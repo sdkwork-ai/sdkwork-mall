@@ -31,6 +31,7 @@
     "@sdkwork/cloudrouter-backend-sdk": "workspace:*",
     "@sdkwork/iam-app-sdk": "workspace:*",
     "@sdkwork/iam-contracts": "workspace:*",
+    "@sdkwork/iam-credential-entry": "workspace:*",
     "@sdkwork/iam-runtime": "workspace:*",
     "@sdkwork/mall-commerce-sdk-ports": "workspace:*",
     "@sdkwork/mall-commerce-service": "workspace:*",
