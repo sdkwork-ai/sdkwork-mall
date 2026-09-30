@@ -7,8 +7,9 @@
 - 2026-09-30: auth reuses @sdkwork/auth-pc-react + @sdkwork/auth-runtime-pc-react
   (already workspace members). Migrating to sdkwork-iam-h5 auth packages is a
   follow-up.
-- 2026-09-30: shop/activity mobile pages are follow-ups; the routes registry
-  keeps their ids reserved for parity with the PC root.
+- 2026-09-30 (updated): shop and activity mobile pages have landed
+  (storefront.mall.shop / storefront.mall.activity-list / -detail), closing
+  the public storefront parity with the PC root.
 - 2026-09-30: buyer mobile surfaces landed for the JD core loop
   (订单/物流/地址/优惠券/售后/发票). Remaining buyer surfaces are tracked
   here: 收藏/足迹 (needs a server-side favorites API; PC root keeps local
