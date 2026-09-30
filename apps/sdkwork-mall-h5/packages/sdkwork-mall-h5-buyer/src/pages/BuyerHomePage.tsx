@@ -33,9 +33,11 @@ const QUICK_LINKS = [
   { icon: CreditCard, label: "钱包", path: "/buyer/wallet" },
   { icon: Star, label: "积分", path: "/buyer/points" },
   { icon: Crown, label: "会员", path: "/buyer/membership" },
+  { icon: Heart, label: "收藏", path: "/buyer/favorites" },
+  { icon: History, label: "足迹", path: "/buyer/footprint" },
 ] as const;
 
-const PENDING_LINKS = ["收藏", "消息"] as const;
+const PENDING_LINKS = ["消息"] as const;
 
 export function SdkworkMallH5BuyerHomePage() {
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);

@@ -846,3 +846,20 @@ body {
   color: var(--sdk-h5-text-muted);
   opacity: 0.55;
 }
+
+.sdk-h5-pdp-favorite {
+  margin-left: 0.6rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--sdk-h5-border);
+  background: var(--sdk-h5-panel);
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.72rem;
+  vertical-align: middle;
+}
+
+.sdk-h5-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

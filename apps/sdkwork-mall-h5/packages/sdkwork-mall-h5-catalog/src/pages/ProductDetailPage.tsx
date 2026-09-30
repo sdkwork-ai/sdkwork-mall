@@ -9,6 +9,11 @@ import {
   type MallH5ProductCard,
   type MallH5ProductDetail,
 } from "../catalog-service";
+import {
+  isMallH5Favorite,
+  recordMallH5Footprint,
+  toggleMallH5Favorite,
+} from "@sdkwork/mall-h5-buyer/favorites-service";
 
 const CART_COUNT_STORAGE_KEY = "sdkwork-mall-h5-cart-count";
 
@@ -30,6 +35,7 @@ export function SdkworkMallH5ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [favoriteFlag, setFavoriteFlag] = useState(() => (productId ? isMallH5Favorite(productId) : false));
 
   useEffect(() => {
     if (!productId) {
@@ -41,6 +47,13 @@ export function SdkworkMallH5ProductDetailPage() {
       .then((record) => {
         if (!active) {
           return;
+        }
+        if (record) {
+          recordMallH5Footprint({
+            id: record.id,
+            imageUrl: record.imageUrl,
+            title: record.title,
+          });
         }
         setDetail(record);
         setSelectedSkuId(record?.skus[0]?.id ?? "");
@@ -137,7 +150,21 @@ export function SdkworkMallH5ProductDetailPage() {
         <div className="sdk-h5-pdp-price">
           {displayPrice != null ? <>¥{displayPrice.toFixed(2)}</> : "询价"}
         </div>
-        <h1 className="sdk-h5-pdp-title">{detail.title}</h1>
+        <h1 className="sdk-h5-pdp-title">
+          {detail.title}
+          <button
+            className="sdk-h5-pdp-favorite"
+            onClick={() => setFavoriteFlag(toggleMallH5Favorite({
+              id: detail.id,
+              imageUrl: detail.imageUrl,
+              priceCny: detail.priceCny,
+              title: detail.title,
+            }))}
+            type="button"
+          >
+            {favoriteFlag ? "已收藏" : "收藏"}
+          </button>
+        </h1>
         {detail.sales != null ? <p className="sdk-h5-pdp-sales">已售 {detail.sales}</p> : null}
       </section>
 

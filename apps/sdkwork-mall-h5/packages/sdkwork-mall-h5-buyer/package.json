@@ -39,6 +39,16 @@
       "types": "./src/pages/InvoicesPage.tsx",
       "import": "./src/pages/InvoicesPage.tsx",
       "default": "./src/pages/InvoicesPage.tsx"
+    },
+    "./favorites-page": {
+      "types": "./src/pages/FavoritesPage.tsx",
+      "import": "./src/pages/FavoritesPage.tsx",
+      "default": "./src/pages/FavoritesPage.tsx"
+    },
+    "./footprint-page": {
+      "types": "./src/pages/FootprintPage.tsx",
+      "import": "./src/pages/FootprintPage.tsx",
+      "default": "./src/pages/FootprintPage.tsx"
     }
   },
   "files": [
