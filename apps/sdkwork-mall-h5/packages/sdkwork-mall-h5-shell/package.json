@@ -1,0 +1,31 @@
+{
+  "name": "@sdkwork/mall-h5-shell",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mobile shell (top search bar + bottom tab bar) for the mall H5 root.",
+  "exports": {
+    ".": {
+      "types": "./src/index.tsx",
+      "import": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    }
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@sdkwork/mall-h5-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "lucide-react": ">=1.0.0",
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "h5-react",
+    "domain": "commerce",
+    "capability": "shell",
+    "status": "ready"
+  }
+}

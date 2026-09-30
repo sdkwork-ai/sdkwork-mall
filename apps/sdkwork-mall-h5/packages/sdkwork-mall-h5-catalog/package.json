@@ -1,0 +1,46 @@
+{
+  "name": "@sdkwork/mall-h5-catalog",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mall H5 catalog, search, and product detail pages.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./routes": {
+      "types": "./src/routes.ts",
+      "import": "./src/routes.ts",
+      "default": "./src/routes.ts"
+    },
+    "./catalog-page": {
+      "types": "./src/pages/CatalogPage.tsx",
+      "import": "./src/pages/CatalogPage.tsx",
+      "default": "./src/pages/CatalogPage.tsx"
+    },
+    "./product-detail-page": {
+      "types": "./src/pages/ProductDetailPage.tsx",
+      "import": "./src/pages/ProductDetailPage.tsx",
+      "default": "./src/pages/ProductDetailPage.tsx"
+    }
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@sdkwork/mall-commerce-service": "workspace:*",
+    "@sdkwork/mall-h5-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "h5-react",
+    "domain": "commerce",
+    "capability": "catalog",
+    "status": "ready"
+  }
+}
