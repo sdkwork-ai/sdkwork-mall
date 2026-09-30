@@ -9,3 +9,9 @@
   follow-up.
 - 2026-09-30: shop/activity mobile pages are follow-ups; the routes registry
   keeps their ids reserved for parity with the PC root.
+- 2026-09-30: buyer mobile surfaces landed for the JD core loop
+  (订单/物流/地址/优惠券/售后/发票). Remaining buyer surfaces are tracked
+  here: 收藏/足迹 (needs a server-side favorites API; PC root keeps local
+  storage today), 会员/钱包/积分 (needs Tier-1 account/membership service
+  wiring on mobile), 消息中心 (needs a notification API). Each lands as its
+  own change with route ids aligned to the PC registry.
