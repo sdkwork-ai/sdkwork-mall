@@ -5,8 +5,10 @@ import { formatSdkworkPaymentCurrencyCny as formatSdkworkCommerceCurrencyCny } f
 import { searchMallProducts } from "@sdkwork/mall-pc-search/search-service";
 import {
   createMallCheckoutQuote,
+  listMallPaymentMethods,
   loadMallCart,
   loadMallCheckoutContext,
+  MALL_CHECKOUT_WARNINGS_STORAGE_KEY,
   removeMallCartItem,
   retrieveMallOrderPaymentSuccess,
   retryMallOrderPayment,
@@ -440,15 +442,19 @@ export function SdkworkMallCheckoutPage() {
     [context],
   );
 
+  // 应付金额以服务端报价为准；配送费按报价口径推导展示，避免前端另算一笔。
   const deliveryFee = useMemo(() => {
-    const method = DELIVERY_METHODS.find((item) => item.code === selectedDeliveryMethod);
-    return method?.feeCny ?? 0;
-  }, [selectedDeliveryMethod]);
+    if (!quote) {
+      return 0;
+    }
+    const merchandiseAmount = Math.max(0, quote.originalAmountCny - quote.discountAmountCny);
+    return Math.max(0, quote.payableAmountCny - merchandiseAmount);
+  }, [quote]);
 
   const payableAmount = useMemo(() => {
     const base = quote?.payableAmountCny ?? context?.cart.totalAmountCny ?? 0;
-    return Math.max(0, base + deliveryFee);
-  }, [quote, context, deliveryFee]);
+    return Math.max(0, base);
+  }, [quote, context]);
 
   function handleApplyGiftCard() {
     setGiftCardError(null);
@@ -504,6 +510,12 @@ export function SdkworkMallCheckoutPage() {
         usePoints,
         useWallet,
       });
+      if (result.warnings.length > 0 && typeof window !== "undefined") {
+        window.sessionStorage.setItem(
+          MALL_CHECKOUT_WARNINGS_STORAGE_KEY,
+          JSON.stringify(result.warnings),
+        );
+      }
       window.location.assign(result.nextUrl);
     } catch (cause: unknown) {
       setMessage(cause instanceof Error ? cause.message : "提交订单失败");
@@ -798,7 +810,27 @@ export function SdkworkMallPaymentResultPage() {
   const [loading, setLoading] = useState(Boolean(orderId));
   const [retrying, setRetrying] = useState(false);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
+  const [checkoutWarnings, setCheckoutWarnings] = useState<string[]>([]);
   const [recommendations, setRecommendations] = useState<Awaited<ReturnType<typeof searchMallProducts>>["items"]>([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const raw = window.sessionStorage.getItem(MALL_CHECKOUT_WARNINGS_STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+    window.sessionStorage.removeItem(MALL_CHECKOUT_WARNINGS_STORAGE_KEY);
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setCheckoutWarnings(parsed.filter((entry): entry is string => typeof entry === "string"));
+      }
+    } catch {
+      // 忽略无法解析的警告数据。
+    }
+  }, []);
 
   useEffect(() => {
     if (!orderId) {
@@ -857,9 +889,20 @@ export function SdkworkMallPaymentResultPage() {
     setRetrying(true);
     setRetryMessage(null);
     try {
-      const newPaymentId = await retryMallOrderPayment(orderId, "WECHAT_PAY");
+      const knownMethod =
+        params.get("paymentMethod")
+        || (typeof paymentInfo?.paymentMethod === "string" ? paymentInfo.paymentMethod : "")
+        || (typeof paymentInfo?.paymentMethodCode === "string" ? paymentInfo.paymentMethodCode : "");
+      const paymentMethod =
+        knownMethod
+        || (await listMallPaymentMethods())[0]?.code;
+      if (!paymentMethod) {
+        setRetryMessage("暂无可用支付方式，请稍后再试或联系客服。");
+        return;
+      }
+      const newPaymentId = await retryMallOrderPayment(orderId, paymentMethod);
       if (newPaymentId) {
-        window.location.assign(`/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}&paymentId=${encodeURIComponent(newPaymentId)}`);
+        window.location.assign(`/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}&paymentId=${encodeURIComponent(newPaymentId)}&paymentMethod=${encodeURIComponent(paymentMethod)}`);
       } else {
         setRetryMessage("支付重试已发起，请稍后查看订单状态。");
       }
@@ -898,6 +941,12 @@ export function SdkworkMallPaymentResultPage() {
       ) : null}
 
       {retryMessage ? <StatusNotice tone="warning">{retryMessage}</StatusNotice> : null}
+
+      {checkoutWarnings.map((warning) => (
+        <StatusNotice key={warning} tone="warning" title="结算提示">
+          {warning}
+        </StatusNotice>
+      ))}
 
       {/* 操作引导 */}
       <div className="sdkwork-mall-pc-payment-actions">

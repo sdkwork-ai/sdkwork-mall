@@ -123,6 +123,46 @@ export interface SdkworkOrderCancelResult {
   orderId: string;
 }
 
+export interface SdkworkOrderConfirmReceiptInput {
+  orderId: string;
+}
+
+export interface SdkworkOrderConfirmReceiptResult {
+  confirmed: true;
+  orderId: string;
+}
+
+export interface SdkworkShipmentTrackingEvent {
+  description: string;
+  occurredAt?: string;
+  status?: string;
+}
+
+export interface SdkworkShipmentPackage {
+  id: string;
+  name?: string;
+}
+
+export interface SdkworkShipmentLogistics {
+  carrier?: string;
+  packages: SdkworkShipmentPackage[];
+  shipmentId: string;
+  shipmentNo?: string;
+  status?: string;
+  statusLabel?: string;
+  trackingEvents: SdkworkShipmentTrackingEvent[];
+}
+
+export interface SdkworkOrderLogistics {
+  orderId?: string;
+  shipments: SdkworkShipmentLogistics[];
+}
+
+export interface SdkworkOrderLogisticsInput {
+  orderId?: string;
+  shipmentId?: string;
+}
+
 export interface CreateSdkworkOrderServiceOptions {
   orderService?: SdkworkOrderAppService;
   locale?: string | null;
@@ -131,9 +171,11 @@ export interface CreateSdkworkOrderServiceOptions {
 
 export interface SdkworkOrderService {
   cancelOrder(input: SdkworkOrderCancelInput): Promise<SdkworkOrderCancelResult>;
+  confirmReceipt(input: SdkworkOrderConfirmReceiptInput): Promise<SdkworkOrderConfirmReceiptResult>;
   getDashboard(): Promise<SdkworkOrderDashboardData>;
   getEmptyDashboard(): SdkworkOrderDashboardData;
   getOrderDetail(orderId: string): Promise<SdkworkOrderDetail>;
+  getOrderLogistics(input: SdkworkOrderLogisticsInput): Promise<SdkworkOrderLogistics>;
   payOrder(input: SdkworkOrderPaymentInput): Promise<SdkworkOrderPaymentResult>;
 }
 
@@ -436,6 +478,98 @@ function mapPaymentResult(result: RemotePaymentParams | null | undefined): Sdkwo
   };
 }
 
+function pickRemoteString(record: Record<string, unknown>, keys: readonly string[]): string | undefined {
+  for (const key of keys) {
+    const value = toSdkworkOrderOptionalString(record[key]);
+    if (value) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function extractRemoteShipmentIds(detail: Record<string, unknown> | null): string[] {
+  const ids: string[] = [];
+  const directIds = detail?.shipmentIds;
+  if (Array.isArray(directIds)) {
+    for (const entry of directIds) {
+      const id = toSdkworkOrderOptionalString(entry);
+      if (id) {
+        ids.push(id);
+      }
+    }
+  }
+  const shipments = detail?.shipments;
+  if (Array.isArray(shipments)) {
+    for (const entry of shipments) {
+      if (!isPlainRecord(entry)) {
+        continue;
+      }
+      const id = toSdkworkOrderOptionalString(entry.shipmentId ?? entry.id);
+      if (id) {
+        ids.push(id);
+      }
+    }
+  }
+  return [...new Set(ids)];
+}
+
+function mapTrackingEvents(payload: unknown, fallbackMessage: string): SdkworkShipmentTrackingEvent[] {
+  const page = unwrapSdkworkOrderResponse<{ content?: unknown[]; items?: unknown[] } | unknown[] | null>(
+    payload,
+    fallbackMessage,
+  );
+  const rows = Array.isArray(page)
+    ? page
+    : page?.content ?? page?.items ?? [];
+  return rows
+    .filter(isPlainRecord)
+    .map((row) => ({
+      description: pickRemoteString(row, ["description", "content", "detail", "message", "info"])
+        || fallbackMessage,
+      occurredAt: pickRemoteString(row, ["occurredAt", "eventTime", "createdAt", "time"]),
+      status: pickRemoteString(row, ["statusName", "status", "eventType"]),
+    }))
+    .sort((left, right) => {
+      const leftTime = left.occurredAt ? new Date(left.occurredAt).getTime() : 0;
+      const rightTime = right.occurredAt ? new Date(right.occurredAt).getTime() : 0;
+      return rightTime - leftTime;
+    });
+}
+
+function mapShipmentLogistics(
+  shipmentId: string,
+  shipment: Record<string, unknown> | null,
+  packagesPayload: unknown,
+  trackingPayload: unknown,
+  copy: SdkworkOrderServiceCopy,
+): SdkworkShipmentLogistics {
+  const packagesPage = unwrapSdkworkOrderResponse<{ content?: unknown[]; items?: unknown[] } | unknown[] | null>(
+    packagesPayload,
+    copy.requestFailed,
+  );
+  const packageRows = Array.isArray(packagesPage)
+    ? packagesPage
+    : packagesPage?.content ?? packagesPage?.items ?? [];
+
+  return {
+    carrier: pickRemoteString(shipment ?? {}, ["carrierName", "carrier", "logisticsCompany", "expressCompany"]),
+    packages: packageRows.filter(isPlainRecord).map((row, index) => ({
+      id: pickRemoteString(row, ["packageId", "id"]) || `package-${index + 1}`,
+      name: pickRemoteString(row, ["packageName", "name", "title"]),
+    })),
+    shipmentId,
+    shipmentNo: pickRemoteString(shipment ?? {}, ["shipmentNo", "shipmentNumber", "trackingNumber", "logisticsNo"]),
+    status: pickRemoteString(shipment ?? {}, ["status"]),
+    statusLabel: pickRemoteString(shipment ?? {}, ["statusName", "statusLabel"]),
+    trackingEvents: mapTrackingEvents(trackingPayload, copy.shipmentMissing),
+  };
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
 export function createSdkworkOrderService(
   options: CreateSdkworkOrderServiceOptions = {},
 ): SdkworkOrderService {
@@ -460,6 +594,22 @@ export function createSdkworkOrderService(
 
       return {
         cancelled: true,
+        orderId: input.orderId,
+      };
+    },
+
+    async confirmReceipt(input) {
+      requireSdkworkOrderSession(copy.signInRequired);
+      await unwrapSdkworkOrderResponse<void>(
+        await getOrderService().orders.receipts.create(
+          input.orderId,
+          createSdkworkIdempotencyParams(),
+        ),
+        copy.confirmReceiptFailed,
+      );
+
+      return {
+        confirmed: true,
         orderId: input.orderId,
       };
     },
@@ -512,6 +662,44 @@ export function createSdkworkOrderService(
       );
 
       return mapDetail(detail, status, paymentSuccess, messages, copy);
+    },
+
+    async getOrderLogistics(input) {
+      requireSdkworkOrderSession(copy.signInRequired);
+      let shipmentIds = input.shipmentId ? [input.shipmentId] : [];
+      let orderId = input.orderId;
+
+      if (shipmentIds.length === 0) {
+        if (!orderId) {
+          throw new Error(copy.shipmentMissing);
+        }
+        const detailPayload = unwrapSdkworkOrderResponse<Record<string, unknown> | null>(
+          await getOrderService().orders.retrieve(orderId),
+          copy.requestFailed,
+        );
+        shipmentIds = extractRemoteShipmentIds(detailPayload).slice(0, 5);
+      }
+
+      if (shipmentIds.length === 0) {
+        return { orderId, shipments: [] };
+      }
+
+      const shipments = await Promise.all(
+        shipmentIds.map(async (shipmentId) => {
+          const [shipmentPayload, packagesPayload, trackingPayload] = await Promise.all([
+            getOrderService().shipments.retrieve(shipmentId),
+            getOrderService().shipments.packages.list(shipmentId, { page: 1, pageSize: 20 }),
+            getOrderService().shipments.trackingEvents.list(shipmentId, { page: 1, pageSize: 50 }),
+          ]);
+          const shipment = unwrapSdkworkOrderResponse<Record<string, unknown> | null>(
+            shipmentPayload,
+            copy.requestFailed,
+          );
+          return mapShipmentLogistics(shipmentId, shipment, packagesPayload, trackingPayload, copy);
+        }),
+      );
+
+      return { orderId, shipments };
     },
 
     async payOrder(input) {

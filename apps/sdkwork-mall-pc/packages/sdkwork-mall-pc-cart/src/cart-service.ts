@@ -81,7 +81,10 @@ export interface MallCheckoutSubmitResult {
   nextUrl: string;
   orderId: string;
   paymentId?: string;
+  warnings: string[];
 }
+
+export const MALL_CHECKOUT_WARNINGS_STORAGE_KEY = "sdkwork-mall-pc-checkout-warnings";
 
 function readMoney(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -283,19 +286,29 @@ export async function submitMallCheckoutOrder(
     });
   }
 
+  const warnings: string[] = [];
+
   if (input.useWallet) {
     try {
       await remote.createWalletHold({ orderId, assetType: "cash" });
-    } catch {
-      // Wallet deduction is optional when balance is insufficient.
+    } catch (cause: unknown) {
+      warnings.push(
+        cause instanceof Error
+          ? `钱包抵扣未生效：${cause.message}`
+          : "钱包抵扣未生效，订单将全额支付。",
+      );
     }
   }
 
   if (input.usePoints) {
     try {
       await remote.createWalletHold({ orderId, assetType: "points" });
-    } catch {
-      // Points deduction is optional when balance is insufficient.
+    } catch (cause: unknown) {
+      warnings.push(
+        cause instanceof Error
+          ? `积分抵扣未生效：${cause.message}`
+          : "积分抵扣未生效，订单将全额支付。",
+      );
     }
   }
 
@@ -309,11 +322,11 @@ export async function submitMallCheckoutOrder(
     const payment = unwrapSdkworkPaymentResponse(paymentResponse) as Record<string, unknown>;
     paymentId = String(payment.paymentId ?? payment.payment_id ?? payment.id ?? "");
     if (paymentId) {
-      nextUrl = `/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}&paymentId=${encodeURIComponent(paymentId)}`;
+      nextUrl = `/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}&paymentId=${encodeURIComponent(paymentId)}&paymentMethod=${encodeURIComponent(input.paymentMethodCode)}`;
     }
   }
 
-  return { orderId, paymentId, nextUrl };
+  return { nextUrl, orderId, paymentId, warnings };
 }
 
 export async function retrieveMallOrderPaymentSuccess(
@@ -337,4 +350,22 @@ export async function retryMallOrderPayment(
   const result = unwrapSdkworkPaymentResponse(response) as Record<string, unknown>;
   const paymentId = String(result.paymentId ?? result.payment_id ?? result.id ?? "");
   return paymentId || undefined;
+}
+
+export async function listMallPaymentMethods(): Promise<
+  { code: string; id: string; label: string }[]
+> {
+  const remote = getSdkworkCartRemotePort();
+  const response = await remote.listPaymentMethods({});
+  const payload = unwrapSdkworkPaymentResponse(response) as {
+    items?: Record<string, unknown>[];
+  };
+  return (payload.items ?? []).map((item, index) => {
+    const code = String(item.code ?? item.methodCode ?? item.id ?? `method-${index + 1}`);
+    return {
+      code,
+      id: String(item.id ?? code),
+      label: String(item.label ?? item.name ?? code),
+    };
+  });
 }

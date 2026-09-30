@@ -5,6 +5,7 @@ export type SdkworkOrderMessagesOverrides = DeepPartial<SdkworkOrderMessages>;
 export interface SdkworkOrderMessages {
   actions: {
     close: string;
+    confirmReceipt: string;
     viewDetails: string;
   };
   common: {
@@ -13,6 +14,7 @@ export interface SdkworkOrderMessages {
   controller: {
     bootstrapFailed: string;
     cancelFailed: string;
+    confirmReceiptFailed: string;
     detailFailed: string;
     payFailed: string;
   };
@@ -45,6 +47,21 @@ export interface SdkworkOrderMessages {
     metaValue: string;
     title: string;
   };
+  logistics: {
+    backToList: string;
+    carrier: string;
+    description: string;
+    empty: string;
+    errorTitle: string;
+    loading: string;
+    noShipment: string;
+    orderMissing: string;
+    packages: string;
+    pageTitle: string;
+    shipmentNo: string;
+    status: string;
+    trackingTitle: string;
+  };
   manifest: {
     description: string;
     title: string;
@@ -75,10 +92,12 @@ export interface SdkworkOrderMessages {
   service: {
     cancelFailed: string;
     clientMethodUnavailable: string;
+    confirmReceiptFailed: string;
     detailFailed: string;
     itemFallbackName: string;
     payFailed: string;
     requestFailed: string;
+    shipmentMissing: string;
     signInRequired: string;
     summaryFallbackSubject: string;
   };
@@ -155,6 +174,7 @@ function mergeDeep<T>(base: T, overrides?: DeepPartial<T>): T {
 const EN_US_MESSAGES: SdkworkOrderMessages = {
   actions: {
     close: "Close",
+    confirmReceipt: "Confirm receipt",
     viewDetails: "View details",
   },
   common: {
@@ -163,6 +183,7 @@ const EN_US_MESSAGES: SdkworkOrderMessages = {
   controller: {
     bootstrapFailed: "Failed to load order center.",
     cancelFailed: "Failed to cancel order.",
+    confirmReceiptFailed: "Failed to confirm receipt.",
     detailFailed: "Failed to load order detail.",
     payFailed: "Failed to retry payment.",
   },
@@ -195,6 +216,21 @@ const EN_US_MESSAGES: SdkworkOrderMessages = {
     metaValue: "Qty {quantity} | {amount}",
     title: "Items",
   },
+  logistics: {
+    backToList: "Back to orders",
+    carrier: "Carrier",
+    description: "Shipment packages and tracking events for this order.",
+    empty: "No shipments are available yet.",
+    errorTitle: "Logistics error",
+    loading: "Loading logistics...",
+    noShipment: "The merchant has not shipped this order yet.",
+    orderMissing: "Missing order reference. Open logistics from an order.",
+    packages: "Packages",
+    pageTitle: "Logistics tracking",
+    shipmentNo: "Shipment No.",
+    status: "Status",
+    trackingTitle: "Tracking timeline",
+  },
   manifest: {
     description: "Order workspace for billing history, payment retries, and order-detail drawer routing.",
     title: "Orders",
@@ -225,10 +261,12 @@ const EN_US_MESSAGES: SdkworkOrderMessages = {
   service: {
     cancelFailed: "Failed to cancel order.",
     clientMethodUnavailable: "{name} is unavailable on the current app client.",
+    confirmReceiptFailed: "Failed to confirm receipt.",
     detailFailed: "Failed to load order detail.",
     itemFallbackName: "Order item",
     payFailed: "Failed to start payment.",
     requestFailed: "Request failed.",
+    shipmentMissing: "No shipment was found for this order.",
     signInRequired: "Please sign in to manage orders and payments.",
     summaryFallbackSubject: "Order",
   },
@@ -270,6 +308,7 @@ const EN_US_MESSAGES: SdkworkOrderMessages = {
 const ZH_CN_MESSAGES: SdkworkOrderMessages = {
   actions: {
     close: "\u5173\u95ed",
+    confirmReceipt: "\u786e\u8ba4\u6536\u8d27",
     viewDetails: "\u67e5\u770b\u8be6\u60c5",
   },
   common: {
@@ -278,6 +317,7 @@ const ZH_CN_MESSAGES: SdkworkOrderMessages = {
   controller: {
     bootstrapFailed: "\u52a0\u8f7d\u8ba2\u5355\u4e2d\u5fc3\u5931\u8d25\u3002",
     cancelFailed: "\u53d6\u6d88\u8ba2\u5355\u5931\u8d25\u3002",
+    confirmReceiptFailed: "\u786e\u8ba4\u6536\u8d27\u5931\u8d25\u3002",
     detailFailed: "\u52a0\u8f7d\u8ba2\u5355\u8be6\u60c5\u5931\u8d25\u3002",
     payFailed: "\u91cd\u8bd5\u652f\u4ed8\u5931\u8d25\u3002",
   },
@@ -310,6 +350,21 @@ const ZH_CN_MESSAGES: SdkworkOrderMessages = {
     metaValue: "\u6570\u91cf {quantity} | {amount}",
     title: "\u5546\u54c1\u660e\u7ec6",
   },
+  logistics: {
+    backToList: "\u8fd4\u56de\u8ba2\u5355\u5217\u8868",
+    carrier: "\u627f\u8fd0\u65b9",
+    description: "\u67e5\u770b\u8ba2\u5355\u7684\u5305\u88f9\u4e0e\u7269\u6d41\u8f68\u8ff9\u3002",
+    empty: "\u6682\u65e0\u53ef\u7528\u7684\u7269\u6d41\u4fe1\u606f\u3002",
+    errorTitle: "\u7269\u6d41\u4fe1\u606f\u5f02\u5e38",
+    loading: "\u6b63\u5728\u52a0\u8f7d\u7269\u6d41\u4fe1\u606f...",
+    noShipment: "\u5546\u5bb6\u5c1a\u672a\u53d1\u8d27\uff0c\u53d1\u8d27\u540e\u53ef\u5728\u6b64\u67e5\u770b\u7269\u6d41\u8f68\u8ff9\u3002",
+    orderMissing: "\u7f3a\u5c11\u8ba2\u5355\u53c2\u6570\uff0c\u8bf7\u4ece\u8ba2\u5355\u5217\u8868\u8fdb\u5165\u3002",
+    packages: "\u5305\u88f9",
+    pageTitle: "\u7269\u6d41\u8ddf\u8e2a",
+    shipmentNo: "\u8fd0\u5355\u53f7",
+    status: "\u72b6\u6001",
+    trackingTitle: "\u7269\u6d41\u8f68\u8ff9",
+  },
   manifest: {
     description: "\u7528\u4e8e\u8d26\u5355\u5386\u53f2\u67e5\u770b\u3001\u652f\u4ed8\u91cd\u8bd5\u4e0e\u8ba2\u5355\u8be6\u60c5\u62bd\u5c49\u8def\u7531\u7684\u8ba2\u5355\u5de5\u4f5c\u533a\u3002",
     title: "\u8ba2\u5355",
@@ -340,10 +395,12 @@ const ZH_CN_MESSAGES: SdkworkOrderMessages = {
   service: {
     cancelFailed: "\u53d6\u6d88\u8ba2\u5355\u5931\u8d25\u3002",
     clientMethodUnavailable: "\u5f53\u524d\u5e94\u7528\u5ba2\u6237\u7aef\u672a\u63d0\u4f9b {name} \u80fd\u529b\u3002",
+    confirmReceiptFailed: "\u786e\u8ba4\u6536\u8d27\u5931\u8d25\u3002",
     detailFailed: "\u52a0\u8f7d\u8ba2\u5355\u8be6\u60c5\u5931\u8d25\u3002",
     itemFallbackName: "\u8ba2\u5355\u5546\u54c1",
     payFailed: "\u53d1\u8d77\u652f\u4ed8\u5931\u8d25\u3002",
     requestFailed: "\u8bf7\u6c42\u5931\u8d25\u3002",
+    shipmentMissing: "\u672a\u67e5\u8be2\u5230\u8be5\u8ba2\u5355\u7684\u7269\u6d41\u5355\u3002",
     signInRequired: "\u8bf7\u5148\u767b\u5f55\u540e\u518d\u7ba1\u7406\u8ba2\u5355\u4e0e\u652f\u4ed8\u3002",
     summaryFallbackSubject: "\u8ba2\u5355",
   },

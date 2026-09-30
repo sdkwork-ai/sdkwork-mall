@@ -329,4 +329,90 @@ describe("sdkwork-mall-pc-order service", () => {
       }),
     ).rejects.toThrow("Unable to restart payment from overrides");
   });
+
+  it("confirms receipt through the order receipts command", async () => {
+    const receiptsCreate = vi.fn().mockResolvedValue({ code: 0 });
+    const orderService = createSdkworkOrderService({
+      orderService: createOrderServiceMock({
+        orders: {
+          receipts: {
+            create: receiptsCreate,
+          },
+        },
+      } as never),
+    });
+
+    await expect(
+      orderService.confirmReceipt({ orderId: "ORDER-11" }),
+    ).resolves.toEqual({ confirmed: true, orderId: "ORDER-11" });
+    expect(receiptsCreate).toHaveBeenCalledWith(
+      "ORDER-11",
+      expect.objectContaining({ idempotencyKey: expect.any(String) }),
+    );
+  });
+
+  it("resolves shipments and tracking events for an order", async () => {
+    const shipmentsRetrieve = vi.fn().mockResolvedValue({
+      code: 0,
+      data: {
+        carrierName: "SDKWork Express",
+        shipmentId: "SHIP-1",
+        shipmentNo: "SF123",
+        statusName: "In transit",
+      },
+    });
+    const trackingList = vi.fn().mockResolvedValue({
+      code: 0,
+      data: {
+        content: [
+          { description: "Departed sorting center", occurredAt: "2026-04-03T09:00:00.000Z", statusName: "Transport" },
+          { description: "Shipment created", occurredAt: "2026-04-02T18:00:00.000Z" },
+        ],
+      },
+    });
+    const orderService = createSdkworkOrderService({
+      orderService: createOrderServiceMock({
+        orders: {
+          retrieve: vi.fn().mockResolvedValue({
+            code: 0,
+            data: { orderId: "ORDER-12", shipmentIds: ["SHIP-1"] },
+          }),
+        },
+        shipments: {
+          retrieve: shipmentsRetrieve,
+          packages: { list: vi.fn().mockResolvedValue({ code: 0, data: { content: [] } }) },
+          trackingEvents: { list: trackingList },
+        },
+      } as never),
+    });
+
+    const logistics = await orderService.getOrderLogistics({ orderId: "ORDER-12" });
+    expect(logistics.orderId).toBe("ORDER-12");
+    expect(logistics.shipments).toHaveLength(1);
+    expect(logistics.shipments[0]).toMatchObject({
+      carrier: "SDKWork Express",
+      shipmentId: "SHIP-1",
+      shipmentNo: "SF123",
+      statusLabel: "In transit",
+    });
+    expect(logistics.shipments[0].trackingEvents[0].description).toBe("Departed sorting center");
+    expect(trackingList).toHaveBeenCalledWith("SHIP-1", { page: 1, pageSize: 50 });
+  });
+
+  it("returns an empty logistics payload when the order has no shipments yet", async () => {
+    const orderService = createSdkworkOrderService({
+      orderService: createOrderServiceMock({
+        orders: {
+          retrieve: vi.fn().mockResolvedValue({
+            code: 0,
+            data: { orderId: "ORDER-13" },
+          }),
+        },
+      } as never),
+    });
+
+    await expect(
+      orderService.getOrderLogistics({ orderId: "ORDER-13" }),
+    ).resolves.toEqual({ orderId: "ORDER-13", shipments: [] });
+  });
 });

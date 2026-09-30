@@ -10,6 +10,8 @@ import {
   createSdkworkOrderService,
   type SdkworkOrderCancelInput,
   type SdkworkOrderCancelResult,
+  type SdkworkOrderConfirmReceiptInput,
+  type SdkworkOrderConfirmReceiptResult,
   type SdkworkOrderDashboardData,
   type SdkworkOrderDetail,
   type SdkworkOrderPaymentInput,
@@ -39,6 +41,7 @@ export interface SdkworkOrderController {
   bootstrap(): Promise<SdkworkOrderControllerState>;
   cancelOrder(input: SdkworkOrderCancelInput): Promise<SdkworkOrderCancelResult>;
   closeDetail(): void;
+  confirmReceipt(input: SdkworkOrderConfirmReceiptInput): Promise<SdkworkOrderConfirmReceiptResult>;
   getState(): SdkworkOrderControllerState;
   openDetail(orderId: string): Promise<SdkworkOrderControllerState>;
   payOrder(input: SdkworkOrderPaymentInput): Promise<SdkworkOrderPaymentResult>;
@@ -186,6 +189,30 @@ export function createSdkworkOrderController(
         isDetailOpen: false,
         selectedOrderId: undefined,
       });
+    },
+
+    async confirmReceipt(input) {
+      setState({
+        isMutating: true,
+        lastError: undefined,
+      });
+
+      try {
+        const result = await service.confirmReceipt(input);
+        const dashboard = await loadDashboard();
+        setState({
+          dashboard,
+          isBootstrapped: true,
+          isMutating: false,
+        });
+        return result;
+      } catch (error) {
+        setState({
+          isMutating: false,
+          lastError: error instanceof Error ? error.message : copy.confirmReceiptFailed,
+        });
+        throw error;
+      }
     },
 
     getState() {

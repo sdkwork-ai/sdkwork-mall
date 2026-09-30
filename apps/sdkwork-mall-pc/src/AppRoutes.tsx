@@ -60,6 +60,9 @@ const SdkworkMallGiftCardsPage = lazy(() =>
 const SdkworkOrderPage = lazy(() =>
   import("@sdkwork/mall-pc-order/order-page").then((module) => ({ default: module.SdkworkOrderPage })),
 );
+const SdkworkLogisticsPage = lazy(() =>
+  import("@sdkwork/mall-pc-order/logistics-page").then((module) => ({ default: module.SdkworkLogisticsPage })),
+);
 const SdkworkWalletPage = lazy(() =>
   import("@sdkwork/mall-pc-wallet/wallet-page").then((module) => ({ default: module.SdkworkWalletPage })),
 );
@@ -269,6 +272,8 @@ function resolveRouteScreen(
       return <SdkworkMallGiftCardsPage />;
     case "buyer.mall.orders":
       return <SdkworkOrderPage locale={locale} />;
+    case "buyer.mall.orders.logistics":
+      return <SdkworkLogisticsPage locale={locale} />;
     case "buyer.mall.addresses":
       return <SdkworkMallAddressPage />;
     case "buyer.mall.after-sales":

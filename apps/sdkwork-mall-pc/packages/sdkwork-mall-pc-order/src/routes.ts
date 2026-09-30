@@ -13,4 +13,16 @@ export const sdkworkMallPcOrderRoutes = [
     title: "我的订单",
     titleKey: "order.routes.dashboard.title",
   },
+  {
+    auth: "required",
+    capability: "order",
+    domain: "commerce",
+    id: "buyer.mall.orders.logistics",
+    packageName: "@sdkwork/mall-pc-order",
+    path: "/buyer/logistics",
+    screen: "logistics",
+    surface: "buyer",
+    title: "物流跟踪",
+    titleKey: "order.routes.logistics.title",
+  },
 ] as const satisfies readonly SdkworkMallPcRouteContribution[];

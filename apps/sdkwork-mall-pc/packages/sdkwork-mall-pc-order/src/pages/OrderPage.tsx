@@ -292,16 +292,6 @@ function SdkworkOrderPageContent({
                         </Button>
                       </>
                     ) : null}
-                    {order.status === "pending-shipment" ? (
-                      <Button
-                        disabled={state.isMutating}
-                        onClick={() => void controller.refresh()}
-                        type="button"
-                        variant="ghost"
-                      >
-                        提醒发货
-                      </Button>
-                    ) : null}
                     {order.status === "pending-receipt" ? (
                       <>
                         <Link to={`/buyer/logistics?orderId=${encodeURIComponent(order.id)}`}>
@@ -309,10 +299,10 @@ function SdkworkOrderPageContent({
                         </Link>
                         <Button
                           disabled={state.isMutating}
-                          onClick={() => void controller.refresh()}
+                          onClick={() => void controller.confirmReceipt({ orderId: order.id })}
                           type="button"
                         >
-                          确认收货
+                          {copy.actions.confirmReceipt}
                         </Button>
                       </>
                     ) : null}
