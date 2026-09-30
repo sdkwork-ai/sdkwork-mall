@@ -34,6 +34,11 @@
       "types": "./src/pages/AfterSalesPage.tsx",
       "import": "./src/pages/AfterSalesPage.tsx",
       "default": "./src/pages/AfterSalesPage.tsx"
+    },
+    "./invoices-page": {
+      "types": "./src/pages/InvoicesPage.tsx",
+      "import": "./src/pages/InvoicesPage.tsx",
+      "default": "./src/pages/InvoicesPage.tsx"
     }
   },
   "files": [

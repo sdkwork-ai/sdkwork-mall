@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   FileText,
   MapPin,
+  Receipt,
   PackageSearch,
   Star,
   Ticket,
@@ -26,9 +27,10 @@ const QUICK_LINKS = [
   { icon: MapPin, label: "地址管理", path: "/buyer/addresses" },
   { icon: Ticket, label: "领券中心", path: "/buyer/coupons" },
   { icon: FileText, label: "售后", path: "/buyer/after-sales" },
+  { icon: Receipt, label: "发票", path: "/buyer/invoices" },
 ] as const;
 
-const PENDING_LINKS = ["收藏", "会员", "钱包", "积分", "发票", "消息"] as const;
+const PENDING_LINKS = ["收藏", "会员", "钱包", "积分", "消息"] as const;
 
 export function SdkworkMallH5BuyerHomePage() {
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);

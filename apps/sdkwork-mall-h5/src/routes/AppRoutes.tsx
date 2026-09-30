@@ -40,6 +40,9 @@ const SdkworkMallH5CouponsPage = lazy(() =>
 const SdkworkMallH5AfterSalesPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/aftersales-page").then((module) => ({ default: module.SdkworkMallH5AfterSalesPage })),
 );
+const SdkworkMallH5InvoicesPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/invoices-page").then((module) => ({ default: module.SdkworkMallH5InvoicesPage })),
+);
 
 function LoadingPlaceholder() {
   return <div className="sdk-h5-loading">加载中...</div>;
@@ -127,6 +130,14 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/after-sales"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5InvoicesPage />
+            </RequireSession>
+          )}
+          path="/buyer/invoices"
         />
         <Route element={<Navigate replace to="/" />} path="*" />
       </Routes>

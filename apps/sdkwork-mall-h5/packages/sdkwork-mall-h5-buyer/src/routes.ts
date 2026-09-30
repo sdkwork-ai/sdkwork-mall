@@ -49,4 +49,16 @@ export const sdkworkMallH5BuyerRoutes = [
     title: "售后",
     titleKey: "buyer.routes.after-sales.title",
   },
+  {
+    auth: "required",
+    capability: "buyer",
+    domain: "commerce",
+    id: "buyer.mall.invoices",
+    packageName: "@sdkwork/mall-h5-buyer",
+    path: "/buyer/invoices",
+    screen: "invoices",
+    surface: "buyer",
+    title: "发票",
+    titleKey: "buyer.routes.invoices.title",
+  },
 ] as const satisfies readonly SdkworkMallH5RouteContribution[];
