@@ -114,6 +114,13 @@ export function SdkworkMallH5OrderPage() {
     if (order.status === "pending-shipment") {
       return <span className="sdk-h5-muted">商家备货中</span>;
     }
+    if (order.status === "completed" || order.status === "refunding" || order.status === "refunded") {
+      return (
+        <Link className="sdk-h5-button sdk-h5-button-secondary" to={`/buyer/after-sales?orderId=${encodeURIComponent(order.id)}`}>
+          {order.status === "completed" ? "申请售后" : "售后详情"}
+        </Link>
+      );
+    }
     return null;
   }
 

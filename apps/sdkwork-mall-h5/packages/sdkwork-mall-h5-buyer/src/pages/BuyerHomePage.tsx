@@ -25,7 +25,7 @@ const ORDER_ENTRIES: Array<{ code: "all" | MallH5OrderStatus; label: string }> =
 const QUICK_LINKS = [
   { icon: MapPin, label: "地址管理", path: "/buyer/addresses" },
   { icon: Ticket, label: "领券中心", path: "/buyer/coupons" },
-  { icon: FileText, label: "售后", path: "/buyer/orders" },
+  { icon: FileText, label: "售后", path: "/buyer/after-sales" },
 ] as const;
 
 const PENDING_LINKS = ["收藏", "会员", "钱包", "积分", "发票", "消息"] as const;
