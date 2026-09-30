@@ -7,14 +7,14 @@ function read(relativePath) {
 }
 
 test("mall mini-program root is manifest-driven", () => {
-  const manifest = JSON.parse(read("../../sdkwork.app.config.json"));
+  const manifest = JSON.parse(read("../sdkwork.app.config.json"));
   assert.equal(manifest.app?.key, "sdkwork-mall-mini-program");
   assert.equal(manifest.runtime?.family, "mini-program");
   assert.equal(manifest.runtime?.framework, "weixin-mini-program");
 });
 
 test("mall mini-program tab bar covers the JD core surfaces", () => {
-  const appJson = JSON.parse(read("../../src/app.json"));
+  const appJson = JSON.parse(read("../src/app.json"));
   const pages = appJson.tabBar.list.map((entry) => entry.pagePath);
   assert.deepEqual(pages, [
     "pages/home/index",
@@ -29,7 +29,7 @@ test("mall mini-program never issues raw wx.request before the MP SDK family lan
     assert.ok(!read(file).includes("wx.request"), `${file} must not bypass the SDK seam`);
   }
   assert.match(
-    read("../../src/bootstrap/sdkClients.ts"),
+    read("../src/bootstrap/sdkClients.ts"),
     /pending the generated WeChat MP SDK family/u,
   );
 });
