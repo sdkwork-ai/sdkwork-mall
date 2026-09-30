@@ -1,4 +1,6 @@
 packages:
+  - "apps/sdkwork-mall-h5"
+  - "apps/sdkwork-mall-h5/packages/*"
   - "apps/sdkwork-mall-pc"
   - "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-subscription"
   - "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-payment"

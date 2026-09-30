@@ -1,0 +1,42 @@
+{
+  "name": "@sdkwork/mall-h5-buyer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mall H5 buyer dashboard (my) page.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./routes": {
+      "types": "./src/routes.ts",
+      "import": "./src/routes.ts",
+      "default": "./src/routes.ts"
+    },
+    "./buyer-page": {
+      "types": "./src/pages/BuyerHomePage.tsx",
+      "import": "./src/pages/BuyerHomePage.tsx",
+      "default": "./src/pages/BuyerHomePage.tsx"
+    }
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@sdkwork/mall-h5-core": "workspace:*",
+    "@sdkwork/mall-h5-order": "workspace:*",
+    "@sdkwork/order-service": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "h5-react",
+    "domain": "commerce",
+    "capability": "buyer",
+    "status": "ready"
+  }
+}

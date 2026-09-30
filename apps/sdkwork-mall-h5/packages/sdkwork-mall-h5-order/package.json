@@ -1,0 +1,53 @@
+{
+  "name": "@sdkwork/mall-h5-order",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mall H5 order center and logistics tracking pages.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./routes": {
+      "types": "./src/routes.ts",
+      "import": "./src/routes.ts",
+      "default": "./src/routes.ts"
+    },
+    "./order-page": {
+      "types": "./src/pages/OrderPage.tsx",
+      "import": "./src/pages/OrderPage.tsx",
+      "default": "./src/pages/OrderPage.tsx"
+    },
+    "./logistics-page": {
+      "types": "./src/pages/LogisticsPage.tsx",
+      "import": "./src/pages/LogisticsPage.tsx",
+      "default": "./src/pages/LogisticsPage.tsx"
+    },
+    "./order-service": {
+      "types": "./src/order-service.ts",
+      "import": "./src/order-service.ts",
+      "default": "./src/order-service.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@sdkwork/mall-h5-core": "workspace:*",
+    "@sdkwork/order-service": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "h5-react",
+    "domain": "commerce",
+    "capability": "order",
+    "status": "ready"
+  }
+}

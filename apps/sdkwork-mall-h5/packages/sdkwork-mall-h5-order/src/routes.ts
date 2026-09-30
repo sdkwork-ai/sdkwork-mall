@@ -1,0 +1,28 @@
+import type { SdkworkMallH5RouteContribution } from "@sdkwork/mall-h5-core";
+
+export const sdkworkMallH5OrderRoutes = [
+  {
+    auth: "required",
+    capability: "order",
+    domain: "commerce",
+    id: "buyer.mall.orders",
+    packageName: "@sdkwork/mall-h5-order",
+    path: "/buyer/orders",
+    screen: "orders",
+    surface: "buyer",
+    title: "我的订单",
+    titleKey: "order.routes.dashboard.title",
+  },
+  {
+    auth: "required",
+    capability: "order",
+    domain: "commerce",
+    id: "buyer.mall.orders.logistics",
+    packageName: "@sdkwork/mall-h5-order",
+    path: "/buyer/logistics",
+    screen: "logistics",
+    surface: "buyer",
+    title: "物流跟踪",
+    titleKey: "order.routes.logistics.title",
+  },
+] as const satisfies readonly SdkworkMallH5RouteContribution[];
