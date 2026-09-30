@@ -3,15 +3,38 @@ import {
   unwrapSdkworkCommerceResponse,
 } from "@sdkwork/mall-commerce-service";
 import {
-  configureSdkworkBillingUsageRecordsLoader,
-  type LoadSdkworkBillingUsageRecordsOptions,
-  type SdkworkBillingUsageRecordsLoader,
-} from "@sdkwork/mall-pc-billing";
-import {
   toSdkworkPaymentNumber,
   toSdkworkPaymentOptionalString,
 } from "@sdkwork/payment-service";
-import type { SdkworkBillingUsageRecord } from "@sdkwork/mall-pc-billing";
+
+interface SdkworkBillingUsageRecord {
+  capability: string;
+  costCny: number;
+  id: string;
+  model: string;
+  provider: string;
+  title: string;
+  unitLabel: string;
+  units: number;
+  usageAt: string;
+  workspace: string;
+}
+
+export interface LoadSdkworkBillingUsageRecordsOptions {
+  referenceDate?: string | Date;
+}
+
+type SdkworkBillingUsageRecordsLoader = (
+  options?: LoadSdkworkBillingUsageRecordsOptions,
+) => Promise<SdkworkBillingUsageRecord[]>;
+
+let sdkworkBillingUsageRecordsLoader: SdkworkBillingUsageRecordsLoader | null = null;
+
+function configureSdkworkBillingUsageRecordsLoader(
+  loader: SdkworkBillingUsageRecordsLoader | null,
+): void {
+  sdkworkBillingUsageRecordsLoader = loader;
+}
 
 interface RemoteUsageRecord {
   capability?: string;

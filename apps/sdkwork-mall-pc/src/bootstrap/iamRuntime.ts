@@ -8,8 +8,8 @@ import type { IamAppContext, IamDeploymentMode, IamEnvironment } from "@sdkwork/
 import type { IamRuntime } from "@sdkwork/iam-runtime";
 import { normalizeSdkworkApiBaseUrl } from "@sdkwork/runtime-bootstrap";
 import { createClient as createAccountAppClient } from "@sdkwork/account-app-sdk";
-import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk";
-import { createClient as createCommerceBackendClient } from "@sdkwork/cloudrouter-backend-sdk";
+import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk/domains";
+import { createClient as createCommerceBackendClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
 import { createClient as createMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import { createClient as createOrderAppClient } from "@sdkwork/order-app-sdk";
 import { createClient as createPaymentAppClient } from "@sdkwork/payment-app-sdk";

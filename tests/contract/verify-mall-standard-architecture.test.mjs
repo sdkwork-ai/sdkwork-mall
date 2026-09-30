@@ -215,10 +215,21 @@ function collectFiles(root, predicate) {
     return [];
   }
   const files = [];
-  for (const entry of readdirSync(root)) {
-    const fullPath = path.join(root, entry);
-    const stats = statSync(fullPath);
-    if (stats.isDirectory()) {
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const fullPath = path.join(root, entry.name);
+    // Never follow symlinked directories: workspace node_modules links point
+    // into sibling repositories and pnpm store chains that are not source
+    // trees and can reject stat on Windows (errno -4094).
+    if (entry.isSymbolicLink()) {
+      continue;
+    }
+    let isDirectory = false;
+    try {
+      isDirectory = statSync(fullPath).isDirectory();
+    } catch {
+      continue;
+    }
+    if (isDirectory) {
       files.push(...collectFiles(fullPath, predicate));
       continue;
     }

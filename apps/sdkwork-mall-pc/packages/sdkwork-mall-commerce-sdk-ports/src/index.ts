@@ -18,6 +18,7 @@ export const APP_COMMERCE_METHOD_TREE = {
   catalog: {
     categories: { list: true, retrieve: true },
     spus: { list: true, retrieve: true },
+    products: { list: true, retrieve: true },
   },
   cart: {
     current: { retrieve: true },

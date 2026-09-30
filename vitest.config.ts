@@ -164,7 +164,21 @@ export default defineConfig({
     ],
   },
   test: {
-    exclude: [...configDefaults.exclude],
+    exclude: [
+      ...configDefaults.exclude,
+      // Inactive legacy SaaS-template packages (contract:
+      // tests/contract/verify-mall-standard-architecture.test.mjs
+      // `inactiveMallPackages`): unrouted surfaces whose peers are no longer
+      // provided by the app root.
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-billing/**",
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-checkout/**",
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-entitlement/**",
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-membership-purchase/**",
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-offer/**",
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-payment/**",
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-pricing/**",
+      "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-subscription/**",
+    ],
     environment: "jsdom",
     include: [
       "apps/**/*.test.ts",

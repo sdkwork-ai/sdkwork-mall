@@ -7,10 +7,10 @@ settings:
 catalogs:
   default:
     '@testing-library/jest-dom':
-      specifier: ^6.9.1
-      version: 6.9.1
+      specifier: ^7.0.1
+      version: 7.0.1
     '@testing-library/react':
-      specifier: ^16.3.2
+      specifier: 16.3.2
       version: 16.3.2
     '@types/qrcode':
       specifier: ^1.5.6
@@ -122,6 +122,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@sdkwork/app-topology':
+        specifier: workspace:*
+        version: link:../sdkwork-app-topology
       '@sdkwork/appbase-pc-react':
         specifier: workspace:*
         version: link:../sdkwork-appbase/packages/pc-react/foundation/sdkwork-appbase-pc-react
@@ -268,6 +271,8 @@ importers:
         specifier: ^0.11.0
         version: 0.11.0
 
+  ../sdkwork-app-topology: {}
+
   ../sdkwork-appbase/packages/common/foundation/sdkwork-runtime-bootstrap:
     dependencies:
       '@sdkwork/utils':
@@ -337,8 +342,8 @@ importers:
         specifier: workspace:*
         version: link:../../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript
       '@sdkwork/utils':
-        specifier: ^0.11.0
-        version: 0.11.0
+        specifier: workspace:*
+        version: link:../../../../sdkwork-utils/packages/sdkwork-utils-typescript
     devDependencies:
       '@types/node':
         specifier: 20.19.39
@@ -457,6 +462,16 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3
 
+  ../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-desktop-auth:
+    dependencies:
+      '@sdkwork/iam-sdk-ports':
+        specifier: workspace:*
+        version: link:../sdkwork-iam-sdk-ports
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
   ../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-runtime:
     dependencies:
       '@sdkwork/iam-app-sdk':
@@ -535,6 +550,9 @@ importers:
       '@sdkwork/iam-contracts':
         specifier: workspace:*
         version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-contracts
+      '@sdkwork/iam-desktop-auth':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-desktop-auth
       '@sdkwork/iam-sdk-adapter':
         specifier: workspace:*
         version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-sdk-adapter
@@ -556,7 +574,7 @@ importers:
         version: link:../../../../../sdkwork-core/sdkwork-core-pc-react
       '@testing-library/jest-dom':
         specifier: 'catalog:'
-        version: 6.9.1
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(jsdom@29.1.1))
       '@testing-library/react':
         specifier: 'catalog:'
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -602,7 +620,7 @@ importers:
     devDependencies:
       '@testing-library/jest-dom':
         specifier: 'catalog:'
-        version: 6.9.1
+        version: 7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(jsdom@29.1.1))
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
@@ -976,6 +994,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@sdkwork/iam-credential-entry':
+        specifier: workspace:*
+        version: link:../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-credential-entry
       '@sdkwork/utils':
         specifier: ^0.11.0
         version: 0.11.0
@@ -1103,6 +1124,9 @@ importers:
       '@sdkwork/iam-contracts':
         specifier: workspace:*
         version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-contracts
+      '@sdkwork/iam-credential-entry':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-credential-entry
       '@sdkwork/iam-runtime':
         specifier: workspace:*
         version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-runtime
@@ -1154,9 +1178,6 @@ importers:
       '@sdkwork/mall-pc-after-sales':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-after-sales
-      '@sdkwork/mall-pc-billing':
-        specifier: workspace:*
-        version: link:packages/sdkwork-mall-pc-billing
       '@sdkwork/mall-pc-cart':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-cart
@@ -1193,15 +1214,9 @@ importers:
       '@sdkwork/mall-pc-messages':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-messages
-      '@sdkwork/mall-pc-offer':
-        specifier: workspace:*
-        version: link:packages/sdkwork-mall-pc-offer
       '@sdkwork/mall-pc-order':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-order
-      '@sdkwork/mall-pc-payment':
-        specifier: workspace:*
-        version: link:packages/sdkwork-mall-pc-payment
       '@sdkwork/mall-pc-points':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-points
@@ -1217,9 +1232,6 @@ importers:
       '@sdkwork/mall-pc-shop':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-shop
-      '@sdkwork/mall-pc-subscription':
-        specifier: workspace:*
-        version: link:packages/sdkwork-mall-pc-subscription
       '@sdkwork/mall-pc-wallet':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-wallet
@@ -3416,6 +3428,16 @@ packages:
   '@testing-library/jest-dom@6.9.1':
     resolution: {integrity: sha512-zIcONa+hVtVSSep9UT3jZ5rizo2BsxgyDYU7WFD5eICBE7no3881HGeb/QkGfsJs6JTkY1aQhT7rIPC7e+0nnA==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
+
+  '@testing-library/jest-dom@7.0.1':
+    resolution: {integrity: sha512-oMDTC3oA+6CXSO2JZnvOI7CA6oVub6kij5ggk9ohwye5slmkwxYDXcPOVxgMw/RQlticjtO0C1RZkR97HgrWMw==}
+    engines: {node: '>=22', npm: '>=6', yarn: '>=1'}
+    peerDependencies:
+      '@testing-library/dom': '>=10 <11'
+      vitest: '>= 0.32'
+    peerDependenciesMeta:
+      vitest:
+        optional: true
 
   '@testing-library/react@16.3.2':
     resolution: {integrity: sha512-XU5/SytQM+ykqMnAnvB2umaJNIOsLF3PVv//1Ew4CTcpz0/BRyy/af40qqrt7SjKpDdT1saBMc42CUok5gaw+g==}
@@ -6912,6 +6934,18 @@ snapshots:
       dom-accessibility-api: 0.6.3
       picocolors: 1.1.1
       redent: 3.0.0
+
+  '@testing-library/jest-dom@7.0.1(@testing-library/dom@10.4.1)(vitest@4.1.11(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(jsdom@29.1.1))':
+    dependencies:
+      '@adobe/css-tools': 4.5.0
+      '@testing-library/dom': 10.4.1
+      aria-query: 5.3.2
+      css.escape: 1.5.1
+      dom-accessibility-api: 0.6.3
+      picocolors: 1.1.1
+      redent: 3.0.0
+    optionalDependencies:
+      vitest: 4.1.11(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(jsdom@29.1.1)
 
   '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:

@@ -33,13 +33,9 @@ describe("createSdkCommandPortAdapter", () => {
     const result = await port.applications.create({ shop_name: "SDKWork" });
     expect(create).toHaveBeenCalledWith(
       { shopName: "SDKWork" },
-      expect.objectContaining({
-        idempotencyKey: expect.any(String),
-        sdkworkRequestHash: expect.stringContaining("applications.create"),
-        xIdempotencyFingerprint: expect.any(String),
-      }),
+      { idempotencyKey: expect.any(String) },
     );
-    expect(result).toEqual(expect.objectContaining({ idempotencyKey: expect.any(String) }));
+    expect(result).toEqual({ idempotencyKey: expect.any(String) });
   });
 
   it("supports explicit query-to-path argument rules", async () => {

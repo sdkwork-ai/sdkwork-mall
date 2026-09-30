@@ -22,7 +22,7 @@ export function configureSdkworkMallPcMerchantCommerceRemotePort(
     afterSales: commerce().afterSales,
     promotions: commerce().promotions,
     shops: createSdkCommandPortAdapter<SdkworkMerchantRemotePort["shops"]>(
-      sdkClients.commerceAppClient.shops,
+      sdkClients.commerceAppClient.commerce.shops,
       { commandPaths: MERCHANT_COMMAND_PATHS },
     ),
   });
