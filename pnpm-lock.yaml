@@ -1300,6 +1300,9 @@ importers:
       '@sdkwork/mall-commerce-service':
         specifier: workspace:*
         version: link:../../../sdkwork-mall-pc/packages/sdkwork-mall-commerce-service
+      '@sdkwork/mall-h5-buyer':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-h5-buyer
       '@sdkwork/mall-h5-core':
         specifier: workspace:*
         version: link:../sdkwork-mall-h5-core

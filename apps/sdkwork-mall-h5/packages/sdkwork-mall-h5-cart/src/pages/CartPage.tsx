@@ -101,6 +101,18 @@ export function SdkworkMallH5CartPage() {
     <div className="sdk-h5-page">
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
+      <label className="sdk-h5-address-row">
+        <input
+          aria-label="全选商品"
+          checked={selectedIds.length === cart.items.length && cart.items.length > 0}
+          onChange={(event) => {
+            setSelectedIds(event.target.checked ? cart.items.map((item) => item.id) : []);
+          }}
+          type="checkbox"
+        />
+        <span>全选</span>
+      </label>
+
       <div className="sdk-h5-cart-list">
         {cart.items.map((item) => (
           <div className="sdk-h5-cart-row" key={item.id}>

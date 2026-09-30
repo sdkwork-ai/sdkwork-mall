@@ -8,6 +8,11 @@ import {
   type MallH5CategoryTreeNode,
   type MallH5ProductCard,
 } from "../catalog-service";
+import {
+  clearMallH5SearchHistory,
+  readMallH5SearchHistory,
+  recordMallH5SearchHistory,
+} from "../search-history-service";
 
 const SORT_OPTIONS = [
   { code: "", label: "综合" },
@@ -46,6 +51,7 @@ export function SdkworkMallH5CatalogPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchHistory, setSearchHistory] = useState<string[]>(() => readMallH5SearchHistory());
 
   useEffect(() => {
     let active = true;
@@ -67,6 +73,10 @@ export function SdkworkMallH5CatalogPage() {
     let active = true;
     setLoading(true);
     setError(null);
+    if (!categoryId && keyword) {
+      recordMallH5SearchHistory(keyword);
+      setSearchHistory(readMallH5SearchHistory());
+    }
     searchMallH5Products({
       categoryId,
       page: 1,
@@ -130,6 +140,40 @@ export function SdkworkMallH5CatalogPage() {
 
   return (
     <div className="sdk-h5-page">
+      {!keyword && searchHistory.length > 0 ? (
+        <section className="sdk-h5-section">
+          <div className="sdk-h5-flex-between">
+            <h2>搜索历史</h2>
+            <button
+              className="sdk-h5-button sdk-h5-button-ghost"
+              onClick={() => {
+                clearMallH5SearchHistory();
+                setSearchHistory([]);
+              }}
+              type="button"
+            >
+              清空
+            </button>
+          </div>
+          <div className="sdk-h5-chip-row">
+            {searchHistory.map((entry) => (
+              <button
+                className="sdk-h5-chip"
+                key={entry}
+                onClick={() => {
+                  const next = new URLSearchParams();
+                  next.set("q", entry);
+                  setSearchParams(next);
+                }}
+                type="button"
+              >
+                {entry}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <div className="sdk-h5-sort-row">
         {SORT_OPTIONS.map((option) => (
           <button

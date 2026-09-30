@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
 
 import { loadMallH5HomeSnapshot, type MallH5HomeSnapshot } from "../home-service";
+import { readMallH5Footprint } from "@sdkwork/mall-h5-buyer/favorites-service";
 
 const HOME_BANNERS = [
   { id: "banner-quality", linkUrl: "/categories", subtitle: "平台自营与品牌商家", title: "品质生活，一站购齐" },
@@ -28,6 +29,7 @@ function ProductCard({ product }: { product: MallH5HomeSnapshot["hotProducts"][n
 export function SdkworkMallH5HomePage() {
   const [snapshot, setSnapshot] = useState<MallH5HomeSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
+  const footprint = readMallH5Footprint().slice(0, 6);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,6 +79,17 @@ export function SdkworkMallH5HomePage() {
           <div className="sdk-h5-chip-row">
             {snapshot.featuredShops.map((shop) => (
               <Link key={shop.id} to={`/shop/${shop.id}`}>{shop.name}</Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {footprint.length > 0 ? (
+        <section className="sdk-h5-section">
+          <h2>最近浏览</h2>
+          <div className="sdk-h5-chip-row">
+            {footprint.map((item) => (
+              <Link key={`${item.id}-${item.viewedAt}`} to={`/product/${item.id}`}>{item.title || item.id}</Link>
             ))}
           </div>
         </section>

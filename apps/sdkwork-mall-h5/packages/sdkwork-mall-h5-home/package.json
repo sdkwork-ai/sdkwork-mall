@@ -21,9 +21,12 @@
       "default": "./src/pages/HomePage.tsx"
     }
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@sdkwork/mall-commerce-service": "workspace:*",
+    "@sdkwork/mall-h5-buyer": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*"
   },
   "peerDependencies": {
