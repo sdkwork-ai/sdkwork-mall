@@ -12,6 +12,14 @@
     "tmp",
     "target",
     "e2e",
-    "scripts"
+    "scripts",
+    "packages/sdkwork-mall-pc-billing",
+    "packages/sdkwork-mall-pc-checkout",
+    "packages/sdkwork-mall-pc-entitlement",
+    "packages/sdkwork-mall-pc-membership-purchase",
+    "packages/sdkwork-mall-pc-offer",
+    "packages/sdkwork-mall-pc-payment",
+    "packages/sdkwork-mall-pc-pricing",
+    "packages/sdkwork-mall-pc-subscription"
   ]
 }
