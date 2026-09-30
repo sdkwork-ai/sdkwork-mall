@@ -64,20 +64,34 @@ export function SdkworkMallAdminMarketingPage() {
   const [title, setTitle] = useState("");
   const [code, setCode] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [offersStatusFilter, setOffersStatusFilter] = useState("");
+  const [offersPage, setOffersPage] = useState(1);
+  const [offersHasNextPage, setOffersHasNextPage] = useState(false);
 
-  const reload = useCallback(async () => {
+  const reloadOffers = useCallback(async (targetPage = offersPage) => {
     const service = getSdkworkAdminRemotePort();
-    const offersResponse = await service.admin.promotions.offers.management.list({ page: 1, page_size: 50 });
+    const offersResponse = await service.admin.promotions.offers.management.list({
+      page: targetPage,
+      page_size: 30,
+      status: offersStatusFilter || undefined,
+    });
     const offersPayload = unwrapSdkworkPaymentResponse(offersResponse) as { items?: Record<string, unknown>[] };
+    const rows = offersPayload.items ?? [];
     setOffers(
-      offersPayload.items
-        ?.filter((item) => !isCmsConfigOffer(item))
+      rows
+        .filter((item) => !isCmsConfigOffer(item))
         .map((item) => ({
           id: String(item.id ?? ""),
           title: String(item.title ?? item.name ?? "活动"),
           status: String(item.status ?? "draft"),
         })) ?? [],
     );
+    setOffersHasNextPage(rows.filter((item) => !isCmsConfigOffer(item)).length >= 30);
+  }, [offersPage, offersStatusFilter]);
+
+  const reload = useCallback(async () => {
+    const service = getSdkworkAdminRemotePort();
+    await reloadOffers();
 
     const [stocksResult, userCouponsResult, ledgerResult] = await Promise.allSettled([
       service.admin.promotions.couponStocks.list({ page: 1, page_size: 20 }),
@@ -117,7 +131,7 @@ export function SdkworkMallAdminMarketingPage() {
         })),
       );
     }
-  }, []);
+  }, [reloadOffers]);
 
   useEffect(() => {
     let active = true;
@@ -151,7 +165,8 @@ export function SdkworkMallAdminMarketingPage() {
       setTitle("");
       setCode("");
       setMessage("活动草稿已创建");
-      await reload();
+      setOffersPage(1);
+      await reloadOffers(1);
     } catch {
       setMessage("创建失败，请检查后台 API 与权限");
     } finally {
@@ -190,6 +205,22 @@ export function SdkworkMallAdminMarketingPage() {
 
       <section>
         <h2>活动列表</h2>
+        <div className="sdkwork-mall-pc-filter-bar">
+          <select
+            aria-label="按状态筛选活动"
+            onChange={(event) => {
+              setOffersStatusFilter(event.target.value);
+              setOffersPage(1);
+              void reloadOffers(1);
+            }}
+            value={offersStatusFilter}
+          >
+            <option value="">全部状态</option>
+            <option value="draft">草稿</option>
+            <option value="active">进行中</option>
+            <option value="ended">已结束</option>
+          </select>
+        </div>
         {offers.length === 0 ? (
           <EmptyState description="在此创建平台级营销活动" title="暂无活动" />
         ) : (
@@ -210,6 +241,33 @@ export function SdkworkMallAdminMarketingPage() {
             </tbody>
           </table>
         )}
+        <div className="sdkwork-mall-pc-pager">
+          <Button
+            disabled={loading || offersPage <= 1}
+            onClick={() => {
+              const target = offersPage - 1;
+              setOffersPage(target);
+              void reloadOffers(target);
+            }}
+            type="button"
+            variant="outline"
+          >
+            上一页
+          </Button>
+          <span>第 {offersPage} 页</span>
+          <Button
+            disabled={loading || !offersHasNextPage}
+            onClick={() => {
+              const target = offersPage + 1;
+              setOffersPage(target);
+              void reloadOffers(target);
+            }}
+            type="button"
+            variant="outline"
+          >
+            下一页
+          </Button>
+        </div>
       </section>
 
       <section>
