@@ -396,6 +396,7 @@ export function SdkworkMallHomePage() {
             新品上市
           </Link>
           <Link to="/search?q=brand">品牌馆</Link>
+          <Link to="/buyer/coupons">领券中心</Link>
           <Link to="/buyer/membership">会员专区</Link>
         </div>
       </section>
