@@ -18,6 +18,11 @@
       "types": "./src/storefront-pages.ts",
       "import": "./src/storefront-pages.ts",
       "default": "./src/storefront-pages.ts"
+    },
+    "./activity-service": {
+      "types": "./src/activity-service.ts",
+      "import": "./src/activity-service.ts",
+      "default": "./src/activity-service.ts"
     }
   },
   "peerDependencies": {

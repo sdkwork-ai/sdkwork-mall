@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Clock, Flame, History, Sparkles, Store, Tag } from "lucide-react";
 import { EmptyState, LoadingBlock } from "@sdkwork/ui-pc-react";
@@ -11,7 +11,198 @@ import {
 import { loadMallCmsConfigRemote } from "@sdkwork/mall-pc-cms/cms-service";
 import { searchMallProducts } from "@sdkwork/mall-pc-search/search-service";
 import { readMallFootprint, type MallFootprintItem } from "@sdkwork/mall-pc-reviews/footprint-service";
+import {
+  formatCountdown,
+  getActivityCountdownTarget,
+  listMallActivities,
+  type MallActivityOffer,
+} from "@sdkwork/mall-pc-activity/activity-service";
 import { loadMallHomeSnapshot, type MallHomeProductCard, type MallHomeSnapshot } from "../home-service";
+
+const BANNER_AUTOPLAY_INTERVAL_MS = 5000;
+const SEKILL_AUTOPLAY_INTERVAL_MS = 1000;
+const SEKILL_STRIP_SIZE = 4;
+
+interface SdkworkMallSeckillCountdownState {
+  phase: "active" | "ended" | "upcoming";
+  label: string;
+}
+
+function useMallSeckillActivities() {
+  const [offers, setOffers] = useState<MallActivityOffer[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    void listMallActivities()
+      .then((rows) => {
+        if (active) {
+          setOffers(
+            rows
+              .filter((row) => row.activityType === "flash-sale" || row.activityType === "limited-rush")
+              .slice(0, SEKILL_STRIP_SIZE),
+          );
+        }
+      })
+      .catch(() => {
+        // 秒杀区块为可选增强，加载失败时静默隐藏。
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return offers;
+}
+
+function useMallSeckillCountdown(offers: MallActivityOffer[]): SdkworkMallSeckillCountdownState[] {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (offers.length === 0) {
+      return undefined;
+    }
+    const timer = window.setInterval(() => setNow(Date.now()), SEKILL_AUTOPLAY_INTERVAL_MS);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [offers.length]);
+
+  return useMemo(
+    () =>
+      offers.map((offer) => {
+        const countdown = getActivityCountdownTarget(offer);
+        if (!countdown || countdown.phase === "ended") {
+          return { phase: "ended" as const, label: "已结束" };
+        }
+        const parts = formatCountdown(countdown.target);
+        const pad = (value: number) => String(value).padStart(2, "0");
+        const clock = `${pad(parts.days * 24 + parts.hours)}:${pad(parts.minutes)}:${pad(parts.seconds)}`;
+        return {
+          phase: countdown.phase,
+          label: countdown.phase === "upcoming" ? `距开始 ${clock}` : `距结束 ${clock}`,
+        };
+      }),
+    [offers, now],
+  );
+}
+
+function SdkworkMallSeckillStrip({ offers }: { offers: MallActivityOffer[] }) {
+  const countdowns = useMallSeckillCountdown(offers);
+  if (offers.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="sdkwork-mall-pc-floor sdkwork-mall-pc-seckill">
+      <h2>
+        <Clock aria-hidden="true" size={18} /> 秒杀专场
+      </h2>
+      <div className="sdkwork-mall-pc-seckill-row">
+        {offers.map((offer, index) => {
+          const countdown = countdowns[index];
+          return (
+            <Link
+              className="sdkwork-mall-pc-seckill-card"
+              key={offer.id}
+              to={`/activity/${offer.id}`}
+            >
+              <div className="sdkwork-mall-pc-seckill-head">
+                <strong>{offer.title}</strong>
+                {offer.discountText ? <span>{offer.discountText}</span> : null}
+              </div>
+              {offer.highlight ? <p>{offer.highlight}</p> : null}
+              <span
+                className={
+                  countdown.phase === "active"
+                    ? "sdkwork-mall-pc-seckill-countdown sdkwork-mall-pc-seckill-countdown-active"
+                    : "sdkwork-mall-pc-seckill-countdown"
+                }
+              >
+                {countdown.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function SdkworkMallBannerCarousel({ banners }: { banners: MallCmsBanner[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const count = banners.length;
+
+  useEffect(() => {
+    if (count <= 1 || isPaused) {
+      return undefined;
+    }
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % count);
+    }, BANNER_AUTOPLAY_INTERVAL_MS);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [count, isPaused]);
+
+  const activeBanner = banners[activeIndex];
+
+  if (count === 0) {
+    return null;
+  }
+
+  return (
+    <section
+      className="sdkwork-mall-pc-banner-carousel"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {count === 1 || !activeBanner ? (
+        <BannerCard banner={activeBanner ?? banners[0]} />
+      ) : (
+        <>
+          {banners.map((banner, index) => (
+            <BannerCard banner={banner} hidden={index !== activeIndex} key={banner.id} />
+          ))}
+          <div className="sdkwork-mall-pc-banner-dots" role="tablist" aria-label="banner 切换">
+            {banners.map((banner, index) => (
+              <button
+                aria-label={`切换到第 ${index + 1} 张 banner`}
+                aria-selected={index === activeIndex}
+                className={
+                  index === activeIndex
+                    ? "sdkwork-mall-pc-banner-dot sdkwork-mall-pc-banner-dot-active"
+                    : "sdkwork-mall-pc-banner-dot"
+                }
+                key={banner.id}
+                onClick={() => setActiveIndex(index)}
+                role="tab"
+                type="button"
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function BannerCard({ banner, hidden = false }: { banner: MallCmsBanner; hidden?: boolean }) {
+  return (
+    <Link
+      className="sdkwork-mall-pc-banner-card"
+      key={banner.id}
+      style={hidden ? { display: "none" } : undefined}
+      to={banner.linkUrl}
+    >
+      {banner.imageUrl ? <img alt={banner.title} src={banner.imageUrl} /> : <Sparkles aria-hidden="true" size={24} />}
+      <div>
+        <h2>{banner.title}</h2>
+        {banner.subtitle ? <p>{banner.subtitle}</p> : null}
+      </div>
+    </Link>
+  );
+}
 
 function ProductGrid({
   loading,
@@ -99,6 +290,7 @@ export function SdkworkMallHomePage() {
   const [guessYouLike, setGuessYouLike] = useState<MallHomeProductCard[]>([]);
   const [guessLoading, setGuessLoading] = useState(true);
   const [footprint, setFootprint] = useState<MallFootprintItem[]>([]);
+  const seckillOffers = useMallSeckillActivities();
 
   useEffect(() => {
     let active = true;
@@ -184,17 +376,8 @@ export function SdkworkMallHomePage() {
 
   return (
     <div className="sdkwork-mall-pc-home">
-      <section className="sdkwork-mall-pc-banner-carousel">
-        {banners.map((banner) => (
-          <Link className="sdkwork-mall-pc-banner-card" key={banner.id} to={banner.linkUrl}>
-            {banner.imageUrl ? <img alt={banner.title} src={banner.imageUrl} /> : <Sparkles aria-hidden="true" size={24} />}
-            <div>
-              <h2>{banner.title}</h2>
-              {banner.subtitle ? <p>{banner.subtitle}</p> : null}
-            </div>
-          </Link>
-        ))}
-      </section>
+      <SdkworkMallBannerCarousel banners={banners} />
+      <SdkworkMallSeckillStrip offers={seckillOffers} />
 
       <section className="sdkwork-mall-pc-hero">
         <div className="sdkwork-mall-pc-hero-banner">

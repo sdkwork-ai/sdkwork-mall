@@ -39,7 +39,7 @@ import {
   type KeyValueTableRowData,
 } from "@sdkwork/ui-pc-react";
 import { isMallFavorite, toggleMallFavorite } from "@sdkwork/mall-pc-commerce/favorites-service";
-import { listMallCategories, searchMallProducts, type MallSearchProduct } from "@sdkwork/mall-pc-search/search-service";
+import { buildMallCategoryTree, listMallCategories, searchMallProducts, type MallCategoryTreeNode, type MallSearchProduct } from "@sdkwork/mall-pc-search/search-service";
 import { recordMallFootprint } from "@sdkwork/mall-pc-reviews/footprint-service";
 import {
   listEnabledMallCmsBanners,
@@ -163,7 +163,7 @@ export function SdkworkMallCategoryPage() {
 
   const [items, setItems] = useState<MallSearchProduct[]>([]);
   const [total, setTotal] = useState(0);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [categoryTree, setCategoryTree] = useState<MallCategoryTreeNode[]>([]);
   const [categoryDetail, setCategoryDetail] = useState<{ description?: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [banners, setBanners] = useState<MallCmsBanner[]>(() => listEnabledMallCmsBanners());
@@ -230,7 +230,7 @@ export function SdkworkMallCategoryPage() {
         page,
       });
       if (active) {
-        setCategories(categoryList);
+        setCategoryTree(buildMallCategoryTree(categoryList));
         setCategoryDetail(detail);
         setItems(productResult.items);
         setTotal(productResult.total);
@@ -369,8 +369,9 @@ export function SdkworkMallCategoryPage() {
   }
 
   const activeCategory = categoryDetail
-    ?? categories.find((category) => category.id === categoryId)
-    ?? (keyword ? categories.find((category) => category.name.includes(keyword)) : undefined);
+    ?? categoryTree.find((category) => category.id === categoryId)
+    ?? categoryTree.flatMap((root) => root.children).find((category) => category.id === categoryId)
+    ?? (keyword ? categoryTree.find((category) => category.name.includes(keyword)) : undefined);
 
   const categoryTitle = activeCategory?.name ?? (keyword ? `类目：${keyword}` : categoryId ? "类目商品" : "全部类目");
 
@@ -391,7 +392,7 @@ export function SdkworkMallCategoryPage() {
 
       {/* 类目横幅 */}
       {banners.length > 0 ? (
-        <section className="sdkwork-mall-pc-banner-carousel">
+        <section className="sdkwork-mall-pc-banner-grid">
           {banners.slice(0, 3).map((banner) => (
             <Link className="sdkwork-mall-pc-banner-card" key={banner.id} to={banner.linkUrl}>
               {banner.imageUrl ? <img alt={banner.title} src={banner.imageUrl} /> : <Sparkles aria-hidden="true" size={24} />}
@@ -416,8 +417,8 @@ export function SdkworkMallCategoryPage() {
         </p>
       </header>
 
-      {/* 子类目导航 */}
-      {categories.length > 0 ? (
+      {/* 类目导航：一级类目 + 当前一级下的子类目 */}
+      {categoryTree.length > 0 ? (
         <section className="sdkwork-mall-pc-floor">
           <div className="sdkwork-mall-pc-chip-row">
             <Link
@@ -426,16 +427,38 @@ export function SdkworkMallCategoryPage() {
             >
               全部类目
             </Link>
-            {categories.map((category) => (
+            {categoryTree.map((node) => (
               <Link
-                className={category.id === categoryId ? "is-active" : ""}
-                key={category.id}
-                to={`/categories/${category.id}`}
+                className={node.id === categoryId || node.children.some((child) => child.id === categoryId) ? "is-active" : ""}
+                key={node.id}
+                to={`/categories/${node.id}`}
               >
-                {category.name}
+                {node.name}
               </Link>
             ))}
           </div>
+          {(() => {
+            const activeRoot = categoryId
+              ? categoryTree.find((node) => node.id === categoryId)
+                ?? categoryTree.find((node) => node.children.some((child) => child.id === categoryId))
+              : undefined;
+            if (!activeRoot || activeRoot.children.length === 0) {
+              return null;
+            }
+            return (
+              <div className="sdkwork-mall-pc-chip-row sdkwork-mall-pc-subcategory-row">
+                {activeRoot.children.map((child) => (
+                  <Link
+                    className={child.id === categoryId ? "is-active" : ""}
+                    key={child.id}
+                    to={`/categories/${child.id}`}
+                  >
+                    {child.name}
+                  </Link>
+                ))}
+              </div>
+            );
+          })()}
         </section>
       ) : null}
 

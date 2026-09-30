@@ -1462,9 +1462,8 @@ a {
 }
 
 .sdkwork-mall-pc-banner-carousel {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
+  position: relative;
+  display: block;
   margin-bottom: 1rem;
 }
 
@@ -1473,10 +1472,115 @@ a {
   grid-template-columns: auto 1fr;
   gap: 0.75rem;
   align-items: center;
-  padding: 1rem;
+  padding: 1.25rem 1.5rem;
+  min-height: 7.5rem;
   border-radius: 0.75rem;
   background: linear-gradient(135deg, #fff7ed, #ffffff);
   border: 1px solid var(--sdk-color-border-subtle);
+}
+
+.sdkwork-mall-pc-banner-dots {
+  position: absolute;
+  right: 1rem;
+  bottom: 0.85rem;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.sdkwork-mall-pc-banner-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--sdk-color-border-strong, var(--sdk-color-border-subtle));
+  background: var(--sdk-color-surface-panel, #fff);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.sdkwork-mall-pc-banner-dot-active {
+  width: 1.4rem;
+  background: var(--sdk-color-primary, #2563eb);
+  border-color: var(--sdk-color-primary, #2563eb);
+  opacity: 1;
+}
+
+.sdkwork-mall-pc-seckill-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.85rem;
+}
+
+.sdkwork-mall-pc-seckill-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+  border-radius: 0.85rem;
+  border: 1px solid #fecaca;
+  background: linear-gradient(150deg, #fef2f2, #ffffff);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.sdkwork-mall-pc-seckill-card:hover {
+  box-shadow: var(--sdk-shadow-md, 0 8px 24px rgba(0, 0, 0, 0.08));
+  transform: translateY(-2px);
+}
+
+.sdkwork-mall-pc-seckill-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.sdkwork-mall-pc-seckill-head strong {
+  color: var(--sdk-color-text-primary, #111827);
+  font-size: 0.95rem;
+}
+
+.sdkwork-mall-pc-seckill-head span {
+  color: #dc2626;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.sdkwork-mall-pc-seckill-card p {
+  margin: 0;
+  color: var(--sdk-color-text-secondary, #4b5563);
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-seckill-countdown {
+  align-self: flex-start;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.sdkwork-mall-pc-seckill-countdown-active {
+  color: #fff;
+  background: #dc2626;
+  font-variant-numeric: tabular-nums;
+}
+
+.sdkwork-mall-pc-banner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sdkwork-mall-pc-subcategory-row {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--sdk-color-border-subtle);
 }
 
 .sdkwork-mall-pc-cms-admin section {

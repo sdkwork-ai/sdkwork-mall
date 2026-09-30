@@ -112,15 +112,46 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
   };
 }
 
-export async function listMallCategories(): Promise<Array<{ id: string; name: string }>> {
+export interface MallCategoryOption {
+  id: string;
+  name: string;
+  parentId?: string;
+}
+
+export async function listMallCategories(): Promise<MallCategoryOption[]> {
   const response = await getSdkworkSearchRemotePort().listCategories({ page: 1, pageSize: 50, status: "active" });
   const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
   return (
-    payload.items?.map((item) => ({
-      id: String(item.id ?? ""),
-      name: String(item.name ?? item.title ?? "类目"),
-    })) ?? []
+    payload.items?.map((item) => {
+      const parentId = String(item.parentId ?? item.parent_id ?? "").trim();
+      return {
+        id: String(item.id ?? ""),
+        name: String(item.name ?? item.title ?? "类目"),
+        ...(parentId ? { parentId } : {}),
+      };
+    }) ?? []
   );
+}
+
+export interface MallCategoryTreeNode extends MallCategoryOption {
+  children: MallCategoryTreeNode[];
+}
+
+export function buildMallCategoryTree(categories: MallCategoryOption[]): MallCategoryTreeNode[] {
+  const nodesById = new Map<string, MallCategoryTreeNode>();
+  for (const category of categories) {
+    nodesById.set(category.id, { ...category, children: [] });
+  }
+  const roots: MallCategoryTreeNode[] = [];
+  for (const node of nodesById.values()) {
+    const parent = node.parentId ? nodesById.get(node.parentId) : undefined;
+    if (parent) {
+      parent.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
 }
 
 export async function searchMallProducts(input: {

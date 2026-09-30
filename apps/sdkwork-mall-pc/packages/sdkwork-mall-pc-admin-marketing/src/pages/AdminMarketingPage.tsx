@@ -18,8 +18,47 @@ function isCmsConfigOffer(item: Record<string, unknown>): boolean {
   return marker.includes(MALL_CMS_OFFER_MARKER);
 }
 
+interface MallCouponStockRow {
+  id: string;
+  name: string;
+  remaining: string;
+  total: string;
+}
+
+interface MallUserCouponRow {
+  id: string;
+  status: string;
+  title: string;
+  userId: string;
+}
+
+interface MallCouponLedgerRow {
+  id: string;
+  change: string;
+  occurredAt: string;
+  reason: string;
+}
+
+function readRemoteRows(payload: unknown): Record<string, unknown>[] {
+  const rows = payload as { content?: Record<string, unknown>[]; items?: Record<string, unknown>[] } | null;
+  return rows?.items ?? rows?.content ?? [];
+}
+
+function readRemoteString(record: Record<string, unknown>, keys: readonly string[]): string {
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return String(value);
+    }
+  }
+  return "--";
+}
+
 export function SdkworkMallAdminMarketingPage() {
   const [offers, setOffers] = useState<MallCampaignRow[]>([]);
+  const [couponStocks, setCouponStocks] = useState<MallCouponStockRow[]>([]);
+  const [userCoupons, setUserCoupons] = useState<MallUserCouponRow[]>([]);
+  const [couponLedger, setCouponLedger] = useState<MallCouponLedgerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [title, setTitle] = useState("");
@@ -28,10 +67,10 @@ export function SdkworkMallAdminMarketingPage() {
 
   const reload = useCallback(async () => {
     const service = getSdkworkAdminRemotePort();
-    const response = await service.admin.promotions.offers.management.list({ page: 1, page_size: 50 });
-    const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+    const offersResponse = await service.admin.promotions.offers.management.list({ page: 1, page_size: 50 });
+    const offersPayload = unwrapSdkworkPaymentResponse(offersResponse) as { items?: Record<string, unknown>[] };
     setOffers(
-      payload.items
+      offersPayload.items
         ?.filter((item) => !isCmsConfigOffer(item))
         .map((item) => ({
           id: String(item.id ?? ""),
@@ -39,6 +78,45 @@ export function SdkworkMallAdminMarketingPage() {
           status: String(item.status ?? "draft"),
         })) ?? [],
     );
+
+    const [stocksResult, userCouponsResult, ledgerResult] = await Promise.allSettled([
+      service.admin.promotions.couponStocks.list({ page: 1, page_size: 20 }),
+      service.admin.promotions.userCoupons.management.list({ page: 1, page_size: 20 }),
+      service.admin.promotions.couponLedgerEntries.list({ page: 1, page_size: 20 }),
+    ]);
+    if (stocksResult.status === "fulfilled") {
+      const payload = unwrapSdkworkPaymentResponse(stocksResult.value) as unknown;
+      setCouponStocks(
+        readRemoteRows(payload).map((item) => ({
+          id: readRemoteString(item, ["id", "couponStockId", "stockId"]),
+          name: readRemoteString(item, ["name", "title", "couponName"]),
+          remaining: readRemoteString(item, ["remainingQuantity", "remaining", "leftQuantity"]),
+          total: readRemoteString(item, ["totalQuantity", "total", "issuedQuantity"]),
+        })),
+      );
+    }
+    if (userCouponsResult.status === "fulfilled") {
+      const payload = unwrapSdkworkPaymentResponse(userCouponsResult.value) as unknown;
+      setUserCoupons(
+        readRemoteRows(payload).map((item) => ({
+          id: readRemoteString(item, ["id", "userCouponId"]),
+          status: readRemoteString(item, ["status", "statusName"]),
+          title: readRemoteString(item, ["title", "name", "couponName"]),
+          userId: readRemoteString(item, ["userId", "buyerId", "accountId"]),
+        })),
+      );
+    }
+    if (ledgerResult.status === "fulfilled") {
+      const payload = unwrapSdkworkPaymentResponse(ledgerResult.value) as unknown;
+      setCouponLedger(
+        readRemoteRows(payload).map((item) => ({
+          id: readRemoteString(item, ["id", "entryId"]),
+          change: readRemoteString(item, ["changeQuantity", "quantity", "amount", "change"]),
+          occurredAt: readRemoteString(item, ["occurredAt", "createdAt", "entryTime"]),
+          reason: readRemoteString(item, ["reason", "reasonCode", "entryType", "remark"]),
+        })),
+      );
+    }
   }, []);
 
   useEffect(() => {
@@ -127,6 +205,81 @@ export function SdkworkMallAdminMarketingPage() {
                 <tr key={offer.id}>
                   <td>{offer.title}</td>
                   <td>{offer.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <section>
+        <h2>平台优惠券</h2>
+        <h3>券库存</h3>
+        {couponStocks.length === 0 ? (
+          <EmptyState description="券批次创建后在此展示库存" title="暂无券库存" />
+        ) : (
+          <table className="sdkwork-mall-pc-table">
+            <thead>
+              <tr>
+                <th>券批次</th>
+                <th>名称</th>
+                <th>剩余 / 总量</th>
+              </tr>
+            </thead>
+            <tbody>
+              {couponStocks.map((stock) => (
+                <tr key={stock.id}>
+                  <td>{stock.id}</td>
+                  <td>{stock.name}</td>
+                  <td>{stock.remaining} / {stock.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <h3>用户领券</h3>
+        {userCoupons.length === 0 ? (
+          <EmptyState description="用户领取平台券后在此展示" title="暂无领券记录" />
+        ) : (
+          <table className="sdkwork-mall-pc-table">
+            <thead>
+              <tr>
+                <th>券</th>
+                <th>用户</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              {userCoupons.map((coupon) => (
+                <tr key={coupon.id}>
+                  <td>{coupon.title}</td>
+                  <td>{coupon.userId}</td>
+                  <td>{coupon.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <h3>券流水</h3>
+        {couponLedger.length === 0 ? (
+          <EmptyState description="发放、核销与过期流水在此展示" title="暂无券流水" />
+        ) : (
+          <table className="sdkwork-mall-pc-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>变动</th>
+                <th>原因</th>
+              </tr>
+            </thead>
+            <tbody>
+              {couponLedger.map((entry) => (
+                <tr key={entry.id}>
+                  <td>{entry.occurredAt}</td>
+                  <td>{entry.change}</td>
+                  <td>{entry.reason}</td>
                 </tr>
               ))}
             </tbody>

@@ -115,11 +115,14 @@ export interface SdkworkAdminCommerceNamespace {
     };
   };
   promotions: {
+    couponLedgerEntries: { list(query: Record<string, unknown>): Promise<unknown> };
+    couponStocks: { list(query: Record<string, unknown>): Promise<unknown> };
     offers: {
       create(body: Record<string, unknown>): Promise<unknown>;
       management: { list(query: Record<string, unknown>): Promise<unknown> };
       update(offerId: string, body: Record<string, unknown>): Promise<unknown>;
     };
+    userCoupons: { management: { list(query: Record<string, unknown>): Promise<unknown> } };
   };
   reports: {
     commerceOverview: { retrieve(query: Record<string, unknown>): Promise<unknown> };

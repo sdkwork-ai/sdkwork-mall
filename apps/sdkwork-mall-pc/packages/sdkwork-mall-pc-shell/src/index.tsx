@@ -1,15 +1,27 @@
 import type { ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
+  Crown,
+  FileBarChart2,
+  Flag,
   Heart,
   HelpCircle,
+  KeyRound,
+  LayoutDashboard,
   MapPin,
+  Megaphone,
+  Package,
+  ScrollText,
   Search,
+  ShieldAlert,
   ShoppingCart,
   Store,
   User,
+  Users,
+  Wallet,
 } from "lucide-react";
 import type { SdkworkMallPcRouteContribution } from "@sdkwork/mall-pc-core";
+import type { LucideIcon } from "lucide-react";
 import {
   sdkworkMallPcBrand,
 } from "@sdkwork/mall-pc-commons";
@@ -189,11 +201,82 @@ export function SdkworkMallPcMerchantShell({
   );
 }
 
+interface SdkworkAdminMenuSection {
+  readonly icon: LucideIcon;
+  readonly label: string;
+  readonly routeIds: readonly string[];
+}
+
+const SDKWORK_ADMIN_MENU_SECTIONS: readonly SdkworkAdminMenuSection[] = [
+  {
+    icon: LayoutDashboard,
+    label: "总览",
+    routeIds: ["admin.mall.dashboard", "admin.mall.reports", "admin.mall.audit"],
+  },
+  {
+    icon: ScrollText,
+    label: "内容",
+    routeIds: ["admin.mall.cms"],
+  },
+  {
+    icon: Package,
+    label: "商品",
+    routeIds: ["admin.commerce.product-admin.catalog", "admin.mall.brands"],
+  },
+  {
+    icon: ShoppingCart,
+    label: "交易",
+    routeIds: ["admin.mall.orders", "admin.mall.after-sales"],
+  },
+  {
+    icon: Megaphone,
+    label: "营销",
+    routeIds: ["admin.mall.marketing", "admin.commerce.membership-admin.dashboard"],
+  },
+  {
+    icon: Store,
+    label: "商家",
+    routeIds: ["admin.mall.shops", "admin.mall.settlement"],
+  },
+  {
+    icon: ShieldAlert,
+    label: "治理",
+    routeIds: [
+      "admin.mall.risk",
+      "admin.mall.moderation",
+      "admin.mall.users",
+      "admin.mall.permissions",
+    ],
+  },
+];
+
+const SDKWORK_ADMIN_ROUTE_ICONS: Readonly<Record<string, LucideIcon>> = {
+  "admin.mall.dashboard": LayoutDashboard,
+  "admin.mall.reports": FileBarChart2,
+  "admin.mall.audit": ScrollText,
+  "admin.mall.cms": ScrollText,
+  "admin.commerce.product-admin.catalog": Package,
+  "admin.mall.brands": Package,
+  "admin.mall.orders": ShoppingCart,
+  "admin.mall.after-sales": ShoppingCart,
+  "admin.mall.marketing": Megaphone,
+  "admin.commerce.membership-admin.dashboard": Crown,
+  "admin.mall.shops": Store,
+  "admin.mall.settlement": Wallet,
+  "admin.mall.risk": ShieldAlert,
+  "admin.mall.moderation": Flag,
+  "admin.mall.users": Users,
+  "admin.mall.permissions": KeyRound,
+};
+
 export function SdkworkMallPcAdminShell({
   children,
   runtime,
 }: SdkworkMallPcShellProps) {
   const adminRoutes = runtime.routes.filter((route) => route.surface === "backend-admin");
+  const routesById = new Map(adminRoutes.map((route) => [route.id, route]));
+  const groupedIds = new Set(SDKWORK_ADMIN_MENU_SECTIONS.flatMap((section) => [...section.routeIds]));
+  const ungroupedRoutes = adminRoutes.filter((route) => !groupedIds.has(route.id));
 
   return (
     <div className="sdkwork-mall-pc-app">
@@ -203,7 +286,7 @@ export function SdkworkMallPcAdminShell({
           <span>平台管理</span>
         </div>
         <nav className="sdkwork-mall-pc-nav">
-          {adminRoutes.map((route) => (
+          {ungroupedRoutes.map((route) => (
             <NavLink
               className={({ isActive }) =>
                 isActive
@@ -216,6 +299,59 @@ export function SdkworkMallPcAdminShell({
               {route.title}
             </NavLink>
           ))}
+          {SDKWORK_ADMIN_MENU_SECTIONS.map((section) => {
+            const sectionRoutes = section.routeIds
+              .map((routeId) => routesById.get(routeId))
+              .filter((route): route is SdkworkMallPcRouteContribution => Boolean(route));
+            if (sectionRoutes.length === 0) {
+              return null;
+            }
+            const SectionIcon = section.icon;
+            return (
+              <div className="sdkwork-mall-pc-nav-section" key={section.label}>
+                <div
+                  className="sdkwork-mall-pc-nav-section-label"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.4rem",
+                    margin: "0.9rem 0 0.35rem",
+                    fontSize: "0.68rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: "var(--sdk-color-text-muted)",
+                  }}
+                >
+                  <SectionIcon aria-hidden="true" size={13} />
+                  {section.label}
+                </div>
+                {sectionRoutes.map((route) => {
+                  const RouteIcon = SDKWORK_ADMIN_ROUTE_ICONS[route.id];
+                  return (
+                    <NavLink
+                      className={({ isActive }) =>
+                        isActive
+                          ? "sdkwork-mall-pc-nav-link sdkwork-mall-pc-nav-link-active"
+                          : "sdkwork-mall-pc-nav-link"}
+                      end
+                      key={route.id}
+                      to={route.path}
+                    >
+                      {RouteIcon ? (
+                        <RouteIcon
+                          aria-hidden="true"
+                          size={14}
+                          style={{ flexShrink: 0, verticalAlign: "-0.18em", marginRight: "0.45rem" }}
+                        />
+                      ) : null}
+                      {route.title}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            );
+          })}
         </nav>
       </aside>
       <main className="sdkwork-mall-pc-main">{children}</main>
