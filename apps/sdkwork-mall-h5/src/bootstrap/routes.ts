@@ -9,6 +9,7 @@ import { sdkworkMallH5OrderRoutes } from "@sdkwork/mall-h5-order/routes";
 import { sdkworkMallH5AccountRoutes } from "@sdkwork/mall-h5-account/routes";
 import { sdkworkMallH5BuyerRoutes } from "@sdkwork/mall-h5-buyer/routes";
 import { sdkworkMallH5MembershipRoutes } from "@sdkwork/mall-h5-membership/routes";
+import { sdkworkMallH5ShopRoutes } from "@sdkwork/mall-h5-shop/routes";
 
 const registry = createSdkworkMallH5RouteRegistry([
   ...sdkworkMallH5HomeRoutes,
@@ -18,6 +19,7 @@ const registry = createSdkworkMallH5RouteRegistry([
   ...sdkworkMallH5BuyerRoutes,
   ...sdkworkMallH5AccountRoutes,
   ...sdkworkMallH5MembershipRoutes,
+  ...sdkworkMallH5ShopRoutes,
 ] satisfies readonly SdkworkMallH5RouteContribution[]);
 
 export const sdkworkMallH5Routes = registry.routes;

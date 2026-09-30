@@ -45,6 +45,7 @@
     "@sdkwork/mall-h5-membership": "workspace:*",
     "@sdkwork/mall-h5-order": "workspace:*",
     "@sdkwork/mall-h5-shell": "workspace:*",
+    "@sdkwork/mall-h5-shop": "workspace:*",
     "@sdkwork/membership-app-sdk": "workspace:*",
     "@sdkwork/membership-service": "workspace:*",
     "@sdkwork/order-app-sdk": "workspace:*",

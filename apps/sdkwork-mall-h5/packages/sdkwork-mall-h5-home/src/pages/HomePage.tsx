@@ -70,6 +70,17 @@ export function SdkworkMallH5HomePage() {
       {loading ? <div className="sdk-h5-loading">加载中...</div> : null}
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
+      {snapshot?.featuredShops.length ? (
+        <section className="sdk-h5-section">
+          <h2>热门店铺</h2>
+          <div className="sdk-h5-chip-row">
+            {snapshot.featuredShops.map((shop) => (
+              <Link key={shop.id} to={`/shop/${shop.id}`}>{shop.name}</Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {snapshot?.categories.length ? (
         <section className="sdk-h5-section">
           <h2>热门类目</h2>

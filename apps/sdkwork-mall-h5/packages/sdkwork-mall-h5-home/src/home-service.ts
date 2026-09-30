@@ -16,8 +16,16 @@ export interface MallH5HomeCategory {
   name: string;
 }
 
+export interface MallH5HomeShop {
+  id: string;
+  logoUrl?: string;
+  name: string;
+  rating?: number | null;
+}
+
 export interface MallH5HomeSnapshot {
   categories: MallH5HomeCategory[];
+  featuredShops: MallH5HomeShop[];
   hotProducts: MallH5HomeProductCard[];
   newProducts: MallH5HomeProductCard[];
 }
@@ -45,10 +53,11 @@ function readProductCard(item: Record<string, unknown>): MallH5HomeProductCard {
 
 export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
   const commerce = getSdkworkCommerceService();
-  const [categoriesResult, hotResult, newResult] = await Promise.allSettled([
+  const [categoriesResult, hotResult, newResult, shopsResult] = await Promise.allSettled([
     commerce.catalog.categories.list({ page: 1, page_size: 10, status: "active" }),
     commerce.catalog.spus.list({ page: 1, page_size: 10, sort: "sales" }),
     commerce.catalog.spus.list({ page: 1, page_size: 10, sort: "newest" }),
+    commerce.shops.list({ page: 1, page_size: 4, status: "active" }),
   ]);
 
   const categoriesPayload =
@@ -64,11 +73,25 @@ export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
       ? (unwrapSdkworkCommerceResponse<{ items?: Record<string, unknown>[] }>(newResult.value) ?? { items: [] })
       : { items: [] };
 
+  const shopsPayload =
+    shopsResult.status === "fulfilled"
+      ? (unwrapSdkworkCommerceResponse<{ items?: Record<string, unknown>[] }>(shopsResult.value) ?? { items: [] })
+      : { items: [] };
+
   return {
     categories: (categoriesPayload.items ?? []).map((item) => ({
       id: String(item.id ?? ""),
       name: String(item.name ?? item.title ?? "类目"),
     })),
+    featuredShops: (shopsPayload.items ?? [])
+      .map((item) => ({
+        id: String(item.id ?? item.shopId ?? ""),
+        logoUrl: typeof (item.logoUrl ?? item.logo) === "string" ? String(item.logoUrl ?? item.logo) : undefined,
+        name: String(item.name ?? item.title ?? item.shopName ?? "店铺"),
+        rating: readMoney(item.rating ?? item.score),
+      }))
+      .filter((shop) => shop.id)
+      .slice(0, 4),
     hotProducts: (hotPayload.items ?? []).map(readProductCard),
     newProducts: (newPayload.items ?? []).map(readProductCard),
   };

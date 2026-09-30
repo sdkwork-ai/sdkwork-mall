@@ -195,6 +195,15 @@ export function SdkworkMallH5ProductDetailPage() {
         </section>
       ) : null}
 
+      {detail.shopId ? (
+        <section className="sdk-h5-section">
+          <h2>店铺</h2>
+          <Link className="sdk-h5-button sdk-h5-button-secondary" to={`/shop/${detail.shopId}`}>
+            {detail.shopName || "进入店铺"}
+          </Link>
+        </section>
+      ) : null}
+
       {detail.description ? (
         <section className="sdk-h5-section">
           <h2>商品介绍</h2>
