@@ -6,7 +6,7 @@
 
 SDKWORK_MODULE_ID="sdkwork-mall"
 SDKWORK_IMAGE_NAME="sdkwork-mall-standalone"
-SDKWORK_APP_TYPES="server,pc,h5"
+SDKWORK_APP_TYPES="server,pc,h5,flutter,mini-program"
 
 # Operations wiring (OPERATIONS_SPEC.md): compose service carrying the health
 # probe and its path; adjust to the module's compose file when it lands.
@@ -53,6 +53,10 @@ sdkwork_build_app() {
       else
         sdkwork_local_run pnpm --dir apps/sdkwork-mall-h5 run "build:${env_alias}"
       fi ;;
+    flutter)
+      sdkwork_local_run flutter build apk --release --no-pub         --dart-define-from-file "apps/sdkwork-mall-flutter-mobile/env/sdkwork.${profile}.${environment}.json" ;;
+    mini-program)
+      sdkwork_local_run pnpm --dir apps/sdkwork-mall-mini-program run build ;;
     *)
       sdkwork_die "${SDKWORK_BIN_E_ENV}" \
         "app type '${app_type}' has no wired build for sdkwork-mall; extend sdkwork_build_app with the repository's canonical runner (declared: ${SDKWORK_APP_TYPES})" ;;

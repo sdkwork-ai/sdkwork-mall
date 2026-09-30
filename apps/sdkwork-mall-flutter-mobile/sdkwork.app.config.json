@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 3,
+  "kind": "sdkwork.app",
+  "app": {
+    "key": "sdkwork-mall-flutter-mobile",
+    "name": "SDKWork Mall Flutter Mobile",
+    "displayName": "SDKWork 商城",
+    "description": "SDKWork Mall Flutter mobile storefront and buyer surfaces.",
+    "vendor": "SDKWork",
+    "appType": "APP_FLUTTER",
+    "versionSource": "pubspec.yaml",
+    "identifiers": {
+      "packageName": "com.sdkwork.mall.flutter",
+      "bundleId": "com.sdkwork.mall.flutter",
+      "desktopAppId": null,
+      "containerImage": null
+    }
+  },
+  "backend": {
+    "profileKey": "backend-root-admin",
+    "ownerMode": "tenant",
+    "grantMode": "current",
+    "platform": "APP_ANDROID",
+    "appId": null,
+    "organizationId": "0",
+    "tenantId": "100001"
+  },
+  "runtime": {
+    "family": "mobile",
+    "framework": "flutter",
+    "runtimes": [
+      "MOBILE",
+      "APP_ANDROID",
+      "APP_IOS"
+    ],
+    "deliveryModes": [
+      "APP_STORE_PACKAGE"
+    ],
+    "defaultPlatform": "APP_ANDROID",
+    "defaultArchitecture": "arm64",
+    "supportedDeploymentProfiles": [
+      "cloud"
+    ],
+    "defaultDeploymentProfile": "cloud"
+  },
+  "publish": {
+    "status": "DRAFT",
+    "platforms": [
+      "APP_ANDROID",
+      "APP_IOS"
+    ],
+    "installPlatforms": [
+      "APP_ANDROID",
+      "APP_IOS"
+    ],
+    "config": {
+      "workspaceRoot": "apps/sdkwork-mall-flutter-mobile",
+      "managedBy": "sdkwork-mall"
+    }
+  },
+  "environments": {
+    "development": {
+      "accessUrl": "https://api-dev.sdkwork.com/apps/sdkwork-mall-flutter-mobile",
+      "deployUrl": "https://api-dev.sdkwork.com/apps/sdkwork-mall-flutter-mobile",
+      "deployEnv": "dev"
+    },
+    "production": {
+      "accessUrl": "https://api.sdkwork.com/apps/sdkwork-mall-flutter-mobile",
+      "deployUrl": "https://api.sdkwork.com/apps/sdkwork-mall-flutter-mobile",
+      "deployEnv": "production"
+    }
+  },
+  "metadata": {
+    "standardOwner": "sdkwork-mall",
+    "initializedAt": "2026-09-30T00:00:00Z"
+  }
+}
