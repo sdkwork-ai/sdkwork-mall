@@ -49,6 +49,11 @@
       "types": "./src/pages/FootprintPage.tsx",
       "import": "./src/pages/FootprintPage.tsx",
       "default": "./src/pages/FootprintPage.tsx"
+    },
+    "./favorites-service": {
+      "types": "./src/favorites-service.ts",
+      "import": "./src/favorites-service.ts",
+      "default": "./src/favorites-service.ts"
     }
   },
   "files": [

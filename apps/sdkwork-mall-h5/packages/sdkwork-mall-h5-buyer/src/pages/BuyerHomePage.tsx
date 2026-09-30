@@ -4,6 +4,8 @@ import {
   CreditCard,
   Crown,
   FileText,
+  Heart,
+  History,
   MapPin,
   Receipt,
   PackageSearch,
