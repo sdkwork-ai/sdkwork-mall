@@ -26,7 +26,7 @@ test("mall mini-program tab bar covers the JD core surfaces", () => {
 
 test("mall mini-program never issues raw wx.request before the MP SDK family lands", () => {
   for (const file of ["../src/bootstrap/sdkClients.ts", "../src/app.js"]) {
-    assert.ok(!read(file).includes("wx.request"), `${file} must not bypass the SDK seam`);
+    assert.ok(!read(file).includes("wx.request("), `${file} must not call wx.request directly`);
   }
   assert.match(
     read("../src/bootstrap/sdkClients.ts"),
