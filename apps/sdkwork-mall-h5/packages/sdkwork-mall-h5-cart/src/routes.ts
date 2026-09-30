@@ -1,0 +1,40 @@
+import type { SdkworkMallH5RouteContribution } from "@sdkwork/mall-h5-core";
+
+export const sdkworkMallH5CartRoutes = [
+  {
+    auth: "required",
+    capability: "cart",
+    domain: "commerce",
+    id: "storefront.mall.cart",
+    packageName: "@sdkwork/mall-h5-cart",
+    path: "/cart",
+    screen: "cart",
+    surface: "storefront",
+    title: "购物车",
+    titleKey: "cart.routes.cart.title",
+  },
+  {
+    auth: "required",
+    capability: "cart",
+    domain: "commerce",
+    id: "storefront.mall.checkout",
+    packageName: "@sdkwork/mall-h5-cart",
+    path: "/checkout",
+    screen: "checkout",
+    surface: "storefront",
+    title: "确认订单",
+    titleKey: "cart.routes.checkout.title",
+  },
+  {
+    auth: "public",
+    capability: "cart",
+    domain: "commerce",
+    id: "storefront.mall.payment-result",
+    packageName: "@sdkwork/mall-h5-cart",
+    path: "/payment/result",
+    screen: "payment-result",
+    surface: "storefront",
+    title: "支付结果",
+    titleKey: "cart.routes.payment-result.title",
+  },
+] as const satisfies readonly SdkworkMallH5RouteContribution[];

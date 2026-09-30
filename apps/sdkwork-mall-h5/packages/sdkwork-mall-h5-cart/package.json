@@ -1,0 +1,51 @@
+{
+  "name": "@sdkwork/mall-h5-cart",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mall H5 cart, checkout, and payment result pages.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./routes": {
+      "types": "./src/routes.ts",
+      "import": "./src/routes.ts",
+      "default": "./src/routes.ts"
+    },
+    "./cart-page": {
+      "types": "./src/pages/CartPage.tsx",
+      "import": "./src/pages/CartPage.tsx",
+      "default": "./src/pages/CartPage.tsx"
+    },
+    "./checkout-page": {
+      "types": "./src/pages/CheckoutPage.tsx",
+      "import": "./src/pages/CheckoutPage.tsx",
+      "default": "./src/pages/CheckoutPage.tsx"
+    },
+    "./payment-result-page": {
+      "types": "./src/pages/PaymentResultPage.tsx",
+      "import": "./src/pages/PaymentResultPage.tsx",
+      "default": "./src/pages/PaymentResultPage.tsx"
+    }
+  },
+  "files": ["src"],
+  "dependencies": {
+    "@sdkwork/mall-commerce-service": "workspace:*",
+    "@sdkwork/mall-h5-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "h5-react",
+    "domain": "commerce",
+    "capability": "cart",
+    "status": "ready"
+  }
+}
