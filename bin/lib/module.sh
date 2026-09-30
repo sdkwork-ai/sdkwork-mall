@@ -6,7 +6,7 @@
 
 SDKWORK_MODULE_ID="sdkwork-mall"
 SDKWORK_IMAGE_NAME="sdkwork-mall-standalone"
-SDKWORK_APP_TYPES="server,pc"
+SDKWORK_APP_TYPES="server,pc,h5"
 
 # Operations wiring (OPERATIONS_SPEC.md): compose service carrying the health
 # probe and its path; adjust to the module's compose file when it lands.
@@ -26,11 +26,33 @@ sdkwork_image_build() {
 # ----------------------------------------------------------------------------
 # Application build (apps-build.sh)
 # ----------------------------------------------------------------------------
+sdkwork_mall_env_alias() {
+  case "$1" in
+    development) echo "dev" ;;
+    production) echo "prod" ;;
+    *) echo "$1" ;;
+  esac
+}
+
 sdkwork_build_app() {
   local app_type="$1" environment="$2" profile="$3"
+  local env_alias
+  env_alias=$(sdkwork_mall_env_alias "${environment}")
   case "${app_type}" in
     server)
       sdkwork_local_run cargo build --release ;;
+    pc)
+      if [ "${profile}" = "cloud" ]; then
+        sdkwork_local_run pnpm --dir apps/sdkwork-mall-pc run "build:${env_alias}:cloud"
+      else
+        sdkwork_local_run pnpm --dir apps/sdkwork-mall-pc run "build:${env_alias}"
+      fi ;;
+    h5)
+      if [ "${profile}" = "cloud" ]; then
+        sdkwork_local_run pnpm --dir apps/sdkwork-mall-h5 run "build:${env_alias}:cloud"
+      else
+        sdkwork_local_run pnpm --dir apps/sdkwork-mall-h5 run "build:${env_alias}"
+      fi ;;
     *)
       sdkwork_die "${SDKWORK_BIN_E_ENV}" \
         "app type '${app_type}' has no wired build for sdkwork-mall; extend sdkwork_build_app with the repository's canonical runner (declared: ${SDKWORK_APP_TYPES})" ;;
@@ -42,8 +64,25 @@ sdkwork_build_app() {
 # ----------------------------------------------------------------------------
 sdkwork_package_app() {
   local app_type="$1" environment="$2" profile="$3" out="$4"
-  sdkwork_die "${SDKWORK_BIN_E_STATE}" \
-    "sdkwork-mall has no canonical release packager wired yet; implement sdkwork_package_app against the repository's packaging command (MODULE_BIN_SPEC.md §4.4)"
+  local env_alias dist_dir artifact_name
+  case "${app_type}" in
+    pc|h5)
+      env_alias=$(sdkwork_mall_env_alias "${environment}")
+      dist_dir="apps/sdkwork-mall-${app_type}/dist/standalone/${env_alias}"
+      if [ ! -d "${dist_dir}" ]; then
+        dist_dir="apps/sdkwork-mall-${app_type}/dist/cloud/${env_alias}"
+      fi
+      if [ ! -d "${dist_dir}" ]; then
+        sdkwork_die "${SDKWORK_BIN_E_STATE}" \
+          "missing browser bundle for sdkwork-mall-${app_type} (${environment}/${profile}); run bin/apps-build.sh ${app_type} ${environment}:${profile} first"
+      fi
+      mkdir -p "${out:-target/bin-packages}"
+      artifact_name="sdkwork-mall-${app_type}-${env_alias}-${profile}.tgz"
+      sdkwork_tar_artifact "${dist_dir}" "${out:-target/bin-packages}/${artifact_name}" ;;
+    *)
+      sdkwork_die "${SDKWORK_BIN_E_STATE}" \
+        "sdkwork-mall has no canonical packager for app type '${app_type}' yet; extend sdkwork_package_app (MODULE_BIN_SPEC.md §4.4)" ;;
+  esac
 }
 
 # ----------------------------------------------------------------------------
