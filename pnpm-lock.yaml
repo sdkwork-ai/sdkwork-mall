@@ -1139,6 +1139,9 @@ importers:
       '@sdkwork/mall-h5-account':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-h5-account
+      '@sdkwork/mall-h5-activity':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-h5-activity
       '@sdkwork/mall-h5-buyer':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-h5-buyer
@@ -1166,6 +1169,9 @@ importers:
       '@sdkwork/mall-h5-shell':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-h5-shell
+      '@sdkwork/mall-h5-shop':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-h5-shop
       '@sdkwork/membership-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-membership/sdks/sdkwork-membership-app-sdk/sdkwork-membership-app-sdk-typescript
@@ -1243,6 +1249,15 @@ importers:
         specifier: workspace:*
         version: link:../sdkwork-mall-h5-core
 
+  apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-activity:
+    dependencies:
+      '@sdkwork/mall-commerce-service':
+        specifier: workspace:*
+        version: link:../../../sdkwork-mall-pc/packages/sdkwork-mall-commerce-service
+      '@sdkwork/mall-h5-core':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-h5-core
+
   apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer:
     dependencies:
       '@sdkwork/mall-h5-core':
@@ -1269,6 +1284,9 @@ importers:
       '@sdkwork/mall-commerce-service':
         specifier: workspace:*
         version: link:../../../sdkwork-mall-pc/packages/sdkwork-mall-commerce-service
+      '@sdkwork/mall-h5-buyer':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-h5-buyer
       '@sdkwork/mall-h5-core':
         specifier: workspace:*
         version: link:../sdkwork-mall-h5-core
@@ -1306,6 +1324,15 @@ importers:
 
   apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-shell:
     dependencies:
+      '@sdkwork/mall-h5-core':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-h5-core
+
+  apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-shop:
+    dependencies:
+      '@sdkwork/mall-commerce-service':
+        specifier: workspace:*
+        version: link:../../../sdkwork-mall-pc/packages/sdkwork-mall-commerce-service
       '@sdkwork/mall-h5-core':
         specifier: workspace:*
         version: link:../sdkwork-mall-h5-core
