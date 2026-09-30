@@ -1,0 +1,4 @@
+<view class="mp-section">
+  <view class="mp-title">{{title}}</view>
+  <view class="mp-muted">小程序端正在接入商城联邦服务，敬请期待。</view>
+</view>

@@ -1,0 +1,17 @@
+{
+  "name": "sdkwork-mall-mini-program",
+  "private": true,
+  "version": "0.1.0",
+  "description": "SDKWork Mall WeChat mini-program storefront.",
+  "scripts": {
+    "dev": "pnpm dev:standalone",
+    "dev:standalone": "pnpm exec sdkwork-app dev --root ../.. --deployment-profile standalone",
+    "dev:cloud": "pnpm exec sdkwork-app dev --root ../.. --deployment-profile cloud",
+    "build": "node scripts/build-runtime.mjs",
+    "build:standalone": "node scripts/build-runtime.mjs",
+    "build:cloud": "node scripts/build-runtime.mjs --deployment-profile cloud",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm --dir ../.. run test:vitest",
+    "lint": "pnpm run typecheck"
+  }
+}

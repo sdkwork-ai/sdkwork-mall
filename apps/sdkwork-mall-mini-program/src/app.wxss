@@ -1,0 +1,19 @@
+page {
+  background: #f5f6f8;
+  color: #111827;
+  font-size: 28rpx;
+}
+.mp-section {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 20rpx;
+}
+.mp-title {
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+.mp-muted {
+  color: #6b7280;
+  font-size: 24rpx;
+}

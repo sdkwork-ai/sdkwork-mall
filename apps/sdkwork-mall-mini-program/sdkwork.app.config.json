@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 3,
+  "kind": "sdkwork.app",
+  "app": {
+    "key": "sdkwork-mall-mini-program",
+    "name": "SDKWork Mall Mini Program",
+    "displayName": "SDKWork 商城小程序",
+    "description": "SDKWork Mall WeChat mini-program storefront and buyer surfaces.",
+    "vendor": "SDKWork",
+    "appType": "APP_REACT",
+    "versionSource": "package.json",
+    "identifiers": {
+      "packageName": "sdkwork-mall-mini-program",
+      "bundleId": null,
+      "desktopAppId": null,
+      "containerImage": null
+    }
+  },
+  "backend": {
+    "profileKey": "backend-root-admin",
+    "ownerMode": "tenant",
+    "grantMode": "current",
+    "platform": "MP_WEIXIN",
+    "appId": null,
+    "organizationId": "0",
+    "tenantId": "100001"
+  },
+  "runtime": {
+    "family": "mini-program",
+    "framework": "weixin-mini-program",
+    "runtimes": ["MINI_PROGRAM"],
+    "deliveryModes": ["MINI_PROGRAM_PACKAGE"],
+    "defaultPlatform": "MP_WEIXIN",
+    "defaultArchitecture": "universal",
+    "supportedDeploymentProfiles": ["cloud"],
+    "defaultDeploymentProfile": "cloud"
+  },
+  "publish": {
+    "status": "DRAFT",
+    "platforms": ["MP_WEIXIN"],
+    "installPlatforms": ["MP_WEIXIN"],
+    "config": {
+      "workspaceRoot": "apps/sdkwork-mall-mini-program",
+      "managedBy": "sdkwork-mall"
+    }
+  },
+  "environments": {
+    "development": {
+      "accessUrl": "https://api-dev.sdkwork.com/apps/sdkwork-mall-mini-program",
+      "deployUrl": "https://api-dev.sdkwork.com/apps/sdkwork-mall-mini-program",
+      "deployEnv": "dev"
+    },
+    "production": {
+      "accessUrl": "https://api.sdkwork.com/apps/sdkwork-mall-mini-program",
+      "deployUrl": "https://api.sdkwork.com/apps/sdkwork-mall-mini-program",
+      "deployEnv": "production"
+    }
+  },
+  "metadata": {
+    "standardOwner": "sdkwork-mall",
+    "initializedAt": "2026-09-30T00:00:00Z"
+  }
+}
