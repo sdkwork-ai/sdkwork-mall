@@ -25,15 +25,44 @@ function statusLabel(status: MallH5OrderStatus): string {
 
 export function SdkworkMallH5OrderPage() {
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);
+  const [loadedOrders, setLoadedOrders] = useState<MallH5OrderSummary[]>([]);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersHasMore, setOrdersHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | MallH5OrderStatus>("all");
   const [loading, setLoading] = useState(true);
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
-    const data = await loadMallH5OrderDashboard();
+    const data = await loadMallH5OrderDashboard(1);
     setDashboard(data);
+    setLoadedOrders(data.orders);
+    setOrdersPage(1);
+    setOrdersHasMore(data.orders.length >= 20);
   }, []);
+
+  async function loadMoreOrders() {
+    if (loadingMore || !ordersHasMore) {
+      return;
+    }
+    setLoadingMore(true);
+    try {
+      const nextPage = ordersPage + 1;
+      const data = await loadMallH5OrderDashboard(nextPage);
+      setDashboard((current) => current ?? data);
+      setLoadedOrders((current) => {
+        const known = new Set(current.map((order) => order.id));
+        return [...current, ...data.orders.filter((order) => !known.has(order.id))];
+      });
+      setOrdersPage(nextPage);
+      setOrdersHasMore(data.orders.length >= 20);
+    } catch {
+      // 加载更多失败时保留当前列表，用户可重试。
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -66,7 +95,7 @@ export function SdkworkMallH5OrderPage() {
     }
   }
 
-  const orders = (dashboard?.orders ?? []).filter(
+  const orders = loadedOrders.filter(
     (order) => activeFilter === "all" || order.status === activeFilter,
   );
 
@@ -148,6 +177,7 @@ export function SdkworkMallH5OrderPage() {
       {orders.length === 0 ? (
         <div className="sdk-h5-empty">暂无订单</div>
       ) : (
+        <>
         <div className="sdk-h5-order-list">
           {orders.map((order) => (
             <article className="sdk-h5-order-row" key={order.id}>
@@ -163,6 +193,19 @@ export function SdkworkMallH5OrderPage() {
             </article>
           ))}
         </div>
+        {ordersHasMore ? (
+          <div className="sdk-h5-center">
+            <button
+              className="sdk-h5-button sdk-h5-button-secondary"
+              disabled={loadingMore}
+              onClick={() => void loadMoreOrders()}
+              type="button"
+            >
+              {loadingMore ? "加载中..." : "加载更多订单"}
+            </button>
+          </div>
+        ) : null}
+        </>
       )}
     </div>
   );

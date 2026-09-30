@@ -42,6 +42,8 @@ export function SdkworkMallH5CatalogPage() {
   const [categoryTree, setCategoryTree] = useState<MallH5CategoryTreeNode[]>([]);
   const [items, setItems] = useState<MallH5ProductCard[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +69,7 @@ export function SdkworkMallH5CatalogPage() {
     setError(null);
     searchMallH5Products({
       categoryId,
+      page: 1,
       pageSize: 20,
       query: categoryId ? undefined : keyword || undefined,
       sort: sort || undefined,
@@ -75,6 +78,7 @@ export function SdkworkMallH5CatalogPage() {
         if (active) {
           setItems(result.items);
           setTotal(result.total);
+          setPage(1);
         }
       })
       .catch((cause: unknown) => {
@@ -91,6 +95,32 @@ export function SdkworkMallH5CatalogPage() {
       active = false;
     };
   }, [categoryId, keyword, sort]);
+
+  async function loadMore() {
+    if (loadingMore || items.length >= total) {
+      return;
+    }
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const result = await searchMallH5Products({
+        categoryId,
+        page: nextPage,
+        pageSize: 20,
+        query: categoryId ? undefined : keyword || undefined,
+        sort: sort || undefined,
+      });
+      setItems((current) => {
+        const known = new Set(current.map((item) => item.id));
+        return [...current, ...result.items.filter((item) => !known.has(item.id))];
+      });
+      setPage(nextPage);
+    } catch {
+      // 加载更多失败时保留当前列表，用户可重试。
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   const activeRoot = categoryId
     ? categoryTree.find((node) => node.id === categoryId)
@@ -182,8 +212,17 @@ export function SdkworkMallH5CatalogPage() {
           <ProductRow key={product.id} product={product} />
         ))}
       </div>
-      {total > items.length ? (
-        <div className="sdk-h5-list-footer">共 {total} 件，仅展示前 {items.length} 件</div>
+      {items.length < total ? (
+        <div className="sdk-h5-center">
+          <button
+            className="sdk-h5-button sdk-h5-button-secondary"
+            disabled={loadingMore}
+            onClick={() => void loadMore()}
+            type="button"
+          >
+            {loadingMore ? "加载中..." : `加载更多（已展示 ${items.length}/${total}）`}
+          </button>
+        </div>
       ) : null}
     </div>
   );

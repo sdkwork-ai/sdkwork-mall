@@ -132,7 +132,7 @@ function pickString(record: Record<string, unknown>, keys: readonly string[]): s
   return undefined;
 }
 
-export async function loadMallH5OrderDashboard(): Promise<MallH5OrderDashboard> {
+export async function loadMallH5OrderDashboard(page = 1): Promise<MallH5OrderDashboard> {
   if (!hasSdkworkOrderSession()) {
     return {
       orders: [],
@@ -146,7 +146,7 @@ export async function loadMallH5OrderDashboard(): Promise<MallH5OrderDashboard> 
     };
   }
   const [orderPagePayload, statisticsPayload] = await Promise.all([
-    getSdkworkOrderService().orders.list({ page: 1, pageSize: 20 }),
+    getSdkworkOrderService().orders.list({ page, pageSize: 20 }),
     getSdkworkOrderService().orders.statistics.retrieve(),
   ]);
   const orderPage = unwrapSdkworkOrderResponse<{ content?: RemoteOrder[] }>(orderPagePayload, "订单加载失败");

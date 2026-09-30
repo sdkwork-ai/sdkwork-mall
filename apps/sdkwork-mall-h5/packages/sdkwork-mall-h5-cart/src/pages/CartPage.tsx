@@ -20,6 +20,12 @@ export function SdkworkMallH5CartPage() {
     const snapshot = await loadMallH5Cart();
     setCart(snapshot);
     setSelectedIds(snapshot.items.map((item) => item.id));
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        "sdkwork-mall-h5-cart-count",
+        String(snapshot.items.reduce((sum, item) => sum + item.quantity, 0)),
+      );
+    }
   }, []);
 
   useEffect(() => {
