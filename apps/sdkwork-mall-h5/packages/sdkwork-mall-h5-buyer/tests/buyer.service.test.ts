@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { configureSdkworkCommerceServiceProvider } from "@sdkwork/mall-commerce-service";
+import {
+  configureSdkworkCommerceServiceProvider,
+  type SdkworkCommerceService,
+} from "@sdkwork/mall-commerce-service";
 
 import {
   configureCommerceServiceMockSession,
@@ -30,7 +33,9 @@ describe("sdkwork-mall-h5-buyer services", () => {
   });
 
   function useCommerceMock(overrides: Parameters<typeof createCommerceServiceMock>[0]) {
-    configureSdkworkCommerceServiceProvider(() => createCommerceServiceMock(overrides));
+    configureSdkworkCommerceServiceProvider(
+      (): SdkworkCommerceService => createCommerceServiceMock(overrides) as SdkworkCommerceService,
+    );
   }
 
   it("maps, creates, defaults, and deletes addresses through the commerce facade", async () => {
