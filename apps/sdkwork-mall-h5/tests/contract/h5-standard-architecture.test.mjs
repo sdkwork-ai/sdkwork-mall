@@ -30,6 +30,9 @@ test("mall H5 route ids align with the PC root registry", () => {
     "buyer.mall.coupons",
     "buyer.mall.after-sales",
     "buyer.mall.invoices",
+    "buyer.mall.wallet",
+    "buyer.mall.points",
+    "buyer.mall.membership",
   ]);
   const routeSources = [
     "../../packages/sdkwork-mall-h5-home/src/routes.ts",

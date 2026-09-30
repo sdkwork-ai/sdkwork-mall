@@ -43,6 +43,15 @@ const SdkworkMallH5AfterSalesPage = lazy(() =>
 const SdkworkMallH5InvoicesPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/invoices-page").then((module) => ({ default: module.SdkworkMallH5InvoicesPage })),
 );
+const SdkworkMallH5WalletPage = lazy(() =>
+  import("@sdkwork/mall-h5-account/wallet-page").then((module) => ({ default: module.SdkworkMallH5WalletPage })),
+);
+const SdkworkMallH5PointsPage = lazy(() =>
+  import("@sdkwork/mall-h5-account/points-page").then((module) => ({ default: module.SdkworkMallH5PointsPage })),
+);
+const SdkworkMallH5MembershipPage = lazy(() =>
+  import("@sdkwork/mall-h5-membership/membership-page").then((module) => ({ default: module.SdkworkMallH5MembershipPage })),
+);
 
 function LoadingPlaceholder() {
   return <div className="sdk-h5-loading">加载中...</div>;
@@ -138,6 +147,30 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/invoices"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5WalletPage />
+            </RequireSession>
+          )}
+          path="/buyer/wallet"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5PointsPage />
+            </RequireSession>
+          )}
+          path="/buyer/points"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5MembershipPage />
+            </RequireSession>
+          )}
+          path="/buyer/membership"
         />
         <Route element={<Navigate replace to="/" />} path="*" />
       </Routes>
