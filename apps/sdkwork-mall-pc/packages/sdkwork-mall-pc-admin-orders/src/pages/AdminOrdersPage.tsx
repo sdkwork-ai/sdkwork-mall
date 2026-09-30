@@ -209,6 +209,24 @@ export function SdkworkMallAdminOrdersPage() {
   );
 }
 
+const ADMIN_AFTER_SALES_STATUS_OPTIONS = [
+  { value: "", label: "全部状态" },
+  { value: "PENDING", label: "待审核" },
+  { value: "APPROVED", label: "已同意" },
+  { value: "REJECTED", label: "已拒绝" },
+  { value: "COMPLETED", label: "已完成" },
+  { value: "CANCELLED", label: "已取消" },
+] as const;
+
+const ADMIN_AFTER_SALES_TYPE_OPTIONS = [
+  { value: "", label: "全部类型" },
+  { value: "refund", label: "仅退款" },
+  { value: "return-refund", label: "退货退款" },
+  { value: "exchange", label: "换货" },
+] as const;
+
+const ADMIN_AFTER_SALES_PAGE_SIZE = 30;
+
 export function SdkworkMallAdminAfterSalesPage() {
   const [rows, setRows] = useState<Array<{ id: string; orderId?: string; status: string; type: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -216,26 +234,41 @@ export function SdkworkMallAdminAfterSalesPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [orderIdFilter, setOrderIdFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
-  async function reload() {
+  async function reload(targetPage = page) {
     setLoading(true);
     const service = getSdkworkAdminRemotePort();
-    const response = await service.admin.afterSales.management.list({ page: 1, page_size: 30 });
+    const response = await service.admin.afterSales.management.list({
+      page: targetPage,
+      page_size: ADMIN_AFTER_SALES_PAGE_SIZE,
+      status: statusFilter || undefined,
+      afterSalesType: typeFilter || undefined,
+      orderId: orderIdFilter.trim() || undefined,
+    });
     const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+    const items = payload.items ?? [];
     setRows(
-      payload.items?.map((item) => ({
+      items.map((item) => ({
         id: String(item.id ?? ""),
         orderId: typeof item.orderId === "string" ? item.orderId : undefined,
         type: String(item.type ?? item.afterSalesType ?? "售后"),
         status: String(item.status ?? "unknown"),
       })) ?? [],
     );
+    setHasNextPage(items.length >= ADMIN_AFTER_SALES_PAGE_SIZE);
     setLoading(false);
   }
 
   useEffect(() => {
-    void reload();
-  }, []);
+    void reload(1);
+    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, typeFilter, orderIdFilter]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -282,9 +315,39 @@ export function SdkworkMallAdminAfterSalesPage() {
     <div>
       <h1>售后监管</h1>
       {message ? <p>{message}</p> : null}
+
+      <section className="sdkwork-mall-pc-filter-bar">
+        <input
+          aria-label="按订单号筛选"
+          onChange={(event) => setOrderIdFilter(event.target.value)}
+          placeholder="按订单号筛选"
+          type="search"
+          value={orderIdFilter}
+        />
+        <select
+          aria-label="按状态筛选"
+          onChange={(event) => setStatusFilter(event.target.value)}
+          value={statusFilter}
+        >
+          {ADMIN_AFTER_SALES_STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+        <select
+          aria-label="按类型筛选"
+          onChange={(event) => setTypeFilter(event.target.value)}
+          value={typeFilter}
+        >
+          {ADMIN_AFTER_SALES_TYPE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </section>
+
       {rows.length === 0 ? (
-        <EmptyState description="平台售后单将在此展示" title="暂无售后单" />
+        <EmptyState description="调整筛选条件或等待新售后单" title="暂无售后单" />
       ) : (
+        <>
         <table className="sdkwork-mall-pc-table">
           <thead>
             <tr>
@@ -313,6 +376,34 @@ export function SdkworkMallAdminAfterSalesPage() {
             ))}
           </tbody>
         </table>
+        <div className="sdkwork-mall-pc-pager">
+          <Button
+            disabled={loading || page <= 1}
+            onClick={() => {
+              const target = page - 1;
+              setPage(target);
+              void reload(target);
+            }}
+            type="button"
+            variant="outline"
+          >
+            上一页
+          </Button>
+          <span>第 {page} 页</span>
+          <Button
+            disabled={loading || !hasNextPage}
+            onClick={() => {
+              const target = page + 1;
+              setPage(target);
+              void reload(target);
+            }}
+            type="button"
+            variant="outline"
+          >
+            下一页
+          </Button>
+        </div>
+        </>
       )}
 
       {selectedId && detail ? (
