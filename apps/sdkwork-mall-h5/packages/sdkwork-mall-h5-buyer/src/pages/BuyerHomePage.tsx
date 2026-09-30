@@ -7,8 +7,9 @@ import {
   Heart,
   History,
   MapPin,
-  Receipt,
+  MessageSquare,
   PackageSearch,
+  Receipt,
   Star,
   Ticket,
 } from "lucide-react";
@@ -37,9 +38,8 @@ const QUICK_LINKS = [
   { icon: Crown, label: "会员", path: "/buyer/membership" },
   { icon: Heart, label: "收藏", path: "/buyer/favorites" },
   { icon: History, label: "足迹", path: "/buyer/footprint" },
+  { icon: MessageSquare, label: "消息", path: "/buyer/messages" },
 ] as const;
-
-const PENDING_LINKS = ["消息"] as const;
 
 export function SdkworkMallH5BuyerHomePage() {
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);
@@ -124,14 +124,7 @@ export function SdkworkMallH5BuyerHomePage() {
               </Link>
             );
           })}
-          {PENDING_LINKS.map((label) => (
-            <span aria-disabled="true" className="sdk-h5-quick-grid-item sdk-h5-quick-grid-item-pending" key={label}>
-              <Star aria-hidden="true" size={20} />
-              <span>{label}</span>
-            </span>
-          ))}
         </div>
-        <p className="sdk-h5-muted">收藏/会员/钱包等账户服务页将在后续版本开放移动端。</p>
       </section>
     </div>
   );

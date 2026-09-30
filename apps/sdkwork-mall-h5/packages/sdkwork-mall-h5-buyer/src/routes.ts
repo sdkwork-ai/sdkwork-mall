@@ -85,4 +85,16 @@ export const sdkworkMallH5BuyerRoutes = [
     title: "浏览足迹",
     titleKey: "buyer.routes.footprint.title",
   },
+  {
+    auth: "required",
+    capability: "buyer",
+    domain: "commerce",
+    id: "buyer.mall.messages",
+    packageName: "@sdkwork/mall-h5-buyer",
+    path: "/buyer/messages",
+    screen: "messages",
+    surface: "buyer",
+    title: "消息中心",
+    titleKey: "buyer.routes.messages.title",
+  },
 ] as const satisfies readonly SdkworkMallH5RouteContribution[];

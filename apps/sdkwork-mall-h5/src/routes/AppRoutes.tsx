@@ -67,6 +67,9 @@ const SdkworkMallH5FavoritesPage = lazy(() =>
 const SdkworkMallH5FootprintPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/footprint-page").then((module) => ({ default: module.SdkworkMallH5FootprintPage })),
 );
+const SdkworkMallH5MessagesPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/messages-page").then((module) => ({ default: module.SdkworkMallH5MessagesPage })),
+);
 
 function LoadingPlaceholder() {
   return <div className="sdk-h5-loading">加载中...</div>;
@@ -205,6 +208,14 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/footprint"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5MessagesPage />
+            </RequireSession>
+          )}
+          path="/buyer/messages"
         />
         <Route element={<Navigate replace to="/" />} path="*" />
       </Routes>

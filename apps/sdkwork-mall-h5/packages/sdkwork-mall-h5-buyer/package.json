@@ -54,6 +54,11 @@
       "types": "./src/favorites-service.ts",
       "import": "./src/favorites-service.ts",
       "default": "./src/favorites-service.ts"
+    },
+    "./messages-page": {
+      "types": "./src/pages/MessagesPage.tsx",
+      "import": "./src/pages/MessagesPage.tsx",
+      "default": "./src/pages/MessagesPage.tsx"
     }
   },
   "files": [
