@@ -19,9 +19,21 @@
       "types": "./src/pages/BuyerHomePage.tsx",
       "import": "./src/pages/BuyerHomePage.tsx",
       "default": "./src/pages/BuyerHomePage.tsx"
+    },
+    "./addresses-page": {
+      "types": "./src/pages/AddressesPage.tsx",
+      "import": "./src/pages/AddressesPage.tsx",
+      "default": "./src/pages/AddressesPage.tsx"
+    },
+    "./coupons-page": {
+      "types": "./src/pages/CouponsPage.tsx",
+      "import": "./src/pages/CouponsPage.tsx",
+      "default": "./src/pages/CouponsPage.tsx"
     }
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@sdkwork/mall-h5-core": "workspace:*",
     "@sdkwork/mall-h5-order": "workspace:*",

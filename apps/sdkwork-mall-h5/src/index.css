@@ -787,3 +787,62 @@ body {
   color: var(--sdk-h5-text-muted);
   font-size: 0.75rem;
 }
+
+.sdk-h5-address-line strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.sdk-h5-address-line .sdk-h5-muted {
+  margin-top: 0.2rem;
+}
+
+.sdk-h5-field {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--sdk-h5-text-muted);
+  margin-bottom: 0.55rem;
+}
+
+.sdk-h5-field input {
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.85rem;
+  color: var(--sdk-h5-text);
+}
+
+.sdk-h5-coupon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--sdk-h5-border);
+  font-size: 0.85rem;
+}
+
+.sdk-h5-coupon-row:last-child {
+  border-bottom: 0;
+}
+
+.sdk-h5-redeem-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sdk-h5-redeem-row input {
+  flex: 1;
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.sdk-h5-quick-grid-item-pending {
+  color: var(--sdk-h5-text-muted);
+  opacity: 0.55;
+}

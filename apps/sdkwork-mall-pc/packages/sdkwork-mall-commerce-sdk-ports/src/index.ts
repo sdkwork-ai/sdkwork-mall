@@ -58,7 +58,8 @@ export const APP_COMMERCE_METHOD_TREE = {
   },
   promotions: {
     offers: { list: true, retrieve: true },
-    userCoupons: { list: true },
+    userCoupons: { list: true, claims: { create: true } },
+    codes: { redemptions: { create: true } },
     discountApplications: { create: true },
   },
   billing: { history: { list: true } },

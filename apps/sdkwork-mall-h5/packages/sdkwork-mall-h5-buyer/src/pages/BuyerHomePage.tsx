@@ -1,16 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  CreditCard,
-  Crown,
   FileText,
   MapPin,
-  MessageSquare,
   PackageSearch,
-  Receipt,
   Star,
   Ticket,
-  Wallet,
 } from "lucide-react";
 
 import {
@@ -28,16 +23,12 @@ const ORDER_ENTRIES: Array<{ code: "all" | MallH5OrderStatus; label: string }> =
 ];
 
 const QUICK_LINKS = [
-  { icon: Star, label: "收藏", path: "/buyer" },
-  { icon: Ticket, label: "优惠券", path: "/buyer" },
-  { icon: Crown, label: "会员", path: "/buyer" },
-  { icon: Wallet, label: "钱包", path: "/buyer" },
-  { icon: CreditCard, label: "积分", path: "/buyer" },
-  { icon: Receipt, label: "发票", path: "/buyer" },
-  { icon: MapPin, label: "地址", path: "/buyer" },
-  { icon: FileText, label: "售后", path: "/buyer" },
-  { icon: MessageSquare, label: "消息", path: "/buyer" },
+  { icon: MapPin, label: "地址管理", path: "/buyer/addresses" },
+  { icon: Ticket, label: "领券中心", path: "/buyer/coupons" },
+  { icon: FileText, label: "售后", path: "/buyer/orders" },
 ] as const;
+
+const PENDING_LINKS = ["收藏", "会员", "钱包", "积分", "发票", "消息"] as const;
 
 export function SdkworkMallH5BuyerHomePage() {
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);
@@ -122,8 +113,14 @@ export function SdkworkMallH5BuyerHomePage() {
               </Link>
             );
           })}
+          {PENDING_LINKS.map((label) => (
+            <span aria-disabled="true" className="sdk-h5-quick-grid-item sdk-h5-quick-grid-item-pending" key={label}>
+              <Star aria-hidden="true" size={20} />
+              <span>{label}</span>
+            </span>
+          ))}
         </div>
-        <p className="sdk-h5-muted">优惠券/会员/钱包等账户服务页将在后续版本开放移动端。</p>
+        <p className="sdk-h5-muted">收藏/会员/钱包等账户服务页将在后续版本开放移动端。</p>
       </section>
     </div>
   );

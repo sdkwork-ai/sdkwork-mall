@@ -29,7 +29,9 @@ const COMMERCE_APP_COMMAND_PATHS = [
   "checkout.sessions.orders.create",
   "checkout.sessions.quotes.create",
   "orders.pay",
+  "promotions.codes.redemptions.create",
   "promotions.discountApplications.create",
+  "promotions.userCoupons.claims.create",
   "wallet.holds.create",
 ] as const;
 
