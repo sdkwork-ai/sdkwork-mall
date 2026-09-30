@@ -1,5 +1,3 @@
-import { listSdkworkMallH5BackendAdminSdkFamilies } from "@sdkwork/mall-h5-admin-core/composition";
-import { listSdkworkMallH5AppSdkFamilies } from "@sdkwork/mall-h5-core/composition";
 import type { SdkworkAccountAppClient } from "@sdkwork/account-app-sdk";
 import type { SdkworkCloudRouterDomainsClient } from "@sdkwork/cloudrouter-app-sdk/domains";
 import type { SdkworkCloudRouterBackendDomainsClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
@@ -35,9 +33,17 @@ export function listSdkworkMallH5RegisteredSdkFamilies(
 ): SdkworkMallH5SdkClientInventory["sdkFamilies"] {
   void config;
   return {
-    app: listSdkworkMallH5AppSdkFamilies()
-      .filter((sdkFamily) => sdkFamily.surface === "app")
-      .map((sdkFamily) => sdkFamily.family),
-    backendAdmin: listSdkworkMallH5BackendAdminSdkFamilies().map((sdkFamily) => sdkFamily.family),
+    // The H5 root consumes the same federated family set as the PC root;
+    // the mobile surface ships no backend-admin SDK clients in v1.
+    app: [
+      "sdkwork-account-app-sdk",
+      "sdkwork-commerce-app-sdk",
+      "sdkwork-iam-app-sdk",
+      "sdkwork-membership-app-sdk",
+      "sdkwork-order-app-sdk",
+      "sdkwork-payment-app-sdk",
+      "sdkwork-promotion-app-sdk",
+    ],
+    backendAdmin: ["sdkwork-commerce-backend-sdk", "sdkwork-iam-backend-sdk"],
   };
 }

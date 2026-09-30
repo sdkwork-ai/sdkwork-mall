@@ -78,7 +78,7 @@ export function SdkworkMallH5OrderPage() {
           <button
             className="sdk-h5-button sdk-h5-button-primary"
             disabled={busy}
-            onClick={() => void runOrderAction(order.id, (id) => payMallH5Order({ id, paymentMethod: "WECHAT" }))}
+            onClick={() => void runOrderAction(order.id, (id) => payMallH5Order({ orderId: id, paymentMethod: "WECHAT" }))}
             type="button"
           >
             去支付
@@ -86,7 +86,7 @@ export function SdkworkMallH5OrderPage() {
           <button
             className="sdk-h5-button sdk-h5-button-ghost"
             disabled={busy}
-            onClick={() => void runOrderAction(order.id, (id) => cancelMallH5Order({ id }))}
+            onClick={() => void runOrderAction(order.id, (id) => cancelMallH5Order({ orderId: id }))}
             type="button"
           >
             取消订单
@@ -103,7 +103,7 @@ export function SdkworkMallH5OrderPage() {
           <button
             className="sdk-h5-button sdk-h5-button-primary"
             disabled={busy}
-            onClick={() => void runOrderAction(order.id, (id) => confirmMallH5OrderReceipt({ id }))}
+            onClick={() => void runOrderAction(order.id, (id) => confirmMallH5OrderReceipt({ orderId: id }))}
             type="button"
           >
             确认收货
