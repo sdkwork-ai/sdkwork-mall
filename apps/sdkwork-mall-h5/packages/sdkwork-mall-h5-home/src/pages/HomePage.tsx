@@ -64,6 +64,7 @@ export function SdkworkMallH5HomePage() {
         <Link className="sdk-h5-quick-item" to="/categories">分类逛</Link>
         <Link className="sdk-h5-quick-item" to="/search?q=new">新品</Link>
         <Link className="sdk-h5-quick-item" to="/search?sort=sales">热卖</Link>
+        <Link className="sdk-h5-quick-item" to="/activity">活动</Link>
         <Link className="sdk-h5-quick-item" to="/buyer">会员</Link>
       </section>
 

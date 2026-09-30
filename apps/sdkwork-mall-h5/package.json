@@ -36,6 +36,7 @@
     "@sdkwork/mall-commerce-sdk-ports": "workspace:*",
     "@sdkwork/mall-commerce-service": "workspace:*",
     "@sdkwork/mall-h5-account": "workspace:*",
+    "@sdkwork/mall-h5-activity": "workspace:*",
     "@sdkwork/mall-h5-buyer": "workspace:*",
     "@sdkwork/mall-h5-cart": "workspace:*",
     "@sdkwork/mall-h5-catalog": "workspace:*",
