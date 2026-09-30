@@ -40,6 +40,8 @@ test("mall H5 route ids align with the PC root registry", () => {
     "../../packages/sdkwork-mall-h5-cart/src/routes.ts",
     "../../packages/sdkwork-mall-h5-order/src/routes.ts",
     "../../packages/sdkwork-mall-h5-buyer/src/routes.ts",
+    "../../packages/sdkwork-mall-h5-account/src/routes.ts",
+    "../../packages/sdkwork-mall-h5-membership/src/routes.ts",
   ];
   const collected = new Set();
   for (const source of routeSources) {
