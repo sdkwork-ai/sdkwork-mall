@@ -9,6 +9,19 @@ interface AdminOrderRow {
   subject: string;
 }
 
+const ADMIN_ORDER_STATUS_OPTIONS = [
+  { value: "", label: "全部状态" },
+  { value: "PENDING_PAYMENT", label: "待付款" },
+  { value: "PENDING_SHIPMENT", label: "待发货" },
+  { value: "PENDING_RECEIPT", label: "待收货" },
+  { value: "COMPLETED", label: "已完成" },
+  { value: "CANCELLED", label: "已取消" },
+  { value: "REFUNDING", label: "退款中" },
+  { value: "REFUNDED", label: "已退款" },
+] as const;
+
+const ADMIN_ORDER_PAGE_SIZE = 30;
+
 export function SdkworkMallAdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrderRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,25 +29,39 @@ export function SdkworkMallAdminOrdersPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [keyword, setKeyword] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(false);
 
-  async function reload() {
+  async function reload(targetPage = page) {
     setLoading(true);
     const service = getSdkworkAdminRemotePort();
-    const response = await service.admin.orders.management.list({ page: 1, page_size: 30 });
+    const response = await service.admin.orders.management.list({
+      page: targetPage,
+      page_size: ADMIN_ORDER_PAGE_SIZE,
+      q: keyword.trim() || undefined,
+      status: statusFilter || undefined,
+    });
     const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+    const rows = payload.items ?? [];
     setOrders(
-      payload.items?.map((item) => ({
+      rows.map((item) => ({
         id: String(item.id ?? ""),
         subject: String(item.subject ?? item.title ?? "订单"),
         status: String(item.status ?? "unknown"),
       })) ?? [],
     );
+    setHasNextPage(rows.length >= ADMIN_ORDER_PAGE_SIZE);
     setLoading(false);
   }
 
   useEffect(() => {
-    void reload();
-  }, []);
+    void reload(1);
+    setPage(1);
+    // 重新加载由筛选条件变化触发；page 重置回第一页。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyword, statusFilter]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -82,9 +109,30 @@ export function SdkworkMallAdminOrdersPage() {
     <div>
       <h1>订单监管</h1>
       {message ? <p>{message}</p> : null}
+
+      <section className="sdkwork-mall-pc-filter-bar">
+        <input
+          aria-label="搜索订单"
+          onChange={(event) => setKeyword(event.target.value)}
+          placeholder="按主题/编号搜索"
+          type="search"
+          value={keyword}
+        />
+        <select
+          aria-label="按状态筛选"
+          onChange={(event) => setStatusFilter(event.target.value)}
+          value={statusFilter}
+        >
+          {ADMIN_ORDER_STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </section>
+
       {orders.length === 0 ? (
-        <EmptyState description="平台订单将在此展示" title="暂无订单" />
+        <EmptyState description="调整筛选条件或等待新订单" title="暂无订单" />
       ) : (
+        <>
         <table className="sdkwork-mall-pc-table">
           <thead>
             <tr>
@@ -117,6 +165,34 @@ export function SdkworkMallAdminOrdersPage() {
             ))}
           </tbody>
         </table>
+        <div className="sdkwork-mall-pc-pager">
+          <Button
+            disabled={loading || page <= 1}
+            onClick={() => {
+              const target = page - 1;
+              setPage(target);
+              void reload(target);
+            }}
+            type="button"
+            variant="outline"
+          >
+            上一页
+          </Button>
+          <span>第 {page} 页</span>
+          <Button
+            disabled={loading || !hasNextPage}
+            onClick={() => {
+              const target = page + 1;
+              setPage(target);
+              void reload(target);
+            }}
+            type="button"
+            variant="outline"
+          >
+            下一页
+          </Button>
+        </div>
+        </>
       )}
 
       {selectedId && detail ? (

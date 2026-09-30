@@ -1884,3 +1884,31 @@ a {
   margin-top: 2rem;
   justify-content: center;
 }
+
+.sdkwork-mall-pc-filter-bar {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.sdkwork-mall-pc-filter-bar input,
+.sdkwork-mall-pc-filter-bar select {
+  border: 1px solid var(--sdk-color-border-default, #d1d5db);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.sdkwork-mall-pc-filter-bar input {
+  flex: 1;
+  max-width: 22rem;
+}
+
+.sdkwork-mall-pc-pager {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--sdk-color-text-secondary, #4b5563);
+}
