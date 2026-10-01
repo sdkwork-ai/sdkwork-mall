@@ -243,6 +243,7 @@ export default defineConfig(({ mode }) => {
       "@sdkwork/order-app-sdk",
       "@sdkwork/mall-commerce-service",
       "@sdkwork/order-service",
+      "@sdkwork/utils",
       "@sdkwork/cloudrouter-app-sdk",
       "@sdkwork/sdk-common",
       "@sdkwork/appbase-pc-react",
