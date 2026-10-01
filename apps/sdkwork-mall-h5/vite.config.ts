@@ -219,6 +219,34 @@ export default defineConfig(({ mode }) => {
     }),
     react(), tailwindcss(),
   ],
+  optimizeDeps: {
+    // Workspace-linked sources must not be frozen into the esbuild prebundle:
+    // the sdk-common dist barrel dropped fresh exports once already.
+    exclude: [
+      "@sdkwork/order-app-sdk",
+      "@sdkwork/cloudrouter-backend-sdk",
+      "@sdkwork/iam-contracts",
+      "@sdkwork/auth-pc-react",
+      "@sdkwork/promotion-service",
+      "@sdkwork/cloudrouter-app-sdk/domains",
+      "@sdkwork/promotion-app-sdk",
+      "@sdkwork/sdk-common",
+      "@sdkwork/membership-service",
+      "@sdkwork/cloudrouter-app-sdk",
+      "@sdkwork/iam-runtime",
+      "@sdkwork/iam-app-sdk",
+      "@sdkwork/cloudrouter-backend-sdk/domains",
+      "@sdkwork/auth-runtime-pc-react",
+      "@sdkwork/payment-app-sdk",
+      "@sdkwork/order-service",
+      "@sdkwork/account-app-sdk",
+      "@sdkwork/membership-app-sdk",
+      "@sdkwork/mall-commerce-sdk-ports",
+      "@sdkwork/account-service",
+      "@sdkwork/mall-commerce-service",
+      "@sdkwork/payment-service",
+    ],
+  },
   resolve: {
     alias: [
       {
