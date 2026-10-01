@@ -80,5 +80,9 @@ export function configureSdkworkMallH5Providers(input: {
   );
   void configureSdkworkOrderAppServiceProvider;
 
+  if (typeof window !== "undefined") {
+    (window as unknown as Record<string, unknown>).__commerceService = commerceService;
+  }
+
   return { commerceService };
 }

@@ -76,7 +76,9 @@ export function createSdkworkMallH5IamRuntime(
     sdkClients: [
       options.sdkClients.accountAppClient,
       options.sdkClients.commerceAppClient,
-      options.sdkClients.commerceBackendClient,
+      ...(options.sdkClients.commerceBackendClient
+        ? [options.sdkClients.commerceBackendClient]
+        : []),
       options.sdkClients.membershipAppClient,
       options.sdkClients.orderAppClient,
       options.sdkClients.paymentAppClient,
