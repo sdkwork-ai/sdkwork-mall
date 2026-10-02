@@ -149,22 +149,35 @@ function mapType(raw: string): AfterSalesType {
   return "refund";
 }
 
+function mapRowAmount(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const amount = Number(value);
+    if (Number.isFinite(amount)) {
+      return amount;
+    }
+  }
+  return null;
+}
+
 function mapRow(item: Record<string, unknown>): AfterSalesRow {
   const rawType = String(item.type ?? item.requestType ?? item.afterSalesType ?? "refund");
   const rawStatus = String(item.status ?? item.statusName ?? "pending");
   const mappedType = mapType(rawType);
   const mappedStatus = mapStatus(rawStatus);
+  const description = typeof item.description === "string" && item.description.trim() !== ""
+    ? item.description
+    : undefined;
   return {
     createdAt: typeof item.createdAt === "string" ? item.createdAt : undefined,
     id: String(item.id ?? ""),
     orderId: typeof item.orderId === "string" ? item.orderId : undefined,
-    reason: typeof item.reason === "string" ? item.reason : typeof item.reasonCode === "string" ? item.reasonCode : undefined,
-    requestedAmountCny:
-      typeof item.requestedAmount === "number"
-        ? item.requestedAmount
-        : typeof item.requested_amount === "number"
-          ? item.requested_amount
-          : null,
+    reason: description
+      ?? (typeof item.reason === "string" ? item.reason : undefined)
+      ?? (typeof item.reasonCode === "string" && item.reasonCode !== "buyer-request" ? item.reasonCode : undefined),
+    requestedAmountCny: mapRowAmount(item.requestedAmount ?? item.requested_amount),
     status: mappedStatus,
     statusLabel: typeof item.statusName === "string" ? item.statusName : STATUS_LABELS[mappedStatus],
     type: mappedType,
@@ -176,6 +189,58 @@ export async function listMallAfterSalesRows(): Promise<AfterSalesRow[]> {
   const response = await getSdkworkAfterSalesRemotePort().listAfterSalesRequests({});
   const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
   return payload.items?.map(mapRow) ?? [];
+}
+
+/** Order snapshot used to prefill the form and build the create payload. */
+export interface AfterSalesOrderContext {
+  items: Array<{ orderItemId: string; priceCny: number | null; quantity: number; title: string }>;
+  orderId: string;
+  paidAmountCny: number | null;
+  status: string;
+  totalAmountCny: number | null;
+}
+
+function readContextAmount(value: unknown): number | null {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : null;
+}
+
+/**
+ * Loads the buyer order snapshot for the after-sales form. Amounts and
+ * per-item quantities come from the order domain, never from user input.
+ */
+export async function loadMallAfterSalesOrderContext(orderId: string): Promise<AfterSalesOrderContext> {
+  const trimmed = orderId.trim();
+  if (!trimmed) {
+    throw new Error("请填写订单号");
+  }
+  const payload = unwrapSdkworkPaymentResponse<Record<string, unknown> | null>(
+    await getSdkworkAfterSalesRemotePort().retrieveOrder(trimmed),
+  );
+  if (!payload) {
+    throw new Error("订单不存在或已被删除");
+  }
+  const rawItems = Array.isArray(payload.items) ? (payload.items as Record<string, unknown>[]) : [];
+  return {
+    items: rawItems.map((item, index) => ({
+      orderItemId: String(item.orderItemId ?? item.id ?? `item-${index + 1}`),
+      priceCny: readContextAmount(item.priceCny),
+      quantity: readContextAmount(item.quantity) ?? 1,
+      title:
+        String(
+          (item.spu as Record<string, unknown> | undefined)?.title
+            ?? item.title
+            ?? "商品",
+        ),
+    })),
+    orderId: String(payload.orderId ?? trimmed),
+    paidAmountCny: readContextAmount(payload.paidAmount),
+    status: String(payload.status ?? ""),
+    totalAmountCny: readContextAmount(payload.totalAmount),
+  };
 }
 
 export async function loadMallAfterSalesDetail(selectedId: string): Promise<AfterSalesDetailSnapshot> {
@@ -216,29 +281,48 @@ export async function loadMallAfterSalesDetail(selectedId: string): Promise<Afte
   return snapshot;
 }
 
-export async function createMallAfterSalesRequest(form: AfterSalesFormState): Promise<void> {
+/**
+ * Creates an after-sales request with the wire-contract body
+ * (`CreateAfterSalesRequest`): orderId, afterSalesType, reasonCode,
+ * requestedAmount (decimal string), currencyCode, and at least one order item.
+ * The order context supplies the items; call loadMallAfterSalesOrderContext()
+ * first.
+ */
+export async function createMallAfterSalesRequest(
+  form: AfterSalesFormState,
+  orderContext: AfterSalesOrderContext,
+): Promise<void> {
+  if (orderContext.items.length === 0) {
+    throw new Error("订单没有可售后的商品行");
+  }
+  const description = [form.reason.trim(), form.description.trim()]
+    .filter((part) => part !== "")
+    .join("\n");
   const requestBody: Record<string, unknown> = {
-    orderId: form.orderId.trim(),
-    reasonCode: form.reason.trim() || "buyer-request",
-    requestType: form.requestType,
-    type: form.requestType,
-    description: form.description.trim() || undefined,
+    afterSalesType: form.requestType,
+    currencyCode: "CNY",
+    description: description || undefined,
+    evidenceSnapshot:
+      form.evidenceFiles.length > 0
+        ? form.evidenceFiles.map((file) => ({ fileName: file.name, fileSize: file.size }))
+        : undefined,
+    items: orderContext.items.map((item) => ({
+      orderItemId: item.orderItemId,
+      refundAmount:
+        (form.requestType === "refund" || form.requestType === "return") && item.priceCny !== null
+          ? (item.priceCny * item.quantity).toFixed(2)
+          : undefined,
+      requestedQuantity: item.quantity,
+    })),
+    orderId: orderContext.orderId,
+    reasonCode: "buyer-request",
+    requestedAmount: Number(form.requestedAmountCny).toFixed(2),
   };
-  if (form.requestType === "refund" || form.requestType === "return") {
-    requestBody.requestedAmount = Number(form.requestedAmountCny);
-  }
-  if (form.evidenceFiles.length > 0) {
-    requestBody.evidenceFiles = form.evidenceFiles.map((file) => ({
-      fileName: file.name,
-      fileSize: file.size,
-    }));
-  }
   await getSdkworkAfterSalesRemotePort().createAfterSalesRequest(requestBody);
 }
 
 export async function revokeMallAfterSalesRequest(rowId: string): Promise<void> {
   await getSdkworkAfterSalesRemotePort().updateAfterSalesRequest(rowId, {
-    action: "cancel",
-    status: "cancelled",
+    status: "CANCELLED",
   });
 }

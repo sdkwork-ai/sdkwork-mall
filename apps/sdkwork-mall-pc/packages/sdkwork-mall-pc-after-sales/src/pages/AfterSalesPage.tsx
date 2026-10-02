@@ -9,11 +9,13 @@ import {
   formatAfterSalesCurrencyCny,
   listMallAfterSalesRows,
   loadMallAfterSalesDetail,
+  loadMallAfterSalesOrderContext,
   revokeMallAfterSalesRequest,
   STATUS_LABELS,
   validateAfterSalesForm,
   type AfterSalesFormErrors,
   type AfterSalesFormState,
+  type AfterSalesOrderContext,
   type AfterSalesRow,
   type AfterSalesStatus,
 } from "../after-sales-service";
@@ -48,6 +50,11 @@ function formatTimestamp(value: string | undefined): string {
   return date.toLocaleString();
 }
 
+function readDetailAmountCny(detail: Record<string, unknown> | null, fallback: number | null): number | null {
+  const amount = Number(detail?.requestedAmount ?? detail?.requested_amount ?? fallback ?? Number.NaN);
+  return Number.isFinite(amount) ? amount : null;
+}
+
 export function SdkworkMallAfterSalesPage() {
   const [searchParams] = useSearchParams();
   const [rows, setRows] = useState<AfterSalesRow[]>([]);
@@ -60,6 +67,7 @@ export function SdkworkMallAfterSalesPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedRow, setSelectedRow] = useState<AfterSalesRow | null>(null);
+  const [orderContext, setOrderContext] = useState<AfterSalesOrderContext | null>(null);
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null);
   const [events, setEvents] = useState<Array<{ action: string; at?: string }>>([]);
   const [returnShipments, setReturnShipments] = useState<Array<{ id: string; status: string; tracking?: string }>>([]);
@@ -184,17 +192,42 @@ export function SdkworkMallAfterSalesPage() {
     setBusy(true);
     setMessage(null);
     try {
-      await createMallAfterSalesRequest(form);
+      // Amounts and per-item quantities come from the order domain at submit
+      // time; the form amount is user input, the items never are.
+      const context = await loadMallAfterSalesOrderContext(form.orderId);
+      setOrderContext(context);
+      await createMallAfterSalesRequest(form, context);
       setShowForm(false);
       setForm(createEmptyAfterSalesForm());
+      setOrderContext(null);
       setErrors({});
       setTouched({});
       setMessage("售后申请已提交，请耐心等待商家审核");
       await reload();
-    } catch {
-      setMessage("提交失败，请确认订单状态后重试");
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "提交失败，请确认订单状态后重试");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleOrderLookup() {
+    if (!form.orderId.trim()) {
+      return;
+    }
+    setMessage(null);
+    try {
+      const context = await loadMallAfterSalesOrderContext(form.orderId);
+      setOrderContext(context);
+      if (!form.requestedAmountCny.trim()) {
+        const reference = context.paidAmountCny ?? context.totalAmountCny;
+        if (reference !== null) {
+          setForm((current) => ({ ...current, requestedAmountCny: reference.toFixed(2) }));
+        }
+      }
+    } catch (cause: unknown) {
+      setOrderContext(null);
+      setMessage(cause instanceof Error ? cause.message : "订单读取失败");
     }
   }
 
@@ -224,14 +257,17 @@ export function SdkworkMallAfterSalesPage() {
       requestedAmountCny: row.requestedAmountCny != null ? String(row.requestedAmountCny) : "",
       requestType: row.type,
     });
+    setOrderContext(null);
     setErrors({});
     setTouched({});
     setShowForm(true);
     setMessage(null);
+    void handleOrderLookup();
   }
 
   function openCreateForm() {
     setForm(createEmptyAfterSalesForm());
+    setOrderContext(null);
     setErrors({});
     setTouched({});
     setShowForm(true);
@@ -277,9 +313,16 @@ export function SdkworkMallAfterSalesPage() {
                     : "border-[var(--sdk-color-border-default)]"
                 }`}
                 onChange={(event) => updateField("orderId", event.target.value)}
+                onBlur={() => void handleOrderLookup()}
                 placeholder="请输入需要售后的订单号"
                 value={form.orderId}
               />
+              {orderContext ? (
+                <span className="mt-1 block text-xs text-[var(--sdk-color-state-success)]">
+                  已读取订单：{orderContext.items.length} 项商品 · 实付{" "}
+                  {formatAfterSalesCurrencyCny(orderContext.paidAmountCny)}
+                </span>
+              ) : null}
               {touched.orderId && errors.orderId ? (
                 <span className="mt-1 block text-xs text-[var(--sdk-color-state-danger)]">{errors.orderId}</span>
               ) : null}
@@ -558,11 +601,7 @@ export function SdkworkMallAfterSalesPage() {
               <div className="text-xs text-[var(--sdk-color-text-muted)]">申请金额</div>
               <div className="mt-1 text-sm">
                 {formatAfterSalesCurrencyCny(
-                  typeof detail?.requestedAmount === "number"
-                    ? detail.requestedAmount
-                    : typeof detail?.requested_amount === "number"
-                      ? detail.requested_amount
-                      : selectedRow?.requestedAmountCny,
+                  readDetailAmountCny(detail, selectedRow?.requestedAmountCny ?? null),
                 )}
               </div>
             </div>

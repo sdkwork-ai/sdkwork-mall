@@ -216,7 +216,7 @@ export function SdkworkMallH5OrderDetailPage() {
             </button>
           </>
         ) : null}
-        {detail.status === "completed" ? (
+        {detail.status === "paid" || detail.status === "pending-receipt" || detail.status === "completed" ? (
           <Link
             className="sdk-h5-button sdk-h5-button-secondary"
             to={`/buyer/after-sales?orderId=${encodeURIComponent(detail.id)}`}

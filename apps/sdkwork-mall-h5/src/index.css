@@ -418,6 +418,20 @@ body {
   opacity: 0.5;
 }
 
+.sdk-h5-link-button {
+  background: none;
+  border: none;
+  color: var(--sdk-h5-primary, #e93b3d);
+  cursor: pointer;
+  font-size: 0.78rem;
+  margin-left: 0.5rem;
+  padding: 0;
+}
+
+.sdk-h5-link-button:disabled {
+  opacity: 0.5;
+}
+
 .sdk-h5-pdp-actions {
   position: fixed;
   bottom: 0;

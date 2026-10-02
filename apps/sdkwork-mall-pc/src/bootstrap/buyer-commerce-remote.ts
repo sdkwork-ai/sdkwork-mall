@@ -37,6 +37,9 @@ export function configureSdkworkMallPcBuyerCommerceRemotePorts(): void {
     retrieveAfterSalesRequest(afterSalesRequestId) {
       return commerce().afterSales.requests.retrieve(afterSalesRequestId);
     },
+    retrieveOrder(orderId) {
+      return commerce().orders.retrieve(orderId);
+    },
     updateAfterSalesRequest(afterSalesRequestId, body) {
       return commerce().afterSales.requests.update(afterSalesRequestId, body);
     },

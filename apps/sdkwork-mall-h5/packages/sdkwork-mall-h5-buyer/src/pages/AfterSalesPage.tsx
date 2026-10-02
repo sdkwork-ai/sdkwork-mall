@@ -2,20 +2,32 @@ import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import {
+  cancelMallH5AfterSalesRequest,
   createMallH5AfterSalesRequest,
   listMallH5AfterSalesRequests,
+  loadMallH5AfterSalesOrderContext,
+  MALL_H5_AFTER_SALES_REASON_PRESETS,
   MALL_H5_AFTER_SALES_TYPES,
+  type MallH5AfterSalesOrderContext,
   type MallH5AfterSalesRequest,
 } from "../aftersales-service";
 
+function formatCny(amount: number | null): string {
+  return amount === null ? "-" : `¥${amount.toFixed(2)}`;
+}
+
 export function SdkworkMallH5AfterSalesPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const presetOrderId = searchParams.get("orderId") ?? "";
   const [requests, setRequests] = useState<MallH5AfterSalesRequest[]>([]);
   const [orderId, setOrderId] = useState(presetOrderId);
+  const [orderContext, setOrderContext] = useState<MallH5AfterSalesOrderContext | null>(null);
   const [type, setType] = useState<string>(MALL_H5_AFTER_SALES_TYPES[0].value);
-  const [reason, setReason] = useState("");
+  const [reasonCode, setReasonCode] = useState<string>(MALL_H5_AFTER_SALES_REASON_PRESETS[0].code);
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingOrder, setLoadingOrder] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -41,30 +53,105 @@ export function SdkworkMallH5AfterSalesPage() {
     };
   }, [reload]);
 
+  const applyOrderContext = useCallback((context: MallH5AfterSalesOrderContext) => {
+    setOrderContext(context);
+    const reference = context.paidAmountCny ?? context.totalAmountCny;
+    setAmount(reference === null ? "" : reference.toFixed(2));
+  }, []);
+
+  const loadOrder = useCallback(
+    async (targetOrderId: string) => {
+      const trimmed = targetOrderId.trim();
+      if (!trimmed) {
+        setMessage("请填写订单号");
+        return;
+      }
+      setLoadingOrder(true);
+      setMessage(null);
+      try {
+        applyOrderContext(await loadMallH5AfterSalesOrderContext(trimmed));
+      } catch (cause: unknown) {
+        setOrderContext(null);
+        setMessage(cause instanceof Error ? cause.message : "订单加载失败");
+      } finally {
+        setLoadingOrder(false);
+      }
+    },
+    [applyOrderContext],
+  );
+
+  useEffect(() => {
+    if (presetOrderId) {
+      void loadOrder(presetOrderId);
+    }
+  }, [presetOrderId, loadOrder]);
+
   async function handleSubmit() {
-    if (!orderId.trim()) {
-      setMessage("请填写订单号");
+    if (!orderContext) {
+      setMessage("请先读取订单");
       return;
     }
-    if (!reason.trim()) {
-      setMessage("请填写售后原因");
+    const amountNumber = Number(amount);
+    if (!reasonCode) {
+      setMessage("请选择售后原因");
+      return;
+    }
+    if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
+      setMessage("请填写有效的售后金额");
+      return;
+    }
+    if (type !== "exchange" && orderContext.paidAmountCny !== null && amountNumber > orderContext.paidAmountCny) {
+      setMessage("售后金额不能超过订单实付金额");
       return;
     }
     setBusy(true);
     setMessage(null);
     try {
       await createMallH5AfterSalesRequest({
-        orderId: orderId.trim(),
-        reason: reason.trim(),
-        type,
+        description,
+        items: orderContext.items.map((item) => ({
+          orderItemId: item.orderItemId,
+          refundAmountCny:
+            type === "exchange" || item.priceCny === null
+              ? undefined
+              : Number((item.priceCny * item.quantity).toFixed(2)),
+          requestedQuantity: item.quantity,
+        })),
+        orderId: orderContext.orderId,
+        reasonCode,
+        requestedAmountCny: Number(amountNumber.toFixed(2)),
+        type: type as MallH5AfterSalesRequest["type"],
       });
-      setReason("");
+      setDescription("");
       setMessage("售后申请已提交");
       await reload();
     } catch (cause: unknown) {
       setMessage(cause instanceof Error ? cause.message : "售后申请失败");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleCancel(requestId: string) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      await cancelMallH5AfterSalesRequest(requestId);
+      await reload();
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "撤销失败");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function clearPreset() {
+    setOrderContext(null);
+    setAmount("");
+    if (presetOrderId) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("orderId");
+      setSearchParams(next, { replace: true });
     }
   }
 
@@ -82,8 +169,29 @@ export function SdkworkMallH5AfterSalesPage() {
         <h2>申请售后</h2>
         <label className="sdk-h5-field">
           订单号
-          <input onChange={(event) => setOrderId(event.target.value)} value={orderId} />
+          <input
+            disabled={Boolean(orderContext)}
+            onChange={(event) => setOrderId(event.target.value)}
+            value={orderId}
+          />
         </label>
+        {orderContext ? (
+          <div className="sdk-h5-muted">
+            {orderContext.items.length} 项商品 · 实付 {formatCny(orderContext.paidAmountCny)}
+            <button className="sdk-h5-link-button" onClick={clearPreset} type="button">
+              更换订单
+            </button>
+          </div>
+        ) : (
+          <button
+            className="sdk-h5-button sdk-h5-button-secondary"
+            disabled={loadingOrder}
+            onClick={() => void loadOrder(orderId)}
+            type="button"
+          >
+            {loadingOrder ? "读取中..." : "读取订单"}
+          </button>
+        )}
         <label className="sdk-h5-field">
           售后类型
           <select onChange={(event) => setType(event.target.value)} value={type}>
@@ -94,17 +202,34 @@ export function SdkworkMallH5AfterSalesPage() {
         </label>
         <label className="sdk-h5-field">
           售后原因
+          <select onChange={(event) => setReasonCode(event.target.value)} value={reasonCode}>
+            {MALL_H5_AFTER_SALES_REASON_PRESETS.map((option) => (
+              <option key={option.code} value={option.code}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="sdk-h5-field">
+          问题描述（选填）
           <textarea
             maxLength={200}
-            onChange={(event) => setReason(event.target.value)}
-            placeholder="请描述问题（必填）"
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="补充描述有助于加快审核"
             rows={3}
-            value={reason}
+            value={description}
+          />
+        </label>
+        <label className="sdk-h5-field">
+          售后金额（元）
+          <input
+            inputMode="decimal"
+            onChange={(event) => setAmount(event.target.value)}
+            placeholder="0.00"
+            value={amount}
           />
         </label>
         <button
           className="sdk-h5-button sdk-h5-button-primary sdk-h5-button-block"
-          disabled={busy}
+          disabled={busy || loadingOrder}
           onClick={() => void handleSubmit()}
           type="button"
         >
@@ -120,11 +245,29 @@ export function SdkworkMallH5AfterSalesPage() {
           requests.map((request) => (
             <div className="sdk-h5-coupon-row" key={request.id}>
               <div>
-                <strong>{request.type}</strong>
+                <strong>{request.typeLabel}</strong>
+                {request.afterSalesNo ? <span className="sdk-h5-muted"> {request.afterSalesNo}</span> : null}
                 <div className="sdk-h5-muted">订单 {request.orderId}</div>
-                {request.reason ? <div className="sdk-h5-muted">{request.reason}</div> : null}
+                <div className="sdk-h5-muted">
+                  {formatCny(request.requestedAmountCny)}
+                  {request.reason
+                    ? ` · ${MALL_H5_AFTER_SALES_REASON_PRESETS.find((preset) => preset.code === request.reason)?.label ?? request.reason}`
+                    : ""}
+                </div>
               </div>
-              <span className="sdk-h5-muted">{request.status}</span>
+              <div>
+                <span className="sdk-h5-muted">{request.statusLabel}</span>
+                {request.status === "pending" || request.status === "reviewing" ? (
+                  <button
+                    className="sdk-h5-link-button"
+                    disabled={busy}
+                    onClick={() => void handleCancel(request.id)}
+                    type="button"
+                  >
+                    撤销
+                  </button>
+                ) : null}
+              </div>
             </div>
           ))
         )}

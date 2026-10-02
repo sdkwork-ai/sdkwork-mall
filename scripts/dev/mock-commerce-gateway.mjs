@@ -60,6 +60,20 @@ const orders = [];
 const afterSalesRequests = [];
 const invoices = [];
 const shipmentByOrder = new Map();
+let afterSalesSeq = 0;
+
+// Wire-contract create body per the commerce app-api OpenAPI
+// (CreateAfterSalesRequest): every field is required server-side.
+function validateAfterSalesCreateBody(body) {
+  const missing = [];
+  if (!body.orderId) missing.push("orderId");
+  if (!body.afterSalesType) missing.push("afterSalesType");
+  if (!body.reasonCode) missing.push("reasonCode");
+  if (body.requestedAmount === undefined || body.requestedAmount === null || body.requestedAmount === "") missing.push("requestedAmount");
+  if (!body.currencyCode) missing.push("currencyCode");
+  if (!Array.isArray(body.items) || body.items.length === 0) missing.push("items");
+  return missing;
+}
 
 function couponFromOffer(offer, override = {}) {
   return {
@@ -128,6 +142,30 @@ async function handle(method, url, body) {
   const path = url.replace(/\?.*$/u, "");
   const query = new URL(url, "http://mock").searchParams;
   const p = `${method} ${path}`;
+
+  // ── auth (IAM session contract, dev double) ──
+  if (p === "POST /app/v3/api/auth/sessions") {
+    const principal = body.username || body.phone || body.email;
+    if (!principal || !body.password) {
+      return { code: 40001, message: "请输入账号与密码" };
+    }
+    // Dev double: every credential pair is accepted; tokens are static.
+    return ok({
+      accessToken: "mock-access-token",
+      authToken: "mock-auth-token",
+      refreshToken: "mock-refresh-token",
+      sessionId: nextId("session"),
+      context: {
+        tenantId: "100001",
+        userId: `user-${principal}`,
+        organizationId: "0",
+        appId: "sdkwork-mall",
+        environment: "development",
+        deploymentMode: "standalone",
+      },
+    });
+  }
+  if (p === "DELETE /app/v3/api/auth/sessions/current") return ok({});
 
   // ── catalog ──
   if (p === "GET /app/v3/api/catalog/categories") {
@@ -260,7 +298,7 @@ async function handle(method, url, body) {
   const orderMatch = path.match(/^\/app\/v3\/api\/orders\/([^/]+)$/u);
   if (method === "GET" && orderMatch) {
     const order = orders.find((entry) => entry.id === orderMatch[1]);
-    return order ? ok({ orderId: order.id, subject: order.subject, status: orderStatus(order), totalAmount: order.totalAmountCny, paidAmount: order.paid ? order.totalAmountCny : null, paymentMethod: order.paymentMethod, createdAt: order.createdAt, shipmentIds: order.paid ? [shipmentFor(order).shipment.id] : [], items: order.items.map((item) => ({ id: item.skuId, priceCny: item.priceCny, quantity: item.quantity, sku: { name: item.sku?.name ?? item.sku?.title }, spu: { id: item.spuId, imageUrl: item.spu?.imageUrl, title: item.spu?.title } })) }) : { code: 40401, message: "order not found" };
+    return order ? ok({ orderId: order.id, subject: order.subject, status: orderStatus(order), totalAmount: order.totalAmountCny, paidAmount: order.paid ? order.totalAmountCny : null, paymentMethod: order.paymentMethod, createdAt: order.createdAt, shipmentIds: order.paid ? [shipmentFor(order).shipment.id] : [], items: order.items.map((item) => ({ id: item.id, orderItemId: item.id, priceCny: item.priceCny, quantity: item.quantity, sku: { name: item.sku?.name ?? item.sku?.title }, spu: { id: item.spuId, imageUrl: item.spu?.imageUrl, title: item.spu?.title } })) }) : { code: 40401, message: "order not found" };
   }
   const statusMatch = path.match(/^\/app\/v3\/api\/orders\/([^/]+)\/status$/u);
   if (statusMatch && method === "GET") {
@@ -356,11 +394,50 @@ async function handle(method, url, body) {
 
   // ── after-sales ──
   if (p === "GET /app/v3/api/after_sales/requests") {
-    return ok({ items: afterSalesRequests, pageInfo: { page: 1, total: afterSalesRequests.length } });
+    const orderIdFilter = query.get("order_id");
+    const page = Math.max(1, Number(query.get("page") ?? 1));
+    const pageSize = Math.max(1, Number(query.get("page_size") ?? 20));
+    let rows = [...afterSalesRequests];
+    if (orderIdFilter) rows = rows.filter((request) => request.orderId === orderIdFilter);
+    const total = rows.length;
+    rows = rows.slice((page - 1) * pageSize, page * pageSize);
+    return ok({ items: rows, pageInfo: { page, total } });
   }
   if (p === "POST /app/v3/api/after_sales/requests") {
-    afterSalesRequests.push({ id: nextId("as"), orderId: body.orderId, reason: body.reason, type: body.type, status: "PENDING", createdAt: new Date().toISOString() });
-    return ok({});
+    const missing = validateAfterSalesCreateBody(body);
+    if (missing.length > 0) {
+      return { code: 40001, message: `售后申请缺少必填字段: ${missing.join(", ")}` };
+    }
+    const order = orders.find((entry) => entry.id === body.orderId);
+    if (!order) return { code: 40401, message: "order not found" };
+    afterSalesSeq += 1;
+    const request = {
+      id: nextId("as"),
+      afterSalesNo: `AS${String(100000 + afterSalesSeq)}`,
+      orderId: body.orderId,
+      afterSalesType: body.afterSalesType,
+      status: "PENDING",
+      reasonCode: body.reasonCode,
+      description: body.description ?? "",
+      requestedAmount: String(body.requestedAmount),
+      currencyCode: body.currencyCode,
+      items: body.items,
+      createdAt: new Date().toISOString(),
+    };
+    afterSalesRequests.push(request);
+    return ok(request);
+  }
+  const afterSalesMatch = path.match(/^\/app\/v3\/api\/after_sales\/requests\/([^/]+)$/u);
+  if (afterSalesMatch && method === "GET") {
+    const request = afterSalesRequests.find((entry) => entry.id === afterSalesMatch[1]);
+    return request ? ok(request) : { code: 40401, message: "after-sales request not found" };
+  }
+  if (afterSalesMatch && method === "PATCH") {
+    const request = afterSalesRequests.find((entry) => entry.id === afterSalesMatch[1]);
+    if (!request) return { code: 40401, message: "after-sales request not found" };
+    if (body.status) request.status = String(body.status).toUpperCase();
+    if (body.description !== undefined) request.description = body.description;
+    return ok(request);
   }
 
   // ── invoices ──

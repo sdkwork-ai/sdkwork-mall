@@ -4,6 +4,7 @@ export interface SdkworkAfterSalesRemotePort {
   listAfterSalesRequests(query: Record<string, unknown>): Promise<unknown>;
   listReturnShipments(afterSalesRequestId: string, query: Record<string, unknown>): Promise<unknown>;
   retrieveAfterSalesRequest(afterSalesRequestId: string): Promise<unknown>;
+  retrieveOrder(orderId: string): Promise<unknown>;
   updateAfterSalesRequest(afterSalesRequestId: string, body: Record<string, unknown>): Promise<unknown>;
 }
 
