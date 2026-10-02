@@ -7,6 +7,9 @@ import type { SdkworkMallH5Runtime } from "../bootstrap/runtime";
 const SdkworkMallH5HomePage = lazy(() =>
   import("@sdkwork/mall-h5-home/home-page").then((module) => ({ default: module.SdkworkMallH5HomePage })),
 );
+const SdkworkMallH5TvPage = lazy(() =>
+  import("@sdkwork/mall-h5-home/tv-home-page").then((module) => ({ default: module.SdkworkMallH5TvPage })),
+);
 const SdkworkMallH5CatalogPage = lazy(() =>
   import("@sdkwork/mall-h5-catalog/catalog-page").then((module) => ({ default: module.SdkworkMallH5CatalogPage })),
 );
@@ -103,6 +106,7 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
     <Suspense fallback={<LoadingPlaceholder />}>
       <Routes>
         <Route element={<SdkworkMallH5HomePage />} path="/" />
+        <Route element={<SdkworkMallH5TvPage />} path="/tv" />
         <Route element={<SdkworkMallH5CatalogPage />} path="/categories" />
         <Route element={<SdkworkMallH5CatalogPage />} path="/categories/:categoryId" />
         <Route element={<SdkworkMallH5CatalogPage />} path="/search" />

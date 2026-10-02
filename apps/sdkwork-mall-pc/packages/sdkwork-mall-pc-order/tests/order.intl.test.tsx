@@ -1,9 +1,9 @@
 import {
-  fireEvent,
   render,
   screen,
 } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import { SdkworkThemeProvider } from "@sdkwork/ui-pc-react/theme";
 import {
   SdkworkOrderIntlProvider,
@@ -81,7 +81,9 @@ describe("sdkwork-mall-pc-order intl", () => {
 
     render(
       <SdkworkThemeProvider defaultTheme="light">
-        <SdkworkOrderPage controller={controller} locale="zh-CN" />
+        <MemoryRouter>
+          <SdkworkOrderPage controller={controller} locale="zh-CN" />
+        </MemoryRouter>
       </SdkworkThemeProvider>,
     );
 
@@ -93,17 +95,12 @@ describe("sdkwork-mall-pc-order intl", () => {
     expect(screen.getByRole("heading", { name: "\u8d26\u5355\u5386\u53f2" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "\u5168\u90e8" })).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", {
+    // 「查看详情」是导航到订单详情路由的链接。
+    expect(
+      screen.getByRole("link", {
         name: "\u67e5\u770b\u8be6\u60c5",
       }),
-    );
-
-    expect(
-      await screen.findByRole("heading", {
-        name: "\u8ba2\u5355\u8be6\u60c5",
-      }),
-    ).toBeInTheDocument();
+    ).toHaveAttribute("href", "/buyer/orders/ORDER-3");
   });
 
   it("applies host message overrides on top of the localized order copy seam", async () => {
@@ -129,18 +126,20 @@ describe("sdkwork-mall-pc-order intl", () => {
 
     render(
       <SdkworkThemeProvider defaultTheme="light">
-        <SdkworkOrderPage
-          controller={controller}
-          locale="zh-CN"
-          messages={{
-            actions: {
-              viewDetails: "Open dossier",
-            },
-            page: {
-              title: "Host order cockpit",
-            },
-          }}
-        />
+        <MemoryRouter>
+          <SdkworkOrderPage
+            controller={controller}
+            locale="zh-CN"
+            messages={{
+              actions: {
+                viewDetails: "Open dossier",
+              },
+              page: {
+                title: "Host order cockpit",
+              },
+            }}
+          />
+        </MemoryRouter>
       </SdkworkThemeProvider>,
     );
 
@@ -149,7 +148,7 @@ describe("sdkwork-mall-pc-order intl", () => {
         name: "Host order cockpit",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open dossier" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Open dossier" })).toBeInTheDocument();
   });
 
   it("falls back to built-in English copy for standalone components without a host intl provider", () => {

@@ -1,6 +1,8 @@
 # ADR 0001 — TV Client Root Deferred
 
-Status: accepted (deferral upheld)
+Status: accepted (deferral upheld); amended 2026-10-02 — a TV **entry surface**
+ships inside the H5 root at `/tv` while the dedicated TV client root remains
+deferred
 Date: 2026-09-30
 Owner: SDKWork Mall maintainers
 Authority: `APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md` §2.3, `GOVERNANCE_SPEC.md`,
@@ -46,3 +48,16 @@ registered surfaces until the TV root standard is adopted through governance.
   deliberate, spec-compliant gap, not an oversight.
 - Storefront services and route ids stay client-agnostic so the future TV root
   consumes the same headless layer without forking.
+
+## Amendment (2026-10-02)
+
+Product direction requires a JD-style TV entry now. Rather than standing up an
+unregistered TV application root (forbidden by the deferred-pattern rule), the
+H5 browser root ships a **TV surface** at route `storefront.mall.tv` (`/tv`,
+package `@sdkwork/mall-h5-home`): a ten-foot UI (dark theme, large type,
+category rail + product grid) navigated by remote-D-style arrow keys with
+Enter/Back equivalents. It consumes the same headless commerce facade as every
+other surface, registers through the standard route registry, and hides the
+mobile shell chrome on that path only. The dedicated `apps/sdkwork-mall-tv`
+client root remains deferred and still requires the §Adoption-path governance
+steps before it may be created.

@@ -68,6 +68,11 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   const [keyword, setKeyword] = useState("");
   const cartRoute = runtime.routes.find((route) => route.id === "storefront.mall.cart");
   const cartTabBadge = useSyncExternalStore(subscribeMallH5CartCount, readMallH5CartCount, () => 0);
+  // The TV surface owns the full screen (10-foot UI): no mobile chrome.
+  const isTvSurface = location.pathname === "/tv";
+  if (isTvSurface) {
+    return <div className="sdk-h5-app">{children}</div>;
+  }
 
   function handleSearchSubmit() {
     const trimmed = keyword.trim();

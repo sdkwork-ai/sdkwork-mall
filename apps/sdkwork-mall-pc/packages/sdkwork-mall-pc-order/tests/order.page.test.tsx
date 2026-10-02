@@ -1,12 +1,13 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import { SdkworkThemeProvider } from "@sdkwork/ui-pc-react/theme";
 import { SdkworkOrderPage, createSdkworkOrderController } from "../src";
 
 describe("sdkwork-mall-pc-order page", () => {
-  it("renders the reusable order center and opens the detail drawer", async () => {
+  it("renders the reusable order center and links to the order detail page", async () => {
     const controller = createSdkworkOrderController({
       service: {
         cancelOrder: vi.fn(),
@@ -65,7 +66,9 @@ describe("sdkwork-mall-pc-order page", () => {
 
     render(
       <SdkworkThemeProvider defaultTheme="light">
-        <SdkworkOrderPage controller={controller} />
+        <MemoryRouter>
+          <SdkworkOrderPage controller={controller} />
+        </MemoryRouter>
       </SdkworkThemeProvider>,
     );
 
@@ -76,13 +79,11 @@ describe("sdkwork-mall-pc-order page", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Pro Monthly")).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /view details/i,
-      }),
-    );
-
-    expect(await screen.findByText(/order detail/i)).toBeInTheDocument();
+    // 「查看详情」现在导航到可分享/可刷新的订单详情路由。
+    const detailsLink = screen.getByRole("link", {
+      name: /view details/i,
+    });
+    expect(detailsLink).toHaveAttribute("href", "/buyer/orders/ORDER-3");
   });
 
   it("keeps the order hero free of raw white utility styling", () => {
