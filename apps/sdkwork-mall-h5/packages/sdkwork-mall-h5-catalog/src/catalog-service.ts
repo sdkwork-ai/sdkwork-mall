@@ -168,3 +168,33 @@ export async function addMallH5CartItem(input: {
   });
 }
 
+
+export interface MallH5ProductOffer {
+  discountText?: string;
+  highlight?: string;
+  id: string;
+  title: string;
+}
+
+/** Claimable promotion offers shown on the PDP promotions row. */
+export async function listMallH5ProductOffers(): Promise<MallH5ProductOffer[]> {
+  const response = await getSdkworkCommerceService().promotions.offers.list({
+    page: 1,
+    page_size: 6,
+    status: "active",
+  });
+  const payload = unwrapSdkworkCommerceResponse<{ items?: Record<string, unknown>[] }>(response) ?? {};
+  return (payload.items ?? [])
+    .filter((item) => item.claimable === true || item.claim_enabled === true || Boolean(item.couponStockId))
+    .map((item) => ({
+      id: String(item.id ?? item.offerId ?? ""),
+      title: String(item.title ?? item.name ?? "优惠"),
+      discountText: typeof item.discountText === "string" ? item.discountText : undefined,
+      highlight: typeof item.highlight === "string" ? item.highlight : undefined,
+    }))
+    .filter((offer) => offer.id);
+}
+
+export async function claimMallH5ProductOffer(offerId: string): Promise<void> {
+  await getSdkworkCommerceService().promotions.userCoupons.claims.create({ offerId });
+}

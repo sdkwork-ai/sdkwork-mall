@@ -13,6 +13,15 @@ let seq = 1000;
 const nextId = (prefix) => `${prefix}-${(seq += 1)}`;
 const ok = (data) => ({ code: 0, data, traceId: `mock-${Math.random().toString(36).slice(2, 10)}` });
 
+// Dev-only placeholder artwork so galleries/recommendations render like a
+// real storefront. Not served in production.
+const PALETTE = ["#2563eb", "#7c3aed", "#e93b3d", "#f97316", "#059669", "#0891b2"];
+function artImage(label, colorIndex) {
+  const bg = PALETTE[colorIndex % PALETTE.length];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="600" height="600" fill="${bg}"/><rect x="60" y="60" width="480" height="480" rx="48" fill="rgba(255,255,255,0.14)"/><text x="300" y="290" font-family="sans-serif" font-size="44" font-weight="700" fill="#fff" text-anchor="middle">SDKWork</text><text x="300" y="360" font-family="sans-serif" font-size="34" fill="rgba(255,255,255,0.85)" text-anchor="middle">${label}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 const categories = [
   { id: "cat-digital", name: "数码家电" },
   { id: "cat-digital-phone", parentId: "cat-digital", name: "手机通讯" },
@@ -22,12 +31,12 @@ const categories = [
 ];
 
 const spus = [
-  { id: "spu-phone-1", categoryId: "cat-digital-phone", title: "SDKWork Phone X1 旗舰手机 12GB+256GB", priceCny: 3999, sales: 1200, description: "6.7 英寸 OLED 屏,5000mAh 电池,旗舰芯片。", shopId: "shop-1", skus: [{ id: "sku-phone-black", title: "曜石黑", priceCny: 3999, stock: 50 }, { id: "sku-phone-white", title: "皓月白", priceCny: 4099, stock: 30 }] },
-  { id: "spu-phone-2", categoryId: "cat-digital-phone", title: "SDKWork Phone Lite 轻薄手机", priceCny: 1999, sales: 3400, description: "轻薄机身,长续航。", shopId: "shop-1", skus: [{ id: "sku-lite-blue", title: "远峰蓝", priceCny: 1999, stock: 80 }] },
-  { id: "spu-laptop-1", categoryId: "cat-digital-laptop", title: "SDKWork Book 14 轻薄本", priceCny: 5499, sales: 860, description: "14 英寸 2.8K 屏,标压处理器。", shopId: "shop-1", skus: [{ id: "sku-book-16", title: "16GB+512GB", priceCny: 5499, stock: 40 }, { id: "sku-book-32", title: "32GB+1TB", priceCny: 7299, stock: 15 }] },
-  { id: "spu-chair-1", categoryId: "cat-home", title: "人体工学椅 Pro", priceCny: 1299, sales: 2200, description: "全网面,4D 扶手。", shopId: "shop-1", skus: [{ id: "sku-chair-black", title: "黑色", priceCny: 1299, stock: 60 }] },
-  { id: "spu-rice-1", categoryId: "cat-food", title: "东北五常大米 10kg", priceCny: 89, sales: 9000, description: "当年新米。", shopId: "shop-1", skus: [{ id: "sku-rice-10", title: "10kg 装", priceCny: 89, stock: 500 }] },
-  { id: "spu-phone-3", categoryId: "cat-digital-phone", title: "SDKWork Phone Ultra 影像旗舰", priceCny: 6999, sales: 500, description: "一英寸大底,卫星通信。", shopId: "shop-1", skus: [{ id: "sku-ultra-ti", title: "钛金属", priceCny: 6999, stock: 10 }] },
+  { id: "spu-phone-1", categoryId: "cat-digital-phone", title: "SDKWork Phone X1 旗舰手机 12GB+256GB", priceCny: 3999, sales: 1200, description: "6.7 英寸 OLED 屏,5000mAh 电池,旗舰芯片。", shopId: "shop-1", imageUrl: artImage("Phone X1", 0), images: [artImage("Phone X1 正面", 0), artImage("Phone X1 背面", 3), artImage("Phone X1 影像", 5)], skus: [{ id: "sku-phone-black", title: "曜石黑", priceCny: 3999, stock: 50, imageUrl: artImage("曜石黑", 0) }, { id: "sku-phone-white", title: "皓月白", priceCny: 4099, stock: 30, imageUrl: artImage("皓月白", 4) }] },
+  { id: "spu-phone-2", categoryId: "cat-digital-phone", title: "SDKWork Phone Lite 轻薄手机", priceCny: 1999, sales: 3400, description: "轻薄机身,长续航。", shopId: "shop-1", imageUrl: artImage("Phone Lite", 4), images: [artImage("Phone Lite", 4)], skus: [{ id: "sku-lite-blue", title: "远峰蓝", priceCny: 1999, stock: 80, imageUrl: artImage("远峰蓝", 5) }] },
+  { id: "spu-laptop-1", categoryId: "cat-digital-laptop", title: "SDKWork Book 14 轻薄本", priceCny: 5499, sales: 860, description: "14 英寸 2.8K 屏,标压处理器。", shopId: "shop-1", imageUrl: artImage("Book 14", 1), images: [artImage("Book 14", 1), artImage("Book 14 键盘", 0)], skus: [{ id: "sku-book-16", title: "16GB+512GB", priceCny: 5499, stock: 40, imageUrl: artImage("16G+512G", 1) }, { id: "sku-book-32", title: "32GB+1TB", priceCny: 7299, stock: 15, imageUrl: artImage("32G+1T", 2) }] },
+  { id: "spu-chair-1", categoryId: "cat-home", title: "人体工学椅 Pro", priceCny: 1299, sales: 2200, description: "全网面,4D 扶手。", shopId: "shop-1", imageUrl: artImage("工学椅 Pro", 2), images: [artImage("工学椅 Pro", 2)], skus: [{ id: "sku-chair-black", title: "黑色", priceCny: 1299, stock: 60, imageUrl: artImage("黑色", 0) }] },
+  { id: "spu-rice-1", categoryId: "cat-food", title: "东北五常大米 10kg", priceCny: 89, sales: 9000, description: "当年新米。", shopId: "shop-1", imageUrl: artImage("五常大米", 3), images: [artImage("五常大米", 3)], skus: [{ id: "sku-rice-10", title: "10kg 装", priceCny: 89, stock: 500, imageUrl: artImage("10kg", 3) }] },
+  { id: "spu-phone-3", categoryId: "cat-digital-phone", title: "SDKWork Phone Ultra 影像旗舰", priceCny: 6999, sales: 500, description: "一英寸大底,卫星通信。", shopId: "shop-1", imageUrl: artImage("Phone Ultra", 5), images: [artImage("Phone Ultra", 5), artImage("Ultra 影像", 2)], skus: [{ id: "sku-ultra-ti", title: "钛金属", priceCny: 6999, stock: 10, imageUrl: artImage("钛金属", 5) }] },
 ];
 
 const shop = { id: "shop-1", name: "SDKWork 官方旗舰店", logoUrl: "", rating: 4.9, status: "active" };

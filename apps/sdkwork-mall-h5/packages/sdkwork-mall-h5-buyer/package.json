@@ -59,6 +59,11 @@
       "types": "./src/pages/MessagesPage.tsx",
       "import": "./src/pages/MessagesPage.tsx",
       "default": "./src/pages/MessagesPage.tsx"
+    },
+    "./addresses-service": {
+      "types": "./src/addresses-service.ts",
+      "import": "./src/addresses-service.ts",
+      "default": "./src/addresses-service.ts"
     }
   },
   "files": [
