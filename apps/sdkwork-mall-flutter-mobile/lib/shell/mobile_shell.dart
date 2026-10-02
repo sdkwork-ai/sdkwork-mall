@@ -1,5 +1,46 @@
 import 'package:flutter/material.dart';
 
+import '../bootstrap/session.dart';
+import '../pages/address_page.dart';
+import '../pages/buyer_page.dart';
+import '../pages/cart_page.dart';
+import '../pages/cashier_page.dart';
+import '../pages/category_page.dart';
+import '../pages/checkout_page.dart';
+import '../pages/coupons_page.dart';
+import '../pages/home_page.dart';
+import '../pages/login_page.dart';
+import '../pages/order_detail_page.dart';
+import '../pages/orders_page.dart';
+import '../pages/payment_result_page.dart';
+import '../pages/product_page.dart';
+import '../pages/search_page.dart';
+
+/// Application routes for the commerce flow.
+Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
+      '/login': (context) => const SdkworkLoginPage(),
+      '/search': (context) => const SdkworkSearchPage(),
+      '/product': (context) => SdkworkProductPage(
+            productId: '${_routeArguments(context)}',
+          ),
+      '/checkout': (context) => const SdkworkCheckoutPage(),
+      '/cashier': (context) => SdkworkCashierPage(
+            orderId: '${_routeArguments(context)}',
+          ),
+      '/payment-result': (context) => SdkworkPaymentResultPage(
+            arguments: _routeArguments(context) as Map<String, String>,
+          ),
+      '/orders': (context) => const SdkworkOrdersPage(),
+      '/order-detail': (context) => SdkworkOrderDetailPage(
+            orderId: '${_routeArguments(context)}',
+          ),
+      '/address': (context) => const SdkworkAddressPage(),
+      '/coupons': (context) => const SdkworkCouponsPage(),
+    };
+
+Object? _routeArguments(BuildContext context) =>
+    ModalRoute.of(context)?.settings.arguments;
+
 /// Bottom-tab mobile shell: 首页 / 分类 / 购物车 / 我的.
 class SdkworkMallFlutterMobileShell extends StatelessWidget {
   const SdkworkMallFlutterMobileShell({super.key});
@@ -8,52 +49,88 @@ class SdkworkMallFlutterMobileShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SDKWork 商城',
-      theme: ThemeData(colorSchemeSeed: const Color(0xFF2563EB), useMaterial3: true),
-      home: DefaultTabController(
-        length: 4,
-        child: Scaffold(
-          appBar: AppBar(title: const Text('SDKWork 商城')),
-          body: const TabBarView(
-            children: [
-              _PendingSurface(title: '首页', note: '等待生成的 Dart 商城 SDK 家族落地'),
-              _PendingSurface(title: '分类', note: '等待生成的 Dart 商城 SDK 家族落地'),
-              _PendingSurface(title: '购物车', note: '等待生成的 Dart 商城 SDK 家族落地'),
-              _PendingSurface(title: '我的', note: '等待生成的 Dart 商城 SDK 家族落地'),
-            ],
-          ),
-          bottomNavigationBar: const TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.home_outlined), text: '首页'),
-              Tab(icon: Icon(Icons.grid_view_outlined), text: '分类'),
-              Tab(icon: Icon(Icons.shopping_cart_outlined), text: '购物车'),
-              Tab(icon: Icon(Icons.person_outline), text: '我的'),
-            ],
-          ),
-        ),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE93B3D)),
+        useMaterial3: true,
       ),
+      onGenerateRoute: (settings) {
+        final builder = buildSdkworkMallRoutes()[settings.name];
+        if (builder == null) {
+          return null;
+        }
+        return MaterialPageRoute<void>(builder: builder, settings: settings);
+      },
+      home: const SdkworkMallHomeTabs(),
     );
   }
 }
 
-class _PendingSurface extends StatelessWidget {
-  const _PendingSurface({required this.title, required this.note});
+class SdkworkMallHomeTabs extends StatefulWidget {
+  const SdkworkMallHomeTabs({super.key});
 
-  final String title;
-  final String note;
+  @override
+  State<SdkworkMallHomeTabs> createState() => _SdkworkMallHomeTabsState();
+}
+
+class _SdkworkMallHomeTabsState extends State<SdkworkMallHomeTabs> {
+  int _tabIndex = 0;
+
+  static const _tabTitles = <String>['首页', '分类', '购物车', '我的'];
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(note, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
+    final pages = <Widget>[
+      SdkworkHomePage(onSwitchTab: (tab) => setState(() => _tabIndex = tab)),
+      const SdkworkCategoryPage(),
+      const SdkworkCartPage(),
+      const SdkworkBuyerPage(),
+    ];
+
+    return Scaffold(
+      appBar: _tabIndex == 0 || _tabIndex == 1
+          ? null
+          : AppBar(title: Text(_tabTitles[_tabIndex])),
+      body: IndexedStack(index: _tabIndex, children: pages),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: const Color(0xFFE93B3D),
+        currentIndex: _tabIndex,
+        onTap: (index) => setState(() => _tabIndex = index),
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: '首页',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view_outlined),
+            activeIcon: Icon(Icons.grid_view),
+            label: '分类',
+          ),
+          BottomNavigationBarItem(
+            icon: ListenableBuilder(
+              listenable: CartBadge.instance,
+              builder: (context, _) => Badge(
+                isLabelVisible: CartBadge.instance.count > 0,
+                label: Text('${CartBadge.instance.count}'),
+                child: const Icon(Icons.shopping_cart_outlined),
+              ),
+            ),
+            activeIcon: const Icon(Icons.shopping_cart),
+            label: '购物车',
+          ),
+          BottomNavigationBarItem(
+            icon: ListenableBuilder(
+              listenable: SdkworkSession.instance,
+              builder: (context, _) => Icon(
+                SdkworkSession.instance.isLoggedIn
+                    ? Icons.person
+                    : Icons.person_outline,
+              ),
+            ),
+            label: '我的',
+          ),
+        ],
       ),
     );
   }
