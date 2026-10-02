@@ -62,6 +62,21 @@ const SHELL_TABS: readonly ShellTab[] = [
   },
 ];
 
+/**
+ * Surfaces that keep the bottom tab bar. Stacked pages (product detail,
+ * checkout, search, orders, ...) render without it, matching JD-style
+ * navigation where the tab bar belongs to the four tab roots only.
+ */
+export function isSdkworkMallH5TabBarSurface(pathname: string): boolean {
+  return (
+    pathname === "/" ||
+    pathname === "/categories" ||
+    /^\/categories\/[^/]+$/u.test(pathname) ||
+    pathname === "/cart" ||
+    pathname === "/buyer"
+  );
+}
+
 export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5MobileShellProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -73,6 +88,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   if (isTvSurface) {
     return <div className="sdk-h5-app">{children}</div>;
   }
+  const showTabBar = isSdkworkMallH5TabBarSurface(location.pathname);
 
   function handleSearchSubmit() {
     const trimmed = keyword.trim();
@@ -108,31 +124,33 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
         </div>
       </header>
 
-      <main className="sdk-h5-main">{children}</main>
+      <main className={showTabBar ? "sdk-h5-main" : "sdk-h5-main sdk-h5-main-without-tabbar"}>{children}</main>
 
-      <nav aria-label="底部导航" className="sdk-h5-tabbar">
-        {SHELL_TABS.map((tab) => {
-          const Icon = tab.icon;
-          const active = tab.match(location.pathname);
-          return (
-            <button
-              aria-current={active ? "page" : undefined}
-              className={active ? "sdk-h5-tab sdk-h5-tab-active" : "sdk-h5-tab"}
-              key={tab.path}
-              onClick={() => navigate(tab.path)}
-              type="button"
-            >
-              <span className="sdk-h5-tab-icon">
-                <Icon aria-hidden="true" size={22} />
-                {tab.path === (cartRoute?.path ?? "/cart") && cartTabBadge > 0 ? (
-                  <span className="sdk-h5-tab-badge">{cartTabBadge > 99 ? "99+" : cartTabBadge}</span>
-                ) : null}
-              </span>
-              {tab.label}
-            </button>
-          );
-        })}
-      </nav>
+      {showTabBar ? (
+        <nav aria-label="底部导航" className="sdk-h5-tabbar">
+          {SHELL_TABS.map((tab) => {
+            const Icon = tab.icon;
+            const active = tab.match(location.pathname);
+            return (
+              <button
+                aria-current={active ? "page" : undefined}
+                className={active ? "sdk-h5-tab sdk-h5-tab-active" : "sdk-h5-tab"}
+                key={tab.path}
+                onClick={() => navigate(tab.path)}
+                type="button"
+              >
+                <span className="sdk-h5-tab-icon">
+                  <Icon aria-hidden="true" size={22} />
+                  {tab.path === (cartRoute?.path ?? "/cart") && cartTabBadge > 0 ? (
+                    <span className="sdk-h5-tab-badge">{cartTabBadge > 99 ? "99+" : cartTabBadge}</span>
+                  ) : null}
+                </span>
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      ) : null}
     </div>
   );
 }

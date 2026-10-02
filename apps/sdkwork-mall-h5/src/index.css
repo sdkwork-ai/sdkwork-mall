@@ -1271,3 +1271,8 @@ body {
   padding: 3rem 0;
   text-align: center;
 }
+
+/* Non-tab surfaces render without the bottom nav: no reserved gutter. */
+.sdk-h5-main-without-tabbar {
+  padding-bottom: 0;
+}
