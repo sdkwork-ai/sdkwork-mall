@@ -29,12 +29,18 @@
       "types": "./src/order-service.ts",
       "import": "./src/order-service.ts",
       "default": "./src/order-service.ts"
+    },
+    "./order-detail-page": {
+      "types": "./src/pages/OrderDetailPage.tsx",
+      "import": "./src/pages/OrderDetailPage.tsx",
+      "default": "./src/pages/OrderDetailPage.tsx"
     }
   },
   "files": [
     "src"
   ],
   "dependencies": {
+    "@sdkwork/mall-h5-cart": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*",
     "@sdkwork/order-service": "workspace:*"
   },

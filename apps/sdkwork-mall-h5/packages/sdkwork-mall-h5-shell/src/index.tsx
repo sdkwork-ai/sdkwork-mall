@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -9,6 +9,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { SdkworkMallH5RouteContribution } from "@sdkwork/mall-h5-core";
+import {
+  readMallH5CartCount,
+  subscribeMallH5CartCount,
+} from "@sdkwork/mall-h5-commons";
 
 export interface SdkworkMallH5ShellRuntime {
   readonly config: {
@@ -63,7 +67,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState("");
   const cartRoute = runtime.routes.find((route) => route.id === "storefront.mall.cart");
-  const cartTabBadge = readCartBadge();
+  const cartTabBadge = useSyncExternalStore(subscribeMallH5CartCount, readMallH5CartCount, () => 0);
 
   function handleSearchSubmit() {
     const trimmed = keyword.trim();
@@ -126,18 +130,4 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
       </nav>
     </div>
   );
-}
-
-const SDKWORK_MALL_H5_CART_COUNT_STORAGE_KEY = "sdkwork-mall-h5-cart-count";
-
-function readCartBadge(): number {
-  if (typeof window === "undefined") {
-    return 0;
-  }
-  const raw = window.localStorage.getItem(SDKWORK_MALL_H5_CART_COUNT_STORAGE_KEY);
-  if (!raw) {
-    return 0;
-  }
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
 }

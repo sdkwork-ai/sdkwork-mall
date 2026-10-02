@@ -21,6 +21,8 @@ const SORT_OPTIONS = [
   { code: "price_desc", label: "价格↓" },
 ] as const;
 
+const HOT_SEARCH_KEYWORDS = ["手机", "笔记本", "大米", "人体工学椅", "新品", "旗舰"] as const;
+
 function ProductRow({ product }: { product: MallH5ProductCard }) {
   return (
     <Link className="sdk-h5-product-row" to={`/product/${product.id}`}>
@@ -140,6 +142,26 @@ export function SdkworkMallH5CatalogPage() {
 
   return (
     <div className="sdk-h5-page">
+      <section className="sdk-h5-section">
+        <h2>热搜</h2>
+        <div className="sdk-h5-chip-row">
+          {HOT_SEARCH_KEYWORDS.map((entry) => (
+            <button
+              className="sdk-h5-chip"
+              key={entry}
+              onClick={() => {
+                const next = new URLSearchParams();
+                next.set("q", entry);
+                setSearchParams(next);
+              }}
+              type="button"
+            >
+              {entry}
+            </button>
+          ))}
+        </div>
+      </section>
+
       {!keyword && searchHistory.length > 0 ? (
         <section className="sdk-h5-section">
           <div className="sdk-h5-flex-between">

@@ -24,10 +24,14 @@ function matchesShopFilter(shop: ShopRow, filter: ShopFilter): boolean {
   return operation.includes("active") || operation.includes("open") || review.includes("approved");
 }
 
+const SHOPS_PAGE_SIZE = 20;
+
 export function SdkworkMallAdminShopsPage() {
   const [shops, setShops] = useState<ShopRow[]>([]);
   const [filter, setFilter] = useState<ShopFilter>("all");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [busyShopId, setBusyShopId] = useState<string | null>(null);
   const [selectedShopId, setSelectedShopId] = useState<string | null>(null);
   const [shopDetail, setShopDetail] = useState<Record<string, unknown> | null>(null);
@@ -37,24 +41,30 @@ export function SdkworkMallAdminShopsPage() {
     [filter, shops],
   );
 
-  async function refresh() {
+  async function refresh(nextPage = page) {
     setLoading(true);
     const service = getSdkworkAdminRemotePort();
-    const response = await service.admin.shops.management.list({ page: 1, page_size: 20 });
+    const response = await service.admin.shops.management.list({
+      page: nextPage,
+      page_size: SHOPS_PAGE_SIZE,
+    });
     const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+    const rows = payload.items ?? [];
     setShops(
-      payload.items?.map((item) => ({
+      rows.map((item) => ({
         id: String(item.id ?? ""),
         name: String(item.name ?? item.shopName ?? item.title ?? "店铺"),
         reviewStatus: String(item.reviewStatus ?? item.review_status ?? "unknown"),
         operationStatus: String(item.operationStatus ?? item.operation_status ?? "unknown"),
-      })) ?? [],
+      })),
     );
+    setHasMore(rows.length >= SHOPS_PAGE_SIZE);
+    setPage(nextPage);
     setLoading(false);
   }
 
   useEffect(() => {
-    void refresh();
+    void refresh(1);
   }, []);
 
   useEffect(() => {
@@ -149,6 +159,26 @@ export function SdkworkMallAdminShopsPage() {
           <p>状态：{String(shopDetail.status ?? shopDetail.operationStatus ?? "-")}</p>
         </section>
       ) : null}
+
+      <div className="sdkwork-mall-pc-pagination">
+        <Button
+          disabled={loading || page <= 1}
+          onClick={() => void refresh(page - 1)}
+          type="button"
+          variant="outline"
+        >
+          上一页
+        </Button>
+        <span>第 {page} 页</span>
+        <Button
+          disabled={loading || !hasMore}
+          onClick={() => void refresh(page + 1)}
+          type="button"
+          variant="outline"
+        >
+          下一页
+        </Button>
+      </div>
     </div>
   );
 }

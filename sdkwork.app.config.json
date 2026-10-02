@@ -9,7 +9,16 @@
     "appType": "SDK",
     "officialWebsiteUrl": "https://sdkwork.com/apps/sdkwork-mall"
   },
-  "backend": {},
+  "backend": {
+    "profileKey": "backend-root-admin",
+    "appId": "sdkwork-mall",
+    "serviceId": "sdkwork-mall",
+    "ownerMode": "tenant",
+    "grantMode": "current",
+    "platform": "WEB",
+    "organizationId": "0",
+    "tenantId": "100001"
+  },
   "runtime": {
     "family": "server",
     "framework": "rust-service",

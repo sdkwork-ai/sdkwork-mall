@@ -9,4 +9,5 @@ export * from "./components/order-detail-drawer.tsx";
 export * from "./components/order-stat-grid.tsx";
 export * from "./pages/OrderPage.tsx";
 export * from "./pages/LogisticsPage.tsx";
+export * from "./pages/OrderDetailPage.tsx";
 export * from "./routes.ts";

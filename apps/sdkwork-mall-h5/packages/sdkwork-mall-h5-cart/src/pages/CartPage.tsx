@@ -4,10 +4,36 @@ import { Trash2 } from "lucide-react";
 
 import {
   loadMallH5Cart,
+  publishMallH5CartCount,
   removeMallH5CartItem,
   updateMallH5CartItem,
+  type MallH5CartLine,
   type MallH5CartSnapshot,
 } from "../cart-service";
+
+interface MallH5CartShopGroup {
+  shopId: string;
+  shopName: string;
+  items: MallH5CartLine[];
+}
+
+function groupCartItemsByShop(items: MallH5CartLine[]): MallH5CartShopGroup[] {
+  const groups = new Map<string, MallH5CartShopGroup>();
+  for (const item of items) {
+    const shopId = item.shopId || "shop-default";
+    const group = groups.get(shopId) ?? {
+      items: [],
+      shopId,
+      shopName: item.shopName || "SDKWork 精选",
+    };
+    group.items.push(item);
+    if (!group.shopName && item.shopName) {
+      group.shopName = item.shopName;
+    }
+    groups.set(shopId, group);
+  }
+  return [...groups.values()];
+}
 
 export function SdkworkMallH5CartPage() {
   const [cart, setCart] = useState<MallH5CartSnapshot | null>(null);
@@ -19,13 +45,12 @@ export function SdkworkMallH5CartPage() {
   const reload = useCallback(async () => {
     const snapshot = await loadMallH5Cart();
     setCart(snapshot);
-    setSelectedIds(snapshot.items.map((item) => item.id));
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(
-        "sdkwork-mall-h5-cart-count",
-        String(snapshot.items.reduce((sum, item) => sum + item.quantity, 0)),
-      );
-    }
+    setSelectedIds((current) => {
+      const known = new Set(snapshot.items.map((item) => item.id));
+      const kept = current.filter((id) => known.has(id));
+      return kept.length > 0 ? kept : snapshot.items.map((item) => item.id);
+    });
+    publishMallH5CartCount(snapshot.items.reduce((sum, item) => sum + item.quantity, 0));
   }, []);
 
   useEffect(() => {
@@ -46,6 +71,11 @@ export function SdkworkMallH5CartPage() {
     };
   }, [reload]);
 
+  const shopGroups = useMemo(
+    () => (cart ? groupCartItemsByShop(cart.items) : []),
+    [cart],
+  );
+
   const selectedTotal = useMemo(() => {
     if (!cart) {
       return 0;
@@ -55,7 +85,25 @@ export function SdkworkMallH5CartPage() {
       .reduce((sum, item) => sum + (item.lineTotalCny ?? (item.priceCny ?? 0) * item.quantity), 0);
   }, [cart, selectedIds]);
 
-  async function handleQuantity(item: MallH5CartSnapshot["items"][number], nextQuantity: number) {
+  const allSelected = Boolean(cart) && selectedIds.length === (cart?.items.length ?? 0) && (cart?.items.length ?? 0) > 0;
+
+  function toggleAll(selected: boolean) {
+    if (!cart) {
+      return;
+    }
+    setSelectedIds(selected ? cart.items.map((item) => item.id) : []);
+  }
+
+  function toggleShop(group: MallH5CartShopGroup, selected: boolean) {
+    const groupIds = group.items.map((item) => item.id);
+    setSelectedIds((current) =>
+      selected
+        ? [...new Set([...current, ...groupIds])]
+        : current.filter((id) => !groupIds.includes(id)),
+    );
+  }
+
+  async function handleQuantity(item: MallH5CartLine, nextQuantity: number) {
     if (nextQuantity < 1) {
       return;
     }
@@ -70,10 +118,11 @@ export function SdkworkMallH5CartPage() {
     }
   }
 
-  async function handleRemove(item: MallH5CartSnapshot["items"][number]) {
+  async function handleRemove(item: MallH5CartLine) {
     setBusy(true);
     try {
       await removeMallH5CartItem(item.id);
+      setSelectedIds((current) => current.filter((id) => id !== item.id));
       await reload();
     } catch (cause: unknown) {
       setError(cause instanceof Error ? cause.message : "删除失败");
@@ -104,58 +153,72 @@ export function SdkworkMallH5CartPage() {
       <label className="sdk-h5-address-row">
         <input
           aria-label="全选商品"
-          checked={selectedIds.length === cart.items.length && cart.items.length > 0}
-          onChange={(event) => {
-            setSelectedIds(event.target.checked ? cart.items.map((item) => item.id) : []);
-          }}
+          checked={allSelected}
+          onChange={(event) => toggleAll(event.target.checked)}
           type="checkbox"
         />
         <span>全选</span>
       </label>
 
       <div className="sdk-h5-cart-list">
-        {cart.items.map((item) => (
-          <div className="sdk-h5-cart-row" key={item.id}>
-            <label className="sdk-h5-cart-select">
-              <input
-                aria-label={`选择 ${item.title}`}
-                checked={selectedIds.includes(item.id)}
-                onChange={(event) => {
-                  setSelectedIds((current) =>
-                    event.target.checked
-                      ? [...current, item.id]
-                      : current.filter((id) => id !== item.id),
-                  );
-                }}
-                type="checkbox"
-              />
-            </label>
-            <div className="sdk-h5-product-image">
-              {item.imageUrl ? <img alt={item.title} loading="lazy" src={item.imageUrl} /> : null}
-            </div>
-            <div className="sdk-h5-cart-row-body">
-              <Link className="sdk-h5-product-title" to={`/product/${item.spuId}`}>{item.title}</Link>
-              {item.skuName ? <div className="sdk-h5-cart-sku">{item.skuName}</div> : null}
-              <div className="sdk-h5-product-meta">
-                <strong>{item.priceCny != null ? `¥${item.priceCny.toFixed(2)}` : "询价"}</strong>
-                <div className="sdk-h5-quantity sdk-h5-quantity-inline">
-                  <button aria-label="减少" disabled={busy} onClick={() => void handleQuantity(item, item.quantity - 1)} type="button">−</button>
-                  <span>{item.quantity}</span>
-                  <button aria-label="增加" disabled={busy} onClick={() => void handleQuantity(item, item.quantity + 1)} type="button">+</button>
+        {shopGroups.map((group) => {
+          const groupAllSelected = group.items.every((item) => selectedIds.includes(item.id));
+          return (
+            <section className="sdk-h5-cart-shop" key={group.shopId}>
+              <label className="sdk-h5-cart-shop-header">
+                <input
+                  aria-label={`选择店铺 ${group.shopName} 全部商品`}
+                  checked={groupAllSelected}
+                  onChange={(event) => toggleShop(group, event.target.checked)}
+                  type="checkbox"
+                />
+                <Link to={`/shop/${group.shopId}`}>{group.shopName}</Link>
+              </label>
+              {group.items.map((item) => (
+                <div className="sdk-h5-cart-row" key={item.id}>
+                  <label className="sdk-h5-cart-select">
+                    <input
+                      aria-label={`选择 ${item.title}`}
+                      checked={selectedIds.includes(item.id)}
+                      onChange={(event) => {
+                        setSelectedIds((current) =>
+                          event.target.checked
+                            ? [...current, item.id]
+                            : current.filter((id) => id !== item.id),
+                        );
+                      }}
+                      type="checkbox"
+                    />
+                  </label>
+                  <div className="sdk-h5-product-image">
+                    {item.imageUrl ? <img alt={item.title} loading="lazy" src={item.imageUrl} /> : null}
+                  </div>
+                  <div className="sdk-h5-cart-row-body">
+                    <Link className="sdk-h5-product-title" to={`/product/${item.spuId}`}>{item.title}</Link>
+                    {item.skuName ? <div className="sdk-h5-cart-sku">{item.skuName}</div> : null}
+                    <div className="sdk-h5-product-meta">
+                      <strong>{item.priceCny != null ? `¥${item.priceCny.toFixed(2)}` : "询价"}</strong>
+                      <div className="sdk-h5-quantity sdk-h5-quantity-inline">
+                        <button aria-label="减少" disabled={busy} onClick={() => void handleQuantity(item, item.quantity - 1)} type="button">−</button>
+                        <span>{item.quantity}</span>
+                        <button aria-label="增加" disabled={busy} onClick={() => void handleQuantity(item, item.quantity + 1)} type="button">+</button>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    aria-label={`删除 ${item.title}`}
+                    className="sdk-h5-cart-remove"
+                    disabled={busy}
+                    onClick={() => void handleRemove(item)}
+                    type="button"
+                  >
+                    <Trash2 aria-hidden="true" size={16} />
+                  </button>
                 </div>
-              </div>
-            </div>
-            <button
-              aria-label={`删除 ${item.title}`}
-              className="sdk-h5-cart-remove"
-              disabled={busy}
-              onClick={() => void handleRemove(item)}
-              type="button"
-            >
-              <Trash2 aria-hidden="true" size={16} />
-            </button>
-          </div>
-        ))}
+              ))}
+            </section>
+          );
+        })}
       </div>
 
       <div className="sdk-h5-cart-footer">

@@ -32,7 +32,8 @@
   "dependencies": {
     "@sdkwork/mall-commerce-service": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*",
-    "@sdkwork/mall-h5-buyer": "workspace:*"
+    "@sdkwork/mall-h5-buyer": "workspace:*",
+    "@sdkwork/mall-h5-commons": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18.2.0 <20.0.0",

@@ -29,11 +29,17 @@
       "types": "./src/pages/PaymentResultPage.tsx",
       "import": "./src/pages/PaymentResultPage.tsx",
       "default": "./src/pages/PaymentResultPage.tsx"
+    },
+    "./cart-service": {
+      "types": "./src/cart-service.ts",
+      "import": "./src/cart-service.ts",
+      "default": "./src/cart-service.ts"
     }
   },
   "files": ["src"],
   "dependencies": {
     "@sdkwork/mall-commerce-service": "workspace:*",
+    "@sdkwork/mall-h5-commons": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*"
   },
   "peerDependencies": {

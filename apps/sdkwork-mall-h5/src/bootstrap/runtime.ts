@@ -16,6 +16,7 @@ import {
 } from "./routes";
 import {
   createSdkworkMallH5SessionStore,
+  registerSdkworkMallH5SessionStoreLocator,
   type SdkworkMallH5SessionStore,
 } from "./sessionStore";
 import { createSdkworkMallH5SessionTokenManager } from "./sessionTokenManager";
@@ -35,6 +36,7 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
   const session = createSdkworkMallH5SessionStore(
     typeof window === "undefined" ? undefined : window.localStorage,
   );
+  registerSdkworkMallH5SessionStoreLocator(() => session);
   const tokenManager = createSdkworkMallH5SessionTokenManager(session);
   const sdkClients = createSdkworkMallH5SdkClientsWithTokenManager(config, tokenManager);
   const iamRuntime = createSdkworkMallH5IamRuntime({

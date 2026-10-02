@@ -1,23 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   listMallH5Addresses,
   listMallH5PaymentMethods,
+  listMallH5SelectableCoupons,
   MALL_H5_CHECKOUT_WARNINGS_STORAGE_KEY,
   submitMallH5CheckoutOrder,
   type MallH5AddressOption,
   type MallH5CheckoutQuote,
   type MallH5PaymentMethodOption,
+  type MallH5SelectableCoupon,
 } from "../cart-service";
+
+function parseCartItemIds(rawItems: string | null): string[] {
+  if (!rawItems) {
+    return [];
+  }
+  return rawItems
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
 
 export function SdkworkMallH5CheckoutPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const cartItemIds = useMemo(() => parseCartItemIds(searchParams.get("items")), [searchParams]);
   const [addresses, setAddresses] = useState<MallH5AddressOption[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<MallH5PaymentMethodOption[]>([]);
+  const [coupons, setCoupons] = useState<MallH5SelectableCoupon[]>([]);
   const [quote, setQuote] = useState<MallH5CheckoutQuote | null>(null);
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [selectedMethodCode, setSelectedMethodCode] = useState("");
+  const [selectedCouponId, setSelectedCouponId] = useState("");
   const [useWallet, setUseWallet] = useState(false);
   const [usePoints, setUsePoints] = useState(false);
   const [buyerRemark, setBuyerRemark] = useState("");
@@ -55,18 +71,29 @@ export function SdkworkMallH5CheckoutPage() {
       .catch(() => {
         // 支付方式加载失败时提交前再校验。
       });
-    const quoteTask = (async () => {
-      const checkoutQuote = await import("../cart-service").then((module) => module.createMallH5CheckoutQuote());
-      if (active) {
-        setQuote(checkoutQuote);
-      }
-    })().catch((cause: unknown) => {
-      if (active) {
-        setMessage(cause instanceof Error ? cause.message : "结算报价加载失败");
-      }
-    });
+    const couponsTask = listMallH5SelectableCoupons()
+      .then((rows) => {
+        if (active) {
+          setCoupons(rows);
+        }
+      })
+      .catch(() => {
+        // 优惠券为可选增强，加载失败时不阻塞结算。
+      });
+    const quoteTask = import("../cart-service")
+      .then((module) => module.createMallH5CheckoutQuote({ cartItemIds }))
+      .then((checkoutQuote) => {
+        if (active) {
+          setQuote(checkoutQuote);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (active) {
+          setMessage(cause instanceof Error ? cause.message : "结算报价加载失败");
+        }
+      });
 
-    void Promise.allSettled([addressesTask, methodsTask, quoteTask]).finally(() => {
+    void Promise.allSettled([addressesTask, methodsTask, couponsTask, quoteTask]).finally(() => {
       if (active) {
         setLoading(false);
       }
@@ -74,9 +101,10 @@ export function SdkworkMallH5CheckoutPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [cartItemIds]);
 
   const payableAmount = useMemo(() => quote?.payableAmountCny ?? null, [quote]);
+  const selectedCoupon = coupons.find((coupon) => coupon.id === selectedCouponId) ?? null;
 
   async function handleSubmit() {
     if (!selectedAddressId) {
@@ -93,6 +121,8 @@ export function SdkworkMallH5CheckoutPage() {
       const result = await submitMallH5CheckoutOrder({
         addressId: selectedAddressId,
         buyerRemark: buyerRemark.trim() || undefined,
+        cartItemIds: cartItemIds.length ? cartItemIds : undefined,
+        couponId: selectedCouponId || undefined,
         paymentMethodCode: selectedMethodCode,
         usePoints,
         useWallet,
@@ -128,6 +158,9 @@ export function SdkworkMallH5CheckoutPage() {
   return (
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-page-title">确认订单</h1>
+      {cartItemIds.length > 0 ? (
+        <p className="sdk-h5-muted">已选择 {cartItemIds.length} 件购物车商品参与结算</p>
+      ) : null}
 
       <section className="sdk-h5-section">
         <h2>收货地址</h2>
@@ -167,6 +200,37 @@ export function SdkworkMallH5CheckoutPage() {
       ) : null}
 
       <section className="sdk-h5-section">
+        <h2>优惠券</h2>
+        <label className="sdk-h5-address-row">
+          <input
+            checked={!selectedCouponId}
+            name="coupon"
+            onChange={() => setSelectedCouponId("")}
+            type="radio"
+          />
+          <span>不使用优惠券</span>
+        </label>
+        {coupons.map((coupon) => (
+          <label className="sdk-h5-address-row" key={coupon.id}>
+            <input
+              checked={selectedCouponId === coupon.id}
+              name="coupon"
+              onChange={() => setSelectedCouponId(coupon.id)}
+              type="radio"
+            />
+            <span>
+              {coupon.title}
+              {coupon.discountAmountCny != null ? <strong> ¥{coupon.discountAmountCny.toFixed(2)}</strong> : null}
+              {coupon.minSpendCny != null ? (
+                <small>{coupon.minSpendCny > 0 ? `（满 ¥${coupon.minSpendCny.toFixed(2)} 可用）` : "（无门槛）"}</small>
+              ) : null}
+            </span>
+          </label>
+        ))}
+        {coupons.length === 0 ? <p className="sdk-h5-muted">暂无可用优惠券，可到领券中心领取。</p> : null}
+      </section>
+
+      <section className="sdk-h5-section">
         <h2>抵扣</h2>
         <label className="sdk-h5-address-row">
           <input checked={useWallet} onChange={(event) => setUseWallet(event.target.checked)} type="checkbox" />
@@ -192,6 +256,9 @@ export function SdkworkMallH5CheckoutPage() {
 
       <section className="sdk-h5-checkout-summary">
         {quote?.discountAmountCny ? <p>优惠：-¥{quote.discountAmountCny.toFixed(2)}</p> : null}
+        {selectedCoupon?.discountAmountCny != null ? (
+          <p>已选优惠券：{selectedCoupon.title}（-¥{selectedCoupon.discountAmountCny.toFixed(2)}）</p>
+        ) : null}
         <p>
           应付：<strong>¥{payableAmount != null ? payableAmount.toFixed(2) : "--"}</strong>
         </p>

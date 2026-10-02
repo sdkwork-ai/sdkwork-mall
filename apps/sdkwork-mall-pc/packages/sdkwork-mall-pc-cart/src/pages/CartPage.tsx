@@ -985,3 +985,127 @@ export function SdkworkMallPaymentResultPage() {
     </div>
   );
 }
+
+export function SdkworkMallPaymentCashierPage() {
+  const [params] = useSearchParams();
+  const orderId = params.get("orderId");
+  const preselectedMethod = params.get("paymentMethod") ?? "";
+  const [methods, setMethods] = useState<{ code: string; id: string; label: string }[]>([]);
+  const [selectedCode, setSelectedCode] = useState(preselectedMethod);
+  const [loading, setLoading] = useState(Boolean(orderId));
+  const [paying, setPaying] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!orderId) {
+      setLoading(false);
+      return;
+    }
+    let active = true;
+    listMallPaymentMethods()
+      .then((rows) => {
+        if (!active) {
+          return;
+        }
+        setMethods(rows);
+        setSelectedCode((current) => current || rows[0]?.code || "");
+      })
+      .catch((cause: unknown) => {
+        if (active) {
+          setMessage(cause instanceof Error ? cause.message : "支付方式加载失败");
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [orderId]);
+
+  async function handlePay() {
+    if (!orderId || !selectedCode) {
+      setMessage("请选择支付方式");
+      return;
+    }
+    setPaying(true);
+    setMessage(null);
+    try {
+      const paymentId = await retryMallOrderPayment(orderId, selectedCode);
+      const query = new URLSearchParams({ orderId, status: "pending" });
+      if (paymentId) {
+        query.set("paymentId", paymentId);
+      }
+      query.set("paymentMethod", selectedCode);
+      window.location.assign(`/payment/result?${query.toString()}`);
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "发起支付失败，请稍后再试");
+      setPaying(false);
+    }
+  }
+
+  if (!orderId) {
+    return (
+      <div className="sdkwork-mall-pc-payment-cashier">
+        <EmptyState title="缺少订单参数" description="请从订单列表或结算页进入收银台。" />
+        <div className="sdkwork-mall-pc-payment-actions">
+          <Link to="/buyer/orders">查看订单</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <LoadingBlock label="加载收银台..." />;
+  }
+
+  return (
+    <div className="sdkwork-mall-pc-payment-cashier">
+      <div className="sdkwork-mall-pc-payment-result-header">
+        <h1>收银台</h1>
+        <p>订单号：{orderId}</p>
+      </div>
+
+      {methods.length > 0 ? (
+        <section className="sdkwork-mall-pc-checkout-section">
+          <h2>选择支付方式</h2>
+          <div className="sdkwork-mall-pc-checkout-methods">
+            {methods.map((method) => (
+              <label key={method.id}>
+                <input
+                  checked={selectedCode === method.code}
+                  name="cashier-payment-method"
+                  onChange={() => setSelectedCode(method.code)}
+                  type="radio"
+                />
+                {method.label}
+              </label>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <StatusNotice tone="warning" title="暂无可用支付方式">
+          未获取到可用支付渠道，请稍后重试或联系客服。
+        </StatusNotice>
+      )}
+
+      {message ? <StatusNotice tone="danger">{message}</StatusNotice> : null}
+
+      <div className="sdkwork-mall-pc-payment-actions">
+        <Button
+          disabled={paying || !selectedCode}
+          onClick={() => void handlePay()}
+          size="lg"
+          type="button"
+          variant="primary"
+        >
+          {paying ? "支付中..." : "立即支付"}
+        </Button>
+        <Link to={`/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}`}>稍后支付</Link>
+        <Link to="/buyer/orders">取消返回订单列表</Link>
+      </div>
+    </div>
+  );
+}

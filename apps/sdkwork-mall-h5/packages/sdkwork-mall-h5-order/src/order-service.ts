@@ -30,6 +30,28 @@ export interface MallH5OrderSummary {
   totalAmountCny: number | null;
 }
 
+export interface MallH5OrderItemLine {
+  id: string;
+  imageUrl?: string;
+  priceCny: number | null;
+  quantity: number;
+  skuName?: string;
+  spuId?: string;
+  title: string;
+}
+
+export interface MallH5OrderDetail {
+  createdAt: string;
+  id: string;
+  items: MallH5OrderItemLine[];
+  paidAmountCny: number | null;
+  paymentMethod?: string;
+  shipmentIds: string[];
+  status: MallH5OrderStatus;
+  subject: string;
+  totalAmountCny: number | null;
+}
+
 export interface MallH5OrderStatistics {
   completed: number;
   pendingPayment: number;
@@ -65,6 +87,17 @@ interface RemoteOrder {
   status?: string;
   subject?: string;
   totalAmount?: number | string;
+}
+
+interface RemoteOrderItem {
+  id?: string;
+  imageUrl?: string;
+  priceCny?: number | string;
+  quantity?: number | string;
+  sku?: { name?: string; title?: string };
+  spu?: { id?: string; imageUrl?: string; title?: string };
+  spuId?: string;
+  title?: string;
 }
 
 interface RemoteOrderStatistics {
@@ -118,6 +151,20 @@ function mapSummary(order: RemoteOrder): MallH5OrderSummary {
   };
 }
 
+function mapItemLine(item: RemoteOrderItem, index: number): MallH5OrderItemLine {
+  const spu = (item.spu ?? {}) as NonNullable<RemoteOrderItem["spu"]>;
+  const image = item.imageUrl ?? spu.imageUrl;
+  return {
+    id: toSdkworkOrderOptionalString(item.id) || `item-${index + 1}`,
+    imageUrl: image ? String(image) : undefined,
+    priceCny: toNullableSdkworkOrderNumber(item.priceCny),
+    quantity: toSdkworkOrderNumber(item.quantity) ?? 1,
+    skuName: toSdkworkOrderOptionalString(item.sku?.title ?? item.sku?.name),
+    spuId: toSdkworkOrderOptionalString(item.spuId ?? spu.id),
+    title: toSdkworkOrderOptionalString(spu.title ?? item.title) || "商品",
+  };
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -132,7 +179,27 @@ function pickString(record: Record<string, unknown>, keys: readonly string[]): s
   return undefined;
 }
 
-export async function loadMallH5OrderDashboard(page = 1): Promise<MallH5OrderDashboard> {
+/** Server-side status vocabulary expected by the order app-api. */
+export function toRemoteOrderStatusFilter(
+  filter: "all" | MallH5OrderStatus,
+): string | undefined {
+  const mapping: Partial<Record<MallH5OrderStatus, string>> = {
+    cancelled: "CANCELLED",
+    completed: "COMPLETED",
+    expired: "EXPIRED",
+    "pending-payment": "PENDING_PAYMENT",
+    "pending-receipt": "PENDING_RECEIPT",
+    "pending-shipment": "PENDING_SHIPMENT",
+    refunded: "REFUNDED",
+    refunding: "REFUNDING",
+  };
+  return filter === "all" ? undefined : mapping[filter];
+}
+
+export async function loadMallH5OrderDashboard(
+  page = 1,
+  statusFilter: "all" | MallH5OrderStatus = "all",
+): Promise<MallH5OrderDashboard> {
   if (!hasSdkworkOrderSession()) {
     return {
       orders: [],
@@ -146,7 +213,11 @@ export async function loadMallH5OrderDashboard(page = 1): Promise<MallH5OrderDas
     };
   }
   const [orderPagePayload, statisticsPayload] = await Promise.all([
-    getSdkworkOrderService().orders.list({ page, pageSize: 20 }),
+    getSdkworkOrderService().orders.list({
+      page,
+      pageSize: 20,
+      status: toRemoteOrderStatusFilter(statusFilter),
+    }),
     getSdkworkOrderService().orders.statistics.retrieve(),
   ]);
   const orderPage = unwrapSdkworkOrderResponse<{ content?: RemoteOrder[] }>(orderPagePayload, "订单加载失败");
@@ -177,16 +248,47 @@ export async function cancelMallH5Order(input: { orderId: string }): Promise<voi
   );
 }
 
-export async function payMallH5Order(input: { orderId: string; paymentMethod: string }): Promise<void> {
+export async function loadMallH5OrderDetail(orderId: string): Promise<MallH5OrderDetail> {
+  requireSdkworkOrderSession("请先登录后查看订单。");
+  const payload = unwrapSdkworkOrderResponse<Record<string, unknown> | null>(
+    await getSdkworkOrderService().orders.retrieve(orderId),
+    "订单加载失败",
+  );
+  if (!payload) {
+    throw new Error("订单不存在或已被删除");
+  }
+  const items = Array.isArray(payload.items) ? (payload.items as RemoteOrderItem[]) : [];
+  return {
+    createdAt: toSdkworkOrderOptionalString(payload.createdAt) || new Date(0).toISOString(),
+    id: toSdkworkOrderOptionalString(payload.orderId) || orderId,
+    items: items.map(mapItemLine),
+    paidAmountCny: toNullableSdkworkOrderNumber(payload.paidAmount),
+    paymentMethod: toSdkworkOrderOptionalString(payload.paymentMethod),
+    shipmentIds: extractShipmentIds(payload),
+    status: mapOrderStatus(toSdkworkOrderOptionalString(payload.status)),
+    subject: toSdkworkOrderOptionalString(payload.subject) || "订单",
+    totalAmountCny: toNullableSdkworkOrderNumber(payload.totalAmount),
+  };
+}
+
+export async function payMallH5Order(input: {
+  orderId: string;
+  paymentMethod: string;
+}): Promise<{ paymentId?: string }> {
   requireSdkworkOrderSession("请先登录后管理订单。");
-  await unwrapSdkworkOrderResponse<void>(
-    await getSdkworkOrderService().orders.payments.create(
-      input.orderId,
-      { paymentMethod: input.paymentMethod },
-      createSdkworkIdempotencyParams(),
-    ),
+  const response = await getSdkworkOrderService().orders.payments.create(
+    input.orderId,
+    { paymentMethod: input.paymentMethod },
+    createSdkworkIdempotencyParams(),
+  );
+  const payload = unwrapSdkworkOrderResponse<Record<string, unknown> | null>(
+    response,
     "发起支付失败",
   );
+  const paymentId = payload
+    ? toSdkworkOrderOptionalString(payload.paymentId ?? payload.id)
+    : undefined;
+  return { paymentId };
 }
 
 export async function confirmMallH5OrderReceipt(input: { orderId: string }): Promise<void> {

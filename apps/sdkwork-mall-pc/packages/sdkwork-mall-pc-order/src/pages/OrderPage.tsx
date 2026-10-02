@@ -270,9 +270,11 @@ function SdkworkOrderPageContent({
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <Button onClick={() => void controller.openDetail(order.id)} type="button" variant="outline">
-                      {copy.actions.viewDetails}
-                    </Button>
+                    <Link to={`/buyer/orders/${encodeURIComponent(order.id)}`}>
+                      <Button type="button" variant="outline">
+                        {copy.actions.viewDetails}
+                      </Button>
+                    </Link>
                     {order.status === "pending-payment" ? (
                       <>
                         <Button

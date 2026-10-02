@@ -863,3 +863,247 @@ body {
   align-items: center;
   justify-content: space-between;
 }
+
+/* ── Home JD-style floors ── */
+.sdk-h5-banner-carousel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.sdk-h5-banner-track {
+  display: flex;
+  transition: transform 0.45s ease;
+}
+
+.sdk-h5-banner-track .sdk-h5-banner {
+  flex: 0 0 100%;
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
+.sdk-h5-banner-carousel > .sdk-h5-banner-dots {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.6rem;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.sdk-h5-banner-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 0;
+  cursor: pointer;
+}
+
+.sdk-h5-banner-dot-active {
+  background: #fff;
+  width: 1rem;
+}
+
+.sdk-h5-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+}
+
+.sdk-h5-category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--sdk-h5-panel);
+  border-radius: 0.7rem;
+  padding: 0.75rem 0.3rem;
+  font-size: 0.78rem;
+  color: var(--sdk-h5-text);
+  text-decoration: none;
+}
+
+.sdk-h5-category-item svg {
+  color: var(--sdk-h5-primary);
+}
+
+.sdk-h5-seckill {
+  border: 1px solid #fecaca;
+  background: #fff7f7;
+}
+
+.sdk-h5-seckill-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sdk-h5-seckill-header h2 {
+  color: #dc2626;
+}
+
+.sdk-h5-seckill-countdown {
+  background: #dc2626;
+  color: #fff;
+  border-radius: 0.35rem;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sdk-h5-seckill-more {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: #dc2626;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.sdk-h5-seckill-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.sdk-h5-seckill-item {
+  text-decoration: none;
+  color: var(--sdk-h5-text);
+}
+
+.sdk-h5-seckill-price {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.sdk-h5-coupon-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: #fff;
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  margin-bottom: 0.8rem;
+}
+
+.sdk-h5-coupon-entry span {
+  flex: 1;
+}
+
+/* ── PDP gallery thumbnails ── */
+.sdk-h5-pdp-thumbnails {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  overflow-x: auto;
+}
+
+.sdk-h5-pdp-thumbnail {
+  flex: 0 0 3rem;
+  height: 3rem;
+  border-radius: 0.45rem;
+  border: 2px solid transparent;
+  overflow: hidden;
+  padding: 0;
+  background: var(--sdk-h5-panel);
+  cursor: pointer;
+}
+
+.sdk-h5-pdp-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sdk-h5-pdp-thumbnail-active {
+  border-color: var(--sdk-h5-primary);
+}
+
+.sdk-h5-pdp-sales em {
+  color: #dc2626;
+  font-style: normal;
+}
+
+/* ── Cart shop groups ── */
+.sdk-h5-cart-shop {
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 0.7rem;
+  padding: 0.55rem;
+  margin-bottom: 0.6rem;
+  background: var(--sdk-h5-panel);
+}
+
+.sdk-h5-cart-shop-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
+.sdk-h5-cart-shop-header a {
+  color: var(--sdk-h5-text);
+  text-decoration: none;
+}
+
+/* ── Order status hero ── */
+.sdk-h5-order-status-hero {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  border-radius: 0.9rem;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.sdk-h5-order-status-hero h1 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.sdk-h5-order-status-hero p {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  opacity: 0.9;
+  word-break: break-all;
+}
+
+/* ── Buyer hero logout ── */
+.sdk-h5-buyer-hero {
+  position: relative;
+}
+
+.sdk-h5-buyer-logout {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+/* ── Address form selects ── */
+.sdk-h5-field select {
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+  background: var(--sdk-h5-panel);
+  color: var(--sdk-h5-text);
+}

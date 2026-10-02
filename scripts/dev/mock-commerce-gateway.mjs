@@ -48,10 +48,28 @@ const offers = [
 
 const cart = { items: [] };
 const orders = [];
-const userCoupons = [];
 const afterSalesRequests = [];
 const invoices = [];
 const shipmentByOrder = new Map();
+
+function couponFromOffer(offer, override = {}) {
+  return {
+    id: nextId("uc"),
+    offerId: offer?.id,
+    title: offer?.title ?? "SDKWork 优惠券",
+    status: "AVAILABLE",
+    discountAmountCny: override.discountAmountCny ?? 100,
+    minSpendCny: override.minSpendCny ?? 999,
+    validUntil: new Date(Date.now() + 30 * 86400_000).toISOString().slice(0, 10),
+  };
+}
+
+const userCoupons = [
+  couponFromOffer(offers[1], { discountAmountCny: 300, minSpendCny: 2999 }),
+  couponFromOffer(null, { title: "无门槛新人券", discountAmountCny: 15, minSpendCny: 0 }),
+];
+const discountApplications = [];
+const walletHolds = [];
 
 function readBody(req) {
   return new Promise((resolve) => {
@@ -63,8 +81,16 @@ function readBody(req) {
   });
 }
 
-function cartTotal() {
-  return cart.items.reduce((sum, item) => sum + item.priceCny * item.quantity, 0);
+function cartTotal(items = cart.items) {
+  return items.reduce((sum, item) => sum + item.priceCny * item.quantity, 0);
+}
+
+function selectCartItems(cartItemIds) {
+  if (!Array.isArray(cartItemIds) || cartItemIds.length === 0) {
+    return cart.items;
+  }
+  const wanted = new Set(cartItemIds.map(String));
+  return cart.items.filter((item) => wanted.has(item.id));
 }
 
 function orderStatus(order) {
@@ -178,22 +204,40 @@ async function handle(method, url, body) {
 
   // ── checkout ──
   if (p === "POST /app/v3/api/checkout/sessions") {
-    const total = cartTotal();
-    return ok({ id: nextId("cs"), originalAmountCny: total, discountAmountCny: 0, payableAmountCny: total });
+    const selection = selectCartItems(body.cartItemIds);
+    const total = cartTotal(selection);
+    const discount = discountApplications
+      .filter((entry) => !entry.consumed)
+      .reduce((sum, entry) => sum + (entry.discountAmountCny ?? 0), 0);
+    return ok({ id: nextId("cs"), originalAmountCny: total, discountAmountCny: discount, payableAmountCny: Math.max(0, total - discount) });
   }
   const quoteMatch = path.match(/^\/app\/v3\/api\/checkout\/sessions\/([^/]+)\/quotes$/u);
   if (quoteMatch && method === "POST") return ok({ id: nextId("quote") });
   const checkoutOrderMatch = path.match(/^\/app\/v3\/api\/checkout\/sessions\/([^/]+)\/orders$/u);
   if (checkoutOrderMatch && method === "POST") {
-    const order = { id: nextId("order"), paid: false, cancelled: false, receiptConfirmed: false, totalAmountCny: cartTotal(), subject: cart.items[0]?.spu?.title ?? "SDKWork 订单", createdAt: new Date().toISOString(), items: cart.items.map((item) => ({ ...item })), quantity: cart.items.reduce((sum, item) => sum + item.quantity, 0) };
+    const selection = selectCartItems(body.cartItemIds);
+    const order = { id: nextId("order"), paid: false, cancelled: false, receiptConfirmed: false, totalAmountCny: cartTotal(selection), subject: selection[0]?.spu?.title ?? "SDKWork 订单", createdAt: new Date().toISOString(), items: selection.map((item) => ({ ...item })), quantity: selection.reduce((sum, item) => sum + item.quantity, 0) };
     orders.push(order);
-    cart.items = [];
+    const orderedIds = new Set(selection.map((item) => item.id));
+    cart.items = cart.items.filter((item) => !orderedIds.has(item.id));
+    for (const application of discountApplications) {
+      if (!application.consumed) application.consumed = true;
+    }
     return ok({ id: order.id });
   }
 
   // ── orders (buyer) ──
   if (p === "GET /app/v3/api/orders") {
-    return ok({ content: orders.map((order) => ({ orderId: order.id, subject: order.subject, status: orderStatus(order), totalAmount: order.totalAmountCny, createdAt: order.createdAt })), pageInfo: { page: 1, total: orders.length } });
+    const statusFilter = query.get("status");
+    const page = Math.max(1, Number(query.get("page") ?? 1));
+    const pageSize = Math.max(1, Number(query.get("page_size") ?? query.get("pageSize") ?? 20));
+    let rows = orders.map((order) => ({ orderId: order.id, subject: order.subject, status: orderStatus(order), totalAmount: order.totalAmountCny, paidAmount: order.paid ? order.totalAmountCny : null, paymentMethod: order.paymentMethod, createdAt: order.createdAt }));
+    if (statusFilter) {
+      rows = rows.filter((order) => order.status === statusFilter.toUpperCase());
+    }
+    const total = rows.length;
+    rows = rows.slice((page - 1) * pageSize, page * pageSize);
+    return ok({ content: rows, pageInfo: { page, total } });
   }
   if (p === "GET /app/v3/api/orders/statistics") {
     const count = (match) => orders.filter((order) => match(orderStatus(order))).length;
@@ -202,7 +246,7 @@ async function handle(method, url, body) {
   const orderMatch = path.match(/^\/app\/v3\/api\/orders\/([^/]+)$/u);
   if (method === "GET" && orderMatch) {
     const order = orders.find((entry) => entry.id === orderMatch[1]);
-    return order ? ok({ orderId: order.id, subject: order.subject, status: orderStatus(order), totalAmount: order.totalAmountCny, createdAt: order.createdAt, items: order.items }) : { code: 40401, message: "order not found" };
+    return order ? ok({ orderId: order.id, subject: order.subject, status: orderStatus(order), totalAmount: order.totalAmountCny, paidAmount: order.paid ? order.totalAmountCny : null, paymentMethod: order.paymentMethod, createdAt: order.createdAt, shipmentIds: order.paid ? [shipmentFor(order).shipment.id] : [], items: order.items.map((item) => ({ id: item.skuId, priceCny: item.priceCny, quantity: item.quantity, sku: { name: item.sku?.name ?? item.sku?.title }, spu: { id: item.spuId, imageUrl: item.spu?.imageUrl, title: item.spu?.title } })) }) : { code: 40401, message: "order not found" };
   }
   const statusMatch = path.match(/^\/app\/v3\/api\/orders\/([^/]+)\/status$/u);
   if (statusMatch && method === "GET") {
@@ -266,14 +310,34 @@ async function handle(method, url, body) {
     const offer = offers.find((entry) => entry.id === offerMatch[1]);
     return offer ? ok(offer) : { code: 40401, message: "offer not found" };
   }
-  if (p === "POST /app/v3/api/promotions/user_coupon_claims") return ok({});
+  if (p === "POST /app/v3/api/promotions/user_coupon_claims") {
+    const offer = offers.find((entry) => entry.id === body.offerId);
+    const coupon = couponFromOffer(offer, offer?.id === "offer-brand-1" ? { discountAmountCny: 300, minSpendCny: 2999 } : { discountAmountCny: 50, minSpendCny: 999 });
+    userCoupons.push(coupon);
+    return ok({ id: coupon.id });
+  }
   if (p === "GET /app/v3/api/promotions/user_coupons") {
-    return ok({ items: userCoupons, pageInfo: { page: 1, total: userCoupons.length } });
+    return ok({ items: userCoupons.filter((coupon) => coupon.status === "AVAILABLE"), pageInfo: { page: 1, total: userCoupons.length } });
   }
   if (p === "POST /app/v3/api/promotions/codes/redemptions") {
     if (!body.code || body.code.length < 6) return { code: 40401, message: "兑换码无效" };
-    userCoupons.push({ id: nextId("uc"), title: `兑换券 ${body.code}`, status: "available" });
+    userCoupons.push(couponFromOffer(null, { title: `兑换券 ${body.code}`, discountAmountCny: 20, minSpendCny: 0 }));
     return ok({});
+  }
+  if (p === "POST /app/v3/api/promotions/discount_applications") {
+    const coupon = userCoupons.find((entry) => entry.id === body.userCouponId && entry.status === "AVAILABLE");
+    if (!coupon) return { code: 40401, message: "优惠券不可用" };
+    const application = { id: nextId("da"), orderId: body.orderId, userCouponId: coupon.id, discountAmountCny: coupon.discountAmountCny, consumed: false };
+    discountApplications.push(application);
+    coupon.status = "USED";
+    return ok(application);
+  }
+
+  // ── wallet holds (checkout offsets) ──
+  if (p === "POST /app/v3/api/wallet/holds") {
+    const hold = { id: nextId("hold"), orderId: body.orderId, assetType: body.assetType ?? "cash" };
+    walletHolds.push(hold);
+    return ok(hold);
   }
 
   // ── after-sales ──

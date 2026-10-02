@@ -1912,3 +1912,113 @@ a {
   font-size: 0.85rem;
   color: var(--sdk-color-text-secondary, #4b5563);
 }
+
+/* ── Payment cashier ── */
+.sdkwork-mall-pc-payment-cashier {
+  max-width: 46rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sdkwork-mall-pc-payment-cashier .sdkwork-mall-pc-checkout-section h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.sdkwork-mall-pc-payment-cashier .sdkwork-mall-pc-checkout-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sdkwork-mall-pc-payment-cashier .sdkwork-mall-pc-checkout-methods label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid var(--sdk-color-border, #e5e7eb);
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  cursor: pointer;
+  background: var(--sdk-color-surface, #fff);
+}
+
+/* ── Order detail page ── */
+.sdkwork-mall-pc-order-detail {
+  max-width: 56rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sdkwork-mall-pc-order-detail-hero {
+  border-radius: 0.9rem;
+  padding: 1.4rem 1.5rem;
+}
+
+.sdkwork-mall-pc-order-detail-hero h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.sdkwork-mall-pc-order-detail-hero p {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+}
+
+.sdkwork-mall-pc-order-detail-section {
+  border-radius: 0.9rem;
+  padding: 1.1rem 1.3rem;
+}
+
+.sdkwork-mall-pc-order-detail-section h2 {
+  margin: 0 0 0.8rem;
+  font-size: 1rem;
+}
+
+.sdkwork-mall-pc-order-detail-items {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.sdkwork-mall-pc-order-detail-items th,
+.sdkwork-mall-pc-order-detail-items td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--sdk-color-border, #e5e7eb);
+}
+
+.sdkwork-mall-pc-order-detail-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.7rem 1.4rem;
+  margin: 0;
+}
+
+.sdkwork-mall-pc-order-detail-meta div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sdkwork-mall-pc-order-detail-meta dt {
+  color: var(--sdk-color-text-secondary, #6b7280);
+  flex: 0 0 auto;
+}
+
+.sdkwork-mall-pc-order-detail-meta dd {
+  margin: 0;
+  word-break: break-all;
+}
+
+/* ── Admin pagination ── */
+.sdkwork-mall-pc-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--sdk-color-text-secondary, #4b5563);
+}

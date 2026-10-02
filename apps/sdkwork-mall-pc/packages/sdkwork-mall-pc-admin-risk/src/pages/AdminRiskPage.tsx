@@ -12,48 +12,64 @@ interface RiskSignalRow {
   type: string;
 }
 
+const RISK_PAGE_SIZE = 20;
+
 export function SdkworkMallAdminRiskPage() {
   const [signals, setSignals] = useState<RiskSignalRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [busySignalId, setBusySignalId] = useState<string | null>(null);
 
-  async function refresh() {
+  async function refresh(nextPage = page) {
     setLoading(true);
     const service = getSdkworkAdminRemotePort();
-    const shopsResponse = await service.admin.shops.management.list({ page: 1, page_size: 10 });
+    const shopsResponse = await service.admin.shops.management.list({
+      page: nextPage,
+      page_size: RISK_PAGE_SIZE,
+    });
     const shopsPayload = unwrapSdkworkPaymentResponse(shopsResponse) as { items?: Record<string, unknown>[] };
     const shops = shopsPayload.items ?? [];
-    const rows: RiskSignalRow[] = [];
 
-    for (const shop of shops.slice(0, 5)) {
-      const shopId = String(shop.id ?? "");
-      if (!shopId) {
-        continue;
-      }
-      try {
-        const riskResponse = await service.admin.shops.riskSignals.list({ shopId, page: 1, page_size: 5 });
-        const riskPayload = unwrapSdkworkPaymentResponse(riskResponse) as { items?: Record<string, unknown>[] };
-        for (const signal of riskPayload.items ?? []) {
-          rows.push({
+    // Fetch each shop's risk signals concurrently; a missing endpoint in dev
+    // environments degrades that shop to zero rows instead of failing the page.
+    const perShopRows = await Promise.all(
+      shops.map(async (shop) => {
+        const shopId = String(shop.id ?? "");
+        if (!shopId) {
+          return [];
+        }
+        try {
+          const riskResponse = await service.admin.shops.riskSignals.list({
+            page: 1,
+            page_size: RISK_PAGE_SIZE,
+            shopId,
+          });
+          const riskPayload = unwrapSdkworkPaymentResponse(riskResponse) as {
+            items?: Record<string, unknown>[];
+          };
+          return (riskPayload.items ?? []).map((signal) => ({
             id: String(signal.id ?? ""),
             shopId,
             shopName: String(shop.name ?? shop.title ?? shopId),
             type: String(signal.signalType ?? signal.type ?? "risk"),
             level: String(signal.riskLevel ?? signal.level ?? "medium"),
             status: String(signal.signalStatus ?? signal.status ?? "open"),
-          });
+          }));
+        } catch {
+          return [];
         }
-      } catch {
-        // Shop may have no risk endpoint in dev environments.
-      }
-    }
+      }),
+    );
 
-    setSignals(rows);
+    setSignals(perShopRows.flat());
+    setHasMore(shops.length >= RISK_PAGE_SIZE);
+    setPage(nextPage);
     setLoading(false);
   }
 
   useEffect(() => {
-    void refresh();
+    void refresh(1);
   }, []);
 
   async function resolveSignal(signal: RiskSignalRow) {
@@ -115,6 +131,26 @@ export function SdkworkMallAdminRiskPage() {
           </tbody>
         </table>
       )}
+
+      <div className="sdkwork-mall-pc-pagination">
+        <Button
+          disabled={loading || page <= 1}
+          onClick={() => void refresh(page - 1)}
+          type="button"
+          variant="outline"
+        >
+          上一页
+        </Button>
+        <span>第 {page} 页</span>
+        <Button
+          disabled={loading || !hasMore}
+          onClick={() => void refresh(page + 1)}
+          type="button"
+          variant="outline"
+        >
+          下一页
+        </Button>
+      </div>
     </div>
   );
 }

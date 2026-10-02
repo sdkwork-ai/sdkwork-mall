@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CreditCard,
   Crown,
   FileText,
   Heart,
   History,
+  LogOut,
   MapPin,
   MessageSquare,
   PackageSearch,
@@ -19,6 +20,13 @@ import {
   type MallH5OrderDashboard,
   type MallH5OrderStatus,
 } from "../buyer-service";
+import {
+  getSdkworkMallH5SessionStore,
+  readSdkworkMallH5SessionDisplayName,
+  type SdkworkMallH5SessionSnapshot,
+} from "@sdkwork/mall-h5-core/session";
+
+const EMPTY_SESSION: SdkworkMallH5SessionSnapshot = {};
 
 const ORDER_ENTRIES: Array<{ code: "all" | MallH5OrderStatus; label: string }> = [
   { code: "all", label: "全部订单" },
@@ -42,9 +50,18 @@ const QUICK_LINKS = [
 ] as const;
 
 export function SdkworkMallH5BuyerHomePage() {
+  const navigate = useNavigate();
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const sessionStore = getSdkworkMallH5SessionStore();
+  const session = useSyncExternalStore(
+    sessionStore?.subscribe ?? (() => () => {}),
+    sessionStore?.getSnapshot ?? (() => EMPTY_SESSION),
+    () => EMPTY_SESSION,
+  );
+  const displayName = readSdkworkMallH5SessionDisplayName(session);
+  const userId = session.context?.userId ?? "";
 
   const reload = useCallback(async () => {
     const data = await loadMallH5BuyerDashboard();
@@ -83,14 +100,22 @@ export function SdkworkMallH5BuyerHomePage() {
     }
   };
 
+  function handleLogout() {
+    sessionStore?.clearSession();
+    navigate("/auth/login");
+  }
+
   return (
     <div className="sdk-h5-page">
       <section className="sdk-h5-buyer-hero">
-        <div className="sdk-h5-buyer-avatar" aria-hidden="true">客</div>
+        <div className="sdk-h5-buyer-avatar" aria-hidden="true">{displayName.slice(0, 1)}</div>
         <div>
-          <strong>SDKWork 用户</strong>
+          <strong>{displayName}</strong>
           <p>{loading ? "加载中..." : error ? "登录后同步订单信息" : "欢迎回来"}</p>
         </div>
+        <button className="sdk-h5-buyer-logout" onClick={handleLogout} type="button">
+          <LogOut aria-hidden="true" size={14} /> 退出登录
+        </button>
       </section>
 
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}

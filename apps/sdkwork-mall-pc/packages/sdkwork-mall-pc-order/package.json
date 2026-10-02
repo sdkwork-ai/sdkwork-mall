@@ -24,6 +24,11 @@
       "types": "./src/pages/LogisticsPage.tsx",
       "import": "./src/pages/LogisticsPage.tsx",
       "default": "./src/pages/LogisticsPage.tsx"
+    },
+    "./order-detail-page": {
+      "types": "./src/pages/OrderDetailPage.tsx",
+      "import": "./src/pages/OrderDetailPage.tsx",
+      "default": "./src/pages/OrderDetailPage.tsx"
     }
   },
   "files": [

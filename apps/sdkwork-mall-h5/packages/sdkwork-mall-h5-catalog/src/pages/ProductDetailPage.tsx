@@ -14,15 +14,10 @@ import {
   recordMallH5Footprint,
   toggleMallH5Favorite,
 } from "@sdkwork/mall-h5-buyer/favorites-service";
-
-const CART_COUNT_STORAGE_KEY = "sdkwork-mall-h5-cart-count";
+import { readMallH5CartCount, writeMallH5CartCount } from "@sdkwork/mall-h5-commons";
 
 function bumpLocalCartBadge(delta: number): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  const next = Math.max(0, (Number(window.localStorage.getItem(CART_COUNT_STORAGE_KEY)) || 0) + delta);
-  window.localStorage.setItem(CART_COUNT_STORAGE_KEY, String(next));
+  writeMallH5CartCount(readMallH5CartCount() + delta);
 }
 
 export function SdkworkMallH5ProductDetailPage() {
@@ -94,9 +89,24 @@ export function SdkworkMallH5ProductDetailPage() {
     [detail, selectedSkuId],
   );
   const displayPrice = selectedSku?.priceCny ?? detail?.priceCny ?? null;
+  const galleryImages = useMemo(() => {
+    const base = detail?.images.length ? detail.images : detail?.imageUrl ? [detail.imageUrl] : [];
+    return base;
+  }, [detail]);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const maxQuantity = selectedSku?.stock ?? detail?.skus.reduce((sum, sku) => sum + (sku.stock ?? 0), 0) ?? null;
+  const soldOut = maxQuantity != null && maxQuantity <= 0;
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [productId]);
 
   async function handleAddToCart() {
     if (!detail || !selectedSku) {
+      return;
+    }
+    if (maxQuantity != null && quantity > maxQuantity) {
+      setMessage(`库存不足，最多可购 ${maxQuantity} 件`);
       return;
     }
     setBusy(true);
@@ -143,7 +153,33 @@ export function SdkworkMallH5ProductDetailPage() {
   return (
     <div className="sdk-h5-page sdk-h5-pdp">
       <section className="sdk-h5-pdp-gallery">
-        {detail.imageUrl ? <img alt={detail.title} src={detail.imageUrl} /> : <div className="sdk-h5-pdp-gallery-fallback">暂无主图</div>}
+        {galleryImages.length > 0 ? (
+          <>
+            <img
+              alt={`${detail.title} 图片 ${activeImageIndex + 1}`}
+              src={galleryImages[Math.min(activeImageIndex, galleryImages.length - 1)]}
+            />
+            {galleryImages.length > 1 ? (
+              <div className="sdk-h5-pdp-thumbnails" role="tablist" aria-label="商品图片切换">
+                {galleryImages.map((image, index) => (
+                  <button
+                    aria-label={`查看第 ${index + 1} 张图片`}
+                    aria-selected={index === activeImageIndex}
+                    className={index === activeImageIndex ? "sdk-h5-pdp-thumbnail sdk-h5-pdp-thumbnail-active" : "sdk-h5-pdp-thumbnail"}
+                    key={`${image}-${index}`}
+                    onClick={() => setActiveImageIndex(index)}
+                    role="tab"
+                    type="button"
+                  >
+                    <img alt="" loading="lazy" src={image} />
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <div className="sdk-h5-pdp-gallery-fallback">暂无主图</div>
+        )}
       </section>
 
       <section className="sdk-h5-pdp-summary">
@@ -165,7 +201,11 @@ export function SdkworkMallH5ProductDetailPage() {
             {favoriteFlag ? "已收藏" : "收藏"}
           </button>
         </h1>
-        {detail.sales != null ? <p className="sdk-h5-pdp-sales">已售 {detail.sales}</p> : null}
+        <p className="sdk-h5-pdp-sales">
+          {detail.sales != null ? `已售 ${detail.sales}` : null}
+          {maxQuantity != null ? <span> · 库存 {maxQuantity}</span> : null}
+          {soldOut ? <em> · 暂时售罄</em> : null}
+        </p>
       </section>
 
       {detail.skus.length > 0 ? (
@@ -200,12 +240,16 @@ export function SdkworkMallH5ProductDetailPage() {
           <span aria-live="polite">{quantity}</span>
           <button
             aria-label="增加数量"
-            onClick={() => setQuantity((value) => value + 1)}
+            disabled={maxQuantity != null && quantity >= maxQuantity}
+            onClick={() => setQuantity((value) => (maxQuantity != null ? Math.min(maxQuantity, value + 1) : value + 1))}
             type="button"
           >
             +
           </button>
         </div>
+        {maxQuantity != null && quantity >= maxQuantity ? (
+          <p className="sdk-h5-muted">已达当前规格库存上限</p>
+        ) : null}
       </section>
 
       {detail.specs.length > 0 ? (
@@ -259,7 +303,7 @@ export function SdkworkMallH5ProductDetailPage() {
       <div className="sdk-h5-pdp-actions">
         <button
           className="sdk-h5-button sdk-h5-button-secondary"
-          disabled={busy || !selectedSku}
+          disabled={busy || !selectedSku || soldOut}
           onClick={() => void handleAddToCart()}
           type="button"
         >
@@ -267,11 +311,11 @@ export function SdkworkMallH5ProductDetailPage() {
         </button>
         <button
           className="sdk-h5-button sdk-h5-button-primary"
-          disabled={busy || !selectedSku}
+          disabled={busy || !selectedSku || soldOut}
           onClick={handleBuyNow}
           type="button"
         >
-          立即购买
+          {soldOut ? "暂时售罄" : "立即购买"}
         </button>
       </div>
     </div>

@@ -11,9 +11,12 @@
       "default": "./src/index.tsx"
     }
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
-    "@sdkwork/mall-h5-core": "workspace:*"
+    "@sdkwork/mall-h5-core": "workspace:*",
+    "@sdkwork/mall-h5-commons": "workspace:*"
   },
   "peerDependencies": {
     "lucide-react": ">=1.0.0",

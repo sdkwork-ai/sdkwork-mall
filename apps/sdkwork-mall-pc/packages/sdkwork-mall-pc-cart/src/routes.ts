@@ -26,6 +26,18 @@ export const sdkworkMallPcCartRoutes = [
     titleKey: "cart.routes.checkout.title",
   },
   {
+    auth: "required",
+    capability: "payment-cashier",
+    domain: "commerce",
+    id: "storefront.mall.payment-cashier",
+    packageName: "@sdkwork/mall-pc-cart",
+    path: "/payment/cashier",
+    screen: "payment-cashier",
+    surface: "storefront",
+    title: "收银台",
+    titleKey: "cart.routes.paymentCashier.title",
+  },
+  {
     auth: "public",
     capability: "payment-result",
     domain: "commerce",

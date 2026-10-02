@@ -23,11 +23,21 @@ export interface MallH5HomeShop {
   rating?: number | null;
 }
 
+export interface MallH5HomeOffer {
+  discountText?: string;
+  endAt?: string;
+  highlight?: string;
+  id: string;
+  startAt?: string;
+  title: string;
+}
+
 export interface MallH5HomeSnapshot {
   categories: MallH5HomeCategory[];
   featuredShops: MallH5HomeShop[];
   hotProducts: MallH5HomeProductCard[];
   newProducts: MallH5HomeProductCard[];
+  offers: MallH5HomeOffer[];
 }
 
 function readMoney(value: unknown): number | null {
@@ -53,11 +63,12 @@ function readProductCard(item: Record<string, unknown>): MallH5HomeProductCard {
 
 export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
   const commerce = getSdkworkCommerceService();
-  const [categoriesResult, hotResult, newResult, shopsResult] = await Promise.allSettled([
+  const [categoriesResult, hotResult, newResult, shopsResult, offersResult] = await Promise.allSettled([
     commerce.catalog.categories.list({ page: 1, page_size: 10, status: "active" }),
     commerce.catalog.spus.list({ page: 1, page_size: 10, sort: "sales" }),
     commerce.catalog.spus.list({ page: 1, page_size: 10, sort: "newest" }),
     commerce.shops.list({ page: 1, page_size: 4, status: "active" }),
+    commerce.promotions.offers.list({ page: 1, page_size: 6, status: "active" }),
   ]);
 
   const categoriesPayload =
@@ -78,6 +89,21 @@ export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
       ? (unwrapSdkworkCommerceResponse<{ items?: Record<string, unknown>[] }>(shopsResult.value) ?? { items: [] })
       : { items: [] };
 
+  const offersPayload =
+    offersResult.status === "fulfilled"
+      ? (unwrapSdkworkCommerceResponse<{ items?: Record<string, unknown>[] }>(offersResult.value) ?? { items: [] })
+      : { items: [] };
+
+  const readOfferTime = (record: Record<string, unknown>, keys: readonly string[]): string | undefined => {
+    for (const key of keys) {
+      const value = record[key];
+      if (typeof value === "string" && value) {
+        return value;
+      }
+    }
+    return undefined;
+  };
+
   return {
     categories: (categoriesPayload.items ?? []).map((item) => ({
       id: String(item.id ?? ""),
@@ -94,5 +120,15 @@ export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
       .slice(0, 4),
     hotProducts: (hotPayload.items ?? []).map(readProductCard),
     newProducts: (newPayload.items ?? []).map(readProductCard),
+    offers: (offersPayload.items ?? [])
+      .map((item) => ({
+        discountText: typeof item.discountText === "string" ? item.discountText : undefined,
+        endAt: readOfferTime(item, ["endAt", "endTime", "expiresAt"]),
+        highlight: typeof item.highlight === "string" ? item.highlight : undefined,
+        id: String(item.id ?? item.offerId ?? ""),
+        startAt: readOfferTime(item, ["startAt", "startTime"]),
+        title: String(item.title ?? item.name ?? "活动"),
+      }))
+      .filter((offer) => offer.id),
   };
 }

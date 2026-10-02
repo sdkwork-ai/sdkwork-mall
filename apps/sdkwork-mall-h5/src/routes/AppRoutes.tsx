@@ -25,6 +25,9 @@ const SdkworkMallH5PaymentResultPage = lazy(() =>
 const SdkworkMallH5OrderPage = lazy(() =>
   import("@sdkwork/mall-h5-order/order-page").then((module) => ({ default: module.SdkworkMallH5OrderPage })),
 );
+const SdkworkMallH5OrderDetailPage = lazy(() =>
+  import("@sdkwork/mall-h5-order/order-detail-page").then((module) => ({ default: module.SdkworkMallH5OrderDetailPage })),
+);
 const SdkworkMallH5LogisticsPage = lazy(() =>
   import("@sdkwork/mall-h5-order/logistics-page").then((module) => ({ default: module.SdkworkMallH5LogisticsPage })),
 );
@@ -75,6 +78,17 @@ function LoadingPlaceholder() {
   return <div className="sdk-h5-loading">加载中...</div>;
 }
 
+function NotFoundPage() {
+  return (
+    <div className="sdk-h5-page">
+      <div className="sdk-h5-empty">页面不存在或已下线</div>
+      <div className="sdk-h5-center">
+        <a className="sdk-h5-button sdk-h5-button-primary" href="/">回到首页</a>
+      </div>
+    </div>
+  );
+}
+
 function RequireSession({ children, runtime }: { children: ReactNode; runtime: SdkworkMallH5Runtime }) {
   const location = useLocation();
   if (hasSdkworkMallH5AuthenticatedSession(runtime.session.getSnapshot())) {
@@ -120,6 +134,14 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/orders"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5OrderDetailPage />
+            </RequireSession>
+          )}
+          path="/buyer/orders/:orderId"
         />
         <Route
           element={(
@@ -217,7 +239,7 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
           )}
           path="/buyer/messages"
         />
-        <Route element={<Navigate replace to="/" />} path="*" />
+        <Route element={<NotFoundPage />} path="*" />
       </Routes>
     </Suspense>
   );

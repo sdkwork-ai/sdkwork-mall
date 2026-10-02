@@ -20,6 +20,8 @@ export function SdkworkMallAdminUsersPage() {
   );
 }
 
+const BRAND_SHOP_PAGE_SIZE = 20;
+
 export function SdkworkMallAdminBrandsPage() {
   const [rows, setRows] = useState<Array<{ brandName: string; shopName: string; status: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -28,37 +30,41 @@ export function SdkworkMallAdminBrandsPage() {
     let active = true;
     async function load() {
       const service = getSdkworkAdminRemotePort();
-      const shopsResponse = await service.admin.shops.management.list({ page: 1, page_size: 5 });
+      const shopsResponse = await service.admin.shops.management.list({
+        page: 1,
+        page_size: BRAND_SHOP_PAGE_SIZE,
+      });
       const shopsPayload = unwrapSdkworkPaymentResponse(shopsResponse) as { items?: Record<string, unknown>[] };
-      const brandRows: Array<{ brandName: string; shopName: string; status: string }> = [];
 
-      for (const shop of shopsPayload.items ?? []) {
-        const shopId = String(shop.id ?? "");
-        if (!shopId) {
-          continue;
-        }
-        try {
-          const brandResponse = await service.admin.shops.brandAuthorizations.list(shopId, {
-            page: 1,
-            page_size: 5,
-          });
-          const brandPayload = unwrapSdkworkPaymentResponse(brandResponse) as {
-            items?: Record<string, unknown>[];
-          };
-          for (const brand of brandPayload.items ?? []) {
-            brandRows.push({
+      // Concurrent per-shop brand authorization lookups; shops without the
+      // endpoint in dev environments contribute zero rows instead of failing.
+      const perShopRows = await Promise.all(
+        (shopsPayload.items ?? []).map(async (shop) => {
+          const shopId = String(shop.id ?? "");
+          if (!shopId) {
+            return [];
+          }
+          try {
+            const brandResponse = await service.admin.shops.brandAuthorizations.list(shopId, {
+              page: 1,
+              page_size: BRAND_SHOP_PAGE_SIZE,
+            });
+            const brandPayload = unwrapSdkworkPaymentResponse(brandResponse) as {
+              items?: Record<string, unknown>[];
+            };
+            return (brandPayload.items ?? []).map((brand) => ({
               shopName: String(shop.name ?? shop.title ?? shopId),
               brandName: String(brand.brandName ?? brand.brand_name ?? "品牌"),
               status: String(brand.authorizationStatus ?? brand.authorization_status ?? "pending"),
-            });
+            }));
+          } catch {
+            return [];
           }
-        } catch {
-          // Shop may have no brand authorizations in dev environments.
-        }
-      }
+        }),
+      );
 
       if (active) {
-        setRows(brandRows);
+        setRows(perShopRows.flat());
         setLoading(false);
       }
     }

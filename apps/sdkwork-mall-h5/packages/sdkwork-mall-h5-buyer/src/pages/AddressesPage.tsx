@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   createMallH5Address,
@@ -8,10 +8,44 @@ import {
   updateMallH5Address,
   type MallH5Address,
 } from "../addresses-service";
+import {
+  formatMallH5RegionPrefix,
+  MALL_H5_REGIONS,
+  parseMallH5RegionSelection,
+  type MallH5RegionSelection,
+} from "../regions";
 
 interface EditingState {
   address?: MallH5Address;
   open: boolean;
+}
+
+interface AddressFormState {
+  addressDetail: string;
+  receiverName: string;
+  receiverPhone: string;
+  region: MallH5RegionSelection;
+}
+
+const EMPTY_REGION: MallH5RegionSelection = { province: "", city: "" };
+
+function regionLabel(selection: MallH5RegionSelection): string {
+  if (!selection.province) {
+    return "请选择省 / 市";
+  }
+  return selection.city ? `${selection.province} ${selection.city}` : selection.province;
+}
+
+function detectRegion(addressLine: string): MallH5RegionSelection {
+  return parseMallH5RegionSelection(addressLine) ?? EMPTY_REGION;
+}
+
+function stripRegionPrefix(addressLine: string): string {
+  const selection = parseMallH5RegionSelection(addressLine);
+  if (!selection) {
+    return addressLine;
+  }
+  return addressLine.slice(formatMallH5RegionPrefix(selection).length).trim();
 }
 
 export function SdkworkMallH5AddressesPage() {
@@ -20,7 +54,12 @@ export function SdkworkMallH5AddressesPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditingState>({ open: false });
-  const [form, setForm] = useState({ addressLine: "", receiverName: "", receiverPhone: "" });
+  const [form, setForm] = useState<AddressFormState>({
+    addressDetail: "",
+    receiverName: "",
+    receiverPhone: "",
+    region: EMPTY_REGION,
+  });
 
   const reload = useCallback(async () => {
     setAddresses(await listMallH5Addresses());
@@ -44,32 +83,51 @@ export function SdkworkMallH5AddressesPage() {
     };
   }, [reload]);
 
+  const cityOptions = useMemo(() => {
+    const region = MALL_H5_REGIONS.find((entry) => entry.name === form.region.province);
+    return region?.cities ?? [];
+  }, [form.region.province]);
+
   function openCreate() {
-    setForm({ addressLine: "", receiverName: "", receiverPhone: "" });
+    setForm({ addressDetail: "", receiverName: "", receiverPhone: "", region: EMPTY_REGION });
     setEditing({ open: true });
   }
 
   function openEdit(address: MallH5Address) {
     setForm({
-      addressLine: address.addressLine,
+      addressDetail: stripRegionPrefix(address.addressLine),
       receiverName: address.receiverName,
       receiverPhone: address.receiverPhone,
+      region: detectRegion(address.addressLine),
     });
     setEditing({ address, open: true });
   }
 
   async function handleSave() {
-    if (!form.receiverName.trim() || !form.receiverPhone.trim() || !form.addressLine.trim()) {
-      setMessage("请完整填写收货人、电话与地址");
+    if (!form.receiverName.trim() || !form.receiverPhone.trim()) {
+      setMessage("请填写收货人与联系电话");
+      return;
+    }
+    if (!form.region.province || !form.region.city) {
+      setMessage("请选择所在省 / 市");
+      return;
+    }
+    if (!form.addressDetail.trim()) {
+      setMessage("请填写区县、街道等详细地址");
+      return;
+    }
+    const phone = form.receiverPhone.trim();
+    if (!/^1[3-9]\d{9}$/u.test(phone)) {
+      setMessage("请填写 11 位大陆手机号");
       return;
     }
     setBusy(true);
     setMessage(null);
     try {
       const input = {
-        addressLine: form.addressLine.trim(),
+        addressLine: `${formatMallH5RegionPrefix(form.region)} ${form.addressDetail.trim()}`,
         receiverName: form.receiverName.trim(),
-        receiverPhone: form.receiverPhone.trim(),
+        receiverPhone: phone,
       };
       if (editing.address) {
         await updateMallH5Address(editing.address.id, input);
@@ -162,15 +220,49 @@ export function SdkworkMallH5AddressesPage() {
             联系电话
             <input
               inputMode="tel"
+              maxLength={11}
               onChange={(event) => setForm((current) => ({ ...current, receiverPhone: event.target.value }))}
+              placeholder="11 位手机号"
               value={form.receiverPhone}
             />
           </label>
           <label className="sdk-h5-field">
-            收货地址
+            所在省
+            <select
+              onChange={(event) => {
+                const province = event.target.value;
+                setForm((current) => ({ ...current, region: { city: "", province } }));
+              }}
+              value={form.region.province}
+            >
+              <option value="">请选择省份</option>
+              {MALL_H5_REGIONS.map((region) => (
+                <option key={region.name} value={region.name}>{region.name}</option>
+              ))}
+            </select>
+          </label>
+          <label className="sdk-h5-field">
+            所在市
+            <select
+              disabled={cityOptions.length === 0}
+              onChange={(event) => {
+                const city = event.target.value;
+                setForm((current) => ({ ...current, region: { ...current.region, city } }));
+              }}
+              value={form.region.city}
+            >
+              <option value="">{cityOptions.length === 0 ? "请先选择省份" : "请选择城市"}</option>
+              {cityOptions.map((city) => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </label>
+          <label className="sdk-h5-field">
+            详细地址（区县 / 街道 / 门牌）
             <input
-              onChange={(event) => setForm((current) => ({ ...current, addressLine: event.target.value }))}
-              value={form.addressLine}
+              onChange={(event) => setForm((current) => ({ ...current, addressDetail: event.target.value }))}
+              placeholder="例如：西湖区文一路 96 号"
+              value={form.addressDetail}
             />
           </label>
           <div className="sdk-h5-action-row">

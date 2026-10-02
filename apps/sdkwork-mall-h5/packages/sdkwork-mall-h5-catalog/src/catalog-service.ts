@@ -23,6 +23,7 @@ export interface MallH5ProductCard {
 
 export interface MallH5ProductDetail extends MallH5ProductCard {
   description?: string;
+  images: string[];
   skus: MallH5SkuOption[];
   specs: Array<{ name: string; value: string }>;
   shopId?: string;
@@ -126,10 +127,17 @@ export async function retrieveMallH5ProductDetail(productId: string): Promise<Ma
   }
   const skuItems = Array.isArray(record.skus) ? (record.skus as Record<string, unknown>[]) : [];
   const specItems = Array.isArray(record.specs) ? (record.specs as Record<string, unknown>[]) : [];
+  const mainImage = readImage(record.imageUrl ?? record.mainImage ?? record.image);
+  const galleryImages = Array.isArray(record.images) || Array.isArray(record.galleryImages)
+    ? ((record.images ?? record.galleryImages) as unknown[])
+        .filter((entry): entry is string => typeof entry === "string" && Boolean(entry))
+    : [];
+  const images = [...new Set([mainImage, ...galleryImages].filter((entry): entry is string => Boolean(entry)))];
   return {
     description: typeof record.description === "string" ? record.description : undefined,
     id: String(record.id ?? productId),
-    imageUrl: readImage(record.imageUrl ?? record.mainImage ?? record.image),
+    imageUrl: mainImage,
+    images,
     priceCny: readMoney(record.priceCny ?? record.price ?? record.salePrice),
     sales: readMoney(record.sales ?? record.salesCount) ?? undefined,
     shopId: typeof record.shopId === "string" ? record.shopId : undefined,

@@ -313,18 +313,13 @@ export async function submitMallCheckoutOrder(
   }
 
   let paymentId: string | undefined;
-  let nextUrl = `/payment/result?status=success&orderId=${encodeURIComponent(orderId)}`;
-
+  // JD-style two-step flow: checkout only creates the order, payment happens
+  // on the cashier page where the buyer confirms the payment channel.
+  const cashierQuery = new URLSearchParams({ orderId });
   if (input.paymentMethodCode) {
-    const paymentResponse = await remote.payOrder(orderId, {
-      paymentMethod: input.paymentMethodCode,
-    });
-    const payment = unwrapSdkworkPaymentResponse(paymentResponse) as Record<string, unknown>;
-    paymentId = String(payment.paymentId ?? payment.payment_id ?? payment.id ?? "");
-    if (paymentId) {
-      nextUrl = `/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}&paymentId=${encodeURIComponent(paymentId)}&paymentMethod=${encodeURIComponent(input.paymentMethodCode)}`;
-    }
+    cashierQuery.set("paymentMethod", input.paymentMethodCode);
   }
+  const nextUrl = `/payment/cashier?${cashierQuery.toString()}`;
 
   return { nextUrl, orderId, paymentId, warnings };
 }
