@@ -85,6 +85,9 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   const cartTabBadge = useSyncExternalStore(subscribeMallH5CartCount, readMallH5CartCount, () => 0);
   // The TV surface owns the full screen (10-foot UI): no mobile chrome.
   const isTvSurface = location.pathname === "/tv";
+  // JD-style PDP: full-bleed with no static search header; the page reveals
+  // a search header itself when the buyer scrolls up.
+  const isProductDetail = location.pathname.startsWith("/product/");
   if (isTvSurface) {
     return <div className="sdk-h5-app">{children}</div>;
   }
@@ -97,6 +100,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
 
   return (
     <div className="sdk-h5-app">
+      {!isProductDetail ? (
       <header className="sdk-h5-topbar">
         <button
           aria-label={runtime.config.appDisplayName}
@@ -123,6 +127,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
           />
         </div>
       </header>
+      ) : null}
 
       <main className={showTabBar ? "sdk-h5-main" : "sdk-h5-main sdk-h5-main-without-tabbar"}>{children}</main>
 

@@ -1831,3 +1831,50 @@ html::-webkit-scrollbar {
   padding: 0 0.3rem;
   font-size: 0.8rem;
 }
+
+/* ── PDP full-bleed (JD-style): no page padding, full-width white blocks ── */
+.sdk-h5-pdp {
+  padding: 0 0 4.2rem;
+}
+
+.sdk-h5-pdp .sdk-h5-section {
+  border-radius: 0;
+  margin-bottom: 0.6rem;
+}
+
+.sdk-h5-pdp-summary {
+  border-radius: 0;
+}
+
+.sdk-h5-pdp-searchbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  background: var(--sdk-h5-panel);
+  border-bottom: 1px solid var(--sdk-h5-border);
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.82rem;
+  text-align: left;
+  padding: 0.55rem 0.9rem;
+  padding-top: calc(0.55rem + env(safe-area-inset-top));
+  cursor: pointer;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  transform: translateY(-110%);
+  transition: transform 0.25s ease;
+}
+
+.sdk-h5-pdp-searchbar::before {
+  content: "🔍";
+  margin-right: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.sdk-h5-pdp-searchbar-show {
+  transform: translateY(0);
+}

@@ -57,6 +57,7 @@ export function SdkworkMallH5ProductDetailPage() {
   const [couponSheetOpen, setCouponSheetOpen] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [showCompact, setShowCompact] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -167,11 +168,22 @@ export function SdkworkMallH5ProductDetailPage() {
   useEffect(() => {
     setActiveImage(0);
     setShowCompact(false);
+    setShowSearchBar(false);
   }, [productId]);
 
   useEffect(() => {
+    // 京东式:上滑浮出搜索头;下滑或回到画廊附近时隐藏,价格紧凑条仅在下滑态出现。
+    let lastScrollY = 0;
     function onScroll() {
-      setShowCompact(window.scrollY > 280);
+      const y = window.scrollY;
+      // 同位置的重复 scroll 事件(滚动停止时的收尾触发)不得翻转方向状态。
+      if (Math.abs(y - lastScrollY) < 4) {
+        return;
+      }
+      const goingUp = y < lastScrollY - 4;
+      lastScrollY = y;
+      setShowSearchBar(y > 240 && goingUp);
+      setShowCompact(y > 280 && !goingUp);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
@@ -343,6 +355,16 @@ export function SdkworkMallH5ProductDetailPage() {
 
   return (
     <div className="sdk-h5-page sdk-h5-pdp">
+      {/* 上滑浮出的搜索头 */}
+      <button
+        aria-label="搜索商品"
+        className={showSearchBar ? "sdk-h5-pdp-searchbar sdk-h5-pdp-searchbar-show" : "sdk-h5-pdp-searchbar"}
+        onClick={() => navigate("/search")}
+        type="button"
+      >
+        搜索商品 / 品牌 / 店铺
+      </button>
+
       {/* 滚动后的紧凑头部 */}
       <header className={showCompact ? "sdk-h5-pdp-compact sdk-h5-pdp-compact-show" : "sdk-h5-pdp-compact"}>
         <span className="sdk-h5-pdp-compact-price">
