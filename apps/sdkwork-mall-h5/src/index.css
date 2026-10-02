@@ -10,6 +10,9 @@
   --sdk-h5-danger: #dc2626;
   --sdk-h5-warning-bg: #fef3c7;
   --sdk-h5-success-bg: #d1fae5;
+  /* Single source of truth for tab-bar clearance: fixed bars on tab surfaces
+     and main's gutter must match the rendered tab-bar height exactly. */
+  --sdk-h5-tabbar-height: 3.5rem;
 }
 
 html,
@@ -76,7 +79,7 @@ body {
 
 .sdk-h5-main {
   flex: 1;
-  padding-bottom: 4.2rem;
+  padding-bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
 }
 
 .sdk-h5-tabbar {
@@ -89,7 +92,9 @@ body {
   grid-template-columns: repeat(4, 1fr);
   background: var(--sdk-h5-panel);
   border-top: 1px solid var(--sdk-h5-border);
+  height: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
 }
 
 .sdk-h5-tab {
@@ -353,7 +358,7 @@ body {
 
 .sdk-h5-toast {
   position: fixed;
-  bottom: 5.2rem;
+  bottom: calc(var(--sdk-h5-tabbar-height) + 1.2rem + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   background: rgba(17, 24, 39, 0.9);
@@ -415,15 +420,21 @@ body {
 
 .sdk-h5-pdp-actions {
   position: fixed;
-  bottom: 4.2rem;
+  bottom: 0;
   left: 0;
   right: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
   padding: 0.6rem 0.9rem;
+  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
   background: var(--sdk-h5-panel);
   border-top: 1px solid var(--sdk-h5-border);
+}
+
+/* The PDP clears its fixed action bar (main's tab gutter no longer applies). */
+.sdk-h5-pdp {
+  padding-bottom: 4.2rem;
 }
 
 .sdk-h5-pdp-gallery {
@@ -573,7 +584,7 @@ body {
 
 .sdk-h5-cart-footer {
   position: fixed;
-  bottom: 4.2rem;
+  bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
   display: flex;
@@ -1354,4 +1365,9 @@ body {
 
 .sdk-h5-catalog-siblings {
   margin-bottom: 0.6rem;
+}
+
+/* Stacked surfaces have no tab bar: toasts sit near the bottom edge. */
+.sdk-h5-main-without-tabbar .sdk-h5-toast {
+  bottom: 1.2rem;
 }
