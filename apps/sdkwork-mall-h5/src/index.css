@@ -1371,3 +1371,25 @@ body {
 .sdk-h5-main-without-tabbar .sdk-h5-toast {
   bottom: 1.2rem;
 }
+
+/* Mobile-style H5: hide scrollbars (content stays scrollable) so the page
+   gutter stays clean next to fixed bars. */
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+  width: 0;
+}
+
+.sdk-h5-main,
+.sdk-h5-catalog-rail {
+  scrollbar-width: none;
+}
+
+.sdk-h5-main::-webkit-scrollbar,
+.sdk-h5-catalog-rail::-webkit-scrollbar {
+  display: none;
+  width: 0;
+}
