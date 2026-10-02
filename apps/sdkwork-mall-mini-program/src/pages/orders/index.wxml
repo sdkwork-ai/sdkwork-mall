@@ -1,0 +1,52 @@
+<view class="page-orders">
+  <scroll-view class="orders-tabs" scroll-x>
+    <view
+      class="orders-tab {{activeTab === item.code ? 'orders-tab-active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="code"
+      bindtap="selectTab"
+      data-code="{{item.code}}"
+    >{{item.label}}</view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="mp-loading">加载订单...</view>
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{!loading && orders.length === 0}}" class="mp-empty">暂无订单</view>
+
+  <view class="orders-list">
+    <view class="orders-item" wx:for="{{orders}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <view class="mp-flex-between">
+        <view class="orders-subject">{{item.subject}}</view>
+        <text class="orders-status">{{item.statusText}}</text>
+      </view>
+      <view class="mp-flex-between orders-meta">
+        <text class="mp-muted">{{item.timeText}}</text>
+        <text class="mp-price">{{item.totalText}}</text>
+      </view>
+      <view class="orders-actions">
+        <button
+          wx:if="{{item.status === 'PENDING_PAYMENT'}}"
+          class="mp-btn mp-btn-primary orders-action"
+          catchtap="payOrder"
+          data-id="{{item.id}}"
+        >去支付</button>
+        <button
+          wx:if="{{item.status === 'PENDING_PAYMENT'}}"
+          class="mp-btn mp-btn-ghost orders-action"
+          catchtap="cancelOrder"
+          data-id="{{item.id}}"
+        >取消订单</button>
+        <button
+          wx:if="{{item.status === 'PENDING_RECEIPT'}}"
+          class="mp-btn mp-btn-primary orders-action"
+          catchtap="confirmReceipt"
+          data-id="{{item.id}}"
+        >确认收货</button>
+        <button class="mp-btn mp-btn-plain orders-action">订单详情</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{orders.length > 0 && orders.length < total}}" class="mp-loading">上拉加载更多</view>
+  <view wx:if="{{orders.length > 0 && orders.length >= total}}" class="mp-loading">已展示全部</view>
+</view>

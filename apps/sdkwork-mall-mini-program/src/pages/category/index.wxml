@@ -1,4 +1,47 @@
-<view class="mp-section">
-  <view class="mp-title">{{title}}</view>
-  <view class="mp-muted">小程序端正在接入商城联邦服务，敬请期待。</view>
+<view class="page-category">
+  <view class="category-search" bindtap="goSearch">
+    <view class="category-search-box">搜索商品</view>
+  </view>
+
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+  <view class="category-layout">
+    <scroll-view class="category-rail" scroll-y>
+      <view
+        class="category-rail-item {{activeCategoryId === item.id ? 'category-rail-item-active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="id"
+        bindtap="selectCategory"
+        data-id="{{item.id}}"
+      >{{item.name}}</view>
+    </scroll-view>
+
+    <scroll-view class="category-content" scroll-y bindscrolltolower="loadMore">
+      <view wx:if="{{loading}}" class="mp-loading">加载中...</view>
+      <view wx:elif="{{products.length === 0}}" class="mp-empty">该分类暂无商品</view>
+      <view wx:else class="category-product-list">
+        <view
+          class="category-product-row"
+          wx:for="{{products}}"
+          wx:key="id"
+          bindtap="goProduct"
+          data-id="{{item.id}}"
+        >
+          <view class="category-product-image">
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+            <text wx:else>SDKWork</text>
+          </view>
+          <view class="category-product-body">
+            <view class="mp-product-title">{{item.title}}</view>
+            <view class="mp-product-meta">
+              <text class="mp-price">{{item.priceText}}</text>
+              <text class="mp-product-sales" wx:if="{{item.sales}}">已售 {{item.sales}}</text>
+            </view>
+          </view>
+        </view>
+        <view wx:if="{{products.length >= total}}" class="mp-loading">已展示全部 {{total}} 件商品</view>
+        <view wx:elif="{{loadingMore}}" class="mp-loading">加载更多...</view>
+      </view>
+    </scroll-view>
+  </view>
 </view>

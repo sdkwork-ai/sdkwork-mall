@@ -1,4 +1,76 @@
-<view class="mp-section">
-  <view class="mp-title">{{title}}</view>
-  <view class="mp-muted">小程序端正在接入商城联邦服务，敬请期待。</view>
+<view class="page-home">
+  <view class="home-search" bindtap="goQuickEntry" data-link="/pages/search/index">
+    <view class="home-search-box">搜索商品 / 品牌 / 店铺</view>
+  </view>
+
+  <swiper class="home-banner" indicator-dots autoplay circular interval="4200">
+    <swiper-item wx:for="{{banners}}" wx:key="id">
+      <view class="home-banner-item">
+        <view class="home-banner-title">{{item.title}}</view>
+        <view class="home-banner-sub">{{item.subtitle}}</view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <view class="home-quick">
+    <view
+      class="home-quick-item"
+      wx:for="{{quickEntries}}"
+      wx:key="id"
+      bindtap="goQuickEntry"
+      data-link="{{item.link}}"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="mp-loading">加载中...</view>
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+  <view wx:if="{{categories.length}}" class="mp-card">
+    <view class="mp-card-title">分类导航</view>
+    <view class="home-category-grid">
+      <view
+        class="home-category-item"
+        wx:for="{{categories}}"
+        wx:key="id"
+        bindtap="goCategory"
+        data-id="{{item.id}}"
+      >{{item.name}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{seckillOffer}}" class="mp-card">
+    <view class="mp-flex-between">
+      <view class="mp-flex">
+        <text class="home-seckill-title">限时秒杀</text>
+        <text class="home-seckill-countdown">{{seckillCountdown}}</text>
+      </view>
+      <text class="home-seckill-more">{{seckillOffer.discountText || '进行中'}}</text>
+    </view>
+    <view class="home-seckill-highlight" wx:if="{{seckillOffer.highlight}}">{{seckillOffer.highlight}}</view>
+  </view>
+
+  <view wx:if="{{hotProducts.length}}" class="home-products">
+    <view class="mp-card-title home-products-title">热卖推荐</view>
+    <view class="mp-product-grid">
+      <view
+        class="mp-product-card"
+        wx:for="{{hotProducts}}"
+        wx:key="id"
+        bindtap="goProduct"
+        data-id="{{item.id}}"
+      >
+        <view class="mp-product-image">
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+          <text wx:else>SDKWork</text>
+        </view>
+        <view class="mp-product-body">
+          <view class="mp-product-title">{{item.title}}</view>
+          <view class="mp-product-meta">
+            <text class="mp-price">{{item.priceText}}</text>
+            <text class="mp-product-sales" wx:if="{{item.sales}}">已售 {{item.sales}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>

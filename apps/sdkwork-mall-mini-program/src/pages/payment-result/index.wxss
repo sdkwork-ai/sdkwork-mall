@@ -1,0 +1,55 @@
+.result-hero {
+  margin: 40rpx 30rpx;
+  border-radius: 20rpx;
+  padding: 60rpx 40rpx;
+  text-align: center;
+}
+
+.result-hero-success {
+  background: #f0fdf4;
+}
+
+.result-hero-warning {
+  background: #fffbeb;
+}
+
+.result-hero-danger {
+  background: #fef2f2;
+}
+
+.result-title {
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.result-hero-success .result-title {
+  color: #16a34a;
+}
+
+.result-hero-warning .result-title {
+  color: #d97706;
+}
+
+.result-hero-danger .result-title {
+  color: #dc2626;
+}
+
+.result-desc {
+  margin-top: 16rpx;
+  color: #6b7280;
+  font-size: 26rpx;
+}
+
+.result-meta {
+  margin-top: 12rpx;
+  color: #9ca3af;
+  font-size: 24rpx;
+  word-break: break-all;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin: 0 30rpx;
+}

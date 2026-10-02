@@ -1,0 +1,68 @@
+<view class="page-address">
+  <view wx:if="{{loading}}" class="mp-loading">加载地址...</view>
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+  <view wx:if="{{!loading && addresses.length === 0}}" class="mp-empty">还没有收货地址</view>
+
+  <view
+    class="mp-card {{pickerMode ? 'address-pickable' : ''}}"
+    wx:for="{{addresses}}"
+    wx:key="id"
+    bindtap="pickAddress"
+    data-id="{{item.id}}"
+  >
+    <view class="mp-flex-between">
+      <view class="address-name">{{item.receiverName}} {{item.receiverPhone}}</view>
+      <text wx:if="{{item.isDefault}}" class="address-default">默认</text>
+    </view>
+    <view class="mp-muted address-line">{{item.addressLine}}</view>
+    <view class="address-actions">
+      <button
+        wx:if="{{!item.isDefault}}"
+        class="mp-btn mp-btn-plain address-action"
+        catchtap="setDefault"
+        data-id="{{item.id}}"
+      >设为默认</button>
+      <button class="mp-btn mp-btn-ghost address-action" catchtap="openEdit" data-id="{{item.id}}">编辑</button>
+      <button class="mp-btn mp-btn-ghost address-action" catchtap="remove" data-id="{{item.id}}">删除</button>
+    </view>
+  </view>
+
+  <view wx:if="{{!editing}}" class="address-create">
+    <button class="mp-btn mp-btn-primary address-create-btn" bindtap="openCreate">新增收货地址</button>
+  </view>
+
+  <view wx:if="{{editing}}" class="mp-card">
+    <view class="mp-card-title">{{editingId ? '编辑地址' : '新增地址'}}</view>
+    <view class="mp-field">
+      <text class="mp-field-label">收货人</text>
+      <input value="{{form.receiverName}}" bindinput="onNameInput" />
+    </view>
+    <view class="mp-field">
+      <text class="mp-field-label">联系电话（11 位手机号）</text>
+      <input type="number" maxlength="11" value="{{form.receiverPhone}}" bindinput="onPhoneInput" />
+    </view>
+    <view class="mp-field">
+      <text class="mp-field-label">所在省</text>
+      <picker range="{{provinces}}" bindchange="onProvinceChange">
+        <view class="address-picker">{{form.province || '请选择省份'}}</view>
+      </picker>
+    </view>
+    <view class="mp-field">
+      <text class="mp-field-label">所在市</text>
+      <picker range="{{cities}}" bindchange="onCityChange" disabled="{{!form.province}}">
+        <view class="address-picker">{{form.city || (form.province ? '请选择城市' : '请先选择省份')}}</view>
+      </picker>
+    </view>
+    <view class="mp-field">
+      <text class="mp-field-label">详细地址（区县 / 街道 / 门牌）</text>
+      <input value="{{form.detail}}" bindinput="onDetailInput" placeholder="例如：西湖区文一路 96 号" />
+    </view>
+    <view class="address-editor-actions">
+      <button class="mp-btn mp-btn-primary" bindtap="save">保存</button>
+      <button class="mp-btn mp-btn-ghost" bindtap="closeEditor">取消</button>
+    </view>
+  </view>
+
+  <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>
+</view>

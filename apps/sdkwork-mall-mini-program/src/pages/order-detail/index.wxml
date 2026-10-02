@@ -1,0 +1,52 @@
+<view class="page-order-detail">
+  <view wx:if="{{loading}}" class="mp-loading">加载订单详情...</view>
+  <view wx:if="{{!loading && !detail}}" class="mp-empty">{{error || '订单不存在'}}</view>
+
+  <block wx:if="{{detail}}">
+    <view class="detail-hero">
+      <view class="detail-status">{{detail.statusText}}</view>
+      <view class="detail-subject">{{detail.subject}}</view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">商品清单</view>
+      <view wx:if="{{detail.items.length === 0}}" class="mp-muted">暂无商品明细</view>
+      <view
+        class="detail-item"
+        wx:for="{{detail.items}}"
+        wx:key="id"
+        bindtap="goProduct"
+        data-spu="{{item.spuId}}"
+      >
+        <view class="detail-item-image">
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+          <text wx:else>SDKWork</text>
+        </view>
+        <view class="detail-item-body">
+          <view class="mp-product-title">{{item.title}}</view>
+          <view class="mp-muted" wx:if="{{item.skuName}}">{{item.skuName}}</view>
+          <view class="mp-flex-between">
+            <text class="mp-price">{{item.priceText}}</text>
+            <text class="mp-muted">x{{item.quantity}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">订单信息</view>
+      <view class="detail-meta"><text>订单号</text><text>{{detail.id}}</text></view>
+      <view class="detail-meta"><text>下单时间</text><text>{{detail.timeText}}</text></view>
+      <view class="detail-meta"><text>订单总额</text><text>{{detail.totalText}}</text></view>
+      <view class="detail-meta"><text>实付金额</text><text>{{detail.paidText}}</text></view>
+      <view class="detail-meta" wx:if="{{detail.paymentMethod}}"><text>支付方式</text><text>{{detail.paymentMethod}}</text></view>
+    </view>
+
+    <view class="detail-actions">
+      <button wx:if="{{detail.status === 'PENDING_PAYMENT'}}" class="mp-btn mp-btn-primary" bindtap="pay">去支付</button>
+      <button wx:if="{{detail.status === 'PENDING_PAYMENT'}}" class="mp-btn mp-btn-ghost" bindtap="cancel">取消订单</button>
+      <button wx:if="{{detail.status === 'PENDING_RECEIPT'}}" class="mp-btn mp-btn-primary" bindtap="confirmReceipt">确认收货</button>
+      <button class="mp-btn mp-btn-ghost" bindtap="goOrders">返回列表</button>
+    </view>
+  </block>
+</view>

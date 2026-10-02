@@ -3,17 +3,27 @@
     "pages/home/index",
     "pages/category/index",
     "pages/cart/index",
-    "pages/buyer/index"
+    "pages/buyer/index",
+    "pages/search/index",
+    "pages/product/index",
+    "pages/checkout/index",
+    "pages/cashier/index",
+    "pages/payment-result/index",
+    "pages/orders/index",
+    "pages/order-detail/index",
+    "pages/address/index",
+    "pages/coupons/index",
+    "pages/login/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#2563eb",
+    "navigationBarBackgroundColor": "#e93b3d",
     "navigationBarTextStyle": "white",
     "navigationBarTitleText": "SDKWork 商城",
-    "backgroundColor": "#f5f6f8"
+    "backgroundColor": "#f4f5f7"
   },
   "tabBar": {
     "color": "#6b7280",
-    "selectedColor": "#2563eb",
+    "selectedColor": "#e93b3d",
     "list": [
       { "pagePath": "pages/home/index", "text": "首页" },
       { "pagePath": "pages/category/index", "text": "分类" },

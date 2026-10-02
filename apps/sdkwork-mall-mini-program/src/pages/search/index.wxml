@@ -1,0 +1,93 @@
+<view class="page-search">
+  <view class="search-bar">
+    <input
+      class="search-input"
+      confirm-type="search"
+      placeholder="搜索商品 / 品牌 / 店铺"
+      value="{{keyword}}"
+      bindinput="onKeywordInput"
+      bindconfirm="onSearchConfirm"
+    />
+    <button class="mp-btn mp-btn-primary search-btn" bindtap="onSearchConfirm">搜索</button>
+  </view>
+
+  <view wx:if="{{history.length && !keyword}}" class="mp-card">
+    <view class="mp-flex-between">
+      <view class="mp-card-title">搜索历史</view>
+      <text class="mp-muted" bindtap="clearHistory">清空</text>
+    </view>
+    <view class="search-chips">
+      <text
+        class="search-chip"
+        wx:for="{{history}}"
+        wx:key="*this"
+        bindtap="tapKeyword"
+        data-keyword="{{item}}"
+      >{{item}}</text>
+    </view>
+  </view>
+
+  <view class="mp-card">
+    <view class="mp-card-title">热搜</view>
+    <view class="search-chips">
+      <text
+        class="search-chip"
+        wx:for="{{hotKeywords}}"
+        wx:key="*this"
+        bindtap="tapKeyword"
+        data-keyword="{{item}}"
+      >{{item}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{categories.length}}" class="mp-card">
+    <view class="search-chips">
+      <text
+        class="search-chip {{activeCategoryId === item.id ? 'search-chip-active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="id"
+        bindtap="selectCategory"
+        data-id="{{item.id}}"
+      >{{item.name}}</text>
+    </view>
+  </view>
+
+  <view class="search-sorts">
+    <text
+      class="search-sort {{activeSort === item.code ? 'search-sort-active' : ''}}"
+      wx:for="{{sorts}}"
+      wx:key="code"
+      bindtap="selectSort"
+      data-code="{{item.code}}"
+    >{{item.label}}</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="mp-loading">加载中...</view>
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{!loading && products.length === 0}}" class="mp-empty">暂无匹配商品</view>
+
+  <view class="mp-product-grid">
+    <view
+      class="mp-product-card"
+      wx:for="{{products}}"
+      wx:key="id"
+      bindtap="goProduct"
+      data-id="{{item.id}}"
+    >
+      <view class="mp-product-image">
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+        <text wx:else>SDKWork</text>
+      </view>
+      <view class="mp-product-body">
+        <view class="mp-product-title">{{item.title}}</view>
+        <view class="mp-product-meta">
+          <text class="mp-price">{{item.priceText}}</text>
+          <text class="mp-product-sales" wx:if="{{item.sales}}">已售 {{item.sales}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{products.length > 0 && products.length < total}}" class="mp-loading">上拉加载更多（{{products.length}}/{{total}}）</view>
+  <view wx:if="{{products.length > 0 && products.length >= total}}" class="mp-loading">已展示全部</view>
+</view>

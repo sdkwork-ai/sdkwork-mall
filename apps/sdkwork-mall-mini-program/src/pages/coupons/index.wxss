@@ -1,0 +1,44 @@
+.coupon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1rpx solid #fde68a;
+  background: #fffbeb;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.coupon-body {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.coupon-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.coupon-action {
+  font-size: 24rpx;
+  padding: 8rpx 28rpx;
+}
+
+.coupon-amount {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.coupon-redeem {
+  display: flex;
+  gap: 16rpx;
+}
+
+.coupon-redeem-input {
+  flex: 1;
+  border: 1rpx solid #e5e7eb;
+  border-radius: 12rpx;
+  padding: 14rpx 20rpx;
+  font-size: 26rpx;
+}

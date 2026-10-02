@@ -1,4 +1,76 @@
-<view class="mp-section">
-  <view class="mp-title">{{title}}</view>
-  <view class="mp-muted">小程序端正在接入商城联邦服务，敬请期待。</view>
+<view class="page-cart">
+  <view wx:if="{{!loggedIn}}" class="mp-empty">
+    <view>登录后同步购物车</view>
+    <button class="mp-btn mp-btn-primary cart-login-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{loading}}" class="mp-loading">加载购物车...</view>
+    <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+    <view wx:if="{{!loading && groups.length === 0}}" class="mp-empty">
+      <view>购物车还是空的</view>
+      <button class="mp-btn mp-btn-primary cart-login-btn" bindtap="goHome">去逛逛</button>
+    </view>
+
+    <block wx:if="{{groups.length > 0}}">
+      <view class="cart-select-all mp-row" bindtap="toggleAll">
+        <view class="cart-checkbox {{selectedIds.length > 0 && groups.length > 0 && selectedIds.length === allCount ? 'cart-checkbox-on' : ''}}" />
+        <text>全选</text>
+      </view>
+
+      <view class="cart-shop" wx:for="{{groups}}" wx:for-item="group" wx:key="shopId">
+        <view class="mp-row cart-shop-header" bindtap="toggleGroup" data-shop="{{group.shopId}}">
+          <view class="cart-checkbox {{group.allSelected ? 'cart-checkbox-on' : ''}}" />
+          <text class="cart-shop-name">{{group.shopName}}</text>
+        </view>
+
+        <view class="mp-row cart-item" wx:for="{{group.items}}" wx:key="id">
+          <view
+            class="cart-checkbox {{selectedIds.indexOf(item.id) >= 0 ? 'cart-checkbox-on' : ''}}"
+            bindtap="toggleItem"
+            data-id="{{item.id}}"
+          />
+          <view class="cart-item-image" bindtap="goProduct" data-id="{{item.spuId}}">
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+            <text wx:else>SDKWork</text>
+          </view>
+          <view class="cart-item-body">
+            <view class="mp-product-title" bindtap="goProduct" data-id="{{item.spuId}}">{{item.title}}</view>
+            <view class="mp-muted" wx:if="{{item.skuName}}">{{item.skuName}}</view>
+            <view class="mp-flex-between">
+              <text class="mp-price">{{item.priceCny ? '¥' + item.priceCny.toFixed(2) : '询价'}}</text>
+              <view class="cart-quantity">
+                <text
+                  class="cart-quantity-btn"
+                  bindtap="changeQuantity"
+                  data-id="{{item.id}}"
+                  data-quantity="{{item.quantity - 1}}"
+                >−</text>
+                <text class="cart-quantity-num">{{item.quantity}}</text>
+                <text
+                  class="cart-quantity-btn"
+                  bindtap="changeQuantity"
+                  data-id="{{item.id}}"
+                  data-quantity="{{item.quantity + 1}}"
+                >+</text>
+              </view>
+            </view>
+          </view>
+          <view class="cart-remove" bindtap="removeItem" data-id="{{item.id}}">删除</view>
+        </view>
+      </view>
+
+      <view class="cart-footer">
+        <view class="cart-total">合计：<text class="mp-price">¥{{selectedTotal}}</text></view>
+        <button
+          class="mp-btn mp-btn-primary cart-checkout-btn"
+          disabled="{{selectedCount === 0}}"
+          bindtap="goCheckout"
+        >去结算({{selectedCount}})</button>
+      </view>
+    </block>
+  </block>
+
+  <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>
 </view>

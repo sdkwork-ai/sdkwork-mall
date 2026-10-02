@@ -1,0 +1,52 @@
+<view class="page-coupons">
+  <view wx:if="{{loading}}" class="mp-loading">加载优惠券...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view class="mp-card" wx:if="{{claimable.length}}">
+      <view class="mp-card-title">可领取</view>
+      <view class="coupon-row" wx:for="{{claimable}}" wx:key="id">
+        <view class="coupon-body">
+          <view class="coupon-title">{{item.title}}</view>
+          <view class="mp-muted" wx:if="{{item.discountText}}">{{item.discountText}}</view>
+        </view>
+        <button
+          class="mp-btn mp-btn-primary coupon-action"
+          disabled="{{busy}}"
+          bindtap="claim"
+          data-id="{{item.id}}"
+        >领取</button>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">兑换码</view>
+      <view class="coupon-redeem">
+        <input
+          class="coupon-redeem-input"
+          placeholder="输入兑换码"
+          value="{{code}}"
+          bindinput="onCodeInput"
+        />
+        <button class="mp-btn mp-btn-ghost" disabled="{{busy || !code}}" bindtap="redeem">兑换</button>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">我的优惠券</view>
+      <view wx:if="{{myCoupons.length === 0}}" class="mp-empty">暂无优惠券</view>
+      <view class="coupon-row" wx:for="{{myCoupons}}" wx:key="id">
+        <view class="coupon-body">
+          <view class="coupon-title">{{item.title}}</view>
+          <view class="mp-muted" wx:if="{{item.validUntil}}">有效期至 {{item.validUntil}}</view>
+        </view>
+        <view class="coupon-amount">
+          <text wx:if="{{item.discountAmountCny}}" class="mp-price">¥{{item.discountAmountCny}}</text>
+          <text class="mp-muted" wx:if="{{item.minSpendCny}}">满{{item.minSpendCny}}可用</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>
+</view>

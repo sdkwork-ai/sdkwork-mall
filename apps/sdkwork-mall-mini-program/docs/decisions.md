@@ -6,6 +6,25 @@
   that the ecosystem has not produced for mall yet (PC/H5 consume
   `@sdkwork/cloudrouter-app-sdk/domains`, which cannot run inside the MP
   runtime). Pages fail fast with guidance instead of raw wx.request.
-- Follow-ups: generate `sdkwork-mall-mp-*` SDK family from the commerce
-  authority, wire `createMallMpCommerceClient`, then implement
-  home/category/cart/buyer data flows per APP_MINI_PROGRAM_UI_SPEC.
+- 2026-10-02 (supersedes the inert-surface stance above; user-directed): the
+  mini-program now implements the JD-style commerce flows for real — home,
+  category, search, product detail, cart, checkout, cashier, payment result,
+  orders, order detail, addresses, coupons, buyer center, token login —
+  against the same commerce app-api contract the H5/PC clients consume.
+  Architecture keeps the building-block rule: every domain lives in its own
+  `src/services/*` module (catalog / cart / order / address / promotion),
+  all traffic funnels through the single `services/transport.js` seam (the
+  contract test enforces exactly one `wx.request` call site), and
+  `bootstrap/sdkClients.ts` composes the services into one typed facade.
+  When the generated WeChat MP SDK family lands, each service swaps its
+  transport calls for the generated client without page changes.
+- Auth: the IAM SDK family for MP runtimes is still pending, so the session
+  holds a platform-issued bearer token (login page). wx.login /
+  code2session replaces it once the identity contract exists.
+- Payment: the cashier page selects a channel and calls `orders.pay`; the
+  real `wx.requestPayment` handoff (and its provider params) plugs into
+  `pages/cashier/index.js` when the WeChat pay provider contract lands.
+- Local dev: point `commerceAppApiBaseUrl` at
+  `http://127.0.0.1:3900/app/v3/api` (repo-root
+  `scripts/dev/mock-commerce-gateway.mjs`) and enable "不校验合法域名" in
+  DevTools.

@@ -1,0 +1,87 @@
+<view class="page-product">
+  <view wx:if="{{loading}}" class="mp-loading">加载商品...</view>
+  <view wx:if="{{error}}" class="mp-empty">{{error}}</view>
+
+  <block wx:if="{{detail}}">
+    <swiper class="product-gallery" indicator-dots circular bindchange="onImageChange" current="{{activeImage}}">
+      <swiper-item wx:for="{{images}}" wx:key="*this">
+        <image class="product-gallery-image" src="{{item}}" mode="aspectFill" />
+      </swiper-item>
+      <swiper-item wx:if="{{images.length === 0}}">
+        <view class="product-gallery-image product-gallery-fallback">暂无主图</view>
+      </swiper-item>
+    </swiper>
+
+    <view class="mp-card product-summary">
+      <view class="mp-price product-price">{{displayPrice || '询价'}}</view>
+      <view class="product-title">{{detail.title}}</view>
+      <view class="mp-muted product-sales">
+        <text wx:if="{{detail.sales}}">已售 {{detail.sales}}</text>
+        <text wx:if="{{maxQuantity != null}}"> · 库存 {{maxQuantity}}</text>
+        <text wx:if="{{soldOut}}" class="product-soldout"> · 暂时售罄</text>
+      </view>
+    </view>
+
+    <view class="mp-card" wx:if="{{skus.length}}">
+      <view class="mp-card-title">选择规格</view>
+      <view class="search-chips">
+        <text
+          class="search-chip {{selectedSkuId === item.id ? 'search-chip-active' : ''}}"
+          wx:for="{{skus}}"
+          wx:key="id"
+          bindtap="selectSku"
+          data-id="{{item.id}}"
+        >{{item.title}}</text>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-flex-between">
+        <view class="mp-card-title">购买数量</view>
+        <view class="cart-quantity">
+          <text class="cart-quantity-btn" bindtap="decreaseQuantity">−</text>
+          <text class="cart-quantity-num">{{quantity}}</text>
+          <text class="cart-quantity-btn" bindtap="increaseQuantity">+</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="mp-card" wx:if="{{specs.length}}">
+      <view class="mp-card-title">规格参数</view>
+      <view class="product-spec" wx:for="{{specs}}" wx:key="name">
+        <text class="product-spec-name">{{item.name}}</text>
+        <text class="product-spec-value">{{item.value}}</text>
+      </view>
+    </view>
+
+    <view class="mp-card" wx:if="{{detail.shopId}}">
+      <view class="mp-card-title">店铺</view>
+      <view class="mp-muted">{{detail.shopName || detail.shopId}}</view>
+    </view>
+
+    <view class="mp-card" wx:if="{{detail.description}}">
+      <view class="mp-card-title">商品介绍</view>
+      <view class="product-description">{{detail.description}}</view>
+    </view>
+
+    <view class="product-actions">
+      <button class="product-action-cart" disabled="{{busy || soldOut}}" bindtap="openSkuPopup" data-mode="cart">加入购物车</button>
+      <button class="product-action-buy" disabled="{{busy || soldOut}}" bindtap="openSkuPopup" data-mode="buy">{{soldOut ? '暂时售罄' : '立即购买'}}</button>
+    </view>
+
+    <view wx:if="{{skuPopupOpen}}" class="product-sku-mask" bindtap="closeSkuPopup">
+      <view class="product-sku-popup" catchtap="">
+        <view class="mp-flex-between product-sku-head">
+          <text class="mp-price">{{displayPrice}}</text>
+          <text bindtap="closeSkuPopup">关闭</text>
+        </view>
+        <view class="mp-card-title">已选：{{quantity}} 件</view>
+        <button class="mp-btn mp-btn-primary" bindtap="confirmSkuPopup">
+          {{skuPopupMode === 'buy' ? '立即购买' : '加入购物车'}}
+        </button>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>
+</view>

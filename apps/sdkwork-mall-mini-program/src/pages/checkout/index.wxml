@@ -1,0 +1,82 @@
+<view class="page-checkout">
+  <view wx:if="{{loading}}" class="mp-loading">加载结算信息...</view>
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view wx:if="{{itemCount}}" class="mp-muted checkout-count">已选择 {{itemCount}} 件购物车商品参与结算</view>
+
+    <view class="mp-card">
+      <view class="mp-flex-between">
+        <view class="mp-card-title">收货地址</view>
+        <text class="mp-muted" bindtap="goAddress">管理地址</text>
+      </view>
+      <view wx:if="{{addresses.length === 0}}" class="mp-empty">请先添加收货地址</view>
+      <view
+        class="checkout-address {{selectedAddressId === item.id ? 'checkout-address-active' : ''}}"
+        wx:for="{{addresses}}"
+        wx:key="id"
+        bindtap="selectAddress"
+        data-id="{{item.id}}"
+      >
+        <view>{{item.receiverName}} {{item.receiverPhone}} <text wx:if="{{item.isDefault}}" class="checkout-default">默认</text></view>
+        <view class="mp-muted">{{item.addressLine}}</view>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">优惠券</view>
+      <view
+        class="checkout-coupon {{selectedCouponId === '' ? 'checkout-address-active' : ''}}"
+        bindtap="selectCoupon"
+        data-id=""
+      >不使用优惠券</view>
+      <view
+        class="checkout-coupon {{selectedCouponId === item.id ? 'checkout-address-active' : ''}}"
+        wx:for="{{coupons}}"
+        wx:key="id"
+        bindtap="selectCoupon"
+        data-id="{{item.id}}"
+      >
+        <view>{{item.title}} <text wx:if="{{item.discountAmountCny}}" class="mp-price">¥{{item.discountAmountCny}}</text></view>
+        <view class="mp-muted" wx:if="{{item.minSpendCny}}">满 ¥{{item.minSpendCny}} 可用</view>
+      </view>
+      <view wx:if="{{coupons.length === 0}}" class="mp-muted">暂无可用优惠券，可到领券中心领取。</view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">抵扣</view>
+      <view class="mp-flex-between checkout-deduct" bindtap="toggleWallet">
+        <text>钱包余额抵扣</text>
+        <view class="cart-checkbox {{useWallet ? 'cart-checkbox-on' : ''}}" />
+      </view>
+      <view class="mp-flex-between checkout-deduct" bindtap="togglePoints">
+        <text>积分抵扣</text>
+        <view class="cart-checkbox {{usePoints ? 'cart-checkbox-on' : ''}}" />
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">买家留言</view>
+      <textarea
+        class="checkout-remark"
+        placeholder="选填，给商家留言"
+        maxlength="200"
+        value="{{buyerRemark}}"
+        bindinput="onRemarkInput"
+      />
+    </view>
+
+    <view class="mp-card mp-flex-between">
+      <text>应付金额</text>
+      <text class="mp-price checkout-payable">{{payableText}}</text>
+    </view>
+
+    <view class="checkout-footer">
+      <button class="mp-btn mp-btn-primary checkout-submit" disabled="{{busy}}" bindtap="submit">
+        {{busy ? '提交中...' : '提交订单'}}
+      </button>
+    </view>
+  </block>
+
+  <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>
+</view>

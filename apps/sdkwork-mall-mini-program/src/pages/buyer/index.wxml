@@ -1,4 +1,45 @@
-<view class="mp-section">
-  <view class="mp-title">{{title}}</view>
-  <view class="mp-muted">小程序端正在接入商城联邦服务，敬请期待。</view>
+<view class="page-buyer">
+  <view class="buyer-hero">
+    <view class="buyer-avatar">客</view>
+    <view class="buyer-hero-body">
+      <block wx:if="{{loggedIn}}">
+        <view class="buyer-name">SDKWork 用户</view>
+        <view class="buyer-sub">欢迎回来</view>
+      </block>
+      <block wx:else>
+        <view class="buyer-name">未登录</view>
+        <button class="mp-btn mp-btn-ghost buyer-login-btn" bindtap="goLogin">点击登录</button>
+      </block>
+    </view>
+    <view wx:if="{{loggedIn}}" class="buyer-logout" bindtap="logout">退出</view>
+  </view>
+
+  <view class="mp-card">
+    <view class="mp-card-title">我的订单</view>
+    <view class="buyer-order-entries">
+      <view
+        class="buyer-order-entry"
+        wx:for="{{orderEntries}}"
+        wx:key="status"
+        bindtap="goOrderEntry"
+        data-status="{{item.status}}"
+      >
+        <view class="buyer-order-entry-count">{{item.count}}</view>
+        <view class="buyer-order-entry-label">{{item.label}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="mp-card">
+    <view class="mp-card-title">常用服务</view>
+    <view class="buyer-quick-grid">
+      <view
+        class="buyer-quick-item"
+        wx:for="{{quickLinks}}"
+        wx:key="label"
+        bindtap="goQuickLink"
+        data-path="{{item.path}}"
+      >{{item.label}}</view>
+    </view>
+  </view>
 </view>

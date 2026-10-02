@@ -1,0 +1,15 @@
+<view class="page-payment-result">
+  <view class="result-hero result-hero-{{tone}}">
+    <view class="result-title">{{title}}</view>
+    <view class="result-desc">{{description}}</view>
+    <view class="result-meta" wx:if="{{orderId}}">订单号：{{orderId}}</view>
+    <view class="result-meta" wx:if="{{paymentId}}">支付单号：{{paymentId}}</view>
+    <view wx:if="{{loading}}" class="mp-loading">查询支付结果...</view>
+  </view>
+
+  <view class="result-actions">
+    <button class="mp-btn mp-btn-primary" bindtap="goOrders">查看订单</button>
+    <button wx:if="{{status === 'failed'}}" class="mp-btn mp-btn-ghost" bindtap="retryPay">重新支付</button>
+    <button class="mp-btn mp-btn-ghost" bindtap="goHome">继续购物</button>
+  </view>
+</view>
