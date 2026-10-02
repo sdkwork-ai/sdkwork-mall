@@ -1276,3 +1276,82 @@ body {
 .sdk-h5-main-without-tabbar {
   padding-bottom: 0;
 }
+
+/* ── Category page: JD-style left rail + right content ── */
+.sdk-h5-catalog {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  min-height: calc(100vh - 3.4rem);
+}
+
+.sdk-h5-catalog-rail {
+  flex: 0 0 6rem;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: var(--sdk-h5-panel);
+  min-height: calc(100vh - 3.4rem);
+  padding: 0.4rem 0.25rem;
+  box-sizing: border-box;
+}
+
+.sdk-h5-catalog-rail-item {
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.82rem;
+  padding: 0.7rem 0.4rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.sdk-h5-catalog-rail-item-active {
+  border-left-color: var(--sdk-h5-primary);
+  background: var(--sdk-h5-bg, #f4f5f7);
+  color: var(--sdk-h5-primary);
+  font-weight: 600;
+}
+
+.sdk-h5-catalog-rail-empty {
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.78rem;
+  padding: 0.6rem 0.3rem;
+  text-align: center;
+}
+
+.sdk-h5-catalog-content {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.7rem 1rem;
+}
+
+.sdk-h5-catalog-title {
+  font-size: 1rem;
+  margin: 0 0 0.6rem;
+}
+
+.sdk-h5-catalog-child-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.sdk-h5-catalog-child-card {
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 0.6rem;
+  background: var(--sdk-h5-panel);
+  color: var(--sdk-h5-text);
+  font-size: 0.8rem;
+  padding: 0.75rem 0.3rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.sdk-h5-catalog-siblings {
+  margin-bottom: 0.6rem;
+}
