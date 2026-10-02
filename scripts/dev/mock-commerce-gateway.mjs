@@ -194,6 +194,11 @@ async function handle(method, url, body) {
     if (index >= 0) addresses.splice(index, 1);
     return ok({});
   }
+  const defaultSelectionMatch = path.match(/^\/app\/v3\/api\/addresses\/([^/]+)\/default_selection$/u);
+  if (defaultSelectionMatch && method === "POST") {
+    for (const address of addresses) address.isDefault = address.id === defaultSelectionMatch[1];
+    return ok({ addressId: defaultSelectionMatch[1] });
+  }
   if (p === "POST /app/v3/api/addresses/default_selection") {
     for (const address of addresses) address.isDefault = address.id === body.addressId;
     return ok({ addressId: body.addressId });

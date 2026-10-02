@@ -46,5 +46,6 @@ export async function deleteMallH5Address(addressId: string): Promise<void> {
 }
 
 export async function setDefaultMallH5Address(addressId: string): Promise<void> {
-  await getSdkworkCommerceService().addresses.defaultSelection.create({ addressId });
+  // Generated signature: create(addressId, body) — path parameter, not body.
+  await getSdkworkCommerceService().addresses.defaultSelection.create(addressId, {});
 }

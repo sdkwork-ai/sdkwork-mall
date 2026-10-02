@@ -21,7 +21,8 @@ export function configureSdkworkMallPcCartCommerceRemotePort(): void {
       return commerce().wallet.holds.create(body);
     },
     deleteCartItem(cartItemId) {
-      return commerce().cart.items.delete({ cartItemId });
+      // Generated signature: delete(cartItemId) — path parameter.
+      return commerce().cart.items.delete(cartItemId);
     },
     listAddresses(query) {
       return commerce().addresses.list(query);
@@ -48,10 +49,12 @@ export function configureSdkworkMallPcCartCommerceRemotePort(): void {
       return commerce().wallet.overview.retrieve();
     },
     setDefaultAddress(body) {
-      return commerce().addresses.defaultSelection.create(body);
+      // Generated signature: create(addressId, body) — path parameter, not body.
+      return commerce().addresses.defaultSelection.create(body.addressId, {});
     },
     updateCartItem(cartItemId, quantity) {
-      return commerce().cart.items.update({ cartItemId, quantity });
+      // Generated signature: update(cartItemId, body) — path parameter first.
+      return commerce().cart.items.update(cartItemId, { quantity });
     },
   });
 }

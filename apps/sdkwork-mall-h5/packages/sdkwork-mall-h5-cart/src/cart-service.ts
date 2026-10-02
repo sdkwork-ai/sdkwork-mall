@@ -239,7 +239,9 @@ export async function submitMallH5CheckoutOrder(
   const quote = await createMallH5CheckoutQuote({ cartItemIds: input.cartItemIds });
 
   if (input.addressId) {
-    await remote.addresses.defaultSelection.create({ addressId: input.addressId });
+    // Generated signature: create(addressId, body) — the address id is a path
+    // parameter, not part of the request body.
+    await remote.addresses.defaultSelection.create(input.addressId, {});
   }
 
   const orderResponse = await remote.checkout.sessions.orders.create(quote.sessionId, {

@@ -24,7 +24,8 @@ export function createCommerceAddressRemotePort(): SdkworkAddressRemotePort {
       return commerce().addresses.delete(addressId);
     },
     setDefaultAddress(addressId) {
-      return commerce().addresses.defaultSelection.create({ addressId });
+      // Generated signature: create(addressId, body) — path parameter, not body.
+      return commerce().addresses.defaultSelection.create(addressId, {});
     },
   };
 }

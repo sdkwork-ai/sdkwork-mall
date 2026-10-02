@@ -42,14 +42,17 @@ export function configureSdkworkMallH5Providers(input: {
 }): SdkworkMallH5CommerceProviders {
   const appClient: CommerceAppSdkClient = {
     commerce: createSdkCommandPortAdapter<CommerceAppSdkClient["commerce"]>(
-      input.sdkClients.commerceAppClient,
+      // Adapt the commerce namespace itself: the facade spreads this node, so
+      // wrapping the client root would leak httpClient/ai/iam into the service
+      // and leave catalog/cart/... undefined.
+      input.sdkClients.commerceAppClient.commerce,
       { commandPaths: COMMERCE_APP_COMMAND_PATHS },
     ),
   };
   const backendClient = input.sdkClients.commerceBackendClient
     ? {
         commerce: createSdkCommandPortAdapter<CommerceBackendSdkClient["commerce"]>(
-          input.sdkClients.commerceBackendClient,
+          input.sdkClients.commerceBackendClient.commerce,
           { commandPaths: [] },
         ),
       }
