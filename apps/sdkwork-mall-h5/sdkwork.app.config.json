@@ -7,7 +7,7 @@
     "displayName": "SDKWork 商城 H5",
     "description": "SDKWork Mall H5 mobile storefront and buyer console.",
     "vendor": "SDKWork",
-    "officialWebsiteUrl": "https://sdkwork.com/apps/sdkwork-mall-pc",
+    "officialWebsiteUrl": "https://sdkwork.com/apps/sdkwork-mall-h5",
     "supportUrl": "https://sdkwork.com/support",
     "privacyPolicyUrl": "https://sdkwork.com/privacy",
     "termsOfServiceUrl": "https://sdkwork.com/terms",
@@ -16,8 +16,8 @@
     "identifiers": {
       "packageName": null,
       "bundleId": null,
-      "desktopAppId": "com.sdkwork.sdkwork.mall.pc.desktop",
-      "containerImage": "registry.sdkwork.com/apps/sdkwork-mall-pc"
+      "desktopAppId": null,
+      "containerImage": "registry.sdkwork.com/apps/sdkwork-mall-h5"
     },
     "desktopAppId": null,
     "containerImage": "registry.sdkwork.com/apps/sdkwork-mall-h5"
@@ -51,10 +51,10 @@
   "media": {
     "icons": {
       "primary": {
-        "id": "sdkwork-mall-pc-primary-icon",
+        "id": "sdkwork-mall-h5-primary-icon",
         "type": "ICON",
         "purpose": "PRIMARY",
-        "url": "https://cdn.sdkwork.com/apps/sdkwork-mall-pc/assets/icon-1024.png",
+        "url": "https://cdn.sdkwork.com/apps/sdkwork-mall-h5/assets/icon-1024.png",
         "platform": "APP",
         "locale": "en-US",
         "width": 1024,
@@ -75,34 +75,34 @@
     },
     "screenshots": [
       {
-        "id": "sdkwork-mall-pc-web-screenshot",
+        "id": "sdkwork-mall-h5-web-screenshot",
         "type": "SCREENSHOT",
         "purpose": "CATALOG_SCREENSHOT",
-        "url": "https://cdn.sdkwork.com/apps/sdkwork-mall-pc/media/web-screenshot.png",
+        "url": "https://cdn.sdkwork.com/apps/sdkwork-mall-h5/media/web-screenshot.png",
         "platform": "WEB",
         "locale": "en-US",
         "deviceClass": "BROWSER",
-        "displayType": "WEB_DESKTOP",
+        "displayType": "WEB_MOBILE",
         "width": 1920,
         "height": 1080,
         "format": "PNG",
         "fileSizeBytes": 1048576,
         "alphaChannel": false,
-        "caption": "SDKWork Mall PC product screenshot.",
+        "caption": "SDKWork Mall H5 mobile screenshot.",
         "sortOrder": 0,
         "enabled": true,
         "metadata": {
           "generatedPlaceholder": true,
-          "altText": "SDKWork Mall PC app screenshot."
+          "altText": "SDKWork Mall H5 app screenshot."
         }
       }
     ],
     "previews": [
       {
-        "id": "sdkwork-mall-pc-catalog-preview",
+        "id": "sdkwork-mall-h5-catalog-preview",
         "type": "PREVIEW_IMAGE",
         "purpose": "CATALOG_PREVIEW",
-        "url": "https://cdn.sdkwork.com/apps/sdkwork-mall-pc/media/preview-cover.png",
+        "url": "https://cdn.sdkwork.com/apps/sdkwork-mall-h5/media/preview-cover.png",
         "platform": "WEB",
         "locale": "en-US",
         "width": 1600,
@@ -110,12 +110,12 @@
         "format": "PNG",
         "fileSizeBytes": 786432,
         "alphaChannel": false,
-        "caption": "SDKWork Mall PC preview.",
+        "caption": "SDKWork Mall H5 preview.",
         "sortOrder": 0,
         "enabled": true,
         "metadata": {
           "generatedPlaceholder": true,
-          "altText": "SDKWork Mall PC preview cover."
+          "altText": "SDKWork Mall H5 preview cover."
         }
       }
     ],
@@ -136,10 +136,10 @@
       "H5"
     ],
     "defaultPackageId": "web-universal-cloud-browser-zip",
-    "storeUrl": "https://sdkwork.com/apps/sdkwork-mall-pc",
+    "storeUrl": "https://sdkwork.com/apps/sdkwork-mall-h5",
     "stores": [],
     "config": {
-      "workspaceRoot": "apps/sdkwork-mall-pc",
+      "workspaceRoot": "apps/sdkwork-mall-h5",
       "framework": "react",
       "managedBy": "sdkwork-mall"
     }
@@ -169,13 +169,13 @@
   "artifacts": {
     "installConfig": {
       "defaultPackageId": "web-universal-cloud-browser-zip",
-      "installCommand": "sdkwork install sdkwork-mall-pc",
-      "launchCommand": "sdkwork open sdkwork-mall-pc",
-      "uninstallCommand": "sdkwork uninstall sdkwork-mall-pc",
+      "installCommand": "sdkwork install sdkwork-mall-h5",
+      "launchCommand": "sdkwork open sdkwork-mall-h5",
+      "uninstallCommand": "sdkwork uninstall sdkwork-mall-h5",
       "packages": [
         {
           "id": "web-universal-cloud-browser-zip",
-          "name": "SDKWork Mall PC Web Bundle",
+          "name": "SDKWork Mall H5 Web Bundle",
           "sourceType": "WEB_URL",
           "packageFormat": "ZIP",
           "platform": "WEB",
@@ -189,11 +189,11 @@
           "runtimeTarget": "browser",
           "profileBinding": "fixed",
           "targetPlatform": "web",
-          "clientArchitecture": "pc-web"
+          "clientArchitecture": "h5"
         }
       ],
       "metadata": {
-        "workspaceRoot": "apps/sdkwork-mall-pc",
+        "workspaceRoot": "apps/sdkwork-mall-h5",
         "framework": "react",
         "packageManager": "pnpm@10.33.0"
       }
@@ -209,9 +209,9 @@
       {
         "version": "0.1.0",
         "releaseChannel": "STABLE",
-        "title": "SDKWork Mall PC 0.1.0",
-        "summary": "SDKWork Mall PC initialized standard release.",
-        "content": "Initial SDKWork App Standard v3 manifest for SDKWork Mall PC.",
+        "title": "SDKWork Mall H5 0.1.0",
+        "summary": "SDKWork Mall H5 initialized standard release.",
+        "content": "Initial SDKWork App Standard v3 manifest for SDKWork Mall H5.",
         "highlights": [
           "SDKWork App Standard v3 configuration initialized",
           "platform_app projection metadata standardized",
