@@ -2458,3 +2458,30 @@ html::-webkit-scrollbar {
   color: var(--sdk-h5-primary);
   font-weight: 600;
 }
+
+/* ── Documented surface content inset (APP_MOBILE_REACT_UI_SPEC §5):
+   text-dense surfaces and edge-to-edge rows keep a 0.9rem internal
+   horizontal inset now that the page gutter is gone. */
+.sdk-h5-page-title,
+.sdk-h5-sort-row,
+.sdk-h5-field,
+.sdk-h5-empty,
+.sdk-h5-center,
+.sdk-h5-product-row,
+.sdk-h5-cart-row {
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+}
+
+.sdk-h5-button-block {
+  width: calc(100% - 1.8rem);
+  margin: 0.9rem;
+}
+
+.sdk-h5-notice-row,
+.sdk-h5-conv-row,
+.sdk-h5-conv-entry-row,
+.sdk-h5-cell,
+.sdk-h5-checkout-summary {
+  /* already carry their own 0.9rem surface inset */
+}
