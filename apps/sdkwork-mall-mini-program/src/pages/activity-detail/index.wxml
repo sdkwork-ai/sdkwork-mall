@@ -1,0 +1,18 @@
+<view class="page-activity-detail">
+  <view wx:if="{{loading}}" class="mp-loading">加载活动...</view>
+  <view wx:if="{{!loading && !activity}}" class="mp-empty">活动不存在或已结束</view>
+
+  <block wx:if="{{!loading && activity}}">
+    <view class="activity-hero activity-{{activity.phase}}">
+      <view class="activity-hero-type">{{activity.typeLabel}}</view>
+      <view class="activity-hero-title">{{activity.title}}</view>
+      <view class="activity-hero-highlight" wx:if="{{activity.highlight}}">{{activity.highlight}}</view>
+      <view class="activity-hero-window" wx:if="{{activity.windowText}}">{{activity.windowText}}</view>
+    </view>
+
+    <view class="mp-card" wx:if="{{activity.description}}">
+      <view class="mp-card-title">活动介绍</view>
+      <view class="activity-description">{{activity.description}}</view>
+    </view>
+  </block>
+</view>

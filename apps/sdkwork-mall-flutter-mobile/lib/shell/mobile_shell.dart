@@ -13,6 +13,7 @@ import '../pages/coupons_page.dart';
 import '../pages/favorites_page.dart';
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
+import '../pages/marketing_pages.dart';
 import '../pages/order_detail_page.dart';
 import '../pages/orders_page.dart';
 import '../pages/payment_result_page.dart';
@@ -52,6 +53,13 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
       '/membership': (context) => const SdkworkMembershipPage(),
       '/invoices': (context) => const SdkworkInvoicesPage(),
       '/settings': (context) => const SdkworkSettingsPage(),
+      '/shop': (context) => SdkworkShopPage(
+            shopId: '${_routeArguments(context)}',
+          ),
+      '/activity': (context) => const SdkworkActivityListPage(),
+      '/activity-detail': (context) => SdkworkActivityDetailPage(
+            offerId: '${_routeArguments(context)}',
+          ),
     };
 
 Object? _routeArguments(BuildContext context) =>

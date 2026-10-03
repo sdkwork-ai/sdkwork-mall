@@ -1,0 +1,22 @@
+<view class="page-activity">
+  <view wx:if="{{loading}}" class="mp-loading">加载活动...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view wx:if="{{activities.length === 0}}" class="mp-empty">暂无进行中的活动</view>
+    <view
+      class="activity-card activity-{{item.phase}}"
+      wx:for="{{activities}}"
+      wx:key="id"
+      bindtap="goDetail"
+      data-id="{{item.id}}"
+    >
+      <view class="mp-flex-between">
+        <view class="activity-title">{{item.title}}</view>
+        <view class="activity-tag">{{item.phaseText}}</view>
+      </view>
+      <view class="mp-muted" wx:if="{{item.highlight}}">{{item.highlight}}</view>
+      <view class="activity-meta" wx:if="{{item.windowText}}">{{item.windowText}}</view>
+    </view>
+  </block>
+</view>

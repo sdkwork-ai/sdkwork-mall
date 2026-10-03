@@ -21,6 +21,9 @@
     "pages/membership/index",
     "pages/invoices/index",
     "pages/settings/index",
+    "pages/shop/index",
+    "pages/activity/index",
+    "pages/activity-detail/index",
     "pages/login/index"
   ],
   "window": {

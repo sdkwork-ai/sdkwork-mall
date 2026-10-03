@@ -79,6 +79,13 @@
   z-index: 10;
 }
 
+.product-shop-entry {
+  color: #e93b3d;
+  font-size: 26rpx;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
 .product-action-fav {
   flex-shrink: 0;
   border-radius: 999rpx;

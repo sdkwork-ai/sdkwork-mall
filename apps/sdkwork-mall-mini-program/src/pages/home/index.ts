@@ -32,6 +32,7 @@ interface HomeData {
 
 const BANNERS: HomeBanner[] = [
   { id: "b-quality", title: "品质生活，一站购齐", subtitle: "平台自营与品牌商家", link: "/pages/category/index" },
+  { id: "b-activity", title: "活动会场", subtitle: "大促/秒杀/品牌日", link: "/pages/activity/index" },
   { id: "b-new", title: "新品首发", subtitle: "每周上新", link: "/pages/search/index?q=new" },
   { id: "b-coupon", title: "领券中心", subtitle: "领券下单更划算", link: "/pages/coupons/index" },
   { id: "b-member", title: "会员专区", subtitle: "专属价与积分回馈", link: "/pages/buyer/index" },
@@ -39,6 +40,7 @@ const BANNERS: HomeBanner[] = [
 
 const QUICK_ENTRIES: HomeQuickEntry[] = [
   { id: "category", label: "分类逛", link: "/pages/category/index" },
+  { id: "activity", label: "活动", link: "/pages/activity/index" },
   { id: "new", label: "新品", link: "/pages/search/index?q=new" },
   { id: "hot", label: "热卖", link: "/pages/search/index?sort=sales" },
   { id: "coupon", label: "领券", link: "/pages/coupons/index" },

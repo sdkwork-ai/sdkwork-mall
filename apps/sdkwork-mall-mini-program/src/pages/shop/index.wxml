@@ -1,0 +1,36 @@
+<view class="page-shop">
+  <view wx:if="{{loading}}" class="mp-loading">加载店铺...</view>
+  <view wx:if="{{!loading && !shop}}" class="mp-empty">店铺不存在或已关闭</view>
+
+  <block wx:if="{{!loading && shop}}">
+    <view class="shop-hero">
+      <image wx:if="{{shop.logoUrl}}" class="shop-logo" src="{{shop.logoUrl}}" mode="aspectFill" />
+      <view wx:else class="shop-logo shop-logo-fallback">店</view>
+      <view class="shop-hero-body">
+        <view class="shop-name">{{shop.name}}</view>
+        <view class="mp-muted" wx:if="{{shop.ratingText}}">评分 {{shop.ratingText}}</view>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">店铺商品</view>
+      <view wx:if="{{shop.products.length === 0}}" class="mp-empty">暂无在售商品</view>
+      <view class="shop-product-grid">
+        <view
+          class="shop-product-card"
+          wx:for="{{shop.products}}"
+          wx:key="id"
+          bindtap="goProduct"
+          data-id="{{item.id}}"
+        >
+          <image class="shop-product-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view class="shop-product-title">{{item.title}}</view>
+          <view class="mp-flex-between">
+            <text class="mp-price">{{item.priceText}}</text>
+            <text class="mp-muted" wx:if="{{item.salesText}}">已售 {{item.salesText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

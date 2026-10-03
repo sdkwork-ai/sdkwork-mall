@@ -7,6 +7,7 @@ import 'auth_service.dart';
 import 'cart_service.dart';
 import 'catalog_service.dart';
 import 'invoice_service.dart';
+import 'marketing_service.dart';
 import 'order_service.dart';
 import 'promotion_service.dart';
 
@@ -25,7 +26,8 @@ class MallCommerce {
         auth = AuthService(client),
         afterSales = AfterSalesService(client),
         account = AccountService(client),
-        invoices = InvoiceService(client);
+        invoices = InvoiceService(client),
+        marketing = MarketingService(client);
 
   static MallCommerce? _instance;
 
@@ -39,6 +41,7 @@ class MallCommerce {
   final AfterSalesService afterSales;
   final AccountService account;
   final InvoiceService invoices;
+  final MarketingService marketing;
 
   static MallCommerce get instance {
     _instance ??= MallCommerce._(

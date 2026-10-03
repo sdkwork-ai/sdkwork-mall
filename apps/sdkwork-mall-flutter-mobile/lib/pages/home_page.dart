@@ -96,6 +96,7 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Map<String, dynamic>>[
             {'label': '分类逛', 'tab': 1},
+            {'label': '活动', 'route': '/activity'},
             {'label': '热卖', 'sort': 'sales'},
             {'label': '新品', 'sort': 'newest'},
             {'label': '领券', 'route': '/coupons'},

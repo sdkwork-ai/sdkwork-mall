@@ -55,8 +55,13 @@
     </view>
 
     <view class="mp-card" wx:if="{{detail.shopId}}">
-      <view class="mp-card-title">店铺</view>
-      <view class="mp-muted">{{detail.shopName || detail.shopId}}</view>
+      <view class="mp-flex-between" bindtap="goShop" data-id="{{detail.shopId}}">
+        <view>
+          <view class="mp-card-title">店铺</view>
+          <view class="mp-muted">{{detail.shopName || detail.shopId}}</view>
+        </view>
+        <view class="product-shop-entry">进店 ›</view>
+      </view>
     </view>
 
     <view class="mp-card" wx:if="{{detail.description}}">

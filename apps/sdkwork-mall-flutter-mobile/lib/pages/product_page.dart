@@ -196,8 +196,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
+                        children: [                          SizedBox(
                             width: 96,
                             child: Text(
                               '${spec['name']}',
@@ -210,6 +209,24 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
                     ),
                   ),
                 ],
+              ),
+            ),
+          if (asString(detail, <String>['shopId']).isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Card(
+                margin: EdgeInsets.zero,
+                child: ListTile(
+                  leading: const Icon(Icons.storefront_outlined),
+                  title: Text(
+                    asString(detail, <String>['shopName', 'shopId'], fallback: '店铺'),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).pushNamed(
+                    '/shop',
+                    arguments: asString(detail, <String>['shopId']),
+                  ),
+                ),
               ),
             ),
           if ('${detail['description']}'.isNotEmpty)

@@ -117,6 +117,13 @@ Page({
     this.showToast(favorited ? "已加入收藏" : "已取消收藏");
   },
 
+  goShop(event: MpTapEvent) {
+    const shopId = String(event.currentTarget.dataset.id ?? "");
+    if (shopId) {
+      wx.navigateTo({ url: `/pages/shop/index?id=${shopId}` });
+    }
+  },
+
   selectSku(event: MpTapEvent) {
     const skuId = String(event.currentTarget.dataset.id ?? "");
     const sku = this.data.skus.find((entry) => entry.id === skuId);

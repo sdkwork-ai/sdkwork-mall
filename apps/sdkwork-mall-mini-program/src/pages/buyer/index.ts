@@ -21,6 +21,7 @@ const QUICK_LINKS: Array<{ label: string; path: string }> = [
   { label: "我的积分", path: "/pages/points/index" },
   { label: "会员中心", path: "/pages/membership/index" },
   { label: "发票", path: "/pages/invoices/index" },
+  { label: "活动会场", path: "/pages/activity/index" },
   { label: "设置", path: "/pages/settings/index" },
   { label: "去逛逛", path: "home" },
 ];
