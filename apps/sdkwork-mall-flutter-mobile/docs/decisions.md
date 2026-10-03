@@ -37,6 +37,12 @@
   requestedAmount decimal string/CNY/items) from the live order snapshot and
   revokes pending requests via PATCH. applicationId/bundleId aligned to the
   manifest identity `com.sdkwork.mall.flutter`.
+- 2026-10-03: full-bleed audit against APP_FLUTTER_UI_SPEC v1.1 — every page
+  scroll body already carries vertical-only (or zero) EdgeInsets, cards span
+  full width with vertical-only margins, and all remaining horizontal insets
+  are content-level (text rows, action bars, badges) inside their own
+  surfaces, which the spec permits. No code change required; recorded as the
+  conformance baseline for the mandate.
 - Follow-ups: generate `sdkwork_mall_*` Dart SDK family, swap services over,
   upgrade session persistence to secure storage (Keystore/Keychain), wire
   `wx`-equivalent native pay channels, add console/admin packages, wire store
