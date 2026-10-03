@@ -556,7 +556,86 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  margin-bottom: 4.6rem;
+  margin-bottom: 5.4rem;
+}
+
+.sdk-h5-cart-toolbar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.1rem 0.85rem 0.45rem;
+}
+
+.sdk-h5-cart-toolbar .sdk-h5-page-title {
+  padding: 0;
+  margin: 0;
+}
+
+.sdk-h5-cart-toolbar-count {
+  margin-left: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--sdk-h5-text-muted);
+}
+
+.sdk-h5-cart-manage {
+  border: 0;
+  background: transparent;
+  color: var(--sdk-h5-text-secondary);
+  font-size: 0.82rem;
+  padding: 0.25rem 0.4rem;
+}
+
+.sdk-h5-cart-manage:disabled {
+  opacity: 0.5;
+}
+
+/* Round check control: hidden native input keeps focus/label semantics. */
+.sdk-h5-check {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sdk-h5-check input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.sdk-h5-check span {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  border: 1px solid var(--sdk-h5-border);
+  background: var(--sdk-h5-panel);
+  box-sizing: border-box;
+  position: relative;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sdk-h5-check input:checked + span {
+  background: var(--sdk-h5-primary);
+  border-color: var(--sdk-h5-primary);
+}
+
+.sdk-h5-check input:checked + span::after {
+  content: "";
+  position: absolute;
+  left: 0.32rem;
+  top: 0.14rem;
+  width: 0.32rem;
+  height: 0.58rem;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.sdk-h5-check input:focus-visible + span {
+  outline: 2px solid var(--sdk-h5-border-focus, var(--sdk-h5-primary));
+  outline-offset: 1px;
 }
 
 .sdk-h5-cart-row {
@@ -585,9 +664,67 @@ body {
 }
 
 .sdk-h5-cart-sku {
+  align-self: flex-start;
+  background: #f3f4f6;
+  border-radius: 0.3rem;
   color: var(--sdk-h5-text-muted);
-  font-size: 0.72rem;
-  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+  padding: 0.08rem 0.4rem;
+}
+
+.sdk-h5-cart-row-title {
+  color: var(--sdk-h5-text);
+  display: -webkit-box;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.sdk-h5-cart-row-pricing {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+}
+
+.sdk-h5-cart-row-pricing strong {
+  color: var(--sdk-h5-danger);
+  font-size: 0.92rem;
+}
+
+/* Capsule stepper used inside cart rows. */
+.sdk-h5-stepper {
+  align-items: center;
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 999px;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+.sdk-h5-stepper button {
+  align-items: center;
+  background: var(--sdk-h5-panel);
+  border: 0;
+  display: inline-flex;
+  font-size: 0.85rem;
+  height: 1.5rem;
+  justify-content: center;
+  width: 1.7rem;
+}
+
+.sdk-h5-stepper button:disabled {
+  color: var(--sdk-h5-text-muted);
+  opacity: 0.45;
+}
+
+.sdk-h5-stepper span {
+  font-size: 0.8rem;
+  min-width: 1.8rem;
+  text-align: center;
 }
 
 .sdk-h5-cart-remove {
@@ -604,10 +741,50 @@ body {
   right: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 0.9rem;
+  gap: 0.55rem;
+  padding: 0.55rem 0.9rem;
   background: var(--sdk-h5-panel);
   border-top: 1px solid var(--sdk-h5-border);
+}
+
+.sdk-h5-cart-footer-check {
+  align-items: center;
+  display: flex;
+  font-size: 0.78rem;
+  gap: 0.35rem;
+  color: var(--sdk-h5-text-secondary);
+}
+
+.sdk-h5-cart-total-block {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+  margin-right: 0.2rem;
+}
+
+.sdk-h5-cart-total-block .sdk-h5-muted {
+  font-size: 0.68rem;
+}
+
+.sdk-h5-cart-hero-empty {
+  padding: 3.2rem 1rem 1.4rem;
+  text-align: center;
+}
+
+.sdk-h5-cart-hero-empty-icon {
+  font-size: 2.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.sdk-h5-cart-hero-empty p {
+  margin: 0.3rem 0 0;
+}
+
+.sdk-h5-button-danger {
+  background: var(--sdk-h5-danger);
+  color: #fff;
 }
 
 .sdk-h5-cart-total strong {
