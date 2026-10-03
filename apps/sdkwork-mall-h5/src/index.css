@@ -183,7 +183,7 @@ body {
 
 .sdk-h5-quick-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 0.5rem;
   margin-bottom: 0.8rem;
 }
@@ -2203,4 +2203,61 @@ html::-webkit-scrollbar {
 
 .sdk-h5-chat-composer .sdk-h5-button {
   flex-shrink: 0;
+}
+
+/* ── Full-bleed surface normalization (APP_MOBILE_REACT_UI_SPEC §5):
+   edge-to-edge blocks keep square corners and no horizontal gutters.
+   Radius stays on inset elements (chips, avatars, thumbnails, controls). */
+.sdk-h5-quick-row,
+.sdk-h5-product-card,
+.sdk-h5-product-row,
+.sdk-h5-error,
+.sdk-h5-notice,
+.sdk-h5-checkout-summary,
+.sdk-h5-order-row,
+.sdk-h5-payment-hero,
+.sdk-h5-banner-carousel,
+.sdk-h5-cart-shop,
+.sdk-h5-order-status-hero,
+.sdk-h5-coupon-entry,
+.sdk-h5-seckill {
+  border-radius: 0;
+}
+
+.sdk-h5-product-card,
+.sdk-h5-product-row,
+.sdk-h5-order-row,
+.sdk-h5-cart-shop,
+.sdk-h5-checkout-summary,
+.sdk-h5-payment-hero,
+.sdk-h5-order-status-hero,
+.sdk-h5-coupon-entry,
+.sdk-h5-banner-carousel,
+.sdk-h5-seckill {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Quick entries become a full-bleed icon strip instead of floating tiles. */
+.sdk-h5-quick-row {
+  background: var(--sdk-h5-panel);
+  margin: 0 0 0.6rem;
+  padding: 0.55rem 0.4rem;
+}
+
+.sdk-h5-quick-item {
+  background: transparent;
+  border-radius: 0;
+}
+
+.sdk-h5-error,
+.sdk-h5-notice {
+  margin: 0.7rem 0;
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+}
+
+.sdk-h5-buyer-hero,
+.sdk-h5-chat-head {
+  border-radius: 0;
 }
