@@ -15,7 +15,8 @@
     "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-offer/**",
     "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-payment/**",
     "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-pricing/**",
-    "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-subscription/**"
+    "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-subscription/**",
+    "apps/sdkwork-mall-mini-program/**"
   ],
   "compilerOptions": {
     "jsx": "react-jsx",

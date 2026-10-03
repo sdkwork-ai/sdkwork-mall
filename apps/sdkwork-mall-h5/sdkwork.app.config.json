@@ -27,7 +27,7 @@
     "ownerMode": "tenant",
     "grantMode": "current",
     "platform": "WEB",
-    "appId": null,
+    "appId": "sdkwork-mall-h5",
     "organizationId": "0",
     "tenantId": "100001"
   },
