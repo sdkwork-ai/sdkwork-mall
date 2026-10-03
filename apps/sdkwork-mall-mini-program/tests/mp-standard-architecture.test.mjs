@@ -16,7 +16,7 @@ function collectPageFiles() {
     try {
       const inner = readdirSync(entryPath);
       for (const name of inner) {
-        if (name.endsWith(".js")) {
+        if (name.endsWith(".ts")) {
           files.push(`../src/pages/${entry}/${name}`);
         }
       }
@@ -70,24 +70,24 @@ test("mall mini-program registers the full commerce route catalog", () => {
 });
 
 test("mall mini-program funnels all traffic through the single transport seam", () => {
-  const transportSource = read("../src/services/transport.js");
+  const transportSource = read("../src/services/transport.ts");
   const seamCalls = transportSource.match(/wx\.request\(/gu) ?? [];
   assert.equal(
     seamCalls.length,
     1,
-    "services/transport.js must be the only module issuing wx.request",
+    "services/transport.ts must be the only module issuing wx.request",
   );
 
   for (const file of collectPageFiles()) {
     assert.ok(!read(file).includes("wx.request("), `${file} must not call wx.request directly`);
   }
   for (const file of [
-    "../src/app.js",
-    "../src/services/catalog-service.js",
-    "../src/services/cart-service.js",
-    "../src/services/order-service.js",
-    "../src/services/address-service.js",
-    "../src/services/promotion-service.js",
+    "../src/app.ts",
+    "../src/services/catalog-service.ts",
+    "../src/services/cart-service.ts",
+    "../src/services/order-service.ts",
+    "../src/services/address-service.ts",
+    "../src/services/promotion-service.ts",
   ]) {
     assert.ok(!read(file).includes("wx.request("), `${file} must go through the transport seam`);
   }
@@ -105,12 +105,12 @@ test("mall mini-program commerce facade composes the domain services", () => {
     assert.match(facade, new RegExp(serviceType, "u"), `facade must type ${serviceType}`);
   }
   for (const service of [
-    "../src/services/catalog-service.js",
-    "../src/services/cart-service.js",
-    "../src/services/order-service.js",
-    "../src/services/address-service.js",
-    "../src/services/promotion-service.js",
+    "../src/services/catalog-service.ts",
+    "../src/services/cart-service.ts",
+    "../src/services/order-service.ts",
+    "../src/services/address-service.ts",
+    "../src/services/promotion-service.ts",
   ]) {
-    assert.ok(read(service).includes("module.exports"), `${service} must export its domain surface`);
+    assert.ok(read(service).includes("export "), `${service} must export its domain surface`);
   }
 });

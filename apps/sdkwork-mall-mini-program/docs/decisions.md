@@ -23,7 +23,21 @@
   code2session replaces it once the identity contract exists.
 - Payment: the cashier page selects a channel and calls `orders.pay`; the
   real `wx.requestPayment` handoff (and its provider params) plugs into
-  `pages/cashier/index.js` when the WeChat pay provider contract lands.
+  `pages/cashier/index.ts` when the WeChat pay provider contract lands.
+- 2026-10-03 (user-directed): the mini-program is fully TypeScript. Every
+  page, service, and the app entry are `.ts` (strict `tsc --noEmit` with
+  `miniprogram-api-typings`; WeChat DevTools compile via
+  `setting.useCompilerPlugins: ["typescript"]`), the architecture contract
+  test enforces the single `wx.request` seam on `transport.ts`, and the
+  session speaks the IAM login contract (`POST /auth/sessions`) with dual
+  tokens persisted through wx storage — password login form with the token
+  paste kept as a dev fallback. A new after-sales center
+  (`pages/aftersales`) builds the wire-contract create body
+  (`CreateAfterSalesRequest`) from the live order snapshot and revokes
+  pending requests via PATCH; wx.request has no documented PATCH method, so
+  the transport passes the explicit method and the caveat is documented in
+  the transport seam. tsconfig uses ESNext/bundler resolution for
+  type-checking only (noEmit); DevTools CommonJS output is unchanged.
 - Local dev: point `commerceAppApiBaseUrl` at
   `http://127.0.0.1:3900/app/v3/api` (repo-root
   `scripts/dev/mock-commerce-gateway.mjs`) and enable "不校验合法域名" in

@@ -1,5 +1,20 @@
-const catalog = require("../../services/catalog-service");
-const { formatCny } = require("../../utils/format");
+import { errorMessage, type MpTapEvent } from "../../types/common";
+import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
+import { formatCny } from "../../utils/format";
+
+type CategoryProduct = MpProductCard & { priceText: string };
+
+interface CategoryData {
+  categories: MpCategory[];
+  activeCategoryId: string;
+  products: CategoryProduct[];
+  page: number;
+  total: number;
+  loading: boolean;
+  loadingMore: boolean;
+  error: string;
+  _initialCategoryId: string;
+}
 
 Page({
   data: {
@@ -11,15 +26,16 @@ Page({
     loading: true,
     loadingMore: false,
     error: "",
+    _initialCategoryId: "",
+  } as CategoryData,
+
+  onLoad(options: Record<string, string | undefined>) {
+    this.setData({ _initialCategoryId: options.categoryId || "" });
+    void this.loadCategories();
   },
 
-  onLoad(options) {
-    this.initialCategoryId = options.categoryId || "";
-    this.loadCategories();
-  },
-
-  goProduct(event) {
-    wx.navigateTo({ url: `/pages/product/index?id=${event.currentTarget.dataset.id}` });
+  goProduct(event: MpTapEvent) {
+    wx.navigateTo({ url: `/pages/product/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
   },
 
   goSearch() {
@@ -28,23 +44,23 @@ Page({
 
   async loadCategories() {
     try {
-      const categories = await catalog.listCategories();
+      const categories = await listCategories();
       const roots = categories.filter((category) => !category.parentId);
-      const activeCategoryId = this.initialCategoryId || (roots[0] ? roots[0].id : "");
+      const activeCategoryId = this.data._initialCategoryId || (roots[0] ? roots[0].id : "");
       this.setData({ categories: roots, activeCategoryId, loading: true });
       await this.loadProducts(1);
     } catch (cause) {
       this.setData({
         loading: false,
-        error: cause && cause.message ? cause.message : "分类加载失败",
+        error: errorMessage(cause, "分类加载失败"),
       });
     }
   },
 
-  async loadProducts(nextPage) {
+  async loadProducts(nextPage: number) {
     const { activeCategoryId } = this.data;
     try {
-      const result = await catalog.listProducts({
+      const result = await listProducts({
         categoryId: activeCategoryId || undefined,
         page: nextPage,
         pageSize: 20,
@@ -64,13 +80,13 @@ Page({
       this.setData({
         loading: false,
         loadingMore: false,
-        error: cause && cause.message ? cause.message : "商品加载失败",
+        error: errorMessage(cause, "商品加载失败"),
       });
     }
   },
 
-  async selectCategory(event) {
-    const categoryId = event.currentTarget.dataset.id;
+  async selectCategory(event: MpTapEvent) {
+    const categoryId = String(event.currentTarget.dataset.id ?? "");
     if (categoryId === this.data.activeCategoryId) {
       return;
     }
@@ -91,6 +107,6 @@ Page({
   },
 
   onReachBottom() {
-    this.loadMore();
+    void this.loadMore();
   },
 });

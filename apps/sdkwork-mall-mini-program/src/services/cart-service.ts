@@ -1,14 +1,56 @@
-const { request } = require("./transport");
+import { request } from "./transport";
 
-async function getCart() {
+export interface MpCartItem {
+  id: string;
+  imageUrl: string;
+  priceCny: number | null;
+  quantity: number;
+  shopId: string;
+  shopName: string;
+  skuId: string;
+  skuName: string;
+  spuId: string;
+  title: string;
+}
+
+export interface MpCart {
+  id: string;
+  items: MpCartItem[];
+  totalAmountCny: number;
+}
+
+export interface MpAddToCartOptions {
+  quantity?: number;
+  skuId: string;
+  spuId?: string;
+}
+
+export interface MpCheckoutQuote {
+  sessionId: string;
+  quoteId: string;
+  originalAmountCny: number | null;
+  discountAmountCny: number | null;
+  payableAmountCny: number | null;
+}
+
+export interface MpSubmitOrderOptions {
+  buyerRemark?: string;
+  cartItemIds?: string[];
+  addressId?: string;
+  couponId?: string;
+  usePoints?: boolean;
+  useWallet?: boolean;
+}
+
+export async function getCart(): Promise<MpCart> {
   const payload = await request({ path: "/cart/current" });
   const items = Array.isArray(payload.items) ? payload.items : [];
   return {
     id: String(payload.id ?? "current"),
     items: items.map((item) => {
-      const sku = item.sku ?? {};
-      const spu = item.spu ?? sku.spu ?? {};
-      const shop = item.shop ?? spu.shop ?? {};
+      const sku = (item.sku ?? {}) as Record<string, unknown>;
+      const spu = (item.spu ?? sku.spu ?? {}) as Record<string, unknown>;
+      const shop = (item.shop ?? spu.shop ?? {}) as Record<string, unknown>;
       return {
         id: String(item.id ?? ""),
         skuId: String(item.skuId ?? sku.id ?? ""),
@@ -26,7 +68,7 @@ async function getCart() {
   };
 }
 
-async function addToCart(options) {
+export async function addToCart(options: MpAddToCartOptions): Promise<Record<string, unknown>> {
   return request({
     path: "/cart/items",
     method: "POST",
@@ -34,26 +76,28 @@ async function addToCart(options) {
   });
 }
 
-async function updateCartItem(cartItemId, quantity) {
+export async function updateCartItem(cartItemId: string, quantity: number): Promise<Record<string, unknown>> {
   return request({ path: `/cart/items/${cartItemId}`, method: "PUT", body: { quantity } });
 }
 
-async function removeCartItem(cartItemId) {
+export async function removeCartItem(cartItemId: string): Promise<Record<string, unknown>> {
   return request({ path: `/cart/items/${cartItemId}`, method: "DELETE" });
 }
 
-async function listPaymentMethods() {
+export async function listPaymentMethods(): Promise<Array<{ code: string; id: string; label: string }>> {
   const payload = await request({ path: "/payments/methods" });
-  return (payload.items ?? []).map((item, index) => ({
+  const items = Array.isArray(payload.items) ? payload.items : [];
+  return items.map((item, index) => ({
     id: String(item.id ?? item.code ?? `method-${index + 1}`),
     code: String(item.code ?? item.id ?? `method-${index + 1}`),
     label: String(item.label ?? item.name ?? item.code ?? "支付方式"),
   }));
 }
 
-async function listUserCoupons() {
+export async function listUserCoupons(): Promise<Array<{ discountAmountCny: number | null; id: string; minSpendCny: number | null; title: string; validUntil: string }>> {
   const payload = await request({ path: "/promotions/user_coupons", query: { page: 1, page_size: 50 } });
-  return (payload.items ?? [])
+  const items = Array.isArray(payload.items) ? payload.items : [];
+  return items
     .filter((item) => {
       const status = String(item.status ?? item.statusName ?? "AVAILABLE").toUpperCase();
       return status === "AVAILABLE" || status === "ACTIVE" || status === "UNUSED" || status === "";
@@ -68,7 +112,7 @@ async function listUserCoupons() {
     .filter((coupon) => coupon.id);
 }
 
-async function createCheckoutQuote(options = {}) {
+export async function createCheckoutQuote(options: { cartItemIds?: string[] } = {}): Promise<MpCheckoutQuote> {
   const body = options.cartItemIds && options.cartItemIds.length ? { cartItemIds: options.cartItemIds } : {};
   const sessionRecord = await request({ path: "/checkout/sessions", method: "POST", body });
   const sessionId = String(sessionRecord.id ?? sessionRecord.sessionId ?? "");
@@ -86,7 +130,7 @@ async function createCheckoutQuote(options = {}) {
   };
 }
 
-async function submitOrder(options) {
+export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orderId: string; quote: MpCheckoutQuote }> {
   const quote = await createCheckoutQuote({ cartItemIds: options.cartItemIds });
 
   if (options.addressId) {
@@ -137,7 +181,7 @@ async function submitOrder(options) {
   return { orderId, quote };
 }
 
-async function payOrder(orderId, paymentMethod) {
+export async function payOrder(orderId: string, paymentMethod: string): Promise<string> {
   const payment = await request({
     path: `/orders/${orderId}/payments`,
     method: "POST",
@@ -145,15 +189,3 @@ async function payOrder(orderId, paymentMethod) {
   });
   return String(payment.paymentId ?? payment.id ?? "");
 }
-
-module.exports = {
-  getCart,
-  addToCart,
-  updateCartItem,
-  removeCartItem,
-  listPaymentMethods,
-  listUserCoupons,
-  createCheckoutQuote,
-  submitOrder,
-  payOrder,
-};

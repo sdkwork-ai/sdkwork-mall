@@ -1,0 +1,37 @@
+<view class="page-login">
+  <view class="mp-card">
+    <view class="mp-card-title">登录 SDKWork 商城</view>
+
+    <block wx:if="{{!useTokenFallback}}">
+      <view class="mp-field">
+        <text class="mp-field-label">用户名 / 手机号 / 邮箱</text>
+        <input value="{{account}}" placeholder="输入登录账号" bindinput="onAccountInput" />
+      </view>
+      <view class="mp-field">
+        <text class="mp-field-label">密码</text>
+        <input password value="{{password}}" placeholder="输入密码" bindinput="onPasswordInput" />
+      </view>
+      <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+      <button class="mp-btn mp-btn-primary login-btn" disabled="{{busy}}" bindtap="login">
+        {{busy ? '登录中...' : '登录'}}
+      </button>
+    </block>
+
+    <block wx:else>
+      <view class="mp-muted login-hint">
+        开发回退：直接粘贴平台签发的访问令牌。
+      </view>
+      <view class="mp-field">
+        <text class="mp-field-label">访问令牌</text>
+        <input password value="{{token}}" placeholder="粘贴平台访问令牌" bindinput="onTokenInput" />
+      </view>
+      <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+      <button class="mp-btn mp-btn-primary login-btn" bindtap="loginWithToken">登录</button>
+    </block>
+
+    <button wx:if="{{token}}" class="mp-btn mp-btn-ghost login-btn" bindtap="logout">退出当前账号</button>
+    <view class="login-fallback-switch" bindtap="toggleFallback">
+      {{useTokenFallback ? '使用账号密码登录' : '使用访问令牌登录（开发）'}}
+    </view>
+  </view>
+</view>

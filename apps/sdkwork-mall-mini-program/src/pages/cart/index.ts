@@ -1,10 +1,32 @@
-const cartService = require("../../services/cart-service");
-const session = require("../../services/session");
-const { formatCny } = require("../../utils/format");
+import { errorMessage, type MpTapEvent } from "../../types/common";
+import { type MpCartItem, getCart, removeCartItem, updateCartItem } from "../../services/cart-service";
+import { isLoggedIn } from "../../services/session";
 
-function groupByShop(items) {
-  const groups = [];
-  const byId = new Map();
+interface CartGroup {
+  shopId: string;
+  shopName: string;
+  items: MpCartItem[];
+}
+
+interface CartGroupView extends CartGroup {
+  allSelected: boolean;
+}
+
+interface CartData {
+  groups: CartGroupView[];
+  selectedIds: string[];
+  selectedTotal: string;
+  selectedCount: number;
+  loading: boolean;
+  loggedIn: boolean;
+  error: string;
+  toast: string;
+  _toastTimer: number | null;
+}
+
+function groupByShop(items: MpCartItem[]): CartGroup[] {
+  const groups: CartGroup[] = [];
+  const byId = new Map<string, CartGroup>();
   for (const item of items) {
     const shopId = item.shopId || "shop-default";
     let group = byId.get(shopId);
@@ -28,12 +50,13 @@ Page({
     loggedIn: false,
     error: "",
     toast: "",
-  },
+    _toastTimer: null,
+  } as CartData,
 
   onShow() {
-    this.setData({ loggedIn: session.isLoggedIn() });
-    if (session.isLoggedIn()) {
-      this.refresh();
+    this.setData({ loggedIn: isLoggedIn() });
+    if (isLoggedIn()) {
+      void this.refresh();
     } else {
       this.setData({ loading: false });
     }
@@ -42,7 +65,7 @@ Page({
   async refresh() {
     this.setData({ loading: true, error: "" });
     try {
-      const cart = await cartService.getCart();
+      const cart = await getCart();
       const groups = groupByShop(cart.items).map((group) => ({
         ...group,
         allSelected: group.items.every((item) => this.isSelected(item.id)),
@@ -52,17 +75,17 @@ Page({
     } catch (cause) {
       this.setData({
         loading: false,
-        error: cause && cause.message ? cause.message : "购物车加载失败",
+        error: errorMessage(cause, "购物车加载失败"),
       });
     }
   },
 
-  isSelected(itemId) {
+  isSelected(itemId: string) {
     return this.data.selectedIds.indexOf(itemId) >= 0;
   },
 
-  syncSelection(groups) {
-    const allIds = [];
+  syncSelection(groups: CartGroupView[]) {
+    const allIds: string[] = [];
     for (const group of groups) {
       for (const item of group.items) {
         allIds.push(item.id);
@@ -91,7 +114,7 @@ Page({
   },
 
   toggleAll() {
-    const allIds = [];
+    const allIds: string[] = [];
     for (const group of this.data.groups) {
       for (const item of group.items) {
         allIds.push(item.id);
@@ -102,8 +125,8 @@ Page({
     this.setData({ selectedIds }, () => this.syncSelection(this.data.groups));
   },
 
-  toggleGroup(event) {
-    const shopId = event.currentTarget.dataset.shop;
+  toggleGroup(event: MpTapEvent) {
+    const shopId = String(event.currentTarget.dataset.shop ?? "");
     const group = this.data.groups.find((entry) => entry.shopId === shopId);
     if (!group) {
       return;
@@ -117,8 +140,8 @@ Page({
     this.setData({ selectedIds }, () => this.syncSelection(this.data.groups));
   },
 
-  toggleItem(event) {
-    const itemId = event.currentTarget.dataset.id;
+  toggleItem(event: MpTapEvent) {
+    const itemId = String(event.currentTarget.dataset.id ?? "");
     const index = this.data.selectedIds.indexOf(itemId);
     const selectedIds = this.data.selectedIds.slice();
     if (index >= 0) {
@@ -129,32 +152,32 @@ Page({
     this.setData({ selectedIds }, () => this.syncSelection(this.data.groups));
   },
 
-  async changeQuantity(event) {
-    const { id, quantity } = event.currentTarget.dataset;
-    const nextQuantity = Number(quantity);
+  async changeQuantity(event: MpTapEvent) {
+    const id = String(event.currentTarget.dataset.id ?? "");
+    const nextQuantity = Number(event.currentTarget.dataset.quantity ?? 0);
     if (!id || nextQuantity < 1) {
       return;
     }
     try {
-      await cartService.updateCartItem(id, nextQuantity);
+      await updateCartItem(id, nextQuantity);
       await this.refresh();
     } catch (cause) {
-      this.showToast(cause && cause.message ? cause.message : "更新数量失败");
+      this.showToast(errorMessage(cause, "更新数量失败"));
     }
   },
 
-  async removeItem(event) {
-    const id = event.currentTarget.dataset.id;
+  async removeItem(event: MpTapEvent) {
+    const id = String(event.currentTarget.dataset.id ?? "");
     try {
-      await cartService.removeCartItem(id);
+      await removeCartItem(id);
       await this.refresh();
     } catch (cause) {
-      this.showToast(cause && cause.message ? cause.message : "删除失败");
+      this.showToast(errorMessage(cause, "删除失败"));
     }
   },
 
-  goProduct(event) {
-    wx.navigateTo({ url: `/pages/product/index?id=${event.currentTarget.dataset.id}` });
+  goProduct(event: MpTapEvent) {
+    wx.navigateTo({ url: `/pages/product/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
   },
 
   goHome() {
@@ -173,11 +196,11 @@ Page({
     wx.navigateTo({ url: `/pages/checkout/index?items=${this.data.selectedIds.join(",")}` });
   },
 
-  showToast(message) {
+  showToast(message: string) {
     this.setData({ toast: message });
-    if (this.toastTimer) {
-      clearTimeout(this.toastTimer);
+    if (this.data._toastTimer != null) {
+      clearTimeout(this.data._toastTimer);
     }
-    this.toastTimer = setTimeout(() => this.setData({ toast: "" }), 2200);
+    this.setData({ _toastTimer: setTimeout(() => this.setData({ toast: "" }), 2200) });
   },
 });

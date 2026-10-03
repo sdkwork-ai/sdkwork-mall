@@ -1,11 +1,21 @@
-const { request } = require("./transport");
+import { request } from "./transport";
 
-async function listOffers() {
+export interface MpOffer {
+  claimable: boolean;
+  discountText: string;
+  endAt: string;
+  highlight: string;
+  id: string;
+  title: string;
+}
+
+export async function listOffers(): Promise<MpOffer[]> {
   const payload = await request({
     path: "/promotions/offers",
     query: { page: 1, page_size: 10, status: "active" },
   });
-  return (payload.items ?? []).map((item) => ({
+  const items = Array.isArray(payload.items) ? payload.items : [];
+  return items.map((item) => ({
     id: String(item.id ?? item.offerId ?? ""),
     title: String(item.title ?? item.name ?? "活动"),
     discountText: typeof item.discountText === "string" ? item.discountText : "",
@@ -15,12 +25,10 @@ async function listOffers() {
   }));
 }
 
-async function claimCoupon(offerId) {
+export async function claimCoupon(offerId: string): Promise<Record<string, unknown>> {
   return request({ path: "/promotions/user_coupon_claims", method: "POST", body: { offerId } });
 }
 
-async function redeemCouponCode(code) {
+export async function redeemCouponCode(code: string): Promise<Record<string, unknown>> {
   return request({ path: "/promotions/codes/redemptions", method: "POST", body: { code } });
 }
-
-module.exports = { listOffers, claimCoupon, redeemCouponCode };

@@ -5,6 +5,7 @@
   "projectname": "sdkwork-mall-mini-program",
   "setting": {
     "es6": true,
+    "useCompilerPlugins": ["typescript"],
     "minified": true,
     "urlCheck": false
   }

@@ -8,3 +8,10 @@
   margin-top: 20rpx;
   font-size: 30rpx;
 }
+
+.login-fallback-switch {
+  margin-top: 24rpx;
+  text-align: center;
+  color: #e93b3d;
+  font-size: 26rpx;
+}

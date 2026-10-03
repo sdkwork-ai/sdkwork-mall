@@ -1,6 +1,19 @@
-const addressService = require("../../services/address-service");
+import {
+  errorMessage,
+  type MpInputEvent,
+  type MpPickerChangeEvent,
+  type MpTapEvent,
+} from "../../types/common";
+import {
+  listAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  setDefaultAddress,
+  type MpAddress,
+} from "../../services/address-service";
 
-const PROVINCE_CITIES = [
+const PROVINCE_CITIES: Array<{ province: string; cities: string[] }> = [
   { province: "北京市", cities: ["北京市"] },
   { province: "上海市", cities: ["上海市"] },
   { province: "天津市", cities: ["天津市"] },
@@ -33,7 +46,7 @@ const PROVINCE_CITIES = [
   { province: "新疆维吾尔自治区", cities: ["乌鲁木齐市", "克拉玛依市", "吐鲁番市", "哈密市"] },
 ];
 
-function detectRegion(addressLine) {
+function detectRegion(addressLine: string): { province: string; city: string; detail: string } {
   for (const entry of PROVINCE_CITIES) {
     if (addressLine.indexOf(entry.province) === 0) {
       const rest = addressLine.slice(entry.province.length);
@@ -47,6 +60,28 @@ function detectRegion(addressLine) {
   return { province: "", city: "", detail: addressLine };
 }
 
+interface AddressForm {
+  province: string;
+  city: string;
+  detail: string;
+  receiverName: string;
+  receiverPhone: string;
+}
+
+interface AddressData {
+  addresses: MpAddress[];
+  provinces: string[];
+  cities: string[];
+  editing: boolean;
+  editingId: string;
+  form: AddressForm;
+  loading: boolean;
+  error: string;
+  toast: string;
+  _pickerMode: boolean;
+  _toastTimer: number | null;
+}
+
 Page({
   data: {
     addresses: [],
@@ -58,10 +93,12 @@ Page({
     loading: true,
     error: "",
     toast: "",
-  },
+    _pickerMode: false,
+    _toastTimer: null,
+  } as AddressData,
 
-  onLoad(options) {
-    this.pickerMode = options.picker === "1";
+  onLoad(options: Record<string, string | undefined>) {
+    this.setData({ _pickerMode: options.picker === "1" });
   },
 
   onShow() {
@@ -71,25 +108,32 @@ Page({
   async refresh() {
     this.setData({ loading: true, error: "" });
     try {
-      const addresses = await addressService.listAddresses();
+      const addresses = await listAddresses();
       this.setData({ addresses, loading: false });
     } catch (cause) {
       this.setData({
         loading: false,
-        error: cause && cause.message ? cause.message : "地址加载失败",
+        error: errorMessage(cause, "地址加载失败"),
       });
     }
   },
 
-  pickAddress(event) {
-    if (!this.pickerMode) {
+  pickAddress(event: MpTapEvent) {
+    if (!this.data._pickerMode) {
       return;
     }
-    const address = this.data.addresses.find((entry) => entry.id === event.currentTarget.dataset.id);
+    const addressId = String(event.currentTarget.dataset.id ?? "");
+    const address = this.data.addresses.find((entry) => entry.id === addressId);
     if (!address) {
       return;
     }
-    const eventChannel = this.getOpenerEventChannel && this.getOpenerEventChannel();
+    // Page instances do not declare getOpenerEventChannel in
+    // miniprogram-api-typings (it is typed on Component only), so a narrow
+    // structural cast is required to reach the opener EventChannel.
+    const host = this as unknown as {
+      getOpenerEventChannel?: () => { emit?: (eventName: string, ...args: unknown[]) => void };
+    };
+    const eventChannel = host.getOpenerEventChannel && host.getOpenerEventChannel();
     if (eventChannel && eventChannel.emit) {
       eventChannel.emit("addressPicked", address);
     }
@@ -105,8 +149,9 @@ Page({
     });
   },
 
-  openEdit(event) {
-    const address = this.data.addresses.find((entry) => entry.id === event.currentTarget.dataset.id);
+  openEdit(event: MpTapEvent) {
+    const addressId = String(event.currentTarget.dataset.id ?? "");
+    const address = this.data.addresses.find((entry) => entry.id === addressId);
     if (!address) {
       return;
     }
@@ -130,7 +175,7 @@ Page({
     this.setData({ editing: false });
   },
 
-  onProvinceChange(event) {
+  onProvinceChange(event: MpPickerChangeEvent) {
     const province = this.data.provinces[Number(event.detail.value)];
     const entry = PROVINCE_CITIES.find((candidate) => candidate.province === province);
     this.setData({
@@ -139,20 +184,20 @@ Page({
     });
   },
 
-  onCityChange(event) {
+  onCityChange(event: MpPickerChangeEvent) {
     const city = this.data.cities[Number(event.detail.value)];
     this.setData({ form: { ...this.data.form, city } });
   },
 
-  onDetailInput(event) {
+  onDetailInput(event: MpInputEvent) {
     this.setData({ form: { ...this.data.form, detail: event.detail.value } });
   },
 
-  onNameInput(event) {
+  onNameInput(event: MpInputEvent) {
     this.setData({ form: { ...this.data.form, receiverName: event.detail.value } });
   },
 
-  onPhoneInput(event) {
+  onPhoneInput(event: MpInputEvent) {
     this.setData({ form: { ...this.data.form, receiverPhone: event.detail.value } });
   },
 
@@ -181,28 +226,28 @@ Page({
     };
     try {
       if (editingId) {
-        await addressService.updateAddress(editingId, payload);
+        await updateAddress(editingId, payload);
       } else {
-        await addressService.createAddress(payload);
+        await createAddress(payload);
       }
       this.setData({ editing: false });
       await this.refresh();
     } catch (cause) {
-      this.showToast(cause && cause.message ? cause.message : "保存失败");
+      this.showToast(errorMessage(cause, "保存失败"));
     }
   },
 
-  async setDefault(event) {
+  async setDefault(event: MpTapEvent) {
     try {
-      await addressService.setDefaultAddress(event.currentTarget.dataset.id);
+      await setDefaultAddress(String(event.currentTarget.dataset.id ?? ""));
       await this.refresh();
     } catch (cause) {
-      this.showToast(cause && cause.message ? cause.message : "设置默认失败");
+      this.showToast(errorMessage(cause, "设置默认失败"));
     }
   },
 
-  async remove(event) {
-    const id = event.currentTarget.dataset.id;
+  async remove(event: MpTapEvent) {
+    const id = String(event.currentTarget.dataset.id ?? "");
     wx.showModal({
       title: "删除地址",
       content: "确定删除该收货地址？",
@@ -211,20 +256,20 @@ Page({
           return;
         }
         try {
-          await addressService.deleteAddress(id);
+          await deleteAddress(id);
           await this.refresh();
         } catch (cause) {
-          this.showToast(cause && cause.message ? cause.message : "删除失败");
+          this.showToast(errorMessage(cause, "删除失败"));
         }
       },
     });
   },
 
-  showToast(message) {
+  showToast(message: string) {
     this.setData({ toast: message });
-    if (this.toastTimer) {
-      clearTimeout(this.toastTimer);
+    if (this.data._toastTimer) {
+      clearTimeout(this.data._toastTimer);
     }
-    this.toastTimer = setTimeout(() => this.setData({ toast: "" }), 2200);
+    this.setData({ _toastTimer: setTimeout(() => this.setData({ toast: "" }), 2200) });
   },
 });

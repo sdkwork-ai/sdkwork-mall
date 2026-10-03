@@ -1,0 +1,140 @@
+/**
+ * Single transport seam for the mini-program.
+ *
+ * Every network call in the app funnels through `request()` so envelope
+ * unwrapping, auth headers, timeouts, and error mapping live in exactly one
+ * place. Pages and services never call wx.request directly.
+ */
+import { getAccessToken, getToken } from "./session";
+
+const DEFAULT_TIMEOUT_MS = 15000;
+
+/** One MP record payload (the `data` member of the success envelope). */
+export type MpPayload = Record<string, unknown>;
+
+export interface MpRequestOptions {
+  path: string;
+  method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
+  body?: Record<string, unknown>;
+  query?: Record<string, string | number | boolean | undefined>;
+  timeoutMs?: number;
+}
+
+/** Error carrying the platform problem fields (`code`, `traceId`). */
+export class SdkworkRequestError extends Error {
+  constructor(
+    message: string,
+    fields: { cause?: unknown; code?: string | number; statusCode?: number; traceId?: string } = {},
+  ) {
+    super(message);
+    this.name = "SdkworkRequestError";
+    this.code = fields.code;
+    this.traceId = fields.traceId;
+    this.statusCode = fields.statusCode;
+    if (fields.cause !== undefined) {
+      this.cause = fields.cause;
+    }
+  }
+
+  code?: string | number;
+  traceId?: string;
+  statusCode?: number;
+  cause?: unknown;
+}
+
+function getBaseUrl(): string {
+  const app = getApp<{ globalData?: { commerceApiBaseUrl?: string } }>();
+  return app?.globalData?.commerceApiBaseUrl || "https://api-dev.sdkwork.com/app/v3/api";
+}
+
+/**
+ * Performs a request against the commerce app-api and unwraps the
+ * SdkWorkApiResponse envelope (`{ code, data, traceId }`).
+ * HTTP/problem errors reject with a SdkworkRequestError.
+ */
+export function request(options: MpRequestOptions): Promise<MpPayload> {
+  const { path, method = "GET", body, query, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+  let url = `${getBaseUrl()}${path}`;
+  if (query) {
+    const search = Object.keys(query)
+      .filter((key) => query[key] !== undefined && query[key] !== null && query[key] !== "")
+      .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(String(query[key]))}`)
+      .join("&");
+    if (search) {
+      url += `?${search}`;
+    }
+  }
+
+  const header: Record<string, string> = { "content-type": "application/json" };
+  const token = getToken();
+  if (token) {
+    header.authorization = `Bearer ${token}`;
+  }
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    header["access-token"] = accessToken;
+  }
+
+  return new Promise<MpPayload>((resolve, reject) => {
+    wx.request({
+      url,
+      // `PATCH` sits outside the wx.request documented method list; the
+      // platform passes explicit methods through, and the after-sales revoke
+      // command is a PATCH on the wire contract.
+      method: method as unknown as "GET",
+      data: body,
+      header,
+      timeout: timeoutMs,
+      success(res) {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          const payload = res.data;
+          if (payload && typeof payload === "object" && !Array.isArray(payload) && "code" in payload) {
+            if (Number(payload.code) === 0) {
+              const data = (payload as { data?: unknown }).data;
+              resolve(data !== null && typeof data === "object" && !Array.isArray(data)
+                ? (data as MpPayload)
+                : {});
+              return;
+            }
+            reject(
+              new SdkworkRequestError(
+                String((payload as { message?: unknown }).message ?? `请求失败（${payload.code}）`),
+                {
+                  code: (payload as { code?: string | number }).code,
+                  traceId: String((payload as { traceId?: unknown }).traceId ?? ""),
+                },
+              ),
+            );
+            return;
+          }
+          resolve(payload as MpPayload);
+          return;
+        }
+        const problem = (res.data ?? {}) as Record<string, unknown>;
+        reject(
+          new SdkworkRequestError(
+            String(
+              problem.detail
+                ?? problem.title
+                ?? problem.message
+                ?? `请求失败（HTTP ${res.statusCode}）`,
+            ),
+            {
+              code: (problem.code ?? res.statusCode) as string | number,
+              statusCode: res.statusCode,
+              traceId: String(problem.traceId ?? ""),
+            },
+          ),
+        );
+      },
+      fail(cause) {
+        reject(
+          new SdkworkRequestError(
+            cause?.errMsg ? `网络请求失败：${cause.errMsg}` : "网络请求失败",
+            { cause },
+          ),
+        );
+      },
+    });
+  });
+}

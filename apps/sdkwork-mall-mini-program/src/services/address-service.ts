@@ -1,8 +1,23 @@
-const { request } = require("./transport");
+import { request } from "./transport";
 
-async function listAddresses() {
+export interface MpAddress {
+  addressLine: string;
+  id: string;
+  isDefault: boolean;
+  receiverName: string;
+  receiverPhone: string;
+}
+
+export interface MpAddressInput {
+  addressLine: string;
+  receiverName: string;
+  receiverPhone: string;
+}
+
+export async function listAddresses(): Promise<MpAddress[]> {
   const payload = await request({ path: "/addresses", query: { page: 1, page_size: 20 } });
-  return (payload.items ?? []).map((item) => ({
+  const items = Array.isArray(payload.items) ? payload.items : [];
+  return items.map((item) => ({
     id: String(item.id ?? ""),
     receiverName: String(item.receiverName ?? item.contactName ?? ""),
     receiverPhone: String(item.receiverPhone ?? item.contactPhone ?? ""),
@@ -11,7 +26,7 @@ async function listAddresses() {
   }));
 }
 
-async function createAddress(options) {
+export async function createAddress(options: MpAddressInput): Promise<Record<string, unknown>> {
   return request({
     path: "/addresses",
     method: "POST",
@@ -23,7 +38,7 @@ async function createAddress(options) {
   });
 }
 
-async function updateAddress(addressId, options) {
+export async function updateAddress(addressId: string, options: MpAddressInput): Promise<Record<string, unknown>> {
   return request({
     path: `/addresses/${addressId}`,
     method: "PUT",
@@ -35,12 +50,10 @@ async function updateAddress(addressId, options) {
   });
 }
 
-async function deleteAddress(addressId) {
+export async function deleteAddress(addressId: string): Promise<Record<string, unknown>> {
   return request({ path: `/addresses/${addressId}`, method: "DELETE" });
 }
 
-async function setDefaultAddress(addressId) {
+export async function setDefaultAddress(addressId: string): Promise<Record<string, unknown>> {
   return request({ path: "/addresses/default_selection", method: "POST", body: { addressId } });
 }
-
-module.exports = { listAddresses, createAddress, updateAddress, deleteAddress, setDefaultAddress };

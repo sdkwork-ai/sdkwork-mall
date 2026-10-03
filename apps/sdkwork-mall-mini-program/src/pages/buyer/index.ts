@@ -1,7 +1,8 @@
-const ordersService = require("../../services/order-service");
-const session = require("../../services/session");
+import { type MpTapEvent } from "../../types/common";
+import { getOrderStatistics } from "../../services/order-service";
+import { isLoggedIn, clearSession } from "../../services/session";
 
-const ORDER_ENTRIES = [
+const ORDER_ENTRIES: Array<{ status: string; label: string; count: string | number }> = [
   { status: "all", label: "全部订单", count: "" },
   { status: "PENDING_PAYMENT", label: "待付款", count: "" },
   { status: "PENDING_SHIPMENT", label: "待发货", count: "" },
@@ -9,7 +10,7 @@ const ORDER_ENTRIES = [
   { status: "COMPLETED", label: "已完成", count: "" },
 ];
 
-const QUICK_LINKS = [
+const QUICK_LINKS: Array<{ label: string; path: string }> = [
   { label: "地址管理", path: "/pages/address/index" },
   { label: "领券中心", path: "/pages/coupons/index" },
   { label: "我的订单", path: "/pages/orders/index" },
@@ -17,15 +18,21 @@ const QUICK_LINKS = [
   { label: "去逛逛", path: "home" },
 ];
 
+interface BuyerData {
+  loggedIn: boolean;
+  orderEntries: Array<{ status: string; label: string; count: string | number }>;
+  quickLinks: Array<{ label: string; path: string }>;
+}
+
 Page({
   data: {
     loggedIn: false,
     orderEntries: ORDER_ENTRIES,
     quickLinks: QUICK_LINKS,
-  },
+  } as BuyerData,
 
   onShow() {
-    const loggedIn = session.isLoggedIn();
+    const loggedIn = isLoggedIn();
     this.setData({ loggedIn });
     if (loggedIn) {
       this.loadStatistics();
@@ -34,8 +41,8 @@ Page({
 
   async loadStatistics() {
     try {
-      const statistics = await ordersService.getOrderStatistics();
-      const countFor = (status) => {
+      const statistics = await getOrderStatistics();
+      const countFor = (status: string): string | number => {
         if (!statistics) {
           return "";
         }
@@ -67,14 +74,14 @@ Page({
     }
   },
 
-  goOrderEntry(event) {
-    const status = event.currentTarget.dataset.status;
+  goOrderEntry(event: MpTapEvent) {
+    const status = String(event.currentTarget.dataset.status ?? "");
     const query = status && status !== "all" ? `?status=${status}` : "";
     wx.navigateTo({ url: `/pages/orders/index${query}` });
   },
 
-  goQuickLink(event) {
-    const path = event.currentTarget.dataset.path;
+  goQuickLink(event: MpTapEvent) {
+    const path = String(event.currentTarget.dataset.path ?? "");
     if (path === "home") {
       wx.switchTab({ url: "/pages/home/index" });
       return;
@@ -92,7 +99,7 @@ Page({
       content: "确定退出当前账号？",
       success: (result) => {
         if (result.confirm) {
-          session.clearToken();
+          clearSession();
           this.setData({ loggedIn: false, orderEntries: ORDER_ENTRIES });
         }
       },

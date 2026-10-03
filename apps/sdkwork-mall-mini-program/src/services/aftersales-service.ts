@@ -6,15 +6,43 @@
  * item; amounts and per-item quantities come from the order snapshot, never
  * from user input.
  */
-const { request } = require("./transport");
+import { request } from "./transport";
 
-const AFTER_SALES_TYPES = [
+export interface MpAfterSalesItemInput {
+  orderItemId: string;
+  requestedQuantity: number;
+  refundAmountCny?: number | null;
+}
+
+export interface MpAfterSalesCreateInput {
+  orderId: string;
+  afterSalesType: string;
+  reasonCode: string;
+  description?: string;
+  requestedAmountCny: number;
+  items: MpAfterSalesItemInput[];
+}
+
+export interface MpAfterSalesRow {
+  afterSalesNo: string;
+  description: string;
+  id: string;
+  orderId: string;
+  reasonCode: string;
+  requestedAmount: string;
+  revokable: boolean;
+  status: string;
+  statusLabel: string;
+  typeLabel: string;
+}
+
+export const AFTER_SALES_TYPES = [
   { value: "refund", label: "仅退款" },
   { value: "return", label: "退货退款" },
   { value: "exchange", label: "换货" },
 ];
 
-const AFTER_SALES_REASON_PRESETS = [
+export const AFTER_SALES_REASON_PRESETS = [
   { code: "not-as-described", label: "商品与描述不符" },
   { code: "quality-issue", label: "质量问题" },
   { code: "missing-item", label: "少件/漏发" },
@@ -23,7 +51,7 @@ const AFTER_SALES_REASON_PRESETS = [
   { code: "other", label: "其他" },
 ];
 
-const STATUS_LABELS = {
+export const STATUS_LABELS: Record<string, string> = {
   PENDING: "待审核",
   REVIEWING: "审核中",
   APPROVED: "已通过",
@@ -32,18 +60,18 @@ const STATUS_LABELS = {
   CANCELLED: "已撤销",
 };
 
-function buildCreateAfterSalesBody(input) {
+export function buildCreateAfterSalesBody(input: MpAfterSalesCreateInput): Record<string, unknown> {
   if (!Array.isArray(input.items) || input.items.length === 0) {
     throw new Error("订单没有可售后的商品行");
   }
-  const body = {
+  const body: Record<string, unknown> = {
     orderId: input.orderId,
     afterSalesType: input.afterSalesType,
     reasonCode: input.reasonCode,
     requestedAmount: Number(input.requestedAmountCny).toFixed(2),
     currencyCode: "CNY",
     items: input.items.map((item) => {
-      const entry = {
+      const entry: Record<string, unknown> = {
         orderItemId: item.orderItemId,
         requestedQuantity: item.requestedQuantity,
       };
@@ -59,7 +87,7 @@ function buildCreateAfterSalesBody(input) {
   return body;
 }
 
-async function listRequests(page = 1, pageSize = 50) {
+export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSalesRow[]> {
   const payload = await request({
     path: "/after_sales/requests",
     query: { page, page_size: pageSize },
@@ -84,25 +112,15 @@ async function listRequests(page = 1, pageSize = 50) {
   });
 }
 
-async function createRequest(input) {
+export async function createRequest(input: MpAfterSalesCreateInput): Promise<Record<string, unknown>> {
   const body = buildCreateAfterSalesBody(input);
   return request({ path: "/after_sales/requests", method: "POST", body });
 }
 
-async function cancelRequest(requestId) {
+export async function cancelRequest(requestId: string): Promise<Record<string, unknown>> {
   return request({
     path: `/after_sales/requests/${requestId}`,
     method: "PATCH",
     body: { status: "CANCELLED" },
   });
 }
-
-module.exports = {
-  AFTER_SALES_TYPES,
-  AFTER_SALES_REASON_PRESETS,
-  STATUS_LABELS,
-  buildCreateAfterSalesBody,
-  listRequests,
-  createRequest,
-  cancelRequest,
-};

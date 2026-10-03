@@ -8,13 +8,26 @@
  * lands (see docs/decisions.md); the dev token-paste entry remains on the
  * login page as a fallback.
  */
-const STORAGE_KEY = "sdkwork-mall-mp-session";
 
-function readSession() {
+interface MpSessionSnapshot {
+  authToken: string;
+  accessToken: string;
+  userId: string;
+}
+
+const STORAGE_KEY = "sdkwork-mall-mp-session";
+const LEGACY_TOKEN_KEY = "sdkwork-mall-mp-session-token";
+
+function readSession(): MpSessionSnapshot | null {
   try {
     const stored = wx.getStorageSync(STORAGE_KEY);
     if (stored && typeof stored === "object") {
-      return stored;
+      const record = stored as Record<string, unknown>;
+      return {
+        authToken: String(record.authToken ?? ""),
+        accessToken: String(record.accessToken ?? ""),
+        userId: String(record.userId ?? ""),
+      };
     }
   } catch (error) {
     // storage unavailable
@@ -22,59 +35,45 @@ function readSession() {
   return null;
 }
 
-function getToken() {
+export function getToken(): string {
   const stored = readSession();
-  if (stored && typeof stored.authToken === "string" && stored.authToken !== "") {
+  if (stored && stored.authToken !== "") {
     return stored.authToken;
   }
   // Pre-dual-token storage held a bare token string.
   try {
-    return wx.getStorageSync("sdkwork-mall-mp-session-token") || "";
+    return String(wx.getStorageSync(LEGACY_TOKEN_KEY) || "");
   } catch (error) {
     return "";
   }
 }
 
-function getAccessToken() {
+export function getAccessToken(): string {
   const stored = readSession();
-  return stored && typeof stored.accessToken === "string" ? stored.accessToken : "";
+  return stored ? stored.accessToken : "";
 }
 
-function setSession(snapshot) {
+export function setSession(snapshot: MpSessionSnapshot): void {
   try {
-    wx.setStorageSync(STORAGE_KEY, {
-      authToken: String(snapshot.authToken || ""),
-      accessToken: String(snapshot.accessToken || ""),
-      userId: String(snapshot.userId || ""),
-    });
+    wx.setStorageSync(STORAGE_KEY, snapshot);
   } catch (error) {
     // storage unavailable: keep the session in memory only
   }
 }
 
-function setToken(token) {
+export function setToken(token: string): void {
   setSession({ authToken: token, accessToken: "", userId: "" });
 }
 
-function clearSession() {
+export function clearSession(): void {
   try {
     wx.removeStorageSync(STORAGE_KEY);
-    wx.removeStorageSync("sdkwork-mall-mp-session-token");
+    wx.removeStorageSync(LEGACY_TOKEN_KEY);
   } catch (error) {
     // ignore
   }
 }
 
-function isLoggedIn() {
+export function isLoggedIn(): boolean {
   return Boolean(getToken());
 }
-
-module.exports = {
-  getToken,
-  getAccessToken,
-  setSession,
-  setToken,
-  clearSession,
-  clearToken: clearSession,
-  isLoggedIn,
-};

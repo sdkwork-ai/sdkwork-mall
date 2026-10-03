@@ -1,14 +1,38 @@
-const catalog = require("../../services/catalog-service");
-const { formatCny } = require("../../utils/format");
+import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
+import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
+import { formatCny } from "../../utils/format";
 
-const SORTS = [
+interface SearchSort {
+  code: string;
+  label: string;
+}
+
+type SearchProduct = MpProductCard & { priceText: string };
+
+interface SearchData {
+  keyword: string;
+  sorts: SearchSort[];
+  activeSort: string;
+  hotKeywords: string[];
+  history: string[];
+  categories: MpCategory[];
+  activeCategoryId: string;
+  products: SearchProduct[];
+  page: number;
+  total: number;
+  loading: boolean;
+  loadingMore: boolean;
+  error: string;
+}
+
+const SORTS: SearchSort[] = [
   { code: "", label: "综合" },
   { code: "sales", label: "销量" },
   { code: "price_asc", label: "价格↑" },
   { code: "price_desc", label: "价格↓" },
 ];
 
-const HOT_KEYWORDS = ["手机", "笔记本", "大米", "人体工学椅", "新品", "旗舰"];
+const HOT_KEYWORDS: string[] = ["手机", "笔记本", "大米", "人体工学椅", "新品", "旗舰"];
 const HISTORY_KEY = "sdkwork-mall-mp-search-history";
 
 Page({
@@ -26,9 +50,9 @@ Page({
     loading: true,
     loadingMore: false,
     error: "",
-  },
+  } as SearchData,
 
-  onLoad(options) {
+  onLoad(options: Record<string, string | undefined>) {
     const history = this.readHistory();
     this.setData({
       history,
@@ -36,28 +60,28 @@ Page({
       activeSort: options.sort || "",
       activeCategoryId: options.categoryId || "",
     });
-    this.loadCategories();
-    this.loadProducts(1);
+    void this.loadCategories();
+    void this.loadProducts(1);
   },
 
-  readHistory() {
+  readHistory(): string[] {
     try {
       const raw = wx.getStorageSync(HISTORY_KEY);
-      const list = raw ? JSON.parse(raw) : [];
+      const list: unknown = raw ? JSON.parse(raw) : [];
       return Array.isArray(list) ? list.slice(0, 10) : [];
-    } catch (cause) {
+    } catch {
       return [];
     }
   },
 
-  recordHistory(keyword) {
+  recordHistory(keyword: string) {
     if (!keyword) {
       return;
     }
     const history = [keyword].concat(this.readHistory().filter((entry) => entry !== keyword)).slice(0, 10);
     try {
       wx.setStorageSync(HISTORY_KEY, JSON.stringify(history));
-    } catch (cause) {
+    } catch {
       // storage unavailable
     }
     this.setData({ history });
@@ -66,7 +90,7 @@ Page({
   clearHistory() {
     try {
       wx.removeStorageSync(HISTORY_KEY);
-    } catch (cause) {
+    } catch {
       // ignore
     }
     this.setData({ history: [] });
@@ -74,20 +98,20 @@ Page({
 
   async loadCategories() {
     try {
-      const categories = await catalog.listCategories();
+      const categories = await listCategories();
       this.setData({
         categories: categories.filter((category) => !category.parentId).slice(0, 12),
       });
-    } catch (cause) {
+    } catch {
       // 分类栏为可选增强
     }
   },
 
-  async loadProducts(nextPage) {
+  async loadProducts(nextPage: number) {
     const { keyword, activeSort, activeCategoryId } = this.data;
     this.setData(nextPage === 1 ? { loading: true, error: "" } : { loadingMore: true });
     try {
-      const result = await catalog.listProducts({
+      const result = await listProducts({
         categoryId: activeCategoryId || undefined,
         keyword: activeCategoryId ? undefined : keyword || undefined,
         page: nextPage,
@@ -109,12 +133,12 @@ Page({
       this.setData({
         loading: false,
         loadingMore: false,
-        error: cause && cause.message ? cause.message : "商品加载失败",
+        error: errorMessage(cause, "商品加载失败"),
       });
     }
   },
 
-  onKeywordInput(event) {
+  onKeywordInput(event: MpInputEvent) {
     this.setData({ keyword: event.detail.value });
   },
 
@@ -122,37 +146,37 @@ Page({
     const keyword = this.data.keyword.trim();
     this.recordHistory(keyword);
     this.setData({ activeCategoryId: "" });
-    this.loadProducts(1);
+    void this.loadProducts(1);
   },
 
-  tapKeyword(event) {
-    const keyword = event.currentTarget.dataset.keyword;
+  tapKeyword(event: MpTapEvent) {
+    const keyword = String(event.currentTarget.dataset.keyword ?? "");
     this.setData({ keyword, activeCategoryId: "" });
     this.recordHistory(keyword);
-    this.loadProducts(1);
+    void this.loadProducts(1);
   },
 
-  selectCategory(event) {
-    const categoryId = event.currentTarget.dataset.id;
+  selectCategory(event: MpTapEvent) {
+    const categoryId = String(event.currentTarget.dataset.id ?? "");
     this.setData({
       activeCategoryId: this.data.activeCategoryId === categoryId ? "" : categoryId,
     });
-    this.loadProducts(1);
+    void this.loadProducts(1);
   },
 
-  selectSort(event) {
-    this.setData({ activeSort: event.currentTarget.dataset.code });
-    this.loadProducts(1);
+  selectSort(event: MpTapEvent) {
+    this.setData({ activeSort: String(event.currentTarget.dataset.code ?? "") });
+    void this.loadProducts(1);
   },
 
-  goProduct(event) {
-    wx.navigateTo({ url: `/pages/product/index?id=${event.currentTarget.dataset.id}` });
+  goProduct(event: MpTapEvent) {
+    wx.navigateTo({ url: `/pages/product/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
   },
 
   loadMore() {
     if (this.data.loadingMore || this.data.products.length >= this.data.total) {
       return;
     }
-    this.loadProducts(this.data.page + 1);
+    void this.loadProducts(this.data.page + 1);
   },
 });

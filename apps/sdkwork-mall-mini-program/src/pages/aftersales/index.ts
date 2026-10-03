@@ -1,6 +1,41 @@
-const { formatCny } = require("../../utils/format");
-const ordersService = require("../../services/order-service");
-const aftersales = require("../../services/aftersales-service");
+import { errorMessage, type MpPickerChangeEvent, type MpTapEvent, type MpInputEvent } from "../../types/common";
+import { formatCny } from "../../utils/format";
+import {
+  AFTER_SALES_REASON_PRESETS,
+  AFTER_SALES_TYPES,
+  cancelRequest,
+  createRequest,
+  listRequests,
+  type MpAfterSalesItemInput,
+} from "../../services/aftersales-service";
+import { getOrderDetail } from "../../services/order-service";
+
+interface AftersalesData {
+  presetOrderId: string;
+  orderId: string;
+  orderLoaded: boolean;
+  orderItems: MpAfterSalesItemInput[];
+  orderSummary: string;
+  types: Array<{ label: string; value: string }>;
+  typeIndex: number;
+  reasons: Array<{ code: string; label: string }>;
+  reasonIndex: number;
+  description: string;
+  amount: string;
+  requests: Array<{
+    id: string;
+    afterSalesNo: string;
+    orderId: string;
+    requestedAmount: string;
+    typeLabel: string;
+    statusLabel: string;
+    revokable: boolean;
+  }>;
+  loading: boolean;
+  loadingOrder: boolean;
+  busy: boolean;
+  error: string;
+}
 
 Page({
   data: {
@@ -9,9 +44,9 @@ Page({
     orderLoaded: false,
     orderItems: [],
     orderSummary: "",
-    types: aftersales.AFTER_SALES_TYPES,
+    types: AFTER_SALES_TYPES,
     typeIndex: 0,
-    reasons: aftersales.AFTER_SALES_REASON_PRESETS,
+    reasons: AFTER_SALES_REASON_PRESETS,
     reasonIndex: 0,
     description: "",
     amount: "",
@@ -20,34 +55,34 @@ Page({
     loadingOrder: false,
     busy: false,
     error: "",
-  },
+  } as AftersalesData,
 
-  onLoad(options) {
-    const presetOrderId = options && options.orderId ? options.orderId : "";
+  onLoad(options: Record<string, string | undefined>) {
+    const presetOrderId = options?.orderId ?? "";
     this.setData({ presetOrderId, orderId: presetOrderId });
     if (presetOrderId) {
-      this.loadOrder();
+      void this.loadOrder();
     }
-    this.reloadRequests();
+    void this.reloadRequests();
   },
 
-  onOrderIdInput(event) {
+  onOrderIdInput(event: MpInputEvent) {
     this.setData({ orderId: event.detail.value });
   },
 
-  onDescriptionInput(event) {
+  onDescriptionInput(event: MpInputEvent) {
     this.setData({ description: event.detail.value });
   },
 
-  onAmountInput(event) {
+  onAmountInput(event: MpInputEvent) {
     this.setData({ amount: event.detail.value });
   },
 
-  onTypeChange(event) {
+  onTypeChange(event: MpPickerChangeEvent) {
     this.setData({ typeIndex: Number(event.detail.value) || 0 });
   },
 
-  onReasonChange(event) {
+  onReasonChange(event: MpPickerChangeEvent) {
     this.setData({ reasonIndex: Number(event.detail.value) || 0 });
   },
 
@@ -59,7 +94,7 @@ Page({
     }
     this.setData({ loadingOrder: true, error: "" });
     try {
-      const detail = await ordersService.getOrderDetail(orderId);
+      const detail = await getOrderDetail(orderId);
       const reference = detail.paidAmountCny ?? detail.totalAmountCny;
       this.setData({
         orderLoaded: true,
@@ -78,7 +113,7 @@ Page({
         orderLoaded: false,
         orderItems: [],
         orderSummary: "",
-        error: cause && cause.message ? cause.message : "订单加载失败",
+        error: errorMessage(cause, "订单加载失败"),
       });
     }
   },
@@ -96,12 +131,12 @@ Page({
 
   async reloadRequests() {
     try {
-      const requests = await aftersales.listRequests();
+      const requests = await listRequests();
       this.setData({ requests, loading: false });
     } catch (cause) {
       this.setData({
         loading: false,
-        error: cause && cause.message ? cause.message : "售后列表加载失败",
+        error: errorMessage(cause, "售后列表加载失败"),
       });
     }
   },
@@ -119,7 +154,7 @@ Page({
     const type = this.data.types[this.data.typeIndex];
     this.setData({ busy: true, error: "" });
     try {
-      await aftersales.createRequest({
+      await createRequest({
         orderId: this.data.orderId.trim(),
         afterSalesType: type.value,
         reasonCode: this.data.reasons[this.data.reasonIndex].code,
@@ -127,28 +162,36 @@ Page({
         requestedAmountCny: amount,
         items: this.data.orderItems,
       });
-      this.setData({ description: "", orderItems: [], orderLoaded: false, orderSummary: "", amount: "", orderId: "", presetOrderId: "" });
+      this.setData({
+        description: "",
+        orderItems: [],
+        orderLoaded: false,
+        orderSummary: "",
+        amount: "",
+        orderId: "",
+        presetOrderId: "",
+      });
       wx.showToast({ title: "售后申请已提交", icon: "success" });
       await this.reloadRequests();
     } catch (cause) {
-      this.setData({ error: cause && cause.message ? cause.message : "售后申请失败" });
+      this.setData({ error: errorMessage(cause, "售后申请失败") });
     } finally {
       this.setData({ busy: false });
     }
   },
 
-  async cancelRequest(event) {
-    const requestId = event.currentTarget.dataset.id;
+  async cancelRequest(event: MpTapEvent) {
+    const requestId = `${event.currentTarget.dataset.id ?? ""}`;
     if (!requestId) {
       return;
     }
     this.setData({ busy: true, error: "" });
     try {
-      await aftersales.cancelRequest(requestId);
+      await cancelRequest(requestId);
       wx.showToast({ title: "已撤销", icon: "success" });
       await this.reloadRequests();
     } catch (cause) {
-      this.setData({ error: cause && cause.message ? cause.message : "撤销失败" });
+      this.setData({ error: errorMessage(cause, "撤销失败") });
     } finally {
       this.setData({ busy: false });
     }

@@ -1,6 +1,35 @@
-const { request } = require("./transport");
+import { request } from "./transport";
 
-const STATUS_FILTER_MAP = {
+export interface MpOrderSummary {
+  createdAt: string;
+  id: string;
+  paidAmountCny: number | null;
+  status: string;
+  subject: string;
+  totalAmountCny: number | null;
+}
+
+export interface MpOrderDetail {
+  createdAt: string;
+  id: string;
+  items: Array<{ id: string; imageUrl: string; priceCny: number | null; quantity: number; skuName: string; spuId: string; title: string }>;
+  paidAmountCny: number | null;
+  paymentMethod: string;
+  shipmentIds: string[];
+  status: string;
+  subject: string;
+  totalAmountCny: number | null;
+}
+
+export interface MpOrderStatistics {
+  completed: number;
+  pendingPayment: number;
+  pendingReceipt: number;
+  pendingShipment: number;
+  totalOrders: number;
+}
+
+const STATUS_FILTER_MAP: Record<string, string> = {
   all: "",
   PENDING_PAYMENT: "PENDING_PAYMENT",
   PENDING_SHIPMENT: "PENDING_SHIPMENT",
@@ -9,7 +38,7 @@ const STATUS_FILTER_MAP = {
   CANCELLED: "CANCELLED",
 };
 
-function mapSummary(order) {
+function mapSummary(order: Record<string, unknown>): MpOrderSummary {
   return {
     id: String(order.orderId ?? order.id ?? ""),
     subject: String(order.subject ?? "订单"),
@@ -20,8 +49,8 @@ function mapSummary(order) {
   };
 }
 
-async function listOrders(options = {}) {
-  const statusFilter = STATUS_FILTER_MAP[options.status] || options.status || "";
+export async function listOrders(options: { page?: number; pageSize?: number; status?: string } = {}): Promise<{ orders: MpOrderSummary[]; total: number }> {
+  const statusFilter = STATUS_FILTER_MAP[options.status || "all"] ?? options.status ?? "";
   const payload = await request({
     path: "/orders",
     query: {
@@ -30,14 +59,18 @@ async function listOrders(options = {}) {
       status: statusFilter || undefined,
     },
   });
-  const rows = Array.isArray(payload.content) ? payload.content : payload.items ?? [];
+  const rows: Array<Record<string, unknown>> = Array.isArray(payload.content)
+    ? payload.content
+    : Array.isArray(payload.items)
+      ? payload.items
+      : [];
   return {
     orders: rows.map(mapSummary),
-    total: Number(payload.pageInfo && payload.pageInfo.total) || rows.length,
+    total: Number((payload.pageInfo as Record<string, unknown> | undefined)?.total) || rows.length,
   };
 }
 
-async function getOrderStatistics() {
+export async function getOrderStatistics(): Promise<MpOrderStatistics> {
   const payload = await request({ path: "/orders/statistics" });
   return {
     totalOrders: Number(payload.totalOrders) || 0,
@@ -48,7 +81,7 @@ async function getOrderStatistics() {
   };
 }
 
-async function getOrderDetail(orderId) {
+export async function getOrderDetail(orderId: string): Promise<MpOrderDetail> {
   const record = await request({ path: `/orders/${orderId}` });
   const items = Array.isArray(record.items) ? record.items : [];
   return {
@@ -63,8 +96,8 @@ async function getOrderDetail(orderId) {
       ? record.shipmentIds.map((entry) => String(entry)).filter(Boolean)
       : [],
     items: items.map((item, index) => {
-      const sku = item.sku ?? {};
-      const spu = item.spu ?? {};
+      const sku = (item.sku ?? {}) as Record<string, unknown>;
+      const spu = (item.spu ?? {}) as Record<string, unknown>;
       return {
         id: String(item.id ?? sku.id ?? `item-${index + 1}`),
         spuId: String(item.spuId ?? spu.id ?? ""),
@@ -78,7 +111,7 @@ async function getOrderDetail(orderId) {
   };
 }
 
-async function payOrder(orderId, paymentMethod) {
+export async function payOrder(orderId: string, paymentMethod: string): Promise<string> {
   const payment = await request({
     path: `/orders/${orderId}/payments`,
     method: "POST",
@@ -87,28 +120,18 @@ async function payOrder(orderId, paymentMethod) {
   return String(payment.paymentId ?? payment.id ?? "");
 }
 
-async function cancelOrder(orderId) {
+export async function cancelOrder(orderId: string): Promise<Record<string, unknown>> {
   return request({ path: `/orders/${orderId}/cancellations`, method: "POST", body: {} });
 }
 
-async function confirmReceipt(orderId) {
+export async function confirmReceipt(orderId: string): Promise<Record<string, unknown>> {
   return request({ path: `/orders/${orderId}/receipt_confirmations`, method: "POST", body: {} });
 }
 
-async function getPaymentSuccess(orderId) {
+export async function getPaymentSuccess(orderId: string): Promise<Record<string, unknown> | null> {
   try {
     return await request({ path: `/orders/${orderId}/payment_success` });
   } catch (error) {
     return null;
   }
 }
-
-module.exports = {
-  listOrders,
-  getOrderStatistics,
-  getOrderDetail,
-  payOrder,
-  cancelOrder,
-  confirmReceipt,
-  getPaymentSuccess,
-};

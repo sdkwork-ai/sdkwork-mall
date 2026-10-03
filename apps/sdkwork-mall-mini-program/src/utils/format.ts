@@ -1,12 +1,11 @@
-function formatCny(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) {
+export function formatCny(value: number | null | undefined): string {
+  if (value === null || value === undefined) {
     return "--";
   }
-  return `¥${amount.toFixed(2)}`;
+  return `¥${value.toFixed(2)}`;
 }
 
-function formatTime(value) {
+export function formatTime(value: string | null | undefined): string {
   if (!value) {
     return "--";
   }
@@ -14,11 +13,11 @@ function formatTime(value) {
   if (Number.isNaN(date.getTime())) {
     return String(value);
   }
-  const pad = (part) => String(part).padStart(2, "0");
+  const pad = (part: number) => String(part).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-const STATUS_LABELS = {
+const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "已取消",
   COMPLETED: "已完成",
   EXPIRED: "已超时",
@@ -30,8 +29,6 @@ const STATUS_LABELS = {
   REFUNDING: "退款中",
 };
 
-function statusLabel(status) {
+export function statusLabel(status: string | null | undefined): string {
   return STATUS_LABELS[String(status || "").toUpperCase()] || "处理中";
 }
-
-module.exports = { formatCny, formatTime, statusLabel };

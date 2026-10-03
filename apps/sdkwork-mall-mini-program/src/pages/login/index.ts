@@ -1,5 +1,15 @@
-const auth = require("../../services/auth-service");
-const session = require("../../services/session");
+import { errorMessage, type MpInputEvent } from "../../types/common";
+import { loginWithPassword } from "../../services/auth-service";
+import { getToken, setToken, clearSession } from "../../services/session";
+
+interface LoginData {
+  account: string;
+  password: string;
+  token: string;
+  useTokenFallback: boolean;
+  busy: boolean;
+  error: string;
+}
 
 Page({
   data: {
@@ -9,21 +19,21 @@ Page({
     useTokenFallback: false,
     busy: false,
     error: "",
-  },
+  } as LoginData,
 
   onShow() {
-    this.setData({ token: session.getToken() });
+    this.setData({ token: getToken() });
   },
 
-  onAccountInput(event) {
+  onAccountInput(event: MpInputEvent) {
     this.setData({ account: event.detail.value });
   },
 
-  onPasswordInput(event) {
+  onPasswordInput(event: MpInputEvent) {
     this.setData({ password: event.detail.value });
   },
 
-  onTokenInput(event) {
+  onTokenInput(event: MpInputEvent) {
     this.setData({ token: event.detail.value });
   },
 
@@ -40,12 +50,12 @@ Page({
     }
     this.setData({ busy: true, error: "" });
     try {
-      await auth.loginWithPassword(account, password);
+      await loginWithPassword(account, password);
       this.setData({ busy: false });
       wx.showToast({ title: "登录成功", icon: "success" });
       setTimeout(() => wx.navigateBack({ fail() { wx.switchTab({ url: "/pages/buyer/index" }); } }), 600);
     } catch (cause) {
-      this.setData({ busy: false, error: cause && cause.message ? cause.message : "登录失败" });
+      this.setData({ busy: false, error: errorMessage(cause, "登录失败") });
     }
   },
 
@@ -55,13 +65,13 @@ Page({
       this.setData({ error: "请输入访问令牌" });
       return;
     }
-    session.setToken(token);
+    setToken(token);
     wx.showToast({ title: "登录成功", icon: "success" });
     setTimeout(() => wx.navigateBack({ fail() { wx.switchTab({ url: "/pages/buyer/index" }); } }), 600);
   },
 
   logout() {
-    session.clearSession();
+    clearSession();
     this.setData({ token: "", account: "", password: "" });
     wx.showToast({ title: "已退出", icon: "success" });
   },

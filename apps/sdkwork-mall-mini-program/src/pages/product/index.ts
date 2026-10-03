@@ -1,7 +1,31 @@
-const catalog = require("../../services/catalog-service");
-const cartService = require("../../services/cart-service");
-const session = require("../../services/session");
-const { formatCny } = require("../../utils/format");
+import { errorMessage, type MpSwiperChangeEvent, type MpTapEvent } from "../../types/common";
+import { type MpProductDetail, type MpSku, getProductDetail } from "../../services/catalog-service";
+import { addToCart } from "../../services/cart-service";
+import { isLoggedIn } from "../../services/session";
+import { formatCny } from "../../utils/format";
+
+type ProductSku = MpSku & { priceText: string };
+
+interface ProductData {
+  detail: MpProductDetail | null;
+  images: string[];
+  activeImage: number;
+  skus: ProductSku[];
+  specs: Array<{ name: string; value: string }>;
+  selectedSkuId: string;
+  quantity: number;
+  maxQuantity: number | null;
+  soldOut: boolean;
+  displayPrice: string;
+  loading: boolean;
+  busy: boolean;
+  error: string;
+  skuPopupOpen: boolean;
+  skuPopupMode: string;
+  toast: string;
+  _productId: string;
+  _toastTimer: number | null;
+}
 
 Page({
   data: {
@@ -21,17 +45,19 @@ Page({
     skuPopupOpen: false,
     skuPopupMode: "cart",
     toast: "",
-  },
+    _productId: "",
+    _toastTimer: null,
+  } as ProductData,
 
-  onLoad(options) {
-    this.productId = options.id || "";
-    this.loadDetail();
+  onLoad(options: Record<string, string | undefined>) {
+    this.setData({ _productId: options.id || "" });
+    void this.loadDetail();
   },
 
   async loadDetail() {
     this.setData({ loading: true, error: "" });
     try {
-      const detail = await catalog.getProductDetail(this.productId);
+      const detail = await getProductDetail(this.data._productId);
       if (!detail) {
         this.setData({ loading: false, error: "商品不存在或已下架" });
         return;
@@ -58,17 +84,17 @@ Page({
     } catch (cause) {
       this.setData({
         loading: false,
-        error: cause && cause.message ? cause.message : "商品加载失败",
+        error: errorMessage(cause, "商品加载失败"),
       });
     }
   },
 
-  onImageChange(event) {
+  onImageChange(event: MpSwiperChangeEvent) {
     this.setData({ activeImage: event.detail.current });
   },
 
-  selectSku(event) {
-    const skuId = event.currentTarget.dataset.id;
+  selectSku(event: MpTapEvent) {
+    const skuId = String(event.currentTarget.dataset.id ?? "");
     const sku = this.data.skus.find((entry) => entry.id === skuId);
     if (!sku) {
       return;
@@ -78,7 +104,7 @@ Page({
       selectedSkuId: skuId,
       maxQuantity,
       soldOut: maxQuantity != null && maxQuantity <= 0,
-      displayPrice: formatCny(sku.priceCny != null ? sku.priceCny : this.data.detail.priceCny),
+      displayPrice: formatCny(sku.priceCny ?? this.data.detail?.priceCny ?? null),
       quantity: 1,
     });
   },
@@ -98,8 +124,8 @@ Page({
     this.setData({ quantity: quantity + 1 });
   },
 
-  openSkuPopup(event) {
-    this.setData({ skuPopupOpen: true, skuPopupMode: event.currentTarget.dataset.mode || "cart" });
+  openSkuPopup(event: MpTapEvent) {
+    this.setData({ skuPopupOpen: true, skuPopupMode: String(event.currentTarget.dataset.mode ?? "") || "cart" });
   },
 
   closeSkuPopup() {
@@ -116,7 +142,7 @@ Page({
     }
   },
 
-  async addToCart(goCart) {
+  async addToCart(goCart: boolean) {
     if (!this.data.detail) {
       return;
     }
@@ -125,7 +151,7 @@ Page({
       this.showToast("请选择规格");
       return;
     }
-    if (!session.isLoggedIn()) {
+    if (!isLoggedIn()) {
       wx.navigateTo({ url: "/pages/login/index" });
       return;
     }
@@ -135,7 +161,7 @@ Page({
     }
     this.setData({ busy: true });
     try {
-      await cartService.addToCart({
+      await addToCart({
         spuId: this.data.detail.id,
         skuId: sku.id,
         quantity: this.data.quantity,
@@ -146,17 +172,17 @@ Page({
         this.showToast("已加入购物车");
       }
     } catch (cause) {
-      this.showToast(cause && cause.message ? cause.message : "加入购物车失败");
+      this.showToast(errorMessage(cause, "加入购物车失败"));
     } finally {
       this.setData({ busy: false });
     }
   },
 
-  showToast(message) {
+  showToast(message: string) {
     this.setData({ toast: message });
-    if (this.toastTimer) {
-      clearTimeout(this.toastTimer);
+    if (this.data._toastTimer != null) {
+      clearTimeout(this.data._toastTimer);
     }
-    this.toastTimer = setTimeout(() => this.setData({ toast: "" }), 2200);
+    this.setData({ _toastTimer: setTimeout(() => this.setData({ toast: "" }), 2200) });
   },
 });

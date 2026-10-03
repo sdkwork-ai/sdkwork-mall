@@ -1,14 +1,38 @@
-const ordersService = require("../../services/order-service");
-const session = require("../../services/session");
-const { formatCny, formatTime, statusLabel } = require("../../utils/format");
+import { errorMessage, type MpTapEvent } from "../../types/common";
+import { formatCny, formatTime, statusLabel } from "../../utils/format";
+import {
+  listOrders,
+  payOrder,
+  cancelOrder,
+  confirmReceipt,
+  type MpOrderSummary,
+} from "../../services/order-service";
+import { isLoggedIn } from "../../services/session";
 
-const TABS = [
+const TABS: Array<{ code: string; label: string }> = [
   { code: "all", label: "全部" },
   { code: "PENDING_PAYMENT", label: "待付款" },
   { code: "PENDING_SHIPMENT", label: "待发货" },
   { code: "PENDING_RECEIPT", label: "待收货" },
   { code: "COMPLETED", label: "已完成" },
 ];
+
+type MpOrderRow = MpOrderSummary & {
+  statusText: string;
+  totalText: string;
+  timeText: string;
+};
+
+interface OrdersData {
+  tabs: Array<{ code: string; label: string }>;
+  activeTab: string;
+  orders: MpOrderRow[];
+  page: number;
+  total: number;
+  loading: boolean;
+  loadingMore: boolean;
+  error: string;
+}
 
 Page({
   data: {
@@ -20,26 +44,26 @@ Page({
     loading: true,
     loadingMore: false,
     error: "",
-  },
+  } as OrdersData,
 
-  onLoad(options) {
+  onLoad(options: Record<string, string | undefined>) {
     const status = options.status && options.status !== "all" ? options.status : "all";
     this.setData({ activeTab: status });
   },
 
   onShow() {
-    if (!session.isLoggedIn()) {
+    if (!isLoggedIn()) {
       wx.navigateTo({ url: "/pages/login/index" });
       return;
     }
     this.loadOrders(1);
   },
 
-  async loadOrders(nextPage) {
+  async loadOrders(nextPage: number) {
     const { activeTab } = this.data;
     this.setData(nextPage === 1 ? { loading: true, error: "" } : { loadingMore: true });
     try {
-      const result = await ordersService.listOrders({
+      const result = await listOrders({
         page: nextPage,
         pageSize: 20,
         status: activeTab,
@@ -61,13 +85,13 @@ Page({
       this.setData({
         loading: false,
         loadingMore: false,
-        error: cause && cause.message ? cause.message : "订单加载失败",
+        error: errorMessage(cause, "订单加载失败"),
       });
     }
   },
 
-  selectTab(event) {
-    const code = event.currentTarget.dataset.code;
+  selectTab(event: MpTapEvent) {
+    const code = String(event.currentTarget.dataset.code ?? "");
     if (code === this.data.activeTab) {
       return;
     }
@@ -75,41 +99,41 @@ Page({
     this.loadOrders(1);
   },
 
-  goDetail(event) {
-    wx.navigateTo({ url: `/pages/order-detail/index?id=${event.currentTarget.dataset.id}` });
+  goDetail(event: MpTapEvent) {
+    wx.navigateTo({ url: `/pages/order-detail/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
   },
 
-  async payOrder(event) {
-    const orderId = event.currentTarget.dataset.id;
+  async payOrder(event: MpTapEvent) {
+    const orderId = String(event.currentTarget.dataset.id ?? "");
     try {
-      const paymentId = await ordersService.payOrder(orderId, "WECHAT");
+      const paymentId = await payOrder(orderId, "WECHAT");
       wx.redirectTo({
         url: `/pages/payment-result/index?orderId=${orderId}&paymentId=${paymentId}&status=pending`,
       });
     } catch (cause) {
-      wx.showToast({ title: cause && cause.message ? cause.message : "发起支付失败", icon: "none" });
+      wx.showToast({ title: errorMessage(cause, "发起支付失败"), icon: "none" });
     }
   },
 
-  async cancelOrder(event) {
-    const orderId = event.currentTarget.dataset.id;
+  async cancelOrder(event: MpTapEvent) {
+    const orderId = String(event.currentTarget.dataset.id ?? "");
     try {
-      await ordersService.cancelOrder(orderId);
+      await cancelOrder(orderId);
       wx.showToast({ title: "已取消", icon: "success" });
       this.loadOrders(1);
     } catch (cause) {
-      wx.showToast({ title: cause && cause.message ? cause.message : "取消失败", icon: "none" });
+      wx.showToast({ title: errorMessage(cause, "取消失败"), icon: "none" });
     }
   },
 
-  async confirmReceipt(event) {
-    const orderId = event.currentTarget.dataset.id;
+  async confirmReceipt(event: MpTapEvent) {
+    const orderId = String(event.currentTarget.dataset.id ?? "");
     try {
-      await ordersService.confirmReceipt(orderId);
+      await confirmReceipt(orderId);
       wx.showToast({ title: "已确认收货", icon: "success" });
       this.loadOrders(1);
     } catch (cause) {
-      wx.showToast({ title: cause && cause.message ? cause.message : "确认收货失败", icon: "none" });
+      wx.showToast({ title: errorMessage(cause, "确认收货失败"), icon: "none" });
     }
   },
 

@@ -1,4 +1,16 @@
-const ordersService = require("../../services/order-service");
+import { getPaymentSuccess } from "../../services/order-service";
+
+interface PaymentResultData {
+  orderId: string;
+  paymentId: string;
+  status: string;
+  title: string;
+  description: string;
+  tone: string;
+  loading: boolean;
+  paymentMethod: string;
+  _pollTimer: number | null;
+}
 
 Page({
   data: {
@@ -9,9 +21,11 @@ Page({
     description: "支付正在处理，请稍后查看订单状态。",
     tone: "warning",
     loading: true,
-  },
+    paymentMethod: "",
+    _pollTimer: null,
+  } as PaymentResultData,
 
-  onLoad(options) {
+  onLoad(options: Record<string, string | undefined>) {
     this.setData({
       orderId: options.orderId || "",
       paymentId: options.paymentId || "",
@@ -22,8 +36,8 @@ Page({
   },
 
   onUnload() {
-    if (this.pollTimer) {
-      clearTimeout(this.pollTimer);
+    if (this.data._pollTimer) {
+      clearTimeout(this.data._pollTimer);
     }
   },
 
@@ -49,8 +63,8 @@ Page({
       this.setData({ loading: false });
       return;
     }
-    const tick = async () => {
-      const info = await ordersService.getPaymentSuccess(this.data.orderId);
+    const tick = async (): Promise<void> => {
+      const info = await getPaymentSuccess(this.data.orderId);
       if (info && (info.paid === true || info.status === "PAID" || info.status === "COMPLETED")) {
         this.setData({
           status: "success",
@@ -62,7 +76,7 @@ Page({
         return;
       }
       this.setData({ loading: false });
-      this.pollTimer = setTimeout(tick, 3000);
+      this.setData({ _pollTimer: setTimeout(tick, 3000) });
     };
     tick();
   },

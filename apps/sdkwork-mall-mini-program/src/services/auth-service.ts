@@ -6,10 +6,16 @@
  * response data carries the dual tokens and session context. The dev
  * token-paste entry stays on the login page as a fallback.
  */
-const session = require("./session");
-const { request } = require("./transport");
+import { clearSession, setSession } from "./session";
+import { request } from "./transport";
 
-function detectPrincipalKind(account) {
+export interface MpLoginResult {
+  accessToken: string;
+  authToken: string;
+  userId: string;
+}
+
+export function detectPrincipalKind(account: string): "email" | "phone" | "username" {
   if (account.includes("@")) {
     return "email";
   }
@@ -19,30 +25,29 @@ function detectPrincipalKind(account) {
   return "username";
 }
 
-async function loginWithPassword(account, password) {
+export async function loginWithPassword(account: string, password: string): Promise<MpLoginResult> {
   const kind = detectPrincipalKind(account);
-  const body = { password, [kind]: account };
+  const body: Record<string, unknown> = { password, [kind]: account };
   const data = await request({ path: "/auth/sessions", method: "POST", body });
-  const authToken = data.authToken || data.token || "";
+  const authToken = String(data.authToken ?? data.token ?? "");
   if (!authToken) {
     throw new Error("登录响应缺少令牌，请稍后重试");
   }
-  const context = data.context || {};
-  session.setSession({
+  const context = (data.context ?? {}) as Record<string, unknown>;
+  const result: MpLoginResult = {
     authToken,
-    accessToken: data.accessToken || "",
-    userId: context.userId || "",
-  });
-  return { authToken, accessToken: data.accessToken || "", userId: context.userId || "" };
+    accessToken: String(data.accessToken ?? ""),
+    userId: String(context.userId ?? ""),
+  };
+  setSession(result);
+  return result;
 }
 
-async function logout() {
+export async function logout(): Promise<void> {
   try {
     await request({ path: "/auth/sessions/current", method: "DELETE" });
   } catch (error) {
     // The server session may already be gone; local sign-out proceeds.
   }
-  session.clearSession();
+  clearSession();
 }
-
-module.exports = { loginWithPassword, logout, detectPrincipalKind };
