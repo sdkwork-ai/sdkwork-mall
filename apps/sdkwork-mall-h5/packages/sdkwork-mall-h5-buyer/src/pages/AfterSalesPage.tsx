@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SdkworkMallH5Cell, SdkworkMallH5SelectCell } from "../components/ActionSheet";
-import { openOrderPick } from "../order-pick-channel";
+import { consumePendingOrderPick, openOrderPick } from "../order-pick-channel";
 
 import {
   cancelMallH5AfterSalesRequest,
@@ -85,6 +85,14 @@ export function SdkworkMallH5AfterSalesPage() {
   );
 
   useEffect(() => {
+    // navigate-to-select: the picker page completes the pick channel while
+    // this form is unmounted, so consume the pending reference on remount.
+    const picked = consumePendingOrderPick();
+    if (picked) {
+      setOrderId(picked);
+      void loadOrder(picked);
+      return;
+    }
     if (presetOrderId) {
       void loadOrder(presetOrderId);
     }
@@ -92,7 +100,7 @@ export function SdkworkMallH5AfterSalesPage() {
 
   async function handleSubmit() {
     if (!orderContext) {
-      setMessage("请先读取订单");
+      setMessage("请先选择订单");
       return;
     }
     const amountNumber = Number(amount);
@@ -189,16 +197,7 @@ export function SdkworkMallH5AfterSalesPage() {
               更换订单
             </button>
           </div>
-        ) : (
-          <button
-            className="sdk-h5-button sdk-h5-button-secondary"
-            disabled={loadingOrder}
-            onClick={() => void loadOrder(orderId)}
-            type="button"
-          >
-            {loadingOrder ? "读取中..." : "读取订单"}
-          </button>
-        )}
+        ) : null}
         <div className="sdk-h5-cell-group">
           <SdkworkMallH5SelectCell
             label="售后类型"
