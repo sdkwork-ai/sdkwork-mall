@@ -3,7 +3,7 @@
   "kind": "sdkwork.component.spec",
   "component": {
     "name": "@sdkwork/mall-pc-membership-purchase",
-    "displayName": "SDKWork Membership Purchase PC React",
+    "displayName": "SDKWork MembershipPurchase PC React",
     "version": "0.1.0",
     "type": "react-package",
     "root": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-membership-purchase",
@@ -169,7 +169,6 @@
     ]
   },
   "metadata": {
-    "managedBy": "apps/scripts/initialize-component-specs.mjs",
     "standardVersion": "2026-05-13"
   }
 }

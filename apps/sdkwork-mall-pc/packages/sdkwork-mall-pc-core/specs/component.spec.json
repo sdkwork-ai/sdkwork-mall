@@ -3,7 +3,7 @@
   "kind": "sdkwork.component.spec",
   "component": {
     "name": "@sdkwork/mall-pc-core",
-    "displayName": "SDKWork Mall PC Core",
+    "displayName": "SDKWork Core PC React",
     "version": "0.1.0",
     "type": "typescript-package",
     "root": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-core",
@@ -137,7 +137,6 @@
     ]
   },
   "metadata": {
-    "managedBy": "codex",
     "standardVersion": "2026-06-12"
   }
 }

@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-mall-mini-program",
+    "displayName": "SDKWork Mall Mini Program",
+    "version": "0.1.0",
+    "type": "mini-program-app-root",
+    "root": "sdkwork-mall/apps/sdkwork-mall-mini-program",
+    "domain": "commerce",
+    "declaredDomain": "commerce",
+    "capability": "mall-storefront",
+    "status": "standardizing",
+    "surface": "app",
+    "languages": [
+      "typescript"
+    ],
+    "generated": false,
+    "private": true,
+    "manifests": [
+      "package.json",
+      "sdkwork.app.config.json"
+    ]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md",
+      "purpose": "Cross-client package taxonomy, route identity, and dependency direction.",
+      "path": "../../../../sdkwork-specs/APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md"
+    },
+    {
+      "file": "APP_MINI_PROGRAM_UI_SPEC.md",
+      "purpose": "Mini-program UI architecture standard.",
+      "path": "../../../../sdkwork-specs/APP_MINI_PROGRAM_UI_SPEC.md"
+    },
+    {
+      "file": "APP_COMPOSITION_SPEC.md",
+      "purpose": "Native-authority application composition.",
+      "path": "../../../../sdkwork-specs/APP_COMPOSITION_SPEC.md"
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "SDK consumer import and integration boundary rules (transport swap pending the MP SDK family).",
+      "path": "../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md"
+    },
+    {
+      "file": "PAGINATION_SPEC.md",
+      "purpose": "List/search pagination for interactive mini-program lists.",
+      "path": "../../../../sdkwork-specs/PAGINATION_SPEC.md"
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "purpose": "Contract and verification rules.",
+      "path": "../../../../sdkwork-specs/TEST_SPEC.md"
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "purpose": "Authored source code style baseline.",
+      "path": "../../../../sdkwork-specs/CODE_STYLE_SPEC.md"
+    },
+    {
+      "file": "TYPESCRIPT_CODE_SPEC.md",
+      "purpose": "Strict TypeScript baseline for authored sources.",
+      "path": "../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md"
+    }
+  ],
+  "contracts": {
+    "publicExports": [],
+    "runtimeEntrypoints": [
+      "package.json#scripts.dev",
+      "package.json#scripts.build"
+    ],
+    "sdkClients": [],
+    "events": [],
+    "configKeys": [
+      "src/runtime-env.json"
+    ],
+    "routeManifest": null,
+    "routeRegistry": "src/app.json",
+    "transportSeam": "src/services/transport.ts",
+    "layerRole": "runtime-composition",
+    "providedPorts": [],
+    "requiredPorts": [],
+    "notes": "The MP SDK family is not generated yet (docs/decisions.md); all traffic funnels through the single wx.request transport seam enforced by tests/mp-standard-architecture.test.mjs. When the generated family lands, services swap to it without page changes."
+  },
+  "integration": {
+    "authority": "Root SDKWork specs remain authoritative. Local specs may extend but must not contradict them.",
+    "dependencyPolicy": "Consumers integrate through public package exports, declared runtime entrypoints, generated SDK clients, or documented adapters only.",
+    "sdkPolicy": "Raw HTTP is confined to the single transport seam until the generated MP SDK family exists; no page constructs requests or auth headers directly.",
+    "languagePolicy": "Strict TypeScript (tsc --noEmit) with miniprogram-api-typings."
+  },
+  "verification": {
+    "commands": [
+      "pnpm --filter sdkwork-mall-mini-program typecheck",
+      "node --test apps/sdkwork-mall-mini-program/tests/mp-standard-architecture.test.mjs",
+      "pnpm --filter sdkwork-mall-mini-program build"
+    ]
+  }
+}

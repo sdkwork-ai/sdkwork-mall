@@ -173,7 +173,6 @@
     ]
   },
   "metadata": {
-    "managedBy": "apps/scripts/initialize-component-specs.mjs",
     "standardVersion": "2026-05-13"
   }
 }

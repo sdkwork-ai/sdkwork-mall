@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-mall-flutter-mobile",
+    "displayName": "SDKWork Mall Flutter Mobile",
+    "version": "0.1.0",
+    "type": "flutter-mobile-app-root",
+    "root": "sdkwork-mall/apps/sdkwork-mall-flutter-mobile",
+    "domain": "commerce",
+    "declaredDomain": "commerce",
+    "capability": "mall-storefront",
+    "status": "standardizing",
+    "surface": "app",
+    "languages": [
+      "dart"
+    ],
+    "generated": false,
+    "private": true,
+    "manifests": [
+      "pubspec.yaml",
+      "sdkwork.app.config.json"
+    ]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md",
+      "purpose": "Cross-client package taxonomy, route identity, and dependency direction.",
+      "path": "../../../../sdkwork-specs/APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md"
+    },
+    {
+      "file": "APP_FLUTTER_UI_SPEC.md",
+      "purpose": "Flutter application UI architecture standard.",
+      "path": "../../../../sdkwork-specs/APP_FLUTTER_UI_SPEC.md"
+    },
+    {
+      "file": "ANDROID_APP_MOBILE_ARCHITECTURE_SPEC.md",
+      "purpose": "Android mobile application architecture alignment.",
+      "path": "../../../../sdkwork-specs/ANDROID_APP_MOBILE_ARCHITECTURE_SPEC.md"
+    },
+    {
+      "file": "APP_COMPOSITION_SPEC.md",
+      "purpose": "Native-authority application composition.",
+      "path": "../../../../sdkwork-specs/APP_COMPOSITION_SPEC.md"
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "SDK consumer import and integration boundary rules (transport swap pending the Dart SDK family).",
+      "path": "../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md"
+    },
+    {
+      "file": "PAGINATION_SPEC.md",
+      "purpose": "List/search pagination for interactive Flutter lists.",
+      "path": "../../../../sdkwork-specs/PAGINATION_SPEC.md"
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "purpose": "Contract and verification rules.",
+      "path": "../../../../sdkwork-specs/TEST_SPEC.md"
+    },
+    {
+      "file": "DART_CODE_SPEC.md",
+      "purpose": "Dart authored source baseline.",
+      "path": "../../../../sdkwork-specs/DART_CODE_SPEC.md"
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "purpose": "Authored source code style baseline.",
+      "path": "../../../../sdkwork-specs/CODE_STYLE_SPEC.md"
+    }
+  ],
+  "contracts": {
+    "publicExports": [],
+    "runtimeEntrypoints": [
+      "lib/main.dart"
+    ],
+    "sdkClients": [],
+    "events": [],
+    "configKeys": [
+      "env/sdkwork.<profile>.<environment>.json"
+    ],
+    "routeManifest": null,
+    "routeRegistry": "lib/shell/mobile_shell.dart",
+    "transportSeam": "lib/bootstrap/commerce_transport.dart",
+    "compositionRoot": "lib/services/commerce.dart",
+    "layerRole": "runtime-composition",
+    "providedPorts": [],
+    "requiredPorts": [],
+    "notes": "The Dart SDK family for the mall commerce authority has not been produced yet (lib/bootstrap/commerce_transport.dart header); services speak the same app-api contract through the single HttpClient seam and swap transparently when the generated family lands. Payment channels hand off to native channel SDKs once merchant credentials exist."
+  },
+  "integration": {
+    "authority": "Root SDKWork specs remain authoritative. Local specs may extend but must not contradict them.",
+    "dependencyPolicy": "Consumers integrate through public package exports, declared runtime entrypoints, generated SDK clients, or documented adapters only.",
+    "sdkPolicy": "Raw HTTP is confined to the single HttpClient transport seam until the generated Dart SDK family exists; pages depend on domain services only.",
+    "languagePolicy": "Dart with flutter_lints; environment injected through --dart-define-from-file."
+  },
+  "verification": {
+    "commands": [
+      "flutter analyze",
+      "flutter test"
+    ]
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-mall-h5",
+    "displayName": "SDKWork Mall H5",
+    "version": "0.1.0",
+    "type": "h5-app-root",
+    "root": "sdkwork-mall/apps/sdkwork-mall-h5",
+    "domain": "commerce",
+    "declaredDomain": "commerce",
+    "capability": "mall-storefront",
+    "status": "standardizing",
+    "surface": "app",
+    "languages": [
+      "typescript",
+      "react"
+    ],
+    "generated": false,
+    "private": true,
+    "manifests": [
+      "package.json",
+      "sdkwork.app.config.json"
+    ]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md",
+      "purpose": "Cross-client package taxonomy, route identity, and dependency direction.",
+      "path": "../../../../sdkwork-specs/APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md"
+    },
+    {
+      "file": "APP_H5_ARCHITECTURE_SPEC.md",
+      "purpose": "H5 application root architecture standard.",
+      "path": "../../../../sdkwork-specs/APP_H5_ARCHITECTURE_SPEC.md"
+    },
+    {
+      "file": "APP_MOBILE_REACT_UI_SPEC.md",
+      "purpose": "Mobile React UI rules.",
+      "path": "../../../../sdkwork-specs/APP_MOBILE_REACT_UI_SPEC.md"
+    },
+    {
+      "file": "APP_COMPOSITION_SPEC.md",
+      "purpose": "Native-authority application composition.",
+      "path": "../../../../sdkwork-specs/APP_COMPOSITION_SPEC.md"
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "Generated SDK integration, TokenManager wiring, and dependency composition rules.",
+      "path": "../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md"
+    },
+    {
+      "file": "PAGINATION_SPEC.md",
+      "purpose": "List/search pagination for interactive mobile lists.",
+      "path": "../../../../sdkwork-specs/PAGINATION_SPEC.md"
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "purpose": "Contract, frontend, SDK, security, and documentation verification rules.",
+      "path": "../../../../sdkwork-specs/TEST_SPEC.md"
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "purpose": "Authored source code style baseline.",
+      "path": "../../../../sdkwork-specs/CODE_STYLE_SPEC.md"
+    }
+  ],
+  "contracts": {
+    "publicExports": [],
+    "runtimeEntrypoints": [
+      "package.json#scripts.dev",
+      "package.json#scripts.build"
+    ],
+    "sdkClients": [
+      "@sdkwork/account-app-sdk",
+      "@sdkwork/cloudrouter-app-sdk/domains",
+      "@sdkwork/cloudrouter-backend-sdk/domains",
+      "@sdkwork/im-app-sdk",
+      "@sdkwork/membership-app-sdk",
+      "@sdkwork/order-app-sdk",
+      "@sdkwork/payment-app-sdk",
+      "@sdkwork/promotion-app-sdk"
+    ],
+    "events": [],
+    "configKeys": [
+      "config/browser/runtime-env.*.json"
+    ],
+    "routeManifest": null,
+    "routeRegistry": "src/bootstrap/routes.ts",
+    "layerRole": "runtime-composition",
+    "providedPorts": [],
+    "requiredPorts": [
+      {
+        "name": "commerceService",
+        "export": "@sdkwork/mall-commerce-service",
+        "provider": "@sdkwork/mall-commerce-service"
+      }
+    ]
+  },
+  "integration": {
+    "authority": "Root SDKWork specs remain authoritative. Local specs may extend but must not contradict them.",
+    "dependencyPolicy": "Consumers integrate through public package exports, declared runtime entrypoints, generated SDK clients, or documented adapters only.",
+    "sdkPolicy": "Generated SDK clients are injected through service/runtime boundaries; reusable UI must not create raw HTTP clients or manual auth headers.",
+    "languagePolicy": "Language-specific packages follow their native manifest and build tools while preserving the same component contract."
+  },
+  "verification": {
+    "commands": [
+      "pnpm --dir apps/sdkwork-mall-h5 typecheck",
+      "pnpm exec vitest run --config vitest.config.ts --configLoader native --pool vmThreads apps/sdkwork-mall-h5",
+      "node ../sdkwork-specs/tools/check-browser-dist-layout.mjs --root ."
+    ]
+  }
+}

@@ -3,7 +3,7 @@
   "kind": "sdkwork.component.spec",
   "component": {
     "name": "@sdkwork/mall-pc-admin-shell",
-    "displayName": "SDKWork Mall PC Admin Shell",
+    "displayName": "SDKWork AdminShell PC React",
     "version": "0.1.0",
     "type": "typescript-package",
     "root": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-admin-shell",
@@ -86,7 +86,6 @@
     ]
   },
   "metadata": {
-    "managedBy": "codex",
     "standardVersion": "2026-06-12"
   }
 }

@@ -3,13 +3,13 @@
   "kind": "sdkwork.component.spec",
   "component": {
     "name": "@sdkwork/mall-pc-admin-product",
-    "displayName": "SDKWork Commerce Product Admin PC",
+    "displayName": "SDKWork AdminProduct PC React",
     "version": "0.1.0",
     "type": "react-package",
     "root": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-admin-product",
     "domain": "commerce",
     "declaredDomain": "commerce",
-    "capability": "product-admin",
+    "capability": "admin-product",
     "status": "ready",
     "languages": [
       "typescript",
@@ -117,7 +117,6 @@
     ]
   },
   "metadata": {
-    "managedBy": "codex",
     "standardVersion": "2026-06-07"
   }
 }

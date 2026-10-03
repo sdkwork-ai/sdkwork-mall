@@ -3,7 +3,7 @@
   "kind": "sdkwork.component.spec",
   "component": {
     "name": "@sdkwork/mall-pc-shell",
-    "displayName": "SDKWork Mall PC Shell",
+    "displayName": "SDKWork Shell PC React",
     "version": "0.1.0",
     "type": "react-package",
     "root": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-shell",
@@ -102,7 +102,6 @@
     ]
   },
   "metadata": {
-    "managedBy": "codex",
     "standardVersion": "2026-06-12"
   }
 }

@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "kind": "sdkwork.component.spec",
   "component": {
-    "name": "@sdkwork/mall-pc-order",
-    "displayName": "SDKWork Order PC React",
+    "name": "@sdkwork/mall-pc-home",
+    "displayName": "SDKWork Home PC React",
     "version": "0.1.0",
     "type": "react-package",
     "root": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-home",
     "domain": "commerce",
     "declaredDomain": "commerce",
-    "capability": "order",
+    "capability": "home",
     "status": "ready",
     "languages": [
       "typescript",
@@ -165,11 +165,10 @@
   },
   "verification": {
     "commands": [
-      "pnpm --filter @sdkwork/mall-pc-order typecheck"
+      "pnpm --filter @sdkwork/mall-pc-home typecheck"
     ]
   },
   "metadata": {
-    "managedBy": "apps/scripts/initialize-component-specs.mjs",
     "standardVersion": "2026-05-13"
   }
 }
