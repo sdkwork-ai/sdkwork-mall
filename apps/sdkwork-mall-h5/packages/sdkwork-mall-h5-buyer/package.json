@@ -64,6 +64,11 @@
       "types": "./src/addresses-service.ts",
       "import": "./src/addresses-service.ts",
       "default": "./src/addresses-service.ts"
+    },
+    "./select-order-page": {
+      "types": "./src/pages/SelectOrderPage.tsx",
+      "import": "./src/pages/SelectOrderPage.tsx",
+      "default": "./src/pages/SelectOrderPage.tsx"
     }
   },
   "files": [

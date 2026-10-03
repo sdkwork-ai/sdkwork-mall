@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { SdkworkMallH5SelectCell } from "../components/ActionSheet";
+import { SdkworkMallH5Cell, SdkworkMallH5SelectCell } from "../components/ActionSheet";
+import { openOrderPick } from "../order-pick-channel";
 
 import {
   cancelMallH5AfterSalesRequest,
@@ -20,6 +21,7 @@ function formatCny(amount: number | null): string {
 
 export function SdkworkMallH5AfterSalesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const presetOrderId = searchParams.get("orderId") ?? "";
   const [requests, setRequests] = useState<MallH5AfterSalesRequest[]>([]);
   const [orderId, setOrderId] = useState(presetOrderId);
@@ -169,14 +171,17 @@ export function SdkworkMallH5AfterSalesPage() {
 
       <section className="sdk-h5-section">
         <h2>申请售后</h2>
-        <label className="sdk-h5-field">
-          订单号
-          <input
-            disabled={Boolean(orderContext)}
-            onChange={(event) => setOrderId(event.target.value)}
-            value={orderId}
-          />
-        </label>
+        <SdkworkMallH5Cell
+          label="订单号"
+          onClick={() => {
+            openOrderPick((pickedOrderId) => {
+              setOrderId(pickedOrderId);
+              void loadOrder(pickedOrderId);
+            });
+            navigate("/buyer/after-sales/select-order");
+          }}
+          value={orderContext ? orderContext.orderId || orderId : orderId || ""}
+        />
         {orderContext ? (
           <div className="sdk-h5-muted">
             {orderContext.items.length} 项商品 · 实付 {formatCny(orderContext.paidAmountCny)}

@@ -51,6 +51,18 @@ export const sdkworkMallH5BuyerRoutes = [
   },
   {
     auth: "required",
+    capability: "after-sales",
+    domain: "commerce",
+    id: "buyer.mall.aftersales.select-order",
+    packageName: "@sdkwork/mall-h5-buyer",
+    path: "/buyer/after-sales/select-order",
+    screen: "select-order",
+    surface: "buyer",
+    title: "选择订单",
+    titleKey: "buyer.routes.select-order.title",
+  },
+  {
+    auth: "required",
     capability: "buyer",
     domain: "commerce",
     id: "buyer.mall.invoices",

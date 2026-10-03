@@ -283,6 +283,24 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3
 
+  ../sdkwork-appbase/packages/mobile-react/foundation/sdkwork-appbase-mobile-react:
+    dependencies:
+      '@sdkwork/utils':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.42.0(react@19.2.8)
+
+  ../sdkwork-appbase/packages/mobile-react/foundation/sdkwork-shell-mobile-react:
+    dependencies:
+      '@sdkwork/appbase-mobile-react':
+        specifier: workspace:*
+        version: link:../sdkwork-appbase-mobile-react
+      '@sdkwork/utils':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript
+
   ../sdkwork-appbase/packages/pc-react/foundation/sdkwork-appbase-pc-react:
     dependencies:
       '@sdkwork/runtime-bootstrap':
@@ -1366,6 +1384,9 @@ importers:
       '@sdkwork/mall-h5-core':
         specifier: workspace:*
         version: link:../sdkwork-mall-h5-core
+      '@sdkwork/shell-mobile-react':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-appbase/packages/mobile-react/foundation/sdkwork-shell-mobile-react
 
   apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-shop:
     dependencies:

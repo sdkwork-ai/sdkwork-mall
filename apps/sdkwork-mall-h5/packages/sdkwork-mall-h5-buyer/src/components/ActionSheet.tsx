@@ -70,6 +70,36 @@ export function SdkworkMallH5ActionSheet({
 }
 
 /**
+ * Generic navigation cell: label left, current value and chevron right;
+ * the whole row is a single tap target (navigate-to-select pattern).
+ */
+export function SdkworkMallH5Cell({
+  label,
+  onClick,
+  value,
+}: {
+  label: string;
+  onClick: () => void;
+  value: string;
+}) {
+  return (
+    <button className="sdk-h5-cell" onClick={onClick} type="button">
+      <span className="sdk-h5-cell-label">{label}</span>
+      <span
+        className={
+          value
+            ? "sdk-h5-cell-value"
+            : "sdk-h5-cell-value sdk-h5-cell-placeholder"
+        }
+      >
+        {value || "请选择"}
+      </span>
+      <ChevronRight aria-hidden="true" className="sdk-h5-cell-chevron" size={14} />
+    </button>
+  );
+}
+
+/**
  * Picker cell (cell navigation form): label on the left, current value and a
  * chevron on the right; tapping opens the bottom action-sheet picker. Cells
  * stack into a full-bleed group card.

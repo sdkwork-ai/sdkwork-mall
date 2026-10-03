@@ -76,6 +76,9 @@ const SdkworkMallH5FootprintPage = lazy(() =>
 const SdkworkMallH5MessagesPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/messages-page").then((module) => ({ default: module.SdkworkMallH5MessagesPage })),
 );
+const SdkworkMallH5SelectOrderPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/select-order-page").then((module) => ({ default: module.SdkworkMallH5SelectOrderPage })),
+);
 const SdkworkMallH5ConversationListPage = lazy(() =>
   import("@sdkwork/mall-h5-im/conversation-list-page").then((module) => ({ default: module.SdkworkMallH5ConversationListPage })),
 );
@@ -251,6 +254,14 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/messages"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5SelectOrderPage />
+            </RequireSession>
+          )}
+          path="/buyer/after-sales/select-order"
         />
         <Route
           element={(
