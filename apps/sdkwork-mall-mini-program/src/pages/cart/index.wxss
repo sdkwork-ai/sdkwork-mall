@@ -8,7 +8,7 @@
 }
 
 .cart-select-all {
-  margin: 20rpx 20rpx 0;
+  margin: 0;
   border-radius: 16rpx 16rpx 0 0;
 }
 
@@ -43,7 +43,7 @@
 .cart-shop {
   background: #fff;
   border-radius: 16rpx;
-  margin: 20rpx;
+  margin: 0 0 20rpx 0;
   overflow: hidden;
 }
 

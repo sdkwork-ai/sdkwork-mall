@@ -63,5 +63,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 20rpx;
-  margin: 30rpx;
+  margin: 30rpx 0;
+  padding: 0 30rpx;
 }

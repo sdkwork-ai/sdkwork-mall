@@ -99,7 +99,7 @@ class _SdkworkCategoryPageState extends State<SdkworkCategoryPage> {
                       itemBuilder: (context, index) {
                         if (index == _products.length) {
                           return Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Center(
                               child: Text(
                                 _loadingMore
@@ -125,7 +125,7 @@ class _SdkworkCategoryPageState extends State<SdkworkCategoryPage> {
   Widget _buildProductRow(Map<String, dynamic> product) {
     final imageUrl = product['imageUrl']?.toString() ?? '';
     return Card(
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      margin: const EdgeInsets.only(top: 8),
       child: InkWell(
         onTap: () => openSdkworkProduct(context, '${product['id']}'),
         child: Padding(

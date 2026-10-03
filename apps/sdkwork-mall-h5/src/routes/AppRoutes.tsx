@@ -76,6 +76,15 @@ const SdkworkMallH5FootprintPage = lazy(() =>
 const SdkworkMallH5MessagesPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/messages-page").then((module) => ({ default: module.SdkworkMallH5MessagesPage })),
 );
+const SdkworkMallH5ConversationListPage = lazy(() =>
+  import("@sdkwork/mall-h5-im/conversation-list-page").then((module) => ({ default: module.SdkworkMallH5ConversationListPage })),
+);
+const SdkworkMallH5ChatPage = lazy(() =>
+  import("@sdkwork/mall-h5-im/chat-page").then((module) => ({ default: module.SdkworkMallH5ChatPage })),
+);
+const SdkworkMallH5NoticesPage = lazy(() =>
+  import("@sdkwork/mall-h5-im/notices-page").then((module) => ({ default: module.SdkworkMallH5NoticesPage })),
+);
 
 function LoadingPlaceholder() {
   return <div className="sdk-h5-loading">加载中...</div>;
@@ -242,6 +251,30 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/messages"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5ConversationListPage />
+            </RequireSession>
+          )}
+          path="/buyer/chats"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5ChatPage />
+            </RequireSession>
+          )}
+          path="/buyer/chat"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5NoticesPage />
+            </RequireSession>
+          )}
+          path="/buyer/notices"
         />
         <Route element={<NotFoundPage />} path="*" />
       </Routes>

@@ -5,6 +5,7 @@ import {
   resolveSdkworkMallH5RuntimeConfig,
   type SdkworkMallH5RuntimeConfig,
 } from "./environment";
+import { configureSdkworkMallH5ImProviders } from "./imProviders";
 import {
   createSdkworkMallH5IamRuntime,
   createSdkworkMallH5SdkClientsWithTokenManager,
@@ -49,6 +50,7 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
     iamRuntime,
     sdkClients,
   });
+  configureSdkworkMallH5ImProviders({ config, sdkClients });
 
   return {
     commerceService,

@@ -33,7 +33,7 @@ class _SdkworkLoginPageState extends State<SdkworkLoginPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('登录 SDKWork 商城')),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         children: [
           if (_useTokenFallback) ..._buildTokenForm() else ..._buildPasswordForm(),
           const SizedBox(height: 12),

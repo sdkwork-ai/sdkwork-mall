@@ -79,7 +79,7 @@ class _SdkworkOrdersPageState extends State<SdkworkOrdersPage> {
                         : RefreshIndicator(
                             onRefresh: _load,
                             child: ListView(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               children: _orders.map(_buildOrderCard).toList(),
                             ),
                           ),

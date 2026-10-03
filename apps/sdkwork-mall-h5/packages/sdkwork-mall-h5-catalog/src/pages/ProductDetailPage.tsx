@@ -616,7 +616,7 @@ export function SdkworkMallH5ProductDetailPage() {
           <Home aria-hidden="true" size={20} />
           <span>首页</span>
         </Link>
-        <Link aria-label="联系客服" className="sdk-h5-pdp-action-icon" to="/buyer/messages">
+        <Link aria-label="联系客服" className="sdk-h5-pdp-action-icon" to="/buyer/chat">
           <MessageCircle aria-hidden="true" size={20} />
           <span>客服</span>
         </Link>

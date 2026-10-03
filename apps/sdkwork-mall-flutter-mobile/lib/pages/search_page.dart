@@ -131,7 +131,7 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
                     mainAxisSpacing: 4,
                     crossAxisSpacing: 4,
                     childAspectRatio: 0.72,
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     children: _products
                         .map(
                           (product) => SdkworkProductCard(
@@ -142,7 +142,7 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
                         .toList(),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Center(
                       child: Text(
                         _products.isEmpty

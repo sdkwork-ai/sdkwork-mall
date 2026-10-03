@@ -10,6 +10,7 @@ import { normalizeSdkworkApiBaseUrl } from "@sdkwork/runtime-bootstrap";
 import { createClient as createAccountAppClient } from "@sdkwork/account-app-sdk";
 import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk/domains";
 import { createClient as createCommerceBackendClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
+import { createClient as createImAppClient } from "@sdkwork/im-app-sdk";
 import { createClient as createMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import { createClient as createOrderAppClient } from "@sdkwork/order-app-sdk";
 import { createClient as createPaymentAppClient } from "@sdkwork/payment-app-sdk";
@@ -28,6 +29,7 @@ import type { SdkworkMallH5SdkClientInventory } from "./sdkClients";
 const APPBASE_APP_SDK_FAMILY_ID = "sdkwork-iam-app-sdk";
 const DOMAIN_APP_SDK_FAMILY_IDS = {
   account: "sdkwork-account-app-sdk",
+  im: "sdkwork-im-app-sdk",
   membership: "sdkwork-membership-app-sdk",
   order: "sdkwork-order-app-sdk",
   payment: "sdkwork-payment-app-sdk",
@@ -131,6 +133,10 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
         tokenManager,
       })
     : undefined;
+  // IM 的生成客户端不暴露 setTokenManager；会话凭据通过 config 传入。
+  const imAppClient = createImAppClient(
+    createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.im),
+  );
   const membershipAppClient = createMembershipAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.membership),
   );
@@ -160,6 +166,7 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
       : undefined,
     commerceAppClient,
     commerceBackendClient,
+    imAppClient,
     membershipAppClient,
     orderAppClient,
     paymentAppClient,
@@ -169,6 +176,7 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
         "sdkwork-account-app-sdk",
         "sdkwork-commerce-app-sdk",
         "sdkwork-iam-app-sdk",
+        "sdkwork-im-app-sdk",
         "sdkwork-membership-app-sdk",
         "sdkwork-order-app-sdk",
         "sdkwork-payment-app-sdk",

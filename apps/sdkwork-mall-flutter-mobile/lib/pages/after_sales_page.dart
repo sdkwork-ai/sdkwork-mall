@@ -77,7 +77,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
       body: _loading
           ? const SdkworkLoadingView(label: '加载售后...')
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 if (_message != null)
                   Container(
@@ -100,6 +100,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
 
   Widget _buildApplyCard() {
     return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -205,6 +206,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
 
   Widget _buildRequestsCard() {
     return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

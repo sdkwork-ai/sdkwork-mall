@@ -71,7 +71,7 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
                         mainAxisSpacing: 4,
                         crossAxisSpacing: 4,
                         childAspectRatio: 0.72,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: EdgeInsets.zero,
                         children: _hotProducts
                             .map(
                               (product) => SdkworkProductCard(
@@ -91,7 +91,7 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
   }
 
   Widget _buildQuickEntries() => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Map<String, dynamic>>[
@@ -111,27 +111,25 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
         ),
       );
 
-  Widget _buildCategoryGrid() => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: _categories
-                  .take(9)
-                  .map(
-                    (category) => ActionChip(
-                      label: Text('${category['name']}'),
-                      onPressed: () => Navigator.of(context).pushNamed(
-                        '/search',
-                        arguments: {'categoryId': '${category['id']}'},
-                      ),
+  Widget _buildCategoryGrid() => Card(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: _categories
+                .take(9)
+                .map(
+                  (category) => ActionChip(
+                    label: Text('${category['name']}'),
+                    onPressed: () => Navigator.of(context).pushNamed(
+                      '/search',
+                      arguments: {'categoryId': '${category['id']}'},
                     ),
-                  )
-                  .toList(),
-            ),
+                  ),
+                )
+                .toList(),
           ),
         ),
       );
@@ -141,40 +139,38 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
     String pad(int value) => value.toString().padLeft(2, '0');
     final text =
         '${pad(_remaining.inHours)}:${pad(_remaining.inMinutes % 60)}:${pad(_remaining.inSeconds % 60)}';
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Card(
-        color: const Color(0xFFFFF1F0),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              const Text(
-                '限时秒杀',
-                style: TextStyle(
-                  color: Color(0xFFE93B3D),
-                  fontWeight: FontWeight.w700,
-                ),
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      color: const Color(0xFFFFF1F0),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            const Text(
+              '限时秒杀',
+              style: TextStyle(
+                color: Color(0xFFE93B3D),
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE93B3D),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  text,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE93B3D),
+                borderRadius: BorderRadius.circular(6),
               ),
-              const Spacer(),
-              Text(
-                '${offer['discountText'] ?? offer['highlight'] ?? '进行中'}',
-                style: const TextStyle(color: Color(0xFFE93B3D), fontSize: 12),
+              child: Text(
+                text,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
               ),
-            ],
-          ),
+            ),
+            const Spacer(),
+            Text(
+              '${offer['discountText'] ?? offer['highlight'] ?? '进行中'}',
+              style: const TextStyle(color: Color(0xFFE93B3D), fontSize: 12),
+            ),
+          ],
         ),
       ),
     );
@@ -304,7 +300,7 @@ class _HomeBannerCarouselState extends State<_HomeBannerCarousel> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: SizedBox(

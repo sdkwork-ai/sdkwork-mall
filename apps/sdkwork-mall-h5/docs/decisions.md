@@ -16,3 +16,15 @@
   storage today), 会员/钱包/积分 (needs Tier-1 account/membership service
   wiring on mobile), 消息中心 (needs a notification API). Each lands as its
   own change with route ids aligned to the PC registry.
+- 2026-10-03: messaging lands on the sdkwork-im capability. The
+  `@sdkwork/im-app-sdk` notifications plane (cursor-paged list + retrieve +
+  request submission) is consumed through the generated client created in the
+  H5 bootstrap (same dual-token token manager as every other family); a new
+  `sdkwork-mall-h5-im` package owns the notices page, customer-service
+  conversation list (form follows the im-h5 chat list) and chat room.
+  Customer-service message streams ride a single package-local transport seam
+  (`im-transport.ts`) over the federation gateway chat endpoints until the IM
+  realtime CCP connection is adopted for the mall — adopting it swaps
+  send/receive to the websocket without touching pages. Trade events
+  (order created / paid / cancelled / received) are delivered as IM
+  notifications so 通知与提醒统一走消息管道.

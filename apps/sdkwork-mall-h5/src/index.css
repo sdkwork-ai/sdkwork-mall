@@ -89,7 +89,7 @@ body {
   right: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   background: var(--sdk-h5-panel);
   border-top: 1px solid var(--sdk-h5-border);
   height: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
@@ -1892,4 +1892,315 @@ html::-webkit-scrollbar {
 
 .sdk-h5-pdp-searchbar-show {
   transform: translateY(0);
+}
+
+/* ── IM: conversation list (sdkwork-im h5 chat-list form) ── */
+.sdk-h5-conv-entry-row {
+  background: var(--sdk-h5-panel);
+  border-bottom: 1px solid var(--sdk-h5-border);
+  padding: 0.2rem 0.9rem;
+}
+
+.sdk-h5-conv-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0;
+  color: var(--sdk-h5-text);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--sdk-h5-border);
+}
+
+.sdk-h5-conv-entry:last-child {
+  border-bottom: none;
+}
+
+.sdk-h5-conv-entry-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.75rem;
+  background: var(--sdk-h5-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sdk-h5-conv-entry-icon-notice {
+  background: #fef3c7;
+}
+
+.sdk-h5-conv-entry-label {
+  font-weight: 600;
+}
+
+.sdk-h5-conv-entry .sdk-h5-muted {
+  flex: 1;
+  font-size: 0.72rem;
+}
+
+.sdk-h5-conv-list {
+  background: var(--sdk-h5-panel);
+}
+
+.sdk-h5-conv-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--sdk-h5-text);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.sdk-h5-conv-row:active {
+  background: var(--sdk-h5-surface);
+}
+
+.sdk-h5-conv-row + .sdk-h5-conv-row {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.sdk-h5-conv-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--sdk-h5-primary), #7c3aed);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.sdk-h5-conv-unread {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.45rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #ff3b30;
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 600;
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+.sdk-h5-conv-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.sdk-h5-conv-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.sdk-h5-conv-title-row strong {
+  font-size: 0.92rem;
+}
+
+.sdk-h5-conv-title-row time {
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.sdk-h5-conv-preview {
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── IM: notification center rows ── */
+.sdk-h5-notice-row {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  align-items: flex-start;
+  background: var(--sdk-h5-panel);
+  border: none;
+  border-bottom: 1px solid var(--sdk-h5-border);
+  padding: 0.75rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.sdk-h5-notice-badge {
+  flex-shrink: 0;
+  border-radius: 0.35rem;
+  font-size: 0.68rem;
+  padding: 0.15rem 0.4rem;
+  background: var(--sdk-h5-surface);
+  color: var(--sdk-h5-text-muted);
+}
+
+.sdk-h5-notice-badge-trade {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.sdk-h5-notice-badge-system {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.sdk-h5-notice-badge-notice {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.sdk-h5-notice-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sdk-h5-notice-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sdk-h5-notice-title-row strong {
+  font-size: 0.85rem;
+}
+
+.sdk-h5-notice-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--sdk-h5-danger);
+  flex-shrink: 0;
+}
+
+.sdk-h5-notice-preview,
+.sdk-h5-notice-detail {
+  font-size: 0.78rem;
+  color: var(--sdk-h5-text-muted);
+  line-height: 1.5;
+}
+
+.sdk-h5-notice-detail {
+  color: var(--sdk-h5-text);
+}
+
+.sdk-h5-notice-time {
+  font-size: 0.68rem;
+  color: #9ca3af;
+}
+
+/* ── IM: customer-service chat ── */
+.sdk-h5-chat {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 3.5rem);
+}
+
+.sdk-h5-chat-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--sdk-h5-panel);
+  border-bottom: 1px solid var(--sdk-h5-border);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+.sdk-h5-chat-stream {
+  flex: 1;
+  padding: 0.8rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sdk-h5-chat-row {
+  display: flex;
+}
+
+.sdk-h5-chat-row-buyer {
+  justify-content: flex-end;
+}
+
+.sdk-h5-chat-bubble {
+  max-width: 78%;
+  background: var(--sdk-h5-panel);
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 0.7rem 0.7rem 0.7rem 0.15rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.sdk-h5-chat-bubble p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.sdk-h5-chat-bubble time {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.64rem;
+  color: #9ca3af;
+}
+
+.sdk-h5-chat-bubble-buyer {
+  background: var(--sdk-h5-primary);
+  border-color: var(--sdk-h5-primary);
+  border-radius: 0.7rem 0.7rem 0.15rem 0.7rem;
+}
+
+.sdk-h5-chat-bubble-buyer p {
+  color: #fff;
+}
+
+.sdk-h5-chat-bubble-buyer time {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.sdk-h5-chat-composer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 0.6rem;
+  background: var(--sdk-h5-panel);
+  border-top: 1px solid var(--sdk-h5-border);
+  padding: 0.6rem 0.7rem calc(0.6rem + env(safe-area-inset-bottom));
+}
+
+.sdk-h5-chat-composer input {
+  flex: 1;
+  border: 1px solid var(--sdk-h5-border);
+  border-radius: 999rpx;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+  background: var(--sdk-h5-surface);
+}
+
+.sdk-h5-chat-composer .sdk-h5-button {
+  flex-shrink: 0;
 }

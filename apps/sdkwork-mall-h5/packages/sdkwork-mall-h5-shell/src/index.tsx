@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   LayoutGrid,
+  MessageCircle,
   Search,
   ShoppingCart,
   User,
@@ -35,6 +36,12 @@ interface ShellTab {
   readonly path: string;
 }
 
+/**
+ * JD-order five-tab bar: 首页 / 分类 / 消息 / 购物车 / 我的.
+ * Per APP_MOBILE_REACT_UI_SPEC §5 the selected tab must be distinguishable
+ * beyond color alone: the same stroke glyph is rendered filled when active
+ * (fill="currentColor") on top of the outline form.
+ */
 const SHELL_TABS: readonly ShellTab[] = [
   {
     icon: Home,
@@ -49,15 +56,31 @@ const SHELL_TABS: readonly ShellTab[] = [
     path: "/categories",
   },
   {
+    icon: MessageCircle,
+    label: "消息",
+    match: (pathname) =>
+      pathname.startsWith("/buyer/chats") ||
+      pathname.startsWith("/buyer/chat") ||
+      pathname.startsWith("/buyer/notices") ||
+      pathname.startsWith("/buyer/messages"),
+    path: "/buyer/chats",
+  },
+  {
     icon: ShoppingCart,
     label: "购物车",
-    match: (pathname) => pathname.startsWith("/cart") || pathname.startsWith("/checkout") || pathname.startsWith("/payment/"),
+    match: (pathname) => pathname === "/cart" || pathname.startsWith("/checkout"),
     path: "/cart",
   },
   {
     icon: User,
     label: "我的",
-    match: (pathname) => pathname.startsWith("/buyer"),
+    match: (pathname) =>
+      pathname === "/buyer" ||
+      (pathname.startsWith("/buyer/") &&
+        !pathname.startsWith("/buyer/chats") &&
+        !pathname.startsWith("/buyer/chat") &&
+        !pathname.startsWith("/buyer/notices") &&
+        !pathname.startsWith("/buyer/messages")),
     path: "/buyer",
   },
 ];
@@ -73,7 +96,9 @@ export function isSdkworkMallH5TabBarSurface(pathname: string): boolean {
     pathname === "/categories" ||
     /^\/categories\/[^/]+$/u.test(pathname) ||
     pathname === "/cart" ||
-    pathname === "/buyer"
+    pathname === "/buyer" ||
+    // The messages tab target renders the conversation list itself.
+    pathname === "/buyer/chats"
   );
 }
 
@@ -144,12 +169,12 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
                 onClick={() => navigate(tab.path)}
                 type="button"
               >
-                <span className="sdk-h5-tab-icon">
-                  <Icon aria-hidden="true" size={22} />
-                  {tab.path === (cartRoute?.path ?? "/cart") && cartTabBadge > 0 ? (
-                    <span className="sdk-h5-tab-badge">{cartTabBadge > 99 ? "99+" : cartTabBadge}</span>
-                  ) : null}
-                </span>
+              <span className="sdk-h5-tab-icon">
+                <Icon aria-hidden="true" size={22} fill={active ? "currentColor" : "none"} />
+                {tab.path === (cartRoute?.path ?? "/cart") && cartTabBadge > 0 ? (
+                  <span className="sdk-h5-tab-badge">{cartTabBadge > 99 ? "99+" : cartTabBadge}</span>
+                ) : null}
+              </span>
                 {tab.label}
               </button>
             );

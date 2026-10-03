@@ -32,7 +32,8 @@
 }
 
 .address-create {
-  margin: 30rpx;
+  margin: 30rpx 0;
+  padding: 0 30rpx;
 }
 
 .address-create-btn {

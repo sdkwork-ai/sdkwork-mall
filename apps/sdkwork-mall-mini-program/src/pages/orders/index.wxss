@@ -20,7 +20,7 @@
 }
 
 .orders-list {
-  padding: 20rpx;
+  padding: 20rpx 0;
 }
 
 .orders-item {

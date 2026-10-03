@@ -2,6 +2,7 @@ import {
   createSdkworkMallH5RouteRegistry,
   type SdkworkMallH5RouteContribution,
 } from "@sdkwork/mall-h5-core";
+import { sdkworkMallH5ImRoutes } from "@sdkwork/mall-h5-im/routes";
 import { sdkworkMallH5HomeRoutes } from "@sdkwork/mall-h5-home/routes";
 import { sdkworkMallH5CatalogRoutes } from "@sdkwork/mall-h5-catalog/routes";
 import { sdkworkMallH5CartRoutes } from "@sdkwork/mall-h5-cart/routes";
@@ -17,6 +18,7 @@ const registry = createSdkworkMallH5RouteRegistry([
   ...sdkworkMallH5CatalogRoutes,
   ...sdkworkMallH5CartRoutes,
   ...sdkworkMallH5OrderRoutes,
+  ...sdkworkMallH5ImRoutes,
   ...sdkworkMallH5BuyerRoutes,
   ...sdkworkMallH5AccountRoutes,
   ...sdkworkMallH5MembershipRoutes,

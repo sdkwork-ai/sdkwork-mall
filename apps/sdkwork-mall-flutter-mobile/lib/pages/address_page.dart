@@ -35,7 +35,7 @@ class _SdkworkAddressPageState extends State<SdkworkAddressPage> {
                   : RefreshIndicator(
                       onRefresh: _load,
                       child: ListView(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         children: [
                           for (final address in _addresses) _buildAddressCard(address),
                         ],

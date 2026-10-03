@@ -8,7 +8,7 @@ page {
   background: #fff;
   border-radius: 16rpx;
   padding: 24rpx;
-  margin: 20rpx;
+  margin: 0 0 20rpx 0;
 }
 
 .mp-title {
@@ -25,7 +25,7 @@ page {
 .mp-card {
   background: #fff;
   border-radius: 16rpx;
-  margin: 20rpx;
+  margin: 0 0 20rpx 0;
   padding: 24rpx;
 }
 
@@ -99,7 +99,7 @@ page {
 }
 
 .mp-error {
-  margin: 20rpx;
+  margin: 0 0 20rpx 0;
   padding: 16rpx 24rpx;
   border-radius: 12rpx;
   background: #fef2f2;
@@ -125,7 +125,7 @@ page {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  padding: 0 20rpx;
+  padding: 0;
 }
 
 .mp-product-card {

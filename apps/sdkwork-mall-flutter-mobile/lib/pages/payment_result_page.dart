@@ -51,7 +51,7 @@ class _SdkworkPaymentResultPageState extends State<SdkworkPaymentResultPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('支付结果')),
       body: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(vertical: 24),
         children: [
           Container(
             padding: const EdgeInsets.all(32),

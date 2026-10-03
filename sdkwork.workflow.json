@@ -62,6 +62,12 @@
       "tokenSecret": "SDKWORK_RELEASE_TOKEN"
     },
     {
+      "id": "sdkwork-im",
+      "repository": "sdkwork-ai/sdkwork-im",
+      "refInput": "SDKWORK_IM_REF",
+      "tokenSecret": "SDKWORK_RELEASE_TOKEN"
+    },
+    {
       "id": "sdkwork-promotion",
       "repository": "sdkwork-ai/sdkwork-promotion",
       "refInput": "SDKWORK_PROMOTION_REF",

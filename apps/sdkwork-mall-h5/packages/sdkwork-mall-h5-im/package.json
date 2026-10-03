@@ -1,0 +1,63 @@
+{
+  "name": "@sdkwork/mall-h5-im",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mall H5 messaging: IM notification center and customer-service chat over the sdkwork-im capability.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./routes": {
+      "types": "./src/routes.ts",
+      "import": "./src/routes.ts",
+      "default": "./src/routes.ts"
+    },
+    "./im-service": {
+      "types": "./src/im-service.ts",
+      "import": "./src/im-service.ts",
+      "default": "./src/im-service.ts"
+    },
+    "./im-remote-port": {
+      "types": "./src/im-remote-port.ts",
+      "import": "./src/im-remote-port.ts",
+      "default": "./src/im-remote-port.ts"
+    },
+    "./notices-page": {
+      "types": "./src/pages/NoticesPage.tsx",
+      "import": "./src/pages/NoticesPage.tsx",
+      "default": "./src/pages/NoticesPage.tsx"
+    },
+    "./chat-page": {
+      "types": "./src/pages/ChatPage.tsx",
+      "import": "./src/pages/ChatPage.tsx",
+      "default": "./src/pages/ChatPage.tsx"
+    },
+    "./conversation-list-page": {
+      "types": "./src/pages/ConversationListPage.tsx",
+      "import": "./src/pages/ConversationListPage.tsx",
+      "default": "./src/pages/ConversationListPage.tsx"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@sdkwork/mall-h5-commons": "workspace:*",
+    "@sdkwork/mall-h5-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "h5-react",
+    "domain": "im",
+    "capability": "messaging",
+    "status": "ready"
+  }
+}

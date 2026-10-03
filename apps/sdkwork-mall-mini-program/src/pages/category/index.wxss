@@ -52,7 +52,7 @@
 }
 
 .category-product-list {
-  padding: 20rpx;
+  padding: 20rpx 0;
 }
 
 .category-product-row {

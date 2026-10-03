@@ -104,7 +104,7 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
         ),
         const SdkworkSectionHeader(title: '我的订单'),
         Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12),
+          margin: EdgeInsets.zero,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
@@ -149,7 +149,7 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
         ),
         const SdkworkSectionHeader(title: '常用服务'),
         Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12),
+          margin: EdgeInsets.zero,
           child: Column(
             children: <ListTile>[
               ListTile(

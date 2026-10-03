@@ -94,6 +94,51 @@ const userCoupons = [
 const discountApplications = [];
 const walletHolds = [];
 
+// ── IM (sdkwork-im app-api shape): notifications + customer-service chat ──
+const notifications = [
+  {
+    notificationId: "ntf-welcome",
+    sourceEventId: "evt-welcome",
+    sourceEventType: "system.welcome",
+    category: "system",
+    channel: "inbox",
+    recipientId: "dev-buyer",
+    recipientKind: "buyer",
+    status: "unread",
+    title: "欢迎使用 SDKWork 商城",
+    body: "订单动态、物流提醒与优惠活动都会通过消息通知您。",
+    requestedAt: new Date(Date.now() - 86400_000).toISOString(),
+    dispatchedAt: new Date(Date.now() - 86400_000).toISOString(),
+  },
+];
+function pushNotification(input) {
+  const notification = {
+    notificationId: nextId("ntf"),
+    sourceEventId: nextId("evt"),
+    sourceEventType: input.sourceEventType,
+    category: input.category ?? "trade",
+    channel: "inbox",
+    recipientId: "dev-buyer",
+    recipientKind: "buyer",
+    status: "unread",
+    title: input.title,
+    body: input.body ?? "",
+    requestedAt: new Date().toISOString(),
+    dispatchedAt: new Date().toISOString(),
+  };
+  notifications.unshift(notification);
+  return notification;
+}
+
+const csAgent = { id: "agent-1", name: "客服小雅", online: true };
+const csConversations = [
+  { id: "cs-conv-1", title: "官方客服", agentId: csAgent.id, agentName: csAgent.name, unread: 0, lastMessageAt: new Date().toISOString() },
+];
+const csMessages = new Map();
+csMessages.set("cs-conv-1", [
+  { id: nextId("msg"), role: "agent", content: "您好，我是 SDKWork 客服小雅，有任何问题都可以随时咨询～", sentAt: new Date().toISOString() },
+]);
+
 function readBody(req) {
   return new Promise((resolve) => {
     let body = "";
@@ -281,6 +326,7 @@ async function handle(method, url, body) {
     for (const application of discountApplications) {
       if (!application.consumed) application.consumed = true;
     }
+    pushNotification({ sourceEventType: "order.created", title: "下单成功提醒", body: `订单 ${order.id} 已提交，共 ${order.quantity} 件商品，等待支付。` });
     return ok({ id: order.id });
   }
 
@@ -323,18 +369,93 @@ async function handle(method, url, body) {
     // Mock channel: the payment settles immediately.
     order.paid = true;
     order.paymentId = nextId("pay");
+    pushNotification({ sourceEventType: "order.paid", title: "支付成功提醒", body: `订单 ${order.id} 已完成支付（${body.paymentMethod ?? "线上支付"}），商家将尽快发货。` });
     return ok({ paymentId: order.paymentId, status: "PROCESSING" });
   }
   const receiptMatch = path.match(/^\/app\/v3\/api\/orders\/([^/]+)\/receipt_confirmations$/u);
   if (receiptMatch && method === "POST") {
     const order = orders.find((entry) => entry.id === receiptMatch[1]);
     order.receiptConfirmed = true;
+    pushNotification({ sourceEventType: "order.received", title: "确认收货提醒", body: `订单 ${order.id} 已确认收货，欢迎评价晒单。` });
     return ok({});
   }
   const cancelMatch = path.match(/^\/app\/v3\/api\/orders\/([^/]+)\/cancellations$/u);
   if (cancelMatch && method === "POST") {
     const order = orders.find((entry) => entry.id === cancelMatch[1]);
     order.cancelled = true;
+    pushNotification({ sourceEventType: "order.cancelled", title: "订单取消提醒", body: `订单 ${order.id} 已取消，如有疑问请联系客服。` });
+    return ok({});
+  }
+
+  // ── im (sdkwork-im app-api): notifications + customer-service chat ──
+  if (p === "GET /app/v3/api/notifications") {
+    const pageSize = Math.max(1, Number(query.get("page_size") ?? 20));
+    const cursor = query.get("cursor");
+    let start = 0;
+    if (cursor) {
+      const cursorIndex = notifications.findIndex((entry) => entry.notificationId === cursor);
+      start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
+    }
+    const rows = notifications.slice(start, start + pageSize);
+    const nextCursor = rows.length === pageSize && start + pageSize < notifications.length
+      ? rows[rows.length - 1].notificationId
+      : undefined;
+    return ok({ items: rows, pageInfo: { mode: "cursor", nextCursor, total: notifications.length } });
+  }
+  const notificationMatch = path.match(/^\/app\/v3\/api\/notifications\/([^/]+)$/u);
+  if (notificationMatch && method === "GET") {
+    const notification = notifications.find((entry) => entry.notificationId === notificationMatch[1]);
+    if (notification) {
+      notification.status = "read";
+      return ok(notification);
+    }
+    return { code: 40401, message: "notification not found" };
+  }
+  if (p === "POST /app/v3/api/notifications/requests") {
+    return ok(pushNotification({
+      sourceEventType: body.sourceEventType ?? "buyer.request",
+      category: body.category ?? "notice",
+      title: body.title ?? "消息提醒",
+      body: body.body ?? "",
+    }));
+  }
+
+  if (p === "GET /app/v3/api/im/chat/conversations") {
+    for (const conversation of csConversations) {
+      conversation.unread = (csMessages.get(conversation.id) ?? []).filter((message) => message.role === "agent" && !message.read).length;
+    }
+    return ok({ items: csConversations.map((conversation) => ({ ...conversation, lastMessage: (csMessages.get(conversation.id) ?? []).at(-1)?.content ?? "" })), pageInfo: { page: 1, total: csConversations.length } });
+  }
+  const csMessagesMatch = path.match(/^\/app\/v3\/api\/im\/chat\/conversations\/([^/]+)\/messages$/u);
+  if (csMessagesMatch && method === "GET") {
+    const rows = csMessages.get(csMessagesMatch[1]) ?? [];
+    return ok({ items: rows.map((message) => ({ ...message, read: true })), pageInfo: { page: 1, total: rows.length } });
+  }
+  const csSendMatch = path.match(/^\/app\/v3\/api\/im\/chat\/conversations\/([^/]+)\/messages$/u);
+  if (csSendMatch && method === "POST") {
+    const content = String(body.content ?? "").trim();
+    if (!content) return { code: 40001, message: "消息内容不能为空" };
+    const messages = csMessages.get(csSendMatch[1]) ?? [];
+    messages.push({ id: nextId("msg"), role: "buyer", content, sentAt: new Date().toISOString() });
+    // Mock agent: acknowledge instantly so the conversation feels alive.
+    const reply = content.includes("退款") || content.includes("退货")
+      ? "收到您的售后需求，请提供订单号，我们会尽快为您处理退换款。"
+      : content.includes("发货") || content.includes("物流")
+        ? "商品下单后 48 小时内发货，可在「我的-物流」查看实时轨迹。"
+        : "收到啦～已为您记录，客服小雅会尽快跟进您的问题。";
+    messages.push({ id: nextId("msg"), role: "agent", content: reply, sentAt: new Date().toISOString() });
+    csMessages.set(csSendMatch[1], messages);
+    const conversation = csConversations.find((entry) => entry.id === csSendMatch[1]);
+    if (conversation) conversation.lastMessageAt = new Date().toISOString();
+    return ok({ accepted: true });
+  }
+  const csReadMatch = path.match(/^\/app\/v3\/api\/im\/chat\/conversations\/([^/]+)\/read$/u);
+  if (csReadMatch && method === "POST") {
+    for (const message of csMessages.get(csReadMatch[1]) ?? []) {
+      message.read = true;
+    }
+    const conversation = csConversations.find((entry) => entry.id === csReadMatch[1]);
+    if (conversation) conversation.unread = 0;
     return ok({});
   }
 

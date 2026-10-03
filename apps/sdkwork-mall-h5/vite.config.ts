@@ -308,6 +308,11 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         target: backendApiProxyTarget,
       },
+      // Customer-service chat transport (mall seam) rides the same dev gateway.
+      "/im/chat": {
+        changeOrigin: true,
+        target: appApiProxyTarget,
+      },
     },
     fs: {
       allow: [

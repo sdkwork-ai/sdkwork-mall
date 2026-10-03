@@ -17,7 +17,7 @@
 
 .home-banner {
   height: 240rpx;
-  margin: 20rpx;
+  margin: 0 0 20rpx 0;
   border-radius: 16rpx;
   overflow: hidden;
 }
@@ -47,7 +47,7 @@
 .home-quick {
   display: flex;
   justify-content: space-between;
-  margin: 0 20rpx 20rpx;
+  margin: 0 0 20rpx 0;
   background: #fff;
   border-radius: 16rpx;
   padding: 24rpx 20rpx;

@@ -37,7 +37,7 @@ class _SdkworkCouponsPageState extends State<SdkworkCouponsPage> {
       body: _loading
           ? const SdkworkLoadingView(label: '加载优惠券...')
           : ListView(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               children: [
                 if (_claimable.isNotEmpty) ...[
                   const SdkworkSectionHeader(title: '可领取'),
