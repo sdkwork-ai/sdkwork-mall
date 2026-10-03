@@ -18,7 +18,7 @@ const ok = (data) => ({ code: 0, data, traceId: `mock-${Math.random().toString(3
 const PALETTE = ["#2563eb", "#7c3aed", "#e93b3d", "#f97316", "#059669", "#0891b2"];
 function artImage(label, colorIndex) {
   const bg = PALETTE[colorIndex % PALETTE.length];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="600" height="600" fill="${bg}"/><rect x="60" y="60" width="480" height="480" rx="48" fill="rgba(255,255,255,0.14)"/><text x="300" y="290" font-family="sans-serif" font-size="44" font-weight="700" fill="#fff" text-anchor="middle">SDKWork</text><text x="300" y="360" font-family="sans-serif" font-size="34" fill="rgba(255,255,255,0.85)" text-anchor="middle">${label}</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600"><rect width="600" height="600" fill="${bg}"/><text x="300" y="290" font-family="sans-serif" font-size="44" font-weight="700" fill="#fff" text-anchor="middle">SDKWork</text><text x="300" y="360" font-family="sans-serif" font-size="34" fill="rgba(255,255,255,0.85)" text-anchor="middle">${label}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
@@ -155,13 +155,19 @@ async function handle(method, url, body) {
       authToken: "mock-auth-token",
       refreshToken: "mock-refresh-token",
       sessionId: nextId("session"),
+      userId: `user-${principal}`,
       context: {
         tenantId: "100001",
         userId: `user-${principal}`,
         organizationId: "0",
+        organizationName: "SDKWork",
         appId: "sdkwork-mall",
         environment: "development",
         deploymentMode: "standalone",
+        authLevel: "password",
+        loginScope: "app",
+        dataScope: [],
+        permissionScope: [],
       },
     });
   }
