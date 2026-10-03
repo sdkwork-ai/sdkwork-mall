@@ -2261,3 +2261,69 @@ html::-webkit-scrollbar {
 .sdk-h5-chat-head {
   border-radius: 0;
 }
+
+/* ── Shared secondary-screen navbar (shell-owned) ── */
+:root {
+  --sdk-h5-navbar-height: 3.2rem;
+}
+
+.sdk-h5-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--sdk-h5-panel);
+  border-bottom: 1px solid var(--sdk-h5-border);
+  min-height: calc(var(--sdk-h5-navbar-height) + env(safe-area-inset-top));
+  padding: 0.4rem 0.6rem;
+  padding-top: calc(0.4rem + env(safe-area-inset-top));
+  box-sizing: border-box;
+}
+
+.sdk-h5-navbar-back {
+  border: none;
+  background: transparent;
+  color: var(--sdk-h5-text);
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem;
+  margin-left: -0.2rem;
+  cursor: pointer;
+}
+
+.sdk-h5-navbar-title {
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sdk-h5-navbar-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Chat room fills the viewport below the navbar; composer sits flush. */
+.sdk-h5-chat {
+  height: calc(100dvh - var(--sdk-h5-navbar-height) - env(safe-area-inset-top));
+  min-height: 0;
+  padding: 0;
+}
+
+.sdk-h5-chat-stream {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sdk-h5-chat-stream::-webkit-scrollbar {
+  display: none;
+}
+
+.sdk-h5-chat-composer {
+  position: static;
+}

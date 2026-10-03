@@ -13,7 +13,6 @@ const DEFAULT_CONVERSATION_ID = "cs-conv-1";
 
 export function SdkworkMallH5ChatPage() {
   const [messages, setMessages] = useState<MallH5ChatMessage[]>([]);
-  const [agentName, setAgentName] = useState("官方客服");
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -24,9 +23,6 @@ export function SdkworkMallH5ChatPage() {
     const conversations = await listMallH5ChatConversations();
     const conversation = conversations[0];
     const conversationId = conversation?.id ?? DEFAULT_CONVERSATION_ID;
-    if (conversation) {
-      setAgentName(conversation.agentName || conversation.title);
-    }
     const rows = await listMallH5ChatMessages(conversationId);
     setMessages(rows);
     await markMallH5ChatRead(conversationId);
@@ -85,11 +81,6 @@ export function SdkworkMallH5ChatPage() {
 
   return (
     <div className="sdk-h5-page sdk-h5-chat">
-      <div className="sdk-h5-chat-head">
-        <strong>{agentName}</strong>
-        <span className="sdk-h5-muted">在线</span>
-      </div>
-
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
       <div className="sdk-h5-chat-stream" ref={streamRef}>

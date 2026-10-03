@@ -1,6 +1,7 @@
 import { useState, useSyncExternalStore, type ReactNode } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import {
+  ChevronLeft,
   Home,
   LayoutGrid,
   MessageCircle,
@@ -86,19 +87,42 @@ const SHELL_TABS: readonly ShellTab[] = [
 ];
 
 /**
- * Surfaces that keep the bottom tab bar. Stacked pages (product detail,
- * checkout, search, orders, ...) render without it, matching JD-style
- * navigation where the tab bar belongs to the four tab roots only.
+ * Routes that keep the bottom tab bar — exactly the five tab roots above.
+ * Per spec, tab-bar visibility is decided once here at shell-layout time,
+ * never inside individual screens.
  */
 export function isSdkworkMallH5TabBarSurface(pathname: string): boolean {
+  return SHELL_TABS.some((tab) => tab.path === pathname);
+}
+
+/**
+ * Shared secondary-screen navigation bar: back affordance + route title.
+ * Titles resolve from the route registry at shell-layout time; pages never
+ * assemble their own headers.
+ */
+export function SdkworkMallH5NavBar({
+  onBack,
+  right,
+  title,
+}: {
+  onBack?: () => void;
+  right?: ReactNode;
+  title: string;
+}) {
+  const navigate = useNavigate();
   return (
-    pathname === "/" ||
-    pathname === "/categories" ||
-    /^\/categories\/[^/]+$/u.test(pathname) ||
-    pathname === "/cart" ||
-    pathname === "/buyer" ||
-    // The messages tab target renders the conversation list itself.
-    pathname === "/buyer/chats"
+    <header className="sdk-h5-navbar">
+      <button
+        aria-label="返回"
+        className="sdk-h5-navbar-back"
+        onClick={onBack ?? (() => navigate(-1))}
+        type="button"
+      >
+        <ChevronLeft aria-hidden="true" size={22} />
+      </button>
+      <strong className="sdk-h5-navbar-title">{title}</strong>
+      {right ? <span className="sdk-h5-navbar-right">{right}</span> : null}
+    </header>
   );
 }
 
@@ -108,51 +132,57 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   const [keyword, setKeyword] = useState("");
   const cartRoute = runtime.routes.find((route) => route.id === "storefront.mall.cart");
   const cartTabBadge = useSyncExternalStore(subscribeMallH5CartCount, readMallH5CartCount, () => 0);
-  // The TV surface owns the full screen (10-foot UI): no mobile chrome.
-  const isTvSurface = location.pathname === "/tv";
-  // JD-style PDP: full-bleed with no static search header; the page reveals
-  // a search header itself when the buyer scrolls up.
+
+  // Chrome is decided once here at shell-layout time (APP_MOBILE_REACT_UI_SPEC §5):
+  // - product detail owns a full-bleed surface with floating page chrome;
+  // - tab roots keep the search header;
+  // - every other (secondary) screen gets the shared back navigation bar.
   const isProductDetail = location.pathname.startsWith("/product/");
-  if (isTvSurface) {
-    return <div className="sdk-h5-app">{children}</div>;
-  }
-  const showTabBar = isSdkworkMallH5TabBarSurface(location.pathname);
+  const isTabRoot = isSdkworkMallH5TabBarSurface(location.pathname);
+  const matchedRoute = runtime.routes.find((route) =>
+    matchPath(route.path, location.pathname),
+  );
+  const navbarTitle = matchedRoute?.title ?? runtime.config.appDisplayName;
 
   function handleSearchSubmit() {
     const trimmed = keyword.trim();
     navigate(trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : "/search");
   }
 
+  const showTabBar = isTabRoot;
+
   return (
     <div className="sdk-h5-app">
-      {!isProductDetail ? (
-      <header className="sdk-h5-topbar">
-        <button
-          aria-label={runtime.config.appDisplayName}
-          className="sdk-h5-topbar-brand"
-          onClick={() => navigate("/")}
-          type="button"
-        >
-          商城
-        </button>
-        <div className="sdk-h5-topbar-search">
-          <Search aria-hidden="true" size={16} />
-          <input
-            aria-label="搜索商品"
-            enterKeyHint="search"
-            onChange={(event) => setKeyword(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                handleSearchSubmit();
-              }
-            }}
-            placeholder="搜索商品 / 品牌 / 店铺"
-            type="search"
-            value={keyword}
-          />
-        </div>
-      </header>
-      ) : null}
+      {isProductDetail ? null : isTabRoot ? (
+        <header className="sdk-h5-topbar">
+          <button
+            aria-label={runtime.config.appDisplayName}
+            className="sdk-h5-topbar-brand"
+            onClick={() => navigate("/")}
+            type="button"
+          >
+            商城
+          </button>
+          <div className="sdk-h5-topbar-search">
+            <Search aria-hidden="true" size={16} />
+            <input
+              aria-label="搜索商品"
+              enterKeyHint="search"
+              onChange={(event) => setKeyword(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  handleSearchSubmit();
+                }
+              }}
+              placeholder="搜索商品 / 品牌 / 店铺"
+              type="search"
+              value={keyword}
+            />
+          </div>
+        </header>
+      ) : (
+        <SdkworkMallH5NavBar title={navbarTitle} />
+      )}
 
       <main className={showTabBar ? "sdk-h5-main" : "sdk-h5-main sdk-h5-main-without-tabbar"}>{children}</main>
 
@@ -169,12 +199,12 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
                 onClick={() => navigate(tab.path)}
                 type="button"
               >
-              <span className="sdk-h5-tab-icon">
-                <Icon aria-hidden="true" size={22} fill={active ? "currentColor" : "none"} />
-                {tab.path === (cartRoute?.path ?? "/cart") && cartTabBadge > 0 ? (
-                  <span className="sdk-h5-tab-badge">{cartTabBadge > 99 ? "99+" : cartTabBadge}</span>
-                ) : null}
-              </span>
+                <span className="sdk-h5-tab-icon">
+                  <Icon aria-hidden="true" size={22} fill={active ? "currentColor" : "none"} />
+                  {tab.path === (cartRoute?.path ?? "/cart") && cartTabBadge > 0 ? (
+                    <span className="sdk-h5-tab-badge">{cartTabBadge > 99 ? "99+" : cartTabBadge}</span>
+                  ) : null}
+                </span>
                 {tab.label}
               </button>
             );
