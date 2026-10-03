@@ -1,0 +1,53 @@
+<view class="page-settings">
+  <view class="mp-card">
+    <view class="mp-card-title">本地数据</view>
+    <view class="settings-row" bindtap="clearFootprint">
+      <view class="settings-row-body">
+        <view class="settings-row-label">清空浏览足迹</view>
+        <view class="mp-muted">移除本机保存的浏览记录</view>
+      </view>
+      <view class="settings-arrow">›</view>
+    </view>
+    <view class="settings-row" bindtap="clearFavorites">
+      <view class="settings-row-body">
+        <view class="settings-row-label">清空收藏</view>
+        <view class="mp-muted">移除本机保存的全部收藏</view>
+      </view>
+      <view class="settings-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="mp-card">
+    <view class="mp-card-title">账号</view>
+    <view class="settings-row" bindtap="logout" wx:if="{{loggedIn}}">
+      <view class="settings-row-body">
+        <view class="settings-row-label">退出登录</view>
+        <view class="mp-muted">清除本机会话凭证</view>
+      </view>
+      <view class="settings-arrow">›</view>
+    </view>
+    <view class="settings-row" bindtap="goLogin" wx:else>
+      <view class="settings-row-body">
+        <view class="settings-row-label">登录</view>
+        <view class="mp-muted">登录后同步订单与售后</view>
+      </view>
+      <view class="settings-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="mp-card">
+    <view class="mp-card-title">关于</view>
+    <view class="settings-row">
+      <view class="settings-row-body">
+        <view class="settings-row-label">版本</view>
+        <view class="mp-muted">SDKWork Mall 小程序</view>
+      </view>
+    </view>
+    <view class="settings-row">
+      <view class="settings-row-body">
+        <view class="settings-row-label">环境</view>
+        <view class="mp-muted">{{environment}} · {{deploymentProfile}}</view>
+      </view>
+    </view>
+  </view>
+</view>

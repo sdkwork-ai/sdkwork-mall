@@ -1,6 +1,7 @@
 import { errorMessage, type MpSwiperChangeEvent, type MpTapEvent } from "../../types/common";
 import { type MpProductDetail, type MpSku, getProductDetail } from "../../services/catalog-service";
 import { addToCart } from "../../services/cart-service";
+import { isFavorite, recordFootprint, toggleFavorite } from "../../services/favorites-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
 
@@ -17,6 +18,7 @@ interface ProductData {
   maxQuantity: number | null;
   soldOut: boolean;
   displayPrice: string;
+  favorite: boolean;
   loading: boolean;
   busy: boolean;
   error: string;
@@ -39,6 +41,7 @@ Page({
     maxQuantity: null,
     soldOut: false,
     displayPrice: "",
+    favorite: false,
     loading: true,
     busy: false,
     error: "",
@@ -70,6 +73,11 @@ Page({
       const maxQuantity = selectedSku && selectedSku.stock != null && selectedSku.stock >= 0
         ? selectedSku.stock
         : skus.reduce((sum, sku) => sum + (sku.stock ?? 0), 0) || null;
+      recordFootprint({
+        id: detail.id,
+        imageUrl: detail.imageUrl,
+        title: detail.title,
+      });
       this.setData({
         detail,
         images: detail.images.length ? detail.images : [detail.imageUrl].filter(Boolean),
@@ -79,6 +87,7 @@ Page({
         displayPrice: formatCny(selectedSku && selectedSku.priceCny != null ? selectedSku.priceCny : detail.priceCny),
         maxQuantity,
         soldOut: maxQuantity != null && maxQuantity <= 0,
+        favorite: isFavorite(detail.id),
         loading: false,
       });
     } catch (cause) {
@@ -91,6 +100,21 @@ Page({
 
   onImageChange(event: MpSwiperChangeEvent) {
     this.setData({ activeImage: event.detail.current });
+  },
+
+  toggleFavorite() {
+    const detail = this.data.detail;
+    if (!detail) {
+      return;
+    }
+    const favorited = toggleFavorite({
+      id: detail.id,
+      imageUrl: detail.imageUrl,
+      priceCny: detail.priceCny,
+      title: detail.title,
+    });
+    this.setData({ favorite: favorited });
+    this.showToast(favorited ? "已加入收藏" : "已取消收藏");
   },
 
   selectSku(event: MpTapEvent) {

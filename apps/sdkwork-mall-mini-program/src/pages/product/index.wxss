@@ -79,6 +79,23 @@
   z-index: 10;
 }
 
+.product-action-fav {
+  flex-shrink: 0;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  line-height: 2.4;
+  padding: 0 24rpx;
+  background: #fff;
+  color: #6b7280;
+  border: 1rpx solid #e5e7eb;
+}
+
+.product-action-fav-active {
+  color: #e93b3d;
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
 .product-action-cart,
 .product-action-buy {
   flex: 1;

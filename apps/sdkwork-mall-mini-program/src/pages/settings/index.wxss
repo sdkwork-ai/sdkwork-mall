@@ -1,0 +1,26 @@
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-row-body {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.settings-row-label {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.settings-arrow {
+  color: #9ca3af;
+  font-size: 32rpx;
+}

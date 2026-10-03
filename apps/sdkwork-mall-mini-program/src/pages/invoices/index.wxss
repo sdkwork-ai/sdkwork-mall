@@ -1,0 +1,49 @@
+.inv-field {
+  margin-bottom: 20rpx;
+}
+
+.inv-label {
+  font-size: 24rpx;
+  color: #6b7280;
+  margin-bottom: 8rpx;
+}
+
+.inv-input {
+  border: 1rpx solid #e5e7eb;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+}
+
+.inv-picker {
+  border: 1rpx solid #e5e7eb;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+}
+
+.inv-submit {
+  margin-top: 8rpx;
+}
+
+.inv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.inv-row:last-child {
+  border-bottom: none;
+}
+
+.inv-row-body {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.inv-row-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}

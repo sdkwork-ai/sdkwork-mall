@@ -14,6 +14,13 @@
     "pages/address/index",
     "pages/coupons/index",
     "pages/aftersales/index",
+    "pages/favorites/index",
+    "pages/footprint/index",
+    "pages/wallet/index",
+    "pages/points/index",
+    "pages/membership/index",
+    "pages/invoices/index",
+    "pages/settings/index",
     "pages/login/index"
   ],
   "window": {

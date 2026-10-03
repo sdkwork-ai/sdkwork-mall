@@ -1,0 +1,49 @@
+<view class="page-invoices">
+  <view wx:if="{{loading}}" class="mp-loading">加载发票...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view class="mp-card">
+      <view class="mp-card-title">申请开票</view>
+      <view class="inv-field">
+        <view class="inv-label">抬头类型</view>
+        <picker range="{{titleTypeOptions}}" value="{{titleTypeIndex}}" bindchange="onTitleTypeChange">
+          <view class="inv-picker">{{titleTypeOptions[titleTypeIndex]}}</view>
+        </picker>
+      </view>
+      <view class="inv-field">
+        <view class="inv-label">发票抬头</view>
+        <input class="inv-input" placeholder="个人或企业名称" value="{{title}}" bindinput="onTitleInput" />
+      </view>
+      <view class="inv-field" wx:if="{{titleTypeIndex === 1}}">
+        <view class="inv-label">税号</view>
+        <input class="inv-input" placeholder="企业税号" value="{{taxNumber}}" bindinput="onTaxNumberInput" />
+      </view>
+      <view class="inv-field">
+        <view class="inv-label">接收邮箱</view>
+        <input class="inv-input" placeholder="选填" value="{{email}}" bindinput="onEmailInput" />
+      </view>
+      <view class="inv-field">
+        <view class="inv-label">关联订单号</view>
+        <input class="inv-input" placeholder="选填" value="{{orderId}}" bindinput="onOrderIdInput" />
+      </view>
+      <button class="mp-btn mp-btn-primary inv-submit" disabled="{{busy}}" bindtap="submit">
+        {{busy ? "提交中..." : "提交开票申请"}}
+      </button>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">我的发票</view>
+      <view wx:if="{{invoices.length === 0}}" class="mp-empty">暂无发票</view>
+      <view class="inv-row" wx:for="{{invoices}}" wx:key="id">
+        <view class="inv-row-body">
+          <view class="inv-row-title">{{item.title}}</view>
+          <view class="mp-price" wx:if="{{item.amountText}}">¥{{item.amountText}}</view>
+        </view>
+        <view class="mp-muted">{{item.statusText}}</view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>
+</view>

@@ -1,0 +1,58 @@
+.points-hero {
+  background: linear-gradient(135deg, #f5a623, #f06b3e);
+  border-radius: 20rpx;
+  padding: 40rpx 32rpx;
+  margin-bottom: 24rpx;
+  color: #ffffff;
+}
+
+.points-label {
+  font-size: 24rpx;
+  opacity: 0.85;
+}
+
+.points-amount {
+  font-size: 48rpx;
+  font-weight: 700;
+  margin-top: 8rpx;
+}
+
+.lot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.lot-row:last-child {
+  border-bottom: none;
+}
+
+.lot-points {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #f5a623;
+}
+
+.ledger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.ledger-row:last-child {
+  border-bottom: none;
+}
+
+.ledger-body {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.ledger-summary {
+  font-size: 28rpx;
+  font-weight: 600;
+}

@@ -64,6 +64,7 @@ describe("sdkwork-mall-h5 cart page", () => {
       lines = lines.filter((line) => line.id !== cartItemId);
       return { code: 0 };
     });
+    const updateSpy = vi.fn().mockResolvedValue({ code: 0 });
     const mock = createCommerceServiceMock({
       cart: {
         current: {
@@ -73,7 +74,7 @@ describe("sdkwork-mall-h5 cart page", () => {
           })),
         },
         items: {
-          update: vi.fn().mockResolvedValue({ code: 0 }),
+          update: updateSpy,
           delete: deleteSpy,
         },
       },
@@ -81,7 +82,7 @@ describe("sdkwork-mall-h5 cart page", () => {
     configureSdkworkCommerceServiceProvider(
       (): SdkworkCommerceService => mock as SdkworkCommerceService,
     );
-    return { mock, deleteSpy };
+    return { updateSpy, deleteSpy };
   }
 
   it("renders the toolbar, shop group, and the footer settlement bar", async () => {
@@ -125,16 +126,13 @@ describe("sdkwork-mall-h5 cart page", () => {
   });
 
   it("steps a row quantity through the cart update command", async () => {
-    const { mock } = useCartMock();
+    const { updateSpy } = useCartMock();
     renderCartPage();
 
     const stepperPlus = await screen.findByRole("button", { name: /增加 东北五常大米/ });
     fireEvent.click(stepperPlus);
     await waitFor(() =>
-      expect((mock as { cart: { items: { update: ReturnType<typeof vi.fn> } } }).cart.items.update).toHaveBeenCalledWith(
-        "cart-2",
-        { quantity: 3 },
-      ),
+      expect(updateSpy).toHaveBeenCalledWith("cart-2", { quantity: 3 }),
     );
   });
 });

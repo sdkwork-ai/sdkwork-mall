@@ -11,10 +11,17 @@ const ORDER_ENTRIES: Array<{ status: string; label: string; count: string | numb
 ];
 
 const QUICK_LINKS: Array<{ label: string; path: string }> = [
+  { label: "我的收藏", path: "/pages/favorites/index" },
+  { label: "浏览足迹", path: "/pages/footprint/index" },
   { label: "地址管理", path: "/pages/address/index" },
   { label: "领券中心", path: "/pages/coupons/index" },
   { label: "我的订单", path: "/pages/orders/index" },
   { label: "售后中心", path: "/pages/aftersales/index" },
+  { label: "钱包", path: "/pages/wallet/index" },
+  { label: "我的积分", path: "/pages/points/index" },
+  { label: "会员中心", path: "/pages/membership/index" },
+  { label: "发票", path: "/pages/invoices/index" },
+  { label: "设置", path: "/pages/settings/index" },
   { label: "去逛逛", path: "home" },
 ];
 

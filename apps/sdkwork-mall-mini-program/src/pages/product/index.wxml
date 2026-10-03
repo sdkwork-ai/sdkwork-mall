@@ -65,6 +65,10 @@
     </view>
 
     <view class="product-actions">
+      <button
+        class="product-action-fav {{favorite ? 'product-action-fav-active' : ''}}"
+        bindtap="toggleFavorite"
+      >{{favorite ? '♥ 已收藏' : '♡ 收藏'}}</button>
       <button class="product-action-cart" disabled="{{busy || soldOut}}" bindtap="openSkuPopup" data-mode="cart">加入购物车</button>
       <button class="product-action-buy" disabled="{{busy || soldOut}}" bindtap="openSkuPopup" data-mode="buy">{{soldOut ? '暂时售罄' : '立即购买'}}</button>
     </view>

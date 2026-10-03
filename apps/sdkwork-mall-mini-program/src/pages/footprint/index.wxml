@@ -1,0 +1,14 @@
+<view class="page-footprint">
+  <view wx:if="{{!records.length}}" class="mp-empty">还没有浏览记录</view>
+
+  <view class="mp-card" wx:if="{{records.length}}">
+    <view class="mp-card-title footprint-clear" bindtap="clearAll">清空足迹</view>
+    <view class="fp-row" wx:for="{{records}}" wx:key="id">
+      <image class="fp-image" src="{{item.imageUrl}}" mode="aspectFill" />
+      <view class="fp-body" bindtap="goProduct" data-id="{{item.id}}">
+        <view class="fp-title">{{item.title}}</view>
+        <view class="mp-muted">浏览于 {{item.viewedText}}</view>
+      </view>
+    </view>
+  </view>
+</view>

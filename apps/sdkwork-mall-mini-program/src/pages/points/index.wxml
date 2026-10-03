@@ -1,0 +1,31 @@
+<view class="page-points">
+  <view wx:if="{{loading}}" class="mp-loading">加载积分...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view class="points-hero">
+      <view class="points-label">积分余额</view>
+      <view class="points-amount">{{balanceText}}</view>
+    </view>
+
+    <view class="mp-card" wx:if="{{lots.length}}">
+      <view class="mp-card-title">积分分批</view>
+      <view class="lot-row" wx:for="{{lots}}" wx:key="id">
+        <view class="lot-points">{{item.pointsText}}</view>
+        <view class="mp-muted" wx:if="{{item.expiresText}}">{{item.expiresText}} 过期</view>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">积分明细</view>
+      <view wx:if="{{ledger.length === 0}}" class="mp-empty">暂无积分记录</view>
+      <view class="ledger-row" wx:for="{{ledger}}" wx:key="id">
+        <view class="ledger-body">
+          <view class="ledger-summary">{{item.summary}}</view>
+          <view class="mp-muted" wx:if="{{item.occurredText}}">{{item.occurredText}}</view>
+        </view>
+        <view class="mp-price" wx:if="{{item.amountText}}">{{item.amountText}}</view>
+      </view>
+    </view>
+  </block>
+</view>

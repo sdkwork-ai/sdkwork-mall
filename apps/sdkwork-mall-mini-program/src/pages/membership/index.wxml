@@ -1,0 +1,18 @@
+<view class="page-membership">
+  <view wx:if="{{loading}}" class="mp-loading">加载会员信息...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view class="membership-hero">
+      <view class="membership-label">当前等级</view>
+      <view class="membership-level">{{status ? status.levelName : "普通会员"}}</view>
+      <view class="mp-muted membership-status" wx:if="{{status}}">状态：{{status.status}}</view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">会员方案</view>
+      <view wx:if="{{plans.length === 0}}" class="mp-empty">暂无可选方案</view>
+      <view class="plan-row" wx:for="{{plans}}" wx:key="id">{{item.title}}</view>
+    </view>
+  </block>
+</view>

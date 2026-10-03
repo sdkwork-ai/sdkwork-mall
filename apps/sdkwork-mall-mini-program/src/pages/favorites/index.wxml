@@ -1,0 +1,29 @@
+<view class="page-favorites">
+  <view wx:if="{{loading}}" class="mp-loading">加载收藏...</view>
+
+  <block wx:if="{{!loading}}">
+    <view wx:if="{{favorites.length === 0}}" class="mp-empty">还没有收藏的商品</view>
+
+    <view class="mp-card" wx:if="{{favorites.length}}">
+      <view class="mp-card-title">共 {{favorites.length}} 件收藏</view>
+      <view class="fav-row" wx:for="{{favorites}}" wx:key="id">
+        <image class="fav-image" src="{{item.imageUrl}}" mode="aspectFill" />
+        <view class="fav-body" bindtap="goProduct" data-id="{{item.id}}">
+          <view class="fav-title">{{item.title}}</view>
+          <view class="mp-price" wx:if="{{item.priceText}}">¥{{item.priceText}}</view>
+          <view class="mp-muted" wx:else>询价</view>
+        </view>
+        <button
+          class="mp-btn mp-btn-ghost fav-remove"
+          disabled="{{busy}}"
+          bindtap="remove"
+          data-id="{{item.id}}"
+        >取消收藏</button>
+      </view>
+    </view>
+
+    <view class="mp-muted page-favorites-note">收藏暂存本机，登录账号云同步将在收藏服务上线后开放。</view>
+  </block>
+
+  <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>
+</view>

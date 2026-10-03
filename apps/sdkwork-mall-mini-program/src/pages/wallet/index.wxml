@@ -1,0 +1,31 @@
+<view class="page-wallet">
+  <view wx:if="{{loading}}" class="mp-loading">加载钱包...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view class="wallet-hero">
+      <view class="wallet-hero-item">
+        <view class="wallet-label">现金余额</view>
+        <view class="wallet-amount">{{cashText}}</view>
+      </view>
+      <view class="wallet-hero-item">
+        <view class="wallet-label">积分</view>
+        <view class="wallet-amount">{{pointsText}}</view>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">现金流水</view>
+      <view wx:if="{{ledger.length === 0}}" class="mp-empty">暂无流水记录</view>
+      <view class="ledger-row" wx:for="{{ledger}}" wx:key="id">
+        <view class="ledger-body">
+          <view class="ledger-summary">{{item.summary}}</view>
+          <view class="mp-muted" wx:if="{{item.occurredText}}">{{item.occurredText}}</view>
+        </view>
+        <view class="mp-price" wx:if="{{item.amountText}}">¥{{item.amountText}}</view>
+      </view>
+    </view>
+
+    <view class="mp-muted wallet-note">充值与提现将在支付渠道接入后开放。</view>
+  </block>
+</view>
