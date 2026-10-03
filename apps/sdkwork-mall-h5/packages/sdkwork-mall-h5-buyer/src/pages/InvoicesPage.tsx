@@ -6,6 +6,8 @@ import {
   type MallH5Invoice,
 } from "../invoices-service";
 
+import { SdkworkMallH5SelectCell } from "../components/ActionSheet";
+
 export function SdkworkMallH5InvoicesPage() {
   const [invoices, setInvoices] = useState<MallH5Invoice[]>([]);
   const [titleType, setTitleType] = useState("personal");
@@ -81,13 +83,15 @@ export function SdkworkMallH5InvoicesPage() {
 
       <section className="sdk-h5-section">
         <h2>申请开票</h2>
-        <label className="sdk-h5-field">
-          抬头类型
-          <select onChange={(event) => setTitleType(event.target.value)} value={titleType}>
-            <option value="personal">个人</option>
-            <option value="company">企业</option>
-          </select>
-        </label>
+        <SdkworkMallH5SelectCell
+          label="抬头类型"
+          onChange={setTitleType}
+          options={[
+            { label: "个人", value: "personal" },
+            { label: "企业", value: "company" },
+          ]}
+          value={titleType}
+        />
         <label className="sdk-h5-field">
           发票抬头
           <input onChange={(event) => setTitle(event.target.value)} value={title} />

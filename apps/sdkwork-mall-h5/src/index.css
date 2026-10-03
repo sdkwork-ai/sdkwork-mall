@@ -2327,3 +2327,134 @@ html::-webkit-scrollbar {
 .sdk-h5-chat-composer {
   position: static;
 }
+
+/* ── Picker cells (cell navigation form) + bottom action-sheet picker ── */
+.sdk-h5-cell-group {
+  background: var(--sdk-h5-panel);
+  margin-bottom: 0.8rem;
+}
+
+.sdk-h5-cell {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--sdk-h5-panel);
+  border: none;
+  border-bottom: 1px solid var(--sdk-h5-border);
+  color: var(--sdk-h5-text);
+  font-size: 0.85rem;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.sdk-h5-cell:last-child {
+  border-bottom: none;
+}
+
+.sdk-h5-cell-label {
+  color: var(--sdk-h5-text);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.sdk-h5-cell-value {
+  flex: 1;
+  text-align: right;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sdk-h5-cell-placeholder {
+  color: #9ca3af;
+}
+
+.sdk-h5-cell-chevron {
+  color: #c7cdd6;
+  flex-shrink: 0;
+}
+
+.sdk-h5-cell-group .sdk-h5-field {
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--sdk-h5-border);
+}
+
+.sdk-h5-cell-group .sdk-h5-field:last-child {
+  border-bottom: none;
+}
+
+.sdk-h5-cell-group .sdk-h5-field input,
+.sdk-h5-cell-group .sdk-h5-field textarea {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.25rem 0;
+  width: 100%;
+}
+
+.sdk-h5-actionsheet-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: flex-end;
+}
+
+.sdk-h5-actionsheet {
+  width: 100%;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--sdk-h5-panel);
+  border-radius: 0.9rem 0.9rem 0 0;
+  padding: 0.6rem 0 calc(0.7rem + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.sdk-h5-actionsheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 0.9rem 0.5rem;
+}
+
+.sdk-h5-actionsheet-head strong {
+  font-size: 0.9rem;
+}
+
+.sdk-h5-actionsheet-head button {
+  border: none;
+  background: transparent;
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.sdk-h5-actionsheet-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  border: none;
+  border-top: 1px solid var(--sdk-h5-border);
+  background: transparent;
+  color: var(--sdk-h5-text);
+  font-size: 0.88rem;
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sdk-h5-actionsheet-row:first-of-type {
+  border-top: none;
+}
+
+.sdk-h5-actionsheet-row-active {
+  color: var(--sdk-h5-primary);
+  font-weight: 600;
+}

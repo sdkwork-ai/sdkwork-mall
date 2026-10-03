@@ -8,6 +8,7 @@ import {
   updateMallH5Address,
   type MallH5Address,
 } from "../addresses-service";
+import { SdkworkMallH5SelectCell } from "../components/ActionSheet";
 import {
   formatMallH5RegionPrefix,
   MALL_H5_REGIONS,
@@ -226,37 +227,24 @@ export function SdkworkMallH5AddressesPage() {
               value={form.receiverPhone}
             />
           </label>
-          <label className="sdk-h5-field">
-            所在省
-            <select
-              onChange={(event) => {
-                const province = event.target.value;
-                setForm((current) => ({ ...current, region: { city: "", province } }));
-              }}
-              value={form.region.province}
-            >
-              <option value="">请选择省份</option>
-              {MALL_H5_REGIONS.map((region) => (
-                <option key={region.name} value={region.name}>{region.name}</option>
-              ))}
-            </select>
-          </label>
-          <label className="sdk-h5-field">
-            所在市
-            <select
-              disabled={cityOptions.length === 0}
-              onChange={(event) => {
-                const city = event.target.value;
-                setForm((current) => ({ ...current, region: { ...current.region, city } }));
-              }}
-              value={form.region.city}
-            >
-              <option value="">{cityOptions.length === 0 ? "请先选择省份" : "请选择城市"}</option>
-              {cityOptions.map((city) => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </label>
+          <SdkworkMallH5SelectCell
+            label="所在省"
+            onChange={(province) => {
+              setForm((current) => ({ ...current, region: { city: "", province } }));
+            }}
+            options={MALL_H5_REGIONS.map((region) => ({ label: region.name, value: region.name }))}
+            placeholder="请选择省份"
+            value={form.region.province}
+          />
+          <SdkworkMallH5SelectCell
+            label="所在市"
+            onChange={(city) => {
+              setForm((current) => ({ ...current, region: { ...current.region, city } }));
+            }}
+            options={cityOptions.map((city) => ({ label: city, value: city }))}
+            placeholder={cityOptions.length === 0 ? "请先选择省份" : "请选择城市"}
+            value={form.region.city}
+          />
           <label className="sdk-h5-field">
             详细地址（区县 / 街道 / 门牌）
             <input

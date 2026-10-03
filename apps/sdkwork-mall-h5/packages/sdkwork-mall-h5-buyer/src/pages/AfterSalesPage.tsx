@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { SdkworkMallH5SelectCell } from "../components/ActionSheet";
+
 import {
   cancelMallH5AfterSalesRequest,
   createMallH5AfterSalesRequest,
@@ -192,23 +194,22 @@ export function SdkworkMallH5AfterSalesPage() {
             {loadingOrder ? "读取中..." : "读取订单"}
           </button>
         )}
-        <label className="sdk-h5-field">
-          售后类型
-          <select onChange={(event) => setType(event.target.value)} value={type}>
-            {MALL_H5_AFTER_SALES_TYPES.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className="sdk-h5-field">
-          售后原因
-          <select onChange={(event) => setReasonCode(event.target.value)} value={reasonCode}>
-            {MALL_H5_AFTER_SALES_REASON_PRESETS.map((option) => (
-              <option key={option.code} value={option.code}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className="sdk-h5-field">
+        <div className="sdk-h5-cell-group">
+          <SdkworkMallH5SelectCell
+            label="售后类型"
+            onChange={setType}
+            options={MALL_H5_AFTER_SALES_TYPES.map((option) => ({ label: option.label, value: option.value }))}
+            value={type}
+          />
+          <SdkworkMallH5SelectCell
+            label="售后原因"
+            onChange={setReasonCode}
+            options={MALL_H5_AFTER_SALES_REASON_PRESETS.map((option) => ({ label: option.label, value: option.code }))}
+            value={reasonCode}
+          />
+        </div>
+        <div className="sdk-h5-cell-group">
+        <div className="sdk-h5-field">
           问题描述（选填）
           <textarea
             maxLength={200}
@@ -217,8 +218,8 @@ export function SdkworkMallH5AfterSalesPage() {
             rows={3}
             value={description}
           />
-        </label>
-        <label className="sdk-h5-field">
+        </div>
+        <div className="sdk-h5-field">
           售后金额（元）
           <input
             inputMode="decimal"
@@ -226,7 +227,8 @@ export function SdkworkMallH5AfterSalesPage() {
             placeholder="0.00"
             value={amount}
           />
-        </label>
+        </div>
+        </div>
         <button
           className="sdk-h5-button sdk-h5-button-primary sdk-h5-button-block"
           disabled={busy || loadingOrder}
