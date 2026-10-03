@@ -48,6 +48,10 @@ class SdkworkMallFlutterCommerceClient {
     if (token.isNotEmpty) {
       request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
     }
+    final accessToken = SdkworkSession.instance.accessToken;
+    if (accessToken.isNotEmpty) {
+      request.headers.set('Access-Token', accessToken);
+    }
     if (body != null) {
       request.write(jsonEncode(body));
     }
@@ -89,7 +93,7 @@ class SdkworkMallFlutterCommerceClient {
 }
 
 class SdkworkApiException implements Exception {
-  SdkworkApiException(
+  const SdkworkApiException(
     this.message, {
     this.code,
     this.traceId,

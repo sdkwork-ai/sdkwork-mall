@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../bootstrap/session.dart';
+import '../pages/after_sales_page.dart';
 import '../pages/address_page.dart';
 import '../pages/buyer_page.dart';
 import '../pages/cart_page.dart';
@@ -35,6 +36,11 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
             orderId: '${_routeArguments(context)}',
           ),
       '/address': (context) => const SdkworkAddressPage(),
+      '/after-sales': (context) => SdkworkAfterSalesPage(
+            orderId: _routeArguments(context) == null
+                ? null
+                : '${_routeArguments(context)}',
+          ),
       '/coupons': (context) => const SdkworkCouponsPage(),
     };
 

@@ -25,7 +25,19 @@
   composition root, and pages consume only the domain service they need.
   When the generated Dart SDK family lands, each service swaps its transport
   calls for the generated client without page changes.
+- 2026-10-03: identity and after-sales close the buyer loop. Login posts the
+  IAM session contract (`POST /auth/sessions`) through the same transport seam
+  (password form; the token paste stays as a dev fallback) and the session
+  persists the returned dual tokens via `shared_preferences` (the first
+  flutter.dev plugin dep — restore() runs before the first frame). The
+  transport now sends Authorization + Access-Token. An after-sales center
+  (`/after-sales`, entries from order detail for PAID/PENDING_RECEIPT/
+  COMPLETED and the buyer hub) builds the wire-contract create body
+  (`CreateAfterSalesRequest`: orderId/afterSalesType/reasonCode/
+  requestedAmount decimal string/CNY/items) from the live order snapshot and
+  revokes pending requests via PATCH. applicationId/bundleId aligned to the
+  manifest identity `com.sdkwork.mall.flutter`.
 - Follow-ups: generate `sdkwork_mall_*` Dart SDK family, swap services over,
-  persist the session in secure storage, wire `wx`-equivalent native pay
-  channels, add console/admin packages, wire store signing profiles
-  (applicationId still `com.example.sdkwork_mall_flutter_mobile`).
+  upgrade session persistence to secure storage (Keystore/Keychain), wire
+  `wx`-equivalent native pay channels, add console/admin packages, wire store
+  signing profiles.

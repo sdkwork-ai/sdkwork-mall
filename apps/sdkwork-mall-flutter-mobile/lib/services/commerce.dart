@@ -1,6 +1,8 @@
 import '../bootstrap/commerce_transport.dart';
 import '../bootstrap/environment.dart';
 import 'address_service.dart';
+import 'after_sales_service.dart';
+import 'auth_service.dart';
 import 'cart_service.dart';
 import 'catalog_service.dart';
 import 'order_service.dart';
@@ -17,7 +19,9 @@ class MallCommerce {
         cart = CartService(client),
         orders = OrderService(client),
         addresses = AddressService(client),
-        promotions = PromotionService(client);
+        promotions = PromotionService(client),
+        auth = AuthService(client),
+        afterSales = AfterSalesService(client);
 
   static MallCommerce? _instance;
 
@@ -27,6 +31,8 @@ class MallCommerce {
   final OrderService orders;
   final AddressService addresses;
   final PromotionService promotions;
+  final AuthService auth;
+  final AfterSalesService afterSales;
 
   static MallCommerce get instance {
     _instance ??= MallCommerce._(

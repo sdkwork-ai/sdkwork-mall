@@ -1,10 +1,13 @@
 import 'bootstrap/environment.dart';
+import 'bootstrap/session.dart';
 import 'package:flutter/material.dart';
 
 import 'services/commerce.dart';
 import 'shell/mobile_shell.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SdkworkSession.instance.restore();
   final environment = SdkworkMallFlutterEnvironment.fromDefineValues();
   debugPrint('sdkwork-mall-flutter-mobile runtime: $environment');
   // 构建组合根：传输层按环境注入 baseUrl，各领域服务独立装配。

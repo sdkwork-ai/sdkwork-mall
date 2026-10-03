@@ -170,6 +170,12 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).pushNamed('/orders'),
               ),
+              ListTile(
+                leading: const Icon(Icons.support_agent_outlined),
+                title: const Text('售后中心'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/after-sales'),
+              ),
             ],
           ),
         ),

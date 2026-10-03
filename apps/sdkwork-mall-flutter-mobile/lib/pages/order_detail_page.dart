@@ -142,6 +142,17 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
               ),
             ),
           ] else ...[
+            if (status == 'PAID' ||
+                status == 'PENDING_RECEIPT' ||
+                status == 'COMPLETED') ...[
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _openAfterSales,
+                  child: const Text('申请售后'),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: OutlinedButton(
                 onPressed: () => Navigator.of(context).maybePop(),
@@ -209,6 +220,10 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$cause')));
       }
     }
+  }
+
+  void _openAfterSales() {
+    Navigator.of(context).pushNamed('/after-sales', arguments: widget.orderId);
   }
 
   Future<void> _confirmReceipt() async {
