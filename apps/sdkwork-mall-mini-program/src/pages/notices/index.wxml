@@ -1,0 +1,23 @@
+<view class="page-notices">
+  <view wx:if="{{loading}}" class="mp-loading">加载通知...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view wx:if="{{notices.length === 0}}" class="mp-empty">暂无消息通知</view>
+    <view
+      class="notice-card {{item.status === 'read' ? 'notice-read' : ''}}"
+      wx:for="{{notices}}"
+      wx:key="notificationId"
+      bindtap="openNotice"
+      data-id="{{item.notificationId}}"
+      data-index="{{index}}"
+    >
+      <view class="mp-flex-between">
+        <view class="notice-title">{{item.title}}</view>
+        <view class="notice-dot" wx:if="{{item.status !== 'read'}}"></view>
+      </view>
+      <view class="mp-muted notice-body">{{item.body}}</view>
+      <view class="mp-muted" wx:if="{{item.timeText}}">{{item.timeText}}</view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,27 @@
+<view class="page-chat">
+  <scroll-view class="chat-stream" scroll-y scroll-into-view="{{scrollInto}}">
+    <view wx:if="{{messages.length === 0}}" class="mp-empty chat-empty">发送消息，客服将尽快回复</view>
+    <view
+      class="chat-bubble-row chat-bubble-{{item.role === 'user' ? 'right' : 'left'}}"
+      wx:for="{{messages}}"
+      wx:key="id"
+      id="msg-{{item.id}}"
+    >
+      <view class="chat-bubble {{item.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-agent'}}">
+        {{item.content}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="chat-composer">
+    <input
+      class="chat-composer-input"
+      placeholder="输入消息..."
+      value="{{draft}}"
+      confirm-type="send"
+      bindinput="onDraftInput"
+      bindconfirm="send"
+    />
+    <button class="mp-btn mp-btn-primary chat-composer-send" disabled="{{busy || !draft}}" bindtap="send">发送</button>
+  </view>
+</view>

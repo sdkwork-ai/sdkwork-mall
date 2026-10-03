@@ -8,6 +8,7 @@ import '../pages/buyer_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/cashier_page.dart';
 import '../pages/category_page.dart';
+import '../pages/chat_pages.dart';
 import '../pages/checkout_page.dart';
 import '../pages/coupons_page.dart';
 import '../pages/favorites_page.dart';
@@ -60,6 +61,11 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
       '/activity-detail': (context) => SdkworkActivityDetailPage(
             offerId: '${_routeArguments(context)}',
           ),
+      '/chats': (context) => const SdkworkChatsPage(),
+      '/chat': (context) => SdkworkChatPage(
+            conversationId: '${_routeArguments(context)}',
+          ),
+      '/notices': (context) => const SdkworkNoticesPage(),
     };
 
 Object? _routeArguments(BuildContext context) =>

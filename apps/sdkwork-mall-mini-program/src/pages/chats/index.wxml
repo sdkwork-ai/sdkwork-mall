@@ -1,0 +1,39 @@
+<view class="page-chats">
+  <view wx:if="{{loading}}" class="mp-loading">加载会话...</view>
+  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view class="mp-card">
+      <view class="mp-card-title">消息通知</view>
+      <view class="chat-entry" bindtap="goNotices">
+        <view class="chat-entry-body">
+          <view class="chat-entry-title">系统与交易通知</view>
+          <view class="mp-muted">订单、售后、物流提醒</view>
+        </view>
+        <view class="chat-arrow">›</view>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">客服会话</view>
+      <view wx:if="{{conversations.length === 0}}" class="mp-empty">暂无客服会话</view>
+      <view
+        class="chat-entry"
+        wx:for="{{conversations}}"
+        wx:key="id"
+        bindtap="goChat"
+        data-id="{{item.id}}"
+      >
+        <view class="chat-avatar">客</view>
+        <view class="chat-entry-body">
+          <view class="chat-entry-title">{{item.title}}</view>
+          <view class="mp-muted chat-entry-preview">{{item.lastMessage || "开始对话"}}</view>
+        </view>
+        <view class="chat-entry-meta">
+          <view class="mp-muted" wx:if="{{item.timeText}}">{{item.timeText}}</view>
+          <view class="chat-unread" wx:if="{{item.unread}}">{{item.unread}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

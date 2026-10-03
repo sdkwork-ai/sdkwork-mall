@@ -24,6 +24,9 @@
     "pages/shop/index",
     "pages/activity/index",
     "pages/activity-detail/index",
+    "pages/chats/index",
+    "pages/chat/index",
+    "pages/notices/index",
     "pages/login/index"
   ],
   "window": {

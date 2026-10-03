@@ -1,0 +1,29 @@
+.notice-card {
+  background: #ffffff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.notice-read {
+  opacity: 0.65;
+}
+
+.notice-title {
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.notice-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #e93b3d;
+  flex-shrink: 0;
+}
+
+.notice-body {
+  margin: 10rpx 0;
+  font-size: 26rpx;
+  line-height: 1.6;
+}

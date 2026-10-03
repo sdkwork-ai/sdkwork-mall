@@ -17,6 +17,7 @@ const QUICK_LINKS: Array<{ label: string; path: string }> = [
   { label: "领券中心", path: "/pages/coupons/index" },
   { label: "我的订单", path: "/pages/orders/index" },
   { label: "售后中心", path: "/pages/aftersales/index" },
+  { label: "消息中心", path: "/pages/chats/index" },
   { label: "钱包", path: "/pages/wallet/index" },
   { label: "我的积分", path: "/pages/points/index" },
   { label: "会员中心", path: "/pages/membership/index" },
