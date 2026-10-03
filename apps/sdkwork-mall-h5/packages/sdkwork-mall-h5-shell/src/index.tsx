@@ -1,7 +1,7 @@
 import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { SdkworkMobileNavBar } from '@sdkwork/shell-mobile-react/navbar';
 import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import {
-  ChevronLeft,
   Home,
   LayoutGrid,
   MessageCircle,
@@ -109,20 +109,15 @@ export function SdkworkMallH5NavBar({
   right?: ReactNode;
   title: string;
 }) {
+  // Shared navbar reuse (APP_MOBILE_REACT_UI_SPEC §5): the title bar is the
+  // appbase shell component; mall only adapts its router back handler.
   const navigate = useNavigate();
   return (
-    <header className="sdk-h5-navbar">
-      <button
-        aria-label="返回"
-        className="sdk-h5-navbar-back"
-        onClick={onBack ?? (() => navigate(-1))}
-        type="button"
-      >
-        <ChevronLeft aria-hidden="true" size={22} />
-      </button>
-      <strong className="sdk-h5-navbar-title">{title}</strong>
-      {right ? <span className="sdk-h5-navbar-right">{right}</span> : null}
-    </header>
+    <SdkworkMobileNavBar
+      onBack={onBack ?? (() => navigate(-1))}
+      right={right}
+      title={title}
+    />
   );
 }
 

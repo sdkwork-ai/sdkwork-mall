@@ -15,8 +15,9 @@
     "src"
   ],
   "dependencies": {
+    "@sdkwork/mall-h5-commons": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*",
-    "@sdkwork/mall-h5-commons": "workspace:*"
+    "@sdkwork/shell-mobile-react": "link:../../../../../sdkwork-appbase/packages/mobile-react/foundation/sdkwork-shell-mobile-react"
   },
   "peerDependencies": {
     "lucide-react": ">=1.0.0",
