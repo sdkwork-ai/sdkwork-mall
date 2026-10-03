@@ -453,9 +453,7 @@ body {
 
 .sdk-h5-pdp-gallery {
   background: var(--sdk-h5-panel);
-  border-radius: 0.85rem;
-  overflow: hidden;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 }
 
 .sdk-h5-pdp-gallery img {
@@ -475,7 +473,7 @@ body {
 
 .sdk-h5-pdp-summary {
   background: var(--sdk-h5-panel);
-  border-radius: 0.85rem;
+  border-radius: 0;
   padding: 0.9rem;
   margin-bottom: 0.8rem;
 }
