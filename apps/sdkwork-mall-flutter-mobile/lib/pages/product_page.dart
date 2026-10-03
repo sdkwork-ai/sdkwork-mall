@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../bootstrap/session.dart';
 import '../services/commerce.dart';
+import '../services/favorites_service.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 
-/// 商品详情: 画廊轮播 / SKU 选择 / 数量 / 加购 / 立即购买.
+/// 商品详情: 画廊轮播 / SKU 选择 / 数量 / 加购 / 立即购买 / 收藏.
 class SdkworkProductPage extends StatefulWidget {
   const SdkworkProductPage({super.key, required this.productId});
 
@@ -23,6 +24,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
   String _selectedSkuId = '';
   int _quantity = 1;
   int? _maxQuantity;
+  bool _favorite = false;
   bool _loading = true;
   bool _busy = false;
   String _error = '';
@@ -60,6 +62,14 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
       bottomNavigationBar: BottomAppBar(
         child: Row(
           children: [
+            IconButton(
+              tooltip: _favorite ? '取消收藏' : '收藏',
+              onPressed: _toggleFavorite,
+              icon: Icon(
+                _favorite ? Icons.favorite : Icons.favorite_outline,
+                color: _favorite ? const Color(0xFFE93B3D) : null,
+              ),
+            ),
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _busy || soldOut ? null : () => _openSkuSheet(false),
@@ -249,6 +259,18 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
           .toList();
       final totalStock = skus.fold<int>(0, (sum, sku) => sum + ((asNum(sku, ['stock', 'quantity']) ?? 0).toInt()));
       final firstStock = skus.isNotEmpty ? asNum(skus.first, ['stock', 'quantity'])?.toInt() : null;
+      // PDP 访问即记录足迹（本机，上限 50 条，与 H5/小程序一致）。
+      await SdkworkFavoritesStore.recordFootprint(
+        id: '${detail['id'] ?? widget.productId}',
+        title: '${detail['title'] ?? '商品'}',
+        imageUrl: '${detail['imageUrl'] ?? ''}',
+      );
+      final favorite = await SdkworkFavoritesStore.isFavorite(
+        '${detail['id'] ?? widget.productId}',
+      );
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _detail = detail;
         _images = images.toSet().toList();
@@ -256,6 +278,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
         _specs = specs;
         _selectedSkuId = skus.isNotEmpty ? '${skus.first['id']}' : '';
         _maxQuantity = firstStock ?? (totalStock > 0 ? totalStock : null);
+        _favorite = favorite;
         _loading = false;
       });
     } catch (cause) {
@@ -277,6 +300,31 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
       final stock = sku == null ? null : asNum(sku, ['stock', 'quantity'])?.toInt();
       _maxQuantity = stock ?? _maxQuantity;
     });
+  }
+
+  Future<void> _toggleFavorite() async {
+    final detail = _detail;
+    if (detail == null) {
+      return;
+    }
+    final favorited = await SdkworkFavoritesStore.toggleFavorite(
+      SdkworkFavoriteItem(
+        id: '${detail['id'] ?? widget.productId}',
+        title: '${detail['title'] ?? '商品'}',
+        imageUrl: '${detail['imageUrl'] ?? ''}',
+        priceCny: asNum(detail, <String>['priceCny', 'price', 'salePrice']),
+      ),
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() => _favorite = favorited);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(favorited ? '已加入收藏' : '已取消收藏'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   void _openSkuSheet(bool buyNow) {

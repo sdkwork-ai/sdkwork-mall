@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../bootstrap/session.dart';
+import '../pages/account_pages.dart';
 import '../pages/after_sales_page.dart';
 import '../pages/address_page.dart';
 import '../pages/buyer_page.dart';
@@ -9,6 +10,7 @@ import '../pages/cashier_page.dart';
 import '../pages/category_page.dart';
 import '../pages/checkout_page.dart';
 import '../pages/coupons_page.dart';
+import '../pages/favorites_page.dart';
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
 import '../pages/order_detail_page.dart';
@@ -16,6 +18,7 @@ import '../pages/orders_page.dart';
 import '../pages/payment_result_page.dart';
 import '../pages/product_page.dart';
 import '../pages/search_page.dart';
+import '../pages/settings_and_invoices.dart';
 
 /// Application routes for the commerce flow.
 Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
@@ -42,6 +45,13 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
                 : '${_routeArguments(context)}',
           ),
       '/coupons': (context) => const SdkworkCouponsPage(),
+      '/favorites': (context) => const SdkworkFavoritesPage(),
+      '/footprint': (context) => const SdkworkFootprintPage(),
+      '/wallet': (context) => const SdkworkWalletPage(),
+      '/points': (context) => const SdkworkPointsPage(),
+      '/membership': (context) => const SdkworkMembershipPage(),
+      '/invoices': (context) => const SdkworkInvoicesPage(),
+      '/settings': (context) => const SdkworkSettingsPage(),
     };
 
 Object? _routeArguments(BuildContext context) =>

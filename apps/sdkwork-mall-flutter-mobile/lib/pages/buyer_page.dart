@@ -153,6 +153,18 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
           child: Column(
             children: <ListTile>[
               ListTile(
+                leading: const Icon(Icons.favorite_outline),
+                title: const Text('我的收藏'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/favorites'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.history_outlined),
+                title: const Text('浏览足迹'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/footprint'),
+              ),
+              ListTile(
                 leading: const Icon(Icons.location_on_outlined),
                 title: const Text('地址管理'),
                 trailing: const Icon(Icons.chevron_right),
@@ -177,6 +189,48 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                 onTap: () => Navigator.of(context).pushNamed('/after-sales'),
               ),
             ],
+          ),
+        ),
+        const SdkworkSectionHeader(title: '我的资产'),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Column(
+            children: <ListTile>[
+              ListTile(
+                leading: const Icon(Icons.account_balance_wallet_outlined),
+                title: const Text('钱包'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/wallet'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.stars_outlined),
+                title: const Text('我的积分'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/points'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.workspace_premium_outlined),
+                title: const Text('会员中心'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/membership'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.receipt_outlined),
+                title: const Text('发票'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/invoices'),
+              ),
+            ],
+          ),
+        ),
+        const SdkworkSectionHeader(title: '其他'),
+        Card(
+          margin: EdgeInsets.zero,
+          child: ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text('设置'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).pushNamed('/settings'),
           ),
         ),
         const SizedBox(height: 24),
