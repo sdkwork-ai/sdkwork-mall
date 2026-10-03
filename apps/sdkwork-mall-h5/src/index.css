@@ -132,20 +132,23 @@ body {
   text-align: center;
 }
 
+/* Full-bleed page surface (APP_MOBILE_REACT_UI_SPEC v1.1): no horizontal
+   page gutter; vertical rhythm only. */
 .sdk-h5-page {
-  padding: 0.9rem;
+  padding: 0.7rem 0 0.9rem;
 }
 
 .sdk-h5-page-title {
   font-size: 1.15rem;
   margin: 0 0 0.8rem;
+  padding: 0 0.85rem;
 }
 
 .sdk-h5-section {
   background: var(--sdk-h5-panel);
-  border-radius: 0.85rem;
+  border-radius: 0;
   padding: 0.85rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 }
 
 .sdk-h5-section h2 {
@@ -160,9 +163,9 @@ body {
 }
 
 .sdk-h5-banner {
-  border-radius: 0.9rem;
+  border-radius: 0;
   padding: 1.2rem 1rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
   color: #fff;
   background: linear-gradient(135deg, #2563eb, #7c3aed);
 }
@@ -1349,7 +1352,7 @@ body {
 .sdk-h5-catalog-content {
   flex: 1;
   min-width: 0;
-  padding: 0.6rem 0.7rem 1rem;
+  padding: 0.6rem 0 1rem;
 }
 
 .sdk-h5-catalog-title {
