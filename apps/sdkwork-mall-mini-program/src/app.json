@@ -13,6 +13,7 @@
     "pages/order-detail/index",
     "pages/address/index",
     "pages/coupons/index",
+    "pages/aftersales/index",
     "pages/login/index"
   ],
   "window": {

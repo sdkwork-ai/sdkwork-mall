@@ -46,6 +46,7 @@
       <button wx:if="{{detail.status === 'PENDING_PAYMENT'}}" class="mp-btn mp-btn-primary" bindtap="pay">去支付</button>
       <button wx:if="{{detail.status === 'PENDING_PAYMENT'}}" class="mp-btn mp-btn-ghost" bindtap="cancel">取消订单</button>
       <button wx:if="{{detail.status === 'PENDING_RECEIPT'}}" class="mp-btn mp-btn-primary" bindtap="confirmReceipt">确认收货</button>
+      <button wx:if="{{detail.status === 'PAID' || detail.status === 'PENDING_RECEIPT' || detail.status === 'COMPLETED'}}" class="mp-btn mp-btn-plain" bindtap="goAfterSales">申请售后</button>
       <button class="mp-btn mp-btn-ghost" bindtap="goOrders">返回列表</button>
     </view>
   </block>

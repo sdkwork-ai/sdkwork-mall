@@ -1,0 +1,58 @@
+.aftersales-order-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.aftersales-order-row input {
+  flex: 1;
+}
+
+.aftersales-order-action {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  margin: 0;
+}
+
+.aftersales-picker {
+  padding: 14rpx 0;
+  font-size: 28rpx;
+}
+
+.aftersales-submit {
+  margin-top: 24rpx;
+}
+
+.aftersales-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1rpx solid #f3f4f6;
+  padding: 20rpx 0;
+}
+
+.aftersales-row:last-child {
+  border-bottom: none;
+}
+
+.aftersales-body {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.aftersales-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.aftersales-side {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.aftersales-cancel {
+  font-size: 24rpx;
+  padding: 6rpx 20rpx;
+  margin: 0;
+}

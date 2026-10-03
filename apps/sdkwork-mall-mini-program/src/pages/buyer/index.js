@@ -13,6 +13,7 @@ const QUICK_LINKS = [
   { label: "地址管理", path: "/pages/address/index" },
   { label: "领券中心", path: "/pages/coupons/index" },
   { label: "我的订单", path: "/pages/orders/index" },
+  { label: "售后中心", path: "/pages/aftersales/index" },
   { label: "去逛逛", path: "home" },
 ];
 

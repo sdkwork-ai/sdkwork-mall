@@ -37,6 +37,10 @@ function request(options) {
   if (token) {
     header.authorization = `Bearer ${token}`;
   }
+  const accessToken = session.getAccessToken ? session.getAccessToken() : "";
+  if (accessToken) {
+    header["access-token"] = accessToken;
+  }
 
   return new Promise((resolve, reject) => {
     wx.request({

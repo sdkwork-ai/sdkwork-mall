@@ -70,6 +70,10 @@ Page({
     }
   },
 
+  goAfterSales() {
+    wx.navigateTo({ url: `/pages/aftersales/index?orderId=${this.orderId}` });
+  },
+
   async confirmReceipt() {
     try {
       await ordersService.confirmReceipt(this.orderId);
