@@ -19,12 +19,19 @@ import {
   type AfterSalesRow,
   type AfterSalesStatus,
 } from "../after-sales-service";
+import {
+  getMallAfterSalesMediaRuntime,
+  isMallAfterSalesMediaRuntimeConfigured,
+} from "../after-sales-media-port";
 
 interface EvidenceFile {
   id: string;
   name: string;
   previewUrl?: string;
   size: number;
+  /** Backend-addressable reference (drive://) once the host upload settles. */
+  reference?: string;
+  uploadState?: "uploading" | "uploaded";
 }
 
 const STATUS_TONES: Record<AfterSalesStatus, string> = {
@@ -149,24 +156,57 @@ export function SdkworkMallAfterSalesPage() {
     if (!files || files.length === 0) {
       return;
     }
+    if (!isMallAfterSalesMediaRuntimeConfigured()) {
+      // No host media runtime: there is deliberately no local blob:/data-URL
+      // persistence — evidence references must be host-uploaded
+      // (`DRIVE_SPEC.md` §18).
+      setMessage("媒体上传不可用：需要宿主提供存储能力");
+      event.target.value = "";
+      return;
+    }
+    const mediaRuntime = getMallAfterSalesMediaRuntime();
     const newFiles: EvidenceFile[] = [];
+    let skippedForError = false;
     for (const file of Array.from(files)) {
       if (file.size > MAX_FILE_SIZE) {
         setMessage(`文件 ${file.name} 超过 5MB 限制`);
         continue;
       }
-      newFiles.push({
+      const entry: EvidenceFile = {
         id: `${file.name}-${file.size}-${Date.now()}`,
         name: file.name,
         previewUrl: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
         size: file.size,
-      });
+        uploadState: "uploading",
+      };
+      newFiles.push(entry);
+      void mediaRuntime
+        .uploadImages([file])
+        .then(([reference]) => {
+          if (!reference) throw new Error("upload returned no reference");
+          setForm((current) => ({
+            ...current,
+            evidenceFiles: current.evidenceFiles.map((item) =>
+              item.id === entry.id ? { ...item, reference, uploadState: "uploaded" as const } : item,
+            ),
+          }));
+        })
+        .catch(() => {
+          skippedForError = true;
+          setForm((current) => ({
+            ...current,
+            evidenceFiles: current.evidenceFiles.filter((item) => item.id !== entry.id),
+          }));
+        });
     }
     setForm((current) => ({
       ...current,
       evidenceFiles: [...current.evidenceFiles, ...newFiles].slice(0, MAX_EVIDENCE_FILES),
     }));
     event.target.value = "";
+    if (skippedForError) {
+      setMessage("部分凭证上传失败，已移除；请重试");
+    }
   }
 
   function removeEvidenceFile(fileId: string) {

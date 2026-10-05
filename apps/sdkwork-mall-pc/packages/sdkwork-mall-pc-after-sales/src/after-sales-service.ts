@@ -29,7 +29,15 @@ export interface AfterSalesRow {
 
 export interface AfterSalesFormState {
   description: string;
-  evidenceFiles: Array<{ id: string; name: string; previewUrl?: string; size: number }>;
+  evidenceFiles: Array<{
+    id: string;
+    name: string;
+    previewUrl?: string;
+    size: number;
+    /** Backend-addressable reference (drive://) once the host upload settles. */
+    reference?: string;
+    uploadState?: "uploading" | "uploaded";
+  }>;
   orderId: string;
   reason: string;
   requestedAmountCny: string;
@@ -298,13 +306,26 @@ export async function createMallAfterSalesRequest(
   const description = [form.reason.trim(), form.description.trim()]
     .filter((part) => part !== "")
     .join("\n");
+  // An evidence item still uploading (no reference yet) blocks submission:
+  // declaring metadata without its stored reference would lose the bytes.
+  const pendingUpload = form.evidenceFiles.some((file) => !file.reference);
+  if (pendingUpload) {
+    throw new Error("凭证仍在上传中，请稍候再提交");
+  }
   const requestBody: Record<string, unknown> = {
     afterSalesType: form.requestType,
     currencyCode: "CNY",
     description: description || undefined,
     evidenceSnapshot:
       form.evidenceFiles.length > 0
-        ? form.evidenceFiles.map((file) => ({ fileName: file.name, fileSize: file.size }))
+        ? form.evidenceFiles.map((file) => ({
+            fileName: file.name,
+            fileSize: file.size,
+            // The backend stores snapshot items verbatim (free-form array),
+            // so the drive reference rides inside the item it belongs to.
+            source: "drive",
+            url: file.reference,
+          }))
         : undefined,
     items: orderContext.items.map((item) => ({
       orderItemId: item.orderItemId,

@@ -46,6 +46,7 @@ export function createSdkworkMallPcRuntime(): SdkworkMallPcRuntime {
     config,
     iamRuntime,
     sdkClients,
+    tokenManager,
   });
 
   return {

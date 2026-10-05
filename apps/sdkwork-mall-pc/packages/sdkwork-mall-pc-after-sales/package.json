@@ -21,8 +21,9 @@
     }
   },
   "peerDependencies": {
-    "@sdkwork/payment-service": "workspace:*",
+    "@sdkwork/drive-upload-image-core": "workspace:*",
     "@sdkwork/mall-pc-core": "workspace:*",
+    "@sdkwork/payment-service": "workspace:*",
     "@sdkwork/ui-pc-react": "workspace:*",
     "react": ">=18.2.0 <20.0.0"
   },

@@ -64,7 +64,14 @@ describe("sdkwork-mall-pc-after-sales service", () => {
     const form = {
       ...createEmptyAfterSalesForm(),
       description: "划痕明显",
-      evidenceFiles: [{ id: "f1", name: "proof.png", size: 1024 }],
+      evidenceFiles: [
+        {
+          id: "f1",
+          name: "proof.png",
+          reference: "drive://spaces/space-9/nodes/node-9",
+          size: 1024,
+        },
+      ],
       orderId: "ORDER-9",
       reason: "商品与描述不符",
       requestedAmountCny: "25.00",
@@ -84,7 +91,14 @@ describe("sdkwork-mall-pc-after-sales service", () => {
       afterSalesType: "return",
       currencyCode: "CNY",
       description: "商品与描述不符\n划痕明显",
-      evidenceSnapshot: [{ fileName: "proof.png", fileSize: 1024 }],
+      evidenceSnapshot: [
+        {
+          fileName: "proof.png",
+          fileSize: 1024,
+          source: "drive",
+          url: "drive://spaces/space-9/nodes/node-9",
+        },
+      ],
       items: [{ orderItemId: "oi-1", refundAmount: "25.00", requestedQuantity: 2 }],
       orderId: "ORDER-9",
       reasonCode: "buyer-request",

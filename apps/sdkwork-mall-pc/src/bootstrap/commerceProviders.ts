@@ -17,6 +17,7 @@ import { configureSdkworkMallPcCmsCommerceRemotePort } from "./cms-commerce-remo
 import { configureSdkworkMallPcMerchantCommerceRemotePort } from "./merchant-commerce-remote";
 import { configureSdkworkMallPcStorefrontCommerceRemotePorts } from "./storefront-commerce-remote";
 import { createSdkCommandPortAdapter } from "./sdk-command-port-adapter";
+import { createSdkworkMallPcSessionTokenManager } from "./sessionTokenManager";
 import type { SdkworkMallPcIamRuntime } from "./iamRuntime";
 import type { SdkworkMallPcSdkClientInventory } from "./sdkClients";
 import type { SdkworkMallPcRuntimeConfig } from "./environment";
@@ -59,6 +60,7 @@ export function configureSdkworkMallPcProviders(input: {
   config: SdkworkMallPcRuntimeConfig;
   iamRuntime: SdkworkMallPcIamRuntime;
   sdkClients: SdkworkMallPcSdkClientInventory;
+  tokenManager: ReturnType<typeof createSdkworkMallPcSessionTokenManager>;
 }): SdkworkMallPcCommerceProviders {
   const orderAfterSales = createSdkCommandPortAdapter<{
     requests: {
@@ -121,7 +123,10 @@ export function configureSdkworkMallPcProviders(input: {
   configureSdkworkMallPcInvoiceRemotePort();
   configureSdkworkMallPcAddressRemotePort();
   configureSdkworkMallPcStorefrontCommerceRemotePorts();
-  configureSdkworkMallPcBuyerCommerceRemotePorts();
+  configureSdkworkMallPcBuyerCommerceRemotePorts({
+    config: input.config,
+    tokenManager: input.tokenManager,
+  });
   configureSdkworkMallPcCommerceBuyerHubRemotePort();
   configureSdkworkMallPcCartCommerceRemotePort();
   configureSdkworkMallPcMerchantCommerceRemotePort(input.sdkClients);
