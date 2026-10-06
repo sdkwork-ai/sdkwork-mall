@@ -15,6 +15,9 @@ Runnable application roots live under `apps/<application-root>/`.
 | Directory | Surface role | Runnable | Purpose | Entry |
 | --- | --- | --- | --- | --- |
 | sdkwork-mall-pc | pc | yes | SDKWork Mall PC pc application root. | [README](sdkwork-mall-pc/README.md) |
+| sdkwork-mall-h5 | h5 | yes | SDKWork Mall H5 mobile storefront and buyer console. | [README](sdkwork-mall-h5/README.md) |
+| sdkwork-mall-mini-program | weixin-mini-program | yes | SDKWork Mall WeChat mini-program storefront. | [README](sdkwork-mall-mini-program/README.md) |
+| sdkwork-mall-flutter-mobile | flutter-android-ios | yes | SDKWork Mall Flutter mobile application root. | [README](sdkwork-mall-flutter-mobile/README.md) |
 
 ## Allowed Content
 

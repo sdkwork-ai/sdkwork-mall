@@ -18,6 +18,7 @@
     "test:node": "node --test tests/contract/*.test.mjs",
     "test:vitest": "vitest run --config vitest.config.ts --configLoader native --pool vmThreads",
     "typecheck": "tsc --noEmit",
+    "lint": "pnpm run typecheck",
     "check:app-composition": "node ../sdkwork-specs/tools/verify-repo.mjs --root .",
     "check:cors-standard": "node ../sdkwork-specs/tools/check-cors-standard.mjs --root .",
     "build:h5:dev": "node ../sdkwork-specs/tools/build-browser-client.mjs --root . --architecture h5 --environment dev",
