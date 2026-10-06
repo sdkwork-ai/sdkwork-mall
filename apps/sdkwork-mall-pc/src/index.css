@@ -1,5 +1,7 @@
 @import "tailwindcss";
+@import "@sdkwork/ui-pc-react/styles.css";
 
+@source "../packages";
 @source "../../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-pc-react/src";
 @source "../../../../sdkwork-appbase/packages/pc-react/foundation/sdkwork-i18n-pc-react/src";
 @source "../../../../sdkwork-ui/sdkwork-ui-pc-react/src";

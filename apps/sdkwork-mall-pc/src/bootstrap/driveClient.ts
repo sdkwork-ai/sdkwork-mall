@@ -1,6 +1,8 @@
 import { createDriveAppClient, type SdkworkDriveAppClient } from "@sdkwork/drive-app-sdk";
 import type { SdkworkMallPcRuntimeConfig } from "./environment";
-import type { SdkworkMallPcSessionTokenManager } from "./sessionTokenManager";
+import { createSdkworkMallPcSessionTokenManager } from "./sessionTokenManager";
+
+type SdkworkMallPcSessionTokenManager = ReturnType<typeof createSdkworkMallPcSessionTokenManager>;
 
 const APP_API_PREFIX = "/app/v3/api";
 const DRIVE_APP_SDK_FAMILY_ID = "sdkwork-drive-app-sdk";

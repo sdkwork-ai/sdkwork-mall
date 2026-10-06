@@ -52,9 +52,9 @@ packages:
   - "../sdkwork-app-topology"
   - "../sdkwork-ui/sdkwork-ui-mobile-react"
   - "../sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript"
+  - "../sdkwork-cloudrouter/sdks/cloudrouter-backend-sdk/cloudrouter-backend-sdk-typescript"
   - "../sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript"
   - "../sdkwork-drive/apps/sdkwork-drive-common/packages/sdkwork-drive-upload-image-core"
-  - "../sdkwork-cloudrouter/sdks/cloudrouter-backend-sdk/cloudrouter-backend-sdk-typescript"
 
 catalog:
   "@tailwindcss/vite": ^4.3.3
@@ -165,3 +165,4 @@ catalog:
   tailwindcss-animate: ^1.0.7
   tsup: ^8.5.1
   zustand: ^5.0.12
+

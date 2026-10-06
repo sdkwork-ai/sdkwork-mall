@@ -3,7 +3,7 @@
   "appId": "sdkwork-mall-pc",
   "declarations": [
     {
-      "appResourceType": "mall.after_sales_evidence",
+      "appResourceType": "mall.after-sales-evidence",
       "appResourceIdKind": "application",
       "scene": "after-sales-evidence",
       "source": "sdkwork-mall-pc",

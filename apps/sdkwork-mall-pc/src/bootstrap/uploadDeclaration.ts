@@ -30,7 +30,7 @@ export const SDKWORK_MALL_PC_UPLOAD_SOURCE = 'sdkwork-mall-pc' as const;
  */
 export const SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD = {
   appResourceIdKind: 'application',
-  appResourceType: 'mall.after_sales_evidence',
+  appResourceType: 'mall.after-sales-evidence',
   purpose: 'After-sales evidence images uploaded to Drive and referenced by the after-sales request snapshot.',
   retention: 'long_term',
   scene: 'after-sales-evidence',

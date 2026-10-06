@@ -3,8 +3,10 @@ import { configureSdkworkAfterSalesRemotePort } from "@sdkwork/mall-pc-after-sal
 import { configureSdkworkMessagesRemotePort } from "@sdkwork/mall-pc-messages";
 import { configureSdkworkReviewsRemotePort } from "@sdkwork/mall-pc-reviews";
 import { createDriveUploadImageService } from "@sdkwork/drive-upload-image-core";
+import { configureMallAfterSalesMediaRuntimePort } from "@sdkwork/mall-pc-after-sales";
 import { createSdkworkMallPcDriveAppClient } from "./driveClient";
 import { createSdkworkMallPcSessionTokenManager } from "./sessionTokenManager";
+import { SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD } from "./uploadDeclaration";
 import type { SdkworkMallPcRuntimeConfig } from "./environment";
 
 export function configureSdkworkMallPcBuyerCommerceRemotePorts(input: {
