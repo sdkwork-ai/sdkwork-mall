@@ -97,12 +97,20 @@ function readMoney(value: unknown): number {
 }
 
 function readCartLine(record: Record<string, unknown>): MallCartLine {
+  const sku = (record.sku ?? null) as Record<string, unknown> | null;
+  const spu = (record.spu ?? null) as Record<string, unknown> | null;
   const unitPrice =
     typeof record.unitPrice === "number"
       ? record.unitPrice
       : typeof record.price === "number"
         ? record.price
-        : null;
+        : typeof record.priceCny === "number"
+          ? record.priceCny
+          : typeof sku?.priceCny === "number"
+            ? sku.priceCny
+            : typeof spu?.priceCny === "number"
+              ? spu.priceCny
+              : null;
   const quantity = typeof record.quantity === "number" ? record.quantity : 1;
   const imageSource =
     typeof record.imageUrl === "string" && record.imageUrl.length > 0
@@ -113,15 +121,29 @@ function readCartLine(record: Record<string, unknown>): MallCartLine {
           ? record.thumbnail
           : typeof record.productImage === "string" && record.productImage.length > 0
             ? record.productImage
-            : undefined;
+            : typeof spu?.imageUrl === "string" && spu.imageUrl.length > 0
+              ? spu.imageUrl
+              : undefined;
+  const title =
+    (typeof record.title === "string" && record.title) ||
+    (typeof record.productName === "string" && record.productName) ||
+    (typeof spu?.title === "string" && spu.title) ||
+    (typeof sku?.name === "string" && sku.name) ||
+    "商品";
+  const skuName =
+    (typeof record.skuName === "string" && record.skuName) ||
+    (typeof sku?.name === "string" && sku.name) ||
+    undefined;
+  const shopName =
+    (typeof record.shopName === "string" && record.shopName) || "平台自营";
 
   return {
     id: String(record.id ?? ""),
     productId: String(record.spuId ?? record.productId ?? ""),
     skuId: String(record.skuId ?? ""),
-    title: String(record.title ?? record.productName ?? "商品"),
-    skuName: typeof record.skuName === "string" ? record.skuName : undefined,
-    shopName: typeof record.shopName === "string" ? record.shopName : undefined,
+    title,
+    skuName,
+    shopName,
     imageUrl: imageSource,
     quantity,
     unitPriceCny: unitPrice,

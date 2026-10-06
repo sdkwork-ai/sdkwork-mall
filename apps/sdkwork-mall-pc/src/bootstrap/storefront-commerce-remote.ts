@@ -13,7 +13,9 @@ export function configureSdkworkMallPcStorefrontCommerceRemotePorts(): void {
       return commerce().shops.list(query);
     },
     retrieveShop(query) {
-      return commerce().shops.retrieve(query);
+      // Generated path-parameter commands take (id) strings, not query
+      // objects — an object serializes into the path and 404s.
+      return commerce().shops.retrieve(query.shopId);
     },
   });
 
@@ -52,10 +54,10 @@ export function configureSdkworkMallPcStorefrontCommerceRemotePorts(): void {
       return commerce().promotions.offers.list(query);
     },
     retrieveCategory(query) {
-      return commerce().catalog.categories.retrieve(query);
+      return commerce().catalog.categories.retrieve(query.categoryId);
     },
     retrieveSpu(query) {
-      return commerce().catalog.spus.retrieve(query);
+      return commerce().catalog.spus.retrieve(query.spuId);
     },
   });
 
@@ -64,7 +66,7 @@ export function configureSdkworkMallPcStorefrontCommerceRemotePorts(): void {
       return commerce().promotions.offers.list(query);
     },
     retrievePromotionOffer(query) {
-      return commerce().promotions.offers.retrieve(query);
+      return commerce().promotions.offers.retrieve(query.offerId);
     },
   });
 }
