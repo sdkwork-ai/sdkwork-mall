@@ -42,6 +42,12 @@
           catchtap="confirmReceipt"
           data-id="{{item.id}}"
         >确认收货</button>
+        <button
+          wx:if="{{item.status === 'PENDING_RECEIPT' || item.status === 'COMPLETED'}}"
+          class="mp-btn mp-btn-ghost orders-action"
+          catchtap="goLogistics"
+          data-id="{{item.id}}"
+        >查看物流</button>
         <button class="mp-btn mp-btn-plain orders-action">订单详情</button>
       </view>
     </view>

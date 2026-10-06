@@ -1,0 +1,33 @@
+<view class="page-logistics">
+  <view class="logistics-back">
+    <button class="mp-btn mp-btn-ghost" bindtap="goOrders">返回订单列表</button>
+  </view>
+
+  <view wx:if="{{missingOrder}}" class="mp-empty">缺少订单参数，请从订单列表进入。</view>
+  <view wx:if="{{loading}}" class="mp-loading">加载物流...</view>
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{!loading && !missingOrder && shipments.length === 0}}" class="mp-empty">商家尚未发货，发货后可在此查看物流轨迹。</view>
+
+  <view class="logistics-list">
+    <view class="logistics-card" wx:for="{{shipments}}" wx:key="shipmentId">
+      <view class="logistics-title">{{item.titleText}}</view>
+      <view wx:if="{{item.metaText}}" class="mp-muted logistics-meta">{{item.metaText}}</view>
+      <view wx:if="{{item.packagesText}}" class="mp-muted logistics-meta">{{item.packagesText}}</view>
+      <view wx:if="{{item.events.length === 0}}" class="mp-empty">暂无轨迹</view>
+      <view wx:else class="logistics-timeline">
+        <view
+          class="logistics-event {{event.latest ? 'logistics-event-latest' : ''}}"
+          wx:for="{{item.events}}"
+          wx:for-item="event"
+          wx:key="index"
+        >
+          <view class="logistics-dot"></view>
+          <view class="logistics-event-body">
+            <view class="logistics-event-text">{{event.description}}</view>
+            <view class="mp-muted logistics-event-meta">{{event.metaText}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

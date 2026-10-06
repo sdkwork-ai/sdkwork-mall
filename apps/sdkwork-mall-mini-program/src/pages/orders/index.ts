@@ -103,6 +103,10 @@ Page({
     wx.navigateTo({ url: `/pages/order-detail/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
   },
 
+  goLogistics(event: MpTapEvent) {
+    wx.navigateTo({ url: `/pages/logistics/index?orderId=${String(event.currentTarget.dataset.id ?? "")}` });
+  },
+
   async payOrder(event: MpTapEvent) {
     const orderId = String(event.currentTarget.dataset.id ?? "");
     try {

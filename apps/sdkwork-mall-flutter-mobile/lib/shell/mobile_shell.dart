@@ -14,7 +14,9 @@ import '../pages/coupons_page.dart';
 import '../pages/favorites_page.dart';
 import '../pages/home_page.dart';
 import '../pages/login_page.dart';
+import '../pages/logistics_page.dart';
 import '../pages/marketing_pages.dart';
+import '../pages/messages_page.dart';
 import '../pages/order_detail_page.dart';
 import '../pages/orders_page.dart';
 import '../pages/payment_result_page.dart';
@@ -40,6 +42,12 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
       '/order-detail': (context) => SdkworkOrderDetailPage(
             orderId: '${_routeArguments(context)}',
           ),
+      '/logistics': (context) => SdkworkLogisticsPage(
+            orderId: _routeArguments(context) == null
+                ? null
+                : '${_routeArguments(context)}',
+          ),
+      '/messages': (context) => const SdkworkMessagesPage(),
       '/address': (context) => const SdkworkAddressPage(),
       '/after-sales': (context) => SdkworkAfterSalesPage(
             orderId: _routeArguments(context) == null

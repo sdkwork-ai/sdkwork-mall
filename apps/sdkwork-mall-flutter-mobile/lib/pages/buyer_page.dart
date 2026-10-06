@@ -189,8 +189,14 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                 onTap: () => Navigator.of(context).pushNamed('/after-sales'),
               ),
               ListTile(
-                leading: const Icon(Icons.chat_bubble_outline),
+                leading: const Icon(Icons.notifications_outlined),
                 title: const Text('消息中心'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/messages'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.chat_bubble_outline),
+                title: const Text('客服会话'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).pushNamed('/chats'),
               ),

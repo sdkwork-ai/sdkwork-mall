@@ -100,6 +100,10 @@ Page({
     wx.navigateTo({ url: `/pages/aftersales/index?orderId=${this.data._orderId}` });
   },
 
+  goLogistics() {
+    wx.navigateTo({ url: `/pages/logistics/index?orderId=${this.data._orderId}` });
+  },
+
   async confirmReceipt() {
     try {
       await confirmReceipt(this.data._orderId);

@@ -144,6 +144,12 @@ class _SdkworkOrdersPageState extends State<SdkworkOrdersPage> {
                       Navigator.of(context).pushNamed('/order-detail', arguments: orderId),
                   child: const Text('订单详情'),
                 ),
+                if (status == 'PENDING_RECEIPT' || status == 'COMPLETED')
+                  TextButton(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed('/logistics', arguments: orderId),
+                    child: const Text('查看物流'),
+                  ),
                 if (status == 'PENDING_PAYMENT') ...[
                   FilledButton(
                     onPressed: () => _pay(orderId),

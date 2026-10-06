@@ -1,0 +1,82 @@
+.page-messages {
+  padding: 20rpx 24rpx 40rpx;
+}
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.messages-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.messages-icon {
+  flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.messages-icon-order {
+  background: #e93b3d;
+}
+
+.messages-icon-aftersales {
+  background: #f59e0b;
+}
+
+.messages-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.messages-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messages-summary {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messages-time {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+}
+
+.messages-action {
+  flex-shrink: 0;
+  align-self: center;
+  font-size: 24rpx;
+  color: #e93b3d;
+  border: 2rpx solid #e93b3d;
+  border-radius: 999rpx;
+  padding: 8rpx 24rpx;
+}
+
+.messages-footnote {
+  margin-top: 28rpx;
+  font-size: 22rpx;
+  text-align: center;
+}

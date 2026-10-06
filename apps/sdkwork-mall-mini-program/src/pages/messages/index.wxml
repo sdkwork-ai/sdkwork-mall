@@ -1,0 +1,28 @@
+<view class="page-messages">
+  <view wx:if="{{loading}}" class="mp-loading">加载消息...</view>
+  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{!loading && rows.length === 0}}" class="mp-empty">暂无消息</view>
+
+  <view class="messages-list">
+    <view
+      class="messages-row"
+      wx:for="{{rows}}"
+      wx:key="id"
+      bindtap="openRow"
+      data-url="{{item.targetUrl}}"
+    >
+      <view class="messages-icon {{item.type === 'order' ? 'messages-icon-order' : 'messages-icon-aftersales'}}">
+        <text wx:if="{{item.type === 'order'}}">单</text>
+        <text wx:else>修</text>
+      </view>
+      <view class="messages-body">
+        <view class="messages-title">{{item.title}}</view>
+        <view class="mp-muted messages-summary">{{item.summary}}</view>
+        <view wx:if="{{item.timeText}}" class="mp-muted messages-time">{{item.timeText}}</view>
+      </view>
+      <view class="messages-action">查看</view>
+    </view>
+  </view>
+
+  <view wx:if="{{!loading && rows.length > 0}}" class="mp-muted messages-footnote">消息由订单与售后进度即时合成；推送通知将在消息服务上线后开放。</view>
+</view>

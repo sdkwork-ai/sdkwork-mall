@@ -11,6 +11,8 @@
     "pages/payment-result/index",
     "pages/orders/index",
     "pages/order-detail/index",
+    "pages/logistics/index",
+    "pages/messages/index",
     "pages/address/index",
     "pages/coupons/index",
     "pages/aftersales/index",

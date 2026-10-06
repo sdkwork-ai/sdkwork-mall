@@ -106,6 +106,8 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
     );
   }
 
+  bool get _hasShipments => asList(_detail?['shipmentIds']).isNotEmpty;
+
   Widget _buildMetaRow(String label, String value) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: Row(
@@ -149,6 +151,18 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
                 child: OutlinedButton(
                   onPressed: _openAfterSales,
                   child: const Text('申请售后'),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            if (_hasShipments &&
+                (status == 'PAID' ||
+                    status == 'PENDING_RECEIPT' ||
+                    status == 'COMPLETED')) ...[
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _openLogistics,
+                  child: const Text('查看物流'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -224,6 +238,10 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
 
   void _openAfterSales() {
     Navigator.of(context).pushNamed('/after-sales', arguments: widget.orderId);
+  }
+
+  void _openLogistics() {
+    Navigator.of(context).pushNamed('/logistics', arguments: widget.orderId);
   }
 
   Future<void> _confirmReceipt() async {

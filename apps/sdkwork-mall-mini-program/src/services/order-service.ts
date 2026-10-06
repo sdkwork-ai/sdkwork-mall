@@ -135,3 +135,99 @@ export async function getPaymentSuccess(orderId: string): Promise<Record<string,
     return null;
   }
 }
+
+export interface MpShipmentTrackingEvent {
+  description: string;
+  occurredAt: string;
+  status: string;
+}
+
+export interface MpShipmentPackage {
+  id: string;
+  name: string;
+}
+
+export interface MpShipmentLogistics {
+  carrier: string;
+  packages: MpShipmentPackage[];
+  shipmentId: string;
+  shipmentNo: string;
+  statusLabel: string;
+  trackingEvents: MpShipmentTrackingEvent[];
+}
+
+function pickString(record: Record<string, unknown>, keys: readonly string[]): string {
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return String(value);
+    }
+  }
+  return "";
+}
+
+function readRows(payload: Record<string, unknown>): Array<Record<string, unknown>> {
+  if (Array.isArray(payload)) {
+    return payload as Array<Record<string, unknown>>;
+  }
+  if (Array.isArray(payload.content)) {
+    return payload.content as Array<Record<string, unknown>>;
+  }
+  if (Array.isArray(payload.items)) {
+    return payload.items as Array<Record<string, unknown>>;
+  }
+  return [];
+}
+
+async function getShipmentLogistics(shipmentId: string): Promise<MpShipmentLogistics> {
+  const [shipment, packagesPayload, trackingPayload] = await Promise.all([
+    request({ path: `/shipments/${shipmentId}` }),
+    request({ path: `/shipments/${shipmentId}/packages`, query: { page: 1, page_size: 20 } }),
+    request({ path: `/shipments/${shipmentId}/tracking_events`, query: { page: 1, page_size: 50 } }),
+  ]);
+  const trackingEvents = readRows(trackingPayload)
+    .map((row) => ({
+      description: pickString(row, ["description", "content", "detail", "message"]) || "物流更新",
+      occurredAt: pickString(row, ["occurredAt", "eventTime", "createdAt", "time"]),
+      status: pickString(row, ["statusName", "status", "eventType"]),
+    }))
+    .sort((left, right) => {
+      const leftTime = left.occurredAt ? new Date(left.occurredAt).getTime() : 0;
+      const rightTime = right.occurredAt ? new Date(right.occurredAt).getTime() : 0;
+      return rightTime - leftTime;
+    });
+  return {
+    shipmentId,
+    shipmentNo: pickString(shipment, ["shipmentNo", "shipmentNumber", "trackingNumber", "logisticsNo"]),
+    carrier: pickString(shipment, ["carrierName", "carrier", "logisticsCompany"]),
+    statusLabel: pickString(shipment, ["statusName", "statusLabel"]),
+    packages: readRows(packagesPayload).map((row, index) => ({
+      id: pickString(row, ["packageId", "id"]) || `package-${index + 1}`,
+      name: pickString(row, ["packageName", "name", "title"]),
+    })),
+    trackingEvents,
+  };
+}
+
+/**
+ * Loads every shipment trace for an order (or one explicit shipment).
+ * Mirrors the H5 `/buyer/logistics` surface: order detail supplies the
+ * shipment ids, then shipment/packages/tracking endpoints compose the view.
+ */
+export async function getOrderLogistics(input: {
+  orderId?: string;
+  shipmentId?: string;
+}): Promise<MpShipmentLogistics[]> {
+  let shipmentIds = input.shipmentId ? [input.shipmentId] : [];
+  if (shipmentIds.length === 0) {
+    if (!input.orderId) {
+      throw new Error("缺少订单参数");
+    }
+    const detail = await getOrderDetail(input.orderId);
+    shipmentIds = detail.shipmentIds.slice(0, 5);
+  }
+  if (shipmentIds.length === 0) {
+    return [];
+  }
+  return Promise.all(shipmentIds.map((shipmentId) => getShipmentLogistics(shipmentId)));
+}
