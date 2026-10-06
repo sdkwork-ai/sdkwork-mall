@@ -1,5 +1,6 @@
 export * from "./buyer-service";
 export * from "./addresses-service";
+export * from "./after-sales-media-port";
 export * from "./aftersales-service";
 export * from "./coupons-service";
 export * from "./favorites-service";

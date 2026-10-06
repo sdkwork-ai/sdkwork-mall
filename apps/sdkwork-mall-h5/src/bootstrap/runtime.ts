@@ -1,6 +1,9 @@
 import type { SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
+import { createDriveUploadImageService } from "@sdkwork/drive-upload-image-core";
+import { configureMallH5AfterSalesMediaRuntimePort } from "@sdkwork/mall-h5-buyer";
 
 import { configureSdkworkMallH5Providers } from "./commerceProviders";
+import { createSdkworkMallH5DriveAppClient } from "./driveClient";
 import {
   resolveSdkworkMallH5RuntimeConfig,
   type SdkworkMallH5RuntimeConfig,
@@ -22,6 +25,7 @@ import {
 } from "./sessionStore";
 import { createSdkworkMallH5SessionTokenManager } from "./sessionTokenManager";
 import type { SdkworkMallH5SdkClientInventory } from "./sdkClients";
+import { SDKWORK_MALL_H5_AFTER_SALES_EVIDENCE_UPLOAD } from "./uploadDeclaration";
 
 export interface SdkworkMallH5Runtime {
   commerceService: SdkworkCommerceService;
@@ -51,6 +55,7 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
     sdkClients,
   });
   configureSdkworkMallH5ImProviders({ config, sdkClients });
+  configureSdkworkMallH5AfterSalesMediaPort(config, tokenManager);
 
   return {
     commerceService,
@@ -60,4 +65,38 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
     sdkClients,
     session,
   };
+}
+
+/**
+ * Drive-backed evidence uploads for the buyer after-sales form.
+ *
+ * The media port binds the declared after-sales evidence intent
+ * (`SDKWORK_MALL_H5_AFTER_SALES_EVIDENCE_UPLOAD`) to the composed drive
+ * uploader; evidence snapshot items carry the returned `drive://` reference
+ * next to their declared file metadata. Hosts that never compose this port
+ * get a refuse-with-hint picker instead of a local-only fake upload.
+ */
+function configureSdkworkMallH5AfterSalesMediaPort(
+  config: SdkworkMallH5RuntimeConfig,
+  tokenManager: ReturnType<typeof createSdkworkMallH5SessionTokenManager>,
+): void {
+  const driveClient = createSdkworkMallH5DriveAppClient(config, tokenManager);
+  const imageService = createDriveUploadImageService({
+    uploader: driveClient.uploader,
+    declaration: SDKWORK_MALL_H5_AFTER_SALES_EVIDENCE_UPLOAD,
+  });
+
+  configureMallH5AfterSalesMediaRuntimePort({
+    async uploadImages(files: File[]): Promise<string[]> {
+      const references: string[] = [];
+      for (const file of files) {
+        const uploaded = await imageService.upload({
+          file,
+          appResourceId: SDKWORK_MALL_H5_AFTER_SALES_EVIDENCE_UPLOAD.scene,
+        });
+        references.push(uploaded.uri);
+      }
+      return references;
+    },
+  });
 }

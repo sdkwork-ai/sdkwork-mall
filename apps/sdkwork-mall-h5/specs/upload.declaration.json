@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "appId": "sdkwork-mall-h5",
+  "declarations": [
+    {
+      "appResourceType": "mall.after-sales-evidence",
+      "appResourceIdKind": "application",
+      "scene": "after-sales-evidence",
+      "source": "sdkwork-mall-h5",
+      "uploadProfileCode": "image",
+      "retention": "long_term",
+      "purpose": "After-sales evidence images uploaded to Drive and referenced by the after-sales request snapshot."
+    }
+  ]
+}

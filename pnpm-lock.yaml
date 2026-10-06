@@ -1184,6 +1184,12 @@ importers:
       '@sdkwork/cloudrouter-backend-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-cloudrouter/sdks/cloudrouter-backend-sdk/cloudrouter-backend-sdk-typescript
+      '@sdkwork/drive-app-sdk':
+        specifier: workspace:*
+        version: link:../../../sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript
+      '@sdkwork/drive-upload-image-core':
+        specifier: workspace:*
+        version: link:../../../sdkwork-drive/apps/sdkwork-drive-common/packages/sdkwork-drive-upload-image-core
       '@sdkwork/iam-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript

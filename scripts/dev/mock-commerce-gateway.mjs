@@ -60,6 +60,7 @@ const orders = [];
 const afterSalesRequests = [];
 const invoices = [];
 const shipmentByOrder = new Map();
+const driveSessionNodeBySessionId = new Map();
 let afterSalesSeq = 0;
 
 // Wire-contract create body per the commerce app-api OpenAPI
@@ -587,10 +588,112 @@ async function handle(method, url, body) {
     return ok({ content: [{ id: "lot-1", points: 6000, expiresAt: "2026-12-31" }, { id: "lot-2", points: 2600 }], pageInfo: { page: 1, total: 2 } });
   }
 
+  // ── drive (uploader dev double: presign → raw PUT → register → complete) ──
+  if (p === "POST /app/v3/api/drive/uploader/uploads") {
+    const sessionId = nextId("usess");
+    const nodeId = nextId("node");
+    driveSessionNodeBySessionId.set(sessionId, nodeId);
+    const session = {
+      id: sessionId,
+      spaceId: "space-upload",
+      nodeId,
+      bucket: "mock-bucket",
+      objectKey: `uploads/${sessionId}`,
+      idempotencyKey: String(body.id ?? sessionId),
+      state: "created",
+      expiresAtEpochMs: String(Date.now() + 3600_000),
+      version: "1",
+      storageProviderId: "mock-provider",
+      storageUploadId: nextId("supid"),
+    };
+    const uploadItem = {
+      id: nextId("uitem"),
+      taskId: String(body.taskId ?? sessionId),
+      actorType: "user",
+      actorId: "mock-user",
+      appId: "sdkwork-mall",
+      appResourceType: String(body.appResourceType ?? ""),
+      appResourceId: String(body.appResourceId ?? ""),
+      uploadProfileCode: String(body.uploadProfileCode ?? "image"),
+      fileFingerprint: String(body.fileFingerprint ?? ""),
+      spaceId: session.spaceId,
+      nodeId,
+      uploadSessionId: sessionId,
+      storageProviderId: session.storageProviderId,
+      storageUploadId: session.storageUploadId,
+      originalFileName: String(body.originalFileName ?? "upload.bin"),
+      fileExtension: "",
+      contentType: String(body.contentType ?? "application/octet-stream"),
+      contentTypeGroup: "image",
+      detectedContentType: body.contentType,
+      contentLength: String(body.contentLength ?? "0"),
+      checksumSha256Hex: body.checksumSha256Hex,
+      chunkSizeBytes: String(body.chunkSizeBytes ?? "5242880"),
+      totalParts: "1",
+      uploadedPartsCount: "0",
+      uploadedBytes: "0",
+      status: "created",
+    };
+    return ok({ uploadItem, uploadSession: session });
+  }
+  const presignMatch = path.match(/^\/app\/v3\/api\/drive\/upload_sessions\/([^/]+)\/parts\/(\d+)$/u);
+  if (presignMatch && method === "PUT") {
+    const partNo = Number(presignMatch[2]);
+    return ok({
+      uploadUrl: `/app/v3/api/__mock_storage/${presignMatch[1]}/${partNo}`,
+      expiresAtEpochMs: String(Date.now() + 600_000),
+      method: "PUT",
+      headers: {},
+      partNo,
+      uploadId: presignMatch[1],
+    });
+  }
+  const partRegisterMatch = path.match(/^\/app\/v3\/api\/drive\/uploader\/uploads\/([^/]+)\/parts\/(\d+)$/u);
+  if (partRegisterMatch && method === "POST") {
+    return ok({
+      id: nextId("upart"),
+      uploadItemId: partRegisterMatch[1],
+      partNo: Number(partRegisterMatch[2]),
+      etag: String(body.etag ?? ""),
+      sizeBytes: String(body.sizeBytes ?? "0"),
+      status: "uploaded",
+    });
+  }
+  const completeMatch = path.match(/^\/app\/v3\/api\/drive\/upload_sessions\/([^/]+)\/complete$/u);
+  if (completeMatch && method === "POST") {
+    return ok({
+      id: completeMatch[1],
+      spaceId: "space-upload",
+      nodeId: driveSessionNodeBySessionId.get(completeMatch[1]) ?? nextId("node"),
+      bucket: "mock-bucket",
+      objectKey: `uploads/${completeMatch[1]}`,
+      idempotencyKey: completeMatch[1],
+      state: "completed",
+      expiresAtEpochMs: String(Date.now() + 3600_000),
+      version: "2",
+      storageProviderId: "mock-provider",
+      storageUploadId: nextId("supid"),
+    });
+  }
+
   return { code: 40401, message: `mock gateway: no route for ${p}` };
 }
 
 const server = http.createServer(async (req, res) => {
+  // Raw storage sink for the drive uploader presigned PUT: responds with the
+  // ETag header the composed uploader reads back, without envelope wrapping.
+  const storageMatch = (req.url ?? "").match(/^\/app\/v3\/api\/__mock_storage\/[^/]+\/\d+$/u);
+  if (req.method === "PUT" && storageMatch) {
+    req.resume();
+    req.on("end", () => {
+      res.writeHead(200, {
+        etag: `"mock-${Date.now().toString(36)}"`,
+        "access-control-allow-origin": "*",
+      });
+      res.end();
+    });
+    return;
+  }
   const body = await readBody(req);
   const result = await handle(req.method ?? "GET", req.url ?? "/", body);
   res.writeHead(200, {

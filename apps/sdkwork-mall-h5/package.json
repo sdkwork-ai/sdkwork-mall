@@ -29,6 +29,8 @@
     "@sdkwork/auth-runtime-pc-react": "workspace:*",
     "@sdkwork/cloudrouter-app-sdk": "workspace:*",
     "@sdkwork/cloudrouter-backend-sdk": "workspace:*",
+    "@sdkwork/drive-app-sdk": "workspace:*",
+    "@sdkwork/drive-upload-image-core": "workspace:*",
     "@sdkwork/iam-app-sdk": "workspace:*",
     "@sdkwork/iam-contracts": "workspace:*",
     "@sdkwork/iam-credential-entry": "workspace:*",

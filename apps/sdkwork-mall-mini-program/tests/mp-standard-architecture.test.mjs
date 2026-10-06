@@ -88,6 +88,7 @@ test("mall mini-program funnels all traffic through the single transport seam", 
     "../src/services/order-service.ts",
     "../src/services/address-service.ts",
     "../src/services/promotion-service.ts",
+    "../src/services/messages-service.ts",
   ]) {
     assert.ok(!read(file).includes("wx.request("), `${file} must go through the transport seam`);
   }

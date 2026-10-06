@@ -37,8 +37,19 @@ export interface MallH5AfterSalesOrderContext {
   totalAmountCny: number | null;
 }
 
+/** One drive-backed evidence item riding the free-form evidenceSnapshot. */
+export interface MallH5AfterSalesEvidenceItem {
+  /** Backend-addressable `drive://` reference from the host media port. */
+  reference: string;
+  /** Declared file metadata captured at pick time. */
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+}
+
 export interface MallH5AfterSalesApplyInput {
   description?: string;
+  evidenceSnapshot?: MallH5AfterSalesEvidenceItem[];
   orderId: string;
   reasonCode: string;
   requestedAmountCny: number;
@@ -200,6 +211,14 @@ export async function createMallH5AfterSalesRequest(input: MallH5AfterSalesApply
     afterSalesType: input.type,
     currencyCode: "CNY",
     description: input.description?.trim() ? input.description.trim() : undefined,
+    evidenceSnapshot: input.evidenceSnapshot?.length
+      ? input.evidenceSnapshot.map((item) => ({
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+          reference: item.reference,
+        }))
+      : undefined,
     items: input.items.map((item) => ({
       orderItemId: item.orderItemId,
       refundAmount: item.refundAmountCny === undefined ? undefined : item.refundAmountCny.toFixed(2),
