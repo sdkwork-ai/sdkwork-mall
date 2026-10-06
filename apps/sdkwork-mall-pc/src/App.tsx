@@ -1,5 +1,6 @@
 import { BrowserRouter, HashRouter, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import { SdkworkAppErrorBoundary } from "@sdkwork/appbase-pc-react";
 import { SdkworkSessionAuthBrowserRoot } from "@sdkwork/auth-pc-react";
 import { SdkworkMallPcSurfaceShell } from "@sdkwork/mall-pc-shell";
 
@@ -50,13 +51,39 @@ function MallLayout() {
   return shell;
 }
 
+/** Route-level render-failure guard (FRONTEND_CODE_SPEC: error boundaries at
+ * route/page level). Navigation resets the caught error via resetKeys. */
+function MallErrorBoundary() {
+  const location = useLocation();
+  return (
+    <SdkworkAppErrorBoundary
+      labels={{
+        description: "页面渲染出现问题，已为您保留工作区。",
+        home: "返回首页",
+        retry: "重试",
+        title: "页面出错了",
+      }}
+      onGoHome={() => {
+        window.location.assign("/");
+      }}
+      onRetry={() => {
+        window.location.reload();
+      }}
+      resetKeys={[location.pathname]}
+      variant="page"
+    >
+      <MallLayout />
+    </SdkworkAppErrorBoundary>
+  );
+}
+
 export function App() {
   const Router = IS_TAURI_ENVIRONMENT ? HashRouter : BrowserRouter;
   return (
     <Router>
       <SdkworkSessionAuthBrowserRoot>
         <AuthGate runtime={runtime}>
-          <MallLayout />
+          <MallErrorBoundary />
         </AuthGate>
       </SdkworkSessionAuthBrowserRoot>
     </Router>

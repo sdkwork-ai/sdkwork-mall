@@ -57,6 +57,26 @@ Page({
     void this.loadDetail();
   },
 
+  /** 好友/群聊分享：携带商品标题、主图与还原路径。 */
+  onShareAppMessage() {
+    const detail = this.data.detail;
+    return {
+      title: detail ? detail.title : "SDKWork 商城好物推荐",
+      imageUrl: this.data.images[0],
+      path: `/pages/product/index?id=${this.data._productId}`,
+    };
+  },
+
+  /** 朋友圈分享：静态落地页形态（不携带个性化参数）。 */
+  onShareTimeline() {
+    const detail = this.data.detail;
+    return {
+      title: detail ? `${detail.title} - SDKWork 商城` : "SDKWork 商城好物推荐",
+      imageUrl: this.data.images[0],
+      query: `id=${this.data._productId}`,
+    };
+  },
+
   async loadDetail() {
     this.setData({ loading: true, error: "" });
     try {
