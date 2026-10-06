@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button, EmptyState, LoadingBlock, StatusNotice } from "@sdkwork/ui-pc-react";
-
 import {
   createSdkworkOrderBackdropStyle,
   createSdkworkOrderHeroStyle,
@@ -101,7 +100,9 @@ function SdkworkOrderDetailPageContent() {
           title="订单详情不可用"
         />
         <div className="sdkwork-mall-pc-payment-actions">
-          <Link to="/buyer/orders">返回订单列表</Link>
+          <Link to="/buyer/orders">
+            <Button type="button" variant="ghost">返回订单列表</Button>
+          </Link>
         </div>
       </div>
     );
@@ -209,7 +210,9 @@ function SdkworkOrderDetailPageContent() {
         ) : null}
         {detail.status === "pending-receipt" ? (
           <>
-            <Link to={`/buyer/logistics?orderId=${encodeURIComponent(detail.id)}`}>查看物流</Link>
+            <Link to={`/buyer/logistics?orderId=${encodeURIComponent(detail.id)}`}>
+              <Button type="button" variant="outline">查看物流</Button>
+            </Link>
             <Button
               disabled={mutating}
               onClick={() => void runAction(() => createSdkworkOrderService({}).confirmReceipt({ orderId: detail.id }))}
@@ -222,9 +225,13 @@ function SdkworkOrderDetailPageContent() {
           </>
         ) : null}
         {detail.status === "completed" ? (
-          <Link to={`/buyer/after-sales?orderId=${encodeURIComponent(detail.id)}`}>申请售后</Link>
+          <Link to={`/buyer/after-sales?orderId=${encodeURIComponent(detail.id)}`}>
+            <Button type="button" variant="outline">申请售后</Button>
+          </Link>
         ) : null}
-        <Link to="/buyer/orders">返回订单列表</Link>
+        <Link to="/buyer/orders">
+          <Button type="button" variant="ghost">返回订单列表</Button>
+        </Link>
       </div>
     </div>
   );

@@ -202,7 +202,14 @@ interface RemoteOrderItem {
   id?: string;
   productImage?: unknown;
   productName?: string;
+  /** Dev-double / legacy payloads nest the title under spu/sku; optional so the
+   * canonical wire (`productName`) stays authoritative. */
+  sku?: unknown;
+  spu?: unknown;
+  price?: number | string;
+  priceCny?: number | string;
   quantity?: number | string;
+  title?: string;
   totalAmount?: number | string;
   unitPrice?: number | string;
 }
@@ -382,14 +389,34 @@ function mapStatistics(statistics: RemoteOrderStatistics | null | undefined): Sd
 }
 
 function mapItems(items: RemoteOrderItem[] | undefined, copy: SdkworkOrderServiceCopy): SdkworkOrderItem[] {
-  return (items ?? []).map((item, index) => ({
-    id: toSdkworkOrderOptionalString(item.id) || `order-item-${index + 1}`,
-    image: readSdkworkMediaResource(item.productImage),
-    name: toSdkworkOrderOptionalString(item.productName) || copy.itemFallbackName,
-    quantity: toSdkworkOrderNumber(item.quantity, 1),
-    totalAmountCny: toNullableSdkworkOrderNumber(item.totalAmount),
-    unitPriceCny: toNullableSdkworkOrderNumber(item.unitPrice),
-  }));
+  return (items ?? []).map((item, index) => {
+    const spu = (isRemoteRecord(item.spu) ?? {}) as Record<string, unknown>;
+    const sku = (isRemoteRecord(item.sku) ?? {}) as Record<string, unknown>;
+    const unitPriceCny = toNullableSdkworkOrderNumber(item.unitPrice)
+      ?? toNullableSdkworkOrderNumber(item.priceCny)
+      ?? toNullableSdkworkOrderNumber(item.price);
+    const quantity = toSdkworkOrderNumber(item.quantity, 1);
+    return {
+      id: toSdkworkOrderOptionalString(item.id) || `order-item-${index + 1}`,
+      image: readSdkworkMediaResource(item.productImage)
+        || readSdkworkMediaResource(spu.imageUrl),
+      name: toSdkworkOrderOptionalString(item.productName)
+        || toSdkworkOrderOptionalString(spu.title)
+        || toSdkworkOrderOptionalString(sku.name)
+        || toSdkworkOrderOptionalString(item.title)
+        || copy.itemFallbackName,
+      quantity,
+      totalAmountCny: toNullableSdkworkOrderNumber(item.totalAmount)
+        ?? (unitPriceCny != null ? unitPriceCny * quantity : null),
+      unitPriceCny,
+    };
+  });
+}
+
+function isRemoteRecord(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function createTimeline(

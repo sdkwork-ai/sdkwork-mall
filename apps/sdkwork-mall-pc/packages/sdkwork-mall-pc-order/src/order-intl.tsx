@@ -127,7 +127,12 @@ function createSdkworkOrderIntlValue(
   locale?: string | null,
   overrides?: SdkworkOrderMessagesOverrides,
 ): SdkworkOrderIntlValue {
-  const resolvedLocale = normalizeSdkworkOrderLocale(locale);
+  // Hosts that do not pin a locale follow the browser preference instead of
+  // silently defaulting to English.
+  const resolvedLocale = normalizeSdkworkOrderLocale(
+    locale
+      ?? (typeof navigator === "undefined" ? undefined : navigator.language),
+  );
   const copy = createSdkworkOrderMessages(resolvedLocale, overrides);
 
   return {

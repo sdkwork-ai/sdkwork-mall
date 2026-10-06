@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  Bell,
   CreditCard,
   Crown,
   FileText,
@@ -46,7 +47,8 @@ const QUICK_LINKS = [
   { icon: Crown, label: "会员", path: "/buyer/membership" },
   { icon: Heart, label: "收藏", path: "/buyer/favorites" },
   { icon: History, label: "足迹", path: "/buyer/footprint" },
-  { icon: MessageSquare, label: "消息", path: "/buyer/chats" },
+  { icon: Bell, label: "消息中心", path: "/buyer/messages" },
+  { icon: MessageSquare, label: "客服会话", path: "/buyer/chats" },
 ] as const;
 
 export function SdkworkMallH5BuyerHomePage() {

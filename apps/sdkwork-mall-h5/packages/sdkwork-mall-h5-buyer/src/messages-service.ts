@@ -16,6 +16,23 @@ export interface MallH5MessageRow {
   type: "after-sales" | "order";
 }
 
+const ORDER_STATUS_TEXT: Record<string, string> = {
+  CANCELLED: "已取消",
+  COMPLETED: "已完成",
+  EXPIRED: "已超时",
+  PAID: "已支付",
+  PENDING_PAYMENT: "待付款",
+  PENDING_RECEIPT: "待收货",
+  PENDING_SHIPMENT: "待发货",
+  REFUNDED: "已退款",
+  REFUNDING: "退款中",
+};
+
+function formatAmountText(value: string): string {
+  const amount = Number(value);
+  return value !== "" && Number.isFinite(amount) ? `¥${amount.toFixed(2)}` : "--";
+}
+
 function readString(record: Record<string, unknown>, keys: readonly string[]): string {
   for (const key of keys) {
     const value = record[key];
@@ -47,7 +64,9 @@ export async function loadMallH5MessageRows(): Promise<MallH5MessageRow[]> {
       rows.push({
         id: `order-${readString(item, ["orderId", "id"]) || rows.length + 1}`,
         occurredAt,
-        summary: `金额 ${readString(item, ["totalAmount"]) || "--"} · ${readString(item, ["statusName", "status"]) || "状态更新"}`,
+        summary: `金额 ${formatAmountText(readString(item, ["totalAmount", "paidAmount"]))} · ${
+          ORDER_STATUS_TEXT[readString(item, ["statusName", "status"]).toUpperCase()] || "状态更新"
+        }`,
         title: `订单更新：${readString(item, ["subject"]) || readString(item, ["orderId"]) || "订单"}`,
         type: "order",
       });
