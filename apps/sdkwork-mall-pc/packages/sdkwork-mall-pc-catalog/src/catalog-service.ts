@@ -228,20 +228,34 @@ function readReviewSummary(value: unknown): MallProductDetail["reviewSummary"] {
 export async function loadMallProductDetail(productId: string): Promise<MallProductDetail> {
   const response = await getSdkworkCatalogRemotePort().retrieveSpu({ spuId: productId });
   const record = unwrapSdkworkPaymentResponse(response) as Record<string, unknown>;
+  // Canonical media is a list of `{ url }` items; the dev double (and legacy
+  // payloads) ship a plain `images` string array plus a cover `imageUrl`.
   const mediaList = Array.isArray(record.media) ? record.media : [];
-  const images = mediaList
-    .map((item) =>
+  const legacyImages = Array.isArray(record.images) ? record.images : [];
+  const images = [
+    ...mediaList.map((item) =>
       typeof item === "object" && item !== null && "url" in item
         ? String((item as { url?: unknown }).url ?? "")
         : "",
-    )
-    .filter(Boolean);
+    ),
+    ...legacyImages
+      .map((item) => (typeof item === "string" ? item : ""))
+      .filter(Boolean),
+  ].filter(Boolean);
+  if (images.length === 0 && typeof record.imageUrl === "string" && record.imageUrl) {
+    images.push(record.imageUrl);
+  }
 
   const skus = Array.isArray(record.skus)
     ? record.skus.map((sku: Record<string, unknown>) => ({
         id: String(sku.id ?? ""),
         name: String(sku.name ?? sku.title ?? "默认规格"),
-        priceCny: typeof sku.salePrice === "number" ? sku.salePrice : null,
+        // Canonical wire is `salePrice`; the dev double ships `priceCny`.
+        priceCny: typeof sku.salePrice === "number"
+          ? sku.salePrice
+          : typeof sku.priceCny === "number"
+            ? sku.priceCny
+            : null,
         stock: typeof sku.stock === "number" ? sku.stock : undefined,
         imageUrl: readString(sku.imageUrl ?? sku.image ?? sku.thumbnail),
       }))
@@ -286,7 +300,9 @@ export async function loadMallProductDetail(productId: string): Promise<MallProd
     priceCny:
       typeof record.salePrice === "number"
         ? record.salePrice
-        : skus[0]?.priceCny ?? null,
+        : typeof record.priceCny === "number"
+          ? record.priceCny
+          : skus[0]?.priceCny ?? null,
     listPriceCny: readNumber(record.listPrice ?? record.marketPrice ?? record.originalPrice ?? record.list_price),
     videoUrl: readString(record.videoUrl ?? record.video),
     shopId: readString(record.shopId),
