@@ -6,8 +6,17 @@
 // The test skips itself unless VISUAL_CAPTURE is set, so missing goldens
 // never fail the normal suite. Captures the four shell tabs and key buyer
 // pages as PNGs under test/goldens/, rendered with the system Microsoft
-// YaHei font and live data from the local mock gateway, for human visual
-// review. Goldens are review artifacts: do not commit them.
+// YaHei font, for human visual review. Goldens are review artifacts: do not
+// commit them.
+//
+// Known boundary: pages fire HTTP from initState inside the testWidgets
+// FakeAsync zone, so socket completions bind to fake timers and live-gateway
+// data does not land even inside tester.runAsync (the request future is
+// already scheduled on the fake loop). Pages therefore render their empty /
+// error states here; live-data visuals need `integration_test` on a real
+// device or emulator (Windows desktop additionally requires Developer Mode
+// for plugin symlinks). MaterialIcons and data:URL product images render as
+// placeholder blocks in this harness for the same reason.
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -56,24 +65,24 @@ Future<void> main() async {
     addTearDown(tester.view.reset);
 
     Future<void> pumpAndCapture(Widget child, String golden) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            fontFamily: 'MSYH',
-            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE93B3D)),
+      // The whole pump-and-settle cycle runs inside runAsync: page initState
+      // fires real HTTP from the FakeAsync zone, and only the real event
+      // loop (runAsync) delivers socket data for those futures.
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              useMaterial3: true,
+              fontFamily: 'MSYH',
+              colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE93B3D)),
+            ),
+            home: Scaffold(body: child),
           ),
-          home: Scaffold(body: child),
-        ),
-      );
-      // Real network from the pages only completes outside the FakeAsync
-      // zone — pump the frames, run the wait in runAsync, then pump again.
-      await tester.pump();
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 2500)),
-      );
-      await tester.pump(const Duration(milliseconds: 500));
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 2500));
+      });
+      await tester.pump(const Duration(milliseconds: 300));
       await expectLater(
         find.byType(MaterialApp),
         matchesGoldenFile('goldens/$golden'),
