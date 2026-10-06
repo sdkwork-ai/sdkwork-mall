@@ -179,4 +179,12 @@ Page({
     }
     void this.loadProducts(this.data.page + 1);
   },
+
+  onReachBottom() {
+    this.loadMore();
+  },
+
+  onPullDownRefresh() {
+    this.loadProducts(1).finally(() => wx.stopPullDownRefresh());
+  },
 });

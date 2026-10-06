@@ -1,7 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../bootstrap/commerce_transport.dart';
 import '../services/after_sales_service.dart';
 import '../services/commerce.dart';
+import '../services/drive_upload_service.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
 
@@ -45,9 +50,14 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
   final TextEditingController _orderId = TextEditingController();
   final TextEditingController _description = TextEditingController();
   final TextEditingController _amount = TextEditingController();
+  final ImagePicker _imagePicker = ImagePicker();
+
+  static const _maxEvidenceFiles = 6;
+  static const _maxEvidenceBytes = 5 * 1024 * 1024;
 
   List<Map<String, dynamic>> _requests = const <Map<String, dynamic>>[];
   List<Map<String, dynamic>> _orderItems = const <Map<String, dynamic>>[];
+  List<Map<String, dynamic>> _evidence = const <Map<String, dynamic>>[];
   String _type = 'refund';
   String _reasonCode = _reasonPresets.first['code']!;
   bool _loading = true;
@@ -190,6 +200,16 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '凭证上传（可选，最多 $_maxEvidenceFiles 张）',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildEvidenceGrid(),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -201,6 +221,75 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildEvidenceGrid() {
+    return GridView.count(
+      crossAxisCount: 3,
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 1,
+      children: <Widget>[
+        for (final item in _evidence)
+          Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.file(
+                  File('${item['path']}'),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const ColoredBox(color: Color(0xFFF3F4F6)),
+                ),
+              ),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: InkWell(
+                  onTap: () => _removeEvidence('${item['id']}'),
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      color: Color(0x8C111827),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.close, size: 14, color: Colors.white),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: ColoredBox(
+                  color: const Color(0x8C111827),
+                  child: Text(
+                    item['state'] == 'uploading' ? '上传中...' : '已上传',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white, fontSize: 10),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        if (_evidence.length < _maxEvidenceFiles)
+          InkWell(
+            onTap: _chooseEvidence,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFD1D5DB)),
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+              ),
+              child: const Icon(Icons.add, size: 32, color: Color(0xFF9CA3AF)),
+            ),
+          ),
+      ],
     );
   }
 
@@ -339,6 +428,70 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
     });
   }
 
+  /// 拍摄/相册选图后逐张上传，凭证项带 uploading/uploaded 状态；
+  /// 失败即移除并提示，绝不落本地 blob 引用（`DRIVE_SPEC.md` §18）。
+  Future<void> _chooseEvidence() async {
+    if (_evidence.length >= _maxEvidenceFiles) {
+      return;
+    }
+    final picked = await _imagePicker.pickMultiImage(
+      limit: _maxEvidenceFiles - _evidence.length,
+    );
+    for (final xfile in picked) {
+      final entry = <String, dynamic>{
+        'id': '${xfile.name}-${DateTime.now().microsecondsSinceEpoch}',
+        'path': xfile.path,
+        'name': xfile.name,
+        'state': 'uploading',
+        'reference': '',
+      };
+      setState(() => _evidence = [..._evidence, entry]);
+      try {
+        final bytes = await File(xfile.path).readAsBytes();
+        if (bytes.length > _maxEvidenceBytes) {
+          throw const SdkworkApiException('单张凭证不能超过 5MB');
+        }
+        final reference = await uploadDriveImage(
+          client: MallCommerce.instance.client,
+          declaration: sdkworkAfterSalesEvidenceUpload,
+          appResourceId: sdkworkAfterSalesEvidenceUpload.scene,
+          file: SdkworkUploadFile(
+            fileName: xfile.name,
+            contentType: xfile.mimeType ?? 'image/jpeg',
+            bytes: bytes,
+          ),
+        );
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _evidence = _evidence
+              .map((item) =>
+                  item['id'] == entry['id']
+                      ? <String, dynamic>{...item, 'state': 'uploaded', 'reference': reference}
+                      : item)
+              .toList();
+        });
+      } catch (cause) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _evidence = _evidence
+              .where((item) => item['id'] != entry['id'])
+              .toList();
+          _message = '$cause';
+        });
+      }
+    }
+  }
+
+  void _removeEvidence(String id) {
+    setState(() {
+      _evidence = _evidence.where((item) => item['id'] != id).toList();
+    });
+  }
+
   Future<void> _submit() async {
     if (_orderItems.isEmpty) {
       setState(() => _message = '请先读取订单');
@@ -349,16 +502,30 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
       setState(() => _message = '请填写有效的售后金额');
       return;
     }
+    if (_evidence.any((item) => item['state'] == 'uploading')) {
+      setState(() => _message = '凭证仍在上传中，请稍候');
+      return;
+    }
     setState(() {
       _busy = true;
       _message = null;
     });
     try {
+      final evidenceSnapshot = _evidence
+          .where((item) => item['state'] == 'uploaded' && '${item['reference']}'.isNotEmpty)
+          .map(
+            (item) => AfterSalesEvidenceItem(
+              reference: '${item['reference']}',
+              fileName: '${item['name']}',
+            ),
+          )
+          .toList();
       await MallCommerce.instance.afterSales.createRequest(
         orderId: _orderId.text.trim(),
         afterSalesType: _type,
         reasonCode: _reasonCode,
         description: _description.text.trim().isEmpty ? null : _description.text.trim(),
+        evidenceSnapshot: evidenceSnapshot,
         requestedAmountCny: amount,
         items: _orderItems
             .map(
@@ -375,7 +542,10 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
       if (!mounted) {
         return;
       }
-      setState(() => _message = '售后申请已提交');
+      setState(() {
+        _message = '售后申请已提交';
+        _evidence = const <Map<String, dynamic>>[];
+      });
       await _reloadRequests();
     } catch (cause) {
       if (mounted) {

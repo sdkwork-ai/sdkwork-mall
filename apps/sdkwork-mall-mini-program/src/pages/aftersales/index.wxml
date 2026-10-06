@@ -59,6 +59,22 @@
         <input type="digit" placeholder="0.00" value="{{amount}}" bindinput="onAmountInput" />
       </view>
 
+      <view class="mp-field">
+        <text class="mp-field-label">凭证上传（可选，最多 6 张）</text>
+        <view class="aftersales-evidence-grid">
+          <view class="aftersales-evidence-item" wx:for="{{evidence}}" wx:key="id">
+            <image class="aftersales-evidence-image" mode="aspectFill" src="{{item.tempPath}}" />
+            <view class="aftersales-evidence-remove" bindtap="removeEvidence" data-id="{{item.id}}">×</view>
+            <view class="aftersales-evidence-state">{{item.state === 'uploading' ? '上传中...' : '已上传'}}</view>
+          </view>
+          <view
+            wx:if="{{evidence.length < 6}}"
+            class="aftersales-evidence-add"
+            bindtap="chooseEvidence"
+          >+</view>
+        </view>
+      </view>
+
       <button
         class="mp-btn mp-btn-primary aftersales-submit"
         disabled="{{busy || loadingOrder}}"

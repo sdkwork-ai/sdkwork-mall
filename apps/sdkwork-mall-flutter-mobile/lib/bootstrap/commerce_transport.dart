@@ -90,6 +90,42 @@ class SdkworkMallFlutterCommerceClient {
       statusCode: response.statusCode,
     );
   }
+
+  /// Raw byte PUT for the drive presigned storage hop (`DRIVE_SPEC.md` §9).
+  ///
+  /// Bare body transfer with an ETag response header — no envelope, no auth
+  /// projection. Lives inside the transport seam so the "every hop speaks
+  /// through one seam" rule stays intact.
+  Future<SdkworkRawResponse> rawPut(
+    String url, {
+    required List<int> body,
+    String contentType = 'application/octet-stream',
+  }) async {
+    final request = await _http.openUrl('PUT', Uri.parse(url));
+    request.headers.contentType = ContentType.parse(contentType);
+    request.contentLength = body.length;
+    request.add(body);
+    final response = await request.close().timeout(const Duration(seconds: 30));
+    await response.drain<void>();
+    final etag = response.headers.value(HttpHeaders.etagHeader);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw SdkworkApiException(
+        '存储上传失败（HTTP ${response.statusCode}）',
+        statusCode: response.statusCode,
+      );
+    }
+    if (etag == null || etag.isEmpty) {
+      throw const SdkworkApiException('存储上传响应缺少 ETag');
+    }
+    return SdkworkRawResponse(statusCode: response.statusCode, etag: etag);
+  }
+}
+
+class SdkworkRawResponse {
+  const SdkworkRawResponse({required this.statusCode, required this.etag});
+
+  final int statusCode;
+  final String etag;
 }
 
 class SdkworkApiException implements Exception {

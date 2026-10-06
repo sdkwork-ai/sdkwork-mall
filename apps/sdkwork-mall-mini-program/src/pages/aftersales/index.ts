@@ -6,9 +6,25 @@ import {
   cancelRequest,
   createRequest,
   listRequests,
+  type MpAfterSalesEvidenceItem,
   type MpAfterSalesItemInput,
 } from "../../services/aftersales-service";
+import { uploadDriveImage } from "../../services/drive-upload-service";
 import { getOrderDetail } from "../../services/order-service";
+import { SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD } from "../../bootstrap/uploadDeclaration";
+
+const MAX_EVIDENCE_FILES = 6;
+const MAX_EVIDENCE_BYTES = 5 * 1024 * 1024;
+
+interface EvidenceEntry {
+  id: string;
+  tempPath: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  state: "uploading" | "uploaded";
+  reference: string;
+}
 
 interface AftersalesData {
   presetOrderId: string;
@@ -22,6 +38,7 @@ interface AftersalesData {
   reasonIndex: number;
   description: string;
   amount: string;
+  evidence: EvidenceEntry[];
   requests: Array<{
     id: string;
     afterSalesNo: string;
@@ -50,6 +67,7 @@ Page({
     reasonIndex: 0,
     description: "",
     amount: "",
+    evidence: [],
     requests: [],
     loading: true,
     loadingOrder: false,
@@ -84,6 +102,73 @@ Page({
 
   onReasonChange(event: MpPickerChangeEvent) {
     this.setData({ reasonIndex: Number(event.detail.value) || 0 });
+  },
+
+  chooseEvidence() {
+    const remaining = MAX_EVIDENCE_FILES - this.data.evidence.length;
+    if (remaining <= 0) {
+      return;
+    }
+    wx.chooseMedia({
+      count: remaining,
+      mediaType: ["image"],
+      sizeType: ["compressed"],
+      success: (result) => {
+        for (const item of result.tempFiles ?? []) {
+          void this.uploadOneEvidence(String(item.tempFilePath), Number(item.size ?? 0));
+        }
+      },
+    });
+  },
+
+  async uploadOneEvidence(tempPath: string, sizeBytes: number) {
+    if (sizeBytes > MAX_EVIDENCE_BYTES) {
+      this.setData({ error: "单张凭证不能超过 5MB" });
+      return;
+    }
+    const entry: EvidenceEntry = {
+      id: `${tempPath}-${Date.now()}`,
+      tempPath,
+      fileName: tempPath.split("/").pop() || "evidence.jpg",
+      fileSize: sizeBytes,
+      fileType: "image/jpeg",
+      state: "uploading",
+      reference: "",
+    };
+    this.setData({ evidence: [...this.data.evidence, entry].slice(0, MAX_EVIDENCE_FILES) });
+    try {
+      const bytes = await new Promise<ArrayBuffer>((resolve, reject) => {
+        wx.getFileSystemManager().readFile({
+          filePath: tempPath,
+          success: (read) => resolve(read.data as ArrayBuffer),
+          fail: (cause) => reject(new Error(cause?.errMsg ?? "读取图片失败")),
+        });
+      });
+      const reference = await uploadDriveImage({
+        declaration: SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD,
+        appResourceId: SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD.scene,
+        file: {
+          fileName: entry.fileName,
+          contentType: entry.fileType,
+          bytes,
+        },
+      });
+      this.setData({
+        evidence: this.data.evidence.map((item) =>
+          item.id === entry.id ? { ...item, state: "uploaded", reference } : item,
+        ),
+      });
+    } catch (cause) {
+      this.setData({
+        evidence: this.data.evidence.filter((item) => item.id !== entry.id),
+        error: errorMessage(cause, "凭证上传失败，已移除；请重试"),
+      });
+    }
+  },
+
+  removeEvidence(event: MpTapEvent) {
+    const id = String(event.currentTarget.dataset.id ?? "");
+    this.setData({ evidence: this.data.evidence.filter((item) => item.id !== id) });
   },
 
   async loadOrder() {
@@ -151,19 +236,33 @@ Page({
       this.setData({ error: "请填写有效的售后金额" });
       return;
     }
+    if (this.data.evidence.some((item) => item.state === "uploading")) {
+      this.setData({ error: "凭证仍在上传中，请稍候" });
+      return;
+    }
     const type = this.data.types[this.data.typeIndex];
     this.setData({ busy: true, error: "" });
     try {
+      const evidenceSnapshot: MpAfterSalesEvidenceItem[] = this.data.evidence
+        .filter((item) => item.state === "uploaded" && item.reference)
+        .map((item) => ({
+          reference: item.reference,
+          fileName: item.fileName,
+          fileSize: item.fileSize,
+          fileType: item.fileType,
+        }));
       await createRequest({
         orderId: this.data.orderId.trim(),
         afterSalesType: type.value,
         reasonCode: this.data.reasons[this.data.reasonIndex].code,
         description: this.data.description,
+        evidenceSnapshot,
         requestedAmountCny: amount,
         items: this.data.orderItems,
       });
       this.setData({
         description: "",
+        evidence: [],
         orderItems: [],
         orderLoaded: false,
         orderSummary: "",

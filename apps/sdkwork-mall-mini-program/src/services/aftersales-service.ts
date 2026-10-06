@@ -14,11 +14,20 @@ export interface MpAfterSalesItemInput {
   refundAmountCny?: number | null;
 }
 
+export interface MpAfterSalesEvidenceItem {
+  /** Backend-addressable `drive://spaces/.../nodes/...` reference. */
+  reference: string;
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+}
+
 export interface MpAfterSalesCreateInput {
   orderId: string;
   afterSalesType: string;
   reasonCode: string;
   description?: string;
+  evidenceSnapshot?: MpAfterSalesEvidenceItem[];
   requestedAmountCny: number;
   items: MpAfterSalesItemInput[];
 }
@@ -83,6 +92,14 @@ export function buildCreateAfterSalesBody(input: MpAfterSalesCreateInput): Recor
   };
   if (input.description && input.description.trim() !== "") {
     body.description = input.description.trim();
+  }
+  if (input.evidenceSnapshot && input.evidenceSnapshot.length > 0) {
+    body.evidenceSnapshot = input.evidenceSnapshot.map((item) => ({
+      fileName: item.fileName,
+      fileSize: item.fileSize,
+      fileType: item.fileType,
+      reference: item.reference,
+    }));
   }
   return body;
 }

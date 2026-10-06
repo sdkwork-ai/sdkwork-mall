@@ -42,6 +42,12 @@ export class SdkworkRequestError extends Error {
   cause?: unknown;
 }
 
+export interface MpRawResponse {
+  statusCode: number;
+  header: Record<string, string>;
+  data: ArrayBuffer;
+}
+
 function getBaseUrl(): string {
   const app = getApp<{ globalData?: { commerceApiBaseUrl?: string } }>();
   return app?.globalData?.commerceApiBaseUrl || "https://api-dev.sdkwork.com/app/v3/api";
@@ -131,6 +137,65 @@ export function request(options: MpRequestOptions): Promise<MpPayload> {
         reject(
           new SdkworkRequestError(
             cause?.errMsg ? `网络请求失败：${cause.errMsg}` : "网络请求失败",
+            { cause },
+          ),
+        );
+      },
+    });
+  });
+}
+
+/**
+ * Raw byte PUT for the drive presigned storage hop (`DRIVE_SPEC.md` §9).
+ *
+ * The presigned upload is a bare body transfer with an ETag response header —
+ * no envelope, no auth projection. It lives inside the transport seam so the
+ * "pages and services never call wx.request directly" rule stays intact.
+ */
+export function rawRequest(options: {
+  url: string;
+  method: "PUT";
+  body: ArrayBuffer;
+  contentType?: string;
+  timeoutMs?: number;
+}): Promise<MpRawResponse> {
+  const { url, method, body, contentType = "application/octet-stream", timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+  return new Promise<MpRawResponse>((resolve, reject) => {
+    wx.request({
+      url,
+      // `PATCH` sits outside the wx.request documented method list; the
+      // platform passes explicit methods through, and the presigned storage
+      // hop is a PUT on the wire contract.
+      method: method as unknown as "GET",
+      data: body,
+      header: { "content-type": contentType },
+      timeout: timeoutMs,
+      success(res) {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          const header: Record<string, string> = {};
+          for (const [key, value] of Object.entries(res.header ?? {})) {
+            header[key.toLowerCase()] = String(value);
+          }
+          resolve({
+            statusCode: res.statusCode,
+            header,
+            data:
+              res.data instanceof ArrayBuffer
+                ? res.data
+                : new ArrayBuffer(0),
+          });
+          return;
+        }
+        reject(
+          new SdkworkRequestError(`存储上传失败（HTTP ${res.statusCode}）`, {
+            statusCode: res.statusCode,
+          }),
+        );
+      },
+      fail(cause) {
+        reject(
+          new SdkworkRequestError(
+            cause?.errMsg ? `存储上传失败：${cause.errMsg}` : "存储上传失败",
             { cause },
           ),
         );

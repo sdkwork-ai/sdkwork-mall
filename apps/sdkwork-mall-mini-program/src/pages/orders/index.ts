@@ -90,6 +90,14 @@ Page({
     }
   },
 
+  onReachBottom() {
+    this.loadMore();
+  },
+
+  onPullDownRefresh() {
+    this.loadOrders(1).finally(() => wx.stopPullDownRefresh());
+  },
+
   selectTab(event: MpTapEvent) {
     const code = String(event.currentTarget.dataset.code ?? "");
     if (code === this.data.activeTab) {
