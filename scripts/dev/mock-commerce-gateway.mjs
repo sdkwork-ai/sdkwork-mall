@@ -241,6 +241,38 @@ async function handle(method, url, body) {
     if (sort === "newest") rows = [...rows].reverse();
     return ok({ items: rows, pageInfo: { page: Number(query.get("page") ?? 1), total: rows.length } });
   }
+  // ── catalog products (the generated `catalog.products` surface used by
+  // the storefront search; same dev-double dataset as spus) ──
+  if (p === "GET /app/v3/api/catalog/products") {
+    let rows = spus.map(({ skus, ...rest }) => ({ ...rest, skus }));
+    const productCategoryId = query.get("category_id");
+    if (productCategoryId) {
+      const productChildIds = categories.filter((cat) => cat.parentId === productCategoryId).map((cat) => cat.id);
+      rows = rows.filter((spu) => spu.categoryId === productCategoryId || productChildIds.includes(spu.categoryId));
+    }
+    const productShopId = query.get("shop_id");
+    if (productShopId) rows = rows.filter((spu) => spu.shopId === productShopId);
+    const productQ = query.get("q");
+    if (productQ) rows = rows.filter((spu) => spu.title.includes(productQ));
+    const productSort = query.get("sort");
+    if (productSort === "sales") rows = [...rows].sort((a, b) => b.sales - a.sales);
+    if (productSort === "price_asc") rows = [...rows].sort((a, b) => a.priceCny - b.priceCny);
+    if (productSort === "price_desc") rows = [...rows].sort((a, b) => b.priceCny - a.priceCny);
+    if (productSort === "newest") rows = [...rows].reverse();
+    const productPage = Number(query.get("page") ?? 1);
+    const productPageSize = Number(query.get("page_size") ?? 20);
+    const productStart = (productPage - 1) * productPageSize;
+    return ok({
+      items: rows.slice(productStart, productStart + productPageSize),
+      pageInfo: { page: productPage, total: rows.length },
+    });
+  }
+  const productMatch = path.match(/^\/app\/v3\/api\/catalog\/products\/([^/]+)$/u);
+  if (method === "GET" && productMatch) {
+    const product = spus.find((entry) => entry.id === productMatch[1]);
+    if (!product) return { code: 40401, message: "product not found" };
+    return ok({ ...product, shopName: shop.name });
+  }
   const spuMatch = path.match(/^\/app\/v3\/api\/catalog\/spus\/([^/]+)$/u);
   if (method === "GET" && spuMatch) {
     const spu = spus.find((entry) => entry.id === spuMatch[1]);
