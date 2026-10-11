@@ -157,7 +157,7 @@ export function SdkworkMallH5CheckoutPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-page-title">确认订单</h1>
+      <h1 className="sdk-h5-visually-hidden">确认订单</h1>
       {cartItemIds.length > 0 ? (
         <p className="sdk-h5-muted">已选择 {cartItemIds.length} 件购物车商品参与结算</p>
       ) : null}

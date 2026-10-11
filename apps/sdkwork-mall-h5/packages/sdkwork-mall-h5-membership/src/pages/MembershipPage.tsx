@@ -43,7 +43,7 @@ export function SdkworkMallH5MembershipPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-page-title">会员中心</h1>
+      <h1 className="sdk-h5-visually-hidden">会员中心</h1>
 
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 

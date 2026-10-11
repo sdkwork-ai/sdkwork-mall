@@ -198,7 +198,7 @@ export function SdkworkMallH5CartPage() {
     return (
       <div className="sdk-h5-page">
         <div className="sdk-h5-cart-toolbar">
-          <h1 className="sdk-h5-page-title">购物车</h1>
+          <h1 className="sdk-h5-visually-hidden">购物车</h1>
         </div>
         <div className="sdk-h5-cart-hero-empty">
           <div aria-hidden="true" className="sdk-h5-cart-hero-empty-icon">🛒</div>
@@ -215,9 +215,8 @@ export function SdkworkMallH5CartPage() {
   return (
     <div className="sdk-h5-page">
       <div className="sdk-h5-cart-toolbar">
-        <h1 className="sdk-h5-page-title">
-          购物车<span className="sdk-h5-cart-toolbar-count">共 {totalCount} 件</span>
-        </h1>
+        <h1 className="sdk-h5-visually-hidden">购物车</h1>
+        <span className="sdk-h5-cart-toolbar-count">共 {totalCount} 件</span>
         <button
           className="sdk-h5-cart-manage"
           disabled={busy}

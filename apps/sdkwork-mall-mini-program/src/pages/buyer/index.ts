@@ -10,35 +10,46 @@ const ORDER_ENTRIES: Array<{ status: string; label: string; count: string | numb
   { status: "COMPLETED", label: "已完成", count: "" },
 ];
 
+/** 我的资产：钱包 / 积分 / 会员 — rows with chevrons (parity with the H5
+ * asset list and the Flutter 我的资产 card). */
+const ASSET_LINKS: Array<{ label: string; path: string }> = [
+  { label: "钱包", path: "/pages/wallet/index" },
+  { label: "我的积分", path: "/pages/points/index" },
+  { label: "会员中心", path: "/pages/membership/index" },
+];
+
+/** 常用服务：clean 2×4 grid. */
 const QUICK_LINKS: Array<{ label: string; path: string }> = [
   { label: "我的收藏", path: "/pages/favorites/index" },
   { label: "浏览足迹", path: "/pages/footprint/index" },
   { label: "地址管理", path: "/pages/address/index" },
   { label: "领券中心", path: "/pages/coupons/index" },
-  { label: "我的订单", path: "/pages/orders/index" },
   { label: "售后中心", path: "/pages/aftersales/index" },
+  { label: "发票", path: "/pages/invoices/index" },
   { label: "消息中心", path: "/pages/messages/index" },
   { label: "客服会话", path: "/pages/chats/index" },
-  { label: "钱包", path: "/pages/wallet/index" },
-  { label: "我的积分", path: "/pages/points/index" },
-  { label: "会员中心", path: "/pages/membership/index" },
-  { label: "发票", path: "/pages/invoices/index" },
+];
+
+const OTHER_LINKS: Array<{ label: string; path: string }> = [
   { label: "活动会场", path: "/pages/activity/index" },
   { label: "设置", path: "/pages/settings/index" },
-  { label: "去逛逛", path: "home" },
 ];
 
 interface BuyerData {
   loggedIn: boolean;
   orderEntries: Array<{ status: string; label: string; count: string | number }>;
+  assetLinks: Array<{ label: string; path: string }>;
   quickLinks: Array<{ label: string; path: string }>;
+  otherLinks: Array<{ label: string; path: string }>;
 }
 
 Page({
   data: {
     loggedIn: false,
     orderEntries: ORDER_ENTRIES,
+    assetLinks: ASSET_LINKS,
     quickLinks: QUICK_LINKS,
+    otherLinks: OTHER_LINKS,
   } as BuyerData,
 
   onShow() {

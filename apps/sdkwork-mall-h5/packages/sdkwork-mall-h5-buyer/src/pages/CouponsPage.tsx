@@ -60,7 +60,7 @@ export function SdkworkMallH5CouponsPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-page-title">领券中心</h1>
+      <h1 className="sdk-h5-visually-hidden">领券中心</h1>
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-warning">{message}</div> : null}
 

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
-  CreditCard,
+  ChevronRight,
   Crown,
   FileText,
   Heart,
@@ -14,6 +14,7 @@ import {
   Receipt,
   Star,
   Ticket,
+  Wallet,
 } from "lucide-react";
 
 import {
@@ -37,14 +38,20 @@ const ORDER_ENTRIES: Array<{ code: "all" | MallH5OrderStatus; label: string }> =
   { code: "completed", label: "已完成" },
 ];
 
-const QUICK_LINKS = [
+/** 我的资产：钱包 / 积分 / 会员 — list rows with chevrons (JD-order parity
+ * with the Flutter 我的资产 card). */
+const ASSET_ENTRIES = [
+  { icon: Wallet, label: "钱包", path: "/buyer/wallet" },
+  { icon: Star, label: "积分", path: "/buyer/points" },
+  { icon: Crown, label: "会员", path: "/buyer/membership" },
+] as const;
+
+/** 常用服务：clean 2×4 grid (the flat 11-item grid wrapped awkwardly). */
+const TOOL_LINKS = [
   { icon: MapPin, label: "地址管理", path: "/buyer/addresses" },
   { icon: Ticket, label: "领券中心", path: "/buyer/coupons" },
   { icon: FileText, label: "售后", path: "/buyer/after-sales" },
   { icon: Receipt, label: "发票", path: "/buyer/invoices" },
-  { icon: CreditCard, label: "钱包", path: "/buyer/wallet" },
-  { icon: Star, label: "积分", path: "/buyer/points" },
-  { icon: Crown, label: "会员", path: "/buyer/membership" },
   { icon: Heart, label: "收藏", path: "/buyer/favorites" },
   { icon: History, label: "足迹", path: "/buyer/footprint" },
   { icon: Bell, label: "消息中心", path: "/buyer/messages" },
@@ -140,9 +147,27 @@ export function SdkworkMallH5BuyerHomePage() {
       </section>
 
       <section className="sdk-h5-section">
+        <h2>我的资产</h2>
+        <div className="sdk-h5-asset-list">
+          {ASSET_ENTRIES.map((entry) => {
+            const Icon = entry.icon;
+            return (
+              <Link className="sdk-h5-asset-row" key={entry.label} to={entry.path}>
+                <span className="sdk-h5-asset-icon" aria-hidden="true">
+                  <Icon size={18} />
+                </span>
+                <span className="sdk-h5-asset-label">{entry.label}</span>
+                <ChevronRight aria-hidden="true" size={16} />
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="sdk-h5-section">
         <h2>常用服务</h2>
         <div className="sdk-h5-quick-grid">
-          {QUICK_LINKS.map((link) => {
+          {TOOL_LINKS.map((link) => {
             const Icon = link.icon;
             return (
               <Link className="sdk-h5-quick-grid-item" key={link.label} to={link.path}>

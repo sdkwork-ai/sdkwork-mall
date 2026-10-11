@@ -174,7 +174,7 @@ export function SdkworkMallH5AddressesPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-page-title">地址管理</h1>
+      <h1 className="sdk-h5-visually-hidden">地址管理</h1>
 
       {message ? <div className="sdk-h5-error" role="alert">{message}</div> : null}
 

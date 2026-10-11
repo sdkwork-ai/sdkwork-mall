@@ -36,7 +36,7 @@ export function SdkworkMallH5PointsPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-page-title">我的积分</h1>
+      <h1 className="sdk-h5-visually-hidden">我的积分</h1>
 
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 

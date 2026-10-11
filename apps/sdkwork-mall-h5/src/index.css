@@ -589,11 +589,27 @@ body {
   margin: 0;
 }
 
-.sdk-h5-cart-toolbar-count {
-  margin-left: 0.45rem;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: var(--sdk-h5-text-muted);
+/* Standalone count chip in the cart toolbar (the title lives in the shell
+ * navbar now; the h1 is visually hidden for the accessibility outline). */
+.sdk-h5-cart-toolbar > .sdk-h5-cart-toolbar-count {
+  margin-left: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sdk-h5-text);
+}
+
+/* Accessible page heading that mirrors the navbar title without painting a
+ * second visible title under it. */
+.sdk-h5-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .sdk-h5-cart-manage {
@@ -1085,8 +1101,49 @@ body {
 
 .sdk-h5-quick-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem 0.4rem;
+}
+
+/* 我的资产：list rows with chevrons (钱包 / 积分 / 会员). */
+.sdk-h5-asset-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.sdk-h5-asset-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.2rem;
+  text-decoration: none;
+  color: var(--sdk-h5-text);
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--sdk-h5-border);
+}
+
+.sdk-h5-asset-row:last-child {
+  border-bottom: none;
+}
+
+.sdk-h5-asset-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.55rem;
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--sdk-h5-primary);
+  flex-shrink: 0;
+}
+
+.sdk-h5-asset-label {
+  flex: 1;
+}
+
+.sdk-h5-asset-row > svg:last-child {
+  color: var(--sdk-h5-text-muted);
 }
 
 .sdk-h5-quick-grid-item {

@@ -18,7 +18,7 @@ export function SdkworkMallH5FootprintPage() {
   return (
     <div className="sdk-h5-page">
       <div className="sdk-h5-flex-between">
-        <h1 className="sdk-h5-page-title">浏览足迹</h1>
+        <h1 className="sdk-h5-visually-hidden">浏览足迹</h1>
         {footprint.length > 0 ? (
           <button className="sdk-h5-button sdk-h5-button-ghost" onClick={handleClear} type="button">
             清空
