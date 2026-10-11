@@ -82,6 +82,56 @@ body {
   padding-bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
 }
 
+/* Immersive hero pages (钱包 / 积分 / 会员): the page's own gradient header
+ * is the top chrome — the shell only floats a back control over it, and the
+ * hero reserves top space so its title clears the floating control. */
+.sdk-h5-immersive-back {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  z-index: 30;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(17, 24, 39, 0.28);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.sdk-h5-app {
+  position: relative;
+}
+
+.sdk-h5-hero--immersive {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  padding-top: 3rem;
+  /* Clear the floating back control that overlays the hero. */
+  padding-left: 3.4rem;
+}
+
+/* The membership banner declares its own padding — re-assert the immersive
+ * clearances at equal-or-higher specificity. */
+.sdk-h5-banner.sdk-h5-hero--immersive {
+  padding-top: 3rem;
+  padding-left: 3.4rem;
+}
+
+.sdk-h5-hero--immersive.sdk-h5-wallet-hero {
+  padding-left: 1.2rem;
+}
+
+.sdk-h5-hero--immersive.sdk-h5-wallet-hero .sdk-h5-wallet-hero-label,
+.sdk-h5-hero--immersive.sdk-h5-wallet-hero .sdk-h5-wallet-hero-amount,
+.sdk-h5-hero--immersive.sdk-h5-wallet-hero .sdk-h5-wallet-hero-points {
+  padding-left: 2.2rem;
+}
+
 /* Tab roots without a shell header (消息 / 购物车 / 我的): the page owns its
  * top content directly. */
 .sdk-h5-main--fullbleed {
@@ -174,6 +224,43 @@ body {
   margin-bottom: 0.6rem;
   color: #fff;
   background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+/* 会员权益 2×2 grid. */
+.sdk-h5-benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.sdk-h5-benefit-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.8rem;
+  border-radius: 0.7rem;
+  background: var(--sdk-h5-panel);
+  border: 1px solid var(--sdk-h5-border);
+}
+
+.sdk-h5-benefit-item strong {
+  font-size: 0.85rem;
+}
+
+.sdk-h5-benefit-item .sdk-h5-muted {
+  font-size: 0.7rem;
+}
+
+.sdk-h5-benefit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--sdk-h5-primary);
+  margin-bottom: 0.2rem;
 }
 
 .sdk-h5-banner h1 {

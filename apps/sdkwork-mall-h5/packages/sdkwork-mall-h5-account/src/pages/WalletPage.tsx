@@ -48,7 +48,7 @@ export function SdkworkMallH5WalletPage() {
 
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
-      <section className="sdk-h5-wallet-hero">
+      <section className={`sdk-h5-wallet-hero sdk-h5-hero--immersive`}>
         <div className="sdk-h5-wallet-hero-label">现金余额（元）</div>
         <div className="sdk-h5-wallet-hero-amount">
           {overview?.cashBalanceCny != null ? overview.cashBalanceCny.toFixed(2) : "--"}
