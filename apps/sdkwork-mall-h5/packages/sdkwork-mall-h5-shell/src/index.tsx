@@ -31,6 +31,12 @@ export interface SdkworkMallH5MobileShellProps {
 }
 
 interface ShellTab {
+  /**
+   * Tab-root header chrome (JD-order): storefront tabs keep the search
+   * header, utility tabs get a title bar without a back affordance, and the
+   * buyer tab is full-bleed (its gradient hero starts at the very top).
+   */
+  readonly header: "none" | "search" | "title";
   readonly icon: LucideIcon;
   readonly label: string;
   readonly match: (pathname: string) => boolean;
@@ -45,18 +51,21 @@ interface ShellTab {
  */
 const SHELL_TABS: readonly ShellTab[] = [
   {
+    header: "search",
     icon: Home,
     label: "首页",
     match: (pathname) => pathname === "/" || pathname.startsWith("/activity"),
     path: "/",
   },
   {
+    header: "search",
     icon: LayoutGrid,
     label: "分类",
     match: (pathname) => pathname.startsWith("/categories") || pathname.startsWith("/product/") || pathname.startsWith("/search"),
     path: "/categories",
   },
   {
+    header: "title",
     icon: MessageCircle,
     label: "消息",
     match: (pathname) =>
@@ -67,12 +76,14 @@ const SHELL_TABS: readonly ShellTab[] = [
     path: "/buyer/chats",
   },
   {
+    header: "title",
     icon: ShoppingCart,
     label: "购物车",
     match: (pathname) => pathname === "/cart" || pathname.startsWith("/checkout"),
     path: "/cart",
   },
   {
+    header: "none",
     icon: User,
     label: "我的",
     match: (pathname) =>
@@ -145,10 +156,16 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   }
 
   const showTabBar = isTabRoot;
+  const activeTab = isTabRoot
+    ? SHELL_TABS.find((tab) => tab.path === location.pathname)
+    : undefined;
+  const tabHeaderMode = activeTab?.header ?? "title";
 
   return (
     <div className="sdk-h5-app">
-      {isProductDetail ? null : isTabRoot ? (
+      {isProductDetail ? null : !isTabRoot ? (
+        <SdkworkMallH5NavBar title={navbarTitle} />
+      ) : tabHeaderMode === "search" ? (
         <header className="sdk-h5-topbar">
           <button
             aria-label={runtime.config.appDisplayName}
@@ -175,11 +192,26 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
             />
           </div>
         </header>
-      ) : (
-        <SdkworkMallH5NavBar title={navbarTitle} />
-      )}
+      ) : tabHeaderMode === "title" ? (
+        // Utility tab roots (消息 / 购物车): shared navbar reuse per
+        // APP_MOBILE_REACT_UI_SPEC §5, minus the back affordance — a tab
+        // root is a destination, not a stack level.
+        <div className="sdk-h5-tab-titlebar">
+          <SdkworkMallH5NavBar title={activeTab?.label ?? navbarTitle} />
+        </div>
+      ) : null}
 
-      <main className={showTabBar ? "sdk-h5-main" : "sdk-h5-main sdk-h5-main-without-tabbar"}>{children}</main>
+      <main
+        className={
+          showTabBar
+            ? tabHeaderMode === "none"
+              ? "sdk-h5-main sdk-h5-main--fullbleed"
+              : "sdk-h5-main"
+            : "sdk-h5-main sdk-h5-main-without-tabbar"
+        }
+      >
+        {children}
+      </main>
 
       {showTabBar ? (
         <nav aria-label="底部导航" className="sdk-h5-tabbar">

@@ -82,6 +82,24 @@ body {
   padding-bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
 }
 
+/* Utility tab-root title bar (消息 / 购物车): the shared navbar minus the
+ * back affordance — a tab root is a destination, not a stack level. */
+.sdk-h5-tab-titlebar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.sdk-h5-tab-titlebar .sdkwork-mobile-navbar__back {
+  display: none;
+}
+
+/* Buyer tab root is full-bleed: the gradient hero is the page's own top
+ * chrome, so the shell renders no header above it. */
+.sdk-h5-main--fullbleed {
+  padding-bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
+}
+
 .sdk-h5-tabbar {
   position: fixed;
   bottom: 0;
