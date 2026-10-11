@@ -77,7 +77,7 @@ export function SdkworkMallH5InvoicesPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">发票</h1>
+          <h1 className="sdk-h5-visually-hidden">发票</h1>
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-warning">{message}</div> : null}
 

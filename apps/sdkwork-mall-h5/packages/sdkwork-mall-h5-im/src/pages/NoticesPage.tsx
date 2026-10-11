@@ -81,7 +81,7 @@ export function SdkworkMallH5NoticesPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">消息中心</h1>
+      <h1 className="sdk-h5-visually-hidden">消息通知</h1>
 
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 

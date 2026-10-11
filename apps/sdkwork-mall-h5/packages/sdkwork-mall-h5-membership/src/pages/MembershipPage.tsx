@@ -55,7 +55,7 @@ export function SdkworkMallH5MembershipPage() {
 
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
-      <section className="sdk-h5-banner sdk-h5-hero--immersive">
+      <section className="sdk-h5-banner">
         <Crown aria-hidden="true" size={22} />
         <h1>{status?.levelName ?? "普通会员"}</h1>
         <p>开通会员享专属价、积分回馈与优先客服</p>

@@ -40,7 +40,7 @@ export function SdkworkMallH5PointsPage() {
 
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
-      <section className={`sdk-h5-wallet-hero sdk-h5-hero--immersive`}>
+      <section className="sdk-h5-wallet-hero">
         <div className="sdk-h5-wallet-hero-label">可用积分</div>
         <div className="sdk-h5-wallet-hero-amount">{summary?.balance != null ? summary.balance : "--"}</div>
         <div className="sdk-h5-wallet-hero-points">

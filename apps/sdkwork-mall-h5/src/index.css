@@ -82,56 +82,6 @@ body {
   padding-bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
 }
 
-/* Immersive hero pages (钱包 / 积分 / 会员): the page's own gradient header
- * is the top chrome — the shell only floats a back control over it, and the
- * hero reserves top space so its title clears the floating control. */
-.sdk-h5-immersive-back {
-  position: absolute;
-  top: 0.7rem;
-  left: 0.7rem;
-  z-index: 30;
-  width: 2rem;
-  height: 2rem;
-  border: none;
-  border-radius: 50%;
-  background: rgba(17, 24, 39, 0.28);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.sdk-h5-app {
-  position: relative;
-}
-
-.sdk-h5-hero--immersive {
-  margin-top: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  padding-top: 3rem;
-  /* Clear the floating back control that overlays the hero. */
-  padding-left: 3.4rem;
-}
-
-/* The membership banner declares its own padding — re-assert the immersive
- * clearances at equal-or-higher specificity. */
-.sdk-h5-banner.sdk-h5-hero--immersive {
-  padding-top: 3rem;
-  padding-left: 3.4rem;
-}
-
-.sdk-h5-hero--immersive.sdk-h5-wallet-hero {
-  padding-left: 1.2rem;
-}
-
-.sdk-h5-hero--immersive.sdk-h5-wallet-hero .sdk-h5-wallet-hero-label,
-.sdk-h5-hero--immersive.sdk-h5-wallet-hero .sdk-h5-wallet-hero-amount,
-.sdk-h5-hero--immersive.sdk-h5-wallet-hero .sdk-h5-wallet-hero-points {
-  padding-left: 2.2rem;
-}
-
 /* Tab roots without a shell header (消息 / 购物车 / 我的): the page owns its
  * top content directly. */
 .sdk-h5-main--fullbleed {

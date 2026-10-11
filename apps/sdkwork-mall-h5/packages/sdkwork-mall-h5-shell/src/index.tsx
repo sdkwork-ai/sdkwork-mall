@@ -2,7 +2,6 @@ import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { SdkworkMobileNavBar } from '@sdkwork/shell-mobile-react/navbar';
 import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import {
-  ChevronLeft,
   Home,
   LayoutGrid,
   MessageCircle,
@@ -100,17 +99,6 @@ const SHELL_TABS: readonly ShellTab[] = [
 ];
 
 /**
- * Secondary screens whose content opens with its own gradient hero. These
- * render immersive: no white navbar above the hero (the hero title is the
- * single page title), with the shell floating a back control over the hero.
- */
-const IMMERSIVE_HERO_ROUTES: readonly string[] = [
-  "/buyer/wallet",
-  "/buyer/points",
-  "/buyer/membership",
-];
-
-/**
  * Routes that keep the bottom tab bar — exactly the five tab roots above.
  * Per spec, tab-bar visibility is decided once here at shell-layout time,
  * never inside individual screens.
@@ -155,15 +143,11 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   // Chrome is decided once here at shell-layout time (APP_MOBILE_REACT_UI_SPEC §5):
   // - product detail owns a full-bleed surface with floating page chrome;
   // - tab roots keep the search header (storefront) or are full-bleed;
-  // - hero pages (钱包/积分/会员) are immersive: their own gradient header is
-  //   the top chrome with a floating back — no white navbar above it, so the
-  //   title appears exactly once;
-  // - every other (secondary) screen gets the shared back navigation bar.
+  // - every other (secondary) screen gets the shared back navigation bar —
+  //   the navbar carries the single visible page title (pages keep an
+  //   accessibility-hidden h1 and never paint a second title).
   const isProductDetail = location.pathname.startsWith("/product/");
   const isTabRoot = isSdkworkMallH5TabBarSurface(location.pathname);
-  const isImmersiveHero = IMMERSIVE_HERO_ROUTES.some((prefix) =>
-    location.pathname.startsWith(prefix),
-  );
   const matchedRoute = runtime.routes.find((route) =>
     matchPath(route.path, location.pathname),
   );
@@ -182,18 +166,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
 
   return (
     <div className="sdk-h5-app">
-      {isProductDetail || isImmersiveHero ? (
-        isImmersiveHero ? (
-          <button
-            aria-label="返回"
-            className="sdk-h5-immersive-back"
-            onClick={() => navigate(-1)}
-            type="button"
-          >
-            <ChevronLeft aria-hidden="true" size={20} />
-          </button>
-        ) : null
-      ) : !isTabRoot ? (
+      {isProductDetail ? null : !isTabRoot ? (
         <SdkworkMallH5NavBar title={navbarTitle} />
       ) : tabHeaderMode === "search" ? (
         <header className="sdk-h5-topbar">
