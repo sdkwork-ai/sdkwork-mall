@@ -49,17 +49,15 @@ export function SdkworkMallH5WalletPage() {
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
       <section className="sdk-h5-wallet-hero">
-        <div>
-          <div className="sdk-h5-wallet-label">现金余额</div>
-          <div className="sdk-h5-wallet-amount">
-            {overview?.cashBalanceCny != null ? `¥${overview.cashBalanceCny.toFixed(2)}` : "--"}
-          </div>
+        <div className="sdk-h5-wallet-hero-label">现金余额（元）</div>
+        <div className="sdk-h5-wallet-hero-amount">
+          {overview?.cashBalanceCny != null ? overview.cashBalanceCny.toFixed(2) : "--"}
         </div>
-        <div>
-          <div className="sdk-h5-wallet-label">积分</div>
-          <div className="sdk-h5-wallet-amount">
+        <div className="sdk-h5-wallet-hero-points">
+          <span className="sdk-h5-wallet-hero-points-label">积分余额</span>
+          <strong className="sdk-h5-wallet-hero-points-value">
             {overview?.pointsBalance != null ? overview.pointsBalance : "--"}
-          </div>
+          </strong>
         </div>
       </section>
 
@@ -68,19 +66,31 @@ export function SdkworkMallH5WalletPage() {
         {ledger.length === 0 ? (
           <div className="sdk-h5-empty">暂无流水记录</div>
         ) : (
-          ledger.map((entry) => (
-            <div className="sdk-h5-coupon-row" key={entry.id}>
-              <div>
-                <strong>{entry.summary}</strong>
-                {entry.occurredAt ? <div className="sdk-h5-muted">{new Date(entry.occurredAt).toLocaleString("zh-CN")}</div> : null}
-              </div>
-              <strong>{entry.amountCny != null ? `¥${entry.amountCny.toFixed(2)}` : "--"}</strong>
-            </div>
-          ))
+          <div className="sdk-h5-ledger-list">
+            {ledger.map((entry) => {
+              const positive = entry.amountCny != null && entry.amountCny >= 0;
+              return (
+                <div className="sdk-h5-ledger-row" key={entry.id}>
+                  <span className="sdk-h5-ledger-icon" aria-hidden="true">
+                    {positive ? "入" : "出"}
+                  </span>
+                  <div className="sdk-h5-ledger-body">
+                    <strong>{entry.summary}</strong>
+                    {entry.occurredAt ? (
+                      <div className="sdk-h5-muted">{new Date(entry.occurredAt).toLocaleString("zh-CN")}</div>
+                    ) : null}
+                  </div>
+                  <strong className={positive ? "sdk-h5-ledger-amount-in" : "sdk-h5-ledger-amount-out"}>
+                    {entry.amountCny != null ? `${positive ? "+" : "-"}¥${Math.abs(entry.amountCny).toFixed(2)}` : "--"}
+                  </strong>
+                </div>
+              );
+            })}
+          </div>
         )}
       </section>
 
-      <p className="sdk-h5-muted">充值与提现将在支付渠道接入后开放。</p>
+      <p className="sdk-h5-muted sdk-h5-footnote">充值与提现将在支付渠道接入后开放。</p>
     </div>
   );
 }

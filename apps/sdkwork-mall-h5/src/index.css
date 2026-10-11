@@ -82,20 +82,8 @@ body {
   padding-bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
 }
 
-/* Utility tab-root title bar (消息 / 购物车): the shared navbar minus the
- * back affordance — a tab root is a destination, not a stack level. */
-.sdk-h5-tab-titlebar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-}
-
-.sdk-h5-tab-titlebar .sdkwork-mobile-navbar__back {
-  display: none;
-}
-
-/* Buyer tab root is full-bleed: the gradient hero is the page's own top
- * chrome, so the shell renders no header above it. */
+/* Tab roots without a shell header (消息 / 购物车 / 我的): the page owns its
+ * top content directly. */
 .sdk-h5-main--fullbleed {
   padding-bottom: calc(var(--sdk-h5-tabbar-height) + env(safe-area-inset-bottom));
 }
@@ -287,6 +275,18 @@ body {
   background: var(--sdk-h5-surface);
   color: var(--sdk-h5-text-muted);
   overflow: hidden;
+}
+
+/* Placeholder glyph when a list row has no artwork (favorites / footprint /
+ * cart lines from the dev double): keep the slot visually intentional. */
+.sdk-h5-product-image::before {
+  content: "图";
+  font-size: 0.8rem;
+  opacity: 0.45;
+}
+
+.sdk-h5-product-image:has(img)::before {
+  content: none;
 }
 
 .sdk-h5-product-image img {
@@ -1097,6 +1097,110 @@ body {
 .sdk-h5-order-entry strong {
   font-size: 0.85rem;
   color: var(--sdk-h5-primary);
+}
+
+/* ── 钱包页：渐变余额卡 + 流水列表 ── */
+.sdk-h5-wallet-hero {
+  margin: 0.85rem 0.85rem 0;
+  padding: 1.3rem 1.2rem 1.1rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 0.5rem 1.2rem rgba(37, 99, 235, 0.25);
+}
+
+.sdk-h5-wallet-hero-label {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.sdk-h5-wallet-hero-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 0.3rem;
+  letter-spacing: 0.01em;
+}
+
+.sdk-h5-wallet-hero-points {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.sdk-h5-wallet-hero-points-label {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.sdk-h5-wallet-hero-points-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.sdk-h5-ledger-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.sdk-h5-ledger-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem 0.2rem;
+  border-bottom: 1px solid var(--sdk-h5-border);
+}
+
+.sdk-h5-ledger-row:last-child {
+  border-bottom: none;
+}
+
+.sdk-h5-ledger-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  font-size: 0.68rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--sdk-h5-primary);
+}
+
+.sdk-h5-ledger-row:has(.sdk-h5-ledger-amount-out) .sdk-h5-ledger-icon {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--sdk-h5-danger);
+}
+
+.sdk-h5-ledger-body {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.sdk-h5-ledger-body .sdk-h5-muted {
+  font-size: 0.7rem;
+  margin-top: 0.1rem;
+}
+
+.sdk-h5-ledger-amount-in {
+  color: var(--sdk-h5-primary);
+  font-size: 0.92rem;
+}
+
+.sdk-h5-ledger-amount-out {
+  color: var(--sdk-h5-text);
+  font-size: 0.92rem;
+}
+
+.sdk-h5-footnote {
+  text-align: center;
+  font-size: 0.7rem;
+  padding: 0.6rem 0.85rem 0;
 }
 
 .sdk-h5-quick-grid {

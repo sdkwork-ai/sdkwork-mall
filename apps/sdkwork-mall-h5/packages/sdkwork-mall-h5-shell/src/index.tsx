@@ -32,11 +32,12 @@ export interface SdkworkMallH5MobileShellProps {
 
 interface ShellTab {
   /**
-   * Tab-root header chrome (JD-order): storefront tabs keep the search
-   * header, utility tabs get a title bar without a back affordance, and the
-   * buyer tab is full-bleed (its gradient hero starts at the very top).
+   * Tab-root header chrome: storefront tabs keep the search header; every
+   * other tab root is full-bleed — pages own their top content directly
+   * (no shell navbar on tab roots; tab roots are destinations, not stack
+   * levels).
    */
-  readonly header: "none" | "search" | "title";
+  readonly header: "none" | "search";
   readonly icon: LucideIcon;
   readonly label: string;
   readonly match: (pathname: string) => boolean;
@@ -65,7 +66,7 @@ const SHELL_TABS: readonly ShellTab[] = [
     path: "/categories",
   },
   {
-    header: "title",
+    header: "none",
     icon: MessageCircle,
     label: "消息",
     match: (pathname) =>
@@ -76,7 +77,7 @@ const SHELL_TABS: readonly ShellTab[] = [
     path: "/buyer/chats",
   },
   {
-    header: "title",
+    header: "none",
     icon: ShoppingCart,
     label: "购物车",
     match: (pathname) => pathname === "/cart" || pathname.startsWith("/checkout"),
@@ -159,7 +160,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   const activeTab = isTabRoot
     ? SHELL_TABS.find((tab) => tab.path === location.pathname)
     : undefined;
-  const tabHeaderMode = activeTab?.header ?? "title";
+  const tabHeaderMode = activeTab?.header ?? "none";
 
   return (
     <div className="sdk-h5-app">
@@ -192,13 +193,6 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
             />
           </div>
         </header>
-      ) : tabHeaderMode === "title" ? (
-        // Utility tab roots (消息 / 购物车): shared navbar reuse per
-        // APP_MOBILE_REACT_UI_SPEC §5, minus the back affordance — a tab
-        // root is a destination, not a stack level.
-        <div className="sdk-h5-tab-titlebar">
-          <SdkworkMallH5NavBar title={activeTab?.label ?? navbarTitle} />
-        </div>
       ) : null}
 
       <main

@@ -41,9 +41,10 @@ export function SdkworkMallH5PointsPage() {
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
       <section className="sdk-h5-wallet-hero">
-        <div>
-          <div className="sdk-h5-wallet-label">可用积分</div>
-          <div className="sdk-h5-wallet-amount">{summary?.balance != null ? summary.balance : "--"}</div>
+        <div className="sdk-h5-wallet-hero-label">可用积分</div>
+        <div className="sdk-h5-wallet-hero-amount">{summary?.balance != null ? summary.balance : "--"}</div>
+        <div className="sdk-h5-wallet-hero-points">
+          <span className="sdk-h5-wallet-hero-points-label">积分可在下单时抵扣现金</span>
         </div>
       </section>
 
@@ -52,12 +53,17 @@ export function SdkworkMallH5PointsPage() {
         {!summary || summary.lots.length === 0 ? (
           <div className="sdk-h5-empty">暂无积分批次</div>
         ) : (
-          summary.lots.map((lot) => (
-            <div className="sdk-h5-coupon-row" key={lot.id}>
-              <strong>{lot.points != null ? `${lot.points} 分` : "--"}</strong>
-              <span className="sdk-h5-muted">{lot.expiresAt ? `${lot.expiresAt} 到期` : "长期有效"}</span>
-            </div>
-          ))
+          <div className="sdk-h5-ledger-list">
+            {summary.lots.map((lot) => (
+              <div className="sdk-h5-ledger-row" key={lot.id}>
+                <span className="sdk-h5-ledger-icon" aria-hidden="true">分</span>
+                <div className="sdk-h5-ledger-body">
+                  <strong>{lot.points != null ? `${lot.points} 分` : "--"}</strong>
+                  <div className="sdk-h5-muted">{lot.expiresAt ? `${lot.expiresAt} 到期` : "长期有效"}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </section>
     </div>
