@@ -63,6 +63,13 @@ function MallErrorBoundary() {
         retry: "重试",
         title: "页面出错了",
       }}
+      onError={(error, errorInfo) => {
+        // Diagnostic hook: the boundary UI never shows raw exception details
+        // (appbase contract), but ops needs the trace in the console and the
+        // dev-double window stash for acceptance debugging.
+        console.error("[sdkwork-mall-pc] route render failure", error, errorInfo.componentStack);
+        (window as unknown as { __lastRenderError?: unknown }).__lastRenderError = error;
+      }}
       onGoHome={() => {
         window.location.assign("/");
       }}

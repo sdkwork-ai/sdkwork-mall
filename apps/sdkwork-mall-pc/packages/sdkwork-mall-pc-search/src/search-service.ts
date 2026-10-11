@@ -23,11 +23,22 @@ export interface MallSearchResult {
 }
 
 function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
+  // Canonical media is a primaryImage/coverImage `{ url }` object; the dev
+  // double (and legacy payloads) ship a plain string `imageUrl` plus an
+  // `images` array whose first entry is the cover.
   const media = record.primaryImage ?? record.coverImage;
-  const imageUrl =
+  const objectImageUrl =
     typeof media === "object" && media !== null && "url" in media
       ? String((media as { url?: unknown }).url ?? "")
       : undefined;
+  const images = Array.isArray(record.images) ? record.images : [];
+  const firstListImage = images.find((item) => typeof item === "string" && item !== "");
+  const imageUrl =
+    objectImageUrl
+    ?? (typeof record.imageUrl === "string" && record.imageUrl
+      ? record.imageUrl
+      : undefined)
+    ?? (typeof firstListImage === "string" ? firstListImage : undefined);
 
   const brand =
     typeof record.brand === "string"
@@ -93,7 +104,9 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
         ? record.salePrice
         : typeof record.price === "number"
           ? record.price
-          : null,
+          : typeof record.priceCny === "number"
+            ? record.priceCny
+            : null,
     shopId:
       typeof record.shopId === "string"
         ? record.shopId

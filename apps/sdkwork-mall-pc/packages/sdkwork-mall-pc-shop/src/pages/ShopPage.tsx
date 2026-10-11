@@ -137,6 +137,26 @@ export function SdkworkMallShopPage() {
   // 店铺推荐（取前4个商品作为推荐）
   const recommendedProducts = useMemo(() => products.slice(0, 4), [products]);
 
+  // Hook order invariant: every hook runs before the loading/empty early
+  // returns below, or the hook count changes across renders and React tears
+  // the component down (rules of hooks).
+  const pageNumbers = useMemo(() => {
+    const pages: number[] = [];
+    const maxVisible = 7;
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      return pages;
+    }
+    const half = Math.floor(maxVisible / 2);
+    let start = Math.max(1, page - half);
+    const end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }, [page, totalPages]);
+
   function updateParam(key: string, value: string) {
     const next = new URLSearchParams(params);
     if (value) {
@@ -157,23 +177,6 @@ export function SdkworkMallShopPage() {
   if (!shop) {
     return <EmptyState description="店铺可能已下线或迁移" title="未找到店铺" />;
   }
-
-  const pageNumbers = useMemo(() => {
-    const pages: number[] = [];
-    const maxVisible = 7;
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-      return pages;
-    }
-    const half = Math.floor(maxVisible / 2);
-    let start = Math.max(1, page - half);
-    const end = Math.min(totalPages, start + maxVisible - 1);
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-    for (let i = start; i <= end; i++) pages.push(i);
-    return pages;
-  }, [page, totalPages]);
 
   return (
     <div className="sdkwork-mall-pc-shop-page">
