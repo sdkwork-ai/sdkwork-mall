@@ -54,7 +54,7 @@
     {
       "file": "GITHUB_WORKFLOW_SPEC.md",
       "path": "../../../sdkwork-specs/GITHUB_WORKFLOW_SPEC.md",
-      "purpose": "Thin reusable GitHub packaging workflow and sdkwork.workflow.json contract."
+      "purpose": "Thin reusable GitHub packaging workflow and agent.workflow.json contract."
     },
     {
       "file": "DEPENDENCY_MANAGEMENT_SPEC.md",
@@ -133,7 +133,7 @@
     ],
     "runtimeEntrypoints": [
       "agent.app.config.json",
-      "sdkwork.workflow.json",
+      "agent.workflow.json",
       "package.json",
       "index.html",
       "vite.config.ts",
@@ -173,7 +173,7 @@
   "verification": {
     "commands": [
       "node --test tests/contract/verify-mall-standard-architecture.test.mjs",
-      "node ../sdkwork-github-workflow/scripts/sdkwork-workflow.mjs validate --config apps/sdkwork-mall-pc/sdkwork.workflow.json",
+      "node ../sdkwork-github-workflow/scripts/agent-workflow.mjs validate --config apps/sdkwork-mall-pc/agent.workflow.json",
       "pnpm --dir apps/sdkwork-mall-pc run typecheck",
       "pnpm --dir apps/sdkwork-mall-pc run build",
       "pnpm --dir apps/sdkwork-mall-pc run test:config",

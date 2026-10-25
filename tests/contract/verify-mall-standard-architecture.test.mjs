@@ -10,7 +10,7 @@ const mallPackagesRoot = path.join(mallRoot, "packages");
 const mallApplicationRequiredPaths = [
   "AGENTS.md",
   "agent.app.config.json",
-  "sdkwork.workflow.json",
+  "agent.workflow.json",
   "specs/component.spec.json",
   "src/App.tsx",
   "src/AppRoutes.tsx",
@@ -671,7 +671,7 @@ test("mall PC active packages use service subpaths for cross-package imports", (
 });
 
 test("mall workspace metadata and packaging contract align with sdkwork-mall ownership", () => {
-  const workflow = readJson("apps/sdkwork-mall-pc/sdkwork.workflow.json");
+  const workflow = readJson("apps/sdkwork-mall-pc/agent.workflow.json");
   assert.equal(workflow.app.repository, "sdkwork-ai/sdkwork-mall");
   assert.equal(workflow.app.sourcePath, "apps/sdkwork-mall-pc");
 
