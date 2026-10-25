@@ -6,7 +6,7 @@ Read `../../../sdkwork-specs/SOUL.md` before executing tasks in this application
 
 ## Application Identity
 
-Read `sdkwork.app.config.json` — app key `sdkwork-mall-pc`, comprehensive e-commerce platform (storefront + buyer + merchant + admin).
+Read `agent.app.config.json` — app key `sdkwork-mall-pc`, comprehensive e-commerce platform (storefront + buyer + merchant + admin).
 
 ## Product Requirements
 

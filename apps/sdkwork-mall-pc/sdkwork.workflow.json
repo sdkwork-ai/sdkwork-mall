@@ -6,7 +6,7 @@
     "name": "SDKWork Mall PC",
     "repository": "sdkwork-ai/sdkwork-mall",
     "sourcePath": "apps/sdkwork-mall-pc",
-    "configPath": "sdkwork.app.config.json"
+    "configPath": "agent.app.config.json"
   },
   "release": {
     "artifactPrefix": "sdkwork-mall-pc",
@@ -80,7 +80,7 @@
         "name": "Stage Mall PC web bundle metadata",
         "shell": "pwsh",
         "workingDirectory": ".",
-        "run": "$ErrorActionPreference = \"Stop\"\n$stage = \"apps/sdkwork-mall-pc/dist/web\"\nRemove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue\nNew-Item -ItemType Directory -Force -Path $stage | Out-Null\nCopy-Item -LiteralPath \"apps/sdkwork-mall-pc/sdkwork.app.config.json\" -Destination \"$stage/sdkwork.app.config.json\"\nCopy-Item -LiteralPath \"apps/sdkwork-mall-pc/README.md\" -Destination \"$stage/README.md\""
+        "run": "$ErrorActionPreference = \"Stop\"\n$stage = \"apps/sdkwork-mall-pc/dist/web\"\nRemove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue\nNew-Item -ItemType Directory -Force -Path $stage | Out-Null\nCopy-Item -LiteralPath \"apps/sdkwork-mall-pc/agent.app.config.json\" -Destination \"$stage/agent.app.config.json\"\nCopy-Item -LiteralPath \"apps/sdkwork-mall-pc/README.md\" -Destination \"$stage/README.md\""
       }
     ],
     "package": [

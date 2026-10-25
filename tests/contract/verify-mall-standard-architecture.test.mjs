@@ -9,7 +9,7 @@ const mallPackagesRoot = path.join(mallRoot, "packages");
 
 const mallApplicationRequiredPaths = [
   "AGENTS.md",
-  "sdkwork.app.config.json",
+  "agent.app.config.json",
   "sdkwork.workflow.json",
   "specs/component.spec.json",
   "src/App.tsx",
@@ -249,7 +249,7 @@ test("mall PC application root is registered and manifest-driven", () => {
     assert.equal(existsSync(path.join(mallRoot, relativePath)), true, `apps/sdkwork-mall-pc/${relativePath} must exist`);
   }
 
-  const manifest = readJson("apps/sdkwork-mall-pc/sdkwork.app.config.json");
+  const manifest = readJson("apps/sdkwork-mall-pc/agent.app.config.json");
   assert.equal(manifest.app?.key, "sdkwork-mall-pc");
   assert.equal(manifest.runtime?.family, "web");
   assert.equal(manifest.runtime?.framework, "react");
@@ -683,7 +683,7 @@ test("mall workspace metadata and packaging contract align with sdkwork-mall own
   );
   assert.equal(dependencyIds.includes("sdkwork-appbase"), true, "packaging workflow must declare sdkwork-appbase dependency");
 
-  const appManifest = readJson("apps/sdkwork-mall-pc/sdkwork.app.config.json");
+  const appManifest = readJson("apps/sdkwork-mall-pc/agent.app.config.json");
   assert.equal(appManifest.metadata?.standardOwner, "sdkwork-mall");
   assert.equal(appManifest.publish?.config?.managedBy, "sdkwork-mall");
 

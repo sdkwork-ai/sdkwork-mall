@@ -116,6 +116,6 @@ pnpm --dir apps/sdkwork-mall-pc run typecheck
 
 ## 规范索引
 
-- 应用清单：`sdkwork.app.config.json`
+- 应用清单：`agent.app.config.json`
 - 组件契约：`specs/component.spec.json`
 - SDKWork 标准：`../../../sdkwork-specs/README.md`

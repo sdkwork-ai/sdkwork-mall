@@ -16,7 +16,7 @@ Mall consumes T1 domain service packages (`@sdkwork/account-service`, `@sdkwork/
 
 ## Application root
 
-- Manifest: `apps/sdkwork-mall-pc/sdkwork.app.config.json`
+- Manifest: `apps/sdkwork-mall-pc/agent.app.config.json`
 - Dev: `pnpm dev`
 - Build: `pnpm build`
 - Verify: `pnpm verify`

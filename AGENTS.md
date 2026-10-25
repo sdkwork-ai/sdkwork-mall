@@ -8,7 +8,7 @@ Read `../sdkwork-specs/SOUL.md` before executing tasks in this root.
 
 ## Application Identity
 
-Read `apps/sdkwork-mall-pc/sdkwork.app.config.json` before changing application behavior, runtime config, SDK wiring, release metadata, or app-owned capabilities.
+Read `apps/sdkwork-mall-pc/agent.app.config.json` before changing application behavior, runtime config, SDK wiring, release metadata, or app-owned capabilities.
 
 ## Local Dictionary Structure
 

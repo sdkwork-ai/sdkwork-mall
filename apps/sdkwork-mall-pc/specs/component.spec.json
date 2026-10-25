@@ -17,7 +17,7 @@
     "generated": false,
     "private": true,
     "manifests": [
-      "sdkwork.app.config.json"
+      "agent.app.config.json"
     ]
   },
   "canonicalSpecs": [
@@ -132,7 +132,7 @@
       "src/bootstrap/runtime.ts"
     ],
     "runtimeEntrypoints": [
-      "sdkwork.app.config.json",
+      "agent.app.config.json",
       "sdkwork.workflow.json",
       "package.json",
       "index.html",
@@ -163,7 +163,7 @@
     "dependencyApiSurfaces": [],
     "events": [],
     "configKeys": [
-      "sdkwork.app.config.json",
+      "agent.app.config.json",
       "config/browser/runtime-env.production.example.json",
       "config/server/sdkwork-mall-pc.production.toml.example",
       "config/desktop/sdkwork-mall-pc.production.toml.example",

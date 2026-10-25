@@ -7,7 +7,7 @@ function read(relativePath) {
 }
 
 test("mall H5 root is manifest-driven with mobile runtime identity", () => {
-  const manifest = JSON.parse(read("../../sdkwork.app.config.json"));
+  const manifest = JSON.parse(read("../../agent.app.config.json"));
   assert.equal(manifest.app?.key, "sdkwork-mall-h5");
   assert.equal(manifest.runtime?.family, "mobile");
   assert.equal(manifest.runtime?.framework, "react-h5");

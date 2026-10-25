@@ -19,7 +19,7 @@
     "private": true,
     "manifests": [
       "pubspec.yaml",
-      "sdkwork.app.config.json"
+      "agent.app.config.json"
     ]
   },
   "canonicalSpecs": [

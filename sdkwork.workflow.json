@@ -6,7 +6,7 @@
     "name": "sdkwork-mall",
     "repository": "sdkwork-ai/sdkwork-mall",
     "sourcePath": ".",
-    "configPath": "sdkwork.app.config.json"
+    "configPath": "agent.app.config.json"
   },
   "release": {
     "artifactPrefix": "sdkwork-mall",

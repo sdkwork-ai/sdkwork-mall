@@ -14,7 +14,7 @@ const environment = process.argv.includes("--environment")
   ? process.argv[process.argv.indexOf("--environment") + 1]
   : "development";
 
-const manifest = JSON.parse(readFileSync(path.join(appRoot, "sdkwork.app.config.json"), "utf8"));
+const manifest = JSON.parse(readFileSync(path.join(appRoot, "agent.app.config.json"), "utf8"));
 const envConfig = manifest.environments?.[environment];
 if (!envConfig) {
   console.error(`[mall-mp] unknown environment: ${environment}`);

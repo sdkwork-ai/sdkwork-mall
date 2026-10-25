@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "kind": "sdkwork.app",
+  "kind": "agent.app",
   "app": {
     "key": "sdkwork-mall-flutter-mobile",
     "name": "SDKWork Mall Flutter Mobile",

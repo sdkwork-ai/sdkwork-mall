@@ -32,7 +32,7 @@
   },
   "include": [
     "index.html",
-    "sdkwork.app.config.json",
+    "agent.app.config.json",
     "vite.config.ts",
     "src/**/*.ts",
     "src/**/*.tsx"
