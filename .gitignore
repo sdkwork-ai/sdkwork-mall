@@ -1,7 +1,6 @@
 node_modules/
 dist/
 .vite/
-.env.local
 .env.*.local
 *.log
 
@@ -14,7 +13,6 @@ target/
 **/target/
 !.env.example
 !.env.*.example
-!.env.postgres.example
 **/dist/
 coverage/
 **/.pnpm-store/
