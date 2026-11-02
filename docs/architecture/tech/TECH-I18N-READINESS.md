@@ -12,14 +12,16 @@ long):
 
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
-| PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 120 | 1620 | 0 |
-| H5 | none — literal zh-CN | 68 | 540 | 390 (`regions.ts`) |
-| Mini program | none — literal zh-CN | 66 | 339 | 302 (province/city picker data) |
-| Flutter | none — literal zh-CN | 38 | 517 | 230 (province/city picker data) |
+| PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 121 | 1645 | 0 |
+| H5 | none — literal zh-CN | 68 | 584 | 390 (`regions.ts`) |
+| Mini program | none — literal zh-CN | 66 | 375 | 302 (province/city picker data) |
+| Flutter | none — literal zh-CN | 38 | 567 | 230 (province/city picker data) |
 
-3016 user-facing strings remain hard-coded. The PC root has the mechanism but
-still mixes literal copy into pages (its five biggest hotspots are 227, 128, 106,
-79 and 71 strings), and the mobile roots have no mechanism at all.
+3171 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+The count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
+root adds copy without an explicit baseline update, so the backlog can only grow
+through a reviewable decision. Checkout invoice/delivery copy added since the
+first assessment is already inside the committed baseline.
 
 ## 2. What Already Exists
 
@@ -95,6 +97,7 @@ baseline snapshot for H5.
 | Step | Gate |
 | --- | --- |
 | Numbers refresh | `pnpm audit:i18n` (no diff expected unless copy changed) |
+| Readiness ratchet | `pnpm check:i18n-baseline` — fails when a root adds hard-coded copy; refresh with `pnpm i18n:baseline` |
 | S1a catalogue | `pnpm check:i18n-catalogues` + `tests/contract/verify-i18n-catalogue.test.mjs` |
 | S1b wiring | parity title gate: every root still shows the contract title |
 | S2 per root | existing architecture gates per root, plus catalogue reachability test |

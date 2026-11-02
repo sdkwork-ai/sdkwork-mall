@@ -8,15 +8,21 @@
  * locale data, not translatable strings.
  *
  * Usage:
- *   node scripts/audit-mall-i18n-readiness.mjs
- *   node scripts/audit-mall-i18n-readiness.mjs --json
+ *   node scripts/audit-mall-i18n-readiness.mjs                  # human report
+ *   node scripts/audit-mall-i18n-readiness.mjs --json           # machine output
+ *   node scripts/audit-mall-i18n-readiness.mjs --write-baseline # refresh the ratchet baseline
+ *   node scripts/audit-mall-i18n-readiness.mjs --check          # fail when a root adds copy
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const asJson = process.argv.includes("--json");
+const args = new Set(process.argv.slice(2));
+const asJson = args.has("--json");
+const writeBaseline = args.has("--write-baseline");
+const checkBaseline = args.has("--check");
+const baselinePath = path.join(workspaceRoot, "specs", "i18n-readiness.baseline.json");
 
 const ROOTS = {
   pc: { dir: "apps/sdkwork-mall-pc", extensions: [".ts", ".tsx"] },
@@ -96,7 +102,7 @@ for (const [rootName, root] of Object.entries(ROOTS)) {
 
 if (asJson) {
   process.stdout.write(`${JSON.stringify({ roots: report }, null, 2)}\n`);
-} else {
+} else if (!writeBaseline && !checkBaseline) {
   const header = ["root", "files", "files+wcopy", "copy strings", "locale data"];
   const table = Object.entries(report).map(([root, data]) => [
     root,
@@ -124,6 +130,72 @@ if (asJson) {
     "\nPlan: specs/app-i18n catalogues per root, keyed by capability id (the parity contract already owns the canonical labels).\n",
   );
   process.stdout.write("See docs/architecture/tech/TECH-I18N-READINESS.md.\n");
+}
+
+/**
+ * Readiness ratchet.
+ *
+ * The migration is staged (S1 catalogue landed, per-root runtime pending), so
+ * the audit is not yet a zero-baseline gate. Instead the committed baseline is
+ * a ceiling: a root may not add hard-coded copy without an explicit baseline
+ * update in the same change, which makes the growth reviewable. Shrinking copy
+ * is always allowed and is reported.
+ */
+const copyByRoot = Object.fromEntries(
+  Object.entries(report).map(([rootName, data]) => [rootName, data.copyLiterals]),
+);
+const totalCopy = Object.values(copyByRoot).reduce((sum, count) => sum + count, 0);
+
+if (writeBaseline) {
+  writeFileSync(
+    baselinePath,
+    `${JSON.stringify({ schemaVersion: 1, roots: copyByRoot, total: totalCopy }, null, 2)}\n`,
+    "utf8",
+  );
+  process.stdout.write(
+    `wrote ${path.relative(workspaceRoot, baselinePath)} (total ${totalCopy})\n`,
+  );
+}
+
+if (checkBaseline) {
+  if (!existsSync(baselinePath)) {
+    process.stdout.write(
+      `missing ${path.relative(workspaceRoot, baselinePath)}: run pnpm i18n:baseline\n`,
+    );
+    process.exit(1);
+  }
+  const baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
+  const grown = [];
+  const shrunk = [];
+  for (const [rootName, count] of Object.entries(copyByRoot)) {
+    const previous = baseline.roots?.[rootName];
+    if (typeof previous !== "number") {
+      grown.push(`${rootName}: no baseline entry (current ${count})`);
+      continue;
+    }
+    if (count > previous) {
+      grown.push(`${rootName}: ${previous} -> ${count}`);
+    } else if (count < previous) {
+      shrunk.push(`${rootName}: ${previous} -> ${count}`);
+    }
+  }
+
+  if (grown.length > 0) {
+    process.stdout.write(
+      "i18n readiness regressed: a root added hard-coded user-facing copy.\n" +
+        `${grown.join("\n")}\n` +
+        "Move the copy into a catalogue, or run pnpm i18n:baseline and justify the growth in review.\n",
+    );
+    process.exit(1);
+  }
+  process.stdout.write(
+    `i18n readiness ratchet holds (${Object.entries(copyByRoot)
+      .map(([rootName, count]) => `${rootName} ${count}/${baseline.roots[rootName]}`)
+      .join(", ")}).\n`,
+  );
+  if (shrunk.length > 0) {
+    process.stdout.write(`improved: ${shrunk.join(", ")} — refresh the baseline with pnpm i18n:baseline\n`);
+  }
 }
 
 void CJK;

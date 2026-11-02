@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 73/73 pass
+pnpm test:node                                                     → 75/75 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -183,6 +183,7 @@ pnpm test:node                                                     → 73/73 pas
   (tests/contract/verify-after-sales-depth.test.mjs                → 1/1)
   (tests/contract/verify-browser-page-titles.test.mjs              → 3/3)
   (tests/contract/verify-mobile-failure-handling.test.mjs          → 2/2)
+  (tests/contract/verify-i18n-readiness.test.mjs                   → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
