@@ -308,3 +308,33 @@ test("no H5 capability route is an orphan screen", () => {
     `Routes with no in-app entry (implemented but unreachable):\n${orphans.join("\n")}`,
   );
 });
+
+test("every H5 page component exposes an accessible page heading", () => {
+  // The shell navbar is a styled div, not a heading, so assistive technology
+  // gets no page title unless the page renders its own <h1>. Visual users see
+  // the navbar title; screen-reader users need the heading.
+  const packagesRoot = fileURLToPath(new URL("../../packages/", import.meta.url));
+  const missing = [];
+  let pages = 0;
+  for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const pagesDirectory = join(packagesRoot, entry.name, "src", "pages");
+    if (!existsSync(pagesDirectory)) {
+      continue;
+    }
+    for (const file of readdirSync(pagesDirectory)) {
+      if (!file.endsWith(".tsx")) {
+        continue;
+      }
+      pages += 1;
+      if (!/<h1[\s>]/u.test(readFileSync(join(pagesDirectory, file), "utf8"))) {
+        missing.push(`${entry.name}/${file}`);
+      }
+    }
+  }
+
+  assert.ok(pages > 0, "expected H5 page components");
+  assert.deepEqual(missing, [], `H5 page components without a <h1> heading:\n${missing.join("\n")}`);
+});

@@ -45,6 +45,7 @@ export function SdkworkMallH5LogisticsPage() {
 
   return (
     <div className="sdk-h5-page">
+      <h1 className="sdk-h5-visually-hidden">物流跟踪</h1>
       <div className="sdk-h5-center">
         <Link className="sdk-h5-button sdk-h5-button-ghost" to="/buyer/orders">返回订单列表</Link>
       </div>

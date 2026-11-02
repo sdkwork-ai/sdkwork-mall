@@ -46,6 +46,7 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Link integrity (web) | PC + H5 architecture tests | An in-app `to`/`navigate` link targets a path no route contributes |
 | Orphan screens | PC + H5 architecture tests | A registered route has no in-app entry; the page module resolved from the router is excluded so a page cannot link to itself. PC covers storefront routes (buyer/merchant/admin nav is generated from the registry and asserted as such); H5 covers every non-tab route |
 | Flutter route references | `apps/sdkwork-mall-flutter-mobile/test/route_references_test.dart` | A page pushes a named route `buildSdkworkMallRoutes()` never registers, a registered route is never pushed, or a capability-registry path has no shell route |
+| Accessible page heading (H5) | `apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture.test.mjs` | A page component renders no `<h1>`: the shell navbar is a styled div, so assistive technology would get no page title |
 | Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
 | Title-key convention | same test | A route title key does not follow `<namespace>.routes.<screen>.title` |
 | Shared copy | same test | The upstream notice or buyer-hub label is reworded on one root |
@@ -150,10 +151,10 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 50/50 pass
+pnpm test:node                                                     → 51/51 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
-  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 7/7
+  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 8/8
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 6/6
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
@@ -190,6 +191,16 @@ page cannot satisfy the check by linking to itself. It found `storefront.mall.tv
 (`/tv`) reachable from nowhere — the TV showcase was implemented and routed but
 had no entry point. The H5 home page now carries a 更多服务 row (帮助中心 /
 电视购物 / 我的订单 / 设置), so the TV surface is discoverable instead of dead.
+
+### 6.1.1 Accessible page headings (H5)
+
+The H5 navbar renders the page title as a styled `div`, so screen-reader users
+got no page heading unless the page rendered one. Six page components
+(`BuyerHomePage`, `SelectOrderPage`, `ChatPage`, `ConversationListPage`,
+`LogisticsPage`, `OrderPage`) shipped without one. All 34 page components now
+render an `<h1>` (visually hidden via `.sdk-h5-visually-hidden`, the pattern the
+other pages already used), and the H5 architecture test fails when a page
+component loses it.
 
 ### 6.2 Per-package typecheck while the root gate is upstream-blocked
 

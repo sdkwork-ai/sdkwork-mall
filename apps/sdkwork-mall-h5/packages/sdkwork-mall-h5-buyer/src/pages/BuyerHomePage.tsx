@@ -132,6 +132,7 @@ export function SdkworkMallH5BuyerHomePage() {
 
   return (
     <div className="sdk-h5-page">
+      <h1 className="sdk-h5-visually-hidden">我的</h1>
       <section className="sdk-h5-buyer-hero">
         <div className="sdk-h5-buyer-avatar" aria-hidden="true">{displayName.slice(0, 1)}</div>
         <div>

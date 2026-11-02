@@ -191,6 +191,7 @@ export function SdkworkMallH5OrderPage() {
 
   return (
     <div className="sdk-h5-page">
+      <h1 className="sdk-h5-visually-hidden">我的订单</h1>
       <div className="sdk-h5-sort-row">
         {STATUS_FILTERS.map((filter) => (
           <button

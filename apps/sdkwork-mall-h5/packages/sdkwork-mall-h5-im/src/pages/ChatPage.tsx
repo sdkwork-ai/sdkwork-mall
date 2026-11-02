@@ -81,6 +81,7 @@ export function SdkworkMallH5ChatPage() {
 
   return (
     <div className="sdk-h5-page sdk-h5-chat">
+      <h1 className="sdk-h5-visually-hidden">客服会话</h1>
       {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
 
       <div className="sdk-h5-chat-stream" ref={streamRef}>

@@ -58,6 +58,7 @@ export function SdkworkMallH5ConversationListPage() {
 
   return (
     <div className="sdk-h5-page sdk-h5-conv-page">
+      <h1 className="sdk-h5-visually-hidden">客服会话列表</h1>
       <nav aria-label="消息入口" className="sdk-h5-conv-entry-row">
         <Link className="sdk-h5-conv-entry" to="/buyer/notices">
           <span aria-hidden="true" className="sdk-h5-conv-entry-icon sdk-h5-conv-entry-icon-notice">🔔</span>
