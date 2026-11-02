@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../bootstrap/session.dart';
 import '../services/commerce.dart';
 import '../services/favorites_service.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import 'widgets.dart';
 import '../utils/json.dart';
@@ -47,7 +48,12 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
     if (_detail == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: SdkworkErrorView(message: _error.isEmpty ? '商品不存在或已下架' : _error, onRetry: _load),
+        body: SdkworkErrorView(
+          message: _error.isEmpty
+              ? SdkworkI18n.t('productDetail.notFound')
+              : _error,
+          onRetry: _load,
+        ),
       );
     }
     final detail = _detail!;
@@ -59,12 +65,14 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
     final soldOut = _maxQuantity != null && _maxQuantity! <= 0;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('商品详情')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('productDetail.title'))),
       bottomNavigationBar: BottomAppBar(
         child: Row(
           children: [
             IconButton(
-              tooltip: _favorite ? '取消收藏' : '收藏',
+              tooltip: _favorite
+                  ? SdkworkI18n.t('productDetail.actions.unfavorite')
+                  : SdkworkI18n.t('productDetail.actions.favorite'),
               onPressed: _toggleFavorite,
               icon: Icon(
                 _favorite ? Icons.favorite : Icons.favorite_outline,
@@ -75,14 +83,18 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
               child: OutlinedButton.icon(
                 onPressed: _busy || soldOut ? null : () => _openSkuSheet(false),
                 icon: const Icon(Icons.shopping_cart_outlined),
-                label: const Text('加入购物车'),
+                label: Text(SdkworkI18n.t('productDetail.actions.addToCart')),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: FilledButton(
                 onPressed: _busy || soldOut ? null : () => _openSkuSheet(true),
-                child: Text(soldOut ? '暂时售罄' : '立即购买'),
+                child: Text(
+                  soldOut
+                      ? SdkworkI18n.t('productDetail.actions.soldOut')
+                      : SdkworkI18n.t('productDetail.actions.buyNow'),
+                ),
               ),
             ),
           ],
@@ -125,9 +137,17 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
                 const SizedBox(height: 8),
                 Text(
                   <String>[
-                    if (detail['sales'] != null) '已售 ${detail['sales']}',
-                    if (_maxQuantity != null) '库存 $_maxQuantity',
-                    if (soldOut) '暂时售罄',
+                    if (detail['sales'] != null)
+                      SdkworkI18n.t(
+                        'productDetail.stats.sales',
+                        params: <String, String>{'count': '${detail['sales']}'},
+                      ),
+                    if (_maxQuantity != null)
+                      SdkworkI18n.t(
+                        'productDetail.stats.stock',
+                        params: <String, String>{'count': '$_maxQuantity'},
+                      ),
+                    if (soldOut) SdkworkI18n.t('productDetail.stats.soldOut'),
                   ].join(' · '),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
@@ -140,7 +160,10 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('选择规格', style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    SdkworkI18n.t('productDetail.sku.select'),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -162,7 +185,10 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Text('购买数量', style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  SdkworkI18n.t('productDetail.quantity.title'),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 const Spacer(),
                 IconButton(
                   onPressed: _quantity <= 1 ? null : () => setState(() => _quantity -= 1),
@@ -190,7 +216,10 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('规格参数', style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    SdkworkI18n.t('productDetail.specs.title'),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   ..._specs.map(
                     (spec) => Padding(
@@ -220,7 +249,11 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
                 child: ListTile(
                   leading: const Icon(Icons.storefront_outlined),
                   title: Text(
-                    asString(detail, <String>['shopName', 'shopId'], fallback: '店铺'),
+                    asString(
+                      detail,
+                      <String>['shopName', 'shopId'],
+                      fallback: SdkworkI18n.t('productDetail.shop.fallback'),
+                    ),
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed(
@@ -236,7 +269,10 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('商品介绍', style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    SdkworkI18n.t('productDetail.description.title'),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   Text('${detail['description']}'),
                 ],
@@ -261,7 +297,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
       if (detail == null) {
         setState(() {
           _loading = false;
-          _error = '商品不存在或已下架';
+          _error = SdkworkI18n.t('productDetail.notFound');
         });
         return;
       }
@@ -280,7 +316,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
       // PDP 访问即记录足迹（本机，上限 50 条，与 H5/小程序一致）。
       await SdkworkFavoritesStore.recordFootprint(
         id: '${detail['id'] ?? widget.productId}',
-        title: '${detail['title'] ?? '商品'}',
+        title: '${detail['title'] ?? SdkworkI18n.t('productDetail.title')}',
         imageUrl: '${detail['imageUrl'] ?? ''}',
       );
       final favorite = await SdkworkFavoritesStore.isFavorite(
@@ -328,7 +364,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
     final favorited = await SdkworkFavoritesStore.toggleFavorite(
       SdkworkFavoriteItem(
         id: '${detail['id'] ?? widget.productId}',
-        title: '${detail['title'] ?? '商品'}',
+        title: '${detail['title'] ?? SdkworkI18n.t('productDetail.title')}',
         imageUrl: '${detail['imageUrl'] ?? ''}',
         priceCny: asNum(detail, <String>['priceCny', 'price', 'salePrice']),
       ),
@@ -339,7 +375,11 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
     setState(() => _favorite = favorited);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(favorited ? '已加入收藏' : '已取消收藏'),
+        content: Text(
+          favorited
+              ? SdkworkI18n.t('productDetail.toast.favorited')
+              : SdkworkI18n.t('productDetail.toast.unfavorited'),
+        ),
         duration: const Duration(seconds: 1),
       ),
     );
@@ -355,14 +395,24 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('已选 $_quantity 件', style: Theme.of(sheetContext).textTheme.titleMedium),
+              Text(
+                SdkworkI18n.t(
+                  'productDetail.sku.selected',
+                  params: <String, String>{'count': '$_quantity'},
+                ),
+                style: Theme.of(sheetContext).textTheme.titleMedium,
+              ),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () {
                   Navigator.of(sheetContext).pop();
                   _confirm(buyNow);
                 },
-                child: Text(buyNow ? '立即购买' : '加入购物车'),
+                child: Text(
+                  buyNow
+                      ? SdkworkI18n.t('productDetail.actions.buyNow')
+                      : SdkworkI18n.t('productDetail.actions.addToCart'),
+                ),
               ),
             ],
           ),
@@ -378,7 +428,9 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
     }
     final sku = _skus.where((entry) => '${entry['id']}' == _selectedSkuId).firstOrNull;
     if (sku == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('请选择规格')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SdkworkI18n.t('productDetail.toast.selectSku'))),
+      );
       return;
     }
     setState(() => _busy = true);
@@ -396,14 +448,20 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
         // buyer is kept on the page rather than sent to a whole-cart checkout.
         if (cartItemId == null || cartItemId.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('已加入购物车，请在购物车中选择结算')),
+            SnackBar(
+              content: Text(
+                SdkworkI18n.t('productDetail.toast.addedPickCheckout'),
+              ),
+            ),
           );
         } else {
           Navigator.of(context).pushNamed('/checkout', arguments: cartItemId);
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已加入购物车')),
+          SnackBar(
+            content: Text(SdkworkI18n.t('productDetail.toast.addedToCart')),
+          ),
         );
       }
     } catch (cause) {
