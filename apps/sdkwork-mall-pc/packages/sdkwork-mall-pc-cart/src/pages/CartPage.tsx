@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Badge, Button, Checkbox, EmptyState, LoadingBlock, StatusNotice } from "@sdkwork/ui-pc-react";
 import { formatSdkworkPaymentCurrencyCny as formatSdkworkCommerceCurrencyCny } from "@sdkwork/payment-service";
@@ -399,6 +399,7 @@ export function SdkworkMallCheckoutPage() {
   const [giftCardCode, setGiftCardCode] = useState("");
   const [giftCardApplied, setGiftCardApplied] = useState<string | null>(null);
   const [giftCardError, setGiftCardError] = useState<string | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
 
   // "立即购买" scopes the checkout to the line it just created; the cart entry
   // link passes no `items`, which keeps whole-cart checkout intact.
@@ -409,42 +410,34 @@ export function SdkworkMallCheckoutPage() {
     [rawCartItemIds],
   );
 
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      try {
-        const [checkoutContext, checkoutQuote] = await Promise.all([
-          loadMallCheckoutContext(),
-          createMallCheckoutQuote(cartItemIds),
-        ]);
-        if (!active) {
-          return;
-        }
-        setContext(checkoutContext);
-        setQuote(checkoutQuote);
-        const defaultAddress = checkoutContext.addresses.find((address) => address.isDefault)
-          ?? checkoutContext.addresses[0];
-        if (defaultAddress) {
-          setSelectedAddressId(defaultAddress.id);
-        }
-        if (checkoutContext.paymentMethods[0]) {
-          setSelectedPaymentMethodCode(checkoutContext.paymentMethods[0].code);
-        }
-      } catch (cause: unknown) {
-        if (active) {
-          setMessage(cause instanceof Error ? cause.message : "结算信息加载失败");
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+  const loadCheckout = useCallback(async () => {
+    setLoading(true);
+    setQuoteError(null);
+    try {
+      const [checkoutContext, checkoutQuote] = await Promise.all([
+        loadMallCheckoutContext(),
+        createMallCheckoutQuote(cartItemIds),
+      ]);
+      setContext(checkoutContext);
+      setQuote(checkoutQuote);
+      const defaultAddress = checkoutContext.addresses.find((address) => address.isDefault)
+        ?? checkoutContext.addresses[0];
+      if (defaultAddress) {
+        setSelectedAddressId(defaultAddress.id);
       }
+      if (checkoutContext.paymentMethods[0]) {
+        setSelectedPaymentMethodCode(checkoutContext.paymentMethods[0].code);
+      }
+    } catch (cause: unknown) {
+      setQuoteError(cause instanceof Error ? cause.message : "结算信息加载失败");
+    } finally {
+      setLoading(false);
     }
-    void load();
-    return () => {
-      active = false;
-    };
   }, [cartItemIds]);
+
+  useEffect(() => {
+    void loadCheckout();
+  }, [loadCheckout]);
 
   const checkoutItems = useMemo(() => {
     if (!context) {
@@ -566,6 +559,14 @@ export function SdkworkMallCheckoutPage() {
       <h1>确认订单</h1>
       {cartItemIds.length > 0 ? (
         <p>已选择 {checkoutItems.length} 件购物车商品参与结算</p>
+      ) : null}
+      {quoteError ? (
+        <StatusNotice tone="danger">
+          {quoteError}{" "}
+          <Button onClick={() => void loadCheckout()} size="sm" type="button" variant="outline">
+            重试
+          </Button>
+        </StatusNotice>
       ) : null}
 
       {/* 按店拆单的商品清单 */}

@@ -88,6 +88,15 @@ function SdkworkOrderDetailPageContent() {
     window.location.assign(`/payment/result?${query.toString()}`);
   }
 
+  async function retryLoad() {
+    setError(null);
+    try {
+      await reload();
+    } catch (cause: unknown) {
+      setError(cause instanceof Error ? cause.message : "订单加载失败");
+    }
+  }
+
   if (loading) {
     return <LoadingBlock label="加载订单详情..." />;
   }
@@ -97,9 +106,12 @@ function SdkworkOrderDetailPageContent() {
       <div className="sdkwork-mall-pc-order-detail">
         <EmptyState
           description={error ?? "订单不存在或已被删除"}
-          title="订单详情不可用"
+          title={error ? "订单详情加载失败" : "订单详情不可用"}
         />
         <div className="sdkwork-mall-pc-payment-actions">
+          {error ? (
+            <Button onClick={() => void retryLoad()} type="button" variant="outline">重试</Button>
+          ) : null}
           <Link to="/buyer/orders">
             <Button type="button" variant="ghost">返回订单列表</Button>
           </Link>

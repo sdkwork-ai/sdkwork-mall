@@ -1,5 +1,5 @@
 import { formatMoney } from "@sdkwork/utils/money";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ChevronRight,
@@ -679,6 +679,7 @@ export function SdkworkMallProductDetailPage() {
   const [selectedSkuId, setSelectedSkuId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [favorited, setFavorited] = useState(false);
@@ -687,33 +688,70 @@ export function SdkworkMallProductDetailPage() {
   const [recommendations, setRecommendations] = useState<Awaited<ReturnType<typeof searchMallProducts>>["items"]>([]);
   const [sameShopProducts, setSameShopProducts] = useState<Awaited<ReturnType<typeof searchMallProducts>>["items"]>([]);
 
+  const loadDetail = useCallback(async () => {
+    const data = await loadMallProductDetail(productId);
+    setDetail(data);
+    setSelectedSkuId(data.skus[0]?.id ?? "");
+    setFavorited(isMallFavorite(data.id));
+    recordMallFootprint({ id: data.id, title: data.title });
+    void searchMallProducts({
+      categoryId: undefined,
+      pageSize: 8,
+      query: data.title.split(/\s+/)[0] || undefined,
+    }).then((result) => {
+      setRecommendations(result.items.filter((item) => item.id !== data.id).slice(0, 6));
+    });
+    if (data.shopId) {
+      void searchMallProducts({
+        categoryId: undefined,
+        pageSize: 8,
+        shopId: data.shopId,
+      }).then((result) => {
+        setSameShopProducts(result.items.filter((item) => item.id !== data.id).slice(0, 6));
+      });
+    }
+  }, [productId]);
+
   useEffect(() => {
-    loadMallProductDetail(productId)
-      .then((data) => {
-        setDetail(data);
-        setSelectedSkuId(data.skus[0]?.id ?? "");
-        setFavorited(isMallFavorite(data.id));
-        recordMallFootprint({ id: data.id, title: data.title });
-        void searchMallProducts({
-          categoryId: undefined,
-          pageSize: 8,
-          query: data.title.split(/\s+/)[0] || undefined,
-        }).then((result) => {
-          setRecommendations(result.items.filter((item) => item.id !== data.id).slice(0, 6));
-        });
-        if (data.shopId) {
-          void searchMallProducts({
-            categoryId: undefined,
-            pageSize: 8,
-            shopId: data.shopId,
-          }).then((result) => {
-            setSameShopProducts(result.items.filter((item) => item.id !== data.id).slice(0, 6));
-          });
+    let active = true;
+    setLoading(true);
+    setLoadError(null);
+    loadDetail()
+      .catch((cause: unknown) => {
+        if (active) {
+          setLoadError(cause instanceof Error ? cause.message : "商品详情加载失败");
         }
       })
-      .finally(() => setLoading(false));
-    void loadMallProductCoupons().then(setCoupons);
-  }, [productId]);
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+    void loadMallProductCoupons()
+      .then((rows) => {
+        if (active) {
+          setCoupons(rows);
+        }
+      })
+      .catch(() => {
+        // 优惠券行为可选增强，失败时静默隐藏。
+      });
+    return () => {
+      active = false;
+    };
+  }, [loadDetail]);
+
+  const retryLoadDetail = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    loadDetail()
+      .catch((cause: unknown) => {
+        setLoadError(cause instanceof Error ? cause.message : "商品详情加载失败");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [loadDetail]);
 
   useEffect(() => {
     // SKU 切换时联动主图：若 SKU 有图片则切换到对应图片，否则保持第一张。
@@ -730,6 +768,15 @@ export function SdkworkMallProductDetailPage() {
   }
 
   if (!detail) {
+    if (loadError) {
+      return (
+        <EmptyState
+          actions={<Button onClick={retryLoadDetail} type="button" variant="outline">重试</Button>}
+          description={loadError}
+          title="商品详情加载失败"
+        />
+      );
+    }
     return <EmptyState description="商品可能已下架" title="商品不存在" />;
   }
 

@@ -297,6 +297,16 @@ three block submission when the authoritative quote failed. A rejected coupon or
 an unavailable wallet/points hold is reported as a warning instead of throwing
 after the order already exists.
 
+### 6.1.6 Recoverable failures (PC storefront)
+
+The admin packages already used `BusinessStatePanel` with `onRetry`, but the
+storefront console did not: home, product detail and order detail reported a
+load failure as a bare empty state with no retry, and product detail additionally
+labelled every transport failure 商品不存在 while leaving the rejected load
+promise unhandled. All four storefront surfaces now distinguish "load failed"
+(title + message + 重试) from "not found", and the PC architecture test fails when
+a page that can say 加载失败 does not offer a retry.
+
 ### 6.2 Per-package typecheck
 
 Every active client package on both browser roots carries its own `tsconfig.json`, so

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Clock, Flame, History, Sparkles, Store, Tag } from "lucide-react";
-import { EmptyState, LoadingBlock } from "@sdkwork/ui-pc-react";
+import { Button, EmptyState, LoadingBlock } from "@sdkwork/ui-pc-react";
 import {
   listEnabledMallCmsBanners,
   listEnabledMallCmsFloors,
@@ -309,28 +309,21 @@ export function SdkworkMallHomePage() {
     };
   }, []);
 
-  useEffect(() => {
-    let active = true;
-    loadMallHomeSnapshot()
-      .then((data) => {
-        if (active) {
-          setSnapshot(data);
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active) {
-          setError(cause instanceof Error ? cause.message : "首页加载失败");
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
-    return () => {
-      active = false;
-    };
+  const loadHomeSnapshot = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setSnapshot(await loadMallHomeSnapshot());
+    } catch (cause: unknown) {
+      setError(cause instanceof Error ? cause.message : "首页加载失败");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadHomeSnapshot();
+  }, [loadHomeSnapshot]);
 
   useEffect(() => {
     let active = true;
@@ -371,7 +364,13 @@ export function SdkworkMallHomePage() {
   }
 
   if (error) {
-    return <EmptyState description={error} title="首页暂不可用" />;
+    return (
+      <EmptyState
+        actions={<Button onClick={() => void loadHomeSnapshot()} type="button" variant="outline">重试</Button>}
+        description={error}
+        title="首页暂不可用"
+      />
+    );
   }
 
   return (

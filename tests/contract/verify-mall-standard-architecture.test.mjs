@@ -995,3 +995,34 @@ function collectPcPageModules() {
   }
   return modules;
 }
+
+test("mall PC pages that report a load failure offer a retry", () => {
+  // A storefront page that only prints "加载失败" (or a bare empty state) leaves
+  // the buyer with no recovery path other than a full reload. Every page
+  // component that can report a load failure must also carry a retry action.
+  const violations = [];
+  for (const entry of readdirSync(mallPackagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const pagesDirectory = path.join(mallPackagesRoot, entry.name, "src", "pages");
+    if (!existsSync(pagesDirectory)) {
+      continue;
+    }
+    for (const file of readdirSync(pagesDirectory)) {
+      if (!file.endsWith(".tsx")) {
+        continue;
+      }
+      const source = readFileSync(path.join(pagesDirectory, file), "utf8");
+      if (source.includes("加载失败") && !source.includes("重试")) {
+        violations.push(`${entry.name}/${file}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    `Pages reporting a load failure must expose a retry:\n${violations.join("\n")}`,
+  );
+});
