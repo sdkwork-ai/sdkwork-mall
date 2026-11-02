@@ -95,7 +95,7 @@ export function SdkworkPartnerStatusHero({
               {copy.program.customerRevenue}
             </dt>
             <dd className="text-sm font-semibold text-[var(--sdk-color-text-primary)]">
-              {intl.formatPercent(summary.maxCustomerRevenue)}
+              {intl.formatPercent(summary.maxCustomerRevenueRatio)}
             </dd>
           </div>
           <div className="rounded-[var(--sdk-radius-control)] bg-[var(--sdk-color-surface-panel)] px-3 py-2">

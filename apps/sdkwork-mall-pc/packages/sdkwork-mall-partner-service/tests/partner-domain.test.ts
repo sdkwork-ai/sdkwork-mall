@@ -178,7 +178,7 @@ describe("partner program helpers", () => {
   it("formats ratios and composes invite links", () => {
     expect(formatSdkworkPartnerPercent("20.00", "en-US")).toBe("20%");
     expect(buildSdkworkPartnerInviteLink("https://mall.example.com/", "ABC 123")).toBe(
-      "https://mall.example.com/?invite=ABC%20123",
+      "https://mall.example.com?invite=ABC%20123",
     );
     expect(buildSdkworkPartnerInviteLink("", "ABC")).toBe("");
   });

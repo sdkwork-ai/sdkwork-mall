@@ -45,6 +45,7 @@ const List<SdkworkMallCapabilityRoute> sdkworkMallCapabilityRoutes =
   SdkworkMallCapabilityRoute(routeId: 'buyer.mall.wallet', path: '/wallet'),
   SdkworkMallCapabilityRoute(routeId: 'buyer.mall.points', path: '/points'),
   SdkworkMallCapabilityRoute(routeId: 'buyer.mall.membership', path: '/membership'),
+  SdkworkMallCapabilityRoute(routeId: 'buyer.mall.distribution', path: '/distribution'),
   SdkworkMallCapabilityRoute(routeId: 'buyer.mall.invoices', path: '/invoices'),
   SdkworkMallCapabilityRoute(routeId: 'buyer.mall.im.chats', path: '/chats'),
   SdkworkMallCapabilityRoute(routeId: 'buyer.mall.im.chat', path: '/chat'),

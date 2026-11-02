@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTranslation, type TFunction } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { Copy, Share2, ShieldCheck, ShieldX, Users, Wallet } from "lucide-react";
 
 import {
@@ -112,7 +112,7 @@ export function SdkworkMallH5PartnerCenterPage({
   );
 }
 
-type Translate = TFunction;
+type Translate = ReturnType<typeof useTranslation>["t"];
 
 function StatusHero({
   isApplyAvailable,
@@ -139,7 +139,7 @@ function StatusHero({
             {t("partner.summary.levelCount", { count: summary.levelCount })}
           </span>
           <span className="sdk-h5-chip">
-            {t("partner.program.customerRevenue")} {formatSdkworkPartnerPercent(summary.maxCustomerRevenue, "zh-CN")}
+            {t("partner.program.customerRevenue")} {formatSdkworkPartnerPercent(summary.maxCustomerRevenueRatio, "zh-CN")}
           </span>
           <span className="sdk-h5-chip">
             {formatSdkworkPartnerMoney(summary.minJoinFee, program.rules.currency, "zh-CN")}

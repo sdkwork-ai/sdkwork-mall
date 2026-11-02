@@ -4,9 +4,9 @@ import {
 } from "@sdkwork/mall-partner-service";
 import type {
   SdkworkPartnerCenterPort,
+  SdkworkPartnerJoinWireClient,
   SdkworkPartnerService,
 } from "@sdkwork/mall-partner-service";
-import type { SdkworkAppClient } from "@sdkwork/partner-app-sdk";
 
 export const SDKWORK_MALL_H5_PARTNER_SDK_FAMILY = "sdkwork-partner-app-sdk" as const;
 
@@ -26,7 +26,7 @@ export function getSdkworkH5PartnerService(): SdkworkPartnerService {
 }
 
 export interface CreateSdkworkH5PartnerServiceInput {
-  readonly partnerAppClient: Pick<SdkworkAppClient, "join">;
+  readonly partnerAppClient: SdkworkPartnerJoinWireClient;
   readonly centerPort?: SdkworkPartnerCenterPort | null;
 }
 

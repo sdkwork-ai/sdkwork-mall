@@ -9,6 +9,7 @@ Specs: ARCHITECTURE_DECISION_SPEC.md, DOCUMENTATION_SPEC.md
 
 - Add `TECH-<topic>.md` shards in this directory when the architecture grows beyond one reviewable screen.
 - [TECH-CLIENT-CAPABILITY-PARITY.md](TECH-CLIENT-CAPABILITY-PARITY.md) — cross-client capability contract for PC / H5 / mini program / Flutter.
+- [TECH-DISTRIBUTION-CAPABILITY.md](TECH-DISTRIBUTION-CAPABILITY.md) — distribution (分销) layering, partner-center extension port, and the sdkwork-partner / sdkwork-order module assessment.
 - [TECH-I18N-READINESS.md](TECH-I18N-READINESS.md) — copy inventory, key strategy, and staged i18n migration path.
 
 ## 1. Architecture Overview

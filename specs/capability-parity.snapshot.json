@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "capabilityCount": 36,
+  "capabilityCount": 37,
   "platforms": [
     "pc",
     "h5",
@@ -78,6 +78,22 @@
         "flutter": "ok(tab)"
       },
       "id": "buyer.dashboard",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.distribution",
       "requiredOn": [
         "pc",
         "h5",

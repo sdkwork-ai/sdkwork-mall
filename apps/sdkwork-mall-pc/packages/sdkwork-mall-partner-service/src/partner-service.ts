@@ -2,12 +2,14 @@ import {
   readSdkworkPartnerErrorStatus,
 } from "./partner-sdk-port";
 import type {
+  SdkworkPartnerCenterPort,
+  SdkworkPartnerJoinPort,
+} from "./partner-sdk-port";
+import type {
   SdkworkPartnerApplication,
   SdkworkPartnerApplicationDraft,
   SdkworkPartnerCenterAvailability,
-  SdkworkPartnerCenterPort,
   SdkworkPartnerInviteCodePreview,
-  SdkworkPartnerJoinPort,
   SdkworkPartnerListQuery,
   SdkworkPartnerPage,
   SdkworkPartnerProgram,

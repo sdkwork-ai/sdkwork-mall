@@ -45,6 +45,7 @@ const activeMallPackages = [
   "sdkwork-mall-pc-membership",
   "sdkwork-mall-pc-invoice",
   "sdkwork-mall-pc-points",
+  "sdkwork-mall-pc-partner",
   "sdkwork-mall-pc-merchant",
   "sdkwork-mall-pc-admin-core",
   "sdkwork-mall-pc-admin-shell",
@@ -78,6 +79,7 @@ const MALL_DOMAIN_MIGRATED_PACKAGES = [
   "sdkwork-mall-pc-coupon",
   "sdkwork-mall-pc-payment",
   "sdkwork-mall-pc-points",
+  "sdkwork-mall-pc-partner",
   "sdkwork-mall-pc-offer",
   "sdkwork-mall-pc-subscription",
   "sdkwork-mall-pc-membership-purchase",
@@ -125,6 +127,7 @@ const buyerPageSubpathExports = [
   ["sdkwork-mall-pc-membership", "membership-page"],
   ["sdkwork-mall-pc-invoice", "invoice-page"],
   ["sdkwork-mall-pc-points", "points-page"],
+  ["sdkwork-mall-pc-partner", "partner-page"],
 ];
 
 const routePageSubpathExports = [

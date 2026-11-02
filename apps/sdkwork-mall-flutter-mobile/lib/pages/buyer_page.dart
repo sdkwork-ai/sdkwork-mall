@@ -225,6 +225,7 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
           child: Column(
             children: <ListTile>[
               _menuTile(Icons.person_outline, 'buyerHub.account.profile', '/profile'),
+              _menuTile(Icons.share_outlined, 'buyerHub.account.partner', '/distribution'),
               _menuTile(Icons.rate_review_outlined, 'buyerHub.account.reviews', '/reviews'),
               _menuTile(Icons.card_giftcard_outlined, 'buyerHub.account.giftCards', '/gift-cards'),
               _menuTile(Icons.lock_outline, 'buyerHub.account.security', '/security'),

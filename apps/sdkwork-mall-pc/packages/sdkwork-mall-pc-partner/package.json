@@ -51,11 +51,9 @@
   },
   "dependencies": {
     "@sdkwork/mall-partner-service": "workspace:*",
-    "@sdkwork/mall-pc-core": "workspace:*",
-    "@sdkwork/partner-app-sdk": "workspace:*"
+    "@sdkwork/mall-pc-core": "workspace:*"
   },
   "devDependencies": {
-    "@testing-library/react": "catalog:",
     "typescript": "catalog:"
   },
   "sdkwork": {

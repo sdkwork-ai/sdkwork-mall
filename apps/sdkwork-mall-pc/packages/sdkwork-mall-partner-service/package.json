@@ -18,9 +18,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@sdkwork/partner-app-sdk": "workspace:*"
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "catalog:"
   },

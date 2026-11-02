@@ -6,7 +6,7 @@
     <view class="mp-muted">{{labels.loading}}</view>
   </view>
 
-  <view wx:elif="{{error}}" class="mp-card">
+  <view wx:elif="{{error}}" class="mp-card mp-error">
     <view class="mp-card-title">{{labels.pageTitle}}</view>
     <view class="mp-muted partner-error">{{error}}</view>
     <button class="mp-btn mp-btn-primary" bindtap="retry">{{labels.retry}}</button>

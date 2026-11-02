@@ -1,6 +1,5 @@
 import {
   resolveSdkworkPartnerMembership,
-  type SdkworkPartnerMembership,
 } from "./partner-domain";
 import { readSdkworkPartnerErrorMessage } from "./partner-sdk-port";
 import type { SdkworkPartnerService } from "./partner-service";
@@ -9,6 +8,7 @@ import type {
   SdkworkPartnerApplicationDraft,
   SdkworkPartnerCenterAvailability,
   SdkworkPartnerInviteCodePreview,
+  SdkworkPartnerMembership,
   SdkworkPartnerProgram,
 } from "./partner-types";
 

@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createSdkworkPartnerService } from "../src/partner-service";
+import type { SdkworkPartnerJoinPort } from "../src/partner-sdk-port";
 import type {
   SdkworkPartnerApplication,
   SdkworkPartnerCenterSnapshot,
-  SdkworkPartnerJoinPort,
   SdkworkPartnerProgram,
 } from "../src/partner-types";
 

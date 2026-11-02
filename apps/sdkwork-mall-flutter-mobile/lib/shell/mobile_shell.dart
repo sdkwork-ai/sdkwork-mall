@@ -22,6 +22,7 @@ import '../pages/messages_page.dart';
 import '../pages/order_detail_page.dart';
 import '../pages/orders_page.dart';
 import '../pages/payment_result_page.dart';
+import '../pages/partner_page.dart';
 import '../pages/product_page.dart';
 import '../pages/reviews_page.dart';
 import '../pages/search_page.dart';
@@ -69,6 +70,7 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() {
       '/wallet': (context) => const SdkworkWalletPage(),
       '/points': (context) => const SdkworkPointsPage(),
       '/membership': (context) => const SdkworkMembershipPage(),
+      '/distribution': (context) => const SdkworkPartnerPage(),
       '/invoices': (context) => const SdkworkInvoicesPage(),
       '/settings': (context) => const SdkworkSettingsPage(),
       '/shop': (context) => SdkworkShopPage(

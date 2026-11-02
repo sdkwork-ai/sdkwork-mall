@@ -454,6 +454,26 @@
       }
     },
     {
+      "id": "buyer.distribution",
+      "title": "分销中心",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.distribution",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.distribution" },
+        "h5": { "routeId": "buyer.mall.distribution" },
+        "miniProgram": { "page": "pages/partner/index" },
+        "flutter": { "route": "/distribution" }
+      },
+      "navigationEvidence": [
+        { "platform": "pc", "file": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx", "contains": "/buyer/distribution" },
+        { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/distribution" },
+        { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts", "contains": "buyer.mall.distribution" },
+        { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/distribution" }
+      ],
+      "notes": "Partner join, application tracking, invite-code validation and the level catalogue are live on the sdkwork-partner app API. Team, customer, commission and withdrawal projections render from the optional partner-center port; until that app-api read model lands every root shows the same explicit pending notice instead of fabricated data."
+    },
+    {
       "id": "buyer.invoices",
       "title": "发票",
       "surface": "buyer",

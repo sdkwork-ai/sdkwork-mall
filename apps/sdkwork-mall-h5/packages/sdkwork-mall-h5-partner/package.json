@@ -36,7 +36,6 @@
   "dependencies": {
     "@sdkwork/mall-h5-core": "workspace:*",
     "@sdkwork/mall-partner-service": "workspace:*",
-    "@sdkwork/partner-app-sdk": "workspace:*",
     "lucide-react": "catalog:"
   },
   "peerDependencies": {

@@ -29,7 +29,10 @@ Architecture notes, runbooks, and developer guides for the mall application repo
   (PC/H5 via `drive-upload-image-core`, MP via the four-hop service + pure-TS sha256,
   Flutter via `crypto` + `transport.rawPut`).
 - Buyer engagement: favorites, footprint, wallet, points, membership, coupons, invoices,
-  settings; IM chats / notices on H5, MP, and Flutter.
+  settings, distribution centre (join + invite-code validation; team/commission projections
+  pending the partner app-api read model, see
+  [TECH-DISTRIBUTION-CAPABILITY.md](architecture/tech/TECH-DISTRIBUTION-CAPABILITY.md));
+  IM chats / notices on H5, MP, and Flutter.
 - Messages center: order + after-sales progress feed (H5, MP, Flutter, PC).
 
 ## Local Development

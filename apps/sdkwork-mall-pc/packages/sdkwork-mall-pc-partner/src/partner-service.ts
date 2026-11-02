@@ -1,9 +1,9 @@
 import { createSdkworkPartnerJoinPort, createSdkworkPartnerService } from "@sdkwork/mall-partner-service";
 import type {
   SdkworkPartnerCenterPort,
+  SdkworkPartnerJoinWireClient,
   SdkworkPartnerService,
 } from "@sdkwork/mall-partner-service";
-import type { SdkworkAppClient } from "@sdkwork/partner-app-sdk";
 
 export const SDKWORK_MALL_PARTNER_SDK_FAMILY = "sdkwork-partner-app-sdk" as const;
 
@@ -25,14 +25,14 @@ export function getSdkworkPartnerService(): SdkworkPartnerService {
 
 export interface CreateSdkworkMallPartnerServiceInput {
   /**
-   * Composed partner app client. Only the `join` namespace is required; the
-   * type stays structural so a narrower mock is valid in tests.
+   * Composed partner app client, structurally typed. The bootstrap owns the
+   * generated SDK import; feature packages never import a business SDK.
    */
-  readonly partnerAppClient: Pick<SdkworkAppClient, "join">;
+  readonly partnerAppClient: SdkworkPartnerJoinWireClient;
   readonly centerPort?: SdkworkPartnerCenterPort | null;
 }
 
-/** Composes the mall partner service over the composed partner app SDK. */
+/** Composes the mall partner service over the composed partner app client. */
 export function createSdkworkMallPartnerService(
   input: CreateSdkworkMallPartnerServiceInput,
 ): SdkworkPartnerService {

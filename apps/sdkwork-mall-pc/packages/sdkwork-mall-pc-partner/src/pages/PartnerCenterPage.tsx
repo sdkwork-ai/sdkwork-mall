@@ -1,21 +1,21 @@
 import { LoadingBlock, StatusNotice } from "@sdkwork/ui-pc-react";
 
-import type { SdkworkPartnerMessagesOverrides } from "./partner-copy.ts";
-import type { SdkworkPartnerController } from "./partner-controller.ts";
+import type { SdkworkPartnerMessagesOverrides } from "../partner-copy.ts";
+import type { SdkworkPartnerController } from "../partner-controller.ts";
 import {
   useSdkworkPartnerController,
   useSdkworkPartnerControllerState,
-} from "./partner-controller.ts";
+} from "../partner-controller.ts";
 import {
   SdkworkPartnerIntlProvider,
   useSdkworkPartnerIntl,
-} from "./partner-intl.tsx";
-import { SdkworkPartnerApplicationsList } from "./components/partner-applications-list.tsx";
-import { SdkworkPartnerApplyForm } from "./components/partner-apply-form.tsx";
-import { SdkworkPartnerCenterSection } from "./components/partner-center-section.tsx";
-import { SdkworkPartnerInviteCard } from "./components/partner-invite-card.tsx";
-import { SdkworkPartnerProgramGrid } from "./components/partner-program-grid.tsx";
-import { SdkworkPartnerStatusHero } from "./components/partner-status-hero.tsx";
+} from "../partner-intl.tsx";
+import { SdkworkPartnerApplicationsList } from "../components/partner-applications-list.tsx";
+import { SdkworkPartnerApplyForm } from "../components/partner-apply-form.tsx";
+import { SdkworkPartnerCenterSection } from "../components/partner-center-section.tsx";
+import { SdkworkPartnerInviteCard } from "../components/partner-invite-card.tsx";
+import { SdkworkPartnerProgramGrid } from "../components/partner-program-grid.tsx";
+import { SdkworkPartnerStatusHero } from "../components/partner-status-hero.tsx";
 
 export interface SdkworkMallPartnerCenterPageProps {
   readonly controller?: SdkworkPartnerController;

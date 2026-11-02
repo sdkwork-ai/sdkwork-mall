@@ -888,6 +888,15 @@ importers:
         specifier: workspace:*
         version: link:../../../../sdkwork-utils/packages/sdkwork-utils-typescript
 
+  ../sdkwork-partner/sdks/sdkwork-partner-app-sdk/sdkwork-partner-app-sdk-typescript:
+    dependencies:
+      '@sdkwork/sdk-common':
+        specifier: workspace:*
+        version: link:../../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript
+      '@sdkwork/utils':
+        specifier: workspace:*
+        version: link:../../../../sdkwork-utils/packages/sdkwork-utils-typescript
+
   ../sdkwork-payment/apps/sdkwork-payment-common/packages/sdkwork-payment-contracts: {}
 
   ../sdkwork-payment/apps/sdkwork-payment-common/packages/sdkwork-payment-sdk-ports: {}
@@ -1255,12 +1264,18 @@ importers:
       '@sdkwork/mall-h5-order':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-h5-order
+      '@sdkwork/mall-h5-partner':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-h5-partner
       '@sdkwork/mall-h5-shell':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-h5-shell
       '@sdkwork/mall-h5-shop':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-h5-shop
+      '@sdkwork/mall-partner-service':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-pc/packages/sdkwork-mall-partner-service
       '@sdkwork/membership-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-membership/sdks/sdkwork-membership-app-sdk/sdkwork-membership-app-sdk-typescript
@@ -1273,6 +1288,9 @@ importers:
       '@sdkwork/order-service':
         specifier: workspace:*
         version: link:../../../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-service
+      '@sdkwork/partner-app-sdk':
+        specifier: workspace:*
+        version: link:../../../sdkwork-partner/sdks/sdkwork-partner-app-sdk/sdkwork-partner-app-sdk-typescript
       '@sdkwork/payment-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-payment/sdks/sdkwork-payment-app-sdk/sdkwork-payment-app-sdk-typescript
@@ -1468,6 +1486,22 @@ importers:
         specifier: workspace:*
         version: link:../../../../../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-service
 
+  apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-partner:
+    dependencies:
+      '@sdkwork/mall-h5-core':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-h5-core
+      '@sdkwork/mall-partner-service':
+        specifier: workspace:*
+        version: link:../../../sdkwork-mall-pc/packages/sdkwork-mall-partner-service
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.42.0(react@19.2.8)
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
   apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-shell:
     dependencies:
       '@sdkwork/mall-h5-commons':
@@ -1551,6 +1585,9 @@ importers:
       '@sdkwork/mall-commerce-service':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-commerce-service
+      '@sdkwork/mall-partner-service':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-partner-service
       '@sdkwork/mall-pc-activity':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-activity
@@ -1632,6 +1669,9 @@ importers:
       '@sdkwork/mall-pc-order':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-order
+      '@sdkwork/mall-pc-partner':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-pc-partner
       '@sdkwork/mall-pc-points':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-pc-points
@@ -1662,6 +1702,9 @@ importers:
       '@sdkwork/order-service':
         specifier: workspace:*
         version: link:../../../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-service
+      '@sdkwork/partner-app-sdk':
+        specifier: workspace:*
+        version: link:../../../sdkwork-partner/sdks/sdkwork-partner-app-sdk/sdkwork-partner-app-sdk-typescript
       '@sdkwork/payment-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-payment/sdks/sdkwork-payment-app-sdk/sdkwork-payment-app-sdk-typescript
@@ -1747,6 +1790,12 @@ importers:
       '@sdkwork/mall-commerce-sdk-ports':
         specifier: workspace:*
         version: link:../sdkwork-mall-commerce-sdk-ports
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
+  apps/sdkwork-mall-pc/packages/sdkwork-mall-partner-service:
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -1950,6 +1999,19 @@ importers:
       '@sdkwork/mall-pc-core':
         specifier: workspace:*
         version: link:../sdkwork-mall-pc-core
+
+  apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-partner:
+    dependencies:
+      '@sdkwork/mall-partner-service':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-partner-service
+      '@sdkwork/mall-pc-core':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-pc-core
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-payment:
     dependencies:
