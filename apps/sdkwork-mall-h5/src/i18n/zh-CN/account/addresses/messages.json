@@ -1,0 +1,40 @@
+{
+  "addresses": {
+    "title": "地址管理",
+    "loading": "加载地址...",
+    "loadFailed": "地址加载失败",
+    "empty": "还没有收货地址",
+    "default": "默认",
+    "actions": {
+      "setDefault": "设为默认",
+      "edit": "编辑",
+      "delete": "删除"
+    },
+    "add": "新增收货地址",
+    "form": {
+      "createTitle": "新增地址",
+      "editTitle": "编辑地址",
+      "receiver": "收货人",
+      "phone": "联系电话",
+      "phonePlaceholder": "11 位手机号",
+      "province": "所在省",
+      "city": "所在市",
+      "provincePlaceholder": "请选择省份",
+      "cityPlaceholder": "请选择城市",
+      "provinceFirst": "请先选择省份",
+      "detail": "详细地址（区县 / 街道 / 门牌）",
+      "detailPlaceholder": "例如：西湖区文一路 96 号",
+      "save": "保存",
+      "cancel": "取消"
+    },
+    "errors": {
+      "required": "请填写收货人与联系电话",
+      "region": "请选择所在省 / 市",
+      "detail": "请填写区县、街道等详细地址",
+      "phone": "请填写 11 位大陆手机号",
+      "save": "保存失败",
+      "setDefault": "设置默认地址失败",
+      "delete": "删除失败"
+    }
+  }
+}

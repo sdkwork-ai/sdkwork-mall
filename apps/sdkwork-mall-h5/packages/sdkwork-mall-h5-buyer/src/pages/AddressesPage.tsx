@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   createMallH5Address,
@@ -31,13 +32,6 @@ interface AddressFormState {
 
 const EMPTY_REGION: MallH5RegionSelection = { province: "", city: "" };
 
-function regionLabel(selection: MallH5RegionSelection): string {
-  if (!selection.province) {
-    return "请选择省 / 市";
-  }
-  return selection.city ? `${selection.province} ${selection.city}` : selection.province;
-}
-
 function detectRegion(addressLine: string): MallH5RegionSelection {
   return parseMallH5RegionSelection(addressLine) ?? EMPTY_REGION;
 }
@@ -51,6 +45,7 @@ function stripRegionPrefix(addressLine: string): string {
 }
 
 export function SdkworkMallH5AddressesPage() {
+  const { t } = useTranslation();
   const [addresses, setAddresses] = useState<MallH5Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -73,7 +68,7 @@ export function SdkworkMallH5AddressesPage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setLoadError(cause instanceof Error ? cause.message : "地址加载失败");
+          setLoadError(cause instanceof Error ? cause.message : t("addresses.loadFailed"));
         }
       })
       .finally(() => {
@@ -84,19 +79,19 @@ export function SdkworkMallH5AddressesPage() {
     return () => {
       active = false;
     };
-  }, [reload]);
+  }, [reload, t]);
 
   const retryLoad = useCallback(() => {
     setLoading(true);
     setLoadError(null);
     reload()
       .catch((cause: unknown) => {
-        setLoadError(cause instanceof Error ? cause.message : "地址加载失败");
+        setLoadError(cause instanceof Error ? cause.message : t("addresses.loadFailed"));
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [reload]);
+  }, [reload, t]);
 
   const cityOptions = useMemo(() => {
     const region = MALL_H5_REGIONS.find((entry) => entry.name === form.region.province);
@@ -120,20 +115,20 @@ export function SdkworkMallH5AddressesPage() {
 
   async function handleSave() {
     if (!form.receiverName.trim() || !form.receiverPhone.trim()) {
-      setMessage("请填写收货人与联系电话");
+      setMessage(t("addresses.errors.required"));
       return;
     }
     if (!form.region.province || !form.region.city) {
-      setMessage("请选择所在省 / 市");
+      setMessage(t("addresses.errors.region"));
       return;
     }
     if (!form.addressDetail.trim()) {
-      setMessage("请填写区县、街道等详细地址");
+      setMessage(t("addresses.errors.detail"));
       return;
     }
     const phone = form.receiverPhone.trim();
     if (!/^1[3-9]\d{9}$/u.test(phone)) {
-      setMessage("请填写 11 位大陆手机号");
+      setMessage(t("addresses.errors.phone"));
       return;
     }
     setBusy(true);
@@ -152,7 +147,7 @@ export function SdkworkMallH5AddressesPage() {
       setEditing({ open: false });
       await reload();
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "保存失败");
+      setMessage(cause instanceof Error ? cause.message : t("addresses.errors.save"));
     } finally {
       setBusy(false);
     }
@@ -164,7 +159,7 @@ export function SdkworkMallH5AddressesPage() {
       await setDefaultMallH5Address(address.id);
       await reload();
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "设置默认地址失败");
+      setMessage(cause instanceof Error ? cause.message : t("addresses.errors.setDefault"));
     } finally {
       setBusy(false);
     }
@@ -176,47 +171,49 @@ export function SdkworkMallH5AddressesPage() {
       await deleteMallH5Address(address.id);
       await reload();
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "删除失败");
+      setMessage(cause instanceof Error ? cause.message : t("addresses.errors.delete"));
     } finally {
       setBusy(false);
     }
   }
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载地址...</div>;
+    return <div className="sdk-h5-page sdk-h5-loading">{t("addresses.loading")}</div>;
   }
 
   return (
     <div className="sdk-h5-page">
-          <h1 className="sdk-h5-visually-hidden">地址管理</h1>
+      <h1 className="sdk-h5-visually-hidden">{t("addresses.title")}</h1>
 
       {loadError ? <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoad} /> : null}
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-danger" role="alert">{message}</div> : null}
 
       {addresses.length === 0 ? (
-        <div className="sdk-h5-empty">还没有收货地址</div>
+        <div className="sdk-h5-empty">{t("addresses.empty")}</div>
       ) : (
         addresses.map((address) => (
           <div className="sdk-h5-section" key={address.id}>
             <div className="sdk-h5-address-line">
               <strong>
                 {address.receiverName} {address.receiverPhone}
-                {address.isDefault ? <em className="sdk-h5-address-default">默认</em> : null}
+                {address.isDefault ? (
+                  <em className="sdk-h5-address-default">{t("addresses.default")}</em>
+                ) : null}
               </strong>
               <div className="sdk-h5-muted">{address.addressLine}</div>
             </div>
             <div className="sdk-h5-action-row">
               {!address.isDefault ? (
                 <button className="sdk-h5-button sdk-h5-button-secondary" disabled={busy} onClick={() => void handleSetDefault(address)} type="button">
-                  设为默认
+                  {t("addresses.actions.setDefault")}
                 </button>
               ) : null}
               <button className="sdk-h5-button sdk-h5-button-ghost" disabled={busy} onClick={() => openEdit(address)} type="button">
-                编辑
+                {t("addresses.actions.edit")}
               </button>
               <button className="sdk-h5-button sdk-h5-button-ghost" disabled={busy} onClick={() => void handleDelete(address)} type="button">
-                删除
+                {t("addresses.actions.delete")}
               </button>
             </div>
           </div>
@@ -225,62 +222,66 @@ export function SdkworkMallH5AddressesPage() {
 
       {editing.open ? (
         <div className="sdk-h5-section">
-          <h2>{editing.address ? "编辑地址" : "新增地址"}</h2>
+          <h2>{editing.address ? t("addresses.form.editTitle") : t("addresses.form.createTitle")}</h2>
           <label className="sdk-h5-field">
-            收货人
+            {t("addresses.form.receiver")}
             <input
               onChange={(event) => setForm((current) => ({ ...current, receiverName: event.target.value }))}
               value={form.receiverName}
             />
           </label>
           <label className="sdk-h5-field">
-            联系电话
+            {t("addresses.form.phone")}
             <input
               inputMode="tel"
               maxLength={11}
               onChange={(event) => setForm((current) => ({ ...current, receiverPhone: event.target.value }))}
-              placeholder="11 位手机号"
+              placeholder={t("addresses.form.phonePlaceholder")}
               value={form.receiverPhone}
             />
           </label>
           <SdkworkMallH5SelectCell
-            label="所在省"
+            label={t("addresses.form.province")}
             onChange={(province) => {
               setForm((current) => ({ ...current, region: { city: "", province } }));
             }}
             options={MALL_H5_REGIONS.map((region) => ({ label: region.name, value: region.name }))}
-            placeholder="请选择省份"
+            placeholder={t("addresses.form.provincePlaceholder")}
             value={form.region.province}
           />
           <SdkworkMallH5SelectCell
-            label="所在市"
+            label={t("addresses.form.city")}
             onChange={(city) => {
               setForm((current) => ({ ...current, region: { ...current.region, city } }));
             }}
             options={cityOptions.map((city) => ({ label: city, value: city }))}
-            placeholder={cityOptions.length === 0 ? "请先选择省份" : "请选择城市"}
+            placeholder={
+              cityOptions.length === 0
+                ? t("addresses.form.provinceFirst")
+                : t("addresses.form.cityPlaceholder")
+            }
             value={form.region.city}
           />
           <label className="sdk-h5-field">
-            详细地址（区县 / 街道 / 门牌）
+            {t("addresses.form.detail")}
             <input
               onChange={(event) => setForm((current) => ({ ...current, addressDetail: event.target.value }))}
-              placeholder="例如：西湖区文一路 96 号"
+              placeholder={t("addresses.form.detailPlaceholder")}
               value={form.addressDetail}
             />
           </label>
           <div className="sdk-h5-action-row">
             <button className="sdk-h5-button sdk-h5-button-primary" disabled={busy} onClick={() => void handleSave()} type="button">
-              保存
+              {t("addresses.form.save")}
             </button>
             <button className="sdk-h5-button sdk-h5-button-ghost" disabled={busy} onClick={() => setEditing({ open: false })} type="button">
-              取消
+              {t("addresses.form.cancel")}
             </button>
           </div>
         </div>
       ) : (
         <button className="sdk-h5-button sdk-h5-button-primary sdk-h5-button-block" onClick={openCreate} type="button">
-          新增收货地址
+          {t("addresses.add")}
         </button>
       )}
     </div>

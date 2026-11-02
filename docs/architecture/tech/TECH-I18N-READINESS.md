@@ -13,11 +13,11 @@ long):
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
-| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support}` fragments | 58 | 385 | 390 (`regions.ts`) |
+| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support}` fragments | 57 | 366 | 390 (`regions.ts`) |
 | Mini program | none — literal zh-CN | 66 | 378 | 302 (province/city picker data) |
 | Flutter | none — literal zh-CN | 38 | 571 | 230 (province/city picker data) |
 
-2786 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2767 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -85,12 +85,13 @@ highest first, keeping the existing `sdkwork` prefix conventions.
 initialises i18next with `initReactI18next` and composes authored fragments from
 `i18n/<locale>/<domain>/<capability>/` (`zh-CN/checkout/payment-result`,
 `zh-CN/checkout/confirm-order`, `zh-CN/catalog/product-detail`,
-`zh-CN/storefront/home`, `zh-CN/account/buyer-hub` and `zh-CN/support/help`),
-imported once from `main.tsx`; the default locale is unchanged, so no visible copy
-moved. Six surfaces are migrated: payment-result, confirm-order, product detail,
-storefront home, the buyer hub (order shortcuts, asset rows, service grid, account
-rows, greeting/logout) and the help centre. H5's hard-coded count dropped
-536 → 384 and the baseline was refreshed.
+`zh-CN/storefront/home`, `zh-CN/account/buyer-hub`, `zh-CN/account/addresses` and
+`zh-CN/support/{help,after-sales}`), imported once from `main.tsx`; the default
+locale is unchanged, so no visible copy moved. Seven surfaces are migrated:
+payment-result, confirm-order, product detail, storefront home, the buyer hub, the
+address book (list actions, form labels, validation and failure messages) and the
+help centre. H5's hard-coded count dropped 536 → 366 and the baseline was
+refreshed.
 
 **S3 — locale switching and verification.**
 Locale store per root, `Accept-Language` propagation through the transport seams,
