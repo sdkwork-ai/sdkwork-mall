@@ -26,7 +26,7 @@ class SdkworkGiftCardsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('礼品卡与红包', style: theme.textTheme.titleSmall),
+                  Text('功能说明', style: theme.textTheme.titleSmall),
                   const SizedBox(height: 8),
                   Text(
                     '礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API。',
@@ -86,7 +86,11 @@ class _SdkworkProfilePageState extends State<SdkworkProfilePage> {
   @override
   void initState() {
     super.initState();
-    _reload();
+    if (SdkworkSession.instance.isLoggedIn) {
+      _reload();
+    } else {
+      _loading = false;
+    }
   }
 
   Future<void> _reload() async {
@@ -116,6 +120,12 @@ class _SdkworkProfilePageState extends State<SdkworkProfilePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!SdkworkSession.instance.isLoggedIn) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('个人资料')),
+        body: const SdkworkLoginRequired(message: '登录后查看个人资料'),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('个人资料')),
       body: _loading
@@ -194,7 +204,11 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
   @override
   void initState() {
     super.initState();
-    _reload();
+    if (SdkworkSession.instance.isLoggedIn) {
+      _reload();
+    } else {
+      _loading = false;
+    }
   }
 
   Future<void> _reload() async {
@@ -213,6 +227,12 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (!SdkworkSession.instance.isLoggedIn) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('账户与安全')),
+        body: const SdkworkLoginRequired(message: '登录后查看账户与安全信息'),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('账户与安全')),
       body: _loading
@@ -280,6 +300,35 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// 未登录占位：账户类页面统一给出登录提示与入口，而不是展示空字段。
+class SdkworkLoginRequired extends StatelessWidget {
+  const SdkworkLoginRequired({super.key, required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Icon(Icons.lock_outline, size: 40),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pushNamed('/login'),
+              child: const Text('立即登录'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

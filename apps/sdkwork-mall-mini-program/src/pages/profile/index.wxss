@@ -35,3 +35,9 @@
   text-align: center;
   margin-top: 8rpx;
 }
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 12rpx;
+}

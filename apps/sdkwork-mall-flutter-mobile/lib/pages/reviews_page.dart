@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../bootstrap/session.dart';
 import '../services/commerce.dart';
+import 'buyer_account_pages.dart';
 import 'widgets.dart';
 
 /// 我的评价：已完成订单为当前可评价范围（T1 评价合约落地前）。
@@ -20,7 +22,11 @@ class _SdkworkReviewsPageState extends State<SdkworkReviewsPage> {
   @override
   void initState() {
     super.initState();
-    _reload();
+    if (SdkworkSession.instance.isLoggedIn) {
+      _reload();
+    } else {
+      _loading = false;
+    }
   }
 
   Future<void> _reload() async {
@@ -54,6 +60,9 @@ class _SdkworkReviewsPageState extends State<SdkworkReviewsPage> {
   }
 
   Widget _buildBody(BuildContext context) {
+    if (!SdkworkSession.instance.isLoggedIn) {
+      return const SdkworkLoginRequired(message: '登录后查看我的评价');
+    }
     if (_loading) {
       return const SdkworkLoadingView(label: '加载评价...');
     }

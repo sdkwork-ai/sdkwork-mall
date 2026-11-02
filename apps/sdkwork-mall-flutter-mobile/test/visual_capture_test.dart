@@ -27,12 +27,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sdkwork_mall_flutter_mobile/bootstrap/environment.dart';
 import 'package:sdkwork_mall_flutter_mobile/bootstrap/session.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/after_sales_page.dart';
+import 'package:sdkwork_mall_flutter_mobile/pages/buyer_account_pages.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/buyer_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/cart_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/category_page.dart';
+import 'package:sdkwork_mall_flutter_mobile/pages/help_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/home_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/logistics_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/orders_page.dart';
+import 'package:sdkwork_mall_flutter_mobile/pages/reviews_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/services/commerce.dart';
 
 const _captureOn = bool.fromEnvironment('VISUAL_CAPTURE');
@@ -97,5 +100,11 @@ Future<void> main() async {
     await pumpAndCapture(const SdkworkOrdersPage(), 'orders.png');
     await pumpAndCapture(const SdkworkAfterSalesPage(), 'after-sales.png');
     await pumpAndCapture(const SdkworkLogisticsPage(orderId: 'order-1'), 'logistics.png');
+    // Buyer account surfaces added for cross-client capability parity.
+    await pumpAndCapture(const SdkworkHelpPage(), 'help.png');
+    await pumpAndCapture(const SdkworkReviewsPage(), 'reviews.png');
+    await pumpAndCapture(const SdkworkGiftCardsPage(), 'gift-cards.png');
+    await pumpAndCapture(const SdkworkProfilePage(), 'profile.png');
+    await pumpAndCapture(const SdkworkSecurityPage(), 'security.png');
   });
 }

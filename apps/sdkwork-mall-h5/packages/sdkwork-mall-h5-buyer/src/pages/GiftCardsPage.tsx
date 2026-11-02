@@ -8,7 +8,7 @@ export function SdkworkMallH5GiftCardsPage() {
 
       <section className="sdk-h5-section">
         <h2>
-          <Gift aria-hidden="true" size={18} /> 礼品卡与红包
+          <Gift aria-hidden="true" size={18} /> 功能说明
         </h2>
         <div className="sdk-h5-empty">礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API</div>
         <p className="sdk-h5-muted">

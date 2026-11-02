@@ -1,5 +1,6 @@
 import { errorMessage } from "../../types/common";
 import { getProfile, type MpProfile } from "../../services/profile-service";
+import { isLoggedIn } from "../../services/session";
 
 interface ProfileRow {
   label: string;
@@ -9,6 +10,7 @@ interface ProfileRow {
 interface ProfileData {
   error: string;
   loading: boolean;
+  loggedIn: boolean;
   rows: ProfileRow[];
 }
 
@@ -25,6 +27,7 @@ Page({
   data: {
     error: "",
     loading: true,
+    loggedIn: false,
     rows: [],
   } as ProfileData,
 
@@ -37,12 +40,24 @@ Page({
   },
 
   async load() {
+    if (!isLoggedIn()) {
+      this.setData({ error: "", loading: false, loggedIn: false, rows: [] });
+      return;
+    }
     try {
       const profile = await getProfile();
-      this.setData({ error: "", loading: false, rows: toRows(profile) });
+      this.setData({ error: "", loading: false, loggedIn: true, rows: toRows(profile) });
     } catch (cause: unknown) {
-      this.setData({ error: errorMessage(cause, "个人资料加载失败"), loading: false });
+      this.setData({
+        error: errorMessage(cause, "个人资料加载失败"),
+        loading: false,
+        loggedIn: true,
+      });
     }
+  },
+
+  goLogin() {
+    wx.navigateTo({ url: "/pages/login/index" });
   },
 
   goSecurity() {

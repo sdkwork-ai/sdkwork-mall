@@ -3,6 +3,7 @@ import {
   getSecuritySnapshot,
   type MpSecuritySnapshot,
 } from "../../services/profile-service";
+import { isLoggedIn } from "../../services/session";
 
 interface SecurityRow {
   label: string;
@@ -13,6 +14,7 @@ interface SecurityData {
   accountLabel: string;
   error: string;
   loading: boolean;
+  loggedIn: boolean;
   rows: SecurityRow[];
 }
 
@@ -28,6 +30,7 @@ Page({
     accountLabel: "",
     error: "",
     loading: true,
+    loggedIn: false,
     rows: [],
   } as SecurityData,
 
@@ -40,16 +43,31 @@ Page({
   },
 
   async load() {
+    if (!isLoggedIn()) {
+      this.setData({
+        accountLabel: "",
+        error: "",
+        loading: false,
+        loggedIn: false,
+        rows: [],
+      });
+      return;
+    }
     try {
       const snapshot = await getSecuritySnapshot();
       this.setData({
         accountLabel: snapshot.accountLabel,
         error: "",
         loading: false,
+        loggedIn: true,
         rows: toRows(snapshot),
       });
     } catch (cause: unknown) {
-      this.setData({ error: errorMessage(cause, "账户安全信息加载失败"), loading: false });
+      this.setData({
+        error: errorMessage(cause, "账户安全信息加载失败"),
+        loading: false,
+        loggedIn: true,
+      });
     }
   },
 

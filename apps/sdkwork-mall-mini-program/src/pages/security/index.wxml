@@ -2,38 +2,47 @@
   <view wx:if="{{loading}}" class="mp-loading">加载账户信息...</view>
 
   <block wx:if="{{!loading}}">
-    <view wx:if="{{error}}" class="mp-error">{{error}}</view>
-
-    <view class="mp-card">
-      <view class="mp-card-title">登录信息</view>
-      <view class="security-row" wx:for="{{rows}}" wx:key="label">
-        <text class="security-label">{{item.label}}</text>
-        <text class="security-value">{{item.value}}</text>
-      </view>
-    </view>
-
-    <view class="mp-card">
-      <view class="mp-card-title">安全设置</view>
-      <view class="security-row" bindtap="goLogin">
-        <text class="security-label">修改密码</text>
-        <text class="mp-muted">前往登录页重新认证 ></text>
-      </view>
-      <view class="security-row">
-        <text class="security-label">绑定手机</text>
-        <text class="mp-muted">由 IAM 认证路由提供</text>
-      </view>
-      <view class="security-row">
-        <text class="security-label">登录保护</text>
-        <text class="mp-muted">遵循平台安全策略</text>
-      </view>
-    </view>
-
-    <view class="mp-card">
-      <view class="mp-card-title">需要帮助？</view>
-      <view class="mp-muted security-note">发现异常登录请立即修改密码并联系平台客服。</view>
+    <view wx:if="{{!loggedIn}}" class="mp-card">
+      <view class="mp-empty">登录后查看账户与安全信息</view>
       <view class="security-actions">
-        <button class="mp-btn mp-btn-primary" bindtap="goLogin">重新登录</button>
+        <button class="mp-btn mp-btn-primary" bindtap="goLogin">立即登录</button>
       </view>
     </view>
+
+    <block wx:else>
+      <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+      <view class="mp-card">
+        <view class="mp-card-title">登录信息</view>
+        <view class="security-row" wx:for="{{rows}}" wx:key="label">
+          <text class="security-label">{{item.label}}</text>
+          <text class="security-value">{{item.value}}</text>
+        </view>
+      </view>
+
+      <view class="mp-card">
+        <view class="mp-card-title">安全设置</view>
+        <view class="security-row" bindtap="goLogin">
+          <text class="security-label">修改密码</text>
+          <text class="mp-muted">前往登录页重新认证 ></text>
+        </view>
+        <view class="security-row">
+          <text class="security-label">绑定手机</text>
+          <text class="mp-muted">由 IAM 认证路由提供</text>
+        </view>
+        <view class="security-row">
+          <text class="security-label">登录保护</text>
+          <text class="mp-muted">遵循平台安全策略</text>
+        </view>
+      </view>
+
+      <view class="mp-card">
+        <view class="mp-card-title">需要帮助？</view>
+        <view class="mp-muted security-note">发现异常登录请立即修改密码并联系平台客服。</view>
+        <view class="security-actions">
+          <button class="mp-btn mp-btn-primary" bindtap="goLogin">重新登录</button>
+        </view>
+      </view>
+    </block>
   </block>
 </view>
