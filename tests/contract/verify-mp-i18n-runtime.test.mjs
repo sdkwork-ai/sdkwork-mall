@@ -27,6 +27,7 @@ test("the runtime flattens authored fragments and exposes lookups", () => {
   assert.match(runtime, /from "\.\/zh-CN\/support\/help\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/support\/after-sales\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/order\/list\/messages"/u);
+  assert.match(runtime, /from "\.\/zh-CN\/checkout\/payment-result\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/storefront\/home\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/checkout\/confirm-order\/messages"/u);
   assert.match(runtime, /export function t\(/u);
@@ -44,6 +45,9 @@ test("the runtime flattens authored fragments and exposes lookups", () => {
 
   const orderListFragment = read(`${appRoot}/src/i18n/zh-CN/order/list/messages.js`);
   assert.match(orderListFragment, /orderList:/u);
+
+  const paymentResultFragment = read(`${appRoot}/src/i18n/zh-CN/checkout/payment-result/messages.js`);
+  assert.match(paymentResultFragment, /paymentResult:/u);
 
   const homeFragment = read(`${appRoot}/src/i18n/zh-CN/storefront/home/messages.js`);
   assert.match(homeFragment, /home:/u);
@@ -94,6 +98,11 @@ test("the buyer hub and help centre resolve every label from the catalogue", () 
   assert.match(ordersPage, /t\("orderList\.errors\.loadFailed"\)/u);
   assert.match(ordersPage, /t\("orderList\.actions\.pay"\)/u);
 
+  const paymentResultPage = read(`${appRoot}/src/pages/payment-result/index.ts`);
+  assert.match(paymentResultPage, /t\("paymentResult\.status\.pending\.title"\)/u);
+  assert.match(paymentResultPage, /t\("paymentResult\.pollTimeout"\)/u);
+  assert.match(paymentResultPage, /t\("paymentResult\.actions\.orders"\)/u);
+
   for (const tsPath of [
     `${appRoot}/src/pages/buyer/index.ts`,
     `${appRoot}/src/pages/help/index.ts`,
@@ -101,6 +110,7 @@ test("the buyer hub and help centre resolve every label from the catalogue", () 
     `${appRoot}/src/pages/checkout/index.ts`,
     `${appRoot}/src/pages/aftersales/index.ts`,
     `${appRoot}/src/pages/orders/index.ts`,
+    `${appRoot}/src/pages/payment-result/index.ts`,
   ]) {
     const source = read(tsPath);
     const chineseLiterals = [...source.matchAll(/"[^"\n]*[\u4e00-\u9fff][^"\n]*"/gu)]
@@ -116,6 +126,7 @@ test("the buyer hub and help centre resolve every label from the catalogue", () 
     `${appRoot}/src/pages/checkout/index.wxml`,
     `${appRoot}/src/pages/aftersales/index.wxml`,
     `${appRoot}/src/pages/orders/index.wxml`,
+    `${appRoot}/src/pages/payment-result/index.wxml`,
   ]) {
     const template = read(wxmlPath);
     assert.deepEqual(

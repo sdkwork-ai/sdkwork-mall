@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import { getPaymentSuccess } from "../../services/order-service";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 
@@ -15,8 +16,29 @@ interface PaymentResultData {
   loading: boolean;
   paymentMethod: string;
   pollExhausted: boolean;
+  orderNoText: string;
+  paymentNoText: string;
+  loadingText: string;
+  ordersText: string;
+  refreshText: string;
+  retryPayText: string;
+  continueShoppingText: string;
   _pollAttempts: number;
   _pollTimer: number | null;
+}
+
+function pendingCopy(): { title: string; description: string } {
+  return {
+    title: t("paymentResult.status.pending.title"),
+    description: t("paymentResult.status.pending.description"),
+  };
+}
+
+function successCopy(): { title: string; description: string } {
+  return {
+    title: t("paymentResult.status.success.title"),
+    description: t("paymentResult.status.success.description"),
+  };
 }
 
 Page({
@@ -24,21 +46,32 @@ Page({
     orderId: "",
     paymentId: "",
     status: "pending",
-    title: "支付处理中",
-    description: "支付正在处理，请稍后查看订单状态。",
+    title: pendingCopy().title,
+    description: pendingCopy().description,
     tone: "warning",
     loading: true,
     paymentMethod: "",
     pollExhausted: false,
+    orderNoText: "",
+    paymentNoText: "",
+    loadingText: t("paymentResult.loading"),
+    ordersText: t("paymentResult.actions.orders"),
+    refreshText: t("paymentResult.actions.refresh"),
+    retryPayText: t("paymentResult.actions.retryPay"),
+    continueShoppingText: t("paymentResult.actions.continueShopping"),
     _pollAttempts: 0,
     _pollTimer: null,
   } as PaymentResultData,
 
   onLoad(options: Record<string, string | undefined>) {
+    const orderId = options.orderId || "";
+    const paymentId = options.paymentId || "";
     this.setData({
-      orderId: options.orderId || "",
-      paymentId: options.paymentId || "",
+      orderId,
+      paymentId,
       status: options.status || "pending",
+      orderNoText: orderId ? t("paymentResult.orderNo", { id: orderId }) : "",
+      paymentNoText: paymentId ? t("paymentResult.paymentNo", { id: paymentId }) : "",
     });
     this.render();
     this.pollPaymentSuccess();
@@ -53,15 +86,11 @@ Page({
   render() {
     const { status } = this.data;
     if (status === "success") {
-      this.setData({
-        title: "支付成功",
-        description: "商家将尽快为您发货。",
-        tone: "success",
-      });
+      this.setData({ ...successCopy(), tone: "success" });
     } else if (status === "failed") {
       this.setData({
-        title: "支付失败",
-        description: "支付未成功，可重新支付或联系客服。",
+        title: t("paymentResult.status.failed.title"),
+        description: t("paymentResult.status.failed.description"),
         tone: "danger",
       });
     }
@@ -77,8 +106,7 @@ Page({
       if (info && (info.paid === true || info.status === "PAID" || info.status === "COMPLETED")) {
         this.setData({
           status: "success",
-          title: "支付成功",
-          description: "商家将尽快为您发货。",
+          ...successCopy(),
           tone: "success",
           loading: false,
         });
@@ -91,14 +119,14 @@ Page({
           loading: false,
           pollExhausted: true,
           _pollAttempts: attempts,
-          description: "支付结果确认超时，请到订单列表查看最新状态。",
+          description: t("paymentResult.pollTimeout"),
         });
         return;
       }
       this.setData({ loading: false, _pollAttempts: attempts });
       this.setData({ _pollTimer: setTimeout(tick, PAYMENT_POLL_INTERVAL_MS) });
     };
-    tick();
+    void tick();
   },
 
   restartPoll() {
@@ -110,8 +138,7 @@ Page({
       _pollAttempts: 0,
       loading: true,
       status: "pending",
-      title: "支付处理中",
-      description: "支付正在处理，请稍后查看订单状态。",
+      ...pendingCopy(),
       tone: "warning",
     });
     this.pollPaymentSuccess();
@@ -130,7 +157,10 @@ Page({
       return;
     }
     wx.redirectTo({
-      url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: this.data.orderId, paymentMethod: this.data.paymentMethod || "" }),
+      url: mpCapabilityUrl("storefront.mall.payment-cashier", {
+        orderId: this.data.orderId,
+        paymentMethod: this.data.paymentMethod || "",
+      }),
     });
   },
 });
