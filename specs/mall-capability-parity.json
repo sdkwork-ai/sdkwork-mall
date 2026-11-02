@@ -477,7 +477,7 @@
         "miniProgram": { "page": "pages/chats/index" },
         "flutter": { "route": "/chats" }
       },
-      "notes": "IM is a mobile customer-service surface; the PC root ships the message centre only (follow-up tracked by buyer.im-conversations in the PC backlog)."
+      "notes": "Blocked upstream, not deferred: sdkwork-im-app-sdk currently generates notifications plus a thin chat surface (knowledgebase/archive) only - no conversation list and no message send. The mobile roots reach the federation chat plane through their own transport, while the PC root forbids raw HTTP in capability packages (gate: mall PC active packages avoid raw HTTP transport), so PC chat waits for the generated app SDK to expose conversations and messages."
     },
     {
       "id": "buyer.im-chat",
@@ -489,7 +489,8 @@
         "h5": { "routeId": "buyer.mall.im.chat" },
         "miniProgram": { "page": "pages/chat/index" },
         "flutter": { "route": "/chat" }
-      }
+      },
+      "notes": "Blocked upstream, not deferred: sdkwork-im-app-sdk currently generates notifications plus a thin chat surface (knowledgebase/archive) only - no conversation list and no message send. The mobile roots reach the federation chat plane through their own transport, while the PC root forbids raw HTTP in capability packages (gate: mall PC active packages avoid raw HTTP transport), so PC chat waits for the generated app SDK to expose conversations and messages."
     },
     {
       "id": "buyer.notices",
@@ -501,19 +502,26 @@
         "h5": { "routeId": "buyer.mall.im.notices" },
         "miniProgram": { "page": "pages/notices/index" },
         "flutter": { "route": "/notices" }
-      }
+      },
+      "notes": "Blocked upstream, not deferred: sdkwork-im-app-sdk currently generates notifications plus a thin chat surface (knowledgebase/archive) only - no conversation list and no message send. The mobile roots reach the federation chat plane through their own transport, while the PC root forbids raw HTTP in capability packages (gate: mall PC active packages avoid raw HTTP transport), so PC chat waits for the generated app SDK to expose conversations and messages."
     },
     {
       "id": "buyer.settings",
       "title": "设置",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.settings",
-      "requiredOn": ["miniProgram", "flutter"],
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
       "implementations": {
+        "pc": { "routeId": "buyer.mall.settings" },
+        "h5": { "routeId": "buyer.mall.settings" },
         "miniProgram": { "page": "pages/settings/index" },
         "flutter": { "route": "/settings" }
       },
-      "notes": "H5 and PC have no separate settings screen; logout and cache actions live on the buyer dashboard."
+      "navigationEvidence": [
+        { "platform": "pc", "file": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx", "contains": "/buyer/settings" },
+        { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/settings" }
+      ],
+      "notes": "Scope is deliberately identical on every root — clear local footprint, clear local favourites, sign out. Cross-root preferences (notification channels, locale) need a server-side preference contract first and are not invented per client."
     },
     {
       "id": "account.login",
@@ -592,6 +600,17 @@
         "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
         "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
         "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml",
+        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+      ]
+    },
+    {
+      "key": "buyerNav.settings",
+      "text": "设置",
+      "why": "Buyer-hub menu label and page title, aligned across roots.",
+      "files": [
+        "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
+        "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
+        "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts",
         "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
       ]
     }

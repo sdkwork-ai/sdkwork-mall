@@ -21,3 +21,4 @@ export * from "./pages/GiftCardsPage";
 export * from "./pages/ProfilePage";
 export * from "./pages/ReviewsPage";
 export * from "./pages/SecurityPage";
+export * from "./pages/SettingsPage";

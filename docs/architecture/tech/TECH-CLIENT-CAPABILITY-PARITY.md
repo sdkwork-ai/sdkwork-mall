@@ -77,13 +77,17 @@ Buyer and storefront capabilities required on **all four** roots: home,
 categories, category detail, search, product detail, shop home, activity list,
 activity detail, cart, checkout, payment, payment result, help, buyer dashboard,
 orders, order detail, logistics, addresses, after-sales, coupons, favourites,
-footprint, messages, reviews, gift cards, profile, account security, wallet,
-points, membership, invoices.
+footprint, messages, reviews, gift cards, profile, account security, settings,
+wallet, points, membership, invoices.
+
+Settings scope is identical on every root by contract: clear local footprint,
+clear local favourites, sign out. Cross-root preferences (notification channels,
+locale) are deliberately absent until a server-side preference contract exists —
+inventing them per client is exactly the drift this contract prevents.
 
 Root-scoped capabilities: IM conversations, chat and notices are required on
-H5/mini program/Flutter (the PC root ships the message centre only); settings is
-required on mini program/Flutter; login is required on mini program/Flutter
-because PC and H5 delegate authentication to the shared IAM auth gate.
+H5/mini program/Flutter; login is required on mini program/Flutter because PC
+and H5 delegate authentication to the shared IAM auth gate.
 
 PC-only by design: `admin.*` platform governance, `merchant.*` seller console,
 and the inactive `app.commerce.*` legacy SaaS dashboards.

@@ -157,4 +157,16 @@ export const sdkworkMallH5BuyerRoutes = [
     title: "账户与安全",
     titleKey: "buyer.routes.security.title",
   },
+  {
+    auth: "required",
+    capability: "settings",
+    domain: "commerce",
+    id: "buyer.mall.settings",
+    packageName: "@sdkwork/mall-h5-buyer",
+    path: "/buyer/settings",
+    screen: "settings",
+    surface: "buyer",
+    title: "设置",
+    titleKey: "buyer.routes.settings.title",
+  },
 ] as const satisfies readonly SdkworkMallH5RouteContribution[];

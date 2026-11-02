@@ -209,6 +209,7 @@ export function SdkworkMallBuyerDashboardPage() {
         <Link to="/buyer/profile">个人资料</Link>
         <Link to="/buyer/security">账户与安全</Link>
         <Link to="/buyer/gift-cards"><Gift aria-hidden="true" size={14} /> 礼品卡与红包</Link>
+        <Link to="/buyer/settings">设置</Link>
       </div>
     </div>
   );

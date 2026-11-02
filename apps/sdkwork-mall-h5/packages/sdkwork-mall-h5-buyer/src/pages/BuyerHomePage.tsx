@@ -15,6 +15,7 @@ import {
   PackageSearch,
   PenLine,
   Receipt,
+  Settings,
   ShieldCheck,
   Star,
   Ticket,
@@ -69,6 +70,7 @@ const ACCOUNT_ENTRIES = [
   { icon: PenLine, label: "我的评价", path: "/buyer/reviews" },
   { icon: Gift, label: "礼品卡与红包", path: "/buyer/gift-cards" },
   { icon: ShieldCheck, label: "账户与安全", path: "/buyer/security" },
+  { icon: Settings, label: "设置", path: "/buyer/settings" },
   { icon: LifeBuoy, label: "帮助中心", path: "/help" },
 ] as const;
 

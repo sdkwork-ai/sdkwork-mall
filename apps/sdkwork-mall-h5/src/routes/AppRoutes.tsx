@@ -104,6 +104,9 @@ const SdkworkMallH5ProfilePage = lazy(() =>
 const SdkworkMallH5SecurityPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/security-page").then((module) => ({ default: module.SdkworkMallH5SecurityPage })),
 );
+const SdkworkMallH5SettingsPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/settings-page").then((module) => ({ default: module.SdkworkMallH5SettingsPage })),
+);
 
 function LoadingPlaceholder() {
   return <div className="sdk-h5-loading">加载中...</div>;
@@ -303,6 +306,14 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/security"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5SettingsPage />
+            </RequireSession>
+          )}
+          path="/buyer/settings"
         />
         <Route
           element={(

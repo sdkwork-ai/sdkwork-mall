@@ -90,6 +90,11 @@
       "import": "./src/pages/SecurityPage.tsx",
       "default": "./src/pages/SecurityPage.tsx"
     },
+    "./settings-page": {
+      "types": "./src/pages/SettingsPage.tsx",
+      "import": "./src/pages/SettingsPage.tsx",
+      "default": "./src/pages/SettingsPage.tsx"
+    },
     "./profile-service": {
       "types": "./src/profile-service.ts",
       "import": "./src/profile-service.ts",

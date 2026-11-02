@@ -76,6 +76,11 @@ export function clearMallH5Footprint(): void {
   writeList(FOOTPRINT_STORAGE_KEY, []);
 }
 
+/** Clears every locally stored favourite (settings screen: clear local data). */
+export function clearMallH5Favorites(): void {
+  writeList<MallH5FavoriteItem>(FAVORITES_STORAGE_KEY, []);
+}
+
 export function useMallH5Favorites(): MallH5FavoriteItem[] {
   const [favorites, setFavorites] = useState<MallH5FavoriteItem[]>(() => readMallH5Favorites());
   useEffect(() => {

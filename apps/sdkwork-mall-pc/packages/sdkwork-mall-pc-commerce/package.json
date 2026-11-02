@@ -55,6 +55,11 @@
       "import": "./src/pages/BuyerSecurityPage.tsx",
       "default": "./src/pages/BuyerSecurityPage.tsx"
     },
+    "./buyer-settings-page": {
+      "types": "./src/pages/BuyerSettingsPage.tsx",
+      "import": "./src/pages/BuyerSettingsPage.tsx",
+      "default": "./src/pages/BuyerSettingsPage.tsx"
+    },
     "./buyer-gift-cards-page": {
       "types": "./src/pages/BuyerGiftCardsPage.tsx",
       "import": "./src/pages/BuyerGiftCardsPage.tsx",
@@ -136,6 +141,7 @@
     "status": "ready"
   },
   "dependencies": {
+    "@sdkwork/mall-pc-reviews": "workspace:*",
     "@sdkwork/utils": "workspace:*"
   }
 }

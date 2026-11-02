@@ -60,6 +60,9 @@ const SdkworkMallSecurityPage = lazy(() =>
 const SdkworkMallGiftCardsPage = lazy(() =>
   import("@sdkwork/mall-pc-commerce/buyer-gift-cards-page").then((module) => ({ default: module.SdkworkMallGiftCardsPage })),
 );
+const SdkworkMallSettingsPage = lazy(() =>
+  import("@sdkwork/mall-pc-commerce/buyer-settings-page").then((module) => ({ default: module.SdkworkMallSettingsPage })),
+);
 const SdkworkOrderPage = lazy(() =>
   import("@sdkwork/mall-pc-order/order-page").then((module) => ({ default: module.SdkworkOrderPage })),
 );
@@ -276,6 +279,8 @@ function resolveRouteScreen(
       return <SdkworkMallProfilePage />;
     case "buyer.mall.security":
       return <SdkworkMallSecurityPage />;
+    case "buyer.mall.settings":
+      return <SdkworkMallSettingsPage />;
     case "buyer.mall.gift-cards":
       return <SdkworkMallGiftCardsPage />;
     case "buyer.mall.orders":

@@ -85,3 +85,12 @@ export function toggleMallShopFavorite(shop: MallShopFavorite): boolean {
   window.localStorage.setItem(SHOP_FAVORITES_KEY, JSON.stringify(next));
   return !found;
 }
+
+/** Clears every locally stored favourite (settings screen: clear local data). */
+export function clearMallFavorites(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.localStorage.removeItem(FAVORITES_KEY);
+  window.localStorage.removeItem(SHOP_FAVORITES_KEY);
+}
