@@ -45,6 +45,7 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Mini-program navigation | `apps/sdkwork-mall-mini-program/tests/capability-navigation.test.mjs` | A page module hard-codes `/pages/...`, the registry and `app.json` disagree, a tab capability is not classified for `wx.switchTab`, a page calls `mpCapabilityUrl` with an id the registry does not publish, or a non-tab capability page has no entry from another page |
 | Link integrity (web) | PC + H5 architecture tests | An in-app `to`/`navigate` link targets a path no route contributes |
 | Orphan screens | PC + H5 architecture tests | A registered route has no in-app entry; the page module resolved from the router is excluded so a page cannot link to itself. PC covers storefront routes (buyer/merchant/admin nav is generated from the registry and asserted as such); H5 covers every non-tab route |
+| Flutter route references | `apps/sdkwork-mall-flutter-mobile/test/route_references_test.dart` | A page pushes a named route `buildSdkworkMallRoutes()` never registers, a registered route is never pushed, or a capability-registry path has no shell route |
 | Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
 | Title-key convention | same test | A route title key does not follow `<namespace>.routes.<screen>.title` |
 | Shared copy | same test | The upstream notice or buyer-hub label is reworded on one root |
@@ -160,7 +161,7 @@ pnpm typecheck:packages                                            → 46 packag
 pnpm test:vitest                                                   → 68 files / 169 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
-flutter test                                                       → 18/18 pass
+flutter test                                                       → 21/21 pass
 node ../sdkwork-specs/tools/verify-repo.mjs --root .               → passed
 node ../sdkwork-specs/tools/check-application-layering.mjs --root .→ passed
 node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
