@@ -603,9 +603,13 @@ notifications port with its `notifications.list` / `notifications.retrieve`.
 
 The message centre loads that real data with cursor pagination, category tabs
 (交易/系统/提醒), unread markers, expandable detail retrieved on demand and a retry
-action on failure. `tests/contract/verify-mall-standard-architecture.test.mjs` was
-updated to pin the new port and loader, and the i18n baseline was refreshed for the
-new PC page copy (1452 → 1463).
+action on failure. Its copy now lives in a typed bilingual `messages-copy.ts`
+module (`createSdkworkMallMessagesCopy(locale)`, zh-CN default, en-US included),
+so the page renders no inline strings; the i18n metric is unchanged because it
+counts non-ASCII literals and the Chinese copy moved from the page into the
+catalogue. `tests/contract/verify-mall-standard-architecture.test.mjs` was updated
+to pin the new port and loader, and the i18n baseline was refreshed for the new PC
+page copy (1452 → 1463).
 
 ### 6.1.25 Shared visual system (H5, mini program, Flutter)
 

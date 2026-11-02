@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState, LoadingBlock } from "@sdkwork/ui-pc-react";
 
+import { createSdkworkMallMessagesCopy } from "../messages-copy";
 import {
   loadMallMessageCenterPage,
   retrieveMallMessage,
@@ -11,21 +12,14 @@ import {
 
 type MessageTab = "all" | MallMessageCategory;
 
-const TABS: Array<{ id: MessageTab; label: string }> = [
-  { id: "all", label: "全部" },
-  { id: "trade", label: "交易" },
-  { id: "system", label: "系统" },
-  { id: "notice", label: "提醒" },
-];
+const TAB_ORDER: MessageTab[] = ["all", "trade", "system", "notice"];
 
-const CATEGORY_LABELS: Record<MallMessageCategory, string> = {
-  notice: "提醒",
-  other: "通知",
-  system: "系统",
-  trade: "交易",
-};
+export interface SdkworkMallMessagesPageProps {
+  locale?: string | null;
+}
 
-export function SdkworkMallMessagesPage() {
+export function SdkworkMallMessagesPage({ locale }: SdkworkMallMessagesPageProps = {}) {
+  const copy = createSdkworkMallMessagesCopy(locale);
   const [messages, setMessages] = useState<MallMessageRow[]>([]);
   const [tab, setTab] = useState<MessageTab>("all");
   const [loading, setLoading] = useState(true);
@@ -44,12 +38,12 @@ export function SdkworkMallMessagesPage() {
       setNextCursor(page.nextCursor);
       setError(null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "消息加载失败");
+      setError(cause instanceof Error ? cause.message : copy.error.description);
     } finally {
       setLoadingMore(false);
       setLoading(false);
     }
-  }, []);
+  }, [copy.error.description]);
 
   useEffect(() => {
     void load();
@@ -79,51 +73,53 @@ export function SdkworkMallMessagesPage() {
   }
 
   if (loading) {
-    return <LoadingBlock label="加载消息..." />;
+    return <LoadingBlock label={copy.actions.loading} />;
   }
 
   return (
     <div className="sdkwork-mall-pc-messages-page">
-      <h1>消息中心</h1>
-      <p>来自通知服务的系统、交易与提醒消息，点击可展开详情。</p>
+      <h1>{copy.title}</h1>
+      <p>{copy.intro}</p>
       <nav className="sdkwork-mall-pc-chip-row">
-        {TABS.map((entry) => (
+        {TAB_ORDER.map((entry) => (
           <button
-            aria-pressed={tab === entry.id}
-            key={entry.id}
-            onClick={() => setTab(entry.id)}
+            aria-pressed={tab === entry}
+            key={entry}
+            onClick={() => setTab(entry)}
             type="button"
           >
-            {entry.label}
+            {entry === "all" ? copy.tabs.all : copy.categories[entry]}
           </button>
         ))}
       </nav>
 
       {error ? (
         <div>
-          <EmptyState description={error} title="消息加载失败" />
-          <button onClick={() => void load()} type="button">重试</button>
+          <EmptyState description={error} title={copy.error.title} />
+          <button onClick={() => void load()} type="button">{copy.actions.retry}</button>
         </div>
       ) : visibleMessages.length === 0 ? (
-        <EmptyState description="订单动态、售后进度与系统提醒将在此展示" title="暂无消息" />
+        <EmptyState description={copy.empty.description} title={copy.empty.title} />
       ) : (
         <ul className="sdkwork-mall-pc-message-list">
           {visibleMessages.map((message) => (
             <li key={message.id}>
               <button onClick={() => void toggleExpand(message)} type="button">
                 <span className="sdkwork-mall-pc-message-category">
-                  {CATEGORY_LABELS[message.category]}
+                  {copy.categories[message.category]}
                 </span>
                 {message.status === "unread" ? (
-                  <span aria-label="未读" className="sdkwork-mall-pc-message-unread" />
+                  <span aria-label={copy.status.unread} className="sdkwork-mall-pc-message-unread" />
                 ) : null}
                 <strong>{message.title}</strong>
               </button>
-              {expandedId === message.id ? <p>{message.body || "（无正文）"}</p> : null}
+              {expandedId === message.id ? <p>{message.body || copy.noBody}</p> : null}
               {message.requestedAt ? (
-                <span>{new Date(message.requestedAt).toLocaleString()}</span>
+                <span>{new Date(message.requestedAt).toLocaleString(locale || undefined)}</span>
               ) : null}
-              {message.category === "trade" ? <Link to="/buyer/orders">查看订单</Link> : null}
+              {message.category === "trade" ? (
+                <Link to="/buyer/orders">{copy.actions.viewOrders}</Link>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -131,7 +127,7 @@ export function SdkworkMallMessagesPage() {
 
       {nextCursor ? (
         <button disabled={loadingMore} onClick={() => void load(nextCursor)} type="button">
-          {loadingMore ? "加载中..." : "加载更多"}
+          {loadingMore ? copy.actions.loading : copy.actions.loadMore}
         </button>
       ) : null}
     </div>

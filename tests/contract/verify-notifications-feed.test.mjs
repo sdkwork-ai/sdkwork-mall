@@ -30,7 +30,8 @@ test("the PC message centre reads the IM notifications client", () => {
 
   const page = read("apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-messages/src/pages/MessagesPage.tsx");
   assert.match(page, /loadMallMessageCenterPage/u);
-  assert.match(page, /重试/u);
+  assert.match(page, /createSdkworkMallMessagesCopy/u);
+  assert.match(page, /copy\.actions\.retry/u);
 });
 
 test("the H5 message route renders the real notifications page", () => {
