@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 80/80 pass
+pnpm test:node                                                     → 82/82 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -187,6 +187,7 @@ pnpm test:node                                                     → 80/80 pas
   (tests/contract/verify-search-depth.test.mjs                     → 1/1)
   (tests/contract/verify-h5-i18n-runtime.test.mjs                  → 3/3)
   (tests/contract/verify-after-sales-depth.test.mjs                → 2/2)
+  (tests/contract/verify-flutter-i18n-runtime.test.mjs            → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -480,6 +481,25 @@ service call and the page rendering on all four roots.
 The nine new strings that the three catalogue-less roots needed are recorded in
 the refreshed i18n baseline (mini program 375 → 378, Flutter 567 → 571, H5 +1
 for the session-guard message).
+
+### 6.1.18 Flutter i18n runtime
+
+Flutter was the last root with no i18n mechanism. `lib/src/i18n/runtime.dart`
+flattens authored JSON fragments into a synchronous message map
+(`t(key, {params})` with `{{name}}` interpolation), loads them once from
+`rootBundle` in `main()` before `runApp`, and degrades to the key if a fragment is
+missing. Fragments live at
+`lib/src/i18n/<locale>/<domain>/<capability>/messages.json`, declared in
+`pubspec.yaml`.
+
+The help centre is the first migrated page: all 27 strings resolve from `help.*`.
+Widget tests install the fragments from disk (`test/support/i18n_fixture.dart`), so
+the suite does not depend on asset-bundle resolution, and the capability-title
+parity gate resolves Flutter `AppBar` titles declared as `SdkworkI18n.t(...)`
+through the fragments. Flutter's hard-coded count dropped 571 → 544.
+
+`tests/contract/verify-flutter-i18n-runtime.test.mjs` pins the runtime, the
+fragment wiring and the no-literal rule for migrated pages.
 
 ### 6.2 Per-package typecheck
 

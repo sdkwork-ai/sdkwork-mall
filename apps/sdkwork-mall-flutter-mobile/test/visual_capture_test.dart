@@ -39,9 +39,13 @@ import 'package:sdkwork_mall_flutter_mobile/pages/reviews_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/settings_and_invoices.dart';
 import 'package:sdkwork_mall_flutter_mobile/services/commerce.dart';
 
+import 'support/i18n_fixture.dart';
+
 const _captureOn = bool.fromEnvironment('VISUAL_CAPTURE');
 
 Future<void> main() async {
+  setUpAll(installTestI18n);
+
   testWidgets('visual capture of the flutter buyer surfaces', (tester) async {
     if (!_captureOn) {
       return; // Skipped in normal runs.

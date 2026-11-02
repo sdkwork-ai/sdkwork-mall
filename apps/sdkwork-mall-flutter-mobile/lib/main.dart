@@ -6,6 +6,7 @@ import 'bootstrap/environment.dart';
 import 'bootstrap/session.dart';
 import 'services/commerce.dart';
 import 'shell/mobile_shell.dart';
+import 'src/i18n/runtime.dart';
 
 Future<void> main() async {
   // A release build must not show a raw red/grey box when a widget fails to
@@ -23,6 +24,7 @@ Future<void> main() async {
       // zone that later calls runApp, otherwise the framework reports a zone
       // mismatch every time the app starts.
       WidgetsFlutterBinding.ensureInitialized();
+      await SdkworkI18n.load();
       await SdkworkSession.instance.restore();
       final environment = SdkworkMallFlutterEnvironment.fromDefineValues();
       debugPrint('sdkwork-mall-flutter-mobile runtime: $environment');

@@ -4,7 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/buyer_account_pages.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/help_page.dart';
 
+import 'support/i18n_fixture.dart';
+
 void main() {
+  setUpAll(installTestI18n);
+
   testWidgets('help centre renders the shared self-service sections', (
     tester,
   ) async {

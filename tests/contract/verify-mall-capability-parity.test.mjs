@@ -577,6 +577,7 @@ function readFlutterPageTitles() {
   ).map((filePath) => readFileSync(filePath, "utf8"));
 
   const titles = new Map();
+  const flutterMessages = readFlutterI18nMessages();
   for (const [route, className] of classByRoute) {
     for (const source of dartSources) {
       const classIndex = source.indexOf(`class ${className}`);
@@ -584,12 +585,42 @@ function readFlutterPageTitles() {
         continue;
       }
       const window = source.slice(classIndex, classIndex + 6000);
-      const titleMatch = window.match(/AppBar\(\s*title:\s*(?:const\s+)?Text\(\s*'([^']+)'/u);
+      // Titles are either inline literals or catalogue lookups after the i18n
+      // migration; a lookup resolves through the authored Flutter fragments.
+      const titleMatch = window.match(
+        /AppBar\(\s*title:\s*(?:const\s+)?Text\(\s*(?:'([^']+)'|SdkworkI18n\.t\('([^']+)'\))/u,
+      );
       if (titleMatch) {
-        titles.set(route, titleMatch[1]);
+        const shown = titleMatch[1] ?? flutterMessages.get(titleMatch[2]);
+        if (shown) {
+          titles.set(route, shown);
+        }
       }
       break;
     }
   }
   return titles;
+}
+
+/** Flattens the authored Flutter i18n fragments into `a.b.c` → message. */
+function readFlutterI18nMessages() {
+  const fragmentRoot = toAbsolute("apps/sdkwork-mall-flutter-mobile/lib/src/i18n");
+  const messages = new Map();
+  if (!existsSync(fragmentRoot)) {
+    return messages;
+  }
+  const walk = (node, prefix) => {
+    for (const [key, value] of Object.entries(node)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        walk(value, path);
+      } else if (value != null) {
+        messages.set(path, String(value));
+      }
+    }
+  };
+  for (const filePath of collectFiles(fragmentRoot, (file) => file.endsWith(".json"))) {
+    walk(JSON.parse(readFileSync(filePath, "utf8")), "");
+  }
+  return messages;
 }
