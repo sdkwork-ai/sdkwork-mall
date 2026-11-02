@@ -26,6 +26,7 @@ test("the runtime flattens authored fragments and exposes lookups", () => {
   assert.match(runtime, /from "\.\/zh-CN\/account\/buyer-hub\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/support\/help\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/storefront\/home\/messages"/u);
+  assert.match(runtime, /from "\.\/zh-CN\/checkout\/confirm-order\/messages"/u);
   assert.match(runtime, /export function t\(/u);
   assert.match(runtime, /export function hasMessage\(/u);
   assert.match(runtime, /\{\{\$\{name\}\}\}/u);
@@ -38,6 +39,9 @@ test("the runtime flattens authored fragments and exposes lookups", () => {
 
   const homeFragment = read(`${appRoot}/src/i18n/zh-CN/storefront/home/messages.js`);
   assert.match(homeFragment, /home:/u);
+
+  const checkoutFragment = read(`${appRoot}/src/i18n/zh-CN/checkout/confirm-order/messages.js`);
+  assert.match(checkoutFragment, /checkout:/u);
 
   const declarations = read(`${appRoot}/src/i18n/zh-CN/account/buyer-hub/messages.d.ts`);
   assert.match(declarations, /export = messages;/u);
@@ -64,10 +68,17 @@ test("the buyer hub and help centre resolve every label from the catalogue", () 
   assert.match(homePage, /t\("home\.seckill\.titleMatch"\)/u);
   assert.match(homePage, /t\("home\.sold", \{ count: product\.sales \}\)/u);
 
+  const checkoutPage = read(`${appRoot}/src/pages/checkout/index.ts`);
+  assert.match(checkoutPage, /t\("checkout\.loading"\)/u);
+  assert.match(checkoutPage, /t\("checkout\.giftCard\.required"\)/u);
+  assert.match(checkoutPage, /t\("checkout\.errors\.addressRequired"\)/u);
+  assert.match(checkoutPage, /t\(method\.labelKey\)/u);
+
   for (const tsPath of [
     `${appRoot}/src/pages/buyer/index.ts`,
     `${appRoot}/src/pages/help/index.ts`,
     `${appRoot}/src/pages/home/index.ts`,
+    `${appRoot}/src/pages/checkout/index.ts`,
   ]) {
     const source = read(tsPath);
     const chineseLiterals = [...source.matchAll(/"[^"\n]*[\u4e00-\u9fff][^"\n]*"/gu)]
@@ -80,6 +91,7 @@ test("the buyer hub and help centre resolve every label from the catalogue", () 
   for (const wxmlPath of [
     `${appRoot}/src/pages/help/index.wxml`,
     `${appRoot}/src/pages/home/index.wxml`,
+    `${appRoot}/src/pages/checkout/index.wxml`,
   ]) {
     const template = read(wxmlPath);
     assert.deepEqual(

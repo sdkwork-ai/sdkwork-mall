@@ -1,19 +1,19 @@
 <view class="page-checkout">
-  <view wx:if="{{loading}}" class="mp-loading">加载结算信息...</view>
+  <view wx:if="{{loading}}" class="mp-loading">{{loadingText}}</view>
   <view wx:if="{{error}}" class="mp-error">
     <text>{{error}}</text>
-    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
   </view>
 
   <block wx:if="{{!loading}}">
-    <view wx:if="{{itemCount}}" class="mp-muted checkout-count">已选择 {{itemCount}} 件购物车商品参与结算</view>
+    <view wx:if="{{itemCount}}" class="mp-muted checkout-count">{{selectedCountText}}</view>
 
     <view class="mp-card">
       <view class="mp-flex-between">
-        <view class="mp-card-title">收货地址</view>
-        <text class="mp-muted" bindtap="goAddress">管理地址</text>
+        <view class="mp-card-title">{{addressTitle}}</view>
+        <text class="mp-muted" bindtap="goAddress">{{addressManage}}</text>
       </view>
-      <view wx:if="{{addresses.length === 0}}" class="mp-empty">请先添加收货地址</view>
+      <view wx:if="{{addresses.length === 0}}" class="mp-empty">{{addressEmpty}}</view>
       <view
         class="checkout-address {{selectedAddressId === item.id ? 'checkout-address-active' : ''}}"
         wx:for="{{addresses}}"
@@ -21,13 +21,13 @@
         bindtap="selectAddress"
         data-id="{{item.id}}"
       >
-        <view>{{item.receiverName}} {{item.receiverPhone}} <text wx:if="{{item.isDefault}}" class="checkout-default">默认</text></view>
+        <view>{{item.receiverName}} {{item.receiverPhone}} <text wx:if="{{item.isDefault}}" class="checkout-default">{{defaultLabel}}</text></view>
         <view class="mp-muted">{{item.addressLine}}</view>
       </view>
     </view>
 
     <view class="mp-card">
-      <view class="mp-card-title">配送方式</view>
+      <view class="mp-card-title">{{deliveryTitle}}</view>
       <view
         class="checkout-address {{deliveryMethodCode === item.code ? 'checkout-address-active' : ''}}"
         wx:for="{{deliveryMethods}}"
@@ -41,12 +41,12 @@
     </view>
 
     <view class="mp-card">
-      <view class="mp-card-title">优惠券</view>
+      <view class="mp-card-title">{{couponTitle}}</view>
       <view
         class="checkout-coupon {{selectedCouponId === '' ? 'checkout-address-active' : ''}}"
         bindtap="selectCoupon"
         data-id=""
-      >不使用优惠券</view>
+      >{{couponNone}}</view>
       <view
         class="checkout-coupon {{selectedCouponId === item.id ? 'checkout-address-active' : ''}}"
         wx:for="{{coupons}}"
@@ -55,46 +55,46 @@
         data-id="{{item.id}}"
       >
         <view>{{item.title}} <text wx:if="{{item.discountAmountCny}}" class="mp-price">¥{{item.discountAmountCny}}</text></view>
-        <view class="mp-muted" wx:if="{{item.minSpendCny}}">满 ¥{{item.minSpendCny}} 可用</view>
+        <view class="mp-muted" wx:if="{{item.thresholdText}}">{{item.thresholdText}}</view>
       </view>
-      <view wx:if="{{coupons.length === 0}}" class="mp-muted">暂无可用优惠券，可到领券中心领取。</view>
+      <view wx:if="{{coupons.length === 0}}" class="mp-muted">{{couponEmpty}}</view>
     </view>
 
     <view class="mp-card">
-      <view class="mp-card-title">抵扣</view>
+      <view class="mp-card-title">{{deductTitle}}</view>
       <view class="mp-flex-between checkout-deduct" bindtap="toggleWallet">
-        <text>钱包余额抵扣</text>
+        <text>{{walletLabel}}</text>
         <view class="cart-checkbox {{useWallet ? 'cart-checkbox-on' : ''}}" />
       </view>
       <view class="mp-flex-between checkout-deduct" bindtap="togglePoints">
-        <text>积分抵扣</text>
+        <text>{{pointsLabel}}</text>
         <view class="cart-checkbox {{usePoints ? 'cart-checkbox-on' : ''}}" />
       </view>
     </view>
 
     <view class="mp-card">
-      <view class="mp-card-title">礼品卡</view>
+      <view class="mp-card-title">{{giftCardTitle}}</view>
       <view wx:if="{{giftCardApplied}}" class="mp-flex-between checkout-deduct">
-        <text>已使用礼品卡 {{giftCardApplied}}</text>
-        <text class="mp-muted" bindtap="removeGiftCard">移除</text>
+        <text>{{giftCardAppliedText}}</text>
+        <text class="mp-muted" bindtap="removeGiftCard">{{giftCardRemove}}</text>
       </view>
       <view wx:else class="checkout-giftcard-row">
         <input
           class="checkout-giftcard-input"
-          placeholder="输入礼品卡卡号"
+          placeholder="{{giftCardPlaceholder}}"
           value="{{giftCardCode}}"
           bindinput="onGiftCardInput"
         />
-        <button class="mp-btn mp-btn-ghost" bindtap="applyGiftCard">使用</button>
+        <button class="mp-btn mp-btn-ghost" bindtap="applyGiftCard">{{giftCardApply}}</button>
       </view>
       <view wx:if="{{giftCardError}}" class="checkout-giftcard-error">{{giftCardError}}</view>
     </view>
 
     <view class="mp-card">
-      <view class="mp-card-title">买家留言</view>
+      <view class="mp-card-title">{{remarkTitle}}</view>
       <textarea
         class="checkout-remark"
-        placeholder="选填，给商家留言"
+        placeholder="{{remarkPlaceholder}}"
         maxlength="200"
         value="{{buyerRemark}}"
         bindinput="onRemarkInput"
@@ -103,7 +103,7 @@
 
     <view class="mp-card">
       <view class="mp-flex-between checkout-deduct" bindtap="toggleInvoice">
-        <text>需要开具发票</text>
+        <text>{{invoiceNeed}}</text>
         <view class="cart-checkbox {{needInvoice ? 'cart-checkbox-on' : ''}}" />
       </view>
       <block wx:if="{{needInvoice}}">
@@ -112,50 +112,50 @@
             class="checkout-invoice-type {{invoiceTitleType === 'personal' ? 'checkout-invoice-type-on' : ''}}"
             bindtap="selectInvoiceTitleType"
             data-type="personal"
-          >个人</view>
+          >{{invoicePersonal}}</view>
           <view
             class="checkout-invoice-type {{invoiceTitleType === 'company' ? 'checkout-invoice-type-on' : ''}}"
             bindtap="selectInvoiceTitleType"
             data-type="company"
-          >企业</view>
+          >{{invoiceCompany}}</view>
         </view>
         <view class="mp-field">
-          <text class="mp-field-label">发票抬头</text>
-          <input placeholder="个人姓名或公司名称" value="{{invoiceTitle}}" bindinput="onInvoiceTitleInput" />
+          <text class="mp-field-label">{{invoiceTitleLabel}}</text>
+          <input placeholder="{{invoiceTitlePlaceholder}}" value="{{invoiceTitle}}" bindinput="onInvoiceTitleInput" />
         </view>
         <view class="mp-field" wx:if="{{invoiceTitleType === 'company'}}">
-          <text class="mp-field-label">税号</text>
-          <input placeholder="15-20 位字母或数字" value="{{invoiceTaxNumber}}" bindinput="onInvoiceTaxNumberInput" />
+          <text class="mp-field-label">{{invoiceTaxLabel}}</text>
+          <input placeholder="{{invoiceTaxPlaceholder}}" value="{{invoiceTaxNumber}}" bindinput="onInvoiceTaxNumberInput" />
         </view>
         <view class="mp-field">
-          <text class="mp-field-label">接收邮箱（选填）</text>
-          <input placeholder="用于接收电子发票" value="{{invoiceEmail}}" bindinput="onInvoiceEmailInput" />
+          <text class="mp-field-label">{{invoiceEmailLabel}}</text>
+          <input placeholder="{{invoiceEmailPlaceholder}}" value="{{invoiceEmail}}" bindinput="onInvoiceEmailInput" />
         </view>
       </block>
     </view>
 
     <view class="mp-card">
       <view class="mp-flex-between" wx:if="{{originalAmountText}}">
-        <text>商品金额</text>
+        <text>{{summaryGoods}}</text>
         <text>{{originalAmountText}}</text>
       </view>
       <view class="mp-flex-between" wx:if="{{discountAmountText}}">
-        <text>优惠</text>
+        <text>{{summaryDiscount}}</text>
         <text>-{{discountAmountText}}</text>
       </view>
       <view class="mp-flex-between">
-        <text>应付金额</text>
+        <text>{{summaryPayable}}</text>
         <text class="mp-price checkout-payable">{{payableText}}</text>
       </view>
       <view wx:if="{{quoteError}}" class="mp-error">
         <text>{{quoteError}}</text>
-        <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+        <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
       </view>
     </view>
 
     <view class="checkout-footer">
       <button class="mp-btn mp-btn-primary checkout-submit" disabled="{{busy}}" bindtap="submit">
-        {{busy ? '提交中...' : '提交订单'}}
+        {{busy ? submittingText : submitText}}
       </button>
     </view>
   </block>

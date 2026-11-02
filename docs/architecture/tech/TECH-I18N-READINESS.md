@@ -14,10 +14,10 @@ long):
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
 | H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 54 | 283 | 390 (`regions.ts`) |
-| Mini program | `src/i18n` runtime + `zh-CN/{account/buyer-hub,support/help,storefront/home}` JS fragments | 62 | 310 | 302 (province/city picker data) |
+| Mini program | `src/i18n` runtime + `zh-CN/{account/*,support/help,storefront/home,checkout/confirm-order}` JS fragments | 60 | 285 | 302 (province/city picker data) |
 | Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,checkout/confirm-order}` fragments | 33 | 349 | 230 (province/city picker data) |
 
-2394 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2369 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -111,9 +111,11 @@ JavaScript at runtime (not JSON), copy lives in plain-object
 `src/i18n/<locale>/<domain>/<capability>/messages.js` files with sibling
 `messages.d.ts` declarations for typing. Migrated surfaces: the buyer hub (order
 shortcuts, asset/service/account menus, logout dialog), the help centre (FAQ
-sections, quick links, contact rows) and the storefront home (banners, quick
-entries, seckill/sold labels, loading/error states). Their hard-coded count dropped
-378 → 310, and both templates render catalogue-driven data only.
+sections, quick links, contact rows), the storefront home (banners, quick entries,
+seckill/sold labels, loading/error states) and confirm-order (address, delivery,
+coupons, deductions, gift card, remark, invoice, summary, submit and every
+validation message). Their hard-coded count dropped 378 → 285, and all templates
+render catalogue-driven data only.
 `tests/contract/verify-mp-i18n-runtime.test.mjs` pins the runtime, the fragment
 wiring and the no-literal rule (including WXML templates).
 

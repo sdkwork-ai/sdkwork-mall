@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpAddress, listAddresses } from "../../services/address-service";
@@ -9,16 +10,37 @@ interface MpCouponOption {
   discountAmountCny: number | null;
   id: string;
   minSpendCny: number | null;
+  thresholdText: string;
   title: string;
   validUntil: string;
 }
 
 /** 配送方式；运费由服务端按选择计入报价。 */
 const DELIVERY_METHODS = [
-  { code: "standard", description: "3-5 天送达 · 免费", label: "普通配送" },
-  { code: "express", description: "次日送达 · ¥12.00", label: "极速达" },
-  { code: "sf", description: "当日达 · ¥22.00", label: "顺丰速运" },
+  {
+    code: "standard",
+    descriptionKey: "checkout.delivery.standard.description",
+    labelKey: "checkout.delivery.standard.label",
+  },
+  {
+    code: "express",
+    descriptionKey: "checkout.delivery.express.description",
+    labelKey: "checkout.delivery.express.label",
+  },
+  {
+    code: "sf",
+    descriptionKey: "checkout.delivery.sf.description",
+    labelKey: "checkout.delivery.sf.label",
+  },
 ];
+
+function resolveDeliveryMethods(): Array<{ code: string; description: string; label: string }> {
+  return DELIVERY_METHODS.map((method) => ({
+    code: method.code,
+    description: t(method.descriptionKey),
+    label: t(method.labelKey),
+  }));
+}
 
 interface CheckoutData {
   addresses: MpAddress[];
@@ -29,6 +51,7 @@ interface CheckoutData {
   deliveryMethodCode: string;
   giftCardCode: string;
   giftCardApplied: string;
+  giftCardAppliedText: string;
   giftCardError: string;
   useWallet: boolean;
   usePoints: boolean;
@@ -48,6 +71,40 @@ interface CheckoutData {
   busy: boolean;
   error: string;
   toast: string;
+  loadingText: string;
+  retryText: string;
+  selectedCountText: string;
+  addressTitle: string;
+  addressManage: string;
+  addressEmpty: string;
+  defaultLabel: string;
+  deliveryTitle: string;
+  couponTitle: string;
+  couponNone: string;
+  couponEmpty: string;
+  deductTitle: string;
+  walletLabel: string;
+  pointsLabel: string;
+  giftCardTitle: string;
+  giftCardRemove: string;
+  giftCardPlaceholder: string;
+  giftCardApply: string;
+  remarkTitle: string;
+  remarkPlaceholder: string;
+  invoiceNeed: string;
+  invoicePersonal: string;
+  invoiceCompany: string;
+  invoiceTitleLabel: string;
+  invoiceTitlePlaceholder: string;
+  invoiceTaxLabel: string;
+  invoiceTaxPlaceholder: string;
+  invoiceEmailLabel: string;
+  invoiceEmailPlaceholder: string;
+  summaryGoods: string;
+  summaryDiscount: string;
+  summaryPayable: string;
+  submitText: string;
+  submittingText: string;
   _cartItemIds: string[];
   _toastTimer: number | null;
 }
@@ -58,10 +115,11 @@ Page({
     selectedAddressId: "",
     coupons: [],
     selectedCouponId: "",
-    deliveryMethods: DELIVERY_METHODS,
+    deliveryMethods: resolveDeliveryMethods(),
     deliveryMethodCode: "standard",
     giftCardCode: "",
     giftCardApplied: "",
+    giftCardAppliedText: "",
     giftCardError: "",
     useWallet: false,
     usePoints: false,
@@ -81,13 +139,54 @@ Page({
     busy: false,
     error: "",
     toast: "",
+    loadingText: t("checkout.loading"),
+    retryText: t("checkout.retry"),
+    selectedCountText: "",
+    addressTitle: t("checkout.address.title"),
+    addressManage: t("checkout.address.manage"),
+    addressEmpty: t("checkout.address.empty"),
+    defaultLabel: t("checkout.address.default"),
+    deliveryTitle: t("checkout.delivery.title"),
+    couponTitle: t("checkout.coupon.title"),
+    couponNone: t("checkout.coupon.none"),
+    couponEmpty: t("checkout.coupon.empty"),
+    deductTitle: t("checkout.deduct.title"),
+    walletLabel: t("checkout.deduct.wallet"),
+    pointsLabel: t("checkout.deduct.points"),
+    giftCardTitle: t("checkout.giftCard.title"),
+    giftCardRemove: t("checkout.giftCard.remove"),
+    giftCardPlaceholder: t("checkout.giftCard.placeholder"),
+    giftCardApply: t("checkout.giftCard.apply"),
+    remarkTitle: t("checkout.remark.title"),
+    remarkPlaceholder: t("checkout.remark.placeholder"),
+    invoiceNeed: t("checkout.invoice.need"),
+    invoicePersonal: t("checkout.invoice.personal"),
+    invoiceCompany: t("checkout.invoice.company"),
+    invoiceTitleLabel: t("checkout.invoice.titleLabel"),
+    invoiceTitlePlaceholder: t("checkout.invoice.titlePlaceholder"),
+    invoiceTaxLabel: t("checkout.invoice.taxLabel"),
+    invoiceTaxPlaceholder: t("checkout.invoice.taxPlaceholder"),
+    invoiceEmailLabel: t("checkout.invoice.emailLabel"),
+    invoiceEmailPlaceholder: t("checkout.invoice.emailPlaceholder"),
+    summaryGoods: t("checkout.summary.goods"),
+    summaryDiscount: t("checkout.summary.discount"),
+    summaryPayable: t("checkout.summary.payable"),
+    submitText: t("checkout.submit"),
+    submittingText: t("checkout.submitting"),
     _cartItemIds: [],
     _toastTimer: null,
   } as CheckoutData,
 
   onLoad(options: Record<string, string | undefined>) {
     const cartItemIds = options.items ? options.items.split(",").filter(Boolean) : [];
-    this.setData({ _cartItemIds: cartItemIds, itemCount: cartItemIds.length });
+    this.setData({
+      _cartItemIds: cartItemIds,
+      itemCount: cartItemIds.length,
+      selectedCountText:
+        cartItemIds.length > 0
+          ? t("checkout.selectedCount", { count: cartItemIds.length })
+          : "",
+    });
   },
 
   onShow() {
@@ -112,12 +211,18 @@ Page({
       try {
         quote = await createCheckoutQuote({ cartItemIds: this.data._cartItemIds });
       } catch (cause) {
-        quoteError = errorMessage(cause, "应付金额加载失败");
+        quoteError = errorMessage(cause, t("checkout.errors.quoteLoad"));
       }
       const defaultAddress = addresses.find((address) => address.isDefault) || addresses[0];
       this.setData({
         addresses,
-        coupons,
+        coupons: coupons.map((coupon) => ({
+          ...coupon,
+          thresholdText:
+            coupon.minSpendCny != null && coupon.minSpendCny > 0
+              ? t("checkout.coupon.threshold", { amount: coupon.minSpendCny })
+              : "",
+        })),
         quote,
         quoteError,
         payableText: quote && quote.payableAmountCny != null ? formatCny(quote.payableAmountCny) : "--",
@@ -133,7 +238,7 @@ Page({
     } catch (cause) {
       this.setData({
         loading: false,
-        error: errorMessage(cause, "结算信息加载失败"),
+        error: errorMessage(cause, t("checkout.errors.load")),
       });
     }
   },
@@ -166,18 +271,28 @@ Page({
   applyGiftCard() {
     const code = this.data.giftCardCode.trim();
     if (!code) {
-      this.setData({ giftCardError: "请输入礼品卡卡号" });
+      this.setData({ giftCardError: t("checkout.giftCard.required") });
       return;
     }
     if (code.length < 8) {
-      this.setData({ giftCardError: "礼品卡卡号格式不正确" });
+      this.setData({ giftCardError: t("checkout.giftCard.invalid") });
       return;
     }
-    this.setData({ giftCardApplied: code, giftCardCode: "", giftCardError: "" });
+    this.setData({
+      giftCardApplied: code,
+      giftCardAppliedText: t("checkout.giftCard.applied", { code }),
+      giftCardCode: "",
+      giftCardError: "",
+    });
   },
 
   removeGiftCard() {
-    this.setData({ giftCardApplied: "", giftCardCode: "", giftCardError: "" });
+    this.setData({
+      giftCardApplied: "",
+      giftCardAppliedText: "",
+      giftCardCode: "",
+      giftCardError: "",
+    });
   },
 
   togglePoints() {
@@ -217,29 +332,29 @@ Page({
 
   async submit() {
     if (!this.data.selectedAddressId) {
-      this.showToast("请选择收货地址");
+      this.showToast(t("checkout.errors.addressRequired"));
       return;
     }
     if (!this.data.quote) {
-      this.showToast(this.data.quoteError || "应付金额未就绪，请重试");
+      this.showToast(this.data.quoteError || t("checkout.errors.quoteNotReady"));
       return;
     }
     if (this.data.needInvoice) {
       if (!this.data.invoiceTitle.trim()) {
         this.showToast(
           this.data.invoiceTitleType === "company"
-            ? "请填写发票抬头（公司名称）"
-            : "请填写发票抬头（个人姓名）",
+            ? t("checkout.invoice.titleRequiredCompany")
+            : t("checkout.invoice.titleRequiredPersonal"),
         );
         return;
       }
       if (this.data.invoiceTitleType === "company") {
         if (!this.data.invoiceTaxNumber.trim()) {
-          this.showToast("请填写企业税号");
+          this.showToast(t("checkout.invoice.taxRequired"));
           return;
         }
         if (!/^[A-Z0-9]{15,20}$/.test(this.data.invoiceTaxNumber.trim())) {
-          this.showToast("税号格式不正确（15-20 位字母或数字）");
+          this.showToast(t("checkout.invoice.taxInvalid"));
           return;
         }
       }
@@ -274,7 +389,7 @@ Page({
         // The order exists and will be paid: tell the buyer which deduction did
         // not apply before sending them to the cashier.
         wx.showModal({
-          title: "部分优惠未生效",
+          title: t("checkout.errors.warningsTitle"),
           content: result.warnings.join("\n"),
           showCancel: false,
           complete: next,
@@ -283,7 +398,7 @@ Page({
         next();
       }
     } catch (cause) {
-      this.showToast(errorMessage(cause, "提交订单失败"));
+      this.showToast(errorMessage(cause, t("checkout.errors.submitFailed")));
       this.setData({ busy: false });
     }
   },

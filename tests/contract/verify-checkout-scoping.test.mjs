@@ -167,7 +167,7 @@ const INVOICE_ROOTS = [
       },
       {
         path: "apps/sdkwork-mall-mini-program/src/pages/checkout/index.wxml",
-        patterns: ["需要开具发票", "onInvoiceTitleInput"],
+        patterns: ["{{invoiceNeed}}", "onInvoiceTitleInput"],
       },
     ],
   },
@@ -245,7 +245,7 @@ const DELIVERY_ROOTS = [
       },
       {
         path: "apps/sdkwork-mall-mini-program/src/pages/checkout/index.wxml",
-        patterns: ["配送方式", "礼品卡"],
+        patterns: ["{{deliveryTitle}}", "{{giftCardTitle}}"],
       },
     ],
   },
