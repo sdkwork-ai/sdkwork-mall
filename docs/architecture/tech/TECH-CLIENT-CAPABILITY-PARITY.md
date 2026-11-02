@@ -125,13 +125,14 @@ found 17 capabilities whose screen name drifted — the same screen was labelled
 The only documented exception is the Flutter search screen, whose AppBar hosts a
 search field instead of a static title — the conventional mobile search UX.
 ## 5. Upstream Gaps Represented, Not Hidden
-Two capabilities have no published upstream contract yet. All four roots ship
+Three capabilities have no published upstream contract yet. All four roots ship
 the same realized subset and the same honest notice instead of diverging:
 
 | Capability | Upstream state | Realized behaviour on every root |
 | --- | --- | --- |
 | Buyer reviews | T1 product-review API not landed | Lists completed orders as review candidates; media upload copy states the pending contract |
 | Gift cards / red packets | Commerce gift-cards API not landed | Reserved entry with wallet fallback |
+| Favorites / footprint cloud sync | Commerce favorites API not landed | Device-local favorites and footprint (documented in each service header); sync starts when the contract ships |
 
 Known platform-level dependency gap, resolved 2026-11-02: the composed
 federated transport `@sdkwork/cloudrouter-app-sdk/domains` and
@@ -192,7 +193,7 @@ pnpm test:node                                                     → 109/109 p
   (tests/contract/verify-membership-purchase.test.mjs             → 4/4)
   (tests/contract/verify-payment-channel-wiring.test.mjs           → 4/4)
   (tests/contract/verify-notifications-feed.test.mjs               → 4/4)
-  (tests/contract/verify-first-load-split.test.mjs                 → 2/2)
+  (tests/contract/verify-first-load-split.test.mjs                 → 3/3)
   (tests/contract/verify-runtime-env-profiles.test.mjs             → 5/5)
   (tests/contract/verify-mp-runtime-env.test.mjs                   → 3/3)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
