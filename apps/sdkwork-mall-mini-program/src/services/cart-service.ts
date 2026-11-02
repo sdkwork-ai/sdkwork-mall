@@ -219,11 +219,82 @@ export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orde
   return { orderId, quote, warnings };
 }
 
-export async function payOrder(orderId: string, paymentMethod: string): Promise<string> {
+export interface MpWechatPayParams {
+  nonceStr: string;
+  package: string;
+  paySign: string;
+  signType: WechatMiniprogram.RequestPaymentOption["signType"];
+  timeStamp: string;
+}
+
+export interface MpPaymentStart {
+  paymentId: string;
+  /** Prepay parameters for `wx.requestPayment`; null when the backend returns none. */
+  wechatPay: MpWechatPayParams | null;
+  /** Channel cashier URL (H5/QR channels); empty when the backend returns none. */
+  paymentUrl: string;
+}
+
+const PAYMENT_URL_KEYS = ["paymentUrl", "payUrl", "mwebUrl", "cashierUrl", "redirectUrl"] as const;
+
+function readText(source: Record<string, unknown>, keys: readonly string[]): string {
+  for (const key of keys) {
+    const value = source[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      return String(value).trim();
+    }
+  }
+  return "";
+}
+
+function readPaymentUrl(payment: Record<string, unknown>): string {
+  const params = readParams(payment);
+  for (const key of PAYMENT_URL_KEYS) {
+    for (const source of [payment, params]) {
+      const value = source[key];
+      if (typeof value === "string" && /^https?:\/\//u.test(value.trim())) {
+        return value.trim();
+      }
+    }
+  }
+  return "";
+}
+
+function readParams(payment: Record<string, unknown>): Record<string, unknown> {
+  return payment.paymentParams && typeof payment.paymentParams === "object"
+    ? (payment.paymentParams as Record<string, unknown>)
+    : {};
+}
+
+function readWechatPay(payment: Record<string, unknown>): MpWechatPayParams | null {
+  const params = readParams(payment);
+  const source = Object.keys(params).length > 0 ? params : payment;
+  const timeStamp = readText(source, ["timeStamp", "timestamp"]);
+  const nonceStr = readText(source, ["nonceStr", "nonce_str"]);
+  const packageValue = readText(source, ["package", "packageValue", "prepayId", "prepay_id"]);
+  const paySign = readText(source, ["paySign", "pay_sign", "sign"]);
+  if (!timeStamp || !nonceStr || !packageValue || !paySign) {
+    return null;
+  }
+  const signType = readText(source, ["signType", "sign_type"]).toUpperCase();
+  return {
+    nonceStr,
+    package: packageValue,
+    paySign,
+    signType: signType === "MD5" || signType === "HMAC-SHA256" ? signType : "RSA",
+    timeStamp,
+  };
+}
+
+export async function payOrder(orderId: string, paymentMethod: string): Promise<MpPaymentStart> {
   const payment = await request({
     path: `/orders/${orderId}/payments`,
     method: "POST",
     body: { paymentMethod },
   });
-  return String(payment.paymentId ?? payment.id ?? "");
+  return {
+    paymentId: String(payment.paymentId ?? payment.id ?? ""),
+    paymentUrl: readPaymentUrl(payment),
+    wechatPay: readWechatPay(payment),
+  };
 }

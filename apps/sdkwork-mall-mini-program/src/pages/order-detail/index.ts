@@ -2,10 +2,9 @@ import { errorMessage, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatCny, formatTime, statusLabel } from "../../utils/format";
 import {
-  getOrderDetail,
-  payOrder,
   cancelOrder,
   confirmReceipt,
+  getOrderDetail,
   type MpOrderDetail,
 } from "../../services/order-service";
 
@@ -75,16 +74,16 @@ Page({
     }
   },
 
-  async pay() {
-    try {
-      const paymentMethod = this.data.detail?.paymentMethod || "WECHAT";
-      const paymentId = await payOrder(this.data._orderId, paymentMethod);
-      wx.redirectTo({
-        url: mpCapabilityUrl("storefront.mall.payment-result", { orderId: this.data._orderId, paymentId: paymentId, status: "pending" }),
-      });
-    } catch (cause) {
-      wx.showToast({ title: errorMessage(cause, "发起支付失败"), icon: "none" });
-    }
+  pay() {
+    // The cashier owns the real channel handoff (wx.requestPayment / link
+    // copy), so every pay entry funnels through the same page.
+    const paymentMethod = this.data.detail?.paymentMethod || "";
+    wx.navigateTo({
+      url: mpCapabilityUrl("storefront.mall.payment-cashier", {
+        orderId: this.data._orderId,
+        ...(paymentMethod ? { paymentMethod } : {}),
+      }),
+    });
   },
 
   async cancel() {

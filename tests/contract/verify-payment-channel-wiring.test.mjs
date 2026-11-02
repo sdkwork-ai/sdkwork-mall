@@ -5,12 +5,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 /**
- * Payment channel wiring contract (H5).
+ * Payment channel wiring contract.
  *
  * Creating a payment used to keep only the payment id and navigate to the result
- * page, so a buyer who received an Alipay/WeChat H5 cashier URL could never
- * complete the charge. The client must surface the channel URL and hand the buyer
- * over to it; the result page stays the fallback when no channel URL exists.
+ * page, so a buyer who received a cashier URL (or a WeChat prepay payload) could
+ * never complete the charge. Every pay entry must hand control to the real
+ * channel and keep the result page only as the fallback.
  */
 const workspaceRoot = path.resolve(import.meta.dirname, "..", "..");
 
@@ -47,4 +47,21 @@ test("every H5 pay action redirects to the channel URL when present", () => {
   const cartService = read("apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/cart-service.ts");
   assert.match(cartService, /export interface MallH5PaymentRetryStart/u);
   assert.match(cartService, /paymentUrl: readPaymentUrl\(payment\)/u);
+});
+
+test("the mini-program cashier invokes the native WeChat cashier", () => {
+  const service = read("apps/sdkwork-mall-mini-program/src/services/cart-service.ts");
+  assert.match(service, /export interface MpPaymentStart/u);
+  assert.match(service, /export interface MpWechatPayParams/u);
+  assert.match(service, /function readWechatPay\(/u);
+  assert.match(service, /wechatPay: readWechatPay\(payment\)/u);
+  assert.match(service, /paymentUrl: readPaymentUrl\(payment\)/u);
+
+  const cashier = read("apps/sdkwork-mall-mini-program/src/pages/cashier/index.ts");
+  assert.match(cashier, /wx\.requestPayment\(\{/u);
+  assert.match(cashier, /await this\.requestWechatPayment\(payment\.wechatPay\)/u);
+  assert.match(cashier, /wx\.setClipboardData\(\{ data: payment\.paymentUrl \}\)/u);
+
+  const orderDetail = read("apps/sdkwork-mall-mini-program/src/pages/order-detail/index.ts");
+  assert.match(orderDetail, /storefront\.mall\.payment-cashier/u);
 });
