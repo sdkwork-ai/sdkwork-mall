@@ -152,7 +152,7 @@ const INVOICE_ROOTS = [
     pageFiles: [
       {
         path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
-        patterns: ["需要开具发票", "invoiceForm", "/^[A-Z0-9]{15,20}$/u"],
+        patterns: ["checkout.invoice.need", "invoiceForm", "/^[A-Z0-9]{15,20}$/u"],
       },
     ],
   },
@@ -230,7 +230,7 @@ const DELIVERY_ROOTS = [
     pageFiles: [
       {
         path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
-        patterns: ["配送方式", "礼品卡", "DELIVERY_METHODS"],
+        patterns: ["checkout.delivery.title", "checkout.giftCard.title", "DELIVERY_METHODS"],
       },
     ],
   },

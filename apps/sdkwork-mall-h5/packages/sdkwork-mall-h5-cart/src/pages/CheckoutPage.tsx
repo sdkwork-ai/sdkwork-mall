@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
@@ -15,11 +16,11 @@ import {
 } from "../cart-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
-/** Delivery options; the server prices the choice into the quote. */
+/** Delivery options; labels/descriptions come from the i18n catalogue. */
 const DELIVERY_METHODS = [
-  { code: "standard", description: "3-5 天送达 · 免费", label: "普通配送" },
-  { code: "express", description: "次日送达 · ¥12.00", label: "极速达" },
-  { code: "sf", description: "当日达 · ¥22.00", label: "顺丰速运" },
+  { code: "standard", descriptionKey: "checkout.delivery.standard.description", labelKey: "checkout.delivery.standard.label" },
+  { code: "express", descriptionKey: "checkout.delivery.express.description", labelKey: "checkout.delivery.express.label" },
+  { code: "sf", descriptionKey: "checkout.delivery.sf.description", labelKey: "checkout.delivery.sf.label" },
 ] as const;
 
 function parseCartItemIds(rawItems: string | null): string[] {
@@ -33,6 +34,7 @@ function parseCartItemIds(rawItems: string | null): string[] {
 }
 
 export function SdkworkMallH5CheckoutPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const cartItemIds = useMemo(() => parseCartItemIds(searchParams.get("items")), [searchParams]);
@@ -87,7 +89,7 @@ export function SdkworkMallH5CheckoutPage() {
     loadCheckout()
       .catch((cause: unknown) => {
         if (active) {
-          setQuoteError(cause instanceof Error ? cause.message : "结算报价加载失败");
+          setQuoteError(cause instanceof Error ? cause.message : t("checkout.errors.quote"));
         }
       })
       .finally(() => {
@@ -98,19 +100,19 @@ export function SdkworkMallH5CheckoutPage() {
     return () => {
       active = false;
     };
-  }, [loadCheckout]);
+  }, [loadCheckout, t]);
 
   const retryLoadCheckout = useCallback(() => {
     setLoading(true);
     setQuoteError(null);
     loadCheckout()
       .catch((cause: unknown) => {
-        setQuoteError(cause instanceof Error ? cause.message : "结算报价加载失败");
+        setQuoteError(cause instanceof Error ? cause.message : t("checkout.errors.quote"));
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [loadCheckout]);
+  }, [loadCheckout, t]);
 
   const payableAmount = useMemo(() => quote?.payableAmountCny ?? null, [quote]);
   const selectedCoupon = coupons.find((coupon) => coupon.id === selectedCouponId) ?? null;
@@ -119,11 +121,11 @@ export function SdkworkMallH5CheckoutPage() {
     setGiftCardError(null);
     const code = giftCardCode.trim();
     if (!code) {
-      setGiftCardError("请输入礼品卡卡号");
+      setGiftCardError(t("checkout.giftCard.required"));
       return;
     }
     if (code.length < 8) {
-      setGiftCardError("礼品卡卡号格式不正确");
+      setGiftCardError(t("checkout.giftCard.invalid"));
       return;
     }
     setGiftCardApplied(code);
@@ -138,31 +140,33 @@ export function SdkworkMallH5CheckoutPage() {
 
   async function handleSubmit() {
     if (!selectedAddressId) {
-      setMessage("请选择收货地址");
+      setMessage(t("checkout.errors.addressRequired"));
       return;
     }
     if (!selectedMethodCode) {
-      setMessage("请选择支付方式");
+      setMessage(t("checkout.errors.paymentRequired"));
       return;
     }
     if (!quote) {
-      setMessage("结算报价未就绪，请先重试刷新金额");
+      setMessage(t("checkout.errors.quoteNotReady"));
       return;
     }
     if (needInvoice) {
       if (!invoiceTitle.trim()) {
         setMessage(
-          invoiceTitleType === "company" ? "请填写发票抬头（公司名称）" : "请填写发票抬头（个人姓名）",
+          invoiceTitleType === "company"
+            ? t("checkout.invoice.titleRequiredCompany")
+            : t("checkout.invoice.titleRequiredPersonal"),
         );
         return;
       }
       if (invoiceTitleType === "company") {
         if (!invoiceTaxNumber.trim()) {
-          setMessage("请填写企业税号");
+          setMessage(t("checkout.invoice.taxRequired"));
           return;
         }
         if (!/^[A-Z0-9]{15,20}$/u.test(invoiceTaxNumber.trim())) {
-          setMessage("税号格式不正确（15-20 位字母或数字）");
+          setMessage(t("checkout.invoice.taxInvalid"));
           return;
         }
       }
@@ -195,23 +199,23 @@ export function SdkworkMallH5CheckoutPage() {
       }
       navigate(result.nextUrl, { replace: true });
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "提交订单失败");
+      setMessage(cause instanceof Error ? cause.message : t("checkout.errors.submit"));
     } finally {
       setBusy(false);
     }
   }
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载结算信息...</div>;
+    return <div className="sdk-h5-page sdk-h5-loading">{t("checkout.loading")}</div>;
   }
 
   if (addresses.length === 0) {
     return (
       <div className="sdk-h5-page">
-        <div className="sdk-h5-empty">请先在「我的」中添加收货地址</div>
+        <div className="sdk-h5-empty">{t("checkout.address.empty")}</div>
         <div className="sdk-h5-center">
           <button className="sdk-h5-button sdk-h5-button-primary" onClick={() => navigate("/buyer")} type="button">
-            去添加地址
+            {t("checkout.address.add")}
           </button>
         </div>
       </div>
@@ -220,14 +224,14 @@ export function SdkworkMallH5CheckoutPage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">确认订单</h1>
+      <h1 className="sdk-h5-visually-hidden">{t("checkout.title")}</h1>
       {quoteError ? <SdkworkMallH5ErrorState message={quoteError} onRetry={retryLoadCheckout} /> : null}
       {cartItemIds.length > 0 ? (
-        <p className="sdk-h5-muted">已选择 {cartItemIds.length} 件购物车商品参与结算</p>
+        <p className="sdk-h5-muted">{t("checkout.selectedCount", { count: cartItemIds.length })}</p>
       ) : null}
 
       <section className="sdk-h5-section">
-        <h2>收货地址</h2>
+        <h2>{t("checkout.address.title")}</h2>
         {addresses.map((address) => (
           <label className="sdk-h5-address-row" key={address.id}>
             <input
@@ -238,7 +242,9 @@ export function SdkworkMallH5CheckoutPage() {
             />
             <span>
               {address.receiverName} {address.receiverPhone}
-              {address.isDefault ? <em className="sdk-h5-address-default">默认</em> : null}
+              {address.isDefault ? (
+                <em className="sdk-h5-address-default">{t("checkout.address.default")}</em>
+              ) : null}
               <br />
               <small>{address.addressLine}</small>
             </span>
@@ -247,7 +253,7 @@ export function SdkworkMallH5CheckoutPage() {
       </section>
 
       <section className="sdk-h5-section">
-        <h2>配送方式</h2>
+        <h2>{t("checkout.delivery.title")}</h2>
         {DELIVERY_METHODS.map((method) => (
           <label className="sdk-h5-address-row" key={method.code}>
             <input
@@ -257,9 +263,9 @@ export function SdkworkMallH5CheckoutPage() {
               type="radio"
             />
             <span>
-              {method.label}
+              {t(method.labelKey)}
               <br />
-              <small className="sdk-h5-muted">{method.description}</small>
+              <small className="sdk-h5-muted">{t(method.descriptionKey)}</small>
             </span>
           </label>
         ))}
@@ -267,7 +273,7 @@ export function SdkworkMallH5CheckoutPage() {
 
       {paymentMethods.length > 0 ? (
         <section className="sdk-h5-section">
-          <h2>支付方式</h2>
+          <h2>{t("checkout.payment.title")}</h2>
           {paymentMethods.map((method) => (
             <label className="sdk-h5-address-row" key={method.id}>
               <input
@@ -283,7 +289,7 @@ export function SdkworkMallH5CheckoutPage() {
       ) : null}
 
       <section className="sdk-h5-section">
-        <h2>优惠券</h2>
+        <h2>{t("checkout.coupon.title")}</h2>
         <label className="sdk-h5-address-row">
           <input
             checked={!selectedCouponId}
@@ -291,7 +297,7 @@ export function SdkworkMallH5CheckoutPage() {
             onChange={() => setSelectedCouponId("")}
             type="radio"
           />
-          <span>不使用优惠券</span>
+          <span>{t("checkout.coupon.none")}</span>
         </label>
         {coupons.map((coupon) => (
           <label className="sdk-h5-address-row" key={coupon.id}>
@@ -305,43 +311,47 @@ export function SdkworkMallH5CheckoutPage() {
               {coupon.title}
               {coupon.discountAmountCny != null ? <strong> ¥{coupon.discountAmountCny.toFixed(2)}</strong> : null}
               {coupon.minSpendCny != null ? (
-                <small>{coupon.minSpendCny > 0 ? `（满 ¥${coupon.minSpendCny.toFixed(2)} 可用）` : "（无门槛）"}</small>
+                <small>
+                  {coupon.minSpendCny > 0
+                    ? t("checkout.coupon.minSpend", { amount: coupon.minSpendCny.toFixed(2) })
+                    : t("checkout.coupon.noThreshold")}
+                </small>
               ) : null}
             </span>
           </label>
         ))}
-        {coupons.length === 0 ? <p className="sdk-h5-muted">暂无可用优惠券，可到领券中心领取。</p> : null}
+        {coupons.length === 0 ? <p className="sdk-h5-muted">{t("checkout.coupon.empty")}</p> : null}
       </section>
 
       <section className="sdk-h5-section">
-        <h2>抵扣</h2>
+        <h2>{t("checkout.deduct.title")}</h2>
         <label className="sdk-h5-address-row">
           <input checked={useWallet} onChange={(event) => setUseWallet(event.target.checked)} type="checkbox" />
-          <span>钱包余额抵扣</span>
+          <span>{t("checkout.deduct.wallet")}</span>
         </label>
         <label className="sdk-h5-address-row">
           <input checked={usePoints} onChange={(event) => setUsePoints(event.target.checked)} type="checkbox" />
-          <span>积分抵扣</span>
+          <span>{t("checkout.deduct.points")}</span>
         </label>
       </section>
 
       <section className="sdk-h5-section">
-        <h2>礼品卡</h2>
+        <h2>{t("checkout.giftCard.title")}</h2>
         {giftCardApplied ? (
           <div className="sdk-h5-address-row">
             <span>
-              已使用礼品卡 <code>{giftCardApplied}</code>
+              {t("checkout.giftCard.applied")} <code>{giftCardApplied}</code>
             </span>
             <button className="sdk-h5-link-button" onClick={handleRemoveGiftCard} type="button">
-              移除
+              {t("checkout.giftCard.remove")}
             </button>
           </div>
         ) : (
           <div className="sdk-h5-redeem-row">
             <input
-              aria-label="礼品卡卡号"
+              aria-label={t("checkout.giftCard.label")}
               onChange={(event) => setGiftCardCode(event.target.value)}
-              placeholder="输入礼品卡卡号"
+              placeholder={t("checkout.giftCard.placeholder")}
               value={giftCardCode}
             />
             <button
@@ -350,7 +360,7 @@ export function SdkworkMallH5CheckoutPage() {
               onClick={handleApplyGiftCard}
               type="button"
             >
-              使用
+              {t("checkout.giftCard.apply")}
             </button>
           </div>
         )}
@@ -362,26 +372,26 @@ export function SdkworkMallH5CheckoutPage() {
       </section>
 
       <section className="sdk-h5-section">
-        <h2>买家留言</h2>
+        <h2>{t("checkout.remark.title")}</h2>
         <textarea
-          aria-label="买家留言"
+          aria-label={t("checkout.remark.label")}
           maxLength={200}
           onChange={(event) => setBuyerRemark(event.target.value)}
-          placeholder="选填，给商家留言"
+          placeholder={t("checkout.remark.placeholder")}
           rows={2}
           value={buyerRemark}
         />
       </section>
 
       <section className="sdk-h5-section">
-        <h2>发票</h2>
+        <h2>{t("checkout.invoice.title")}</h2>
         <label className="sdk-h5-address-row">
           <input
             checked={needInvoice}
             onChange={(event) => setNeedInvoice(event.target.checked)}
             type="checkbox"
           />
-          <span>需要开具发票</span>
+          <span>{t("checkout.invoice.need")}</span>
         </label>
         {needInvoice ? (
           <>
@@ -393,7 +403,7 @@ export function SdkworkMallH5CheckoutPage() {
                   onChange={() => setInvoiceTitleType("personal")}
                   type="radio"
                 />
-                <span>个人</span>
+                <span>{t("checkout.invoice.personal")}</span>
               </label>
               <label>
                 <input
@@ -402,31 +412,31 @@ export function SdkworkMallH5CheckoutPage() {
                   onChange={() => setInvoiceTitleType("company")}
                   type="radio"
                 />
-                <span>企业</span>
+                <span>{t("checkout.invoice.company")}</span>
               </label>
             </div>
             <label className="sdk-h5-field">
-              发票抬头
+              {t("checkout.invoice.titleLabel")}
               <input
-                aria-label="发票抬头"
+                aria-label={t("checkout.invoice.titleLabel")}
                 onChange={(event) => setInvoiceTitle(event.target.value)}
                 value={invoiceTitle}
               />
             </label>
             {invoiceTitleType === "company" ? (
               <label className="sdk-h5-field">
-                税号
+                {t("checkout.invoice.taxNumberLabel")}
                 <input
-                  aria-label="税号"
+                  aria-label={t("checkout.invoice.taxNumberLabel")}
                   onChange={(event) => setInvoiceTaxNumber(event.target.value)}
                   value={invoiceTaxNumber}
                 />
               </label>
             ) : null}
             <label className="sdk-h5-field">
-              接收邮箱
+              {t("checkout.invoice.emailLabel")}
               <input
-                aria-label="接收邮箱"
+                aria-label={t("checkout.invoice.emailLabel")}
                 inputMode="email"
                 onChange={(event) => setInvoiceEmail(event.target.value)}
                 value={invoiceEmail}
@@ -437,13 +447,23 @@ export function SdkworkMallH5CheckoutPage() {
       </section>
 
       <section className="sdk-h5-checkout-summary">
-        {quote?.originalAmountCny != null ? <p>商品金额：¥{quote.originalAmountCny.toFixed(2)}</p> : null}
-        {quote?.discountAmountCny ? <p>优惠：-¥{quote.discountAmountCny.toFixed(2)}</p> : null}
+        {quote?.originalAmountCny != null ? (
+          <p>{t("checkout.summary.goods", { amount: quote.originalAmountCny.toFixed(2) })}</p>
+        ) : null}
+        {quote?.discountAmountCny ? (
+          <p>{t("checkout.summary.discount", { amount: quote.discountAmountCny.toFixed(2) })}</p>
+        ) : null}
         {selectedCoupon?.discountAmountCny != null ? (
-          <p>已选优惠券：{selectedCoupon.title}（-¥{selectedCoupon.discountAmountCny.toFixed(2)}）</p>
+          <p>
+            {t("checkout.summary.couponApplied", {
+              amount: selectedCoupon.discountAmountCny.toFixed(2),
+              title: selectedCoupon.title,
+            })}
+          </p>
         ) : null}
         <p>
-          应付：<strong>¥{payableAmount != null ? payableAmount.toFixed(2) : "--"}</strong>
+          {t("checkout.summary.payable")}
+          <strong>¥{payableAmount != null ? payableAmount.toFixed(2) : "--"}</strong>
         </p>
       </section>
 
@@ -455,7 +475,7 @@ export function SdkworkMallH5CheckoutPage() {
         onClick={() => void handleSubmit()}
         type="button"
       >
-        {busy ? "提交中..." : "提交订单"}
+        {busy ? t("checkout.submitting") : t("checkout.submit")}
       </button>
     </div>
   );
