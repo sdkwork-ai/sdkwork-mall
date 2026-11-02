@@ -36,6 +36,7 @@ import 'package:sdkwork_mall_flutter_mobile/pages/home_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/logistics_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/orders_page.dart';
 import 'package:sdkwork_mall_flutter_mobile/pages/reviews_page.dart';
+import 'package:sdkwork_mall_flutter_mobile/pages/settings_and_invoices.dart';
 import 'package:sdkwork_mall_flutter_mobile/services/commerce.dart';
 
 const _captureOn = bool.fromEnvironment('VISUAL_CAPTURE');
@@ -92,6 +93,35 @@ Future<void> main() async {
       );
     }
 
+    /// Same capture, but scrolls the page's primary list first so a long
+    /// surface can be reviewed below the fold.
+    Future<void> pumpAndScrollAndCapture(
+      Widget child,
+      String golden,
+      double deltaY,
+    ) async {
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              useMaterial3: true,
+              fontFamily: 'MSYH',
+              colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE93B3D)),
+            ),
+            home: Scaffold(body: child),
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 2500));
+      });
+      await tester.drag(find.byType(ListView).first, Offset(0, deltaY));
+      await tester.pump(const Duration(milliseconds: 400));
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('goldens/$golden'),
+      );
+    }
+
     Directory('test/goldens').createSync(recursive: true);
     await pumpAndCapture(const SdkworkHomePage(), 'home.png');
     await pumpAndCapture(const SdkworkCategoryPage(), 'category.png');
@@ -106,5 +136,9 @@ Future<void> main() async {
     await pumpAndCapture(const SdkworkGiftCardsPage(), 'gift-cards.png');
     await pumpAndCapture(const SdkworkProfilePage(), 'profile.png');
     await pumpAndCapture(const SdkworkSecurityPage(), 'security.png');
+    await pumpAndCapture(const SdkworkSettingsPage(), 'settings.png');
+    // The buyer hub is long: capture the 账户 block (settings/reviews/gift
+    // cards/security/help entries) that the parity contract requires.
+    await pumpAndScrollAndCapture(const SdkworkBuyerPage(), 'buyer-account-section.png', -980);
   });
 }
