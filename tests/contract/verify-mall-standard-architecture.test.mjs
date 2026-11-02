@@ -210,6 +210,37 @@ function collectRouteIdsFromPackages() {
   return routeIds;
 }
 
+function collectRoutePathsFromPackages() {
+  const routePaths = [];
+  for (const directory of activeMallPackages) {
+    const routesPath = path.join(mallPackagesRoot, directory, "src", "routes.ts");
+    if (!existsSync(routesPath)) {
+      continue;
+    }
+    for (const match of readFileSync(routesPath, "utf8").matchAll(/path:\s*"([^"]+)"/g)) {
+      routePaths.push(match[1]);
+    }
+  }
+  return routePaths;
+}
+
+/** `/admin/products/:productId/edit` matches `/admin/products/42/edit`. */
+function matchesPcRoutePath(registered, target) {
+  const registeredSegments = registered.split("/").filter(Boolean);
+  const targetSegments = target.split("/").filter(Boolean);
+  if (registeredSegments.length !== targetSegments.length) {
+    return false;
+  }
+  return registeredSegments.every(
+    (segment, index) => segment.startsWith(":") || segment === targetSegments[index],
+  );
+}
+
+/** Normalizes a template-literal link (`/admin/products/${id}/edit`) to a matchable shape. */
+function normalizeLinkTemplate(target) {
+  return target.replace(/\$\{[^}]+\}/gu, ":param");
+}
+
 function collectFiles(root, predicate) {
   if (!existsSync(root)) {
     return [];
@@ -781,4 +812,43 @@ test("mall active packages declare sdkwork-mall workspace ownership", () => {
   }
 
   assert.deepEqual(violations, []);
+});
+
+test("mall PC in-app links resolve to a mounted route", () => {
+  // A Link to a path no route contributes lands on the catch-all redirect and
+  // silently drops the operator out of the screen they were on. The route
+  // registry is enough to prove this statically, including parameterised and
+  // template-literal links.
+  const routePaths = collectRoutePathsFromPackages();
+  const nonRoutePaths = new Set([
+    // IAM auth gate rendered by @sdkwork/auth-pc-react outside this router.
+    "/auth/login",
+  ]);
+
+  const unresolved = [];
+  for (const directory of activeMallPackages) {
+    const srcRoot = path.join(mallPackagesRoot, directory, "src");
+    for (const file of collectFiles(srcRoot, (filePath) => /\.(tsx|ts)$/u.test(filePath))) {
+      const source = readFileSync(file, "utf8");
+      const relative = path.relative(workspaceRoot, file).replace(/\\/gu, "/");
+      const linkPattern = /to="(\/[^"]*)"|navigate\("(\/[^"]*)"|to=\{`(\/[^`]*)`\}/gu;
+      for (const match of source.matchAll(linkPattern)) {
+        const raw = match[1] ?? match[2] ?? match[3] ?? "";
+        const pathOnly = raw.split("?")[0].split("#")[0];
+        if (!pathOnly || nonRoutePaths.has(pathOnly)) {
+          continue;
+        }
+        const normalized = normalizeLinkTemplate(pathOnly);
+        if (!routePaths.some((registered) => matchesPcRoutePath(registered, normalized))) {
+          unresolved.push(`${relative} → ${raw}`);
+        }
+      }
+    }
+  }
+
+  assert.deepEqual(
+    unresolved,
+    [],
+    `Links target paths the PC router does not mount:\n${unresolved.join("\n")}`,
+  );
 });

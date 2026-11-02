@@ -147,10 +147,10 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 43/43 pass
+pnpm test:node                                                     → 45/45 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
-  (tests/contract/verify-mall-standard-architecture.test.mjs       → 14/14)
-  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 4/4
+  (tests/contract/verify-mall-standard-architecture.test.mjs       → 15/15)
+  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 5/5
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 4/4
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
@@ -165,7 +165,23 @@ node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
 pnpm check:capability-parity                                       → 36 capabilities, 0 gaps
 ```
 
-### 6.1 Per-package typecheck while the root gate is upstream-blocked
+### 6.1 Navigation integrity
+
+Both browser roots now prove statically that every in-app link resolves to a
+mounted route (`to="…"`, `navigate("…")`, and template-literal links, with
+`:param` matching):
+
+- H5: `apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture.test.mjs`;
+- PC: `tests/contract/verify-mall-standard-architecture.test.mjs` — this gate
+  found two dead admin-product links (`/admin/catalog/products`,
+  `/admin/catalog/products/new`) whose target routes were never contributed, so
+  "back to product list" and "add product" dropped the operator out of the
+  console. The product admin now contributes `admin.commerce.product-admin.create`
+  (`/admin/products/new`) and `admin.commerce.product-admin.edit`
+  (`/admin/products/:productId/edit`), AppRoutes mounts them with the matching
+  `CatalogAdmin sectionId`, and the links point at them.
+
+### 6.2 Per-package typecheck while the root gate is upstream-blocked
 
 The root `pnpm typecheck` fails on the missing `./domains` facade (section 5),
 which would otherwise hide any regression in the capability packages. Every

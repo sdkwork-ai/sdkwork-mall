@@ -365,6 +365,10 @@ function resolveRouteScreen(
       return <SdkworkMallAdminMarketingPage />;
     case "admin.commerce.product-admin.catalog":
       return <CatalogAdmin />;
+    case "admin.commerce.product-admin.create":
+      return <CatalogAdmin sectionId="productCreate" />;
+    case "admin.commerce.product-admin.edit":
+      return <CatalogAdmin sectionId="productEdit" />;
     case "admin.commerce.membership-admin.dashboard":
       return <SdkworkMembershipAdminPage locale={locale} />;
     default:

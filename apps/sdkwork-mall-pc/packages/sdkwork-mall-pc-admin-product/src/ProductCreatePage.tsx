@@ -662,7 +662,7 @@ function ProductCreateHeader({ mode, step }: { mode: ProductCreatePageMode; step
         <Link
           aria-label="返回商品列表"
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-lobster-300 hover:text-lobster-600 dark:border-white/10 dark:bg-[#171717] dark:text-slate-300 dark:hover:border-lobster-500/40 dark:hover:text-lobster-300"
-          to="/admin/catalog/products"
+          to="/admin/products"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
@@ -855,7 +855,7 @@ function ProductCreateStepOne({
         primaryLabel="下一步"
         primaryMarker="data-admin-product-create-next"
         secondaryLabel="返回列表"
-        secondaryTo="/admin/catalog/products"
+        secondaryTo="/admin/products"
         onPrimaryClick={onNext}
       />
     </div>

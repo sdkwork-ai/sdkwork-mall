@@ -1,6 +1,8 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { strict as assert } from "node:assert";
+import { join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 
 function read(relativePath) {
   return readFileSync(new URL(relativePath, import.meta.url), "utf8");
@@ -96,3 +98,83 @@ test("mall H5 commerce consumption goes through the shared facade", () => {
     assert.match(read(file), /getSdkworkCommerceService/u, `${file} must consume the commerce service facade`);
   }
 });
+
+test("every in-app H5 link resolves to a mounted route", () => {
+  // A link to a path the router does not mount lands on the catch-all "page
+  // does not exist" screen. That is a user-visible defect the route registry
+  // can prove statically, so no page link should be able to regress silently.
+  const packagesRoot = fileURLToPath(new URL("../../packages/", import.meta.url));
+  const routePaths = collectRoutePaths(packagesRoot);
+  const nonRoutePaths = new Set([
+    // IAM auth gate owned by @sdkwork/auth-pc-react (rendered before AppRoutes).
+    "/auth/login",
+  ]);
+
+  const unresolved = [];
+  for (const file of collectTsx(packagesRoot)) {
+    const source = readFileSync(file, "utf8");
+    const relative = file.replace(packagesRoot, "").replace(/\\/gu, "/");
+    for (const match of source.matchAll(/to="(\/[^"$]*)"|navigate\("(\/[^"$]*)"/gu)) {
+      const target = match[1] ?? match[2] ?? "";
+      const pathOnly = target.split("?")[0].split("#")[0];
+      if (pathOnly === "" || nonRoutePaths.has(pathOnly)) {
+        continue;
+      }
+      if (!routePaths.some((registered) => matchesRoutePath(registered, pathOnly))) {
+        unresolved.push(`${relative} → ${target}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    unresolved,
+    [],
+    `Links target paths the H5 router does not mount:\n${unresolved.join("\n")}`,
+  );
+});
+
+function collectRoutePaths(packagesRoot) {
+  const paths = [];
+  for (const packageName of readdirSync(packagesRoot, { withFileTypes: true })) {
+    if (!packageName.isDirectory()) {
+      continue;
+    }
+    const routesFile = join(packagesRoot, packageName.name, "src", "routes.ts");
+    if (!existsSync(routesFile)) {
+      continue;
+    }
+    for (const match of readFileSync(routesFile, "utf8").matchAll(/path:\s*"([^"]+)"/gu)) {
+      paths.push(match[1]);
+    }
+  }
+  return paths;
+}
+
+function collectTsx(directory) {
+  const files = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const entryPath = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      // Never descend into linked dependencies.
+      if (entry.name === "node_modules" || entry.name === "dist") {
+        continue;
+      }
+      files.push(...collectTsx(entryPath));
+    } else if (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts")) {
+      files.push(entryPath);
+    }
+  }
+  return files;
+}
+
+/** `/categories/:categoryId` matches `/categories/42`; exact paths match only themselves. */
+function matchesRoutePath(registered, target) {
+  const registeredSegments = registered.split("/").filter(Boolean);
+  const targetSegments = target.split("/").filter(Boolean);
+  if (registeredSegments.length !== targetSegments.length) {
+    return false;
+  }
+  return registeredSegments.every(
+    (segment, index) => segment.startsWith(":") || segment === targetSegments[index],
+  );
+}

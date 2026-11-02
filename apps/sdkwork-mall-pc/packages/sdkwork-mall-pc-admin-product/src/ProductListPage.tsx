@@ -213,7 +213,7 @@ function ProductStatusTabs({ activeTabId, onChange }: ProductStatusTabsProps) {
       <Link
         className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-lobster-600 px-4 text-[14px] font-semibold text-white shadow-sm shadow-lobster-500/20 transition-colors hover:bg-lobster-700 focus:outline-none focus:ring-2 focus:ring-lobster-500/25 dark:bg-lobster-500 dark:hover:bg-lobster-400 dark:hover:text-slate-950"
         data-admin-product-create-button
-        to="/admin/catalog/products/new"
+        to="/admin/products/new"
       >
         <Plus className="h-4 w-4" />
         新增商品
@@ -545,7 +545,7 @@ function ProductTableRow({ onSelectedChange, record, selected, selectionId }: Pr
         {productId ? (
           <Link
             className="font-medium text-lobster-600 transition-colors hover:text-lobster-700 dark:text-lobster-300 dark:hover:text-lobster-200"
-            to={`/admin/catalog/products/${encodeURIComponent(productId)}/edit`}
+            to={`/admin/products/${encodeURIComponent(productId)}/edit`}
           >
             编辑
           </Link>
