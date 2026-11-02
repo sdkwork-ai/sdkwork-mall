@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 100/100 pass
+pnpm test:node                                                     → 103/103 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -193,6 +193,7 @@ pnpm test:node                                                     → 100/100 p
   (tests/contract/verify-payment-channel-wiring.test.mjs           → 4/4)
   (tests/contract/verify-notifications-feed.test.mjs               → 4/4)
   (tests/contract/verify-first-load-split.test.mjs                 → 2/2)
+  (tests/contract/verify-runtime-env-profiles.test.mjs             → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -653,6 +654,27 @@ port also imports the drive uploader and client on first upload.
 Measured dev entry chunks: H5 **864.3 KB → 729.7 KB raw** (gzip **186.0 KB →
 158.9 KB**), PC **864.3 KB → 660.3 KB raw** (gzip 145.1 KB → **134.1 KB**).
 `tests/contract/verify-first-load-split.test.mjs` pins both splits.
+
+### 6.1.27 Runtime environment matrix (Flutter)
+
+The Flutter app ships nine dart-define files (`env/sdkwork.<profile>.<environment>.json`),
+but every one of them still reported `development` and pointed at
+`https://api-dev.sdkwork.com` — including `production` and `cloud.production`. A
+production build therefore talked to the dev backend.
+
+Each file now declares its own identity and host family:
+
+| File suffix | environment | API host |
+| --- | --- | --- |
+| `.development` | development | `https://api-dev.sdkwork.com/app/v3/api` |
+| `.test` / `.staging` | test / staging | `http://127.0.0.1:18082/app/v3/api` (local gateway) |
+| `.demo` | demo | `https://api-demo.sdkwork.com/app/v3/api` |
+| `.production` | production | `https://api.sdkwork.com/app/v3/api` |
+
+`SDKWORK_DEPLOYMENT_PROFILE` follows the file prefix (`standalone`/`cloud`).
+`tests/contract/verify-runtime-env-profiles.test.mjs` also checks that the browser
+runtime-env files (generator-owned by `align-browser-runtime-env.mjs`) keep their
+declared environment/profile identity.
 
 ### 6.2 Per-package typecheck
 
