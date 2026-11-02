@@ -41,6 +41,7 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Drift guard (Flutter) | same test | A route in `buildSdkworkMallRoutes()` is not represented |
 | Navigation evidence | same test | A capability page exists but nothing links to it (orphan screen) |
 | Router mounting | same test | A route is declared in `routes.ts` but the PC/H5 router never mounts it (`case "<id>"` / `path="<path>"` missing) |
+| Checkout scoping | `tests/contract/verify-checkout-scoping.test.mjs` | 立即购买 stops passing the created cart line id, a checkout page stops consuming it, or a quote is requested without the scoped lines |
 | Route identity (mobile) | same test | A capability's canonical route id is missing from `mini-program/src/routes/capabilities.ts` or `flutter-mobile/lib/routes/capability_routes.dart`, or points at a different page/path than the contract |
 | Mini-program navigation | `apps/sdkwork-mall-mini-program/tests/capability-navigation.test.mjs` | A page module hard-codes `/pages/...`, the registry and `app.json` disagree, a tab capability is not classified for `wx.switchTab`, a page calls `mpCapabilityUrl` with an id the registry does not publish, or a non-tab capability page has no entry from another page |
 | Link integrity (web) | PC + H5 architecture tests | An in-app `to`/`navigate` link targets a path no route contributes |
@@ -173,10 +174,11 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 56/56 pass
+pnpm test:node                                                     → 59/59 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
+  (tests/contract/verify-checkout-scoping.test.mjs                 → 3/3)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -273,6 +275,28 @@ page's loader; the asset pages and chat use the new compact
 `SdkworkInlineError`, which keeps the surrounding data visible and still offers
 重试. `test/error_recovery_test.dart` fails when a full-page error view has no
 `onRetry` or a page renders a bare `Text(_error` row.
+### 6.1.5 Buy-now checkout scoping
+
+Every root implemented 立即购买 as "add to cart, then open checkout". On PC and
+Flutter that opened checkout for the whole cart; on H5 and the mini program it
+dropped the buyer in the cart. A buyer with other lines in the cart could
+therefore pay for all of them by clicking 立即购买 on one product.
+
+Each root now adds the line, reads the created cart item id from the add
+response, and opens checkout scoped to that id (`/checkout?items=<id>` on
+PC/H5, the `items` query on the mini program, the route argument on Flutter).
+When the backend does not return an id, the buyer is sent to the cart to choose
+— never to an unscoped checkout. `tests/contract/verify-checkout-scoping.test.mjs`
+fails if a product page stops passing the id, a checkout page stops consuming
+it, or a quote is requested without the scoped lines.
+
+The confirm-order summary is aligned too: PC already showed
+goods/discount/delivery/payable; H5, the mini program and Flutter now show
+商品金额 / 优惠 / 应付 from the quote instead of only the payable amount, and all
+three block submission when the authoritative quote failed. A rejected coupon or
+an unavailable wallet/points hold is reported as a warning instead of throwing
+after the order already exists.
+
 ### 6.2 Per-package typecheck
 
 Every active client package on both browser roots carries its own `tsconfig.json`, so
