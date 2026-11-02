@@ -23,6 +23,7 @@
     "check:app-composition": "node ../sdkwork-specs/tools/verify-repo.mjs --root .",
     "check:cors-standard": "node ../sdkwork-specs/tools/check-cors-standard.mjs --root .",
     "check:capability-parity": "node scripts/mall-capability-parity-report.mjs",
+    "audit:i18n": "node scripts/audit-mall-i18n-readiness.mjs",
     "check:parity-snapshot": "node scripts/mall-capability-parity-report.mjs --check",
     "parity:snapshot": "node scripts/mall-capability-parity-report.mjs --write",
     "report:capability-parity": "node scripts/mall-capability-parity-report.mjs --gaps",
