@@ -2536,3 +2536,143 @@ a {
   font-size: 0.85rem;
   color: var(--sdk-color-text-secondary, #4b5563);
 }
+
+/* ==========================================================================
+   Visual polish layer (2026-11)
+   --------------------------------------------------------------------------
+   Shared focus/selection/scrollbar treatment, chip and message-centre
+   surfaces, and reduced-motion fallbacks. Trailing layer: page rules are
+   untouched and these declarations only refine shared primitives.
+   ========================================================================== */
+:root {
+  --sdk-radius-panel-lg: 1.25rem;
+  --sdk-shadow-panel: 0 1px 2px rgba(15, 23, 42, 0.04),
+    0 18px 40px -30px rgba(15, 23, 42, 0.35);
+  --sdk-shadow-pop: 0 12px 32px -12px rgba(15, 23, 42, 0.28);
+  --sdk-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.35);
+  --sdk-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.18);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--sdk-focus-ring);
+  border-radius: 0.5rem;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+h1 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--sdk-color-text-primary);
+}
+
+/* Chips: the message centre renders buttons, other pages render links. */
+.sdkwork-mall-pc-chip-row button,
+.sdkwork-mall-pc-chip-row a {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--sdk-color-border-subtle);
+  color: var(--sdk-color-text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.18s var(--sdk-ease-out),
+    color 0.18s var(--sdk-ease-out), border-color 0.18s var(--sdk-ease-out);
+}
+
+.sdkwork-mall-pc-chip-row button[aria-pressed="true"],
+.sdkwork-mall-pc-chip-row a.is-active {
+  background: var(--sdk-color-accent);
+  border-color: var(--sdk-color-accent);
+  color: #fff;
+}
+
+/* Message centre surface. */
+.sdkwork-mall-pc-messages-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.sdkwork-mall-pc-message-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sdkwork-mall-pc-message-list li {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  background: var(--sdk-color-surface-panel);
+  border: 1px solid var(--sdk-color-border-subtle);
+  border-radius: var(--sdk-radius-panel);
+  box-shadow: var(--sdk-shadow-panel);
+}
+
+.sdkwork-mall-pc-message-list li > button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.sdkwork-mall-pc-message-category {
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--sdk-color-surface-panel-muted);
+  color: var(--sdk-color-text-muted);
+  font-size: 0.75rem;
+}
+
+.sdkwork-mall-pc-message-unread {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #e1251b;
+}
+
+.sdkwork-mall-pc-message-list li > p {
+  margin: 0;
+  color: var(--sdk-color-text-secondary);
+  line-height: 1.6;
+}
+
+.sdkwork-mall-pc-message-list li > span {
+  color: var(--sdk-color-text-muted);
+  font-size: 0.78rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdkwork-mall-pc-chip-row button,
+  .sdkwork-mall-pc-chip-row a {
+    transition: none;
+  }
+}

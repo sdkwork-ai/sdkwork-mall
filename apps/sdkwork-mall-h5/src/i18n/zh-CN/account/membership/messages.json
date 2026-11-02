@@ -26,7 +26,7 @@
     },
     "plans": {
       "title": "会员方案",
-      "empty": "方案即将上线，敬请期待",
+      "empty": "暂无可选方案",
       "duration": "{{days}} 天",
       "recommended": "推荐",
       "open": "立即开通",

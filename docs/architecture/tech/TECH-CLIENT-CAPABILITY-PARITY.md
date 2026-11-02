@@ -620,6 +620,13 @@ Three roots now carry an explicit visual layer instead of page-local ad-hoc styl
   cards, 48px buttons, filled inputs, dividers, chips and floating snack bars; the
   shared loading view renders a pulsing skeleton (honouring reduced-motion) and the
   error/empty views gained card and icon treatments.
+- **PC**: the app stylesheet gains focus-ring/selection/scrollbar treatment, a
+  refined chip row (including `aria-pressed` pressed state), page-title typography
+  and the message-centre surfaces the new notifications page renders.
+
+The membership empty state copy was also corrected on H5 ("方案即将上线，敬请期待")
+to match the mini program and Flutter ("暂无可选方案"), since membership purchase
+has shipped on every root.
 
 ### 6.2 Per-package typecheck
 
