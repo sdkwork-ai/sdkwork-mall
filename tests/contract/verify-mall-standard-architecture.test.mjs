@@ -259,6 +259,27 @@ test("mall PC application root is registered and manifest-driven", () => {
   assert.match(packageJson.scripts?.dev, /5175/);
 });
 
+test("mall PC active packages are individually typecheckable", () => {
+  // The root `tsc --noEmit` resolves the app bootstraps, which import the
+  // federated commerce facade. While that facade subpath is missing upstream,
+  // the root gate cannot tell a package regression from the dependency gap.
+  // Every active package therefore carries its own tsconfig so
+  // scripts/typecheck-mall-packages.mjs can verify it in isolation.
+  const withoutTsconfig = [];
+  for (const directory of activeMallPackages) {
+    const tsconfigPath = path.join(mallPackagesRoot, directory, "tsconfig.json");
+    if (!existsSync(tsconfigPath)) {
+      withoutTsconfig.push(directory);
+    }
+  }
+
+  assert.deepEqual(
+    withoutTsconfig,
+    [],
+    `active packages must declare tsconfig.json so the per-package typecheck gate covers them: ${withoutTsconfig.join(", ")}`,
+  );
+});
+
 test("mall PC active packages use canonical names and route surfaces", () => {
   for (const directory of activeMallPackages) {
     const packageJsonPath = path.join("apps/sdkwork-mall-pc/packages", directory, "package.json");

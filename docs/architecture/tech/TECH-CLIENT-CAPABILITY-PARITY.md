@@ -132,13 +132,14 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 33/33 pass
-  (tests/contract/verify-mall-capability-parity.test.mjs           → 9/9)
-  (tests/contract/verify-mall-standard-architecture.test.mjs       → 13/13)
+pnpm test:node                                                     → 38/38 pass
+  (tests/contract/verify-mall-capability-parity.test.mjs           → 13/13)
+  (tests/contract/verify-mall-standard-architecture.test.mjs       → 14/14)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 4/4
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
-pnpm test:vitest                                                   → 67 files / 167 tests pass
+pnpm typecheck:packages                                            → 33 packages, 0 failed
+pnpm test:vitest                                                   → 68 files / 169 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
 flutter test                                                       → 18/18 pass
@@ -148,10 +149,29 @@ node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
 pnpm check:capability-parity                                       → 36 capabilities, 0 gaps
 ```
 
+### 6.1 Per-package typecheck while the root gate is upstream-blocked
+
+The root `pnpm typecheck` fails on the missing `./domains` facade (section 5),
+which would otherwise hide any regression in the capability packages. Every
+active client package carries its own `tsconfig.json`, so
+`scripts/typecheck-mall-packages.mjs` (`pnpm typecheck:packages`) typechecks
+each package in isolation and `pnpm check` runs it *before* the root typecheck.
+`tests/contract/verify-mall-standard-architecture.test.mjs` asserts that every
+active package declares a `tsconfig.json`, so a new package cannot silently
+escape the gate. Inactive legacy packages (billing, checkout, offer, pricing,
+subscription, membership-purchase, entitlement, payment) are declared by no app
+root, are excluded from the root tsconfig, and are reported as skipped rather
+than hidden.
+
 Flutter visual review: `flutter test -DVISUAL_CAPTURE=true --update-goldens
 test/visual_capture_test.dart` now captures the help, reviews, gift-card,
 profile and account-security surfaces alongside the shell tabs. Goldens are
 local review artifacts and are not committed.
+
+Before this change the H5 and mini-program architecture tests were not wired
+into any package script (vitest only collects `*.test.ts(x)`, `test:node` only
+collected repository-level `*.test.mjs`), so those two roots had no automated
+architecture gate at all. `test:node` now collects all three test roots.
 
 Before this change the H5 and mini-program architecture tests were not wired
 into any package script (vitest only collects `*.test.ts(x)`, `test:node` only
