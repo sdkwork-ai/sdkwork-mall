@@ -77,7 +77,7 @@ export function SdkworkMallH5AfterSalesPage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setLoadError(cause instanceof Error ? cause.message : "售后列表加载失败");
+          setLoadError(cause instanceof Error ? cause.message : t("afterSales.errors.listLoad"));
         }
       })
       .finally(() => {
@@ -88,19 +88,19 @@ export function SdkworkMallH5AfterSalesPage() {
     return () => {
       active = false;
     };
-  }, [reload]);
+  }, [reload, t]);
 
   const retryLoad = useCallback(() => {
     setLoading(true);
     setLoadError(null);
     reload()
       .catch((cause: unknown) => {
-        setLoadError(cause instanceof Error ? cause.message : "售后列表加载失败");
+        setLoadError(cause instanceof Error ? cause.message : t("afterSales.errors.listLoad"));
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [reload]);
+  }, [reload, t]);
 
   const applyOrderContext = useCallback((context: MallH5AfterSalesOrderContext) => {
     setOrderContext(context);
@@ -112,7 +112,7 @@ export function SdkworkMallH5AfterSalesPage() {
     async (targetOrderId: string) => {
       const trimmed = targetOrderId.trim();
       if (!trimmed) {
-        setMessage("请填写订单号");
+        setMessage(t("afterSales.errors.orderRequired"));
         return;
       }
       setLoadingOrder(true);
@@ -121,12 +121,12 @@ export function SdkworkMallH5AfterSalesPage() {
         applyOrderContext(await loadMallH5AfterSalesOrderContext(trimmed));
       } catch (cause: unknown) {
         setOrderContext(null);
-        setMessage(cause instanceof Error ? cause.message : "订单加载失败");
+        setMessage(cause instanceof Error ? cause.message : t("afterSales.errors.orderLoad"));
       } finally {
         setLoadingOrder(false);
       }
     },
-    [applyOrderContext],
+    [applyOrderContext, t],
   );
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export function SdkworkMallH5AfterSalesPage() {
       // No host media runtime: there is deliberately no local blob:/data-URL
       // persistence — evidence references must be host-uploaded
       // (`DRIVE_SPEC.md` §18).
-      setMessage("媒体上传不可用：需要宿主提供存储能力");
+      setMessage(t("afterSales.apply.mediaUnavailable"));
       event.target.value = "";
       return;
     }
@@ -189,7 +189,7 @@ export function SdkworkMallH5AfterSalesPage() {
     setEvidenceFiles((current) => [...current, ...newFiles].slice(0, MAX_EVIDENCE_FILES));
     event.target.value = "";
     if (skippedForError) {
-      setMessage("部分凭证上传失败，已移除；请重试");
+      setMessage(t("afterSales.apply.evidenceFailed"));
     }
   }
 
@@ -199,20 +199,20 @@ export function SdkworkMallH5AfterSalesPage() {
 
   async function handleSubmit() {
     if (!orderContext) {
-      setMessage("请先选择订单");
+      setMessage(t("afterSales.errors.selectOrder"));
       return;
     }
     const amountNumber = Number(amount);
     if (!reasonCode) {
-      setMessage("请选择售后原因");
+      setMessage(t("afterSales.errors.reasonRequired"));
       return;
     }
     if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
-      setMessage("请填写有效的售后金额");
+      setMessage(t("afterSales.errors.amountInvalid"));
       return;
     }
     if (type !== "exchange" && orderContext.paidAmountCny !== null && amountNumber > orderContext.paidAmountCny) {
-      setMessage("售后金额不能超过订单实付金额");
+      setMessage(t("afterSales.errors.amountExceedsPaid"));
       return;
     }
     setBusy(true);
@@ -242,10 +242,10 @@ export function SdkworkMallH5AfterSalesPage() {
       });
       setDescription("");
       setEvidenceFiles([]);
-      setMessage("售后申请已提交");
+      setMessage(t("afterSales.apply.submitted"));
       await reload();
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "售后申请失败");
+      setMessage(cause instanceof Error ? cause.message : t("afterSales.errors.submitFailed"));
     } finally {
       setBusy(false);
     }
@@ -258,7 +258,7 @@ export function SdkworkMallH5AfterSalesPage() {
       await cancelMallH5AfterSalesRequest(requestId);
       await reload();
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "撤销失败");
+      setMessage(cause instanceof Error ? cause.message : t("afterSales.errors.cancelFailed"));
     } finally {
       setBusy(false);
     }
@@ -288,13 +288,19 @@ export function SdkworkMallH5AfterSalesPage() {
     return request.status === "approved" && (request.type === "return" || request.type === "exchange");
   }
 
+  /** Reason codes are catalogue keys on the page side; unknown codes fall back. */
+  function reasonLabel(reason: string): string {
+    const preset = MALL_H5_AFTER_SALES_REASON_PRESETS.find((entry) => entry.code === reason);
+    return preset ? t(preset.labelKey) : reason;
+  }
+
   async function handleReturnShipment() {
     if (!returnFormRequestId) {
       return;
     }
     const trackingNo = returnTrackingNo.trim();
     if (!trackingNo) {
-      setMessage("请填写退货物流单号");
+      setMessage(t("afterSales.errors.trackingRequired"));
       return;
     }
     setReturnBusy(true);
@@ -303,16 +309,16 @@ export function SdkworkMallH5AfterSalesPage() {
       const carrier = MALL_H5_RETURN_CARRIERS.find((entry) => entry.code === returnCarrierCode);
       await createMallH5AfterSalesReturnShipment({
         carrierCode: returnCarrierCode,
-        carrierName: carrier?.name,
+        carrierName: carrier ? t(carrier.nameKey) : undefined,
         requestId: returnFormRequestId,
         trackingNo,
       });
-      setMessage("退货物流已提交");
+      setMessage(t("afterSales.return.submitted"));
       setReturnFormRequestId("");
       setReturnTrackingNo("");
       await reload();
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "退货物流提交失败");
+      setMessage(cause instanceof Error ? cause.message : t("afterSales.errors.returnSubmitFailed"));
     } finally {
       setReturnBusy(false);
     }
@@ -329,21 +335,21 @@ export function SdkworkMallH5AfterSalesPage() {
   }
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载售后...</div>;
+    return <div className="sdk-h5-page sdk-h5-loading">{t("afterSales.page.loading")}</div>;
   }
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">售后</h1>
+      <h1 className="sdk-h5-visually-hidden">{t("afterSales.page.title")}</h1>
 
       {loadError ? <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoad} /> : null}
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-warning">{message}</div> : null}
 
       <section className="sdk-h5-section">
-        <h2>申请售后</h2>
+        <h2>{t("afterSales.apply.title")}</h2>
         <SdkworkMallH5Cell
-          label="订单号"
+          label={t("afterSales.apply.orderLabel")}
           onClick={() => {
             openOrderPick((pickedOrderId) => {
               setOrderId(pickedOrderId);
@@ -355,39 +361,48 @@ export function SdkworkMallH5AfterSalesPage() {
         />
         {orderContext ? (
           <div className="sdk-h5-muted">
-            {orderContext.items.length} 项商品 · 实付 {formatCny(orderContext.paidAmountCny)}
+            {t("afterSales.apply.orderSummary", {
+              amount: formatCny(orderContext.paidAmountCny),
+              count: orderContext.items.length,
+            })}
             <button className="sdk-h5-link-button" onClick={clearPreset} type="button">
-              更换订单
+              {t("afterSales.apply.changeOrder")}
             </button>
           </div>
         ) : null}
         <div className="sdk-h5-cell-group">
           <SdkworkMallH5SelectCell
-            label="售后类型"
+            label={t("afterSales.apply.typeLabel")}
             onChange={setType}
-            options={MALL_H5_AFTER_SALES_TYPES.map((option) => ({ label: option.label, value: option.value }))}
+            options={MALL_H5_AFTER_SALES_TYPES.map((option) => ({
+              label: t(option.labelKey),
+              value: option.value,
+            }))}
             value={type}
           />
           <SdkworkMallH5SelectCell
-            label="售后原因"
+            label={t("afterSales.apply.reasonLabel")}
             onChange={setReasonCode}
-            options={MALL_H5_AFTER_SALES_REASON_PRESETS.map((option) => ({ label: option.label, value: option.code }))}
+            options={MALL_H5_AFTER_SALES_REASON_PRESETS.map((option) => ({
+              label: t(option.labelKey),
+              value: option.code,
+            }))}
             value={reasonCode}
           />
         </div>
         <div className="sdk-h5-cell-group">
         <div className="sdk-h5-field">
-          问题描述（选填）
+          {t("afterSales.apply.descriptionLabel")}
           <textarea
             maxLength={200}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="补充描述有助于加快审核"
+            placeholder={t("afterSales.apply.descriptionPlaceholder")}
             rows={3}
             value={description}
           />
         </div>
         <div className="sdk-h5-field">
-          售后金额（元）
+          {t("afterSales.apply.amountLabel")}
           <input
             inputMode="decimal"
             onChange={(event) => setAmount(event.target.value)}
@@ -396,7 +411,7 @@ export function SdkworkMallH5AfterSalesPage() {
           />
         </div>
         <div className="sdk-h5-field">
-          凭证上传（可选，最多 {MAX_EVIDENCE_FILES} 张）
+          {t("afterSales.apply.evidenceLabel", { count: MAX_EVIDENCE_FILES })}
           <div className="sdk-h5-evidence-grid">
             {evidenceFiles.map((file) => (
               <div className="sdk-h5-evidence-item" key={file.id}>
@@ -406,7 +421,7 @@ export function SdkworkMallH5AfterSalesPage() {
                   <span className="sdk-h5-evidence-fallback">{file.name}</span>
                 )}
                 <button
-                  aria-label={`移除 ${file.name}`}
+                  aria-label={t("afterSales.apply.evidenceRemove", { name: file.name })}
                   className="sdk-h5-evidence-remove"
                   onClick={() => removeEvidenceFile(file.id)}
                   type="button"
@@ -414,7 +429,9 @@ export function SdkworkMallH5AfterSalesPage() {
                   ×
                 </button>
                 <span className="sdk-h5-evidence-state">
-                  {file.uploadState === "uploading" ? "上传中..." : "已上传"}
+                  {file.uploadState === "uploading"
+                    ? t("afterSales.apply.evidenceUploading")
+                    : t("afterSales.apply.evidenceUploaded")}
                 </span>
               </div>
             ))}
@@ -439,50 +456,48 @@ export function SdkworkMallH5AfterSalesPage() {
           onClick={() => void handleSubmit()}
           type="button"
         >
-          {busy ? "提交中..." : "提交申请"}
+          {busy ? t("afterSales.apply.submitting") : t("afterSales.apply.submit")}
         </button>
       </section>
 
       <section className="sdk-h5-section">
-        <h2>售后记录</h2>
+        <h2>{t("afterSales.list.title")}</h2>
         {requests.length === 0 ? (
-          <div className="sdk-h5-empty">暂无售后记录</div>
+          <div className="sdk-h5-empty">{t("afterSales.list.empty")}</div>
         ) : (
           requests.map((request) => (
             <div className="sdk-h5-coupon-row" key={request.id}>
               <div>
-                <strong>{request.typeLabel}</strong>
+                <strong>{t(request.typeLabelKey)}</strong>
                 {request.afterSalesNo ? <span className="sdk-h5-muted"> {request.afterSalesNo}</span> : null}
-                <div className="sdk-h5-muted">订单 {request.orderId}</div>
+                <div className="sdk-h5-muted">{t("afterSales.list.orderNo", { id: request.orderId })}</div>
                 <div className="sdk-h5-muted">
                   {formatCny(request.requestedAmountCny)}
-                  {request.reason
-                    ? ` · ${MALL_H5_AFTER_SALES_REASON_PRESETS.find((preset) => preset.code === request.reason)?.label ?? request.reason}`
-                    : ""}
+                  {request.reason ? ` · ${reasonLabel(request.reason)}` : ""}
                 </div>
                 {canSubmitReturnShipment(request) ? (
                   returnFormRequestId === request.id ? (
                     <div className="sdk-h5-return-shipment-form">
                       <label className="sdk-h5-field">
-                        物流公司
+                        {t("afterSales.return.carrierLabel")}
                         <select
-                          aria-label="物流公司"
+                          aria-label={t("afterSales.return.carrierLabel")}
                           onChange={(event) => setReturnCarrierCode(event.target.value)}
                           value={returnCarrierCode}
                         >
                           {MALL_H5_RETURN_CARRIERS.map((carrier) => (
                             <option key={carrier.code} value={carrier.code}>
-                              {carrier.name}
+                              {t(carrier.nameKey)}
                             </option>
                           ))}
                         </select>
                       </label>
                       <label className="sdk-h5-field">
-                        退货物流单号
+                        {t("afterSales.return.trackingLabel")}
                         <input
-                          aria-label="退货物流单号"
+                          aria-label={t("afterSales.return.trackingLabel")}
                           onChange={(event) => setReturnTrackingNo(event.target.value)}
-                          placeholder="请输入快递单号"
+                          placeholder={t("afterSales.return.trackingPlaceholder")}
                           value={returnTrackingNo}
                         />
                       </label>
@@ -493,7 +508,7 @@ export function SdkworkMallH5AfterSalesPage() {
                           onClick={() => void handleReturnShipment()}
                           type="button"
                         >
-                          {returnBusy ? "提交中..." : "提交退货物流"}
+                          {returnBusy ? t("afterSales.return.submitting") : t("afterSales.return.submit")}
                         </button>
                         <button
                           className="sdk-h5-button sdk-h5-button-ghost"
@@ -504,7 +519,7 @@ export function SdkworkMallH5AfterSalesPage() {
                           }}
                           type="button"
                         >
-                          取消
+                          {t("afterSales.return.cancel")}
                         </button>
                       </div>
                     </div>
@@ -517,7 +532,7 @@ export function SdkworkMallH5AfterSalesPage() {
                       }}
                       type="button"
                     >
-                      填写退货物流
+                      {t("afterSales.list.returnEntry")}
                     </button>
                   )
                 ) : null}
@@ -559,7 +574,7 @@ export function SdkworkMallH5AfterSalesPage() {
                 ) : null}
               </div>
               <div>
-                <span className="sdk-h5-muted">{request.statusLabel}</span>
+                <span className="sdk-h5-muted">{request.statusLabel ?? t(request.statusLabelKey)}</span>
                 {request.status === "pending" || request.status === "reviewing" ? (
                   <button
                     className="sdk-h5-link-button"
@@ -567,7 +582,7 @@ export function SdkworkMallH5AfterSalesPage() {
                     onClick={() => void handleCancel(request.id)}
                     type="button"
                   >
-                    撤销
+                    {t("afterSales.list.cancel")}
                   </button>
                 ) : null}
               </div>

@@ -22,6 +22,7 @@ const FRAGMENTS = [
   "apps/sdkwork-mall-h5/src/i18n/zh-CN/account/buyer-hub/messages.json",
   "apps/sdkwork-mall-h5/src/i18n/zh-CN/account/addresses/messages.json",
   "apps/sdkwork-mall-h5/src/i18n/zh-CN/support/help/messages.json",
+  "apps/sdkwork-mall-h5/src/i18n/zh-CN/support/after-sales/messages.json",
 ];
 
 const PAGES = [
@@ -31,6 +32,7 @@ const PAGES = [
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-home/src/pages/HomePage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/AddressesPage.tsx",
+  "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/AfterSalesPage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-home/src/pages/HelpPage.tsx",
 ];
 
@@ -76,7 +78,7 @@ test("every key used by a migrated page exists in the merged catalogue", () => {
     // `t(link.labelKey)` lookups resolve those at render time).
     const used = new Set([
       ...[...page.matchAll(/\bt\("([^"]+)"/gu)].map((match) => match[1]),
-      ...[...page.matchAll(/"((?:checkout|paymentResult|help|productDetail|home|buyerHub|addresses)\.[A-Za-z0-9_.]+)"/gu)].map(
+      ...[...page.matchAll(/"((?:checkout|paymentResult|help|productDetail|home|buyerHub|addresses|afterSales)\.[A-Za-z0-9_.]+)"/gu)].map(
         (match) => match[1],
       ),
     ]);

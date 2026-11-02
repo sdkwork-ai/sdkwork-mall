@@ -37,7 +37,7 @@ const ROOTS = [
     ],
     page: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/AfterSalesPage.tsx",
     pagePatterns: [
-      "填写退货物流",
+      "afterSales.list.returnEntry",
       "handleReturnShipment",
       "canSubmitReturnShipment",
       'request.status === "approved"',

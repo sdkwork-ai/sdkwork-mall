@@ -180,9 +180,10 @@ describe("sdkwork-mall-h5-buyer services", () => {
         reason: "quality-issue",
         requestedAmountCny: 88.5,
         status: "pending",
-        statusLabel: "待审核",
+        statusLabel: undefined,
+        statusLabelKey: "afterSales.status.pending",
         type: "refund",
-        typeLabel: "仅退款",
+        typeLabelKey: "afterSales.type.refund",
       },
     ]);
 

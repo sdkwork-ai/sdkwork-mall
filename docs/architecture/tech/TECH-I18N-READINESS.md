@@ -13,11 +13,11 @@ long):
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
-| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support}` fragments | 57 | 366 | 390 (`regions.ts`) |
+| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support}` fragments | 56 | 312 | 390 (`regions.ts`) |
 | Mini program | none — literal zh-CN | 66 | 378 | 302 (province/city picker data) |
 | Flutter | none — literal zh-CN | 38 | 571 | 230 (province/city picker data) |
 
-2767 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2713 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -87,11 +87,21 @@ initialises i18next with `initReactI18next` and composes authored fragments from
 `zh-CN/checkout/confirm-order`, `zh-CN/catalog/product-detail`,
 `zh-CN/storefront/home`, `zh-CN/account/buyer-hub`, `zh-CN/account/addresses` and
 `zh-CN/support/{help,after-sales}`), imported once from `main.tsx`; the default
-locale is unchanged, so no visible copy moved. Seven surfaces are migrated:
+locale is unchanged, so no visible copy moved. Eight surfaces are migrated:
 payment-result, confirm-order, product detail, storefront home, the buyer hub, the
-address book (list actions, form labels, validation and failure messages) and the
-help centre. H5's hard-coded count dropped 536 → 366 and the baseline was
-refreshed.
+address book, the help centre and the after-sales centre (apply form, evidence
+upload, records list, return shipment, progress timeline, validation and failure
+messages). H5's hard-coded count dropped 536 → 312 and the baseline was refreshed.
+
+The after-sales service no longer owns display copy either: request types,
+reasons, statuses and return carriers are exported as `<…>LabelKey` / `nameKey`
+references (`afterSales.type.*`, `afterSales.reason.*`, `afterSales.status.*`,
+`afterSales.carrier.*`), and the page resolves them through `t()`. Server-provided
+status names still win when the backend localizes them itself.
+
+Component tests render pages whose copy resolves through the runtime, so
+`vitest.setup.ts` initialises the H5 i18n instance once; no test has to stub
+translation resources.
 
 **S3 — locale switching and verification.**
 Locale store per root, `Accept-Language` propagation through the transport seams,

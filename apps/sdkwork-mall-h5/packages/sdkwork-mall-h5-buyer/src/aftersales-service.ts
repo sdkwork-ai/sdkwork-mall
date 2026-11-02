@@ -23,9 +23,13 @@ export interface MallH5AfterSalesRequest {
   reason?: string;
   requestedAmountCny: number | null;
   status: string;
-  statusLabel: string;
+  /** Server-provided status name, when the backend localizes it itself. */
+  statusLabel?: string;
+  /** Catalogue key used when the backend sends no status name. */
+  statusLabelKey: string;
   type: MallH5AfterSalesType;
-  typeLabel: string;
+  /** Catalogue key for the request type. */
+  typeLabelKey: string;
 }
 
 /** Order snapshot used to prefill the apply form and build the create payload. */
@@ -58,33 +62,27 @@ export interface MallH5AfterSalesApplyInput {
 }
 
 export const MALL_H5_AFTER_SALES_TYPES = [
-  { value: "refund", label: "仅退款" },
-  { value: "return", label: "退货退款" },
-  { value: "exchange", label: "换货" },
+  { labelKey: "afterSales.type.refund", value: "refund" },
+  { labelKey: "afterSales.type.return", value: "return" },
+  { labelKey: "afterSales.type.exchange", value: "exchange" },
 ] as const;
 
 export const MALL_H5_AFTER_SALES_REASON_PRESETS = [
-  { code: "not-as-described", label: "商品与描述不符" },
-  { code: "quality-issue", label: "质量问题" },
-  { code: "missing-item", label: "少件/漏发" },
-  { code: "shipping-issue", label: "发货/物流问题" },
-  { code: "change-mind", label: "多拍/错拍/不想要了" },
-  { code: "other", label: "其他" },
+  { code: "not-as-described", labelKey: "afterSales.reason.notAsDescribed" },
+  { code: "quality-issue", labelKey: "afterSales.reason.qualityIssue" },
+  { code: "missing-item", labelKey: "afterSales.reason.missingItem" },
+  { code: "shipping-issue", labelKey: "afterSales.reason.shippingIssue" },
+  { code: "change-mind", labelKey: "afterSales.reason.changeMind" },
+  { code: "other", labelKey: "afterSales.reason.other" },
 ] as const;
 
-const STATUS_LABELS: Record<string, string> = {
-  approved: "已通过",
-  cancelled: "已撤销",
-  completed: "已完成",
-  pending: "待审核",
-  rejected: "已拒绝",
-  reviewing: "审核中",
-};
-
-const TYPE_LABELS: Record<MallH5AfterSalesType, string> = {
-  exchange: "换货",
-  refund: "仅退款",
-  return: "退货退款",
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  approved: "afterSales.status.approved",
+  cancelled: "afterSales.status.cancelled",
+  completed: "afterSales.status.completed",
+  pending: "afterSales.status.pending",
+  rejected: "afterSales.status.rejected",
+  reviewing: "afterSales.status.reviewing",
 };
 
 function readString(record: Record<string, unknown>, keys: readonly string[]): string {
@@ -116,24 +114,24 @@ function normalizeType(raw: string): MallH5AfterSalesType {
   return "refund";
 }
 
-function normalizeStatus(raw: string): { key: string; label: string } {
+function normalizeStatus(raw: string): { key: string; labelKey: string } {
   const normalized = raw.trim().toLowerCase();
   if (normalized === "reviewing" || normalized === "review" || normalized === "processing") {
-    return { key: normalized, label: STATUS_LABELS.reviewing };
+    return { key: "reviewing", labelKey: STATUS_LABEL_KEYS.reviewing };
   }
   if (normalized === "approved" || normalized === "accept" || normalized === "accepted") {
-    return { key: normalized, label: STATUS_LABELS.approved };
+    return { key: "approved", labelKey: STATUS_LABEL_KEYS.approved };
   }
   if (normalized === "cancelled" || normalized === "canceled" || normalized === "revoked") {
-    return { key: normalized, label: STATUS_LABELS.cancelled };
+    return { key: "cancelled", labelKey: STATUS_LABEL_KEYS.cancelled };
   }
   if (normalized === "completed" || normalized === "done" || normalized === "finished") {
-    return { key: normalized, label: STATUS_LABELS.completed };
+    return { key: "completed", labelKey: STATUS_LABEL_KEYS.completed };
   }
   if (normalized === "rejected" || normalized === "deny" || normalized === "denied") {
-    return { key: normalized, label: STATUS_LABELS.rejected };
+    return { key: "rejected", labelKey: STATUS_LABEL_KEYS.rejected };
   }
-  return { key: normalized || "pending", label: STATUS_LABELS.pending };
+  return { key: normalized || "pending", labelKey: STATUS_LABEL_KEYS.pending };
 }
 
 function mapRequest(item: Record<string, unknown>): MallH5AfterSalesRequest {
@@ -148,9 +146,10 @@ function mapRequest(item: Record<string, unknown>): MallH5AfterSalesRequest {
     reason: readString(item, ["reasonCode", "reason"]) || undefined,
     requestedAmountCny: readAmount(item.requestedAmount ?? item.requested_amount),
     status: status.key,
-    statusLabel: readString(item, ["statusName"]) || status.label,
+    statusLabel: readString(item, ["statusName"]) || undefined,
+    statusLabelKey: status.labelKey,
     type,
-    typeLabel: TYPE_LABELS[type],
+    typeLabelKey: `afterSales.type.${type}`,
   };
 }
 
@@ -240,12 +239,12 @@ export async function cancelMallH5AfterSalesRequest(requestId: string): Promise<
 
 /** Carriers offered when the buyer ships the goods back. */
 export const MALL_H5_RETURN_CARRIERS = [
-  { code: "SF", name: "顺丰速运" },
-  { code: "ZTO", name: "中通快递" },
-  { code: "YTO", name: "圆通速递" },
-  { code: "YUNDA", name: "韵达速递" },
-  { code: "JD", name: "京东物流" },
-  { code: "OTHER", name: "其他" },
+  { code: "SF", nameKey: "afterSales.carrier.sf" },
+  { code: "ZTO", nameKey: "afterSales.carrier.zto" },
+  { code: "YTO", nameKey: "afterSales.carrier.yto" },
+  { code: "YUNDA", nameKey: "afterSales.carrier.yunda" },
+  { code: "JD", nameKey: "afterSales.carrier.jd" },
+  { code: "OTHER", nameKey: "afterSales.carrier.other" },
 ] as const;
 
 export interface MallH5ReturnShipmentInput {
