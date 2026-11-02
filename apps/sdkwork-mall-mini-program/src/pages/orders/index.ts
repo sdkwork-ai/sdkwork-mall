@@ -1,21 +1,23 @@
+import { t } from "../../i18n";
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatCny, formatTime, statusLabel } from "../../utils/format";
 import {
   listOrders,
-  payOrder,
   cancelOrder,
   confirmReceipt,
   type MpOrderSummary,
 } from "../../services/order-service";
 import { isLoggedIn } from "../../services/session";
 
-const TABS: Array<{ code: string; label: string }> = [
-  { code: "all", label: "全部" },
-  { code: "PENDING_PAYMENT", label: "待付款" },
-  { code: "PENDING_SHIPMENT", label: "待发货" },
-  { code: "PENDING_RECEIPT", label: "待收货" },
-  { code: "COMPLETED", label: "已完成" },
+type OrderTab = { code: string; labelKey: string };
+
+const TAB_DEFINITIONS: OrderTab[] = [
+  { code: "all", labelKey: "orderList.tabs.all" },
+  { code: "PENDING_PAYMENT", labelKey: "orderList.tabs.pendingPayment" },
+  { code: "PENDING_SHIPMENT", labelKey: "orderList.tabs.pendingShipment" },
+  { code: "PENDING_RECEIPT", labelKey: "orderList.tabs.pendingReceipt" },
+  { code: "COMPLETED", labelKey: "orderList.tabs.completed" },
 ];
 
 type MpOrderRow = MpOrderSummary & {
@@ -33,11 +35,20 @@ interface OrdersData {
   loading: boolean;
   loadingMore: boolean;
   error: string;
+  loadingText: string;
+  emptyText: string;
+  loadMoreText: string;
+  allShownText: string;
+  viewDetailText: string;
+  payText: string;
+  cancelText: string;
+  confirmReceiptText: string;
+  logisticsText: string;
 }
 
 Page({
   data: {
-    tabs: TABS,
+    tabs: TAB_DEFINITIONS.map((tab) => ({ code: tab.code, label: t(tab.labelKey) })),
     activeTab: "all",
     orders: [],
     page: 1,
@@ -45,6 +56,15 @@ Page({
     loading: true,
     loadingMore: false,
     error: "",
+    loadingText: t("orderList.loading"),
+    emptyText: t("orderList.empty"),
+    loadMoreText: t("orderList.loadMore"),
+    allShownText: t("orderList.allShown"),
+    viewDetailText: t("orderList.viewDetail"),
+    payText: t("orderList.actions.pay"),
+    cancelText: t("orderList.actions.cancel"),
+    confirmReceiptText: t("orderList.actions.confirmReceipt"),
+    logisticsText: t("orderList.actions.logistics"),
   } as OrdersData,
 
   onLoad(options: Record<string, string | undefined>) {
@@ -57,7 +77,7 @@ Page({
       wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
       return;
     }
-    this.loadOrders(1);
+    void this.loadOrders(1);
   },
 
   async loadOrders(nextPage: number) {
@@ -86,7 +106,7 @@ Page({
       this.setData({
         loading: false,
         loadingMore: false,
-        error: errorMessage(cause, "订单加载失败"),
+        error: errorMessage(cause, t("orderList.errors.loadFailed")),
       });
     }
   },
@@ -96,7 +116,7 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadOrders(1).finally(() => wx.stopPullDownRefresh());
+    void this.loadOrders(1).finally(() => wx.stopPullDownRefresh());
   },
 
   selectTab(event: MpTapEvent) {
@@ -105,7 +125,7 @@ Page({
       return;
     }
     this.setData({ activeTab: code, orders: [] });
-    this.loadOrders(1);
+    void this.loadOrders(1);
   },
 
   goDetail(event: MpTapEvent) {
@@ -116,26 +136,26 @@ Page({
     wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: String(event.currentTarget.dataset.id ?? "") }) });
   },
 
-  async payOrder(event: MpTapEvent) {
+  payOrder(event: MpTapEvent) {
+    // The cashier owns the real channel handoff, so every pay entry funnels
+    // through the same page.
     const orderId = String(event.currentTarget.dataset.id ?? "");
-    try {
-      const paymentId = await payOrder(orderId, "WECHAT");
-      wx.redirectTo({
-        url: mpCapabilityUrl("storefront.mall.payment-result", { orderId: orderId, paymentId: paymentId, status: "pending" }),
-      });
-    } catch (cause) {
-      wx.showToast({ title: errorMessage(cause, "发起支付失败"), icon: "none" });
-    }
+    wx.navigateTo({
+      url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId }),
+    });
   },
 
   async cancelOrder(event: MpTapEvent) {
     const orderId = String(event.currentTarget.dataset.id ?? "");
     try {
       await cancelOrder(orderId);
-      wx.showToast({ title: "已取消", icon: "success" });
-      this.loadOrders(1);
+      wx.showToast({ title: t("orderList.toasts.cancelled"), icon: "success" });
+      void this.loadOrders(1);
     } catch (cause) {
-      wx.showToast({ title: errorMessage(cause, "取消失败"), icon: "none" });
+      wx.showToast({
+        title: errorMessage(cause, t("orderList.errors.cancelFailed")),
+        icon: "none",
+      });
     }
   },
 
@@ -143,10 +163,13 @@ Page({
     const orderId = String(event.currentTarget.dataset.id ?? "");
     try {
       await confirmReceipt(orderId);
-      wx.showToast({ title: "已确认收货", icon: "success" });
-      this.loadOrders(1);
+      wx.showToast({ title: t("orderList.toasts.receiptConfirmed"), icon: "success" });
+      void this.loadOrders(1);
     } catch (cause) {
-      wx.showToast({ title: errorMessage(cause, "确认收货失败"), icon: "none" });
+      wx.showToast({
+        title: errorMessage(cause, t("orderList.errors.receiptFailed")),
+        icon: "none",
+      });
     }
   },
 
@@ -154,6 +177,6 @@ Page({
     if (this.data.loadingMore || this.data.orders.length >= this.data.total) {
       return;
     }
-    this.loadOrders(this.data.page + 1);
+    void this.loadOrders(this.data.page + 1);
   },
 });

@@ -17,6 +17,7 @@ import cashier from "./zh-CN/checkout/cashier/messages";
 import help from "./zh-CN/support/help/messages";
 import afterSales from "./zh-CN/support/after-sales/messages";
 import home from "./zh-CN/storefront/home/messages";
+import orderList from "./zh-CN/order/list/messages";
 
 const messages: Record<string, string> = {};
 
@@ -41,6 +42,7 @@ collect(cashier as Record<string, unknown>, "");
 collect(help as Record<string, unknown>, "");
 collect(afterSales as Record<string, unknown>, "");
 collect(home as Record<string, unknown>, "");
+collect(orderList as Record<string, unknown>, "");
 
 /** Resolves `key` with `{{name}}` placeholder interpolation. */
 export function t(
