@@ -471,7 +471,7 @@
         { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts", "contains": "buyer.mall.distribution" },
         { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/distribution" }
       ],
-      "notes": "Partner join, application tracking, invite-code validation and the level catalogue are live on the sdkwork-partner app API. Team, customer, commission and withdrawal projections render from the optional partner-center port; until that app-api read model lands every root shows the same explicit pending notice instead of fabricated data."
+      "notes": "Full distribution centre on every root: partner join, application tracking, invite-code validation, level catalogue, centre overview, team with per-member earnings, commission records and withdrawal apply/list, all on the sdkwork-partner app API (/partner_join and /partner_center). The partner is always resolved from the signed-in IAM user."
     },
     {
       "id": "buyer.invoices",

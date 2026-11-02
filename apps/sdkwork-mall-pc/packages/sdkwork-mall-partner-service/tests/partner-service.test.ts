@@ -1,12 +1,41 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { createSdkworkPartnerService } from "../src/partner-service";
-import type { SdkworkPartnerJoinPort } from "../src/partner-sdk-port";
+import type { SdkworkPartnerCenterPort, SdkworkPartnerJoinPort } from "../src/partner-sdk-port";
 import type {
   SdkworkPartnerApplication,
   SdkworkPartnerCenterSnapshot,
   SdkworkPartnerProgram,
 } from "../src/partner-types";
+
+function centerPort(
+  overrides: Partial<SdkworkPartnerCenterPort> = {},
+): SdkworkPartnerCenterPort {
+  return {
+    createWithdrawal: vi.fn(async () => ({
+      amount: "100.00",
+      createdAt: "2026-11-01T00:00:00Z",
+      id: "1",
+      paidAt: null,
+      remark: "",
+      reviewRemark: "",
+      status: "PENDING",
+      updatedAt: "2026-11-01T00:00:00Z",
+    })),
+    listCommissionRecords: vi.fn(async () => ({
+      items: [],
+      page: 1,
+      pageSize: 10,
+      total: 0,
+    })),
+    listTeam: vi.fn(async () => ({ items: [], page: 1, pageSize: 10, total: 0 })),
+    listWithdrawals: vi.fn(async () => ({ items: [], page: 1, pageSize: 10, total: 0 })),
+    retrieveCenter: vi.fn(async () => {
+      throw new Error("center fixture must override retrieveCenter");
+    }),
+    ...overrides,
+  };
+}
 
 const program: SdkworkPartnerProgram = {
   levels: [
@@ -95,9 +124,11 @@ describe("partner service", () => {
       balance: {
         available: "100.00",
         currency: "CNY",
+        minWithdrawal: "100.00",
         pending: "10.00",
         settledTotal: "300.00",
         withdrawable: "90.00",
+        withdrawn: "200.00",
       },
       counts: { customerCount: 3, directTeamSize: 2, teamSize: 5 },
       profile: {
@@ -110,10 +141,9 @@ describe("partner service", () => {
         partnerId: "9",
         status: "ACTIVE",
       },
-      updatedAt: "2026-11-01T00:00:00Z",
     };
     const service = createSdkworkPartnerService({
-      center: { retrieveCenter: async () => snapshot },
+      center: centerPort({ retrieveCenter: async () => snapshot }),
       join: joinPort(),
     });
     await expect(service.retrieveCenter()).resolves.toEqual({
@@ -122,15 +152,32 @@ describe("partner service", () => {
     });
   });
 
+  it("maps a 404 to the not-enrolled state", async () => {
+    const service = createSdkworkPartnerService({
+      center: centerPort({
+        retrieveCenter: async () => {
+          const error = new Error("not a partner") as Error & { httpStatus: number };
+          error.httpStatus = 404;
+          throw error;
+        },
+      }),
+      join: joinPort(),
+    });
+    await expect(service.retrieveCenter()).resolves.toEqual({
+      available: false,
+      reason: "not-enrolled",
+    });
+  });
+
   it("downgrades an unsupported center endpoint to not-supported", async () => {
     const service = createSdkworkPartnerService({
-      center: {
+      center: centerPort({
         retrieveCenter: async () => {
           const error = new Error("not implemented") as Error & { status: number };
           error.status = 501;
           throw error;
         },
-      },
+      }),
       join: joinPort(),
     });
     await expect(service.retrieveCenter()).resolves.toEqual({

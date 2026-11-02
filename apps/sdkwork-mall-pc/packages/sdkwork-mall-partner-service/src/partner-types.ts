@@ -124,17 +124,71 @@ export interface SdkworkPartnerCenterCounts {
 
 export interface SdkworkPartnerCenterBalance {
   readonly currency: string;
+  /** Withdrawable cash (account available balance). */
   readonly available: string;
+  /** Amount frozen by pending withdrawals. */
   readonly pending: string;
+  /** Lifetime commission credited. */
   readonly settledTotal: string;
+  /** Commission already paid out through withdrawals. */
+  readonly withdrawn: string;
+  /** Same as available; kept as an explicit semantic alias for the UI. */
   readonly withdrawable: string;
+  /** Platform minimum withdrawal amount. */
+  readonly minWithdrawal: string;
 }
 
 export interface SdkworkPartnerCenterSnapshot {
   readonly profile: SdkworkPartnerCenterProfile;
   readonly counts: SdkworkPartnerCenterCounts;
   readonly balance: SdkworkPartnerCenterBalance;
+}
+
+/** One team member with that member's own earnings. */
+export interface SdkworkPartnerTeamMember {
+  readonly partnerId: string;
+  readonly name: string;
+  readonly levelNo: number;
+  readonly levelName: string;
+  readonly status: string;
+  readonly joinedAt: string | null;
+  readonly depth: number;
+  readonly directTeamSize: number;
+  readonly customerCount: number;
+  readonly totalCommission: string;
+  readonly availableBalance: string;
+}
+
+/** One commission allocation received by the current partner. */
+export interface SdkworkPartnerCommissionRecord {
+  readonly id: string;
+  readonly settlementId: string;
+  readonly eventId: string;
+  readonly sourceType: string;
+  readonly sourceRef: string;
+  readonly baseAmount: string;
+  readonly ratio: string;
+  readonly amount: string;
+  readonly levelOffset: number;
+  readonly status: string;
+  readonly computedAt: string;
+  readonly createdAt: string;
+}
+
+export interface SdkworkPartnerWithdrawal {
+  readonly id: string;
+  readonly amount: string;
+  readonly status: string;
+  readonly reviewRemark: string;
+  readonly paidAt: string | null;
+  readonly remark: string;
+  readonly createdAt: string;
   readonly updatedAt: string;
+}
+
+export interface SdkworkPartnerWithdrawalDraft {
+  readonly amount: string;
+  readonly remark: string;
 }
 
 /** Discriminated union that keeps "no data" explicit instead of null-shaped. */
@@ -142,7 +196,7 @@ export type SdkworkPartnerCenterAvailability =
   | { readonly available: true; readonly snapshot: SdkworkPartnerCenterSnapshot }
   | {
       readonly available: false;
-      readonly reason: "not-configured" | "not-supported";
+      readonly reason: "not-configured" | "not-enrolled" | "not-supported";
     };
 
 /** Stable issue codes; the UI owns the localized wording. */

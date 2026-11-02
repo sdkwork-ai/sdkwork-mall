@@ -65,11 +65,13 @@
       "title": "团队与收益",
       "description": "团队规模、客户数与佣金余额。",
       "team": "团队人数",
+      "directTeam": "直属团队",
       "customers": "客户数",
       "available": "可用余额",
       "withdrawable": "可提现",
       "inviteCode": "我的邀请码",
-      "notConfigured": "团队、佣金与提现需要合作伙伴自助端读模型接入后展示；当前已开放加盟申请与邀请码校验。"
+      "notConfigured": "团队、佣金与提现需要合作伙伴自助端读模型接入后展示；当前已开放加盟申请与邀请码校验。",
+      "notEnrolled": "成为分销伙伴后，这里会展示你的团队、收益记录与提现能力。"
     },
     "invite": {
       "title": "邀请码校验",
@@ -108,6 +110,46 @@
       "contactEmailInvalid": "请输入有效的邮箱地址。",
       "targetLevelInvalid": "请选择意向等级。",
       "inviteCodeTooLong": "邀请码不能超过 64 个字符。"
+    },
+    "team": {
+      "title": "我的团队",
+      "empty": "团队还没有成员，分享邀请码开始招募。",
+      "customerCount": "客户数",
+      "directTeam": "直属",
+      "totalCommission": "累计收益",
+      "availableBalance": "可提现",
+      "joinedAt": "加入时间",
+      "depth": "层级"
+    },
+    "commissions": {
+      "title": "收益记录",
+      "empty": "还没有收益记录。",
+      "baseAmount": "计佣基数",
+      "ratio": "比例",
+      "levelOffset": "层级"
+    },
+    "withdrawals": {
+      "title": "提现",
+      "available": "可提现余额",
+      "pending": "冻结中",
+      "totalEarned": "累计收益",
+      "withdrawn": "已提现",
+      "minWithdrawal": "最低提现 {{value}}",
+      "amount": "提现金额",
+      "amountPlaceholder": "输入提现金额",
+      "remark": "备注（选填）",
+      "submit": "申请提现",
+      "empty": "还没有提现记录。",
+      "invalidAmount": "请输入有效的提现金额。",
+      "exceedsBalance": "提现金额超过可提现余额。",
+      "belowMin": "提现金额低于最低提现额度。",
+      "success": "提现申请已提交，等待平台审核。"
+    },
+    "withdrawalStatusLabel": {
+      "PENDING": "审核中",
+      "APPROVED": "已审核",
+      "REJECTED": "已驳回",
+      "PAID": "已打款"
     }
   }
 }

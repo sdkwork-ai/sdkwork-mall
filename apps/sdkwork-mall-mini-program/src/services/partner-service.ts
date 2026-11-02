@@ -237,3 +237,206 @@ export function resolvePartnerMembershipState(
   return "none";
 }
 
+export interface MpPartnerCenter {
+  partnerId: string;
+  name: string;
+  levelNo: number;
+  levelName: string;
+  status: string;
+  inviteCode: string;
+  joinedAt: string;
+  parentPartnerName: string;
+  directTeamSize: number;
+  teamSize: number;
+  customerCount: number;
+  currency: string;
+  availableBalance: string;
+  frozenBalance: string;
+  totalCommission: string;
+  withdrawnAmount: string;
+  minWithdrawalAmount: string;
+}
+
+export interface MpPartnerTeamMember {
+  partnerId: string;
+  name: string;
+  levelNo: number;
+  levelName: string;
+  status: string;
+  joinedAt: string;
+  depth: number;
+  directTeamSize: number;
+  customerCount: number;
+  totalCommission: string;
+  availableBalance: string;
+}
+
+export interface MpPartnerCommissionRecord {
+  id: string;
+  settlementId: string;
+  eventId: string;
+  sourceType: string;
+  sourceRef: string;
+  baseAmount: string;
+  ratio: string;
+  amount: string;
+  levelOffset: number;
+  status: string;
+  computedAt: string;
+  createdAt: string;
+}
+
+export interface MpPartnerWithdrawal {
+  id: string;
+  amount: string;
+  status: string;
+  reviewRemark: string;
+  paidAt: string;
+  remark: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MpPartnerPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+function readCenter(item: MpRecord): MpPartnerCenter {
+  return {
+    availableBalance: asString(item, ["availableBalance"], "0"),
+    currency: asString(item, ["currency"], "CNY"),
+    customerCount: asNumber(item, ["customerCount"]) ?? 0,
+    directTeamSize: asNumber(item, ["directTeamSize"]) ?? 0,
+    frozenBalance: asString(item, ["frozenBalance"], "0"),
+    inviteCode: asString(item, ["inviteCode"]),
+    joinedAt: asString(item, ["joinedAt"]),
+    levelName: asString(item, ["levelName"]),
+    levelNo: asNumber(item, ["levelNo"]) ?? 0,
+    minWithdrawalAmount: asString(item, ["minWithdrawalAmount"], "0"),
+    name: asString(item, ["name"]),
+    parentPartnerName: asString(item, ["parentPartnerName"]),
+    partnerId: asString(item, ["partnerId"]),
+    status: asString(item, ["status"]),
+    teamSize: asNumber(item, ["teamSize"]) ?? 0,
+    totalCommission: asString(item, ["totalCommission"], "0"),
+    withdrawnAmount: asString(item, ["withdrawnAmount"], "0"),
+  };
+}
+
+function readTeamMember(item: MpRecord): MpPartnerTeamMember {
+  return {
+    availableBalance: asString(item, ["availableBalance"], "0"),
+    customerCount: asNumber(item, ["customerCount"]) ?? 0,
+    depth: asNumber(item, ["depth"]) ?? 1,
+    directTeamSize: asNumber(item, ["directTeamSize"]) ?? 0,
+    joinedAt: asString(item, ["joinedAt"]),
+    levelName: asString(item, ["levelName"]),
+    levelNo: asNumber(item, ["levelNo"]) ?? 0,
+    name: asString(item, ["name"]),
+    partnerId: asString(item, ["partnerId"]),
+    status: asString(item, ["status"]),
+    totalCommission: asString(item, ["totalCommission"], "0"),
+  };
+}
+
+function readCommissionRecord(item: MpRecord): MpPartnerCommissionRecord {
+  return {
+    amount: asString(item, ["amount"], "0"),
+    baseAmount: asString(item, ["baseAmount"], "0"),
+    computedAt: asString(item, ["computedAt"]),
+    createdAt: asString(item, ["createdAt"]),
+    eventId: asString(item, ["eventId"]),
+    id: asString(item, ["id"]),
+    levelOffset: asNumber(item, ["levelOffset"]) ?? 0,
+    ratio: asString(item, ["ratio"], "0"),
+    settlementId: asString(item, ["settlementId"]),
+    sourceRef: asString(item, ["sourceRef"]),
+    sourceType: asString(item, ["sourceType"]),
+    status: asString(item, ["status"]),
+  };
+}
+
+function readWithdrawal(item: MpRecord): MpPartnerWithdrawal {
+  return {
+    amount: asString(item, ["amount"], "0"),
+    createdAt: asString(item, ["createdAt"]),
+    id: asString(item, ["id"]),
+    paidAt: asString(item, ["paidAt"]),
+    remark: asString(item, ["remark"]),
+    reviewRemark: asString(item, ["reviewRemark"]),
+    status: asString(item, ["status"]),
+    updatedAt: asString(item, ["updatedAt"]),
+  };
+}
+
+function readPage<T>(
+  payload: MpRecord,
+  mapper: (record: MpRecord) => T,
+  page: number,
+  pageSize: number,
+): MpPartnerPage<T> {
+  const items = asRecordList(payload.items).map(mapper);
+  const pageInfo = asRecord(payload.pageInfo);
+  return {
+    items,
+    page: asNumber(pageInfo, ["page"]) ?? page,
+    pageSize: asNumber(pageInfo, ["pageSize"]) ?? pageSize,
+    total: asNumber(pageInfo, ["totalItems"]) ?? items.length,
+  };
+}
+
+/** The signed-in user's partner centre; rejects when the user is not a partner. */
+export async function retrievePartnerCenter(): Promise<MpPartnerCenter> {
+  const payload = await request({ path: "/partner_center" });
+  return readCenter(asRecord(payload.item));
+}
+
+export async function listPartnerTeam(
+  page = 1,
+  pageSize = 10,
+): Promise<MpPartnerPage<MpPartnerTeamMember>> {
+  const payload = await request({
+    path: "/partner_center/team",
+    query: { page, page_size: pageSize },
+  });
+  return readPage(payload, readTeamMember, page, pageSize);
+}
+
+export async function listPartnerCommissions(
+  page = 1,
+  pageSize = 10,
+): Promise<MpPartnerPage<MpPartnerCommissionRecord>> {
+  const payload = await request({
+    path: "/partner_center/commissions",
+    query: { page, page_size: pageSize },
+  });
+  return readPage(payload, readCommissionRecord, page, pageSize);
+}
+
+export async function listPartnerWithdrawals(
+  page = 1,
+  pageSize = 10,
+): Promise<MpPartnerPage<MpPartnerWithdrawal>> {
+  const payload = await request({
+    path: "/partner_center/withdrawals",
+    query: { page, page_size: pageSize },
+  });
+  return readPage(payload, readWithdrawal, page, pageSize);
+}
+
+export async function createPartnerWithdrawal(
+  amount: string,
+  remark: string,
+): Promise<MpPartnerWithdrawal> {
+  const payload = await request({
+    body: { amount, remark },
+    method: "POST",
+    path: "/partner_center/withdrawals",
+  });
+  return readWithdrawal(asRecord(payload.item));
+}
+
+

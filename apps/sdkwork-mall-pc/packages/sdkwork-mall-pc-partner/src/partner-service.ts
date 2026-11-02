@@ -1,6 +1,11 @@
-import { createSdkworkPartnerJoinPort, createSdkworkPartnerService } from "@sdkwork/mall-partner-service";
+import {
+  createSdkworkPartnerCenterPort,
+  createSdkworkPartnerJoinPort,
+  createSdkworkPartnerService,
+} from "@sdkwork/mall-partner-service";
 import type {
   SdkworkPartnerCenterPort,
+  SdkworkPartnerCenterWireClient,
   SdkworkPartnerJoinWireClient,
   SdkworkPartnerService,
 } from "@sdkwork/mall-partner-service";
@@ -28,7 +33,7 @@ export interface CreateSdkworkMallPartnerServiceInput {
    * Composed partner app client, structurally typed. The bootstrap owns the
    * generated SDK import; feature packages never import a business SDK.
    */
-  readonly partnerAppClient: SdkworkPartnerJoinWireClient;
+  readonly partnerAppClient: SdkworkPartnerJoinWireClient & SdkworkPartnerCenterWireClient;
   readonly centerPort?: SdkworkPartnerCenterPort | null;
 }
 
@@ -37,7 +42,7 @@ export function createSdkworkMallPartnerService(
   input: CreateSdkworkMallPartnerServiceInput,
 ): SdkworkPartnerService {
   return createSdkworkPartnerService({
-    center: input.centerPort ?? null,
+    center: input.centerPort ?? createSdkworkPartnerCenterPort(input.partnerAppClient),
     join: createSdkworkPartnerJoinPort(input.partnerAppClient),
   });
 }

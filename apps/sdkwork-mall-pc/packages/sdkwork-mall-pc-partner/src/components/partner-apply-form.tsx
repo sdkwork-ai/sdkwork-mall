@@ -69,31 +69,14 @@ export function SdkworkPartnerApplyForm({
     "h-10 w-full rounded-[var(--sdk-radius-control)] border border-[var(--sdk-color-border-default)] bg-[var(--sdk-color-surface-panel)] px-3 text-sm text-[var(--sdk-color-text-primary)] outline-none focus:border-[var(--sdk-color-border-focus)]";
 
   return (
-    <section
-      className="rounded-[var(--sdk-radius-panel)] border border-[var(--sdk-color-border-default)] bg-[var(--sdk-color-surface-panel)] p-4 shadow-[var(--sdk-shadow-sm)]"
+    <form
+      className="grid grid-cols-1 gap-3 md:grid-cols-2"
       data-slot="partner-apply-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void submit();
+      }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-[var(--sdk-color-text-primary)]">
-            {copy.apply.title}
-          </h2>
-          <p className="text-sm text-[var(--sdk-color-text-secondary)]">
-            {copy.apply.description}
-          </p>
-        </div>
-        <Button onClick={onClose} size="sm" variant="ghost">
-          {copy.actions.close}
-        </Button>
-      </div>
-
-      <form
-        className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void submit();
-        }}
-      >
         <label className="text-sm">
           <span className="mb-1 block text-[var(--sdk-color-text-secondary)]">
             {copy.apply.applicantType}
@@ -232,7 +215,6 @@ export function SdkworkPartnerApplyForm({
             {isSubmitting ? copy.actions.submitting : copy.apply.submit}
           </Button>
         </div>
-      </form>
-    </section>
+    </form>
   );
 }

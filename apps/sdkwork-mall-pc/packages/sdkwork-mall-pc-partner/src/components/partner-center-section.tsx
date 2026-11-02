@@ -1,4 +1,4 @@
-import { Users, UserRoundCheck, Wallet } from "lucide-react";
+import { Share2, UserRoundCheck, Users } from "lucide-react";
 
 import type { SdkworkPartnerCenterAvailability } from "@sdkwork/mall-partner-service";
 
@@ -25,7 +25,11 @@ export function SdkworkPartnerCenterSection({
           {copy.center.title}
         </h2>
         <p className="mt-1 text-sm text-[var(--sdk-color-text-secondary)]">
-          {center?.reason === "not-supported" ? copy.center.notSupported : copy.center.notConfigured}
+          {center?.reason === "not-enrolled"
+            ? copy.center.notEnrolled
+            : center?.reason === "not-supported"
+              ? copy.center.notSupported
+              : copy.center.notConfigured}
         </p>
       </section>
     );
@@ -33,26 +37,9 @@ export function SdkworkPartnerCenterSection({
 
   const { snapshot } = center;
   const metrics = [
-    {
-      icon: Users,
-      label: copy.center.team,
-      value: String(snapshot.counts.teamSize),
-    },
-    {
-      icon: UserRoundCheck,
-      label: copy.center.customers,
-      value: String(snapshot.counts.customerCount),
-    },
-    {
-      icon: Wallet,
-      label: copy.center.available,
-      value: intl.formatMoney(snapshot.balance.available, snapshot.balance.currency),
-    },
-    {
-      icon: Wallet,
-      label: copy.center.withdrawable,
-      value: intl.formatMoney(snapshot.balance.withdrawable, snapshot.balance.currency),
-    },
+    { icon: Users, label: copy.center.team, value: String(snapshot.counts.teamSize) },
+    { icon: Users, label: copy.center.directTeam, value: String(snapshot.counts.directTeamSize) },
+    { icon: UserRoundCheck, label: copy.center.customers, value: String(snapshot.counts.customerCount) },
   ];
 
   return (
@@ -65,7 +52,7 @@ export function SdkworkPartnerCenterSection({
           {copy.center.description}
         </p>
       </header>
-      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <dl className="grid grid-cols-3 gap-3">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
@@ -84,9 +71,12 @@ export function SdkworkPartnerCenterSection({
           );
         })}
       </dl>
-      <p className="text-xs text-[var(--sdk-color-text-secondary)]">
+      <p className="flex items-center gap-1.5 text-xs text-[var(--sdk-color-text-secondary)]">
+        <Share2 aria-hidden="true" size={14} />
         {copy.center.inviteCode}:{" "}
-        <span className="font-semibold">{snapshot.profile.inviteCode || "—"}</span>
+        <span className="font-semibold text-[var(--sdk-color-text-primary)]">
+          {snapshot.profile.inviteCode || "—"}
+        </span>
       </p>
     </section>
   );

@@ -593,7 +593,10 @@ function readFlutterPageTitles() {
       if (classIndex < 0) {
         continue;
       }
-      const window = source.slice(classIndex, classIndex + 6000);
+      // Page classes can be several hundred lines (state, form, list sections)
+      // before the Scaffold/AppBar; the window only needs to cover the file's
+      // widget tree, not a fixed short prefix.
+      const window = source.slice(classIndex, classIndex + 20000);
       // Titles are either inline literals or catalogue lookups after the i18n
       // migration; a lookup resolves through the authored Flutter fragments.
       const titleMatch = window.match(

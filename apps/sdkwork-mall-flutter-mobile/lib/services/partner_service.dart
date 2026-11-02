@@ -249,11 +249,280 @@ class PartnerService {
       levelNo: _asInt(item['levelNo']),
     );
   }
+
+  Future<PartnerCenter> retrieveCenter() async {
+    final payload = await _client.request('/partner_center');
+    return PartnerCenter.fromJson(_item(payload));
+  }
+
+  Future<PartnerPage<PartnerTeamMember>> listTeam({int page = 1, int pageSize = 10}) async {
+    final payload = await _client.request(
+      '/partner_center/team',
+      query: <String, String>{'page': '$page', 'page_size': '$pageSize'},
+    );
+    return PartnerPage.fromPayload<PartnerTeamMember>(
+      payload,
+      page,
+      pageSize,
+      PartnerTeamMember.fromJson,
+    );
+  }
+
+  Future<PartnerPage<PartnerCommissionRecord>> listCommissions({
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    final payload = await _client.request(
+      '/partner_center/commissions',
+      query: <String, String>{'page': '$page', 'page_size': '$pageSize'},
+    );
+    return PartnerPage.fromPayload<PartnerCommissionRecord>(
+      payload,
+      page,
+      pageSize,
+      PartnerCommissionRecord.fromJson,
+    );
+  }
+
+  Future<PartnerPage<PartnerWithdrawal>> listWithdrawals({
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    final payload = await _client.request(
+      '/partner_center/withdrawals',
+      query: <String, String>{'page': '$page', 'page_size': '$pageSize'},
+    );
+    return PartnerPage.fromPayload<PartnerWithdrawal>(
+      payload,
+      page,
+      pageSize,
+      PartnerWithdrawal.fromJson,
+    );
+  }
+
+  Future<PartnerWithdrawal> createWithdrawal(String amount, String remark) async {
+    final payload = await _client.request(
+      '/partner_center/withdrawals',
+      method: 'POST',
+      body: <String, dynamic>{'amount': amount, 'remark': remark},
+    );
+    return PartnerWithdrawal.fromJson(_item(payload));
+  }
 }
 
 Map<String, dynamic> _item(Map<String, dynamic> payload) {
   final item = payload['item'];
   return item is Map<String, dynamic> ? item : <String, dynamic>{};
+}
+
+class PartnerCenter {
+  const PartnerCenter({
+    required this.partnerId,
+    required this.name,
+    required this.levelNo,
+    required this.levelName,
+    required this.status,
+    required this.inviteCode,
+    required this.joinedAt,
+    required this.parentPartnerName,
+    required this.directTeamSize,
+    required this.teamSize,
+    required this.customerCount,
+    required this.currency,
+    required this.availableBalance,
+    required this.frozenBalance,
+    required this.totalCommission,
+    required this.withdrawnAmount,
+    required this.minWithdrawalAmount,
+  });
+
+  final String partnerId;
+  final String name;
+  final int levelNo;
+  final String levelName;
+  final String status;
+  final String inviteCode;
+  final String joinedAt;
+  final String parentPartnerName;
+  final int directTeamSize;
+  final int teamSize;
+  final int customerCount;
+  final String currency;
+  final String availableBalance;
+  final String frozenBalance;
+  final String totalCommission;
+  final String withdrawnAmount;
+  final String minWithdrawalAmount;
+
+  factory PartnerCenter.fromJson(Map<String, dynamic> json) {
+    return PartnerCenter(
+      partnerId: '${json['partnerId'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      levelNo: _asInt(json['levelNo']) ?? 0,
+      levelName: '${json['levelName'] ?? ''}',
+      status: '${json['status'] ?? ''}',
+      inviteCode: '${json['inviteCode'] ?? ''}',
+      joinedAt: '${json['joinedAt'] ?? ''}',
+      parentPartnerName: '${json['parentPartnerName'] ?? ''}',
+      directTeamSize: _asInt(json['directTeamSize']) ?? 0,
+      teamSize: _asInt(json['teamSize']) ?? 0,
+      customerCount: _asInt(json['customerCount']) ?? 0,
+      currency: '${json['currency'] ?? 'CNY'}',
+      availableBalance: '${json['availableBalance'] ?? '0'}',
+      frozenBalance: '${json['frozenBalance'] ?? '0'}',
+      totalCommission: '${json['totalCommission'] ?? '0'}',
+      withdrawnAmount: '${json['withdrawnAmount'] ?? '0'}',
+      minWithdrawalAmount: '${json['minWithdrawalAmount'] ?? '0'}',
+    );
+  }
+}
+
+class PartnerTeamMember {
+  const PartnerTeamMember({
+    required this.partnerId,
+    required this.name,
+    required this.levelNo,
+    required this.levelName,
+    required this.status,
+    required this.joinedAt,
+    required this.depth,
+    required this.directTeamSize,
+    required this.customerCount,
+    required this.totalCommission,
+    required this.availableBalance,
+  });
+
+  final String partnerId;
+  final String name;
+  final int levelNo;
+  final String levelName;
+  final String status;
+  final String joinedAt;
+  final int depth;
+  final int directTeamSize;
+  final int customerCount;
+  final String totalCommission;
+  final String availableBalance;
+
+  factory PartnerTeamMember.fromJson(Map<String, dynamic> json) {
+    return PartnerTeamMember(
+      partnerId: '${json['partnerId'] ?? ''}',
+      name: '${json['name'] ?? ''}',
+      levelNo: _asInt(json['levelNo']) ?? 0,
+      levelName: '${json['levelName'] ?? ''}',
+      status: '${json['status'] ?? ''}',
+      joinedAt: '${json['joinedAt'] ?? ''}',
+      depth: _asInt(json['depth']) ?? 1,
+      directTeamSize: _asInt(json['directTeamSize']) ?? 0,
+      customerCount: _asInt(json['customerCount']) ?? 0,
+      totalCommission: '${json['totalCommission'] ?? '0'}',
+      availableBalance: '${json['availableBalance'] ?? '0'}',
+    );
+  }
+}
+
+class PartnerCommissionRecord {
+  const PartnerCommissionRecord({
+    required this.id,
+    required this.sourceType,
+    required this.sourceRef,
+    required this.baseAmount,
+    required this.ratio,
+    required this.amount,
+    required this.levelOffset,
+    required this.status,
+    required this.computedAt,
+  });
+
+  final String id;
+  final String sourceType;
+  final String sourceRef;
+  final String baseAmount;
+  final String ratio;
+  final String amount;
+  final int levelOffset;
+  final String status;
+  final String computedAt;
+
+  factory PartnerCommissionRecord.fromJson(Map<String, dynamic> json) {
+    return PartnerCommissionRecord(
+      id: '${json['id'] ?? ''}',
+      sourceType: '${json['sourceType'] ?? ''}',
+      sourceRef: '${json['sourceRef'] ?? ''}',
+      baseAmount: '${json['baseAmount'] ?? '0'}',
+      ratio: '${json['ratio'] ?? '0'}',
+      amount: '${json['amount'] ?? '0'}',
+      levelOffset: _asInt(json['levelOffset']) ?? 0,
+      status: '${json['status'] ?? ''}',
+      computedAt: '${json['computedAt'] ?? ''}',
+    );
+  }
+}
+
+class PartnerWithdrawal {
+  const PartnerWithdrawal({
+    required this.id,
+    required this.amount,
+    required this.status,
+    required this.reviewRemark,
+    required this.paidAt,
+    required this.remark,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String amount;
+  final String status;
+  final String reviewRemark;
+  final String paidAt;
+  final String remark;
+  final String createdAt;
+
+  factory PartnerWithdrawal.fromJson(Map<String, dynamic> json) {
+    return PartnerWithdrawal(
+      id: '${json['id'] ?? ''}',
+      amount: '${json['amount'] ?? '0'}',
+      status: '${json['status'] ?? ''}',
+      reviewRemark: '${json['reviewRemark'] ?? ''}',
+      paidAt: '${json['paidAt'] ?? ''}',
+      remark: '${json['remark'] ?? ''}',
+      createdAt: '${json['createdAt'] ?? ''}',
+    );
+  }
+}
+
+class PartnerPage<T> {
+  const PartnerPage({
+    required this.items,
+    required this.page,
+    required this.pageSize,
+    required this.total,
+  });
+
+  final List<T> items;
+  final int page;
+  final int pageSize;
+  final int total;
+
+  static PartnerPage<E> fromPayload<E>(
+    Map<String, dynamic> payload,
+    int page,
+    int pageSize,
+    E Function(Map<String, dynamic>) mapper,
+  ) {
+    final rawItems = payload['items'];
+    final items = rawItems is List
+        ? rawItems.whereType<Map<String, dynamic>>().map(mapper).toList(growable: false)
+        : <E>[];
+    final pageInfo = payload['pageInfo'];
+    final info = pageInfo is Map<String, dynamic> ? pageInfo : <String, dynamic>{};
+    return PartnerPage<E>(
+      items: items,
+      page: _asInt(info['page']) ?? page,
+      pageSize: _asInt(info['pageSize']) ?? pageSize,
+      total: _asInt(info['totalItems']) ?? items.length,
+    );
+  }
 }
 
 /// Membership state derived from the newest-first application history.

@@ -3,12 +3,16 @@ import type {
   SdkworkPartnerApplicationDraft,
   SdkworkPartnerBenefit,
   SdkworkPartnerCenterSnapshot,
+  SdkworkPartnerCommissionRecord,
   SdkworkPartnerInviteCodePreview,
   SdkworkPartnerLevel,
   SdkworkPartnerLevelStatus,
   SdkworkPartnerListQuery,
   SdkworkPartnerPage,
   SdkworkPartnerProgram,
+  SdkworkPartnerTeamMember,
+  SdkworkPartnerWithdrawal,
+  SdkworkPartnerWithdrawalDraft,
 } from "./partner-types";
 
 /**
@@ -31,13 +35,22 @@ export interface SdkworkPartnerJoinPort {
 }
 
 /**
- * Optional outbound port for partner self-service read models (team, customer,
- * commission, withdrawal projections). Kept separate from the join port so the
- * join flow never depends on an unlanded contract and adding the centre later
- * is a pure extension (open/closed principle).
+ * Outbound port for the partner self-service centre (team, commission,
+ * withdrawal projections). Kept separate from the join port so the join flow
+ * never depends on the centre contract.
  */
 export interface SdkworkPartnerCenterPort {
   retrieveCenter(): Promise<SdkworkPartnerCenterSnapshot>;
+  listTeam(
+    query?: SdkworkPartnerListQuery,
+  ): Promise<SdkworkPartnerPage<SdkworkPartnerTeamMember>>;
+  listCommissionRecords(
+    query?: SdkworkPartnerListQuery,
+  ): Promise<SdkworkPartnerPage<SdkworkPartnerCommissionRecord>>;
+  listWithdrawals(
+    query?: SdkworkPartnerListQuery,
+  ): Promise<SdkworkPartnerPage<SdkworkPartnerWithdrawal>>;
+  createWithdrawal(draft: SdkworkPartnerWithdrawalDraft): Promise<SdkworkPartnerWithdrawal>;
 }
 
 /**
@@ -61,6 +74,30 @@ export interface SdkworkPartnerJoinWireClient {
       };
     };
   };
+}
+
+/** Structural view of the partner-centre namespace of the app client. */
+export interface SdkworkPartnerCenterWireClient {
+  readonly center: {
+    readonly partnerCenter: {
+      retrieve(): Promise<unknown>;
+      readonly team: {
+        list(params?: SdkworkPartnerPageWireQuery): Promise<unknown>;
+      };
+      readonly commissionRecords: {
+        list(params?: SdkworkPartnerPageWireQuery): Promise<unknown>;
+      };
+      readonly withdrawals: {
+        list(params?: SdkworkPartnerPageWireQuery): Promise<unknown>;
+        create(body: SdkworkPartnerWithdrawalWireRequest): Promise<unknown>;
+      };
+    };
+  };
+}
+
+export interface SdkworkPartnerWithdrawalWireRequest {
+  readonly amount: string;
+  readonly remark?: string;
 }
 
 export interface SdkworkPartnerPageWireQuery {
@@ -129,6 +166,139 @@ export function createSdkworkPartnerJoinPort(
     async validateInviteCode(code) {
       return mapInviteCode(asRecord(await client.join.partnerJoin.inviteCode.retrieve(code)));
     },
+  };
+}
+
+/** Adapts the composed partner app client to the partner-centre port. */
+export function createSdkworkPartnerCenterPort(
+  client: SdkworkPartnerCenterWireClient,
+): SdkworkPartnerCenterPort {
+  const center = client.center.partnerCenter;
+  return {
+    async createWithdrawal(draft) {
+      return mapWithdrawal(
+        asRecord(
+          await center.withdrawals.create({
+            amount: draft.amount,
+            remark: draft.remark || undefined,
+          }),
+        ),
+      );
+    },
+    async listCommissionRecords(query) {
+      return mapPage(
+        await center.commissionRecords.list(pageQuery(query)),
+        mapCommissionRecord,
+      );
+    },
+    async listTeam(query) {
+      return mapPage(await center.team.list(pageQuery(query)), mapTeamMember);
+    },
+    async listWithdrawals(query) {
+      return mapPage(await center.withdrawals.list(pageQuery(query)), mapWithdrawal);
+    },
+    async retrieveCenter() {
+      return mapCenter(asRecord(await center.retrieve()));
+    },
+  };
+}
+
+function pageQuery(query: SdkworkPartnerListQuery | undefined): SdkworkPartnerPageWireQuery {
+  return {
+    page: query?.page ?? DEFAULT_PAGE,
+    pageSize: query?.pageSize ?? DEFAULT_PAGE_SIZE,
+  };
+}
+
+function mapPage<TWire, TDomain>(
+  payload: unknown,
+  mapper: (record: Record<string, unknown>) => TDomain,
+): SdkworkPartnerPage<TDomain> {
+  const result = asRecord(payload);
+  const items = asArray(result.items).map(mapper);
+  const pageInfo = asRecord(result.pageInfo);
+  return {
+    items,
+    page: asNumber(pageInfo.page) ?? DEFAULT_PAGE,
+    pageSize: asNumber(pageInfo.pageSize) ?? DEFAULT_PAGE_SIZE,
+    total: asNumber(pageInfo.totalItems) ?? items.length,
+  };
+}
+
+function mapCenter(record: Record<string, unknown>): SdkworkPartnerCenterSnapshot {
+  return {
+    balance: {
+      available: asText(record.availableBalance, "0"),
+      currency: asText(record.currency, "CNY"),
+      minWithdrawal: asText(record.minWithdrawalAmount, "0"),
+      pending: asText(record.frozenBalance, "0"),
+      settledTotal: asText(record.totalCommission, "0"),
+      withdrawable: asText(record.availableBalance, "0"),
+      withdrawn: asText(record.withdrawnAmount, "0"),
+    },
+    counts: {
+      customerCount: asNumber(record.customerCount) ?? 0,
+      directTeamSize: asNumber(record.directTeamSize) ?? 0,
+      teamSize: asNumber(record.teamSize) ?? 0,
+    },
+    profile: {
+      inviteCode: asText(record.inviteCode),
+      joinedAt: asNullableText(record.joinedAt),
+      levelName: asText(record.levelName),
+      levelNo: asNumber(record.levelNo) ?? 0,
+      name: asText(record.name),
+      parentPartnerName: asText(record.parentPartnerName),
+      partnerId: asText(record.partnerId),
+      status: asText(record.status),
+    },
+  };
+}
+
+function mapTeamMember(record: Record<string, unknown>): SdkworkPartnerTeamMember {
+  return {
+    availableBalance: asText(record.availableBalance, "0"),
+    customerCount: asNumber(record.customerCount) ?? 0,
+    depth: asNumber(record.depth) ?? 1,
+    directTeamSize: asNumber(record.directTeamSize) ?? 0,
+    joinedAt: asNullableText(record.joinedAt),
+    levelName: asText(record.levelName),
+    levelNo: asNumber(record.levelNo) ?? 0,
+    name: asText(record.name),
+    partnerId: asText(record.partnerId),
+    status: asText(record.status),
+    totalCommission: asText(record.totalCommission, "0"),
+  };
+}
+
+function mapCommissionRecord(
+  record: Record<string, unknown>,
+): SdkworkPartnerCommissionRecord {
+  return {
+    amount: asText(record.amount, "0"),
+    baseAmount: asText(record.baseAmount, "0"),
+    computedAt: asText(record.computedAt),
+    createdAt: asText(record.createdAt),
+    eventId: asText(record.eventId),
+    id: asText(record.id),
+    levelOffset: asNumber(record.levelOffset) ?? 0,
+    ratio: asText(record.ratio, "0"),
+    settlementId: asText(record.settlementId),
+    sourceRef: asText(record.sourceRef),
+    sourceType: asText(record.sourceType),
+    status: asText(record.status),
+  };
+}
+
+function mapWithdrawal(record: Record<string, unknown>): SdkworkPartnerWithdrawal {
+  return {
+    amount: asText(record.amount, "0"),
+    createdAt: asText(record.createdAt),
+    id: asText(record.id),
+    paidAt: asNullableText(record.paidAt),
+    remark: asText(record.remark),
+    reviewRemark: asText(record.reviewRemark),
+    status: asText(record.status),
+    updatedAt: asText(record.updatedAt),
   };
 }
 
@@ -246,14 +416,27 @@ export function readSdkworkPartnerErrorMessage(error: unknown): string {
     return error.trim();
   }
   if (error instanceof Error && error.message.trim()) {
-    return error.message.trim();
+    const message = error.message.trim();
+    if (message !== "Failed to fetch" && !message.startsWith("HTTP ")) {
+      return message;
+    }
   }
   if (error && typeof error === "object") {
     const record = error as Record<string, unknown>;
-    for (const key of ["message", "detail", "title"]) {
+    for (const key of ["detail", "title", "message"]) {
       const value = record[key];
       if (typeof value === "string" && value.trim()) {
         return value.trim();
+      }
+    }
+    const problem = record.problem;
+    if (problem && typeof problem === "object") {
+      const recordProblem = problem as Record<string, unknown>;
+      for (const key of ["detail", "title", "message"]) {
+        const value = recordProblem[key];
+        if (typeof value === "string" && value.trim()) {
+          return value.trim();
+        }
       }
     }
   }
@@ -265,10 +448,17 @@ export function readSdkworkPartnerErrorStatus(error: unknown): number | null {
     return null;
   }
   const record = error as Record<string, unknown>;
-  for (const key of ["status", "statusCode", "code"]) {
+  for (const key of ["status", "statusCode", "httpStatus"]) {
     const value = record[key];
     if (typeof value === "number" && Number.isFinite(value)) {
       return value;
+    }
+  }
+  const problem = record.problem;
+  if (problem && typeof problem === "object") {
+    const status = (problem as Record<string, unknown>).status;
+    if (typeof status === "number" && Number.isFinite(status)) {
+      return status;
     }
   }
   const response = record.response;

@@ -78,6 +78,7 @@
       "withdrawable": "可提现",
       "inviteCode": "我的邀请码",
       "notConfigured": "团队、佣金与提现需要合作伙伴自助端读模型接入后展示；当前已开放加盟申请与邀请码校验。",
+      "notEnrolled": "成为分销伙伴后，这里会展示你的团队、收益记录与提现能力。",
       "notSupported": "当前部署尚未提供团队与佣金接口。"
     },
     "invite": {
@@ -119,6 +120,68 @@
       "contactEmailInvalid": "请输入有效的邮箱地址。",
       "targetLevelInvalid": "请选择意向等级。",
       "inviteCodeTooLong": "邀请码不能超过 64 个字符。"
+    },
+    "team": {
+      "title": "我的团队",
+      "description": "团队成员的等级、客户与各自的收益。",
+      "empty": "团队还没有成员，分享邀请码开始招募。",
+      "member": "成员",
+      "level": "等级",
+      "depth": "层级",
+      "directTeam": "直属",
+      "customerCount": "客户数",
+      "totalCommission": "累计收益",
+      "availableBalance": "可提现",
+      "joinedAt": "加入时间",
+      "previousPage": "上一页",
+      "nextPage": "下一页",
+      "page": "第 {{page}} / {{total}} 页"
+    },
+    "commissions": {
+      "title": "收益记录",
+      "description": "每一笔分销收益的来源、比例与金额。",
+      "empty": "还没有收益记录。",
+      "computedAt": "结算时间",
+      "source": "来源",
+      "baseAmount": "计佣基数",
+      "ratio": "比例",
+      "amount": "佣金",
+      "levelOffset": "层级",
+      "status": "状态",
+      "previousPage": "上一页",
+      "nextPage": "下一页",
+      "page": "第 {{page}} / {{total}} 页"
+    },
+    "withdrawals": {
+      "title": "提现",
+      "description": "提交提现申请后由平台审核并打款。",
+      "available": "可提现余额",
+      "pending": "冻结中",
+      "totalEarned": "累计收益",
+      "withdrawn": "已提现",
+      "minWithdrawal": "最低提现 {{value}}",
+      "amount": "提现金额",
+      "amountPlaceholder": "输入提现金额",
+      "remark": "备注（选填）",
+      "remarkPlaceholder": "收款账户或说明",
+      "submit": "申请提现",
+      "empty": "还没有提现记录。",
+      "requestedAt": "申请时间",
+      "paidAt": "打款时间",
+      "reviewRemark": "审核意见",
+      "invalidAmount": "请输入有效的提现金额。",
+      "exceedsBalance": "提现金额超过可提现余额。",
+      "belowMin": "提现金额低于最低提现额度。",
+      "success": "提现申请已提交，等待平台审核。",
+      "previousPage": "上一页",
+      "nextPage": "下一页",
+      "page": "第 {{page}} / {{total}} 页"
+    },
+    "withdrawalStatusLabel": {
+      "PENDING": "审核中",
+      "APPROVED": "已审核",
+      "REJECTED": "已驳回",
+      "PAID": "已打款"
     },
     "routes": {
       "dashboard": {

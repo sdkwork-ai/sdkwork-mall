@@ -11,11 +11,14 @@ import {
   useSdkworkPartnerIntl,
 } from "../partner-intl.tsx";
 import { SdkworkPartnerApplicationsList } from "../components/partner-applications-list.tsx";
-import { SdkworkPartnerApplyForm } from "../components/partner-apply-form.tsx";
+import { SdkworkPartnerApplyDialog } from "../components/partner-apply-dialog.tsx";
 import { SdkworkPartnerCenterSection } from "../components/partner-center-section.tsx";
+import { SdkworkPartnerCommissionTable } from "../components/partner-commission-table.tsx";
 import { SdkworkPartnerInviteCard } from "../components/partner-invite-card.tsx";
 import { SdkworkPartnerProgramGrid } from "../components/partner-program-grid.tsx";
 import { SdkworkPartnerStatusHero } from "../components/partner-status-hero.tsx";
+import { SdkworkPartnerTeamTable } from "../components/partner-team-table.tsx";
+import { SdkworkPartnerWithdrawalPanel } from "../components/partner-withdrawal-panel.tsx";
 
 export interface SdkworkMallPartnerCenterPageProps {
   readonly controller?: SdkworkPartnerController;
@@ -90,14 +93,53 @@ function SdkworkPartnerCenterContent({
         />
 
         {state.isApplyFormOpen && state.program ? (
-          <SdkworkPartnerApplyForm
+          <SdkworkPartnerApplyDialog
             initialInviteCode={readInviteFromLocation()}
             intl={intl}
+            isOpen={state.isApplyFormOpen}
             isSubmitting={state.isSubmitting}
             onClose={controller.closeApplyForm}
             onSubmit={(draft) => controller.submitApplication(draft)}
             program={state.program}
           />
+        ) : null}
+
+        {state.center?.available ? (
+          <>
+            <SdkworkPartnerTeamTable
+              currency={state.center.snapshot.balance.currency}
+              intl={intl}
+              isLoading={state.isTeamLoading}
+              members={state.teamMembers}
+              onPageChange={(page) => void controller.loadTeam(page)}
+              page={state.teamPage}
+              pageSize={10}
+              total={state.teamTotal}
+            />
+            <SdkworkPartnerCommissionTable
+              currency={state.center.snapshot.balance.currency}
+              intl={intl}
+              isLoading={state.isCommissionLoading}
+              onPageChange={(page) => void controller.loadCommissionRecords(page)}
+              page={state.commissionPage}
+              pageSize={10}
+              records={state.commissionRecords}
+              total={state.commissionTotal}
+            />
+            <SdkworkPartnerWithdrawalPanel
+              balance={state.center.snapshot.balance}
+              error={state.withdrawalError}
+              intl={intl}
+              isLoading={state.isWithdrawalLoading}
+              isWithdrawing={state.isWithdrawing}
+              onPageChange={(page) => void controller.loadWithdrawals(page)}
+              onSubmit={(draft) => controller.submitWithdrawal(draft)}
+              page={state.withdrawalPage}
+              pageSize={10}
+              total={state.withdrawalTotal}
+              withdrawals={state.withdrawals}
+            />
+          </>
         ) : null}
 
         {state.program ? (

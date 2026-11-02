@@ -28,7 +28,86 @@
 
     <view class="mp-card">
       <view class="mp-card-title">{{labels.centerTitle}}</view>
-      <view class="mp-muted">{{labels.centerNotice}}</view>
+      <block wx:if="{{center}}">
+        <view class="partner-level-meta">
+          {{labels.teamTitle}} {{center.teamSize}} · {{labels.directTeam}} {{center.directTeamSize}} ·
+          {{labels.customers}} {{center.customerCount}}
+        </view>
+        <view class="mp-muted">{{labels.inviteCodeLabel}}: {{center.inviteCode || '—'}}</view>
+      </block>
+      <view wx:else class="mp-muted">{{centerNotice}}</view>
+    </view>
+
+    <view wx:if="{{center}}" class="mp-card">
+      <view class="mp-card-title">{{labels.teamTitle}}</view>
+      <view wx:if="{{!team.length}}" class="mp-muted partner-empty">{{labels.teamEmpty}}</view>
+      <view class="partner-level" wx:for="{{team}}" wx:key="partnerId">
+        <view class="partner-level-head">
+          <text class="partner-level-name">{{item.name}}</text>
+          <text class="mp-muted">{{item.levelText}}</text>
+        </view>
+        <view class="mp-muted">{{item.metaText}}</view>
+        <view class="partner-level-meta">{{item.commissionText}} · {{item.balanceText}}</view>
+        <view class="mp-muted">{{item.joinedText}}</view>
+      </view>
+      <view class="partner-actions" wx:if="{{teamTotal}}">
+        <button class="mp-btn mp-btn-ghost" data-page="{{teamPage - 1}}" disabled="{{teamPage <= 1 || teamLoading}}" bindtap="teamPage">{{labels.teamPrev}}</button>
+        <text class="mp-muted">{{teamPageText}}</text>
+        <button class="mp-btn mp-btn-ghost" data-page="{{teamPage + 1}}" disabled="{{teamPage * 10 >= teamTotal || teamLoading}}" bindtap="teamPage">{{labels.teamNext}}</button>
+      </view>
+    </view>
+
+    <view wx:if="{{center}}" class="mp-card">
+      <view class="mp-card-title">{{labels.commissionsTitle}}</view>
+      <view wx:if="{{!commissions.length}}" class="mp-muted partner-empty">{{labels.commissionsEmpty}}</view>
+      <view class="partner-level" wx:for="{{commissions}}" wx:key="id">
+        <view class="partner-level-head">
+          <text class="partner-level-name">{{item.amountText}}</text>
+          <text class="mp-muted">{{item.statusText}}</text>
+        </view>
+        <view class="mp-muted">{{item.sourceText}}</view>
+        <view class="partner-level-meta">{{item.baseText}} · {{item.ratioText}}</view>
+        <view class="mp-muted">{{item.metaText}}</view>
+      </view>
+      <view class="partner-actions" wx:if="{{commissionTotal}}">
+        <button class="mp-btn mp-btn-ghost" data-page="{{commissionPage - 1}}" disabled="{{commissionPage <= 1 || commissionLoading}}" bindtap="commissionPageTap">{{labels.commissionsPrev}}</button>
+        <text class="mp-muted">{{commissionPageText}}</text>
+        <button class="mp-btn mp-btn-ghost" data-page="{{commissionPage + 1}}" disabled="{{commissionPage * 10 >= commissionTotal || commissionLoading}}" bindtap="commissionPageTap">{{labels.commissionsNext}}</button>
+      </view>
+    </view>
+
+    <view wx:if="{{center}}" class="mp-card">
+      <view class="mp-card-title">{{labels.withdrawTitle}}</view>
+      <view class="partner-level-meta">
+        {{labels.withdrawAvailable}} {{center.availableBalance}} · {{labels.withdrawPending}} {{center.frozenBalance}} ·
+        {{labels.withdrawTotal}} {{center.totalCommission}} · {{labels.withdrawWithdrawn}} {{center.withdrawnAmount}}
+      </view>
+      <view class="mp-muted">{{labels.withdrawMin}} {{center.minWithdrawalAmount}}</view>
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.withdrawAmount}}</view>
+        <input type="digit" placeholder="{{labels.withdrawAmountPlaceholder}}" value="{{withdrawAmount}}" bindinput="onWithdrawAmountInput" />
+      </view>
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.withdrawRemark}}</view>
+        <input placeholder="{{labels.withdrawRemarkPlaceholder}}" value="{{withdrawRemark}}" bindinput="onWithdrawRemarkInput" />
+      </view>
+      <view wx:if="{{withdrawError}}" class="partner-issue">{{withdrawError}}</view>
+      <view wx:if="{{withdrawSuccess}}" class="mp-muted">{{labels.withdrawSuccess}}</view>
+      <button class="mp-btn mp-btn-primary" disabled="{{withdrawing}}" bindtap="submitWithdrawal">{{labels.withdrawSubmit}}</button>
+      <view wx:if="{{!withdrawals.length}}" class="mp-muted partner-empty">{{labels.withdrawEmpty}}</view>
+      <view class="partner-level" wx:for="{{withdrawals}}" wx:key="id">
+        <view class="partner-level-head">
+          <text class="partner-level-name">{{item.amountText}}</text>
+          <text class="mp-muted">{{item.statusText}}</text>
+        </view>
+        <view class="mp-muted">{{item.metaText}}</view>
+        <view wx:if="{{item.reviewComment}}" class="mp-muted">{{labels.reviewComment}}：{{item.reviewComment}}</view>
+      </view>
+      <view class="partner-actions" wx:if="{{withdrawalTotal}}">
+        <button class="mp-btn mp-btn-ghost" data-page="{{withdrawalPage - 1}}" disabled="{{withdrawalPage <= 1 || withdrawalLoading}}" bindtap="withdrawalPageTap">{{labels.withdrawPrev}}</button>
+        <text class="mp-muted">{{withdrawalPageText}}</text>
+        <button class="mp-btn mp-btn-ghost" data-page="{{withdrawalPage + 1}}" disabled="{{withdrawalPage * 10 >= withdrawalTotal || withdrawalLoading}}" bindtap="withdrawalPageTap">{{labels.withdrawNext}}</button>
+      </view>
     </view>
 
     <view class="mp-card">
@@ -52,8 +131,15 @@
       </view>
     </view>
 
-    <view wx:if="{{formOpen}}" class="mp-card">
-      <view class="mp-card-title">{{labels.applyTitle}}</view>
+    <view wx:if="{{formOpen}}" class="partner-modal">
+      <view class="partner-modal-mask" catchtouchmove="noop" bindtap="closeForm"></view>
+      <view class="partner-modal-panel" catchtap="noop">
+        <view class="partner-modal-head">
+          <text class="partner-modal-title">{{labels.applyTitle}}</text>
+          <button class="partner-modal-close" bindtap="closeForm">×</button>
+        </view>
+        <scroll-view class="partner-modal-body" scroll-y>
+          <view class="mp-card partner-modal-card">
       <view class="mp-muted">{{labels.applyDescription}}</view>
 
       <view class="mp-field">
@@ -125,6 +211,9 @@
         <button class="mp-btn mp-btn-primary" disabled="{{submitting}}" bindtap="submit">
           {{submitting ? labels.actionsSubmitting : labels.applySubmit}}
         </button>
+      </view>
+          </view>
+        </scroll-view>
       </view>
     </view>
 

@@ -49,6 +49,7 @@ export interface SdkworkPartnerMessages {
     directTeam: string;
     inviteCode: string;
     notConfigured: string;
+    notEnrolled: string;
     notSupported: string;
     pending: string;
     settled: string;
@@ -109,6 +110,69 @@ export interface SdkworkPartnerMessages {
     REJECTED: string;
     SUBMITTED: string;
   };
+  team: {
+    availableBalance: string;
+    customerCount: string;
+    depth: string;
+    description: string;
+    directTeam: string;
+    empty: string;
+    joinedAt: string;
+    level: string;
+    member: string;
+    nextPage: string;
+    page: string;
+    previousPage: string;
+    title: string;
+    totalCommission: string;
+  };
+  commissions: {
+    amount: string;
+    baseAmount: string;
+    computedAt: string;
+    description: string;
+    empty: string;
+    levelOffset: string;
+    nextPage: string;
+    page: string;
+    previousPage: string;
+    ratio: string;
+    source: string;
+    status: string;
+    title: string;
+  };
+  withdrawals: {
+    amount: string;
+    amountPlaceholder: string;
+    available: string;
+    belowMin: string;
+    description: string;
+    empty: string;
+    exceedsBalance: string;
+    invalidAmount: string;
+    minWithdrawal: string;
+    nextPage: string;
+    page: string;
+    paidAt: string;
+    pending: string;
+    previousPage: string;
+    remark: string;
+    remarkPlaceholder: string;
+    requestedAt: string;
+    reviewRemark: string;
+    submit: string;
+    submitting: string;
+    success: string;
+    title: string;
+    totalEarned: string;
+    withdrawn: string;
+  };
+  withdrawalStatusLabel: {
+    APPROVED: string;
+    PAID: string;
+    PENDING: string;
+    REJECTED: string;
+  };
   summary: {
     levelCount: string;
     maxCustomerRevenue: string;
@@ -160,6 +224,7 @@ const ZH_CN: SdkworkPartnerMessages = {
     inviteCode: "我的邀请码",
     notConfigured:
       "团队、佣金与提现需要合作伙伴自助端读模型接入后展示；当前已开放加盟申请与邀请码校验。",
+    notEnrolled: "成为分销伙伴后，这里会展示你的团队、收益记录与提现能力。",
     notSupported: "当前部署尚未提供团队与佣金接口。",
     pending: "待结算",
     settled: "累计结算",
@@ -235,6 +300,69 @@ const ZH_CN: SdkworkPartnerMessages = {
     REJECTED: "未通过",
     SUBMITTED: "审核中",
   },
+  team: {
+    availableBalance: "可提现",
+    customerCount: "客户数",
+    depth: "层级",
+    description: "团队成员的等级、客户与各自的收益。",
+    directTeam: "直属",
+    empty: "团队还没有成员，分享邀请码开始招募。",
+    joinedAt: "加入时间",
+    level: "等级",
+    member: "成员",
+    nextPage: "下一页",
+    page: "第 {page} / {total} 页",
+    previousPage: "上一页",
+    title: "我的团队",
+    totalCommission: "累计收益",
+  },
+  commissions: {
+    amount: "佣金",
+    baseAmount: "计佣基数",
+    computedAt: "结算时间",
+    description: "每一笔分销收益的来源、比例与金额。",
+    empty: "还没有收益记录。",
+    levelOffset: "层级",
+    nextPage: "下一页",
+    page: "第 {page} / {total} 页",
+    previousPage: "上一页",
+    ratio: "比例",
+    source: "来源",
+    status: "状态",
+    title: "收益记录",
+  },
+  withdrawals: {
+    amount: "提现金额",
+    amountPlaceholder: "输入提现金额",
+    available: "可提现余额",
+    belowMin: "提现金额低于最低提现额度。",
+    description: "提交提现申请后由平台审核并打款。",
+    empty: "还没有提现记录。",
+    exceedsBalance: "提现金额超过可提现余额。",
+    invalidAmount: "请输入有效的提现金额。",
+    minWithdrawal: "最低提现 {value}",
+    nextPage: "下一页",
+    page: "第 {page} / {total} 页",
+    paidAt: "打款时间",
+    pending: "冻结中",
+    previousPage: "上一页",
+    remark: "备注（选填）",
+    remarkPlaceholder: "收款账户或说明",
+    requestedAt: "申请时间",
+    reviewRemark: "审核意见",
+    submit: "申请提现",
+    submitting: "提交中…",
+    success: "提现申请已提交，等待平台审核。",
+    title: "提现",
+    totalEarned: "累计收益",
+    withdrawn: "已提现",
+  },
+  withdrawalStatusLabel: {
+    APPROVED: "已审核",
+    PAID: "已打款",
+    PENDING: "审核中",
+    REJECTED: "已驳回",
+  },
   summary: {
     levelCount: "{count} 个等级",
     maxCustomerRevenue: "最高客户提成 {value}",
@@ -287,6 +415,7 @@ const EN_US: SdkworkPartnerMessages = {
     inviteCode: "My invite code",
     notConfigured:
       "Team, commission and withdrawal projections appear once the partner self-service read model lands; join applications and invite-code validation are live now.",
+    notEnrolled: "Once you become a partner, your team, earnings records and withdrawals appear here.",
     notSupported: "This deployment does not expose the team and commission API yet.",
     pending: "Pending",
     settled: "Settled total",
@@ -365,6 +494,69 @@ const EN_US: SdkworkPartnerMessages = {
     CANCELLED: "Withdrawn",
     REJECTED: "Rejected",
     SUBMITTED: "Under review",
+  },
+  team: {
+    availableBalance: "Withdrawable",
+    customerCount: "Customers",
+    depth: "Depth",
+    description: "Team members with their level, customers and own earnings.",
+    directTeam: "Direct",
+    empty: "No team members yet. Share your invite code to start recruiting.",
+    joinedAt: "Joined",
+    level: "Level",
+    member: "Member",
+    nextPage: "Next",
+    page: "Page {page} / {total}",
+    previousPage: "Previous",
+    title: "My team",
+    totalCommission: "Lifetime earnings",
+  },
+  commissions: {
+    amount: "Commission",
+    baseAmount: "Base",
+    computedAt: "Settled",
+    description: "Every distribution credit with its source, ratio and amount.",
+    empty: "No commission records yet.",
+    levelOffset: "Depth",
+    nextPage: "Next",
+    page: "Page {page} / {total}",
+    previousPage: "Previous",
+    ratio: "Ratio",
+    source: "Source",
+    status: "Status",
+    title: "Earnings records",
+  },
+  withdrawals: {
+    amount: "Amount",
+    amountPlaceholder: "Enter an amount",
+    available: "Withdrawable balance",
+    belowMin: "The amount is below the minimum withdrawal.",
+    description: "Applications are reviewed and paid out by the platform.",
+    empty: "No withdrawal applications yet.",
+    exceedsBalance: "The amount exceeds your withdrawable balance.",
+    invalidAmount: "Enter a valid withdrawal amount.",
+    minWithdrawal: "Minimum {value}",
+    nextPage: "Next",
+    page: "Page {page} / {total}",
+    paidAt: "Paid at",
+    pending: "Frozen",
+    previousPage: "Previous",
+    remark: "Note (optional)",
+    remarkPlaceholder: "Payout account or note",
+    requestedAt: "Requested",
+    reviewRemark: "Review note",
+    submit: "Request withdrawal",
+    submitting: "Submitting…",
+    success: "Withdrawal requested. The platform will review it.",
+    title: "Withdrawals",
+    totalEarned: "Lifetime earnings",
+    withdrawn: "Withdrawn",
+  },
+  withdrawalStatusLabel: {
+    APPROVED: "Approved",
+    PAID: "Paid",
+    PENDING: "Under review",
+    REJECTED: "Rejected",
   },
   summary: {
     levelCount: "{count} levels",

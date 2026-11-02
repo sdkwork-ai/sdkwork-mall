@@ -1,31 +1,49 @@
-import {
-  resolveSdkworkPartnerMembership,
-} from "./partner-domain";
+import { resolveSdkworkPartnerMembership } from "./partner-domain";
 import { readSdkworkPartnerErrorMessage } from "./partner-sdk-port";
 import type { SdkworkPartnerService } from "./partner-service";
 import type {
   SdkworkPartnerApplication,
   SdkworkPartnerApplicationDraft,
   SdkworkPartnerCenterAvailability,
+  SdkworkPartnerCommissionRecord,
   SdkworkPartnerInviteCodePreview,
   SdkworkPartnerMembership,
   SdkworkPartnerProgram,
+  SdkworkPartnerTeamMember,
+  SdkworkPartnerWithdrawal,
+  SdkworkPartnerWithdrawalDraft,
 } from "./partner-types";
 
 export type SdkworkPartnerLoadStatus = "idle" | "loading" | "ready" | "error";
 
+export const SDKWORK_PARTNER_PAGE_SIZE = 10;
+
 export interface SdkworkPartnerControllerState {
   readonly applications: readonly SdkworkPartnerApplication[];
   readonly center: SdkworkPartnerCenterAvailability | null;
+  readonly commissionPage: number;
+  readonly commissionRecords: readonly SdkworkPartnerCommissionRecord[];
+  readonly commissionTotal: number;
   readonly invitePreview: SdkworkPartnerInviteCodePreview | null;
   readonly isApplyFormOpen: boolean;
   readonly isCancellingId: string | null;
+  readonly isCommissionLoading: boolean;
   readonly isSubmitting: boolean;
+  readonly isTeamLoading: boolean;
   readonly isValidatingInvite: boolean;
+  readonly isWithdrawing: boolean;
+  readonly isWithdrawalLoading: boolean;
   readonly lastError: string;
   readonly membership: SdkworkPartnerMembership;
   readonly program: SdkworkPartnerProgram | null;
   readonly status: SdkworkPartnerLoadStatus;
+  readonly teamMembers: readonly SdkworkPartnerTeamMember[];
+  readonly teamPage: number;
+  readonly teamTotal: number;
+  readonly withdrawalError: string;
+  readonly withdrawalPage: number;
+  readonly withdrawals: readonly SdkworkPartnerWithdrawal[];
+  readonly withdrawalTotal: number;
 }
 
 export interface SdkworkPartnerController {
@@ -40,29 +58,51 @@ export interface SdkworkPartnerController {
   openApplyForm(): void;
   closeApplyForm(): void;
   clearError(): void;
+  loadTeam(page?: number): Promise<void>;
+  loadCommissionRecords(page?: number): Promise<void>;
+  loadWithdrawals(page?: number): Promise<void>;
+  submitWithdrawal(draft: SdkworkPartnerWithdrawalDraft): Promise<boolean>;
 }
 
 const EMPTY_APPLICATIONS: readonly SdkworkPartnerApplication[] = [];
+const EMPTY_COMMISSIONS: readonly SdkworkPartnerCommissionRecord[] = [];
+const EMPTY_TEAM: readonly SdkworkPartnerTeamMember[] = [];
+const EMPTY_WITHDRAWALS: readonly SdkworkPartnerWithdrawal[] = [];
 
 const INITIAL_STATE: SdkworkPartnerControllerState = {
   applications: EMPTY_APPLICATIONS,
   center: null,
+  commissionPage: 1,
+  commissionRecords: EMPTY_COMMISSIONS,
+  commissionTotal: 0,
   invitePreview: null,
   isApplyFormOpen: false,
   isCancellingId: null,
+  isCommissionLoading: false,
   isSubmitting: false,
+  isTeamLoading: false,
   isValidatingInvite: false,
+  isWithdrawing: false,
+  isWithdrawalLoading: false,
   lastError: "",
   membership: { application: null, state: "none" },
   program: null,
   status: "idle",
+  teamMembers: EMPTY_TEAM,
+  teamPage: 1,
+  teamTotal: 0,
+  withdrawalError: "",
+  withdrawalPage: 1,
+  withdrawals: EMPTY_WITHDRAWALS,
+  withdrawalTotal: 0,
 };
 
 /**
- * Framework-free distribution state machine.
+ * Framework-free distribution state machine shared by the PC and H5 roots.
  *
- * Both React roots wrap the same controller with `useSyncExternalStore`, so the
- * join journey has one implementation instead of one per client.
+ * The join journey and the partner-centre projections live behind one service;
+ * this controller owns request ordering, partial-failure handling, and page
+ * state so each client only renders.
  */
 export function createSdkworkPartnerController(
   service: SdkworkPartnerService,
@@ -74,6 +114,63 @@ export function createSdkworkPartnerController(
     state = { ...state, ...patch };
     for (const listener of listeners) {
       listener();
+    }
+  };
+
+  const loadTeamPage = async (page: number): Promise<void> => {
+    setState({ isTeamLoading: true });
+    try {
+      const result = await service.listTeam({ page, pageSize: SDKWORK_PARTNER_PAGE_SIZE });
+      setState({
+        isTeamLoading: false,
+        teamMembers: result?.items ?? EMPTY_TEAM,
+        teamPage: result?.page ?? page,
+        teamTotal: result?.total ?? 0,
+      });
+    } catch (error) {
+      setState({
+        isTeamLoading: false,
+        lastError: readSdkworkPartnerErrorMessage(error) || "partner.teamLoadFailed",
+      });
+    }
+  };
+
+  const loadCommissionPage = async (page: number): Promise<void> => {
+    setState({ isCommissionLoading: true });
+    try {
+      const result = await service.listCommissionRecords({
+        page,
+        pageSize: SDKWORK_PARTNER_PAGE_SIZE,
+      });
+      setState({
+        commissionPage: result?.page ?? page,
+        commissionRecords: result?.items ?? EMPTY_COMMISSIONS,
+        commissionTotal: result?.total ?? 0,
+        isCommissionLoading: false,
+      });
+    } catch (error) {
+      setState({
+        isCommissionLoading: false,
+        lastError: readSdkworkPartnerErrorMessage(error) || "partner.commissionLoadFailed",
+      });
+    }
+  };
+
+  const loadWithdrawalPage = async (page: number): Promise<void> => {
+    setState({ isWithdrawalLoading: true });
+    try {
+      const result = await service.listWithdrawals({ page, pageSize: SDKWORK_PARTNER_PAGE_SIZE });
+      setState({
+        isWithdrawalLoading: false,
+        withdrawalPage: result?.page ?? page,
+        withdrawals: result?.items ?? EMPTY_WITHDRAWALS,
+        withdrawalTotal: result?.total ?? 0,
+      });
+    } catch (error) {
+      setState({
+        isWithdrawalLoading: false,
+        withdrawalError: readSdkworkPartnerErrorMessage(error) || "partner.withdrawalLoadFailed",
+      });
     }
   };
 
@@ -109,6 +206,14 @@ export function createSdkworkPartnerController(
       program,
       status: lastError && !program && applications.length === 0 ? "error" : "ready",
     });
+
+    if (center?.available) {
+      await Promise.all([
+        loadTeamPage(state.teamPage),
+        loadCommissionPage(state.commissionPage),
+        loadWithdrawalPage(state.withdrawalPage),
+      ]);
+    }
   };
 
   return {
@@ -155,6 +260,15 @@ export function createSdkworkPartnerController(
     getState() {
       return state;
     },
+    async loadCommissionRecords(page = 1) {
+      await loadCommissionPage(page);
+    },
+    async loadTeam(page = 1) {
+      await loadTeamPage(page);
+    },
+    async loadWithdrawals(page = 1) {
+      await loadWithdrawalPage(page);
+    },
     openApplyForm() {
       setState({ isApplyFormOpen: true, lastError: "" });
     },
@@ -183,6 +297,26 @@ export function createSdkworkPartnerController(
         setState({
           isSubmitting: false,
           lastError: readSdkworkPartnerErrorMessage(error) || "partner.submitFailed",
+        });
+        return false;
+      }
+    },
+    async submitWithdrawal(draft) {
+      if (state.isWithdrawing) {
+        return false;
+      }
+      setState({ isWithdrawing: true, withdrawalError: "" });
+      try {
+        await service.createWithdrawal(draft);
+        setState({ isWithdrawing: false });
+        const center = await service.retrieveCenter();
+        setState({ center });
+        await loadWithdrawalPage(1);
+        return true;
+      } catch (error) {
+        setState({
+          isWithdrawing: false,
+          withdrawalError: readSdkworkPartnerErrorMessage(error) || "partner.withdrawFailed",
         });
         return false;
       }

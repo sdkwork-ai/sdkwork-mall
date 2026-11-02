@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { createSdkworkPartnerJoinPort } from "../src/partner-sdk-port";
-import type { SdkworkPartnerJoinWireClient } from "../src/partner-sdk-port";
+import { createSdkworkPartnerCenterPort } from "../src/partner-sdk-port";
+import type {
+  SdkworkPartnerCenterWireClient,
+  SdkworkPartnerJoinWireClient,
+} from "../src/partner-sdk-port";
 
 function wireClient(): SdkworkPartnerJoinWireClient {
   return {
@@ -143,8 +147,7 @@ describe("partner SDK port adapter", () => {
     });
   });
 
-  it("degrades malformed records to explicit empty values", async () => {
-    const port = createSdkworkPartnerJoinPort({
+  it("degrades malformed records to explicit empty values", async () => {    const port = createSdkworkPartnerJoinPort({
       join: {
         partnerJoin: {
           application: {
@@ -164,5 +167,149 @@ describe("partner SDK port adapter", () => {
     expect(page.items).toHaveLength(3);
     expect(page.items[2]).toMatchObject({ id: "3", status: "SUBMITTED", targetLevelNo: 1 });
     await expect(port.cancelApplication("1")).resolves.toMatchObject({ id: "" });
+  });
+});
+
+function centerWireClient(): SdkworkPartnerCenterWireClient {
+  return {
+    center: {
+      partnerCenter: {
+        async retrieve() {
+          return {
+            availableBalance: "120.00",
+            currency: "CNY",
+            customerCount: 3,
+            directTeamSize: 1,
+            frozenBalance: "10.00",
+            inviteCode: "ABC123",
+            joinedAt: "2026-01-01T00:00:00Z",
+            levelName: "Standard",
+            levelNo: 1,
+            minWithdrawalAmount: "100.00",
+            name: "Partner",
+            parentPartnerName: "",
+            partnerId: "9",
+            status: "ACTIVE",
+            teamSize: 2,
+            totalCommission: "580.00",
+            withdrawnAmount: "450.00",
+          };
+        },
+        commissionRecords: {
+          async list() {
+            return {
+              items: [
+                {
+                  amount: "20.00",
+                  baseAmount: "100.00",
+                  computedAt: "2026-03-01T00:00:00Z",
+                  createdAt: "2026-03-01T00:00:00Z",
+                  eventId: "2",
+                  id: "3",
+                  levelOffset: 0,
+                  ratio: "20.00",
+                  settlementId: "4",
+                  sourceRef: "order-1",
+                  sourceType: "customer_revenue",
+                  status: "SETTLED",
+                },
+              ],
+              pageInfo: { page: "1", pageSize: "10", totalItems: "1" },
+            };
+          },
+        },
+        team: {
+          async list() {
+            return {
+              items: [
+                {
+                  availableBalance: "80.00",
+                  customerCount: 2,
+                  depth: 1,
+                  directTeamSize: 1,
+                  joinedAt: "2026-02-01T00:00:00Z",
+                  levelName: "Standard",
+                  levelNo: 1,
+                  name: "Team Member",
+                  partnerId: "10",
+                  status: "ACTIVE",
+                  totalCommission: "200.00",
+                },
+              ],
+              pageInfo: { page: "1", pageSize: "10", totalItems: "1" },
+            };
+          },
+        },
+        withdrawals: {
+          async create(body) {
+            return {
+              amount: body.amount,
+              createdAt: "2026-04-01T00:00:00Z",
+              id: "5",
+              paidAt: null,
+              remark: body.remark ?? "",
+              reviewRemark: "",
+              status: "PENDING",
+              updatedAt: "2026-04-01T00:00:00Z",
+            };
+          },
+          async list() {
+            return {
+              items: [
+                {
+                  amount: "100.00",
+                  createdAt: "2026-04-01T00:00:00Z",
+                  id: "5",
+                  paidAt: null,
+                  remark: "",
+                  reviewRemark: "",
+                  status: "PENDING",
+                  updatedAt: "2026-04-01T00:00:00Z",
+                },
+              ],
+              pageInfo: { page: "1", pageSize: "10", totalItems: "1" },
+            };
+          },
+        },
+      },
+    },
+  };
+}
+
+describe("partner center SDK port adapter", () => {
+  it("maps the overview balance and network counts", async () => {
+    const port = createSdkworkPartnerCenterPort(centerWireClient());
+    const snapshot = await port.retrieveCenter();
+    expect(snapshot.profile).toMatchObject({ inviteCode: "ABC123", partnerId: "9" });
+    expect(snapshot.counts).toEqual({ customerCount: 3, directTeamSize: 1, teamSize: 2 });
+    expect(snapshot.balance).toEqual({
+      available: "120.00",
+      currency: "CNY",
+      minWithdrawal: "100.00",
+      pending: "10.00",
+      settledTotal: "580.00",
+      withdrawable: "120.00",
+      withdrawn: "450.00",
+    });
+  });
+
+  it("maps team, commission and withdrawal pages with int64-string pagination", async () => {
+    const port = createSdkworkPartnerCenterPort(centerWireClient());
+    const team = await port.listTeam({ page: 1, pageSize: 10 });
+    expect(team.items[0]).toMatchObject({
+      depth: 1,
+      name: "Team Member",
+      totalCommission: "200.00",
+    });
+    expect(team.total).toBe(1);
+
+    const records = await port.listCommissionRecords();
+    expect(records.items[0]).toMatchObject({ amount: "20.00", sourceType: "customer_revenue" });
+
+    const withdrawals = await port.listWithdrawals();
+    expect(withdrawals.items[0]).toMatchObject({ amount: "100.00", status: "PENDING" });
+
+    const created = await port.createWithdrawal({ amount: "100.00", remark: "alipay" });
+    expect(created).toMatchObject({ amount: "100.00", remark: "alipay", status: "PENDING" });
   });
 });

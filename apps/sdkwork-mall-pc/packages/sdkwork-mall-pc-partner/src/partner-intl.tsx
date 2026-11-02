@@ -29,6 +29,8 @@ export interface SdkworkPartnerIntlValue {
   readonly formatMoney: (amount: string | null | undefined, currency: string) => string;
   readonly formatPercent: (value: string | null | undefined) => string;
   readonly formatStatus: (status: SdkworkPartnerApplicationStatus) => string;
+  readonly formatWithdrawalStatus: (status: string) => string;
+  readonly formatPage: (template: string, page: number, total: number) => string;
   readonly issueText: (code: SdkworkPartnerDraftIssueCode) => string;
   readonly locale: string;
 }
@@ -58,6 +60,16 @@ export function SdkworkPartnerIntlProvider({
         formatSdkworkPartnerMoney(amount, currency, normalizedLocale),
       formatPercent: (value) => formatSdkworkPartnerPercent(value, normalizedLocale),
       formatStatus: (status) => copy.statusLabel[status],
+      formatWithdrawalStatus: (status) => {
+        const key = String(status || "").toUpperCase();
+        return (
+          copy.withdrawalStatusLabel[
+            key as keyof SdkworkPartnerMessages["withdrawalStatusLabel"]
+          ] ?? key
+        );
+      },
+      formatPage: (template, page, total) =>
+        template.replace("{page}", String(page)).replace("{total}", String(total)),
       issueText: (code) => copy.issues[code],
       locale: normalizedLocale,
     };

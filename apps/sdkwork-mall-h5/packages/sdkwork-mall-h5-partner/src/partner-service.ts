@@ -1,9 +1,11 @@
 import {
+  createSdkworkPartnerCenterPort,
   createSdkworkPartnerJoinPort,
   createSdkworkPartnerService,
 } from "@sdkwork/mall-partner-service";
 import type {
   SdkworkPartnerCenterPort,
+  SdkworkPartnerCenterWireClient,
   SdkworkPartnerJoinWireClient,
   SdkworkPartnerService,
 } from "@sdkwork/mall-partner-service";
@@ -26,7 +28,7 @@ export function getSdkworkH5PartnerService(): SdkworkPartnerService {
 }
 
 export interface CreateSdkworkH5PartnerServiceInput {
-  readonly partnerAppClient: SdkworkPartnerJoinWireClient;
+  readonly partnerAppClient: SdkworkPartnerJoinWireClient & SdkworkPartnerCenterWireClient;
   readonly centerPort?: SdkworkPartnerCenterPort | null;
 }
 
@@ -34,7 +36,7 @@ export function createSdkworkH5PartnerService(
   input: CreateSdkworkH5PartnerServiceInput,
 ): SdkworkPartnerService {
   return createSdkworkPartnerService({
-    center: input.centerPort ?? null,
+    center: input.centerPort ?? createSdkworkPartnerCenterPort(input.partnerAppClient),
     join: createSdkworkPartnerJoinPort(input.partnerAppClient),
   });
 }

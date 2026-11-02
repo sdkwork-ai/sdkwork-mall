@@ -58,12 +58,25 @@ function fakeService(): SdkworkPartnerService {
       applications = applications.map((entry) => (entry.id === id ? updated : entry));
       return updated;
     }),
+    createWithdrawal: vi.fn(async () => ({
+      amount: "100.00",
+      createdAt: "2026-11-01T00:00:00Z",
+      id: "1",
+      paidAt: null,
+      remark: "",
+      reviewRemark: "",
+      status: "PENDING",
+      updatedAt: "2026-11-01T00:00:00Z",
+    })),
+    listCommissionRecords: vi.fn(async () => null),
     listMyApplications: vi.fn(async () => ({
       items: applications,
       page: 1,
       pageSize: 20,
       total: applications.length,
     })),
+    listTeam: vi.fn(async () => null),
+    listWithdrawals: vi.fn(async () => null),
     retrieveCenter: vi.fn(async () => ({ available: false as const, reason: "not-configured" as const })),
     retrieveProgram: vi.fn(async () => program),
     submitApplication: vi.fn(async () => {
