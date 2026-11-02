@@ -1,6 +1,10 @@
 import { getPaymentSuccess } from "../../services/order-service";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 
+/** Payment providers settle asynchronously; poll, but never forever. */
+const PAYMENT_POLL_INTERVAL_MS = 3000;
+const PAYMENT_POLL_MAX_ATTEMPTS = 20;
+
 interface PaymentResultData {
   orderId: string;
   paymentId: string;
@@ -10,6 +14,8 @@ interface PaymentResultData {
   tone: string;
   loading: boolean;
   paymentMethod: string;
+  pollExhausted: boolean;
+  _pollAttempts: number;
   _pollTimer: number | null;
 }
 
@@ -23,6 +29,8 @@ Page({
     tone: "warning",
     loading: true,
     paymentMethod: "",
+    pollExhausted: false,
+    _pollAttempts: 0,
     _pollTimer: null,
   } as PaymentResultData,
 
@@ -76,10 +84,37 @@ Page({
         });
         return;
       }
-      this.setData({ loading: false });
-      this.setData({ _pollTimer: setTimeout(tick, 3000) });
+      const attempts = this.data._pollAttempts + 1;
+      if (attempts >= PAYMENT_POLL_MAX_ATTEMPTS) {
+        // A permanently failing settlement must not poll forever on a phone.
+        this.setData({
+          loading: false,
+          pollExhausted: true,
+          _pollAttempts: attempts,
+          description: "支付结果确认超时，请到订单列表查看最新状态。",
+        });
+        return;
+      }
+      this.setData({ loading: false, _pollAttempts: attempts });
+      this.setData({ _pollTimer: setTimeout(tick, PAYMENT_POLL_INTERVAL_MS) });
     };
     tick();
+  },
+
+  restartPoll() {
+    if (!this.data.orderId) {
+      return;
+    }
+    this.setData({
+      pollExhausted: false,
+      _pollAttempts: 0,
+      loading: true,
+      status: "pending",
+      title: "支付处理中",
+      description: "支付正在处理，请稍后查看订单状态。",
+      tone: "warning",
+    });
+    this.pollPaymentSuccess();
   },
 
   goOrders() {

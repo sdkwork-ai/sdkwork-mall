@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import {
@@ -7,6 +7,18 @@ import {
   retrieveMallH5OrderPaymentSuccess,
   retryMallH5OrderPayment,
 } from "../cart-service";
+
+/** Payment providers settle asynchronously; poll, but never forever. */
+const PAYMENT_POLL_INTERVAL_MS = 3000;
+const PAYMENT_POLL_MAX_ATTEMPTS = 20;
+
+function isPaidPayment(info: Record<string, unknown> | null): boolean {
+  if (!info) {
+    return false;
+  }
+  const status = String(info.status ?? "").toUpperCase();
+  return info.paid === true || status === "PAID" || status === "COMPLETED";
+}
 
 export function SdkworkMallH5PaymentResultPage() {
   const [searchParams] = useSearchParams();
@@ -18,6 +30,9 @@ export function SdkworkMallH5PaymentResultPage() {
   const [loading, setLoading] = useState(Boolean(orderId));
   const [retrying, setRetrying] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [pollExhausted, setPollExhausted] = useState(false);
+  const [refreshToken, setRefreshToken] = useState(0);
+  const pollAttemptsRef = useRef(0);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -40,23 +55,43 @@ export function SdkworkMallH5PaymentResultPage() {
       return;
     }
     let active = true;
-    retrieveMallH5OrderPaymentSuccess(orderId)
-      .then((info) => {
-        if (active) {
-          setPaymentInfo(info);
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
+    let timer: number | undefined;
+    pollAttemptsRef.current = 0;
+    setPollExhausted(false);
+    const tick = async () => {
+      const info = await retrieveMallH5OrderPaymentSuccess(orderId);
+      if (!active) {
+        return;
+      }
+      setPaymentInfo(info);
+      setLoading(false);
+      if (isPaidPayment(info)) {
+        return;
+      }
+      pollAttemptsRef.current += 1;
+      if (pollAttemptsRef.current >= PAYMENT_POLL_MAX_ATTEMPTS) {
+        setPollExhausted(true);
+        return;
+      }
+      timer = window.setTimeout(() => void tick(), PAYMENT_POLL_INTERVAL_MS);
+    };
+    void tick();
     return () => {
       active = false;
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+      }
     };
-  }, [orderId]);
+  }, [orderId, refreshToken]);
 
-  const paid = status === "success" || paymentInfo?.paid === true || paymentInfo?.status === "paid";
+  const refreshPaymentStatus = useCallback(() => {
+    setPollExhausted(false);
+    pollAttemptsRef.current = 0;
+    setLoading(true);
+    setRefreshToken((token) => token + 1);
+  }, []);
+
+  const paid = status === "success" || isPaidPayment(paymentInfo);
   const failed = status === "failed" || status === "cancelled" || status === "closed";
   const pending = status === "pending";
 
@@ -105,6 +140,14 @@ export function SdkworkMallH5PaymentResultPage() {
       {paid ? <div className="sdk-h5-notice sdk-h5-notice-success">支付成功，商家将尽快为您发货。</div> : null}
       {pending ? <div className="sdk-h5-notice sdk-h5-notice-warning">支付处理中，请稍后在订单列表查看最新状态。</div> : null}
       {failed ? <div className="sdk-h5-notice sdk-h5-notice-danger">支付未成功，可重新支付或联系客服。</div> : null}
+      {!paid && !failed && pollExhausted ? (
+        <div className="sdk-h5-notice sdk-h5-notice-warning">
+          支付结果确认超时，请到订单列表查看最新状态。
+          <button className="sdk-h5-link-button" onClick={refreshPaymentStatus} type="button">
+            刷新状态
+          </button>
+        </div>
+      ) : null}
 
       {checkoutWarnings.map((warning) => (
         <div className="sdk-h5-notice sdk-h5-notice-warning" key={warning}>

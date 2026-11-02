@@ -96,3 +96,33 @@ test("every checkout quote is requested for the scoped lines, not the whole cart
     assertContains(entry, entry.quoteService, read(entry.quoteService), entry.quotePatterns);
   }
 });
+
+/**
+ * Payment providers settle asynchronously, so the result screens poll. An
+ * unbounded poll (the mini-program and Flutter roots shipped one) keeps a phone
+ * awake and hammering the gateway when a settlement never completes.
+ */
+const PAYMENT_POLLERS = [
+  {
+    name: "h5",
+    file: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/PaymentResultPage.tsx",
+    patterns: ["PAYMENT_POLL_MAX_ATTEMPTS"],
+  },
+  {
+    name: "miniProgram",
+    file: "apps/sdkwork-mall-mini-program/src/pages/payment-result/index.ts",
+    patterns: ["PAYMENT_POLL_MAX_ATTEMPTS"],
+  },
+  {
+    name: "flutter",
+    file: "apps/sdkwork-mall-flutter-mobile/lib/pages/payment_result_page.dart",
+    patterns: ["_maxPollAttempts", "Timer(_pollInterval"],
+  },
+];
+
+test("payment-status polling is bounded on every polling root", () => {
+  for (const entry of PAYMENT_POLLERS) {
+    assert.ok(existsSync(join(workspaceRoot, entry.file)), entry.file);
+    assertContains(entry, entry.file, read(entry.file), entry.patterns);
+  }
+});

@@ -9,6 +9,7 @@
 
   <view class="result-actions">
     <button class="mp-btn mp-btn-primary" bindtap="goOrders">查看订单</button>
+    <button wx:if="{{pollExhausted && status !== 'success'}}" class="mp-btn mp-btn-ghost" bindtap="restartPoll">刷新状态</button>
     <button wx:if="{{status === 'failed'}}" class="mp-btn mp-btn-ghost" bindtap="retryPay">重新支付</button>
     <button class="mp-btn mp-btn-ghost" bindtap="goHome">继续购物</button>
   </view>

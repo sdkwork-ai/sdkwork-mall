@@ -16,8 +16,14 @@ class SdkworkPaymentResultPage extends StatefulWidget {
 }
 
 class _SdkworkPaymentResultPageState extends State<SdkworkPaymentResultPage> {
+  /// Payment providers settle asynchronously; poll, but never forever.
+  static const int _maxPollAttempts = 20;
+  static const Duration _pollInterval = Duration(seconds: 3);
+
   String _status = 'pending';
   bool _loading = true;
+  bool _timedOut = false;
+  int _attempts = 0;
   Timer? _pollTimer;
 
   String get _orderId => widget.arguments['orderId'] ?? '';
@@ -75,7 +81,9 @@ class _SdkworkPaymentResultPageState extends State<SdkworkPaymentResultPage> {
                       ? '商家将尽快为您发货。'
                       : failed
                           ? '支付未成功，可重新支付。'
-                          : '支付正在处理，请稍候...',
+                          : _timedOut
+                              ? '支付结果确认超时，请到订单列表查看最新状态。'
+                              : '支付正在处理，请稍候...',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const SizedBox(height: 8),
@@ -90,6 +98,13 @@ class _SdkworkPaymentResultPageState extends State<SdkworkPaymentResultPage> {
             ),
           ),
           const SizedBox(height: 24),
+          if (_timedOut && !paid && !failed) ...[
+            OutlinedButton(
+              onPressed: _refresh,
+              child: const Text('刷新状态'),
+            ),
+            const SizedBox(height: 12),
+          ],
           FilledButton(
             onPressed: () => Navigator.of(context).pushReplacementNamed('/orders'),
             child: const Text('查看订单'),
@@ -102,6 +117,15 @@ class _SdkworkPaymentResultPageState extends State<SdkworkPaymentResultPage> {
         ],
       ),
     );
+  }
+
+  void _refresh() {
+    setState(() {
+      _attempts = 0;
+      _timedOut = false;
+      _loading = true;
+    });
+    _poll();
   }
 
   Future<void> _poll() async {
@@ -123,7 +147,16 @@ class _SdkworkPaymentResultPageState extends State<SdkworkPaymentResultPage> {
       });
       return;
     }
+    _attempts += 1;
+    if (_attempts >= _maxPollAttempts) {
+      // A permanently failing settlement must not poll forever on a phone.
+      setState(() {
+        _loading = false;
+        _timedOut = true;
+      });
+      return;
+    }
     setState(() => _loading = false);
-    _pollTimer = Timer(const Duration(seconds: 3), _poll);
+    _pollTimer = Timer(_pollInterval, _poll);
   }
 }

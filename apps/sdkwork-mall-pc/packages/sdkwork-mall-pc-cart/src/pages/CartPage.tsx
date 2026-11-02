@@ -838,6 +838,7 @@ export function SdkworkMallPaymentResultPage() {
   const [retrying, setRetrying] = useState(false);
   const [retryMessage, setRetryMessage] = useState<string | null>(null);
   const [checkoutWarnings, setCheckoutWarnings] = useState<string[]>([]);
+  const [refreshToken, setRefreshToken] = useState(0);
   const [recommendations, setRecommendations] = useState<Awaited<ReturnType<typeof searchMallProducts>>["items"]>([]);
 
   useEffect(() => {
@@ -885,7 +886,7 @@ export function SdkworkMallPaymentResultPage() {
     return () => {
       active = false;
     };
-  }, [orderId]);
+  }, [orderId, refreshToken]);
 
   useEffect(() => {
     let active = true;
@@ -987,6 +988,16 @@ export function SdkworkMallPaymentResultPage() {
         {orderId && failed ? (
           <Button disabled={retrying} onClick={handleRetryPayment} size="sm" type="button" variant="primary">
             {retrying ? "重试中..." : "重新支付"}
+          </Button>
+        ) : null}
+        {orderId && !paid && !failed ? (
+          <Button
+            onClick={() => setRefreshToken((token) => token + 1)}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            刷新状态
           </Button>
         ) : null}
         <Link to="/buyer/messages">联系客服</Link>

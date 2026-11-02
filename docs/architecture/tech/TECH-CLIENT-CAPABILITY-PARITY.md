@@ -174,11 +174,11 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 59/59 pass
+pnpm test:node                                                     → 61/61 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
-  (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
+  (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
-  (tests/contract/verify-checkout-scoping.test.mjs                 → 3/3)
+  (tests/contract/verify-checkout-scoping.test.mjs                 → 4/4)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -306,6 +306,15 @@ labelled every transport failure 商品不存在 while leaving the rejected load
 promise unhandled. All four storefront surfaces now distinguish "load failed"
 (title + message + 重试) from "not found", and the PC architecture test fails when
 a page that can say 加载失败 does not offer a retry.
+
+### 6.1.7 Payment result polling
+
+The mini program and Flutter result screens polled the payment-success endpoint
+every three seconds with no attempt limit, so a settlement that never completed
+kept a phone awake and the gateway busy; H5 did not poll at all. All three now
+poll at the same three-second interval for at most 20 attempts (60 seconds),
+then stop with 支付结果确认超时 and offer 刷新状态. The PC result screen keeps its
+single fetch and adds the same manual refresh.
 
 ### 6.2 Per-package typecheck
 
