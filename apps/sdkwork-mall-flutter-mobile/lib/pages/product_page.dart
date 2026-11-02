@@ -4,6 +4,7 @@ import '../bootstrap/session.dart';
 import '../services/commerce.dart';
 import '../services/favorites_service.dart';
 import '../utils/format.dart';
+import 'widgets.dart';
 import '../utils/json.dart';
 
 /// 商品详情: 画廊轮播 / SKU 选择 / 数量 / 加购 / 立即购买 / 收藏.
@@ -46,7 +47,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
     if (_detail == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text(_error.isEmpty ? '商品不存在或已下架' : _error)),
+        body: SdkworkErrorView(message: _error.isEmpty ? '商品不存在或已下架' : _error, onRetry: _load),
       );
     }
     final detail = _detail!;

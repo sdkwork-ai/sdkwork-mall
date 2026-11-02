@@ -140,13 +140,7 @@ class _SdkworkWalletPageState extends State<SdkworkWalletPage> {
                     ),
                   ),
                   if (_error.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        _error,
-                        style: const TextStyle(color: Colors.redAccent),
-                      ),
-                    ),
+                    SdkworkInlineError(message: _error, onRetry: _load),
                   SdkworkSectionHeader(title: '现金流水'),
                   if (_ledger.isEmpty)
                     const SdkworkEmptyView(message: '暂无流水记录')
@@ -290,13 +284,7 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
                     ),
                   ),
                   if (_error.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        _error,
-                        style: const TextStyle(color: Colors.redAccent),
-                      ),
-                    ),
+                    SdkworkInlineError(message: _error, onRetry: _load),
                   if (_lots.isNotEmpty) ...<Widget>[
                     SdkworkSectionHeader(title: '积分分批'),
                     ..._lots.map(_buildLotRow),
@@ -468,13 +456,7 @@ class _SdkworkMembershipPageState extends State<SdkworkMembershipPage> {
                   ),
                 ),
                 if (_error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      _error,
-                      style: const TextStyle(color: Colors.redAccent),
-                    ),
-                  ),
+                  SdkworkInlineError(message: _error, onRetry: _load),
                 SdkworkSectionHeader(title: '会员方案'),
                 if (_plans.isEmpty)
                   const SdkworkEmptyView(message: '暂无可选方案')

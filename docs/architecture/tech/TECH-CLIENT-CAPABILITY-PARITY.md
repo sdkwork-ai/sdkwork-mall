@@ -174,7 +174,7 @@ pnpm typecheck:packages                                            → 46 packag
 pnpm test:vitest                                                   → 68 files / 169 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
-flutter test                                                       → 21/21 pass
+flutter test                                                       → 23/23 pass
 node ../sdkwork-specs/tools/verify-repo.mjs --root .               → passed
 node ../sdkwork-specs/tools/check-application-layering.mjs --root .→ passed
 node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
@@ -236,6 +236,16 @@ a page renders `mp-error` without pull-down or a retry binding. The login form
 is the one exemption: its error is a rejected credential, retried by submitting
 the form again.
 
+### 6.1.4 Recoverable failures (Flutter)
+
+The Flutter root already had `SdkworkErrorView`, but four full-page error states
+omitted `onRetry` (cart, checkout, cashier, product) and three asset pages
+(wallet, points, membership) plus chat rendered a bare red text row. Checkout,
+cashier, cart, product, order detail and the test/fixture pages now wire the
+page's loader; the asset pages and chat use the new compact
+`SdkworkInlineError`, which keeps the surrounding data visible and still offers
+重试. `test/error_recovery_test.dart` fails when a full-page error view has no
+`onRetry` or a page renders a bare `Text(_error` row.
 ### 6.2 Per-package typecheck while the root gate is upstream-blocked
 
 The root `pnpm typecheck` fails on the missing `./domains` facade (section 5),

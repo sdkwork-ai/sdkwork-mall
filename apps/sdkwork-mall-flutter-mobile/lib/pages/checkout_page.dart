@@ -54,7 +54,7 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
       body: _loading
           ? const SdkworkLoadingView(label: '加载结算信息...')
           : _error.isNotEmpty
-              ? SdkworkErrorView(message: _error)
+              ? SdkworkErrorView(message: _error, onRetry: _bootstrap)
               : ListView(
                   children: [
                     if (_itemCount > 0)

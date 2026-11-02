@@ -63,10 +63,7 @@ class _SdkworkChatsPageState extends State<SdkworkChatsPage> {
               padding: const EdgeInsets.all(12),
               children: <Widget>[
                 if (_error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(_error, style: const TextStyle(color: Colors.redAccent)),
-                  ),
+                  SdkworkInlineError(message: _error, onRetry: _load),
                 Card(
                   margin: EdgeInsets.zero,
                   child: ListTile(

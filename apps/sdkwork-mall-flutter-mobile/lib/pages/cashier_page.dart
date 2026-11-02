@@ -38,7 +38,7 @@ class _SdkworkCashierPageState extends State<SdkworkCashierPage> {
                   padding: const EdgeInsets.all(16),
                   child: Text('订单号：${widget.orderId}'),
                 ),
-                if (_error.isNotEmpty) SdkworkErrorView(message: _error),
+                if (_error.isNotEmpty) SdkworkErrorView(message: _error, onRetry: _load),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text('选择支付方式', style: Theme.of(context).textTheme.titleSmall),

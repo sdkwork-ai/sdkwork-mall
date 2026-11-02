@@ -160,3 +160,43 @@ class SdkworkSectionHeader extends StatelessWidget {
 void openSdkworkProduct(BuildContext context, String productId) {
   Navigator.of(context).pushNamed('/product', arguments: productId);
 }
+
+/// Compact inline failure notice with a retry action.
+///
+/// Used when a page keeps rendering the data it already has (asset pages, a
+/// partially loaded detail) instead of replacing the whole body with the
+/// full-screen [SdkworkErrorView].
+class SdkworkInlineError extends StatelessWidget {
+  const SdkworkInlineError({
+    super.key,
+    required this.message,
+    this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: <Widget>[
+          const Icon(Icons.error_outline, size: 18, color: Color(0xFFDC2626)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Color(0xFFB91C1C), fontSize: 13),
+            ),
+          ),
+          if (onRetry != null)
+            TextButton(
+              onPressed: onRetry,
+              child: const Text('重试'),
+            ),
+        ],
+      ),
+    );
+  }
+}

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../bootstrap/session.dart';
 import '../services/commerce.dart';
 import '../utils/format.dart';
+import 'widgets.dart';
 import '../utils/json.dart';
 
 /// 购物车: 店铺分组 / 勾选 / 数量 / 合计 / 去结算.
@@ -42,7 +43,7 @@ class _SdkworkCartPageState extends State<SdkworkCartPage> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_error.isNotEmpty) {
-      return Center(child: Text(_error));
+      return SdkworkErrorView(message: _error, onRetry: _refresh);
     }
     if (_groups.isEmpty) {
       return const Center(child: Text('购物车还是空的'));

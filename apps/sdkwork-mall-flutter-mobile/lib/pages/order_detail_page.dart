@@ -33,7 +33,7 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
       body: _loading
           ? const SdkworkLoadingView(label: '加载订单详情...')
           : _detail == null
-              ? SdkworkEmptyView(message: _error.isEmpty ? '订单不存在' : _error)
+              ? SdkworkErrorView(message: _error.isEmpty ? '订单不存在' : _error, onRetry: _load)
               : ListView(
                   children: [
                     Container(
