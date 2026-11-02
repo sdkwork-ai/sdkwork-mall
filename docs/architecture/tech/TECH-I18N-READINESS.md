@@ -14,10 +14,10 @@ long):
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
 | H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 53 | 272 | 390 (`regions.ts`) |
-| Mini program | `src/i18n` runtime + `zh-CN/{account/*,support/help,storefront/home,checkout/confirm-order}` JS fragments | 59 | 282 | 302 (province/city picker data) |
+| Mini program | `src/i18n` runtime + `zh-CN/{account/*,support/*,storefront/home,checkout/confirm-order}` JS fragments | 58 | 229 | 302 (province/city picker data) |
 | Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,checkout/confirm-order}` fragments | 32 | 341 | 230 (province/city picker data) |
 
-2347 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2294 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -112,10 +112,12 @@ JavaScript at runtime (not JSON), copy lives in plain-object
 `messages.d.ts` declarations for typing. Migrated surfaces: the buyer hub (order
 shortcuts, asset/service/account menus, logout dialog), the help centre (FAQ
 sections, quick links, contact rows), the storefront home (banners, quick entries,
-seckill/sold labels, loading/error states) and confirm-order (address, delivery,
+seckill/sold labels, loading/error states), confirm-order (address, delivery,
 coupons, deductions, gift card, remark, invoice, summary, submit and every
-validation message). Their hard-coded count dropped 378 → 285, and all templates
-render catalogue-driven data only.
+validation message), the membership centre (packages, purchase states) and the
+after-sales centre (apply form, evidence grid, records, return shipment, progress
+timeline, type/status/reason/carrier labels). Their hard-coded count dropped
+378 → 229, and all templates render catalogue-driven data only.
 `tests/contract/verify-mp-i18n-runtime.test.mjs` pins the runtime, the fragment
 wiring and the no-literal rule (including WXML templates).
 

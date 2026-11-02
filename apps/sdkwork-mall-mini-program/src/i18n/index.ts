@@ -13,6 +13,7 @@ import invoices from "./zh-CN/account/invoices/messages";
 import membership from "./zh-CN/account/membership/messages";
 import checkout from "./zh-CN/checkout/confirm-order/messages";
 import help from "./zh-CN/support/help/messages";
+import afterSales from "./zh-CN/support/after-sales/messages";
 import home from "./zh-CN/storefront/home/messages";
 
 const messages: Record<string, string> = {};
@@ -34,6 +35,7 @@ collect(invoices as Record<string, unknown>, "");
 collect(membership as Record<string, unknown>, "");
 collect(checkout as Record<string, unknown>, "");
 collect(help as Record<string, unknown>, "");
+collect(afterSales as Record<string, unknown>, "");
 collect(home as Record<string, unknown>, "");
 
 /** Resolves `key` with `{{name}}` placeholder interpolation. */

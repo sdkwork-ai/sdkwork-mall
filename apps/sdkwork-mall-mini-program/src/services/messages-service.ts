@@ -6,6 +6,7 @@
  * before the push-message service ships. All traffic still funnels through
  * the domain services and the single transport seam.
  */
+import { t } from "../i18n";
 import { listOrders } from "./order-service";
 import { listRequests } from "./aftersales-service";
 import { isLoggedIn } from "./session";
@@ -46,7 +47,10 @@ export async function listMessageRows(): Promise<MpMessageRow[]> {
       rows.push({
         id: `after-sales-${request.id || index + 1}`,
         occurredAt: "",
-        summary: request.description || request.statusLabel || "售后进度更新",
+        summary:
+          request.description ||
+          (request.statusLabelKey ? t(request.statusLabelKey) : "") ||
+          "售后进度更新",
         title: `售后更新：${request.orderId || "售后单"}`,
         type: "after-sales",
       });

@@ -43,32 +43,33 @@ export interface MpAfterSalesRow {
   returnable: boolean;
   revokable: boolean;
   status: string;
-  statusLabel: string;
-  typeLabel: string;
+  statusLabelKey: string;
+  type: string;
+  typeLabelKey: string;
 }
 
 export const AFTER_SALES_TYPES = [
-  { value: "refund", label: "仅退款" },
-  { value: "return", label: "退货退款" },
-  { value: "exchange", label: "换货" },
+  { value: "refund", labelKey: "afterSales.type.refund" },
+  { value: "return", labelKey: "afterSales.type.return" },
+  { value: "exchange", labelKey: "afterSales.type.exchange" },
 ];
 
 export const AFTER_SALES_REASON_PRESETS = [
-  { code: "not-as-described", label: "商品与描述不符" },
-  { code: "quality-issue", label: "质量问题" },
-  { code: "missing-item", label: "少件/漏发" },
-  { code: "shipping-issue", label: "发货/物流问题" },
-  { code: "change-mind", label: "多拍/错拍/不想要了" },
-  { code: "other", label: "其他" },
+  { code: "not-as-described", labelKey: "afterSales.reason.notAsDescribed" },
+  { code: "quality-issue", labelKey: "afterSales.reason.qualityIssue" },
+  { code: "missing-item", labelKey: "afterSales.reason.missingItem" },
+  { code: "shipping-issue", labelKey: "afterSales.reason.shippingIssue" },
+  { code: "change-mind", labelKey: "afterSales.reason.changeMind" },
+  { code: "other", labelKey: "afterSales.reason.other" },
 ];
 
-export const STATUS_LABELS: Record<string, string> = {
-  PENDING: "待审核",
-  REVIEWING: "审核中",
-  APPROVED: "已通过",
-  REJECTED: "已拒绝",
-  COMPLETED: "已完成",
-  CANCELLED: "已撤销",
+export const STATUS_LABEL_KEYS: Record<string, string> = {
+  PENDING: "afterSales.status.pending",
+  REVIEWING: "afterSales.status.reviewing",
+  APPROVED: "afterSales.status.approved",
+  REJECTED: "afterSales.status.rejected",
+  COMPLETED: "afterSales.status.completed",
+  CANCELLED: "afterSales.status.cancelled",
 };
 
 export function buildCreateAfterSalesBody(input: MpAfterSalesCreateInput): Record<string, unknown> {
@@ -122,10 +123,11 @@ export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSale
       reasonCode: String(item.reasonCode ?? ""),
       description: String(item.description ?? ""),
       requestedAmount: String(item.requestedAmount ?? ""),
-      typeLabel:
-        (AFTER_SALES_TYPES.find((entry) => entry.value === type) || { label: type }).label,
+      typeLabelKey:
+        (AFTER_SALES_TYPES.find((entry) => entry.value === type) || { labelKey: "" }).labelKey,
+      type,
       status,
-      statusLabel: STATUS_LABELS[status] || status || "处理中",
+      statusLabelKey: STATUS_LABEL_KEYS[status] || "",
       returnable: status === "APPROVED" && (type === "return" || type === "exchange"),
       revokable: status === "PENDING" || status === "REVIEWING",
     };
@@ -147,12 +149,12 @@ export async function cancelRequest(requestId: string): Promise<Record<string, u
 
 /** Carriers offered when the buyer ships the goods back. */
 export const RETURN_CARRIERS = [
-  { code: "SF", name: "顺丰速运" },
-  { code: "ZTO", name: "中通快递" },
-  { code: "YTO", name: "圆通速递" },
-  { code: "YUNDA", name: "韵达速递" },
-  { code: "JD", name: "京东物流" },
-  { code: "OTHER", name: "其他" },
+  { code: "SF", nameKey: "afterSales.carrier.sf" },
+  { code: "ZTO", nameKey: "afterSales.carrier.zto" },
+  { code: "YTO", nameKey: "afterSales.carrier.yto" },
+  { code: "YUNDA", nameKey: "afterSales.carrier.yunda" },
+  { code: "JD", nameKey: "afterSales.carrier.jd" },
+  { code: "OTHER", nameKey: "afterSales.carrier.other" },
 ] as const;
 
 function createIdempotencyKey(): string {

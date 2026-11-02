@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import { errorMessage, type MpPickerChangeEvent, type MpTapEvent, type MpInputEvent } from "../../types/common";
 import { formatCny } from "../../utils/format";
 import {
@@ -46,6 +47,7 @@ interface AftersalesData {
     id: string;
     afterSalesNo: string;
     orderId: string;
+    orderNoText: string;
     requestedAmount: string;
     typeLabel: string;
     statusLabel: string;
@@ -64,6 +66,55 @@ interface AftersalesData {
   loadingOrder: boolean;
   busy: boolean;
   error: string;
+  titleText: string;
+  loadingText: string;
+  retryText: string;
+  applyTitle: string;
+  orderLabel: string;
+  orderPlaceholder: string;
+  readOrderText: string;
+  readingText: string;
+  changeOrderText: string;
+  changeShortText: string;
+  typeLabel: string;
+  reasonLabel: string;
+  descriptionLabel: string;
+  descriptionPlaceholder: string;
+  amountLabel: string;
+  evidenceLabel: string;
+  evidenceUploadingText: string;
+  evidenceUploadedText: string;
+  submitText: string;
+  submittingText: string;
+  listTitle: string;
+  listEmpty: string;
+  cancelText: string;
+  returnEntryText: string;
+  progressToggleText: string;
+  progressCollapseText: string;
+  progressLoadingText: string;
+  progressEmptyText: string;
+  returnCarrierLabel: string;
+  returnTrackingLabel: string;
+  returnTrackingPlaceholder: string;
+  returnSubmitText: string;
+  returnSubmitShortText: string;
+  returnCancelText: string;
+}
+
+function typeOptions(): Array<{ label: string; value: string }> {
+  return AFTER_SALES_TYPES.map((entry) => ({ label: t(entry.labelKey), value: entry.value }));
+}
+
+function reasonOptions(): Array<{ code: string; label: string }> {
+  return AFTER_SALES_REASON_PRESETS.map((entry) => ({
+    code: entry.code,
+    label: t(entry.labelKey),
+  }));
+}
+
+function carrierOptions(): Array<{ code: string; name: string }> {
+  return RETURN_CARRIERS.map((entry) => ({ code: entry.code, name: t(entry.nameKey) }));
 }
 
 Page({
@@ -73,15 +124,15 @@ Page({
     orderLoaded: false,
     orderItems: [],
     orderSummary: "",
-    types: AFTER_SALES_TYPES,
+    types: typeOptions(),
     typeIndex: 0,
-    reasons: AFTER_SALES_REASON_PRESETS,
+    reasons: reasonOptions(),
     reasonIndex: 0,
     description: "",
     amount: "",
     evidence: [],
     requests: [],
-    returnCarriers: RETURN_CARRIERS,
+    returnCarriers: carrierOptions(),
     returnFormRequestId: "",
     returnCarrierIndex: 0,
     returnTrackingNo: "",
@@ -93,6 +144,40 @@ Page({
     loadingOrder: false,
     busy: false,
     error: "",
+    titleText: t("afterSales.page.title"),
+    loadingText: t("afterSales.page.loading"),
+    retryText: t("afterSales.page.retry"),
+    applyTitle: t("afterSales.apply.title"),
+    orderLabel: t("afterSales.apply.orderLabel"),
+    orderPlaceholder: t("afterSales.apply.orderPlaceholder"),
+    readOrderText: t("afterSales.apply.readOrder"),
+    readingText: t("afterSales.apply.reading"),
+    changeOrderText: t("afterSales.apply.changeOrder"),
+    changeShortText: t("afterSales.apply.changeShort"),
+    typeLabel: t("afterSales.apply.typeLabel"),
+    reasonLabel: t("afterSales.apply.reasonLabel"),
+    descriptionLabel: t("afterSales.apply.descriptionLabel"),
+    descriptionPlaceholder: t("afterSales.apply.descriptionPlaceholder"),
+    amountLabel: t("afterSales.apply.amountLabel"),
+    evidenceLabel: t("afterSales.apply.evidenceLabel", { count: MAX_EVIDENCE_FILES }),
+    evidenceUploadingText: t("afterSales.apply.evidenceUploading"),
+    evidenceUploadedText: t("afterSales.apply.evidenceUploaded"),
+    submitText: t("afterSales.apply.submit"),
+    submittingText: t("afterSales.apply.submitting"),
+    listTitle: t("afterSales.list.title"),
+    listEmpty: t("afterSales.list.empty"),
+    cancelText: t("afterSales.list.cancel"),
+    returnEntryText: t("afterSales.list.returnEntry"),
+    progressToggleText: t("afterSales.list.progressToggle"),
+    progressCollapseText: t("afterSales.list.progressCollapse"),
+    progressLoadingText: t("afterSales.list.progressLoading"),
+    progressEmptyText: t("afterSales.list.progressEmpty"),
+    returnCarrierLabel: t("afterSales.return.carrierLabel"),
+    returnTrackingLabel: t("afterSales.return.trackingLabel"),
+    returnTrackingPlaceholder: t("afterSales.return.trackingPlaceholder"),
+    returnSubmitText: t("afterSales.return.submit"),
+    returnSubmitShortText: t("afterSales.return.submitShort"),
+    returnCancelText: t("afterSales.return.cancel"),
   } as AftersalesData,
 
   onLoad(options: Record<string, string | undefined>) {
@@ -143,7 +228,7 @@ Page({
 
   async uploadOneEvidence(tempPath: string, sizeBytes: number) {
     if (sizeBytes > MAX_EVIDENCE_BYTES) {
-      this.setData({ error: "单张凭证不能超过 5MB" });
+      this.setData({ error: t("afterSales.errors.evidenceTooLarge") });
       return;
     }
     const entry: EvidenceEntry = {
@@ -161,7 +246,7 @@ Page({
         wx.getFileSystemManager().readFile({
           filePath: tempPath,
           success: (read) => resolve(read.data as ArrayBuffer),
-          fail: (cause) => reject(new Error(cause?.errMsg ?? "读取图片失败")),
+          fail: (cause) => reject(new Error(cause?.errMsg ?? t("afterSales.errors.readImageFailed"))),
         });
       });
       const reference = await uploadDriveImage({
@@ -181,7 +266,7 @@ Page({
     } catch (cause) {
       this.setData({
         evidence: this.data.evidence.filter((item) => item.id !== entry.id),
-        error: errorMessage(cause, "凭证上传失败，已移除；请重试"),
+        error: errorMessage(cause, t("afterSales.errors.evidenceUploadFailed")),
       });
     }
   },
@@ -194,7 +279,7 @@ Page({
   async loadOrder() {
     const orderId = this.data.orderId.trim();
     if (!orderId) {
-      this.setData({ error: "请填写订单号" });
+      this.setData({ error: t("afterSales.errors.orderRequired") });
       return;
     }
     this.setData({ loadingOrder: true, error: "" });
@@ -204,7 +289,13 @@ Page({
       this.setData({
         orderLoaded: true,
         loadingOrder: false,
-        orderSummary: `${detail.items.length} 项商品${reference != null ? ` · 实付 ${formatCny(reference)}` : ""}`,
+        orderSummary:
+          reference != null
+            ? t("afterSales.apply.orderSummaryAmount", {
+                amount: formatCny(reference),
+                count: detail.items.length,
+              })
+            : t("afterSales.apply.orderSummary", { count: detail.items.length }),
         amount: this.data.amount || (reference != null ? reference.toFixed(2) : ""),
         orderItems: detail.items.map((item) => ({
           orderItemId: item.id,
@@ -218,7 +309,7 @@ Page({
         orderLoaded: false,
         orderItems: [],
         orderSummary: "",
-        error: errorMessage(cause, "订单加载失败"),
+        error: errorMessage(cause, t("afterSales.errors.orderLoadFailed")),
       });
     }
   },
@@ -236,28 +327,36 @@ Page({
 
   async reloadRequests() {
     try {
-      const requests = await listRequests();
-      this.setData({ requests, loading: false });
+      const rows = await listRequests();
+      this.setData({
+        requests: rows.map((row) => ({
+          ...row,
+          statusLabel: row.statusLabelKey ? t(row.statusLabelKey) : row.status,
+          typeLabel: row.typeLabelKey ? t(row.typeLabelKey) : row.type,
+          orderNoText: t("afterSales.list.orderNo", { id: row.orderId }),
+        })),
+        loading: false,
+      });
     } catch (cause) {
       this.setData({
         loading: false,
-        error: errorMessage(cause, "售后列表加载失败"),
+        error: errorMessage(cause, t("afterSales.errors.listLoadFailed")),
       });
     }
   },
 
   async submit() {
     if (!this.data.orderLoaded || !this.data.orderItems || this.data.orderItems.length === 0) {
-      this.setData({ error: "请先读取订单" });
+      this.setData({ error: t("afterSales.errors.readOrderFirst") });
       return;
     }
     const amount = Number(this.data.amount);
     if (!Number.isFinite(amount) || amount <= 0) {
-      this.setData({ error: "请填写有效的售后金额" });
+      this.setData({ error: t("afterSales.errors.amountInvalid") });
       return;
     }
     if (this.data.evidence.some((item) => item.state === "uploading")) {
-      this.setData({ error: "凭证仍在上传中，请稍候" });
+      this.setData({ error: t("afterSales.errors.evidenceUploading") });
       return;
     }
     const type = this.data.types[this.data.typeIndex];
@@ -290,10 +389,10 @@ Page({
         orderId: "",
         presetOrderId: "",
       });
-      wx.showToast({ title: "售后申请已提交", icon: "success" });
+      wx.showToast({ title: t("afterSales.apply.submitted"), icon: "success" });
       await this.reloadRequests();
     } catch (cause) {
-      this.setData({ error: errorMessage(cause, "售后申请失败") });
+      this.setData({ error: errorMessage(cause, t("afterSales.errors.submitFailed")) });
     } finally {
       this.setData({ busy: false });
     }
@@ -307,10 +406,10 @@ Page({
     this.setData({ busy: true, error: "" });
     try {
       await cancelRequest(requestId);
-      wx.showToast({ title: "已撤销", icon: "success" });
+      wx.showToast({ title: t("afterSales.list.cancelled"), icon: "success" });
       await this.reloadRequests();
     } catch (cause) {
-      this.setData({ error: errorMessage(cause, "撤销失败") });
+      this.setData({ error: errorMessage(cause, t("afterSales.errors.cancelFailed")) });
     } finally {
       this.setData({ busy: false });
     }
@@ -343,7 +442,7 @@ Page({
     }
     const trackingNo = this.data.returnTrackingNo.trim();
     if (!trackingNo) {
-      this.setData({ error: "请填写退货物流单号" });
+      this.setData({ error: t("afterSales.errors.trackingRequired") });
       return;
     }
     const carrier = this.data.returnCarriers[this.data.returnCarrierIndex];
@@ -356,12 +455,12 @@ Page({
         trackingNo,
       });
       this.setData({ returnBusy: false, returnFormRequestId: "", returnTrackingNo: "" });
-      wx.showToast({ title: "退货物流已提交", icon: "success" });
+      wx.showToast({ title: t("afterSales.return.submitted"), icon: "success" });
       await this.reloadRequests();
     } catch (cause) {
       this.setData({
         returnBusy: false,
-        error: errorMessage(cause, "退货物流提交失败"),
+        error: errorMessage(cause, t("afterSales.errors.returnSubmitFailed")),
       });
     }
   },
@@ -384,7 +483,7 @@ Page({
     } catch (cause) {
       this.setData({
         progressLoading: false,
-        error: errorMessage(cause, "进度加载失败"),
+        error: errorMessage(cause, t("afterSales.errors.progressLoadFailed")),
       });
     }
   },

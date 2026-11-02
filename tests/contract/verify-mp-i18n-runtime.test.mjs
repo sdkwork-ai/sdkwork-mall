@@ -25,6 +25,7 @@ test("the runtime flattens authored fragments and exposes lookups", () => {
   const runtime = read(`${appRoot}/src/i18n/index.ts`);
   assert.match(runtime, /from "\.\/zh-CN\/account\/buyer-hub\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/support\/help\/messages"/u);
+  assert.match(runtime, /from "\.\/zh-CN\/support\/after-sales\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/storefront\/home\/messages"/u);
   assert.match(runtime, /from "\.\/zh-CN\/checkout\/confirm-order\/messages"/u);
   assert.match(runtime, /export function t\(/u);
@@ -36,6 +37,9 @@ test("the runtime flattens authored fragments and exposes lookups", () => {
 
   const helpFragment = read(`${appRoot}/src/i18n/zh-CN/support/help/messages.js`);
   assert.match(helpFragment, /help:/u);
+
+  const afterSalesFragment = read(`${appRoot}/src/i18n/zh-CN/support/after-sales/messages.js`);
+  assert.match(afterSalesFragment, /afterSales:/u);
 
   const homeFragment = read(`${appRoot}/src/i18n/zh-CN/storefront/home/messages.js`);
   assert.match(homeFragment, /home:/u);
@@ -74,11 +78,18 @@ test("the buyer hub and help centre resolve every label from the catalogue", () 
   assert.match(checkoutPage, /t\("checkout\.errors\.addressRequired"\)/u);
   assert.match(checkoutPage, /t\(method\.labelKey\)/u);
 
+  const afterSalesPage = read(`${appRoot}/src/pages/aftersales/index.ts`);
+  assert.match(afterSalesPage, /t\("afterSales\.apply\.orderLabel"\)/u);
+  assert.match(afterSalesPage, /t\(entry\.labelKey\)/u);
+  assert.match(afterSalesPage, /t\(row\.statusLabelKey\)/u);
+  assert.match(afterSalesPage, /t\("afterSales\.errors\.trackingRequired"\)/u);
+
   for (const tsPath of [
     `${appRoot}/src/pages/buyer/index.ts`,
     `${appRoot}/src/pages/help/index.ts`,
     `${appRoot}/src/pages/home/index.ts`,
     `${appRoot}/src/pages/checkout/index.ts`,
+    `${appRoot}/src/pages/aftersales/index.ts`,
   ]) {
     const source = read(tsPath);
     const chineseLiterals = [...source.matchAll(/"[^"\n]*[\u4e00-\u9fff][^"\n]*"/gu)]
@@ -92,6 +103,7 @@ test("the buyer hub and help centre resolve every label from the catalogue", () 
     `${appRoot}/src/pages/help/index.wxml`,
     `${appRoot}/src/pages/home/index.wxml`,
     `${appRoot}/src/pages/checkout/index.wxml`,
+    `${appRoot}/src/pages/aftersales/index.wxml`,
   ]) {
     const template = read(wxmlPath);
     assert.deepEqual(
