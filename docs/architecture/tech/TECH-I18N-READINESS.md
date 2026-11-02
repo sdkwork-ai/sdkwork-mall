@@ -1,6 +1,6 @@
 # i18n Readiness
 
-Status: assessment (migration not started)
+Status: S1 catalogue landed; per-root runtime migration pending
 Owner: SDKWork maintainers
 Updated: 2026-11-02
 Specs: I18N_SPEC.md, FRONTEND_CODE_SPEC.md, APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md
@@ -60,6 +60,18 @@ route/page title lookup to it. This removes duplicate literals for the 36 screen
 names and the two upstream notices, and makes future locale additions a
 catalogue drop rather than a code change.
 
+**S1a — catalogue (landed).** `scripts/generate-mall-i18n-catalogues.mjs`
+projects the parity contract into `specs/app-i18n/capabilities.zh-CN.json`:
+`capability.<id>.title` for all 36 capabilities, `shared.<key>` for every
+`sharedCopy` entry, and the `common.*` action labels. The output is sorted and
+deterministic, `pnpm check:i18n-catalogues` fails when it drifts from the
+contract, `tests/contract/verify-i18n-catalogue.test.mjs` pins the projection,
+and `pnpm verify` runs the check. No UI reads it yet.
+
+**S1b — wiring (next).** Point the PC/H5 route `titleKey` lookups and the
+mini-program/Flutter title maps at the catalogue, then delete the duplicated
+literal titles. This is the step that turns the catalogue into visible copy.
+
 **S2 — per-root message catalogues.**
 Introduce the runtime for the three roots without one (H5: i18next to match PC;
 mini program: a typed message map loaded once into `app.ts`; Flutter:
@@ -73,9 +85,8 @@ baseline snapshot for H5.
 
 ## 5. Non-Goals For Now
 
-- No bulk extraction of all 3016 strings in one change: without runtime
-  verification on H5/PC (the root build is blocked upstream, see
-  `TECH-CLIENT-CAPABILITY-PARITY.md` §5), a mass rename is unverifiable.
+- No bulk extraction of all 3016 strings in one change: a mass rename without
+  per-root render verification is not reviewable.
 - Do not translate locale data (province/city lists); it is data, not copy.
 - Do not introduce a second key vocabulary next to the capability ids.
 
@@ -84,6 +95,7 @@ baseline snapshot for H5.
 | Step | Gate |
 | --- | --- |
 | Numbers refresh | `pnpm audit:i18n` (no diff expected unless copy changed) |
-| S1 catalogue | snapshot + parity gate both read the same contract |
+| S1a catalogue | `pnpm check:i18n-catalogues` + `tests/contract/verify-i18n-catalogue.test.mjs` |
+| S1b wiring | parity title gate: every root still shows the contract title |
 | S2 per root | existing architecture gates per root, plus catalogue reachability test |
 | S3 locale switch | Flutter visual capture with the pseudo-locale; H5 baseline screenshot |
