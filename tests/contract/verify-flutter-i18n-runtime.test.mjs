@@ -27,23 +27,37 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(runtime, /static String t\(/u);
   assert.match(runtime, /installForTest/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/support\/help\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
 
   const main = read(`${appRoot}/lib/main.dart`);
   assert.match(main, /await SdkworkI18n\.load\(\)/u);
 
   const pubspec = read(`${appRoot}/pubspec.yaml`);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/support\/help\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
 });
 
-test("the help page resolves every string from the catalogue", () => {
-  const page = read(`${appRoot}/lib/pages/help_page.dart`);
-  assert.match(page, /SdkworkI18n\.t\('help\.title'\)/u);
-  assert.match(page, /SdkworkI18n\.t\(section\.titleKey\)/u);
-  assert.match(page, /SdkworkI18n\.t\(itemKey\)/u);
-  assert.match(page, /SdkworkI18n\.t\(link\.labelKey\)/u);
+test("migrated pages resolve every string from the catalogue", () => {
+  const helpPage = read(`${appRoot}/lib/pages/help_page.dart`);
+  assert.match(helpPage, /SdkworkI18n\.t\('help\.title'\)/u);
+  assert.match(helpPage, /SdkworkI18n\.t\(section\.titleKey\)/u);
+  assert.match(helpPage, /SdkworkI18n\.t\(itemKey\)/u);
+  assert.match(helpPage, /SdkworkI18n\.t\(link\.labelKey\)/u);
 
-  const literalChinese = [...page.matchAll(/'[^'\n]*[\u4e00-\u9fff][^'\n]*'/gu)].map(
-    (match) => match[0],
-  );
-  assert.deepEqual(literalChinese, [], "help page must not inline Chinese copy");
+  const buyerPage = read(`${appRoot}/lib/pages/buyer_page.dart`);
+  assert.match(buyerPage, /SdkworkI18n\.t\('buyerHub\.sections\.orders'\)/u);
+  assert.match(buyerPage, /SdkworkI18n\.t\(labelKey\)/u);
+  assert.match(buyerPage, /SdkworkI18n\.t\(entry\['labelKey'\]/u);
+  assert.match(buyerPage, /SdkworkI18n\.t\('buyerHub\.logout\.confirm'\)/u);
+
+  for (const pagePath of [
+    `${appRoot}/lib/pages/help_page.dart`,
+    `${appRoot}/lib/pages/buyer_page.dart`,
+  ]) {
+    const page = read(pagePath);
+    const literalChinese = [...page.matchAll(/'[^'\n]*[\u4e00-\u9fff][^'\n]*'/gu)].map(
+      (match) => match[0],
+    );
+    assert.deepEqual(literalChinese, [], `${pagePath} must not inline Chinese copy`);
+  }
 });

@@ -492,11 +492,11 @@ missing. Fragments live at
 `lib/src/i18n/<locale>/<domain>/<capability>/messages.json`, declared in
 `pubspec.yaml`.
 
-The help centre is the first migrated page: all 27 strings resolve from `help.*`.
+The help centre and the buyer hub are the first migrated pages (27 + 38 strings).
 Widget tests install the fragments from disk (`test/support/i18n_fixture.dart`), so
 the suite does not depend on asset-bundle resolution, and the capability-title
 parity gate resolves Flutter `AppBar` titles declared as `SdkworkI18n.t(...)`
-through the fragments. Flutter's hard-coded count dropped 571 → 544.
+through the fragments. Flutter's hard-coded count dropped 571 → 506.
 
 `tests/contract/verify-flutter-i18n-runtime.test.mjs` pins the runtime, the
 fragment wiring and the no-literal rule for migrated pages.

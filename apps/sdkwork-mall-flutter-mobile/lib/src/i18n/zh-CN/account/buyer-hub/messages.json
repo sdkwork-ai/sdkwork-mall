@@ -1,0 +1,56 @@
+{
+  "buyerHub": {
+    "avatarInitial": "客",
+    "memberName": "SDKWork 用户",
+    "guestName": "未登录",
+    "greeting": "欢迎回来",
+    "login": "点击登录",
+    "logoutShort": "退出",
+    "sections": {
+      "orders": "我的订单",
+      "services": "常用服务",
+      "assets": "我的资产",
+      "account": "账户",
+      "others": "其他"
+    },
+    "orders": {
+      "all": "全部订单",
+      "pendingPayment": "待付款",
+      "pendingShipment": "待发货",
+      "pendingReceipt": "待收货",
+      "completed": "已完成"
+    },
+    "services": {
+      "favorites": "我的收藏",
+      "footprint": "浏览足迹",
+      "addresses": "地址管理",
+      "coupons": "领券中心",
+      "orders": "我的订单",
+      "afterSales": "售后中心",
+      "messages": "消息中心",
+      "chats": "客服会话"
+    },
+    "assets": {
+      "wallet": "钱包",
+      "points": "我的积分",
+      "membership": "会员中心",
+      "invoices": "发票"
+    },
+    "account": {
+      "profile": "个人资料",
+      "reviews": "我的评价",
+      "giftCards": "礼品卡与红包",
+      "security": "账户与安全",
+      "help": "帮助中心"
+    },
+    "others": {
+      "settings": "设置"
+    },
+    "logout": {
+      "title": "退出登录",
+      "confirm": "确定退出当前账号？",
+      "cancel": "取消",
+      "confirmAction": "确定"
+    }
+  }
+}

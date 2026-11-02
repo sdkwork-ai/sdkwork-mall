@@ -567,7 +567,7 @@
         "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
         "apps/sdkwork-mall-h5/src/i18n/zh-CN/account/buyer-hub/messages.json",
         "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts",
-        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+        "apps/sdkwork-mall-flutter-mobile/lib/src/i18n/zh-CN/account/buyer-hub/messages.json"
       ]
     },
     {
@@ -578,7 +578,7 @@
         "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
         "apps/sdkwork-mall-h5/src/i18n/zh-CN/account/buyer-hub/messages.json",
         "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts",
-        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+        "apps/sdkwork-mall-flutter-mobile/lib/src/i18n/zh-CN/account/buyer-hub/messages.json"
       ]
     },
     {
@@ -589,7 +589,7 @@
         "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
         "apps/sdkwork-mall-h5/src/i18n/zh-CN/account/buyer-hub/messages.json",
         "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts",
-        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+        "apps/sdkwork-mall-flutter-mobile/lib/src/i18n/zh-CN/account/buyer-hub/messages.json"
       ]
     },
     {
@@ -600,7 +600,7 @@
         "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
         "apps/sdkwork-mall-h5/src/i18n/zh-CN/account/buyer-hub/messages.json",
         "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts",
-        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+        "apps/sdkwork-mall-flutter-mobile/lib/src/i18n/zh-CN/account/buyer-hub/messages.json"
       ]
     },
     {
@@ -611,7 +611,7 @@
         "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
         "apps/sdkwork-mall-h5/src/i18n/zh-CN/account/buyer-hub/messages.json",
         "apps/sdkwork-mall-mini-program/src/pages/buyer/index.ts",
-        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+        "apps/sdkwork-mall-flutter-mobile/lib/src/i18n/zh-CN/account/buyer-hub/messages.json"
       ]
     }
   ],

@@ -15,6 +15,7 @@ class SdkworkI18n {
 
   static const List<String> _fragments = <String>[
     'lib/src/i18n/zh-CN/support/help/messages.json',
+    'lib/src/i18n/zh-CN/account/buyer-hub/messages.json',
   ];
 
   static final Map<String, String> _messages = <String, String>{};

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../bootstrap/session.dart';
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import 'widgets.dart';
 
 /// 我的: 会话用户 / 订单入口统计 / 常用服务 / 退出登录.
@@ -42,6 +43,15 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
     }
   }
 
+  ListTile _menuTile(IconData icon, String labelKey, String route) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(SdkworkI18n.t(labelKey)),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => Navigator.of(context).pushNamed(route),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -62,7 +72,7 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                 radius: 28,
                 backgroundColor: Colors.white24,
                 child: Text(
-                  _loggedIn ? '客' : '?',
+                  _loggedIn ? SdkworkI18n.t('buyerHub.avatarInitial') : '?',
                   style: const TextStyle(fontSize: 22, color: Colors.white),
                 ),
               ),
@@ -72,7 +82,9 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _loggedIn ? 'SDKWork 用户' : '未登录',
+                      _loggedIn
+                          ? SdkworkI18n.t('buyerHub.memberName')
+                          : SdkworkI18n.t('buyerHub.guestName'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -81,7 +93,10 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                     ),
                     const SizedBox(height: 4),
                     _loggedIn
-                        ? const Text('欢迎回来', style: TextStyle(color: Colors.white70))
+                        ? Text(
+                            SdkworkI18n.t('buyerHub.greeting'),
+                            style: const TextStyle(color: Colors.white70),
+                          )
                         : TextButton(
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.white,
@@ -89,7 +104,7 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                             ),
                             onPressed: () =>
                                 Navigator.of(context).pushNamed('/login'),
-                            child: const Text('点击登录'),
+                            child: Text(SdkworkI18n.t('buyerHub.login')),
                           ),
                   ],
                 ),
@@ -97,12 +112,15 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
               if (_loggedIn)
                 TextButton(
                   onPressed: _logout,
-                  child: const Text('退出', style: TextStyle(color: Colors.white)),
+                  child: Text(
+                    SdkworkI18n.t('buyerHub.logoutShort'),
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
             ],
           ),
         ),
-        const SdkworkSectionHeader(title: '我的订单'),
+        SdkworkSectionHeader(title: SdkworkI18n.t('buyerHub.sections.orders')),
         Card(
           margin: EdgeInsets.zero,
           child: Padding(
@@ -110,11 +128,11 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Map<String, String>>[
-                {'status': '', 'label': '全部订单', 'key': 'totalOrders'},
-                {'status': 'PENDING_PAYMENT', 'label': '待付款', 'key': 'pendingPayment'},
-                {'status': 'PENDING_SHIPMENT', 'label': '待发货', 'key': 'pendingShipment'},
-                {'status': 'PENDING_RECEIPT', 'label': '待收货', 'key': 'pendingReceipt'},
-                {'status': 'COMPLETED', 'label': '已完成', 'key': 'completed'},
+                {'status': '', 'labelKey': 'buyerHub.orders.all', 'key': 'totalOrders'},
+                {'status': 'PENDING_PAYMENT', 'labelKey': 'buyerHub.orders.pendingPayment', 'key': 'pendingPayment'},
+                {'status': 'PENDING_SHIPMENT', 'labelKey': 'buyerHub.orders.pendingShipment', 'key': 'pendingShipment'},
+                {'status': 'PENDING_RECEIPT', 'labelKey': 'buyerHub.orders.pendingReceipt', 'key': 'pendingReceipt'},
+                {'status': 'COMPLETED', 'labelKey': 'buyerHub.orders.completed', 'key': 'completed'},
               ]
                   .map(
                     (entry) => InkWell(
@@ -135,7 +153,7 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${entry['label']}',
+                              SdkworkI18n.t(entry['labelKey'] ?? ''),
                               style: Theme.of(context).textTheme.labelSmall,
                             ),
                           ],
@@ -147,141 +165,51 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
             ),
           ),
         ),
-        const SdkworkSectionHeader(title: '常用服务'),
+        SdkworkSectionHeader(title: SdkworkI18n.t('buyerHub.sections.services')),
         Card(
           margin: EdgeInsets.zero,
           child: Column(
             children: <ListTile>[
-              ListTile(
-                leading: const Icon(Icons.favorite_outline),
-                title: const Text('我的收藏'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/favorites'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.history_outlined),
-                title: const Text('浏览足迹'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/footprint'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.location_on_outlined),
-                title: const Text('地址管理'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/address'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.local_offer_outlined),
-                title: const Text('领券中心'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/coupons'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.receipt_long_outlined),
-                title: const Text('我的订单'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/orders'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.support_agent_outlined),
-                title: const Text('售后中心'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/after-sales'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.notifications_outlined),
-                title: const Text('消息中心'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/messages'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.chat_bubble_outline),
-                title: const Text('客服会话'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/chats'),
-              ),
+              _menuTile(Icons.favorite_outline, 'buyerHub.services.favorites', '/favorites'),
+              _menuTile(Icons.history_outlined, 'buyerHub.services.footprint', '/footprint'),
+              _menuTile(Icons.location_on_outlined, 'buyerHub.services.addresses', '/address'),
+              _menuTile(Icons.local_offer_outlined, 'buyerHub.services.coupons', '/coupons'),
+              _menuTile(Icons.receipt_long_outlined, 'buyerHub.services.orders', '/orders'),
+              _menuTile(Icons.support_agent_outlined, 'buyerHub.services.afterSales', '/after-sales'),
+              _menuTile(Icons.notifications_outlined, 'buyerHub.services.messages', '/messages'),
+              _menuTile(Icons.chat_bubble_outline, 'buyerHub.services.chats', '/chats'),
             ],
           ),
         ),
-        const SdkworkSectionHeader(title: '我的资产'),
+        SdkworkSectionHeader(title: SdkworkI18n.t('buyerHub.sections.assets')),
         Card(
           margin: EdgeInsets.zero,
           child: Column(
             children: <ListTile>[
-              ListTile(
-                leading: const Icon(Icons.account_balance_wallet_outlined),
-                title: const Text('钱包'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/wallet'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.stars_outlined),
-                title: const Text('我的积分'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/points'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.workspace_premium_outlined),
-                title: const Text('会员中心'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/membership'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.receipt_outlined),
-                title: const Text('发票'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/invoices'),
-              ),
+              _menuTile(Icons.account_balance_wallet_outlined, 'buyerHub.assets.wallet', '/wallet'),
+              _menuTile(Icons.stars_outlined, 'buyerHub.assets.points', '/points'),
+              _menuTile(Icons.workspace_premium_outlined, 'buyerHub.assets.membership', '/membership'),
+              _menuTile(Icons.receipt_outlined, 'buyerHub.assets.invoices', '/invoices'),
             ],
           ),
         ),
-        const SdkworkSectionHeader(title: '账户'),
+        SdkworkSectionHeader(title: SdkworkI18n.t('buyerHub.sections.account')),
         Card(
           margin: EdgeInsets.zero,
           child: Column(
             children: <ListTile>[
-              ListTile(
-                leading: const Icon(Icons.person_outline),
-                title: const Text('个人资料'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/profile'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.rate_review_outlined),
-                title: const Text('我的评价'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/reviews'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.card_giftcard_outlined),
-                title: const Text('礼品卡与红包'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/gift-cards'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.lock_outline),
-                title: const Text('账户与安全'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/security'),
-              ),
-              ListTile(
-                leading: const Icon(Icons.help_outline),
-                title: const Text('帮助中心'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).pushNamed('/help'),
-              ),
+              _menuTile(Icons.person_outline, 'buyerHub.account.profile', '/profile'),
+              _menuTile(Icons.rate_review_outlined, 'buyerHub.account.reviews', '/reviews'),
+              _menuTile(Icons.card_giftcard_outlined, 'buyerHub.account.giftCards', '/gift-cards'),
+              _menuTile(Icons.lock_outline, 'buyerHub.account.security', '/security'),
+              _menuTile(Icons.help_outline, 'buyerHub.account.help', '/help'),
             ],
           ),
         ),
-        const SdkworkSectionHeader(title: '其他'),
+        SdkworkSectionHeader(title: SdkworkI18n.t('buyerHub.sections.others')),
         Card(
           margin: EdgeInsets.zero,
-          child: ListTile(
-            leading: const Icon(Icons.settings_outlined),
-            title: const Text('设置'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).pushNamed('/settings'),
-          ),
+          child: _menuTile(Icons.settings_outlined, 'buyerHub.others.settings', '/settings'),
         ),
         const SizedBox(height: 24),
       ],
@@ -304,19 +232,19 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
     showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('退出登录'),
-        content: const Text('确定退出当前账号？'),
+        title: Text(SdkworkI18n.t('buyerHub.logout.title')),
+        content: Text(SdkworkI18n.t('buyerHub.logout.confirm')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('取消'),
+            child: Text(SdkworkI18n.t('buyerHub.logout.cancel')),
           ),
           FilledButton(
             onPressed: () {
               SdkworkSession.instance.signOut();
               Navigator.of(dialogContext).pop();
             },
-            child: const Text('确定'),
+            child: Text(SdkworkI18n.t('buyerHub.logout.confirmAction')),
           ),
         ],
       ),

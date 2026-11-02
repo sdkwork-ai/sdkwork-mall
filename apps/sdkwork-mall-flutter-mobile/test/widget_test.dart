@@ -2,7 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sdkwork_mall_flutter_mobile/shell/mobile_shell.dart';
 
+import 'support/i18n_fixture.dart';
+
 void main() {
+  setUpAll(installTestI18n);
+
   testWidgets('mobile shell pumps the four-tab storefront', (tester) async {
     await tester.pumpWidget(const SdkworkMallFlutterMobileShell());
     expect(find.text('首页'), findsWidgets);
