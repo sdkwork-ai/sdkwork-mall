@@ -1,6 +1,6 @@
 # i18n Readiness
 
-Status: S1 catalogue landed; per-root runtime migration pending
+Status: S1 catalogue + per-root runtimes landed on all four roots; S1b catalogue wiring and S3 locale switching pending
 Owner: SDKWork maintainers
 Updated: 2026-11-02
 Specs: I18N_SPEC.md, FRONTEND_CODE_SPEC.md, APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md
@@ -12,10 +12,10 @@ long):
 
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
-| PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
-| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 53 | 272 | 390 (`regions.ts`) |
-| Mini program | `src/i18n` runtime + `zh-CN/{account/*,support/*,storefront/home,checkout/confirm-order}` JS fragments | 58 | 229 | 302 (province/city picker data) |
-| Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,storefront/home,catalog/product-detail,checkout/confirm-order}` fragments | 29 | 279 | 230 (province/city picker data) |
+| PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 87 | 1452 | 0 |
+| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 54 | 272 | 390 (`regions.ts`) |
+| Mini program | `src/i18n` runtime + `zh-CN/{account/*,support/*,storefront/home,checkout/confirm-order}` JS fragments | 56 | 229 | 302 (province/city picker data) |
+| Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,storefront/home,catalog/product-detail,checkout/confirm-order}` fragments | 31 | 279 | 230 (province/city picker data) |
 
 2232 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
@@ -76,10 +76,9 @@ mini-program/Flutter title maps at the catalogue, then delete the duplicated
 literal titles. This is the step that turns the catalogue into visible copy.
 
 **S2 — per-root message catalogues.**
-Introduce the runtime for the three roots without one (H5: i18next to match PC;
-mini program: a typed message map loaded once into `app.ts`; Flutter:
-`flutter_localizations` + an ARB-derived message map). Migrate in hotspot order,
-highest first, keeping the existing `sdkwork` prefix conventions.
+All four roots now own a runtime: PC keeps its i18next copy modules, and H5, the
+mini program and Flutter each gained one in S2a–S2c below. Migration continues in
+hotspot order, highest first.
 
 **S2a — H5 runtime (started).** `apps/sdkwork-mall-h5/src/i18n/index.ts`
 initialises i18next with `initReactI18next` and composes authored fragments from
@@ -91,7 +90,7 @@ from `main.tsx`; the default locale is unchanged, so no visible copy moved. Ten
 surfaces are migrated: payment-result, confirm-order, product detail, storefront
 home, the buyer hub, the address book, the help centre, the after-sales centre, the
 order detail page and the order list (status filter tabs, per-status action set,
-pagination and empty/loading states). H5's hard-coded count dropped 536 → 283 and
+pagination and empty/loading states). H5's hard-coded count dropped 536 → 272 and
 the baseline was refreshed.
 
 The after-sales service no longer owns display copy either: request types,
@@ -143,7 +142,7 @@ baseline snapshot for H5.
 
 ## 5. Non-Goals For Now
 
-- No bulk extraction of all 3016 strings in one change: a mass rename without
+- No bulk extraction of all remaining strings in one change: a mass rename without
   per-root render verification is not reviewable.
 - Do not translate locale data (province/city lists); it is data, not copy.
 - Do not introduce a second key vocabulary next to the capability ids.

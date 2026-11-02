@@ -180,7 +180,6 @@ pnpm test:node                                                     → 90/90 pas
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
   (tests/contract/verify-checkout-scoping.test.mjs                 → 6/6)
   (tests/contract/verify-i18n-catalogue.test.mjs                   → 4/4)
-  (tests/contract/verify-after-sales-depth.test.mjs                → 1/1)
   (tests/contract/verify-browser-page-titles.test.mjs              → 3/3)
   (tests/contract/verify-mobile-failure-handling.test.mjs          → 2/2)
   (tests/contract/verify-i18n-readiness.test.mjs                   → 2/2)
@@ -201,7 +200,7 @@ pnpm typecheck:packages                                            → 46 packag
 pnpm test:vitest                                                   → 70 files / 177 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
-flutter test                                                       → 23/23 pass
+flutter test                                                       → 25/25 pass
 node ../sdkwork-specs/tools/verify-repo.mjs --root .               → passed
 node ../sdkwork-specs/tools/check-application-layering.mjs --root .→ passed
 node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
@@ -460,7 +459,7 @@ copy changes are fragment diffs and a new locale is a resource addition. Ten
 surfaces are migrated: payment-result, confirm-order, product detail, storefront
 home, the buyer hub, the address book, the help centre, the after-sales centre,
 order detail and the order list — all copy resolves through `t(...)` keys with
-identical zh-CN text, and the H5 hard-coded count dropped 536 → 283 (the readiness
+identical zh-CN text, and the H5 hard-coded count dropped 536 → 272 (the readiness
 baseline was refreshed).
 
 `tests/contract/verify-h5-i18n-runtime.test.mjs` proves the runtime initialises,
@@ -500,7 +499,7 @@ after-sales centre are the migrated surfaces (27 + 38 + 44 + 51 + 56 strings).
 Widget tests install the fragments from disk (`test/support/i18n_fixture.dart`), so
 the suite does not depend on asset-bundle resolution, and the capability-title
 parity gate resolves Flutter `AppBar` titles declared as `SdkworkI18n.t(...)`
-through the fragments. Flutter's hard-coded count dropped 571 → 349.
+through the fragments. Flutter's hard-coded count dropped 571 → 279.
 
 `tests/contract/verify-flutter-i18n-runtime.test.mjs` pins the runtime, the
 fragment wiring and the no-literal rule for migrated pages.
