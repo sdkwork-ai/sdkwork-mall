@@ -18,6 +18,23 @@ const appbaseRoot = path.resolve(workspaceRoot, "../sdkwork-appbase");
 const uiRoot = path.resolve(workspaceRoot, "../sdkwork-ui");
 const sdkCommonsRoot = path.resolve(workspaceRoot, "../sdkwork-sdk-commons");
 
+// Workspace-linked packages are served as sources (their `exports` point at
+// `src/index.ts`) and must never be frozen into the esbuild prebundle: sibling
+// SDK repos vendor their own npm-installed copies of e.g. `@sdkwork/sdk-common`
+// and `@sdkwork/utils`, and whichever copy the scan reaches first would decide
+// the prebundle exports for the whole graph (`does not provide an export named`).
+const appManifest = JSON.parse(
+  readFileSync(path.join(appRoot, "package.json"), "utf8"),
+) as { dependencies?: Record<string, string> };
+const WORKSPACE_SOURCE_PACKAGES = [
+  ...Object.keys(appManifest.dependencies ?? {}).filter((name) =>
+    name.startsWith("@sdkwork/"),
+  ),
+  // Transitive workspace packages imported directly by consumed sibling
+  // services; excluded so each importer resolves its own workspace link.
+  "@sdkwork/utils",
+];
+
 const sharedRuntimePackages = [
   "@radix-ui/react-avatar",
   "@radix-ui/react-checkbox",
@@ -244,6 +261,9 @@ export default defineConfig(({ mode }) => {
     }),
     react(), tailwindcss(),
   ],
+  optimizeDeps: {
+    exclude: WORKSPACE_SOURCE_PACKAGES,
+  },
   resolve: {
     alias: [
       {
@@ -269,6 +289,11 @@ export default defineConfig(({ mode }) => {
       "react-dom",
       "react-router",
       "react-router-dom",
+      // Generated transport workspaces vendored under sibling SDK repos keep their
+      // own npm-installed @sdkwork/sdk-common (1.0.9), which shadows the workspace
+      // build and drops newer exports. Resolve every import to the single
+      // workspace copy instead of prebundling the stale nested one.
+      "@sdkwork/sdk-common",
       ...sharedRuntimePackages,
     ],
   },

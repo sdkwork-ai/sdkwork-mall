@@ -8,8 +8,6 @@ import 'services/commerce.dart';
 import 'shell/mobile_shell.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   // A release build must not show a raw red/grey box when a widget fails to
   // build, and async failures outside the widget tree must stay observable
   // instead of being dropped by the zone.
@@ -21,6 +19,10 @@ Future<void> main() async {
 
   await runZonedGuarded<Future<void>>(
     () async {
+      // The binding must be initialized inside the guarded zone and in the same
+      // zone that later calls runApp, otherwise the framework reports a zone
+      // mismatch every time the app starts.
+      WidgetsFlutterBinding.ensureInitialized();
       await SdkworkSession.instance.restore();
       final environment = SdkworkMallFlutterEnvironment.fromDefineValues();
       debugPrint('sdkwork-mall-flutter-mobile runtime: $environment');
