@@ -15,6 +15,13 @@ import {
 } from "../cart-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
+/** Delivery options; the server prices the choice into the quote. */
+const DELIVERY_METHODS = [
+  { code: "standard", description: "3-5 天送达 · 免费", label: "普通配送" },
+  { code: "express", description: "次日送达 · ¥12.00", label: "极速达" },
+  { code: "sf", description: "当日达 · ¥22.00", label: "顺丰速运" },
+] as const;
+
 function parseCartItemIds(rawItems: string | null): string[] {
   if (!rawItems) {
     return [];
@@ -38,6 +45,10 @@ export function SdkworkMallH5CheckoutPage() {
   const [selectedCouponId, setSelectedCouponId] = useState("");
   const [useWallet, setUseWallet] = useState(false);
   const [usePoints, setUsePoints] = useState(false);
+  const [selectedDeliveryMethod, setSelectedDeliveryMethod] = useState<string>("standard");
+  const [giftCardCode, setGiftCardCode] = useState("");
+  const [giftCardApplied, setGiftCardApplied] = useState<string | null>(null);
+  const [giftCardError, setGiftCardError] = useState<string | null>(null);
   const [buyerRemark, setBuyerRemark] = useState("");
   const [needInvoice, setNeedInvoice] = useState(false);
   const [invoiceTitleType, setInvoiceTitleType] = useState<"company" | "personal">("personal");
@@ -104,6 +115,27 @@ export function SdkworkMallH5CheckoutPage() {
   const payableAmount = useMemo(() => quote?.payableAmountCny ?? null, [quote]);
   const selectedCoupon = coupons.find((coupon) => coupon.id === selectedCouponId) ?? null;
 
+  function handleApplyGiftCard() {
+    setGiftCardError(null);
+    const code = giftCardCode.trim();
+    if (!code) {
+      setGiftCardError("请输入礼品卡卡号");
+      return;
+    }
+    if (code.length < 8) {
+      setGiftCardError("礼品卡卡号格式不正确");
+      return;
+    }
+    setGiftCardApplied(code);
+    setGiftCardCode("");
+  }
+
+  function handleRemoveGiftCard() {
+    setGiftCardApplied(null);
+    setGiftCardCode("");
+    setGiftCardError(null);
+  }
+
   async function handleSubmit() {
     if (!selectedAddressId) {
       setMessage("请选择收货地址");
@@ -143,6 +175,8 @@ export function SdkworkMallH5CheckoutPage() {
         buyerRemark: buyerRemark.trim() || undefined,
         cartItemIds: cartItemIds.length ? cartItemIds : undefined,
         couponId: selectedCouponId || undefined,
+        deliveryMethod: selectedDeliveryMethod,
+        giftCardCode: giftCardApplied ?? undefined,
         invoiceForm: needInvoice
           ? {
               email: invoiceEmail.trim() || undefined,
@@ -212,6 +246,25 @@ export function SdkworkMallH5CheckoutPage() {
         ))}
       </section>
 
+      <section className="sdk-h5-section">
+        <h2>配送方式</h2>
+        {DELIVERY_METHODS.map((method) => (
+          <label className="sdk-h5-address-row" key={method.code}>
+            <input
+              checked={selectedDeliveryMethod === method.code}
+              name="deliveryMethod"
+              onChange={() => setSelectedDeliveryMethod(method.code)}
+              type="radio"
+            />
+            <span>
+              {method.label}
+              <br />
+              <small className="sdk-h5-muted">{method.description}</small>
+            </span>
+          </label>
+        ))}
+      </section>
+
       {paymentMethods.length > 0 ? (
         <section className="sdk-h5-section">
           <h2>支付方式</h2>
@@ -270,6 +323,42 @@ export function SdkworkMallH5CheckoutPage() {
           <input checked={usePoints} onChange={(event) => setUsePoints(event.target.checked)} type="checkbox" />
           <span>积分抵扣</span>
         </label>
+      </section>
+
+      <section className="sdk-h5-section">
+        <h2>礼品卡</h2>
+        {giftCardApplied ? (
+          <div className="sdk-h5-address-row">
+            <span>
+              已使用礼品卡 <code>{giftCardApplied}</code>
+            </span>
+            <button className="sdk-h5-link-button" onClick={handleRemoveGiftCard} type="button">
+              移除
+            </button>
+          </div>
+        ) : (
+          <div className="sdk-h5-redeem-row">
+            <input
+              aria-label="礼品卡卡号"
+              onChange={(event) => setGiftCardCode(event.target.value)}
+              placeholder="输入礼品卡卡号"
+              value={giftCardCode}
+            />
+            <button
+              className="sdk-h5-button sdk-h5-button-secondary"
+              disabled={!giftCardCode.trim()}
+              onClick={handleApplyGiftCard}
+              type="button"
+            >
+              使用
+            </button>
+          </div>
+        )}
+        {giftCardError ? (
+          <p className="sdk-h5-notice sdk-h5-notice-danger" role="alert">
+            {giftCardError}
+          </p>
+        ) : null}
       </section>
 
       <section className="sdk-h5-section">

@@ -70,6 +70,26 @@
   background: #fef2f2;
 }
 
+.checkout-giftcard-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.checkout-giftcard-input {
+  flex: 1;
+  border: 1rpx solid #e5e7eb;
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  font-size: 26rpx;
+}
+
+.checkout-giftcard-error {
+  margin-top: 8rpx;
+  color: #e93b3d;
+  font-size: 24rpx;
+}
+
 .checkout-payable {
   font-size: 34rpx;
 }

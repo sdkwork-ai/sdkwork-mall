@@ -115,6 +115,8 @@ class CartService {
     List<String>? cartItemIds,
     String? couponId,
     String? buyerRemark,
+    String? deliveryMethod,
+    String? giftCardCode,
     Map<String, dynamic>? invoiceForm,
     bool needInvoice = false,
     bool useWallet = false,
@@ -137,6 +139,8 @@ class CartService {
       body: <String, dynamic>{
         'buyerRemark': buyerRemark,
         'quoteId': quote['quoteId'],
+        'deliveryMethod': deliveryMethod,
+        'giftCardCode': giftCardCode,
         'needInvoice': needInvoice,
         if (needInvoice && invoiceForm != null) 'invoiceForm': invoiceForm,
         if (cartItemIds != null && cartItemIds.isNotEmpty)

@@ -68,6 +68,9 @@ export interface MallH5CheckoutSubmitInput {
   buyerRemark?: string;
   cartItemIds?: string[];
   couponId?: string;
+  /** `standard` | `express` | `sf`; the server prices it into the quote. */
+  deliveryMethod?: string;
+  giftCardCode?: string;
   invoiceForm?: MallH5CheckoutInvoiceForm;
   needInvoice?: boolean;
   paymentMethodCode?: string;
@@ -256,6 +259,8 @@ export async function submitMallH5CheckoutOrder(
   const orderResponse = await remote.checkout.sessions.orders.create(quote.sessionId, {
     buyerRemark: input.buyerRemark,
     cartItemIds: input.cartItemIds?.length ? input.cartItemIds : undefined,
+    deliveryMethod: input.deliveryMethod,
+    giftCardCode: input.giftCardCode,
     invoiceForm: input.needInvoice ? input.invoiceForm : undefined,
     needInvoice: input.needInvoice ?? false,
     quoteId: quote.quoteId,

@@ -26,6 +26,17 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
   final TextEditingController _invoiceEmail = TextEditingController();
   bool _needInvoice = false;
   String _invoiceTitleType = 'personal';
+  String _deliveryMethod = 'standard';
+  final TextEditingController _giftCardCode = TextEditingController();
+  String _giftCardApplied = '';
+  String _giftCardError = '';
+
+  /// 配送方式；运费由服务端按选择计入报价。
+  static const List<Map<String, String>> _deliveryMethods = [
+    {'code': 'standard', 'label': '普通配送', 'description': '3-5 天送达 · 免费'},
+    {'code': 'express', 'label': '极速达', 'description': '次日送达 · ¥12.00'},
+    {'code': 'sf', 'label': '顺丰速运', 'description': '当日达 · ¥22.00'},
+  ];
   num? _payable;
   num? _originalAmount;
   num? _discountAmount;
@@ -55,6 +66,7 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
     _invoiceTitle.dispose();
     _invoiceTaxNumber.dispose();
     _invoiceEmail.dispose();
+    _giftCardCode.dispose();
     super.dispose();
   }
 
@@ -90,6 +102,26 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                                     .toList(),
                               ),
                             ),
+                    ),
+                    _buildSection(
+                      '配送方式',
+                      RadioGroup<String>(
+                        groupValue: _deliveryMethod,
+                        onChanged: (value) => setState(
+                          () => _deliveryMethod = value ?? 'standard',
+                        ),
+                        child: Column(
+                          children: [
+                            for (final method in _deliveryMethods)
+                              RadioListTile<String>(
+                                value: method['code']!,
+                                title: Text(method['label']!),
+                                subtitle: Text(method['description']!),
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                     _buildSection(
                       '优惠券',
@@ -133,6 +165,58 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                             onChanged: (value) => setState(() => _usePoints = value),
                             contentPadding: EdgeInsets.zero,
                           ),
+                        ],
+                      ),
+                    ),
+                    _buildSection(
+                      '礼品卡',
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_giftCardApplied.isNotEmpty)
+                            Row(
+                              children: [
+                                Expanded(child: Text('已使用礼品卡 $_giftCardApplied')),
+                                TextButton(
+                                  onPressed: () => setState(() {
+                                    _giftCardApplied = '';
+                                    _giftCardCode.clear();
+                                    _giftCardError = '';
+                                  }),
+                                  child: const Text('移除'),
+                                ),
+                              ],
+                            )
+                          else
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _giftCardCode,
+                                    decoration: const InputDecoration(
+                                      hintText: '输入礼品卡卡号',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                OutlinedButton(
+                                  onPressed: _applyGiftCard,
+                                  child: const Text('使用'),
+                                ),
+                              ],
+                            ),
+                          if (_giftCardError.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                _giftCardError,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -371,6 +455,23 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
     }
   }
 
+  void _applyGiftCard() {
+    final code = _giftCardCode.text.trim();
+    if (code.isEmpty) {
+      setState(() => _giftCardError = '请输入礼品卡卡号');
+      return;
+    }
+    if (code.length < 8) {
+      setState(() => _giftCardError = '礼品卡卡号格式不正确');
+      return;
+    }
+    setState(() {
+      _giftCardApplied = code;
+      _giftCardCode.clear();
+      _giftCardError = '';
+    });
+  }
+
   Future<void> _submit() async {
     if (_selectedAddressId.isEmpty) {
       ScaffoldMessenger.of(context)
@@ -416,6 +517,8 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
         cartItemIds: _cartItemIds,
         couponId: _selectedCouponId.isEmpty ? null : _selectedCouponId,
         buyerRemark: _remark.text.trim().isEmpty ? null : _remark.text.trim(),
+        deliveryMethod: _deliveryMethod,
+        giftCardCode: _giftCardApplied.isEmpty ? null : _giftCardApplied,
         invoiceForm: _needInvoice
             ? <String, dynamic>{
                 'titleType': _invoiceTitleType,

@@ -204,3 +204,81 @@ test("every root lets the buyer declare an invoice at checkout", () => {
     }
   }
 });
+
+/**
+ * Delivery selection and gift-card redemption are confirm-order choices that
+ * the order command already accepts (`deliveryMethod`, `giftCardCode`). PC
+ * shipped both; the mobile roots dropped them, so a phone buyer could not pick
+ * a delivery speed or pay with a gift card.
+ */
+const DELIVERY_ROOTS = [
+  {
+    name: "pc",
+    service: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-cart/src/cart-service.ts",
+    servicePatterns: ["deliveryMethod", "giftCardCode"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-cart/src/pages/CartPage.tsx",
+        patterns: ["配送方式", "礼品卡", "DELIVERY_METHODS"],
+      },
+    ],
+  },
+  {
+    name: "h5",
+    service: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/cart-service.ts",
+    servicePatterns: ["deliveryMethod", "giftCardCode"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
+        patterns: ["配送方式", "礼品卡", "DELIVERY_METHODS"],
+      },
+    ],
+  },
+  {
+    name: "miniProgram",
+    service: "apps/sdkwork-mall-mini-program/src/services/cart-service.ts",
+    servicePatterns: ["deliveryMethod", "giftCardCode"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-mini-program/src/pages/checkout/index.ts",
+        patterns: ["deliveryMethodCode", "giftCardApplied"],
+      },
+      {
+        path: "apps/sdkwork-mall-mini-program/src/pages/checkout/index.wxml",
+        patterns: ["配送方式", "礼品卡"],
+      },
+    ],
+  },
+  {
+    name: "flutter",
+    service: "apps/sdkwork-mall-flutter-mobile/lib/services/cart_service.dart",
+    servicePatterns: ["deliveryMethod", "giftCardCode"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-flutter-mobile/lib/pages/checkout_page.dart",
+        patterns: ["配送方式", "礼品卡", "_deliveryMethods"],
+      },
+    ],
+  },
+];
+
+test("every root lets the buyer choose delivery and redeem a gift card", () => {
+  for (const entry of DELIVERY_ROOTS) {
+    const service = read(entry.service);
+    for (const pattern of entry.servicePatterns) {
+      assert.ok(
+        service.includes(pattern),
+        `${entry.name} checkout service must contain ${JSON.stringify(pattern)}`,
+      );
+    }
+    for (const pageFile of entry.pageFiles) {
+      const page = read(pageFile.path);
+      for (const pattern of pageFile.patterns) {
+        assert.ok(
+          page.includes(pattern),
+          `${entry.name} ${pageFile.path} must contain ${JSON.stringify(pattern)}`,
+        );
+      }
+    }
+  }
+});

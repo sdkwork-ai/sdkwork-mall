@@ -46,6 +46,9 @@ export interface MpSubmitOrderOptions {
   cartItemIds?: string[];
   addressId?: string;
   couponId?: string;
+  /** `standard` | `express` | `sf`; the server prices it into the quote. */
+  deliveryMethod?: string;
+  giftCardCode?: string;
   invoiceForm?: MpCheckoutInvoiceForm;
   needInvoice?: boolean;
   usePoints?: boolean;
@@ -157,6 +160,8 @@ export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orde
     body: {
       buyerRemark: options.buyerRemark,
       cartItemIds: options.cartItemIds && options.cartItemIds.length ? options.cartItemIds : undefined,
+      deliveryMethod: options.deliveryMethod,
+      giftCardCode: options.giftCardCode,
       invoiceForm: options.needInvoice ? options.invoiceForm : undefined,
       needInvoice: options.needInvoice ?? false,
       quoteId: quote.quoteId || undefined,

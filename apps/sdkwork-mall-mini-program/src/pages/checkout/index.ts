@@ -13,11 +13,23 @@ interface MpCouponOption {
   validUntil: string;
 }
 
+/** 配送方式；运费由服务端按选择计入报价。 */
+const DELIVERY_METHODS = [
+  { code: "standard", description: "3-5 天送达 · 免费", label: "普通配送" },
+  { code: "express", description: "次日送达 · ¥12.00", label: "极速达" },
+  { code: "sf", description: "当日达 · ¥22.00", label: "顺丰速运" },
+];
+
 interface CheckoutData {
   addresses: MpAddress[];
   selectedAddressId: string;
   coupons: MpCouponOption[];
   selectedCouponId: string;
+  deliveryMethods: Array<{ code: string; description: string; label: string }>;
+  deliveryMethodCode: string;
+  giftCardCode: string;
+  giftCardApplied: string;
+  giftCardError: string;
   useWallet: boolean;
   usePoints: boolean;
   buyerRemark: string;
@@ -46,6 +58,11 @@ Page({
     selectedAddressId: "",
     coupons: [],
     selectedCouponId: "",
+    deliveryMethods: DELIVERY_METHODS,
+    deliveryMethodCode: "standard",
+    giftCardCode: "",
+    giftCardApplied: "",
+    giftCardError: "",
     useWallet: false,
     usePoints: false,
     buyerRemark: "",
@@ -136,6 +153,33 @@ Page({
     this.setData({ useWallet: !this.data.useWallet });
   },
 
+  selectDeliveryMethod(event: MpTapEvent) {
+    this.setData({
+      deliveryMethodCode: String(event.currentTarget.dataset.code ?? "standard"),
+    });
+  },
+
+  onGiftCardInput(event: MpInputEvent) {
+    this.setData({ giftCardCode: event.detail.value });
+  },
+
+  applyGiftCard() {
+    const code = this.data.giftCardCode.trim();
+    if (!code) {
+      this.setData({ giftCardError: "请输入礼品卡卡号" });
+      return;
+    }
+    if (code.length < 8) {
+      this.setData({ giftCardError: "礼品卡卡号格式不正确" });
+      return;
+    }
+    this.setData({ giftCardApplied: code, giftCardCode: "", giftCardError: "" });
+  },
+
+  removeGiftCard() {
+    this.setData({ giftCardApplied: "", giftCardCode: "", giftCardError: "" });
+  },
+
   togglePoints() {
     this.setData({ usePoints: !this.data.usePoints });
   },
@@ -206,6 +250,8 @@ Page({
         addressId: this.data.selectedAddressId,
         cartItemIds: this.data._cartItemIds,
         couponId: this.data.selectedCouponId || undefined,
+        deliveryMethod: this.data.deliveryMethodCode,
+        giftCardCode: this.data.giftCardApplied || undefined,
         invoiceForm: this.data.needInvoice
           ? {
               email: this.data.invoiceEmail.trim() || undefined,

@@ -174,11 +174,11 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 67/67 pass
+pnpm test:node                                                     → 68/68 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
-  (tests/contract/verify-checkout-scoping.test.mjs                 → 5/5)
+  (tests/contract/verify-checkout-scoping.test.mjs                 → 6/6)
   (tests/contract/verify-i18n-catalogue.test.mjs                   → 4/4)
   (tests/contract/verify-after-sales-depth.test.mjs                → 1/1)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
@@ -345,6 +345,19 @@ All four roots now render the invoice section on confirm-order, validate the
 same way (title required, company tax number required and format-checked), and
 submit `needInvoice` + `invoiceForm` with the order. The checkout contract test
 asserts the fields and the validation on every root.
+
+### 6.1.10 Delivery method and gift card at checkout
+
+The order command accepts `deliveryMethod` (`standard`/`express`/`sf`) and
+`giftCardCode`, and PC shipped both: a delivery-speed selector priced by the
+server, and a gift-card field with a format check. The three mobile roots sent
+neither, so a phone buyer could not pick a delivery speed or redeem a gift card.
+
+All four roots now offer the delivery selector, apply the same gift-card format
+check (non-empty, at least 8 characters) with an applied/remove state, and send
+both fields with the order. Fees stay server-quoted: no client-side fee math.
+The checkout contract test asserts the fields, the selector and the redemption
+control on every root.
 
 ### 6.2 Per-package typecheck
 

@@ -27,6 +27,20 @@
     </view>
 
     <view class="mp-card">
+      <view class="mp-card-title">配送方式</view>
+      <view
+        class="checkout-address {{deliveryMethodCode === item.code ? 'checkout-address-active' : ''}}"
+        wx:for="{{deliveryMethods}}"
+        wx:key="code"
+        bindtap="selectDeliveryMethod"
+        data-code="{{item.code}}"
+      >
+        <view>{{item.label}}</view>
+        <view class="mp-muted">{{item.description}}</view>
+      </view>
+    </view>
+
+    <view class="mp-card">
       <view class="mp-card-title">优惠券</view>
       <view
         class="checkout-coupon {{selectedCouponId === '' ? 'checkout-address-active' : ''}}"
@@ -56,6 +70,24 @@
         <text>积分抵扣</text>
         <view class="cart-checkbox {{usePoints ? 'cart-checkbox-on' : ''}}" />
       </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">礼品卡</view>
+      <view wx:if="{{giftCardApplied}}" class="mp-flex-between checkout-deduct">
+        <text>已使用礼品卡 {{giftCardApplied}}</text>
+        <text class="mp-muted" bindtap="removeGiftCard">移除</text>
+      </view>
+      <view wx:else class="checkout-giftcard-row">
+        <input
+          class="checkout-giftcard-input"
+          placeholder="输入礼品卡卡号"
+          value="{{giftCardCode}}"
+          bindinput="onGiftCardInput"
+        />
+        <button class="mp-btn mp-btn-ghost" bindtap="applyGiftCard">使用</button>
+      </view>
+      <view wx:if="{{giftCardError}}" class="checkout-giftcard-error">{{giftCardError}}</view>
     </view>
 
     <view class="mp-card">
