@@ -226,3 +226,158 @@ page {
   font-size: 22rpx;
   padding: 6rpx 20rpx;
 }
+
+/* ==========================================================================
+   Visual polish layer (2026-11)
+   --------------------------------------------------------------------------
+   Shared radius/elevation/motion tokens plus surface refinements for the
+   primitives every page reuses. Appended as a trailing layer so individual
+   page styles stay untouched.
+   ========================================================================== */
+page {
+  --mp-radius-sm: 12rpx;
+  --mp-radius-md: 22rpx;
+  --mp-radius-lg: 30rpx;
+  --mp-bg: #f5f6f8;
+  --mp-panel: #ffffff;
+  --mp-border: #eceef2;
+  --mp-text: #111827;
+  --mp-muted: #6b7280;
+  --mp-primary: #e93b3d;
+  --mp-primary-soft: #fef2f2;
+  --mp-shadow-1: 0 4rpx 16rpx rgba(17, 24, 39, 0.05),
+    0 16rpx 40rpx -28rpx rgba(17, 24, 39, 0.32);
+  --mp-shadow-2: 0 10rpx 32rpx rgba(17, 24, 39, 0.12);
+  background: var(--mp-bg);
+  color: var(--mp-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mini-program buttons keep the native border; drop it for a flat surface. */
+button::after {
+  border: 0;
+}
+
+.mp-card,
+.mp-section {
+  background: var(--mp-panel);
+  border: 1rpx solid var(--mp-border);
+  border-radius: var(--mp-radius-md);
+  box-shadow: var(--mp-shadow-1);
+  padding: 28rpx;
+}
+
+.mp-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-weight: 700;
+  letter-spacing: 0.5rpx;
+}
+
+.mp-card-title::before {
+  content: "";
+  width: 6rpx;
+  height: 28rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, #f43f5e, var(--mp-primary));
+}
+
+.mp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76rpx;
+  padding: 0 36rpx;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  transition: transform 0.12s ease, opacity 0.2s ease;
+}
+
+.mp-btn-primary {
+  background: linear-gradient(135deg, #f43f5e, var(--mp-primary));
+  color: #fff;
+  box-shadow: 0 12rpx 28rpx -14rpx rgba(233, 59, 61, 0.9);
+}
+
+.mp-btn-primary[disabled] {
+  background: #fca5a5;
+  box-shadow: none;
+}
+
+.mp-btn-ghost {
+  background: var(--mp-panel);
+  color: #374151;
+  border: 1rpx solid #d1d5db;
+}
+
+.mp-btn-plain {
+  background: var(--mp-primary-soft);
+  color: var(--mp-primary);
+}
+
+.mp-product-card {
+  border-radius: var(--mp-radius-md);
+  box-shadow: var(--mp-shadow-1);
+  border: 1rpx solid var(--mp-border);
+}
+
+.mp-product-image {
+  border-radius: var(--mp-radius-md) var(--mp-radius-md) 0 0;
+}
+
+.mp-row {
+  background: var(--mp-panel);
+  border-bottom: 1rpx solid var(--mp-border);
+}
+
+.mp-row:last-child {
+  border-bottom: 0;
+}
+
+.mp-field input,
+.mp-field textarea,
+.mp-field select {
+  border-radius: var(--mp-radius-sm);
+  border-color: var(--mp-border);
+  background: #fbfbfd;
+}
+
+.mp-empty {
+  padding: 120rpx 48rpx;
+  color: #9aa1ac;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+/* Loading text becomes a shimmer skeleton instead of a bare sentence. */
+@keyframes mp-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.mp-loading {
+  color: transparent;
+  min-height: 120rpx;
+  border-radius: var(--mp-radius-md);
+  background: linear-gradient(90deg, #eef1f5 25%, #f8fafc 37%, #eef1f5 63%);
+  background-size: 200% 100%;
+  animation: mp-shimmer 1.4s linear infinite;
+}
+
+.mp-error {
+  border: 1rpx solid #fecaca;
+  border-radius: var(--mp-radius-sm);
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.mp-toast {
+  border-radius: var(--mp-radius-sm);
+  box-shadow: var(--mp-shadow-2);
+}

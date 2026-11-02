@@ -604,6 +604,23 @@ action on failure. `tests/contract/verify-mall-standard-architecture.test.mjs` w
 updated to pin the new port and loader, and the i18n baseline was refreshed for the
 new PC page copy (1452 → 1463).
 
+### 6.1.25 Shared visual system (H5, mini program, Flutter)
+
+Three roots now carry an explicit visual layer instead of page-local ad-hoc styles:
+
+- **H5**: a trailing layer in `src/index.css` adds radius/elevation/motion tokens, a
+  safe-area-aware gradient header, gradient section-heading accents, elevated card
+  and list surfaces, tactile button press states, a translucent tab bar with an
+  active indicator, shimmer skeletons replacing bare loading text, and a
+  `prefers-reduced-motion` fallback.
+- **Mini program**: `app.wxss` gains the same token set as WXSS custom properties,
+  native button border reset, gradient primary buttons, card/row/field surface
+  refinement, a shimmer `.mp-loading` skeleton and consistent error/empty styling.
+- **Flutter**: `ThemeData` now defines the scaffold surface, flat app-bar, bordered
+  cards, 48px buttons, filled inputs, dividers, chips and floating snack bars; the
+  shared loading view renders a pulsing skeleton (honouring reduced-motion) and the
+  error/empty views gained card and icon treatments.
+
 ### 6.2 Per-package typecheck
 
 Every active client package on both browser roots carries its own `tsconfig.json`, so

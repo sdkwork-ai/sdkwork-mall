@@ -106,8 +106,85 @@ class SdkworkMallFlutterMobileShell extends StatelessWidget {
     return MaterialApp(
       title: 'SDKWork 商城',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE93B3D)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFE93B3D),
+          surface: const Color(0xFFF5F6F8),
+        ),
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF5F6F8),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0.5,
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            color: Color(0xFF111827),
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 0,
+          margin: EdgeInsets.zero,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: Color(0xFFECEEF2)),
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFFBFBFD),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFECEEF2)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFECEEF2)),
+          ),
+        ),
+        listTileTheme: const ListTileThemeData(
+          iconColor: Color(0xFF6B7280),
+        ),
+        dividerTheme: const DividerThemeData(
+          color: Color(0xFFECEEF2),
+          thickness: 0.6,
+          space: 1,
+        ),
+        chipTheme: ChipThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
+          side: const BorderSide(color: Color(0xFFECEEF2)),
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
       onGenerateRoute: (settings) {
         final builder = buildSdkworkMallRoutes()[settings.name];
