@@ -17,7 +17,7 @@
           <view class="mp-muted">订单号 {{item.id}}</view>
         </view>
         <view class="review-side">
-          <view class="mp-price" wx:if="{{item.amountText}}">¥{{item.amountText}}</view>
+          <view class="mp-price" wx:if="{{item.amountText}}">{{item.amountText}}</view>
           <button class="mp-btn mp-btn-ghost review-action" bindtap="goAfterSales" data-id="{{item.id}}">申请售后</button>
         </view>
       </view>

@@ -38,7 +38,7 @@
       <view class="inv-row" wx:for="{{invoices}}" wx:key="id">
         <view class="inv-row-body">
           <view class="inv-row-title">{{item.title}}</view>
-          <view class="mp-price" wx:if="{{item.amountText}}">¥{{item.amountText}}</view>
+          <view class="mp-price" wx:if="{{item.amountText}}">{{item.amountText}}</view>
         </view>
         <view class="mp-muted">{{item.statusText}}</view>
       </view>

@@ -22,7 +22,7 @@
           <view class="ledger-summary">{{item.summary}}</view>
           <view class="mp-muted" wx:if="{{item.occurredText}}">{{item.occurredText}}</view>
         </view>
-        <view class="mp-price" wx:if="{{item.amountText}}">¥{{item.amountText}}</view>
+        <view class="mp-price" wx:if="{{item.amountText}}">{{item.amountText}}</view>
       </view>
     </view>
 

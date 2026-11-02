@@ -35,6 +35,10 @@ Page({
     void this.load();
   },
 
+  onPullDownRefresh() {
+    void this.load().finally(() => wx.stopPullDownRefresh());
+  },
+
   async load() {
     try {
       const snapshot = await getSecuritySnapshot();
