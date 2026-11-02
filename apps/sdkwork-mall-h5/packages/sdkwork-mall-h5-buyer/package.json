@@ -55,11 +55,6 @@
       "import": "./src/favorites-service.ts",
       "default": "./src/favorites-service.ts"
     },
-    "./messages-page": {
-      "types": "./src/pages/MessagesPage.tsx",
-      "import": "./src/pages/MessagesPage.tsx",
-      "default": "./src/pages/MessagesPage.tsx"
-    },
     "./addresses-service": {
       "types": "./src/addresses-service.ts",
       "import": "./src/addresses-service.ts",
