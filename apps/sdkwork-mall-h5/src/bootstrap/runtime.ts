@@ -1,9 +1,7 @@
 import type { SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
-import { createDriveUploadImageService } from "@sdkwork/drive-upload-image-core";
 import { configureMallH5AfterSalesMediaRuntimePort } from "@sdkwork/mall-h5-buyer";
 
 import { configureSdkworkMallH5Providers } from "./commerceProviders";
-import { createSdkworkMallH5DriveAppClient } from "./driveClient";
 import {
   resolveSdkworkMallH5RuntimeConfig,
   type SdkworkMallH5RuntimeConfig,
@@ -54,7 +52,7 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
     iamRuntime,
     sdkClients,
   });
-  configureSdkworkMallH5ImProviders({ config, sdkClients });
+  configureSdkworkMallH5ImProviders({ config, tokenManager });
   configureSdkworkMallH5AfterSalesMediaPort(config, tokenManager);
 
   return {
@@ -73,21 +71,25 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
  * The media port binds the declared after-sales evidence intent
  * (`SDKWORK_MALL_H5_AFTER_SALES_EVIDENCE_UPLOAD`) to the composed drive
  * uploader; evidence snapshot items carry the returned `drive://` reference
- * next to their declared file metadata. Hosts that never compose this port
- * get a refuse-with-hint picker instead of a local-only fake upload.
+ * next to their declared file metadata. The drive client and image uploader are
+ * imported on first upload so they stay out of the first-load bundle.
  */
 function configureSdkworkMallH5AfterSalesMediaPort(
   config: SdkworkMallH5RuntimeConfig,
   tokenManager: ReturnType<typeof createSdkworkMallH5SessionTokenManager>,
 ): void {
-  const driveClient = createSdkworkMallH5DriveAppClient(config, tokenManager);
-  const imageService = createDriveUploadImageService({
-    uploader: driveClient.uploader,
-    declaration: SDKWORK_MALL_H5_AFTER_SALES_EVIDENCE_UPLOAD,
-  });
-
   configureMallH5AfterSalesMediaRuntimePort({
     async uploadImages(files: File[]): Promise<string[]> {
+      const [{ createDriveUploadImageService }, { createSdkworkMallH5DriveAppClient }] =
+        await Promise.all([
+          import("@sdkwork/drive-upload-image-core"),
+          import("./driveClient"),
+        ]);
+      const driveClient = createSdkworkMallH5DriveAppClient(config, tokenManager);
+      const imageService = createDriveUploadImageService({
+        uploader: driveClient.uploader,
+        declaration: SDKWORK_MALL_H5_AFTER_SALES_EVIDENCE_UPLOAD,
+      });
       const references: string[] = [];
       for (const file of files) {
         const uploaded = await imageService.upload({

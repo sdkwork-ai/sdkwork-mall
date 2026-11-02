@@ -10,7 +10,7 @@ import { normalizeSdkworkApiBaseUrl } from "@sdkwork/runtime-bootstrap";
 import { createClient as createAccountAppClient } from "@sdkwork/account-app-sdk";
 import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk/domains";
 import { createClient as createCommerceBackendClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
-import { createClient as createImAppClient } from "@sdkwork/im-app-sdk";
+import type { SdkworkAppClient as SdkworkImAppClient } from "@sdkwork/im-app-sdk";
 import { createClient as createMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import { createClient as createOrderAppClient } from "@sdkwork/order-app-sdk";
 import { createClient as createPaymentAppClient } from "@sdkwork/payment-app-sdk";
@@ -134,9 +134,6 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
       })
     : undefined;
   // IM 的生成客户端不暴露 setTokenManager；会话凭据通过 config 传入。
-  const imAppClient = createImAppClient(
-    createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.im),
-  );
   const membershipAppClient = createMembershipAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.membership),
   );
@@ -166,7 +163,6 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
       : undefined,
     commerceAppClient,
     commerceBackendClient,
-    imAppClient,
     membershipAppClient,
     orderAppClient,
     paymentAppClient,
@@ -185,6 +181,29 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
       backendAdmin: ["sdkwork-commerce-backend-sdk", "sdkwork-iam-backend-sdk"],
     },
   };
+}
+
+/**
+ * Loads the IM notifications client on demand.
+ *
+ * The IM plane is only needed by the chat and notice surfaces, which are lazy
+ * routes, so the client is code-split out of the first-load bundle and created
+ * on the first notification call.
+ */
+export async function loadSdkworkMallH5ImAppClient(
+  config: SdkworkMallH5RuntimeConfig,
+  tokenManager: ReturnType<typeof createSdkworkMallH5SessionTokenManager>,
+): Promise<SdkworkImAppClient> {
+  const { createClient } = await import("@sdkwork/im-app-sdk");
+  return createClient({
+    authMode: "dual-token",
+    baseUrl: normalizeGeneratedSdkBaseUrl(
+      resolveDependencyAppApiBaseUrl(config, DOMAIN_APP_SDK_FAMILY_IDS.im),
+      APP_API_PREFIX,
+    ),
+    platform: "pc",
+    tokenManager,
+  });
 }
 
 function createAppbaseGeneratedAppClient(

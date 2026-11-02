@@ -1,7 +1,6 @@
 import type { SdkworkAccountAppClient } from "@sdkwork/account-app-sdk";
 import type { SdkworkCloudRouterDomainsClient } from "@sdkwork/cloudrouter-app-sdk/domains";
 import type { SdkworkCloudRouterBackendDomainsClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
-import type { SdkworkAppClient as SdkworkImAppClient } from "@sdkwork/im-app-sdk";
 import type { SdkworkAppClient as SdkworkMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import type { SdkworkAppClient as SdkworkOrderAppClient } from "@sdkwork/order-app-sdk";
 import type { SdkworkAppClient as SdkworkPaymentAppClient } from "@sdkwork/payment-app-sdk";
@@ -19,7 +18,6 @@ export interface SdkworkMallH5SdkClientInventory {
   commerceBackendClient?: SdkworkCloudRouterBackendDomainsClient & {
     setTokenManager(manager: unknown): unknown;
   };
-  imAppClient: SdkworkImAppClient;
   membershipAppClient: SdkworkMembershipAppClient;
   orderAppClient: SdkworkOrderAppClient;
   paymentAppClient: SdkworkPaymentAppClient;

@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 98/98 pass
+pnpm test:node                                                     → 100/100 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -192,6 +192,7 @@ pnpm test:node                                                     → 98/98 pas
   (tests/contract/verify-membership-purchase.test.mjs             → 4/4)
   (tests/contract/verify-payment-channel-wiring.test.mjs           → 4/4)
   (tests/contract/verify-notifications-feed.test.mjs               → 4/4)
+  (tests/contract/verify-first-load-split.test.mjs                 → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -627,6 +628,25 @@ Three roots now carry an explicit visual layer instead of page-local ad-hoc styl
 The membership empty state copy was also corrected on H5 ("方案即将上线，敬请期待")
 to match the mini program and Flutter ("暂无可选方案"), since membership purchase
 has shipped on every root.
+
+### 6.1.26 First-load split (H5)
+
+The H5 bootstrap used to import the IM notifications client and the drive
+uploader statically even though both are only reachable from lazy routes (chat,
+notices, after-sales evidence). That pulled their SDK families into the entry
+chunk and delayed first paint.
+
+- `iamRuntime` now exposes `loadSdkworkMallH5ImAppClient`, which dynamic-imports
+  `@sdkwork/im-app-sdk` on first notification call.
+- `imProviders` satisfies the notifications port with async methods that await
+  that client, so the port contract is unchanged for pages.
+- the after-sales media port imports `@sdkwork/drive-upload-image-core` and the
+  drive client on first upload.
+- the SDK inventory no longer carries `imAppClient`; the IM family stays declared
+  in the family list because the root still consumes it.
+
+Measured dev build entry chunk: **864.3 KB → 729.7 KB raw** (gzip **186.0 KB →
+158.9 KB**). `tests/contract/verify-first-load-split.test.mjs` pins the split.
 
 ### 6.2 Per-package typecheck
 
