@@ -412,6 +412,75 @@ test("shared copy stays byte-identical across the roots that ship it", () => {
   }
 });
 
+test("mini-program and Flutter expose the canonical route identity of every capability", () => {
+  // PC and H5 carry route ids in their route contributions; the mobile roots
+  // used to carry only physical paths, which made "route identity is aligned
+  // across clients" unverifiable for half the product. Both now publish a
+  // capability registry keyed by the same canonical route id.
+  const miniProgramRegistry = readCapabilityRegistry("miniProgram");
+  const flutterRegistry = readCapabilityRegistry("flutter");
+
+  for (const capability of contract.capabilities) {
+    const mpImplementation = capability.implementations.miniProgram;
+    if (mpImplementation && !mpImplementation.fusedInto) {
+      const entry = miniProgramRegistry.get(capability.canonicalRouteId);
+      assert.ok(
+        entry,
+        `${capability.id}: mini-program capability registry is missing ${capability.canonicalRouteId}`,
+      );
+      assert.equal(
+        entry.target,
+        mpImplementation.page,
+        `${capability.id}: mini-program registry target must match the contract page`,
+      );
+    }
+
+    const flutterImplementation = capability.implementations.flutter;
+    if (flutterImplementation?.route && !flutterImplementation.fusedInto) {
+      const entry = flutterRegistry.get(capability.canonicalRouteId);
+      assert.ok(
+        entry,
+        `${capability.id}: Flutter capability registry is missing ${capability.canonicalRouteId}`,
+      );
+      assert.equal(
+        entry.target,
+        flutterImplementation.route,
+        `${capability.id}: Flutter registry target must match the contract route`,
+      );
+    }
+  }
+
+  const documentedRouteIds = new Set(
+    contract.capabilities.map((capability) => capability.canonicalRouteId),
+  );
+  for (const [routeId, entry] of [...miniProgramRegistry, ...flutterRegistry]) {
+    assert.ok(
+      documentedRouteIds.has(routeId),
+      `${entry.platform} capability registry declares unknown route id ${routeId}`,
+    );
+  }
+});
+
+function readCapabilityRegistry(platform) {
+  const registry =
+    platform === "miniProgram"
+      ? "apps/sdkwork-mall-mini-program/src/routes/capabilities.ts"
+      : "apps/sdkwork-mall-flutter-mobile/lib/routes/capability_routes.dart";
+  const source = readText(registry);
+  const entries = new Map();
+  const pattern =
+    platform === "miniProgram"
+      ? /\{ routeId: "([^"]+)", page: "([^"]+)" \}/gu
+      : /SdkworkMallCapabilityRoute\(\s*routeId:\s*'([^']+)',\s*path:\s*'([^']+)',?\s*\)/gu;
+  for (const match of source.matchAll(pattern)) {
+    const routeId = match[1];
+    assert.ok(!entries.has(routeId), `${platform} capability registry repeats route id ${routeId}`);
+    entries.set(routeId, { platform, target: match[2] });
+  }
+  assert.ok(entries.size > 0, `${platform} capability registry must not be empty`);
+  return entries;
+}
+
 test("platform roots referenced by the contract exist", () => {
   for (const [platform, configuration] of Object.entries(contract.platforms)) {
     const rootPath = toAbsolute(configuration.root);

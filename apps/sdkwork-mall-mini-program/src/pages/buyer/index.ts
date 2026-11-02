@@ -1,4 +1,5 @@
 import { type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getOrderStatistics } from "../../services/order-service";
 import { isLoggedIn, clearSession } from "../../services/session";
 
@@ -10,37 +11,49 @@ const ORDER_ENTRIES: Array<{ status: string; label: string; count: string | numb
   { status: "COMPLETED", label: "已完成", count: "" },
 ];
 
-/** 我的资产：钱包 / 积分 / 会员 — rows with chevrons (parity with the H5
- * asset list and the Flutter 我的资产 card). */
-const ASSET_LINKS: Array<{ label: string; path: string }> = [
-  { label: "钱包", path: "/pages/wallet/index" },
-  { label: "我的积分", path: "/pages/points/index" },
-  { label: "会员中心", path: "/pages/membership/index" },
+/**
+ * 买家中心入口一律按能力路由 id 声明，页面路径由
+ * `routes/capabilities.ts` 统一解析：改页面路径只需改注册表，
+ * 且与 PC / H5 / Flutter 共用同一套 route id。
+ */
+const ASSET_LINKS: Array<{ label: string; capability: string }> = [
+  { label: "钱包", capability: "buyer.mall.wallet" },
+  { label: "我的积分", capability: "buyer.mall.points" },
+  { label: "会员中心", capability: "buyer.mall.membership" },
 ];
 
-/** 常用服务：clean 2×4 grid. */
-const QUICK_LINKS: Array<{ label: string; path: string }> = [
-  { label: "我的收藏", path: "/pages/favorites/index" },
-  { label: "浏览足迹", path: "/pages/footprint/index" },
-  { label: "地址管理", path: "/pages/address/index" },
-  { label: "领券中心", path: "/pages/coupons/index" },
-  { label: "售后中心", path: "/pages/aftersales/index" },
-  { label: "发票", path: "/pages/invoices/index" },
-  { label: "消息中心", path: "/pages/messages/index" },
-  { label: "客服会话", path: "/pages/chats/index" },
+const QUICK_LINKS: Array<{ label: string; capability: string }> = [
+  { label: "我的收藏", capability: "buyer.mall.favorites" },
+  { label: "浏览足迹", capability: "buyer.mall.footprint" },
+  { label: "地址管理", capability: "buyer.mall.addresses" },
+  { label: "领券中心", capability: "buyer.mall.coupons" },
+  { label: "售后中心", capability: "buyer.mall.after-sales" },
+  { label: "发票", capability: "buyer.mall.invoices" },
+  { label: "消息中心", capability: "buyer.mall.messages" },
+  { label: "客服会话", capability: "buyer.mall.im.chats" },
 ];
 
-const OTHER_LINKS: Array<{ label: string; path: string }> = [
-  { label: "活动会场", path: "/pages/activity/index" },
-  { label: "设置", path: "/pages/settings/index" },
+/** 账户区入口（含设置）同样走能力路由。 */
+const ACCOUNT_LINKS: Array<{ label: string; capability: string }> = [
+  { label: "个人资料", capability: "buyer.mall.profile" },
+  { label: "我的评价", capability: "buyer.mall.reviews" },
+  { label: "礼品卡与红包", capability: "buyer.mall.gift-cards" },
+  { label: "账户与安全", capability: "buyer.mall.security" },
+  { label: "设置", capability: "buyer.mall.settings" },
+  { label: "帮助中心", capability: "storefront.mall.help" },
+];
+
+const OTHER_LINKS: Array<{ label: string; capability: string }> = [
+  { label: "活动会场", capability: "storefront.mall.activity-list" },
 ];
 
 interface BuyerData {
   loggedIn: boolean;
   orderEntries: Array<{ status: string; label: string; count: string | number }>;
-  assetLinks: Array<{ label: string; path: string }>;
-  quickLinks: Array<{ label: string; path: string }>;
-  otherLinks: Array<{ label: string; path: string }>;
+  assetLinks: Array<{ label: string; capability: string }>;
+  quickLinks: Array<{ label: string; capability: string }>;
+  accountLinks: Array<{ label: string; capability: string }>;
+  otherLinks: Array<{ label: string; capability: string }>;
 }
 
 Page({
@@ -49,6 +62,7 @@ Page({
     orderEntries: ORDER_ENTRIES,
     assetLinks: ASSET_LINKS,
     quickLinks: QUICK_LINKS,
+    accountLinks: ACCOUNT_LINKS,
     otherLinks: OTHER_LINKS,
   } as BuyerData,
 
@@ -97,17 +111,20 @@ Page({
 
   goOrderEntry(event: MpTapEvent) {
     const status = String(event.currentTarget.dataset.status ?? "");
-    const query = status && status !== "all" ? `?status=${status}` : "";
-    wx.navigateTo({ url: `/pages/orders/index${query}` });
+    wx.navigateTo({
+      url: mpCapabilityUrl(
+        "buyer.mall.orders",
+        status && status !== "all" ? { status } : undefined,
+      ),
+    });
   },
 
-  goQuickLink(event: MpTapEvent) {
-    const path = String(event.currentTarget.dataset.path ?? "");
-    if (path === "home") {
-      wx.switchTab({ url: "/pages/home/index" });
+  goCapability(event: MpTapEvent) {
+    const capability = String(event.currentTarget.dataset.capability ?? "");
+    if (!capability) {
       return;
     }
-    wx.navigateTo({ url: path });
+    wx.navigateTo({ url: mpCapabilityUrl(capability) });
   },
 
   goLogin() {

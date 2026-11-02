@@ -37,8 +37,8 @@
         class="buyer-asset-row"
         wx:for="{{assetLinks}}"
         wx:key="label"
-        bindtap="goQuickLink"
-        data-path="{{item.path}}"
+        bindtap="goCapability"
+        data-capability="{{item.capability}}"
       >
         <view class="buyer-asset-label">{{item.label}}</view>
         <view class="buyer-asset-chevron">›</view>
@@ -53,8 +53,8 @@
         class="buyer-quick-item"
         wx:for="{{quickLinks}}"
         wx:key="label"
-        bindtap="goQuickLink"
-        data-path="{{item.path}}"
+        bindtap="goCapability"
+        data-capability="{{item.capability}}"
       >{{item.label}}</view>
     </view>
   </view>
@@ -62,24 +62,14 @@
   <view class="mp-card">
     <view class="mp-card-title">账户</view>
     <view class="buyer-asset-list">
-      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/profile/index">
-        <view class="buyer-asset-label">个人资料</view>
-        <view class="buyer-asset-chevron">›</view>
-      </view>
-      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/reviews/index">
-        <view class="buyer-asset-label">我的评价</view>
-        <view class="buyer-asset-chevron">›</view>
-      </view>
-      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/gift-cards/index">
-        <view class="buyer-asset-label">礼品卡与红包</view>
-        <view class="buyer-asset-chevron">›</view>
-      </view>
-      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/security/index">
-        <view class="buyer-asset-label">账户与安全</view>
-        <view class="buyer-asset-chevron">›</view>
-      </view>
-      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/help/index">
-        <view class="buyer-asset-label">帮助中心</view>
+      <view
+        class="buyer-asset-row"
+        wx:for="{{accountLinks}}"
+        wx:key="label"
+        bindtap="goCapability"
+        data-capability="{{item.capability}}"
+      >
+        <view class="buyer-asset-label">{{item.label}}</view>
         <view class="buyer-asset-chevron">›</view>
       </view>
     </view>
@@ -92,8 +82,8 @@
         class="buyer-quick-item"
         wx:for="{{otherLinks}}"
         wx:key="label"
-        bindtap="goQuickLink"
-        data-path="{{item.path}}"
+        bindtap="goCapability"
+        data-capability="{{item.capability}}"
       >{{item.label}}</view>
     </view>
   </view>

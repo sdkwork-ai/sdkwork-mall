@@ -26,9 +26,15 @@ import '../pages/product_page.dart';
 import '../pages/reviews_page.dart';
 import '../pages/search_page.dart';
 import '../pages/settings_and_invoices.dart';
+import '../routes/capability_routes.dart';
 
 /// Application routes for the commerce flow.
-Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
+///
+/// The named-route table is validated against the capability route registry in
+/// debug builds: a capability whose page builder disappears fails fast instead
+/// of becoming an unreachable surface.
+Map<String, WidgetBuilder> buildSdkworkMallRoutes() {
+  final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/login': (context) => const SdkworkLoginPage(),
       '/search': (context) => const SdkworkSearchPage(),
       '/product': (context) => SdkworkProductPage(
@@ -83,6 +89,10 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
       '/profile': (context) => const SdkworkProfilePage(),
       '/security': (context) => const SdkworkSecurityPage(),
     };
+
+  assertSdkworkMallCapabilityRoutes(routes.keys);
+  return routes;
+}
 
 Object? _routeArguments(BuildContext context) =>
     ModalRoute.of(context)?.settings.arguments;

@@ -41,6 +41,7 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Drift guard (Flutter) | same test | A route in `buildSdkworkMallRoutes()` is not represented |
 | Navigation evidence | same test | A capability page exists but nothing links to it (orphan screen) |
 | Router mounting | same test | A route is declared in `routes.ts` but the PC/H5 router never mounts it (`case "<id>"` / `path="<path>"` missing) |
+| Route identity (mobile) | same test | A capability's canonical route id is missing from `mini-program/src/routes/capabilities.ts` or `flutter-mobile/lib/routes/capability_routes.dart`, or points at a different page/path than the contract |
 | Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
 | Title-key convention | same test | A route title key does not follow `<namespace>.routes.<screen>.title` |
 | Shared copy | same test | The upstream notice or buyer-hub label is reworded on one root |
@@ -68,6 +69,12 @@ report. `pnpm report:capability-parity` prints only gaps.
 8. A capability a root deliberately does not ship stays out of that root's
    `requiredOn` **and** carries a `notes` reason; the report lists every such
    asymmetry on each run.
+9. Route identity is carried by all four roots: PC/H5 in route contributions,
+   the mini program in `src/routes/capabilities.ts`, Flutter in
+   `lib/routes/capability_routes.dart`. The mobile registries are the single
+   place a page path is mapped to a capability, so renaming a page means editing
+   the registry — never scattering raw paths through pages. Flutter validates
+   the registry against `buildSdkworkMallRoutes()` in debug builds.
 
 ## 4. Current Parity Status
 
@@ -88,6 +95,12 @@ inventing them per client is exactly the drift this contract prevents.
 Root-scoped capabilities: IM conversations, chat and notices are required on
 H5/mini program/Flutter; login is required on mini program/Flutter because PC
 and H5 delegate authentication to the shared IAM auth gate.
+
+Route identity: all four roots now publish the same canonical route ids — PC/H5
+through route contributions, the mini program through
+`src/routes/capabilities.ts` (the buyer hub navigates by capability id instead
+of raw page paths), and Flutter through `lib/routes/capability_routes.dart`
+(validated against the named-route table in debug builds).
 
 PC-only by design: `admin.*` platform governance, `merchant.*` seller console,
 and the inactive `app.commerce.*` legacy SaaS dashboards.
@@ -132,8 +145,8 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 38/38 pass
-  (tests/contract/verify-mall-capability-parity.test.mjs           → 13/13)
+pnpm test:node                                                     → 39/39 pass
+  (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 14/14)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 4/4
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
