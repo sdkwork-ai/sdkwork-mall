@@ -67,12 +67,14 @@ export function SdkworkInvoiceEditorDialog({
   const [bankAccount, setBankAccount] = useState("");
   const [registerAddress, setRegisterAddress] = useState("");
   const [registerPhone, setRegisterPhone] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
     if (!state.isEditorOpen) {
       return;
     }
 
+    setValidationError("");
     setTitle(editableInvoice?.title ?? "");
     setTitleType(editableInvoice?.titleType ?? "company");
     setInvoiceType(editableInvoice?.type ?? "special");
@@ -90,6 +92,20 @@ export function SdkworkInvoiceEditorDialog({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+
+    // A company invoice is keyed by the 15-20 character unified social credit
+    // code; rejecting a malformed number here avoids an invoice the tax system
+    // refuses after issuance.
+    const normalizedTaxNo = taxNo.trim();
+    if (mode === "create" && titleType === "company" && !normalizedTaxNo) {
+      setValidationError(copy.editor.taxNumberRequired);
+      return;
+    }
+    if (normalizedTaxNo && !/^[A-Z0-9]{15,20}$/.test(normalizedTaxNo)) {
+      setValidationError(copy.editor.taxNumberInvalid);
+      return;
+    }
+    setValidationError("");
 
     if (mode === "create") {
       await controller.createInvoice({
@@ -139,6 +155,12 @@ export function SdkworkInvoiceEditorDialog({
         {state.lastError ? (
           <StatusNotice title={copy.editor.errorTitle} tone="danger">
             {state.lastError}
+          </StatusNotice>
+        ) : null}
+
+        {validationError ? (
+          <StatusNotice title={copy.editor.errorTitle} tone="danger">
+            {validationError}
           </StatusNotice>
         ) : null}
 

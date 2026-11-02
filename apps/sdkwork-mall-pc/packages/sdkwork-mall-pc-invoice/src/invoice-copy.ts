@@ -44,6 +44,8 @@ export interface SdkworkInvoiceMessages {
     editDescription: string;
     editTitle: string;
     errorTitle: string;
+    taxNumberInvalid: string;
+    taxNumberRequired: string;
     fields: {
       bankAccount: string;
       bankName: string;
@@ -240,6 +242,8 @@ const EN_US_MESSAGES: SdkworkInvoiceMessages = {
     editDescription: "Refine draft or failed invoice metadata before submitting it again.",
     editTitle: "Edit invoice",
     errorTitle: "Invoice editor error",
+    taxNumberInvalid: "Enter the 15-20 character unified social credit code.",
+    taxNumberRequired: "A company invoice title needs a tax number.",
     fields: {
       bankAccount: "Bank account",
       bankName: "Bank name",
@@ -401,6 +405,8 @@ const ZH_CN_MESSAGES: SdkworkInvoiceMessages = {
     editDescription: "\u5728\u91cd\u65b0\u63d0\u4ea4\u4e4b\u524d\uff0c\u8865\u5168\u8349\u7a3f\u6216\u5f02\u5e38\u53d1\u7968\u7684\u5143\u6570\u636e\u3002",
     editTitle: "\u7f16\u8f91\u53d1\u7968",
     errorTitle: "\u53d1\u7968\u7f16\u8f91\u5f02\u5e38",
+    taxNumberInvalid: "\u7a0e\u53f7\u683c\u5f0f\u4e0d\u6b63\u786e\uff0815-20 \u4f4d\u5b57\u6bcd\u6216\u6570\u5b57\uff09",
+    taxNumberRequired: "\u4f01\u4e1a\u62ac\u5934\u9700\u8981\u586b\u5199\u7a0e\u53f7",
     fields: {
       bankAccount: "\u5f00\u6237\u8d26\u53f7",
       bankName: "\u5f00\u6237\u94f6\u884c",

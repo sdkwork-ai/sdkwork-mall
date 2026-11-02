@@ -17,6 +17,21 @@ const workspaceRoot = path.resolve(import.meta.dirname, "..", "..");
 
 const ROOTS = [
   {
+    name: "pc",
+    page: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-invoice/src/components/invoice-editor-dialog.tsx",
+    pagePatterns: ["/^[A-Z0-9]{15,20}$/", "copy.editor.taxNumberInvalid"],
+    catalogue: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-invoice/src/invoice-copy.ts",
+    readMessage: (source) => {
+      // The copy module ships English first and zh-CN second (unicode escapes);
+      // the canonical message is the decoded Chinese entry.
+      const matches = [...source.matchAll(/taxNumberInvalid:\s*"((?:[^"\\]|\\.)*)"/gu)];
+      const decoded = matches.map((match) => JSON.parse(`"${match[1]}"`));
+      const chinese = decoded.find((message) => /[\u4e00-\u9fff]/u.test(message));
+      assert.ok(chinese, "PC invoice copy must declare a zh-CN taxNumberInvalid");
+      return chinese;
+    },
+  },
+  {
     name: "h5",
     page: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/InvoicesPage.tsx",
     pagePatterns: ["/^[A-Z0-9]{15,20}$/u", 't("invoices.taxInvalid")'],

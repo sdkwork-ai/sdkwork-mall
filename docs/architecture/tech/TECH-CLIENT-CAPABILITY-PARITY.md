@@ -521,14 +521,16 @@ wiring and the no-literal rule for migrated pages and their WXML templates.
 ### 6.1.20 Invoice tax-number validation
 
 A company invoice is keyed by the 15–20 character unified social credit code.
-Checkout paths rejected malformed codes, but the standalone invoice centres on H5,
-the mini program and Flutter accepted any text, so the merchant received invoices
-the tax system later rejects — a failure the buyer only discovers after issuance.
+Checkout paths rejected malformed codes, but the standalone invoice centres (PC
+editor dialog, H5, mini program, Flutter) accepted any text, so the merchant
+received invoices the tax system later rejects — a failure the buyer only discovers
+after issuance.
 
-All three invoice centres now validate `^[A-Z0-9]{15,20}$` before submitting and
+All four invoice surfaces now validate `^[A-Z0-9]{15,20}$` before submitting and
 surface one shared message (`税号格式不正确（15-20 位字母或数字）`) from their
-respective catalogues. `tests/contract/verify-invoice-tax-validation.test.mjs` pins
-the regex and proves the message stays byte-identical across roots.
+respective catalogues; the PC create form also requires a tax number for company
+titles. `tests/contract/verify-invoice-tax-validation.test.mjs` pins the regex on
+each root and proves the message stays byte-identical.
 
 ### 6.2 Per-package typecheck
 
