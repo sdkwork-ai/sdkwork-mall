@@ -13,11 +13,11 @@ long):
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
-| H5 | none — literal zh-CN | 64 | 536 | 390 (`regions.ts`) |
+| H5 | i18next runtime + `src/i18n/messages.zh-CN.json` (payment-result migrated) | 63 | 527 | 390 (`regions.ts`) |
 | Mini program | none — literal zh-CN | 66 | 375 | 302 (province/city picker data) |
 | Flutter | none — literal zh-CN | 38 | 567 | 230 (province/city picker data) |
 
-2930 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2921 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -81,6 +81,16 @@ mini program: a typed message map loaded once into `app.ts`; Flutter:
 `flutter_localizations` + an ARB-derived message map). Migrate in hotspot order,
 highest first, keeping the existing `sdkwork` prefix conventions.
 
+**S2a — H5 runtime (started).** `apps/sdkwork-mall-h5/src/i18n/index.ts`
+initialises i18next with `initReactI18next` and a zh-CN JSON resource
+(`messages.zh-CN.json`), imported once from `main.tsx`; the default locale is
+unchanged, so no visible copy moved. The payment-result surface is the first
+migrated page: every string now resolves through `t("paymentResult.*")` /
+`t("common.*")`, and `tests/contract/verify-h5-i18n-runtime.test.mjs` proves the
+runtime initialises, every key used by the page exists in the catalogue, and the
+page no longer carries hard-coded user copy. H5's hard-coded count dropped
+536 → 527 and the baseline was refreshed.
+
 **S3 — locale switching and verification.**
 Locale store per root, `Accept-Language` propagation through the transport seams,
 and a pseudo-locale render check in the Flutter visual harness plus a `zh-CN`
@@ -101,5 +111,6 @@ baseline snapshot for H5.
 | Readiness ratchet | `pnpm check:i18n-baseline` — fails when a root adds hard-coded copy; refresh with `pnpm i18n:baseline` |
 | S1a catalogue | `pnpm check:i18n-catalogues` + `tests/contract/verify-i18n-catalogue.test.mjs` |
 | S1b wiring | parity title gate: every root still shows the contract title |
+| S2 H5 runtime | `tests/contract/verify-h5-i18n-runtime.test.mjs` (runtime, key coverage, no literal copy on migrated pages) |
 | S2 per root | existing architecture gates per root, plus catalogue reachability test |
 | S3 locale switch | Flutter visual capture with the pseudo-locale; H5 baseline screenshot |

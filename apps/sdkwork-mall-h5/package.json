@@ -63,9 +63,11 @@
     "@sdkwork/sdk-common": "workspace:*",
     "@sdkwork/ui-pc-react": "workspace:*",
     "@tailwindcss/vite": "^4.2.2",
+    "i18next": "26.3.6",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-i18next": "17.0.11",
     "react-router-dom": "catalog:",
     "tailwindcss": "^4.3.3"
   },

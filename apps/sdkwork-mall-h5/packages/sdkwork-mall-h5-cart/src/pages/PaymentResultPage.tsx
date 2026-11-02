@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 
 import {
@@ -21,6 +22,7 @@ function isPaidPayment(info: Record<string, unknown> | null): boolean {
 }
 
 export function SdkworkMallH5PaymentResultPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const status = searchParams.get("status") ?? "unknown";
   const orderId = searchParams.get("orderId");
@@ -107,7 +109,7 @@ export function SdkworkMallH5PaymentResultPage() {
         || (typeof paymentInfo?.paymentMethod === "string" ? paymentInfo.paymentMethod : "");
       const paymentMethod = knownMethod || (await listMallH5PaymentMethods())[0]?.code;
       if (!paymentMethod) {
-        setMessage("暂无可用支付方式，请稍后再试。");
+        setMessage(t("paymentResult.noPaymentMethod"));
         return;
       }
       const nextPaymentId = await retryMallH5OrderPayment(orderId, paymentMethod);
@@ -117,34 +119,42 @@ export function SdkworkMallH5PaymentResultPage() {
         );
         return;
       }
-      setMessage("支付重试已发起，请稍后查看订单状态。");
+      setMessage(t("paymentResult.retryPending"));
     } catch (cause: unknown) {
-      setMessage(cause instanceof Error ? cause.message : "支付重试失败，请稍后再试。");
+      setMessage(cause instanceof Error ? cause.message : t("paymentResult.retryFailed"));
     } finally {
       setRetrying(false);
     }
   }
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">查询支付结果...</div>;
+    return <div className="sdk-h5-page sdk-h5-loading">{t("paymentResult.loading")}</div>;
   }
+
+  const titleKey = paid
+    ? "paymentResult.title.success"
+    : pending
+      ? "paymentResult.title.processing"
+      : failed
+        ? "paymentResult.title.failed"
+        : "paymentResult.title.default";
 
   return (
     <div className="sdk-h5-page sdk-h5-payment-result">
       <section className="sdk-h5-payment-hero">
-        <h1>{paid ? "支付成功" : pending ? "支付处理中" : failed ? "支付失败" : "支付结果"}</h1>
-        {orderId ? <p>订单号：{orderId}</p> : null}
-        {paymentId ? <p>支付单号：{paymentId}</p> : null}
+        <h1>{t(titleKey)}</h1>
+        {orderId ? <p>{t("paymentResult.orderNo", { orderId })}</p> : null}
+        {paymentId ? <p>{t("paymentResult.paymentNo", { paymentId })}</p> : null}
       </section>
 
-      {paid ? <div className="sdk-h5-notice sdk-h5-notice-success">支付成功，商家将尽快为您发货。</div> : null}
-      {pending ? <div className="sdk-h5-notice sdk-h5-notice-warning">支付处理中，请稍后在订单列表查看最新状态。</div> : null}
-      {failed ? <div className="sdk-h5-notice sdk-h5-notice-danger">支付未成功，可重新支付或联系客服。</div> : null}
+      {paid ? <div className="sdk-h5-notice sdk-h5-notice-success">{t("paymentResult.notice.success")}</div> : null}
+      {pending ? <div className="sdk-h5-notice sdk-h5-notice-warning">{t("paymentResult.notice.processing")}</div> : null}
+      {failed ? <div className="sdk-h5-notice sdk-h5-notice-danger">{t("paymentResult.notice.failed")}</div> : null}
       {!paid && !failed && pollExhausted ? (
         <div className="sdk-h5-notice sdk-h5-notice-warning">
-          支付结果确认超时，请到订单列表查看最新状态。
+          {t("paymentResult.notice.timeout")}
           <button className="sdk-h5-link-button" onClick={refreshPaymentStatus} type="button">
-            刷新状态
+            {t("paymentResult.refresh")}
           </button>
         </div>
       ) : null}
@@ -158,7 +168,11 @@ export function SdkworkMallH5PaymentResultPage() {
       {message ? <div className="sdk-h5-notice sdk-h5-notice-danger" role="alert">{message}</div> : null}
 
       <div className="sdk-h5-action-row">
-        {orderId ? <Link className="sdk-h5-button sdk-h5-button-secondary" to="/buyer/orders">查看订单</Link> : null}
+        {orderId ? (
+          <Link className="sdk-h5-button sdk-h5-button-secondary" to="/buyer/orders">
+            {t("paymentResult.viewOrders")}
+          </Link>
+        ) : null}
         {orderId && failed ? (
           <button
             className="sdk-h5-button sdk-h5-button-primary"
@@ -166,10 +180,12 @@ export function SdkworkMallH5PaymentResultPage() {
             onClick={() => void handleRetry()}
             type="button"
           >
-            {retrying ? "重试中..." : "重新支付"}
+            {retrying ? t("paymentResult.retrying") : t("paymentResult.retryPay")}
           </button>
         ) : null}
-        <Link className="sdk-h5-button sdk-h5-button-ghost" to="/">继续购物</Link>
+        <Link className="sdk-h5-button sdk-h5-button-ghost" to="/">
+          {t("common.continueShopping")}
+        </Link>
       </div>
     </div>
   );

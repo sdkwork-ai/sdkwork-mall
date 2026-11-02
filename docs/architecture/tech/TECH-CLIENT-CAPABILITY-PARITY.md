@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 76/76 pass
+pnpm test:node                                                     → 79/79 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -185,6 +185,7 @@ pnpm test:node                                                     → 76/76 pas
   (tests/contract/verify-mobile-failure-handling.test.mjs          → 2/2)
   (tests/contract/verify-i18n-readiness.test.mjs                   → 2/2)
   (tests/contract/verify-search-depth.test.mjs                     → 1/1)
+  (tests/contract/verify-h5-i18n-runtime.test.mjs                  → 3/3)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -444,6 +445,20 @@ PC now records each effective keyword newest-first (de-duplicated, capped at ten
 stored under `sdkwork-mall-pc-search-history`), renders them as chips with a
 清空 action, and hides the row when empty. `tests/contract/verify-search-depth.test.mjs`
 pins hot terms plus history on all four roots.
+
+### 6.1.16 H5 i18n runtime
+
+H5 was the last browser root without any i18n mechanism: every string was a
+literal in TSX. It now initialises i18next (`initReactI18next`, zh-CN JSON
+resource) once from `main.tsx`, so copy changes are catalogue diffs and a new
+locale is a resource addition. The payment-result surface is the first migrated
+page — all of its copy resolves through `t("paymentResult.*")` / `t("common.*")`
+with identical zh-CN text, and the H5 hard-coded count dropped 536 → 527 (the
+readiness baseline was refreshed).
+
+`tests/contract/verify-h5-i18n-runtime.test.mjs` proves the runtime initialises,
+every key used by the migrated page exists in the catalogue (a missing key would
+render the identifier itself), and the page carries no hard-coded user copy.
 
 ### 6.2 Per-package typecheck
 

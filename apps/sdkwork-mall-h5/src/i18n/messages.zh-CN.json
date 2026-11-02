@@ -1,0 +1,29 @@
+{
+  "common": {
+    "continueShopping": "继续购物"
+  },
+  "paymentResult": {
+    "loading": "查询支付结果...",
+    "title": {
+      "default": "支付结果",
+      "failed": "支付失败",
+      "processing": "支付处理中",
+      "success": "支付成功"
+    },
+    "orderNo": "订单号：{{orderId}}",
+    "paymentNo": "支付单号：{{paymentId}}",
+    "notice": {
+      "failed": "支付未成功，可重新支付或联系客服。",
+      "processing": "支付处理中，请稍后在订单列表查看最新状态。",
+      "success": "支付成功，商家将尽快为您发货。",
+      "timeout": "支付结果确认超时，请到订单列表查看最新状态。"
+    },
+    "refresh": "刷新状态",
+    "viewOrders": "查看订单",
+    "retryPay": "重新支付",
+    "retrying": "重试中...",
+    "noPaymentMethod": "暂无可用支付方式，请稍后再试。",
+    "retryPending": "支付重试已发起，请稍后查看订单状态。",
+    "retryFailed": "支付重试失败，请稍后再试。"
+  }
+}
