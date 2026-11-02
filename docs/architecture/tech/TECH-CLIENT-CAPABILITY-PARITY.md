@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 71/71 pass
+pnpm test:node                                                     → 73/73 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -182,6 +182,7 @@ pnpm test:node                                                     → 71/71 pas
   (tests/contract/verify-i18n-catalogue.test.mjs                   → 4/4)
   (tests/contract/verify-after-sales-depth.test.mjs                → 1/1)
   (tests/contract/verify-browser-page-titles.test.mjs              → 3/3)
+  (tests/contract/verify-mobile-failure-handling.test.mjs          → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -370,6 +371,23 @@ matched route title (`<page> · SDKWork 商城`) on every navigation, the PC roo
 does the same from its route contributions, and
 `tests/contract/verify-browser-page-titles.test.mjs` pins both plus the shared
 entry-document title.
+
+### 6.1.12 Root-level failure handling (mobile)
+
+A release build has no dev overlay, so an uncaught script error or a failed
+widget build is invisible unless the root installs a handler. The mini program
+declared no `onError`, `onUnhandledRejection` or `onPageNotFound` — a rejected
+fire-and-forget promise vanished and an outdated deep link landed on the
+platform's blank page-not-found screen. Flutter relied on the framework's default
+error widget (a grey box in release) and left async failures outside the widget
+tree unobserved.
+
+The mini-program root now logs uncaught errors and rejections and redirects an
+unknown page to the storefront home capability. Flutter installs
+`FlutterError.onError`, runs under `runZonedGuarded`, and replaces the default
+error widget with the branded `SdkworkFatalErrorView`. The H5/PC roots already
+had route-level error boundaries. `tests/contract/verify-mobile-failure-handling.test.mjs`
+pins both mobile roots.
 
 ### 6.2 Per-package typecheck
 
