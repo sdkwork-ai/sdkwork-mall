@@ -1,4 +1,5 @@
 import { type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   clearFootprint,
   readFootprint,
@@ -39,7 +40,7 @@ Page({
   goProduct(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: `/pages/product/index?id=${id}` });
+      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: id }) });
     }
   },
 

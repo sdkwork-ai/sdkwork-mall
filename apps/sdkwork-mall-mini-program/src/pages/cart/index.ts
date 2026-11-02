@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCartItem, getCart, removeCartItem, updateCartItem } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
 
@@ -177,15 +178,15 @@ Page({
   },
 
   goProduct(event: MpTapEvent) {
-    wx.navigateTo({ url: `/pages/product/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
+    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
   },
 
   goHome() {
-    wx.switchTab({ url: "/pages/home/index" });
+    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
   },
 
   goLogin() {
-    wx.navigateTo({ url: "/pages/login/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("account.login") });
   },
 
   goCheckout() {
@@ -193,7 +194,7 @@ Page({
       this.showToast("请先选择商品");
       return;
     }
-    wx.navigateTo({ url: `/pages/checkout/index?items=${this.data.selectedIds.join(",")}` });
+    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.checkout", { items: this.data.selectedIds.join(",") }) });
   },
 
   showToast(message: string) {

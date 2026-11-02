@@ -128,7 +128,7 @@ Page({
   },
 
   goLogin() {
-    wx.navigateTo({ url: "/pages/login/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("account.login") });
   },
 
   logout() {

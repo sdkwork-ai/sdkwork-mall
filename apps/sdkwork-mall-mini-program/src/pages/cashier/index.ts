@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { listPaymentMethods, payOrder } from "../../services/cart-service";
 
 interface CashierData {
@@ -63,7 +64,7 @@ Page({
       // 真实渠道接入后此处调用 wx.requestPayment 拉起收银台；
       // 当前模拟渠道直接进入支付结果页轮询。
       wx.redirectTo({
-        url: `/pages/payment-result/index?orderId=${orderId}&paymentId=${paymentId}&paymentMethod=${selectedCode}&status=pending`,
+        url: mpCapabilityUrl("storefront.mall.payment-result", { orderId: orderId, paymentId: paymentId, paymentMethod: selectedCode, status: "pending" }),
       });
     } catch (cause) {
       this.setData({
@@ -74,6 +75,6 @@ Page({
   },
 
   cancel() {
-    wx.redirectTo({ url: `/pages/orders/index?status=PENDING_PAYMENT` });
+    wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders", { status: "PENDING_PAYMENT" }) });
   },
 });

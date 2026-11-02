@@ -1,4 +1,5 @@
 import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpAddress, listAddresses } from "../../services/address-service";
 import { type MpCheckoutQuote, createCheckoutQuote, listUserCoupons, submitOrder } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
@@ -58,7 +59,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: "/pages/login/index" });
+      wx.navigateTo({ url: mpCapabilityUrl("account.login") });
       return;
     }
     void this.bootstrap();
@@ -113,7 +114,7 @@ Page({
   },
 
   goAddress() {
-    wx.navigateTo({ url: "/pages/address/index?picker=1" });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.addresses", { picker: "1" }) });
   },
 
   async submit() {
@@ -131,7 +132,7 @@ Page({
         usePoints: this.data.usePoints,
         buyerRemark: this.data.buyerRemark.trim() || undefined,
       });
-      wx.redirectTo({ url: `/pages/cashier/index?orderId=${result.orderId}` });
+      wx.redirectTo({ url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: result.orderId }) });
     } catch (cause) {
       this.showToast(errorMessage(cause, "提交订单失败"));
       this.setData({ busy: false });

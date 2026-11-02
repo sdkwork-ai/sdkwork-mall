@@ -1,4 +1,5 @@
 import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
 import { formatCny } from "../../utils/format";
 
@@ -170,7 +171,7 @@ Page({
   },
 
   goProduct(event: MpTapEvent) {
-    wx.navigateTo({ url: `/pages/product/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
+    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
   },
 
   loadMore() {

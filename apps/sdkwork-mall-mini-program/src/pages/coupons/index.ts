@@ -1,4 +1,5 @@
 import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   listOffers,
   claimCoupon,
@@ -35,7 +36,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: "/pages/login/index" });
+      wx.navigateTo({ url: mpCapabilityUrl("account.login") });
       return;
     }
     this.refresh();

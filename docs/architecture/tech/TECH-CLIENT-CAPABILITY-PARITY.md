@@ -42,6 +42,7 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Navigation evidence | same test | A capability page exists but nothing links to it (orphan screen) |
 | Router mounting | same test | A route is declared in `routes.ts` but the PC/H5 router never mounts it (`case "<id>"` / `path="<path>"` missing) |
 | Route identity (mobile) | same test | A capability's canonical route id is missing from `mini-program/src/routes/capabilities.ts` or `flutter-mobile/lib/routes/capability_routes.dart`, or points at a different page/path than the contract |
+| Mini-program navigation | `apps/sdkwork-mall-mini-program/tests/capability-navigation.test.mjs` | A page module hard-codes `/pages/...`, or the registry and `app.json` disagree, or a tab capability is not classified for `wx.switchTab` |
 | Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
 | Title-key convention | same test | A route title key does not follow `<namespace>.routes.<screen>.title` |
 | Shared copy | same test | The upstream notice or buyer-hub label is reworded on one root |
@@ -98,9 +99,10 @@ and H5 delegate authentication to the shared IAM auth gate.
 
 Route identity: all four roots now publish the same canonical route ids — PC/H5
 through route contributions, the mini program through
-`src/routes/capabilities.ts` (the buyer hub navigates by capability id instead
-of raw page paths), and Flutter through `lib/routes/capability_routes.dart`
-(validated against the named-route table in debug builds).
+`src/routes/capabilities.ts` (every page module navigates via
+`mpCapabilityUrl()`; no page hard-codes a `/pages/...` path any more), and
+Flutter through `lib/routes/capability_routes.dart` (validated against the
+named-route table in debug builds).
 
 PC-only by design: `admin.*` platform governance, `merchant.*` seller console,
 and the inactive `app.commerce.*` legacy SaaS dashboards.
@@ -145,11 +147,12 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 39/39 pass
+pnpm test:node                                                     → 43/43 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 14/14)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 4/4
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
+  (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 4/4
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
 pnpm typecheck:packages                                            → 33 packages, 0 failed
 pnpm test:vitest                                                   → 68 files / 169 tests pass

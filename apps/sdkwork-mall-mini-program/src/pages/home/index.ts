@@ -1,19 +1,29 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import {
+  isMpTabCapability,
+  mpCapabilityUrl,
+} from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
 import { type MpOffer, listOffers } from "../../services/promotion-service";
 import { formatCny } from "../../utils/format";
 
+/**
+ * 首页入口按能力路由声明，路径由 routes/capabilities.ts 解析；
+ * `query` 为可选的跳转参数，与 PC/H5 的查询参数同名。
+ */
 interface HomeBanner {
+  capability: string;
   id: string;
-  title: string;
+  query?: Record<string, string>;
   subtitle: string;
-  link: string;
+  title: string;
 }
 
 interface HomeQuickEntry {
+  capability: string;
   id: string;
   label: string;
-  link: string;
+  query?: Record<string, string>;
 }
 
 type HotProduct = MpProductCard & { priceText: string };
@@ -31,20 +41,20 @@ interface HomeData {
 }
 
 const BANNERS: HomeBanner[] = [
-  { id: "b-quality", title: "品质生活，一站购齐", subtitle: "平台自营与品牌商家", link: "/pages/category/index" },
-  { id: "b-activity", title: "活动会场", subtitle: "大促/秒杀/品牌日", link: "/pages/activity/index" },
-  { id: "b-new", title: "新品首发", subtitle: "每周上新", link: "/pages/search/index?q=new" },
-  { id: "b-coupon", title: "领券中心", subtitle: "领券下单更划算", link: "/pages/coupons/index" },
-  { id: "b-member", title: "会员专区", subtitle: "专属价与积分回馈", link: "/pages/buyer/index" },
+  { id: "b-quality", title: "品质生活，一站购齐", subtitle: "平台自营与品牌商家", capability: "storefront.mall.categories" },
+  { id: "b-activity", title: "活动会场", subtitle: "大促/秒杀/品牌日", capability: "storefront.mall.activity-list" },
+  { id: "b-new", title: "新品首发", subtitle: "每周上新", capability: "storefront.mall.search", query: { q: "new" } },
+  { id: "b-coupon", title: "领券中心", subtitle: "领券下单更划算", capability: "buyer.mall.coupons" },
+  { id: "b-member", title: "会员专区", subtitle: "专属价与积分回馈", capability: "buyer.mall.dashboard" },
 ];
 
 const QUICK_ENTRIES: HomeQuickEntry[] = [
-  { id: "category", label: "分类逛", link: "/pages/category/index" },
-  { id: "activity", label: "活动", link: "/pages/activity/index" },
-  { id: "new", label: "新品", link: "/pages/search/index?q=new" },
-  { id: "hot", label: "热卖", link: "/pages/search/index?sort=sales" },
-  { id: "coupon", label: "领券", link: "/pages/coupons/index" },
-  { id: "orders", label: "订单", link: "/pages/orders/index" },
+  { id: "category", label: "分类逛", capability: "storefront.mall.categories" },
+  { id: "activity", label: "活动", capability: "storefront.mall.activity-list" },
+  { id: "new", label: "新品", capability: "storefront.mall.search", query: { q: "new" } },
+  { id: "hot", label: "热卖", capability: "storefront.mall.search", query: { sort: "sales" } },
+  { id: "coupon", label: "领券", capability: "buyer.mall.coupons" },
+  { id: "orders", label: "订单", capability: "buyer.mall.orders" },
 ];
 
 Page({
@@ -71,27 +81,46 @@ Page({
   },
 
   goQuickEntry(event: MpTapEvent) {
-    const link = String(event.currentTarget.dataset.link ?? "");
-    if (!link) {
+    const capability = String(event.currentTarget.dataset.capability ?? "");
+    if (!capability) {
       return;
     }
-    if (link.indexOf("/pages/") === 0) {
-      wx.navigateTo({
-        url: link,
-        fail() {
-          // tab pages cannot be navigated to with navigateTo
-          wx.switchTab({ url: link });
-        },
-      });
-    }
+    this.openCapability(capability, this.queryFor(capability));
   },
 
   goProduct(event: MpTapEvent) {
-    wx.navigateTo({ url: `/pages/product/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
+    this.openCapability("storefront.mall.product-detail", {
+      id: String(event.currentTarget.dataset.id ?? ""),
+    });
   },
 
   goCategory(event: MpTapEvent) {
-    wx.navigateTo({ url: `/pages/search/index?categoryId=${String(event.currentTarget.dataset.id ?? "")}` });
+    this.openCapability("storefront.mall.search", {
+      categoryId: String(event.currentTarget.dataset.id ?? ""),
+    });
+  },
+
+  /** Banner / 快捷入口自带的查询参数（新品、热卖等入口携带）。 */
+  queryFor(capability: string) {
+    const banner = this.data.banners.find(
+      (entry) => entry.capability === capability && entry.query,
+    );
+    if (banner?.query) {
+      return banner.query;
+    }
+    const quick = this.data.quickEntries.find(
+      (entry) => entry.capability === capability && entry.query,
+    );
+    return quick?.query;
+  },
+
+  openCapability(capability: string, query?: Record<string, string>) {
+    const url = mpCapabilityUrl(capability, query);
+    if (isMpTabCapability(capability)) {
+      wx.switchTab({ url });
+      return;
+    }
+    wx.navigateTo({ url });
   },
 
   async loadHome() {

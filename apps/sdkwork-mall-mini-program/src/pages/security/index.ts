@@ -1,4 +1,5 @@
 import { errorMessage } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   getSecuritySnapshot,
   type MpSecuritySnapshot,
@@ -72,6 +73,6 @@ Page({
   },
 
   goLogin() {
-    wx.navigateTo({ url: "/pages/login/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("account.login") });
   },
 });

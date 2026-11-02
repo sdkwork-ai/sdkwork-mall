@@ -1,4 +1,5 @@
 import { errorMessage, type MpSwiperChangeEvent, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpProductDetail, type MpSku, getProductDetail } from "../../services/catalog-service";
 import { addToCart } from "../../services/cart-service";
 import { isFavorite, recordFootprint, toggleFavorite } from "../../services/favorites-service";
@@ -63,7 +64,7 @@ Page({
     return {
       title: detail ? detail.title : "SDKWork 商城好物推荐",
       imageUrl: this.data.images[0],
-      path: `/pages/product/index?id=${this.data._productId}`,
+      path: mpCapabilityUrl("storefront.mall.product-detail", { id: this.data._productId }),
     };
   },
 
@@ -140,7 +141,7 @@ Page({
   goShop(event: MpTapEvent) {
     const shopId = String(event.currentTarget.dataset.id ?? "");
     if (shopId) {
-      wx.navigateTo({ url: `/pages/shop/index?id=${shopId}` });
+      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.shop", { id: shopId }) });
     }
   },
 
@@ -203,7 +204,7 @@ Page({
       return;
     }
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: "/pages/login/index" });
+      wx.navigateTo({ url: mpCapabilityUrl("account.login") });
       return;
     }
     if (this.data.maxQuantity != null && this.data.quantity > this.data.maxQuantity) {
@@ -218,7 +219,7 @@ Page({
         quantity: this.data.quantity,
       });
       if (goCart) {
-        wx.navigateTo({ url: "/pages/cart/index", fail() { wx.switchTab({ url: "/pages/cart/index" }); } });
+        wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.cart"), fail() { wx.switchTab({ url: mpCapabilityUrl("storefront.mall.cart") }); } });
       } else {
         this.showToast("已加入购物车");
       }

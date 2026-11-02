@@ -1,4 +1,5 @@
 import { clearSession, isLoggedIn } from "../../services/session";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { clearFootprint, readFavorites, removeFavorite } from "../../services/favorites-service";
 
 interface SettingsData {
@@ -70,6 +71,6 @@ Page({
   },
 
   goLogin() {
-    wx.navigateTo({ url: "/pages/login/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("account.login") });
   },
 });

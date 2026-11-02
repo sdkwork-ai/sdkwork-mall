@@ -1,4 +1,5 @@
 import { errorMessage } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getProfile, type MpProfile } from "../../services/profile-service";
 import { isLoggedIn } from "../../services/session";
 
@@ -57,10 +58,10 @@ Page({
   },
 
   goLogin() {
-    wx.navigateTo({ url: "/pages/login/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("account.login") });
   },
 
   goSecurity() {
-    wx.navigateTo({ url: "/pages/security/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.security") });
   },
 });

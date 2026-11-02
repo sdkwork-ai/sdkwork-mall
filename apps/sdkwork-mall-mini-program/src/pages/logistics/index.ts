@@ -1,4 +1,5 @@
 import { errorMessage } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatTime } from "../../utils/format";
 import {
   getOrderLogistics,
@@ -76,7 +77,7 @@ Page({
   goOrders() {
     wx.navigateBack({
       fail() {
-        wx.redirectTo({ url: "/pages/orders/index" });
+        wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders") });
       },
     });
   },

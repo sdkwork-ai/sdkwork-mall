@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatCny, formatTime, statusLabel } from "../../utils/format";
 import {
   listOrders,
@@ -53,7 +54,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: "/pages/login/index" });
+      wx.navigateTo({ url: mpCapabilityUrl("account.login") });
       return;
     }
     this.loadOrders(1);
@@ -108,11 +109,11 @@ Page({
   },
 
   goDetail(event: MpTapEvent) {
-    wx.navigateTo({ url: `/pages/order-detail/index?id=${String(event.currentTarget.dataset.id ?? "")}` });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
   },
 
   goLogistics(event: MpTapEvent) {
-    wx.navigateTo({ url: `/pages/logistics/index?orderId=${String(event.currentTarget.dataset.id ?? "")}` });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: String(event.currentTarget.dataset.id ?? "") }) });
   },
 
   async payOrder(event: MpTapEvent) {
@@ -120,7 +121,7 @@ Page({
     try {
       const paymentId = await payOrder(orderId, "WECHAT");
       wx.redirectTo({
-        url: `/pages/payment-result/index?orderId=${orderId}&paymentId=${paymentId}&status=pending`,
+        url: mpCapabilityUrl("storefront.mall.payment-result", { orderId: orderId, paymentId: paymentId, status: "pending" }),
       });
     } catch (cause) {
       wx.showToast({ title: errorMessage(cause, "发起支付失败"), icon: "none" });

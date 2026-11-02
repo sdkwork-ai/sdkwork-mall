@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { listActivities, type MpActivity } from "../../services/marketing-service";
 
 interface ActivityRow {
@@ -68,7 +69,7 @@ Page({
   goDetail(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: `/pages/activity-detail/index?id=${id}` });
+      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.activity-detail", { id: id }) });
     }
   },
 });

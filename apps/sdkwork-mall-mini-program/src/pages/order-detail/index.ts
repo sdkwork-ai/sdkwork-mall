@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatCny, formatTime, statusLabel } from "../../utils/format";
 import {
   getOrderDetail,
@@ -70,7 +71,7 @@ Page({
   goProduct(event: MpTapEvent) {
     const spuId = String(event.currentTarget.dataset.spu ?? "");
     if (spuId) {
-      wx.navigateTo({ url: `/pages/product/index?id=${spuId}` });
+      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: spuId }) });
     }
   },
 
@@ -79,7 +80,7 @@ Page({
       const paymentMethod = this.data.detail?.paymentMethod || "WECHAT";
       const paymentId = await payOrder(this.data._orderId, paymentMethod);
       wx.redirectTo({
-        url: `/pages/payment-result/index?orderId=${this.data._orderId}&paymentId=${paymentId}&status=pending`,
+        url: mpCapabilityUrl("storefront.mall.payment-result", { orderId: this.data._orderId, paymentId: paymentId, status: "pending" }),
       });
     } catch (cause) {
       wx.showToast({ title: errorMessage(cause, "发起支付失败"), icon: "none" });
@@ -97,11 +98,11 @@ Page({
   },
 
   goAfterSales() {
-    wx.navigateTo({ url: `/pages/aftersales/index?orderId=${this.data._orderId}` });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.after-sales", { orderId: this.data._orderId }) });
   },
 
   goLogistics() {
-    wx.navigateTo({ url: `/pages/logistics/index?orderId=${this.data._orderId}` });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: this.data._orderId }) });
   },
 
   async confirmReceipt() {
@@ -117,7 +118,7 @@ Page({
   goOrders() {
     wx.navigateBack({
       fail() {
-        wx.redirectTo({ url: "/pages/orders/index" });
+        wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders") });
       },
     });
   },

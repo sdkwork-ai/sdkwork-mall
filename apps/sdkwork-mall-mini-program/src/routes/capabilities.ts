@@ -79,3 +79,18 @@ export function mpCapabilityUrl(
     .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(String((query ?? {})[key]))}`);
   return `/${route.page}${pairs.length > 0 ? `?${pairs.join("&")}` : ""}`;
 }
+
+/**
+ * Tab destinations. `wx.navigateTo` cannot open a tabBar page, so callers must
+ * use `wx.switchTab` for these capabilities.
+ */
+export const MP_TAB_CAPABILITY_ROUTES: readonly string[] = [
+  "storefront.mall.home",
+  "storefront.mall.categories",
+  "storefront.mall.cart",
+  "buyer.mall.dashboard",
+];
+
+export function isMpTabCapability(routeId: string): boolean {
+  return MP_TAB_CAPABILITY_ROUTES.indexOf(routeId) >= 0;
+}

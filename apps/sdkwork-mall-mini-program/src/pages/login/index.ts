@@ -1,4 +1,5 @@
 import { errorMessage, type MpInputEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { loginWithPassword } from "../../services/auth-service";
 import { getToken, setToken, clearSession } from "../../services/session";
 
@@ -53,7 +54,7 @@ Page({
       await loginWithPassword(account, password);
       this.setData({ busy: false });
       wx.showToast({ title: "登录成功", icon: "success" });
-      setTimeout(() => wx.navigateBack({ fail() { wx.switchTab({ url: "/pages/buyer/index" }); } }), 600);
+      setTimeout(() => wx.navigateBack({ fail() { wx.switchTab({ url: mpCapabilityUrl("buyer.mall.dashboard") }); } }), 600);
     } catch (cause) {
       this.setData({ busy: false, error: errorMessage(cause, "登录失败") });
     }
@@ -67,7 +68,7 @@ Page({
     }
     setToken(token);
     wx.showToast({ title: "登录成功", icon: "success" });
-    setTimeout(() => wx.navigateBack({ fail() { wx.switchTab({ url: "/pages/buyer/index" }); } }), 600);
+    setTimeout(() => wx.navigateBack({ fail() { wx.switchTab({ url: mpCapabilityUrl("buyer.mall.dashboard") }); } }), 600);
   },
 
   logout() {

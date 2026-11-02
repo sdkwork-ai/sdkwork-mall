@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   listChatConversations,
   type MpChatConversation,
@@ -61,11 +62,11 @@ Page({
   goChat(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: `/pages/chat/index?id=${id}` });
+      wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.chat", { id: id }) });
     }
   },
 
   goNotices() {
-    wx.navigateTo({ url: "/pages/notices/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.notices") });
   },
 });

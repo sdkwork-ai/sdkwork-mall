@@ -1,4 +1,5 @@
 import { type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 
 interface HelpSection {
   items: string[];
@@ -6,17 +7,17 @@ interface HelpSection {
 }
 
 interface HelpQuickLink {
+  capability: string;
   label: string;
-  path: string;
 }
 
 const QUICK_LINKS: HelpQuickLink[] = [
-  { label: "订单查询", path: "/pages/orders/index" },
-  { label: "售后服务", path: "/pages/aftersales/index" },
-  { label: "发票开具", path: "/pages/invoices/index" },
-  { label: "消息通知", path: "/pages/messages/index" },
-  { label: "礼品卡", path: "/pages/gift-cards/index" },
-  { label: "账户安全", path: "/pages/security/index" },
+  { label: "订单查询", capability: "buyer.mall.orders" },
+  { label: "售后服务", capability: "buyer.mall.after-sales" },
+  { label: "发票开具", capability: "buyer.mall.invoices" },
+  { label: "消息通知", capability: "buyer.mall.messages" },
+  { label: "礼品卡", capability: "buyer.mall.gift-cards" },
+  { label: "账户安全", capability: "buyer.mall.security" },
 ];
 
 const HELP_SECTIONS: HelpSection[] = [
@@ -62,13 +63,13 @@ Page({
   },
 
   goQuickLink(event: MpTapEvent) {
-    const path = String(event.currentTarget.dataset.path ?? "");
-    if (path) {
-      wx.navigateTo({ url: path });
+    const capability = String(event.currentTarget.dataset.capability ?? "");
+    if (capability) {
+      wx.navigateTo({ url: mpCapabilityUrl(capability) });
     }
   },
 
   goChats() {
-    wx.navigateTo({ url: "/pages/chats/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.chats") });
   },
 });

@@ -10,9 +10,9 @@
       <view
         class="help-quick-item"
         wx:for="{{quickLinks}}"
-        wx:key="path"
+        wx:key="capability"
         bindtap="goQuickLink"
-        data-path="{{item.path}}"
+        data-capability="{{item.capability}}"
       >{{item.label}}</view>
     </view>
   </view>

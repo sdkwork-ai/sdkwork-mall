@@ -1,5 +1,5 @@
 <view class="page-home">
-  <view class="home-search" bindtap="goQuickEntry" data-link="/pages/search/index">
+  <view class="home-search" bindtap="goQuickEntry" data-capability="storefront.mall.search">
     <view class="home-search-box">搜索商品 / 品牌 / 店铺</view>
   </view>
 
@@ -18,7 +18,7 @@
       wx:for="{{quickEntries}}"
       wx:key="id"
       bindtap="goQuickEntry"
-      data-link="{{item.link}}"
+      data-capability="{{item.capability}}"
     >{{item.label}}</view>
   </view>
 

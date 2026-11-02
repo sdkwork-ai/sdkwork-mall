@@ -1,4 +1,5 @@
 import { errorMessage, type MpInputEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   listChatMessages,
   markChatRead,
@@ -36,7 +37,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: "/pages/login/index" });
+      wx.navigateTo({ url: mpCapabilityUrl("account.login") });
       return;
     }
     void this.refresh();

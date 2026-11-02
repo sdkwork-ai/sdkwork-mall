@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatCny } from "../../utils/format";
 import {
   listPendingReviewOrders,
@@ -50,18 +51,18 @@ Page({
   goOrder(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: `/pages/order-detail/index?orderId=${id}` });
+      wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.detail", { orderId: id }) });
     }
   },
 
   goAfterSales(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     wx.navigateTo({
-      url: id ? `/pages/aftersales/index?orderId=${id}` : "/pages/aftersales/index",
+      url: id ? mpCapabilityUrl("buyer.mall.after-sales", { orderId: id }) : mpCapabilityUrl("buyer.mall.after-sales"),
     });
   },
 
   goOrders() {
-    wx.navigateTo({ url: "/pages/orders/index" });
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders") });
   },
 });

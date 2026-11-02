@@ -42,3 +42,12 @@
   `http://127.0.0.1:3900/app/v3/api` (repo-root
   `scripts/dev/mock-commerce-gateway.mjs`) and enable "不校验合法域名" in
   DevTools.
+- 2026-11-02 (user-directed): the mini program now carries the same route
+  identity as PC/H5/Flutter. `src/routes/capabilities.ts` is the only place that
+  maps a capability route id (`buyer.mall.orders`, `storefront.mall.product-detail`,
+  …) to a physical page path, and every page navigates through
+  `mpCapabilityUrl()`; `MP_TAB_CAPABILITY_ROUTES` marks the tabBar destinations
+  so callers use `wx.switchTab` instead of `wx.navigateTo`. The buyer hub and the
+  home/help entry tables were migrated from hard-coded `/pages/...` strings, and
+  `tests/capability-navigation.test.mjs` now fails if any page module hard-codes a
+  page path again or if the registry and `app.json` disagree.

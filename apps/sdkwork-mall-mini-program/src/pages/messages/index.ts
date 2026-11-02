@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatTime } from "../../utils/format";
 import { listMessageRows, type MpMessageRow } from "../../services/messages-service";
 
@@ -32,7 +33,7 @@ Page({
         rows: rows.map((row) => ({
           ...row,
           timeText: row.occurredAt ? formatTime(row.occurredAt) : "",
-          targetUrl: row.type === "order" ? "/pages/orders/index" : "/pages/aftersales/index",
+          targetUrl: row.type === "order" ? mpCapabilityUrl("buyer.mall.orders") : mpCapabilityUrl("buyer.mall.after-sales"),
         })),
         loading: false,
       });

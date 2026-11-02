@@ -1,4 +1,5 @@
 import { getPaymentSuccess } from "../../services/order-service";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 
 interface PaymentResultData {
   orderId: string;
@@ -82,11 +83,11 @@ Page({
   },
 
   goOrders() {
-    wx.redirectTo({ url: "/pages/orders/index" });
+    wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders") });
   },
 
   goHome() {
-    wx.switchTab({ url: "/pages/home/index" });
+    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
   },
 
   retryPay() {
@@ -94,7 +95,7 @@ Page({
       return;
     }
     wx.redirectTo({
-      url: `/pages/cashier/index?orderId=${this.data.orderId}&paymentMethod=${this.data.paymentMethod || ""}`,
+      url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: this.data.orderId, paymentMethod: this.data.paymentMethod || "" }),
     });
   },
 });
