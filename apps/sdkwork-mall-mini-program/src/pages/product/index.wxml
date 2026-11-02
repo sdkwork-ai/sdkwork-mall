@@ -1,6 +1,13 @@
 <view class="page-product">
   <view wx:if="{{loading}}" class="mp-loading">加载商品...</view>
-  <view wx:if="{{error}}" class="mp-empty">{{error}}</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
+  <view wx:if="{{notFound}}" class="mp-empty">
+    <view>商品不存在或已下架</view>
+    <button class="mp-btn mp-btn-ghost" bindtap="goHome">回到首页</button>
+  </view>
 
   <block wx:if="{{detail}}">
     <swiper class="product-gallery" indicator-dots circular bindchange="onImageChange" current="{{activeImage}}">

@@ -161,6 +161,10 @@ test("every mini-program error state offers a recovery path", () => {
   // and reopen the mini program. Pages either enable pull-down refresh or bind
   // a retry action in the error block. The login form is exempt: its error is a
   // rejected credential, retried by submitting the form again.
+  //
+  // The rule keys off `{{error}}` rather than the `mp-error` class: a page that
+  // renders its error through another class (the product page used `mp-empty`)
+  // would otherwise escape the gate while still trapping the buyer.
   const pagesRoot = join(sourceRoot, "pages");
   const exempt = new Set(["login"]);
   const violations = [];
@@ -175,7 +179,12 @@ test("every mini-program error state offers a recovery path", () => {
       continue;
     }
     const wxml = readFileSync(wxmlPath, "utf8");
-    if (!wxml.includes("mp-error")) {
+    const rendersError = /\{\{\s*error\s*\}\}/u.test(wxml);
+    if (!rendersError && !wxml.includes("mp-error")) {
+      continue;
+    }
+    if (rendersError && !wxml.includes("mp-error")) {
+      violations.push(`${entry.name} (renders {{error}} without the mp-error recovery block)`);
       continue;
     }
     const pullDown = existsSync(jsonPath)

@@ -23,6 +23,7 @@ interface ProductData {
   loading: boolean;
   busy: boolean;
   error: string;
+  notFound: boolean;
   skuPopupOpen: boolean;
   skuPopupMode: string;
   toast: string;
@@ -46,6 +47,7 @@ Page({
     loading: true,
     busy: false,
     error: "",
+    notFound: false,
     skuPopupOpen: false,
     skuPopupMode: "cart",
     toast: "",
@@ -79,11 +81,13 @@ Page({
   },
 
   async loadDetail() {
-    this.setData({ loading: true, error: "" });
+    this.setData({ loading: true, error: "", notFound: false });
     try {
       const detail = await getProductDetail(this.data._productId);
       if (!detail) {
-        this.setData({ loading: false, error: "商品不存在或已下架" });
+        // A successful lookup that returns nothing is "off shelf", not a
+        // failure: retrying cannot change it, so offer the way home instead.
+        this.setData({ loading: false, notFound: true });
         return;
       }
       const skus = detail.skus.map((sku) => ({
@@ -228,6 +232,14 @@ Page({
     } finally {
       this.setData({ busy: false });
     }
+  },
+
+  retry() {
+    void this.loadDetail();
+  },
+
+  goHome() {
+    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
   },
 
   showToast(message: string) {
