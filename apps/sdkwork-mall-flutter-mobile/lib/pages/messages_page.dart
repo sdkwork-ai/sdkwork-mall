@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../services/commerce.dart';
-import '../services/messages_service.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
+import '../utils/json.dart';
 import 'widgets.dart';
 
-/// 消息中心: 订单与售后进度即时合成（对齐 H5 `/buyer/messages`）.
+/// 消息中心: 通知服务（`GET /notifications`）里的系统/交易/提醒消息.
 class SdkworkMessagesPage extends StatefulWidget {
   const SdkworkMessagesPage({super.key});
 
@@ -14,7 +15,8 @@ class SdkworkMessagesPage extends StatefulWidget {
 }
 
 class _SdkworkMessagesPageState extends State<SdkworkMessagesPage> {
-  List<MallMessageRow> _rows = const <MallMessageRow>[];
+  List<({String category, String id, String summary, String time, String title, bool unread})>
+      _rows = const [];
   bool _loading = true;
   String _error = '';
 
@@ -27,20 +29,20 @@ class _SdkworkMessagesPageState extends State<SdkworkMessagesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('消息中心')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('messages.title'))),
       body: _buildBody(),
     );
   }
 
   Widget _buildBody() {
     if (_loading) {
-      return const SdkworkLoadingView(label: '加载消息...');
+      return SdkworkLoadingView(label: SdkworkI18n.t('messages.loading'));
     }
     if (_error.isNotEmpty) {
       return SdkworkErrorView(message: _error, onRetry: _load);
     }
     if (_rows.isEmpty) {
-      return const SdkworkEmptyView(message: '暂无消息');
+      return SdkworkEmptyView(message: SdkworkI18n.t('messages.empty'));
     }
     return Column(
       children: <Widget>[
@@ -55,7 +57,7 @@ class _SdkworkMessagesPageState extends State<SdkworkMessagesPage> {
         Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
-            '消息由订单与售后进度即时合成；推送通知将在消息服务上线后开放。',
+            SdkworkI18n.t('messages.footnote'),
             style: Theme.of(context).textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),
@@ -64,39 +66,82 @@ class _SdkworkMessagesPageState extends State<SdkworkMessagesPage> {
     );
   }
 
-  Widget _buildRow(MallMessageRow row) {
-    final isOrder = row.type == 'order';
-    final target = isOrder ? '/orders' : '/after-sales';
+  Widget _buildRow(
+    ({String category, String id, String summary, String time, String title, bool unread}) row,
+  ) {
     return Card(
       margin: EdgeInsets.zero,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: isOrder ? const Color(0xFFE93B3D) : const Color(0xFFF59E0B),
+          backgroundColor: _categoryColor(row.category),
           child: Text(
-            isOrder ? '单' : '修',
-            style: const TextStyle(color: Colors.white, fontSize: 13),
+            _categoryLabel(row.category),
+            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
         ),
-        title: Text(
-          row.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+        title: Row(
+          children: [
+            if (row.unread)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE93B3D),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            Expanded(
+              child: Text(
+                row.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(row.summary, maxLines: 1, overflow: TextOverflow.ellipsis),
-            if (row.occurredAt.isNotEmpty) Text(formatTime(row.occurredAt)),
+            if (row.summary.isNotEmpty)
+              Text(row.summary, maxLines: 2, overflow: TextOverflow.ellipsis),
+            if (row.time.isNotEmpty) Text(row.time),
           ],
         ),
         trailing: TextButton(
-          onPressed: () => Navigator.of(context).pushNamed(target),
-          child: const Text('查看'),
+          onPressed: () => Navigator.of(context).pushNamed('/notices'),
+          child: Text(SdkworkI18n.t('messages.view')),
         ),
-        onTap: () => Navigator.of(context).pushNamed(target),
+        onTap: () => Navigator.of(context).pushNamed('/notices'),
       ),
     );
+  }
+
+  Color _categoryColor(String category) {
+    switch (category) {
+      case 'trade':
+        return const Color(0xFFE93B3D);
+      case 'system':
+        return const Color(0xFF2563EB);
+      default:
+        return const Color(0xFFF59E0B);
+    }
+  }
+
+  String _categoryLabel(String category) {
+    switch (category) {
+      case 'trade':
+        return SdkworkI18n.t('messages.categories.trade');
+      case 'system':
+        return SdkworkI18n.t('messages.categories.system');
+      case 'notice':
+        return SdkworkI18n.t('messages.categories.notice');
+      default:
+        return SdkworkI18n.t('messages.categories.other');
+    }
   }
 
   Future<void> _load() async {
@@ -105,12 +150,22 @@ class _SdkworkMessagesPageState extends State<SdkworkMessagesPage> {
       _error = '';
     });
     try {
-      final rows = await MallCommerce.instance.messages.listRows();
+      final page = await MallCommerce.instance.im.listNotices();
       if (!mounted) {
         return;
       }
       setState(() {
-        _rows = rows;
+        _rows = page.items.map((notice) {
+          final requestedAt = asString(notice, <String>['requestedAt']);
+          return (
+            category: asString(notice, <String>['category'], fallback: 'system'),
+            id: asString(notice, <String>['notificationId']),
+            summary: asString(notice, <String>['body']),
+            time: requestedAt.isEmpty ? '' : formatTime(requestedAt),
+            title: asString(notice, <String>['title'], fallback: SdkworkI18n.t('messages.title')),
+            unread: asString(notice, <String>['status'], fallback: 'read') == 'unread',
+          );
+        }).toList();
         _loading = false;
       });
     } catch (cause) {
