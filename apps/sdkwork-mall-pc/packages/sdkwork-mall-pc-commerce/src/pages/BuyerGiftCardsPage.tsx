@@ -7,7 +7,7 @@ export function SdkworkMallGiftCardsPage() {
     <div className="sdkwork-mall-pc-gift-cards-page">
       <h1><Gift aria-hidden="true" size={20} /> 礼品卡与红包</h1>
       <EmptyState
-        description="礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API"
+        description="礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API。"
         title="礼品卡功能待 SDK 合约"
       />
       <p>

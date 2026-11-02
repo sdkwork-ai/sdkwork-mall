@@ -200,6 +200,7 @@
         "flutter": { "route": "/help" }
       },
       "navigationEvidence": [
+        { "platform": "pc", "file": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-shell/src/index.tsx", "contains": "/help" },
         { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/help" },
         { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/help/index" },
         { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/help" }
@@ -348,6 +349,7 @@
         "flutter": { "route": "/reviews" }
       },
       "navigationEvidence": [
+        { "platform": "pc", "file": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx", "contains": "/buyer/reviews" },
         { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/reviews" },
         { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/reviews/index" },
         { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/reviews" }
@@ -367,6 +369,7 @@
         "flutter": { "route": "/gift-cards" }
       },
       "navigationEvidence": [
+        { "platform": "pc", "file": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx", "contains": "/buyer/gift-cards" },
         { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/gift-cards" },
         { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/gift-cards/index" },
         { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/gift-cards" }
@@ -386,6 +389,7 @@
         "flutter": { "route": "/profile" }
       },
       "navigationEvidence": [
+        { "platform": "pc", "file": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx", "contains": "/buyer/profile" },
         { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/profile" },
         { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/profile/index" },
         { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/profile" }
@@ -404,6 +408,7 @@
         "flutter": { "route": "/security" }
       },
       "navigationEvidence": [
+        { "platform": "pc", "file": "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx", "contains": "/buyer/security" },
         { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/security" },
         { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/security/index" },
         { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/security" }
@@ -521,6 +526,74 @@
         "flutter": { "route": "/login" }
       },
       "notes": "PC and H5 delegate login to the shared IAM auth-gate routes."
+    }
+  ],
+  "sharedCopy": [
+    {
+      "key": "reviews.upstreamNotice",
+      "text": "商品晒单与媒体上传需等待 T1 商品评价 API 合约落地。",
+      "why": "One honest statement of the pending product-review contract, identical everywhere.",
+      "files": [
+        "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-reviews/src/pages/ReviewsPage.tsx",
+        "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/ReviewsPage.tsx",
+        "apps/sdkwork-mall-mini-program/src/pages/reviews/index.wxml",
+        "apps/sdkwork-mall-flutter-mobile/lib/pages/reviews_page.dart"
+      ]
+    },
+    {
+      "key": "giftCards.upstreamStatement",
+      "text": "礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API。",
+      "why": "One statement of the pending gift-card contract across all four roots.",
+      "files": [
+        "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerGiftCardsPage.tsx",
+        "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/GiftCardsPage.tsx",
+        "apps/sdkwork-mall-mini-program/src/pages/gift-cards/index.ts",
+        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_account_pages.dart"
+      ]
+    },
+    {
+      "key": "buyerNav.profile",
+      "text": "个人资料",
+      "why": "Buyer-hub menu label, aligned across roots.",
+      "files": [
+        "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
+        "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
+        "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml",
+        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+      ]
+    },
+    {
+      "key": "buyerNav.reviews",
+      "text": "我的评价",
+      "why": "Buyer-hub menu label, aligned across roots.",
+      "files": [
+        "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
+        "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
+        "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml",
+        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+      ]
+    },
+    {
+      "key": "buyerNav.giftCards",
+      "text": "礼品卡与红包",
+      "why": "Buyer-hub menu label and page title, aligned across roots.",
+      "files": [
+        "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
+        "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
+        "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml",
+        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+      ]
+    },
+    {
+      "key": "buyerNav.security",
+      "text": "账户与安全",
+      "why": "Buyer-hub menu label and page title, aligned across roots.",
+      "files": [
+        "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerDashboardPage.tsx",
+        "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
+        "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml",
+        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart"
+      ]
     }
   ],
   "platformExtras": {

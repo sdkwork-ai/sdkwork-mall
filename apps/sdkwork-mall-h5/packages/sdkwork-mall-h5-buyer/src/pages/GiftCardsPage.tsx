@@ -10,7 +10,7 @@ export function SdkworkMallH5GiftCardsPage() {
         <h2>
           <Gift aria-hidden="true" size={18} /> 功能说明
         </h2>
-        <div className="sdk-h5-empty">礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API</div>
+        <div className="sdk-h5-empty">礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API。</div>
         <p className="sdk-h5-muted">
           当前版本仅预留入口。待 commerce gift-cards / red-packet API 合约落地后，
           将在此接入余额、领取记录与兑换流程。

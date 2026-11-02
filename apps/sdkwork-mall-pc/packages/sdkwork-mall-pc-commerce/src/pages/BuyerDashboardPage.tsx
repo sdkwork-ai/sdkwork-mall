@@ -207,8 +207,8 @@ export function SdkworkMallBuyerDashboardPage() {
         <Link to="/buyer/reviews"><Star aria-hidden="true" size={14} /> 我的评价</Link>
         <Link to="/buyer/messages">消息中心</Link>
         <Link to="/buyer/profile">个人资料</Link>
-        <Link to="/buyer/security">账户安全</Link>
-        <Link to="/buyer/gift-cards"><Gift aria-hidden="true" size={14} /> 礼品卡</Link>
+        <Link to="/buyer/security">账户与安全</Link>
+        <Link to="/buyer/gift-cards"><Gift aria-hidden="true" size={14} /> 礼品卡与红包</Link>
       </div>
     </div>
   );

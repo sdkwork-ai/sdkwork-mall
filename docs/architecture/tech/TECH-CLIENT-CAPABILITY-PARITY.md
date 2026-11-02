@@ -40,7 +40,11 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Drift guard (MP) | same test | A page in `app.json` is neither in the contract nor declared as an extra |
 | Drift guard (Flutter) | same test | A route in `buildSdkworkMallRoutes()` is not represented |
 | Navigation evidence | same test | A capability page exists but nothing links to it (orphan screen) |
-| Human report | `pnpm check:capability-parity` | Prints the matrix and exits non-zero when a required cell is missing |
+| Router mounting | same test | A route is declared in `routes.ts` but the PC/H5 router never mounts it (`case "<id>"` / `path="<path>"` missing) |
+| Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
+| Title-key convention | same test | A route title key does not follow `<namespace>.routes.<screen>.title` |
+| Shared copy | same test | The upstream notice or buyer-hub label is reworded on one root |
+| Human report | `pnpm check:capability-parity` | Prints the matrix, the documented asymmetries, and exits non-zero when a required cell is missing |
 
 `pnpm check` runs the parity test; `pnpm verify` additionally runs the matrix
 report. `pnpm report:capability-parity` prints only gaps.
@@ -59,6 +63,11 @@ report. `pnpm report:capability-parity` prints only gaps.
    and record the reason in `notes` instead of inventing a duplicate route.
 6. Platform-only surfaces go to `platformExtras` with a written reason, never
    silently into a capability entry.
+7. Capability copy that must not drift (upstream notices, buyer-hub labels) is
+   declared under `sharedCopy` with the exact text and every file that ships it.
+8. A capability a root deliberately does not ship stays out of that root's
+   `requiredOn` **and** carries a `notes` reason; the report lists every such
+   asymmetry on each run.
 
 ## 4. Current Parity Status
 

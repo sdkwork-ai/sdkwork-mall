@@ -72,6 +72,7 @@ function readRouteContributions(platform) {
       const block = match[0];
       const field = (name) => (block.match(new RegExp(`${name}:\\s*"([^"]*)"`)) ?? [])[1] ?? "";
       contributions.set(field("id"), {
+        auth: field("auth"),
         capability: field("capability"),
         domain: field("domain"),
         id: field("id"),
@@ -80,6 +81,7 @@ function readRouteContributions(platform) {
         platform,
         screen: field("screen"),
         surface: field("surface"),
+        titleKey: field("titleKey"),
       });
     }
   }
@@ -325,6 +327,86 @@ test("declared navigation evidence resolves so no capability page is orphaned", 
       assert.ok(
         source.includes(evidence.contains),
         `${capability.id}: ${evidence.platform} navigation entry "${evidence.contains}" is missing from ${evidence.file}`,
+      );
+    }
+  }
+});
+
+test("every declared capability route is actually mounted by the web routers", () => {
+  const pcRouter = readText(contract.platforms.pc.router);
+  const h5Router = readText(contract.platforms.h5.router);
+
+  // A route contribution that the app router never mounts is declared metadata
+  // with no reachable screen: the registry check alone cannot see that.
+  for (const capability of contract.capabilities) {
+    const pcRouteId = capability.implementations.pc?.routeId;
+    if (pcRouteId) {
+      assert.ok(
+        pcRouter.includes(`case "${pcRouteId}"`),
+        `${capability.id}: PC router does not mount route id ${pcRouteId}`,
+      );
+    }
+  }
+
+  for (const capability of contract.capabilities) {
+    const h5Implementation = capability.implementations.h5;
+    if (!h5Implementation || h5Implementation.fusedInto) {
+      continue;
+    }
+    const route = registries.h5.get(h5Implementation.routeId);
+    assert.ok(route, `${capability.id}: H5 route ${h5Implementation.routeId} is not registered`);
+    assert.ok(
+      h5Router.includes(`path="${route.path}"`),
+      `${capability.id}: H5 router does not mount path ${route.path}`,
+    );
+  }
+});
+
+test("shared capabilities keep the same auth posture across PC and H5", () => {
+  for (const capability of contract.capabilities) {
+    const pcRouteId = capability.implementations.pc?.routeId;
+    const h5RouteId = capability.implementations.h5?.routeId;
+    if (!pcRouteId || !h5RouteId) {
+      continue;
+    }
+    const pcRoute = registries.pc.get(pcRouteId);
+    const h5Route = registries.h5.get(h5RouteId);
+    if (!pcRoute?.auth || !h5Route?.auth) {
+      continue;
+    }
+    assert.equal(
+      h5Route.auth,
+      pcRoute.auth,
+      `${capability.id}: auth posture differs (PC ${pcRoute.auth}, H5 ${h5Route.auth})`,
+    );
+  }
+});
+
+test("every stored route title key follows the package route-key convention", () => {
+  for (const platform of ROUTE_PLATFORMS) {
+    for (const route of registries[platform].values()) {
+      if (!route.titleKey) {
+        continue;
+      }
+      assert.match(
+        route.titleKey,
+        /^(?:[a-z][a-zA-Z0-9-]*\.)+routes\.[a-zA-Z0-9-]+\.title$/u,
+        `${platform} ${route.id}: title key "${route.titleKey}" must look like <namespace>.routes.<screen>.title`,
+      );
+    }
+  }
+});
+
+test("shared copy stays byte-identical across the roots that ship it", () => {
+  for (const entry of contract.sharedCopy ?? []) {
+    assert.ok(entry.key, "shared copy entry needs a key");
+    assert.ok(entry.text, `${entry.key}: shared copy entry needs text`);
+    assert.ok(Array.isArray(entry.files) && entry.files.length > 0, `${entry.key}: needs at least one file`);
+    for (const file of entry.files) {
+      const source = readText(file);
+      assert.ok(
+        source.includes(entry.text),
+        `${entry.key}: "${entry.text}" is missing or reworded in ${file}`,
       );
     }
   }

@@ -201,10 +201,33 @@ process.stdout.write(
 for (const row of missing) {
   process.stdout.write(`  gap: ${row.capability.id} missing on ${row.requiredGaps.join(", ")}\n`);
 }
+
+// Documented asymmetries: capabilities a root deliberately does not ship. They
+// are contract decisions, not drift, but they must stay visible in every run.
+const asymmetries = contract.capabilities
+  .map((capability) => ({
+    capability,
+    absentOn: platforms.filter((platform) => !capability.requiredOn.includes(platform)),
+  }))
+  .filter((entry) => entry.absentOn.length > 0);
+
+if (asymmetries.length > 0) {
+  process.stdout.write(`\nDocumented asymmetries (${asymmetries.length}):\n`);
+  for (const { capability, absentOn } of asymmetries) {
+    const reason = String(capability.notes ?? "").replace(/\s+/gu, " ").trim();
+    process.stdout.write(
+      `  ${capability.id}: required on ${capability.requiredOn.join(", ")}; not on ${absentOn.join(", ")}\n`,
+    );
+    if (reason) {
+      process.stdout.write(`    reason: ${reason}\n`);
+    }
+  }
+}
+
 if (missing.length > 0) {
   process.stdout.write("\nUpdate the client root or the contract before shipping.\n");
   process.exit(1);
 }
 process.stdout.write(
-  "Every required capability resolves on every listed client root.\n",
+  "\nEvery required capability resolves on every listed client root.\n",
 );
