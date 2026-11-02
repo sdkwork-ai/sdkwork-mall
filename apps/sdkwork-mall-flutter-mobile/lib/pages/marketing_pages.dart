@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
 
-const _activityTypeLabels = <String, String>{
-  'big-promo': '大促专题',
-  'brand-day': '品牌日',
-  'category-venue': '类目会场',
-  'flash-sale': '秒杀',
-  'limited-rush': '限时抢购',
-  'member-day': '会员日',
-  'new-launch': '新品首发',
-  'quantity-tier': '满量会场',
+const _activityTypeKeys = <String, String>{
+  'big-promo': 'marketing.activity.types.bigPromo',
+  'brand-day': 'marketing.activity.types.brandDay',
+  'category-venue': 'marketing.activity.types.categoryVenue',
+  'flash-sale': 'marketing.activity.types.flashSale',
+  'limited-rush': 'marketing.activity.types.limitedRush',
+  'member-day': 'marketing.activity.types.memberDay',
+  'new-launch': 'marketing.activity.types.newLaunch',
+  'quantity-tier': 'marketing.activity.types.quantityTier',
 };
+
+String _activityTypeLabel(String type) {
+  final key = _activityTypeKeys[type];
+  return key == null
+      ? SdkworkI18n.t('marketing.activity.fallback')
+      : SdkworkI18n.t(key);
+}
 
 String _activityPhase(Map<String, dynamic> row) {
   final now = DateTime.now().millisecondsSinceEpoch;
@@ -69,11 +77,13 @@ class _SdkworkShopPageState extends State<SdkworkShopPage> {
   Widget build(BuildContext context) {
     final shop = _shop;
     return Scaffold(
-      appBar: AppBar(title: const Text('店铺首页')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('marketing.shop.title'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : shop == null
-              ? const SdkworkEmptyView(message: '店铺不存在或已关闭')
+              ? SdkworkEmptyView(
+                  message: SdkworkI18n.t('marketing.shop.notFound'),
+                )
               : RefreshIndicator(
                   onRefresh: _load,
                   child: ListView(
@@ -89,7 +99,8 @@ class _SdkworkShopPageState extends State<SdkworkShopPage> {
                                   .colorScheme
                                   .primaryContainer,
                               child: Text(
-                                asString(shop, <String>['name', 'title', 'shopName'], fallback: '店')
+                                asString(shop, <String>['name', 'title', 'shopName'],
+                                        fallback: SdkworkI18n.t('marketing.shop.avatarFallback'))
                                     .characters
                                     .first
                                     .toString(),
@@ -104,21 +115,34 @@ class _SdkworkShopPageState extends State<SdkworkShopPage> {
                                     asString(
                                       shop,
                                       <String>['name', 'title', 'shopName'],
-                                      fallback: '店铺',
+                                      fallback: SdkworkI18n.t('marketing.shop.nameFallback'),
                                     ),
                                     style: Theme.of(context).textTheme.titleLarge,
                                   ),
                                   if (asNum(shop, <String>['rating', 'score']) != null)
-                                    Text('评分 ${formatCny(asNum(shop, <String>['rating', 'score']))}'),
+                                    Text(
+                                      SdkworkI18n.t(
+                                        'marketing.shop.rating',
+                                        params: <String, String>{
+                                          'rating': formatCny(
+                                            asNum(shop, <String>['rating', 'score']),
+                                          ),
+                                        },
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      SdkworkSectionHeader(title: '店铺商品'),
+                      SdkworkSectionHeader(
+                        title: SdkworkI18n.t('marketing.shop.productsTitle'),
+                      ),
                       if (asList(shop['products']).isEmpty)
-                        const SdkworkEmptyView(message: '暂无在售商品')
+                        SdkworkEmptyView(
+                          message: SdkworkI18n.t('marketing.shop.productsEmpty'),
+                        )
                       else
                         GridView.builder(
                           shrinkWrap: true,
@@ -175,7 +199,11 @@ class _SdkworkShopPageState extends State<SdkworkShopPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    asString(product, <String>['title', 'name'], fallback: '商品'),
+                    asString(
+                      product,
+                      <String>['title', 'name'],
+                      fallback: SdkworkI18n.t('marketing.shop.productFallback'),
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
@@ -247,7 +275,7 @@ class _SdkworkActivityListPageState extends State<SdkworkActivityListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('活动会场')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('marketing.activity.title'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -263,8 +291,10 @@ class _SdkworkActivityListPageState extends State<SdkworkActivityListPage> {
                     )
                   : _activities.isEmpty
                       ? ListView(
-                          children: const <Widget>[
-                            SdkworkEmptyView(message: '暂无进行中的活动'),
+                          children: <Widget>[
+                            SdkworkEmptyView(
+                              message: SdkworkI18n.t('marketing.activity.empty'),
+                            ),
                           ],
                         )
                       : ListView(
@@ -284,19 +314,22 @@ class _SdkworkActivityListPageState extends State<SdkworkActivityListPage> {
       fallback: 'general',
     );
     final phase = _activityPhase(row);
-    final phaseText = <String, String>{
-      'active': '进行中',
-      'ended': '已结束',
-      'upcoming': '即将开始',
-    }[phase]!;
+    final phaseKey = <String, String>{
+      'active': 'marketing.activity.phase.active',
+      'ended': 'marketing.activity.phase.ended',
+      'upcoming': 'marketing.activity.phase.upcoming',
+    }[phase];
+    final phaseText = phaseKey == null
+        ? SdkworkI18n.t('marketing.activity.fallback')
+        : SdkworkI18n.t(phaseKey);
     return Opacity(
       opacity: phase == 'ended' ? 0.55 : 1,
       child: Card(
         margin: const EdgeInsets.only(bottom: 12),
         child: ListTile(
           title: Text(
-            '${_activityTypeLabels[type] ?? '活动'} · '
-            '${asString(row, <String>['title', 'name'], fallback: '活动')}',
+            '${_activityTypeLabel(type)} · '
+            '${asString(row, <String>['title', 'name'], fallback: SdkworkI18n.t('marketing.activity.fallback'))}',
           ),
           subtitle: Text(
             asString(row, <String>['highlight', 'slogan']) != ''
@@ -352,11 +385,13 @@ class _SdkworkActivityDetailPageState extends State<SdkworkActivityDetailPage> {
   Widget build(BuildContext context) {
     final activity = _activity;
     return Scaffold(
-      appBar: AppBar(title: const Text('活动详情')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('marketing.activity.detailTitle'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : activity == null
-              ? const SdkworkEmptyView(message: '活动不存在或已结束')
+              ? SdkworkEmptyView(
+                  message: SdkworkI18n.t('marketing.activity.notFound'),
+                )
               : ListView(
                   padding: const EdgeInsets.all(12),
                   children: <Widget>[
@@ -372,17 +407,22 @@ class _SdkworkActivityDetailPageState extends State<SdkworkActivityDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            _activityTypeLabels[asString(
-                              activity,
-                              <String>['activityType', 'activity_type', 'type'],
-                              fallback: 'general',
-                            )] ??
-                                '活动',
+                            _activityTypeLabel(
+                              asString(
+                                activity,
+                                <String>['activityType', 'activity_type', 'type'],
+                                fallback: 'general',
+                              ),
+                            ),
                             style: const TextStyle(color: Colors.white70),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            asString(activity, <String>['title', 'name'], fallback: '活动'),
+                            asString(
+                              activity,
+                              <String>['title', 'name'],
+                              fallback: SdkworkI18n.t('marketing.activity.fallback'),
+                            ),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -406,7 +446,10 @@ class _SdkworkActivityDetailPageState extends State<SdkworkActivityDetailPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text('活动介绍', style: Theme.of(context).textTheme.titleSmall),
+                            Text(
+                              SdkworkI18n.t('marketing.activity.descriptionTitle'),
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               asString(activity, <String>['description', 'summary']),

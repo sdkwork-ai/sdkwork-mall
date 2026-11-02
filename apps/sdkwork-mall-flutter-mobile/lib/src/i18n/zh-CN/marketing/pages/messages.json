@@ -1,0 +1,37 @@
+{
+  "marketing": {
+    "shop": {
+      "title": "店铺首页",
+      "notFound": "店铺不存在或已关闭",
+      "avatarFallback": "店",
+      "nameFallback": "店铺",
+      "rating": "评分 {{rating}}",
+      "productsTitle": "店铺商品",
+      "productsEmpty": "暂无在售商品",
+      "productFallback": "商品"
+    },
+    "activity": {
+      "title": "活动会场",
+      "detailTitle": "活动详情",
+      "empty": "暂无进行中的活动",
+      "notFound": "活动不存在或已结束",
+      "descriptionTitle": "活动介绍",
+      "fallback": "活动",
+      "phase": {
+        "active": "进行中",
+        "ended": "已结束",
+        "upcoming": "即将开始"
+      },
+      "types": {
+        "bigPromo": "大促专题",
+        "brandDay": "品牌日",
+        "categoryVenue": "类目会场",
+        "flashSale": "秒杀",
+        "limitedRush": "限时抢购",
+        "memberDay": "会员日",
+        "newLaunch": "新品首发",
+        "quantityTier": "满量会场"
+      }
+    }
+  }
+}
