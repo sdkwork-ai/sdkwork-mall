@@ -36,61 +36,59 @@ import '../routes/capability_routes.dart';
 /// of becoming an unreachable surface.
 Map<String, WidgetBuilder> buildSdkworkMallRoutes() {
   final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/login': (context) => const SdkworkLoginPage(),
-      '/search': (context) => const SdkworkSearchPage(),
-      '/product': (context) => SdkworkProductPage(
-            productId: '${_routeArguments(context)}',
-          ),
-      '/checkout': (context) => const SdkworkCheckoutPage(),
-      '/cashier': (context) => SdkworkCashierPage(
-            orderId: '${_routeArguments(context)}',
-          ),
-      '/payment-result': (context) => SdkworkPaymentResultPage(
-            arguments: _routeArguments(context) as Map<String, String>,
-          ),
-      '/orders': (context) => const SdkworkOrdersPage(),
-      '/order-detail': (context) => SdkworkOrderDetailPage(
-            orderId: '${_routeArguments(context)}',
-          ),
-      '/logistics': (context) => SdkworkLogisticsPage(
-            orderId: _routeArguments(context) == null
-                ? null
-                : '${_routeArguments(context)}',
-          ),
-      '/messages': (context) => const SdkworkMessagesPage(),
-      '/address': (context) => const SdkworkAddressPage(),
-      '/after-sales': (context) => SdkworkAfterSalesPage(
-            orderId: _routeArguments(context) == null
-                ? null
-                : '${_routeArguments(context)}',
-          ),
-      '/coupons': (context) => const SdkworkCouponsPage(),
-      '/favorites': (context) => const SdkworkFavoritesPage(),
-      '/footprint': (context) => const SdkworkFootprintPage(),
-      '/wallet': (context) => const SdkworkWalletPage(),
-      '/points': (context) => const SdkworkPointsPage(),
-      '/membership': (context) => const SdkworkMembershipPage(),
-      '/distribution': (context) => const SdkworkPartnerPage(),
-      '/invoices': (context) => const SdkworkInvoicesPage(),
-      '/settings': (context) => const SdkworkSettingsPage(),
-      '/shop': (context) => SdkworkShopPage(
-            shopId: '${_routeArguments(context)}',
-          ),
-      '/activity': (context) => const SdkworkActivityListPage(),
-      '/activity-detail': (context) => SdkworkActivityDetailPage(
-            offerId: '${_routeArguments(context)}',
-          ),
-      '/chats': (context) => const SdkworkChatsPage(),
-      '/chat': (context) => SdkworkChatPage(
-            conversationId: '${_routeArguments(context)}',
-          ),
-      '/notices': (context) => const SdkworkNoticesPage(),
-      '/help': (context) => const SdkworkHelpPage(),
-      '/reviews': (context) => const SdkworkReviewsPage(),
-      '/gift-cards': (context) => const SdkworkGiftCardsPage(),
-      '/profile': (context) => const SdkworkProfilePage(),
-      '/security': (context) => const SdkworkSecurityPage(),
-    };
+    '/login': (context) => const SdkworkLoginPage(),
+    '/search': (context) => const SdkworkSearchPage(),
+    '/product': (context) =>
+        SdkworkProductPage(productId: '${_routeArguments(context)}'),
+    '/checkout': (context) => const SdkworkCheckoutPage(),
+    '/cashier': (context) =>
+        SdkworkCashierPage(orderId: '${_routeArguments(context)}'),
+    '/payment-result': (context) => SdkworkPaymentResultPage(
+      arguments: _routeArguments(context) as Map<String, String>,
+    ),
+    '/orders': (context) => const SdkworkOrdersPage(),
+    '/order-detail': (context) =>
+        SdkworkOrderDetailPage(orderId: '${_routeArguments(context)}'),
+    '/logistics': (context) => SdkworkLogisticsPage(
+      orderId: _routeArguments(context) == null
+          ? null
+          : '${_routeArguments(context)}',
+    ),
+    '/messages': (context) => const SdkworkMessagesPage(),
+    '/address': (context) => const SdkworkAddressPage(),
+    '/after-sales': (context) => SdkworkAfterSalesPage(
+      orderId: _routeArguments(context) == null
+          ? null
+          : '${_routeArguments(context)}',
+    ),
+    '/coupons': (context) => const SdkworkCouponsPage(),
+    '/favorites': (context) => const SdkworkFavoritesPage(),
+    '/footprint': (context) => const SdkworkFootprintPage(),
+    '/wallet': (context) => const SdkworkWalletPage(),
+    '/points': (context) => const SdkworkPointsPage(),
+    '/membership': (context) => const SdkworkMembershipPage(),
+    '/distribution': (context) => SdkworkPartnerPage(
+      inviteCode: _routeArguments(context) == null
+          ? ''
+          : '${_routeArguments(context)}',
+    ),
+    '/invoices': (context) => const SdkworkInvoicesPage(),
+    '/settings': (context) => const SdkworkSettingsPage(),
+    '/shop': (context) =>
+        SdkworkShopPage(shopId: '${_routeArguments(context)}'),
+    '/activity': (context) => const SdkworkActivityListPage(),
+    '/activity-detail': (context) =>
+        SdkworkActivityDetailPage(offerId: '${_routeArguments(context)}'),
+    '/chats': (context) => const SdkworkChatsPage(),
+    '/chat': (context) =>
+        SdkworkChatPage(conversationId: '${_routeArguments(context)}'),
+    '/notices': (context) => const SdkworkNoticesPage(),
+    '/help': (context) => const SdkworkHelpPage(),
+    '/reviews': (context) => const SdkworkReviewsPage(),
+    '/gift-cards': (context) => const SdkworkGiftCardsPage(),
+    '/profile': (context) => const SdkworkProfilePage(),
+    '/security': (context) => const SdkworkSecurityPage(),
+  };
 
   assertSdkworkMallCapabilityRoutes(routes.keys);
   return routes;
@@ -142,7 +140,10 @@ class SdkworkMallFlutterMobileShell extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
-            textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            textStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
@@ -156,8 +157,10 @@ class SdkworkMallFlutterMobileShell extends StatelessWidget {
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFFFBFBFD),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFFECEEF2)),
@@ -167,9 +170,7 @@ class SdkworkMallFlutterMobileShell extends StatelessWidget {
             borderSide: const BorderSide(color: Color(0xFFECEEF2)),
           ),
         ),
-        listTileTheme: const ListTileThemeData(
-          iconColor: Color(0xFF6B7280),
-        ),
+        listTileTheme: const ListTileThemeData(iconColor: Color(0xFF6B7280)),
         dividerTheme: const DividerThemeData(
           color: Color(0xFFECEEF2),
           thickness: 0.6,
@@ -238,8 +239,8 @@ class _SdkworkMallHomeTabsState extends State<SdkworkMallHomeTabs> {
             label: '首页',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view_outlined),
-            activeIcon: Icon(Icons.grid_view),
+            icon: Icon(Icons.category_outlined),
+            activeIcon: Icon(Icons.category),
             label: '分类',
           ),
           BottomNavigationBarItem(
@@ -254,15 +255,9 @@ class _SdkworkMallHomeTabsState extends State<SdkworkMallHomeTabs> {
             activeIcon: const Icon(Icons.shopping_cart),
             label: '购物车',
           ),
-          BottomNavigationBarItem(
-            icon: ListenableBuilder(
-              listenable: SdkworkSession.instance,
-              builder: (context, _) => Icon(
-                SdkworkSession.instance.isLoggedIn
-                    ? Icons.person
-                    : Icons.person_outline,
-              ),
-            ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
             label: '我的',
           ),
         ],

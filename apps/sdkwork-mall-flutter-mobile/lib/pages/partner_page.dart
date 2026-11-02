@@ -11,7 +11,10 @@ import 'widgets.dart';
 /// 与 PC / H5 / 小程序共用同一套能力路由 id 与文案语义；数据经
 /// `PartnerService` 走统一 transport，页面不直接构造 HTTP。
 class SdkworkPartnerPage extends StatefulWidget {
-  const SdkworkPartnerPage({super.key});
+  const SdkworkPartnerPage({super.key, this.inviteCode = ''});
+
+  /// Invite code carried by a shared recruitment link.
+  final String inviteCode;
 
   @override
   State<SdkworkPartnerPage> createState() => _SdkworkPartnerPageState();
@@ -44,6 +47,9 @@ class _SdkworkPartnerPageState extends State<SdkworkPartnerPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.inviteCode.trim().isNotEmpty) {
+      _inviteCode.text = widget.inviteCode.trim();
+    }
     _load();
   }
 

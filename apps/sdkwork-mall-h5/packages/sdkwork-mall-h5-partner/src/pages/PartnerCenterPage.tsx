@@ -89,6 +89,7 @@ export function SdkworkMallH5PartnerCenterPage({
 
       {state.isApplyFormOpen && state.program ? (
         <ApplyForm
+          initialInviteCode={readInviteFromLocation()}
           isSubmitting={state.isSubmitting}
           onClose={controller.closeApplyForm}
           onSubmit={(draft) => controller.submitApplication(draft)}
@@ -311,12 +312,14 @@ function InviteSection({
 }
 
 function ApplyForm({
+  initialInviteCode,
   isSubmitting,
   onClose,
   onSubmit,
   program,
   t,
 }: {
+  readonly initialInviteCode?: string;
   readonly isSubmitting: boolean;
   readonly onClose: () => void;
   readonly onSubmit: (draft: SdkworkPartnerApplicationDraft) => Promise<boolean>;
@@ -332,7 +335,7 @@ function ApplyForm({
     contactEmail: "",
     contactName: "",
     contactPhone: "",
-    inviteCode: "",
+    inviteCode: initialInviteCode?.trim() ?? "",
     subjectName: "",
     targetLevelNo: levels[0]?.levelNo ?? 1,
   }));
@@ -564,4 +567,12 @@ function ApplicationsSection({
       )}
     </section>
   );
+}
+
+/** Reads `?invite=CODE` from a shared recruitment link. */
+function readInviteFromLocation(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  return new URLSearchParams(window.location.search).get("invite")?.trim() ?? "";
 }

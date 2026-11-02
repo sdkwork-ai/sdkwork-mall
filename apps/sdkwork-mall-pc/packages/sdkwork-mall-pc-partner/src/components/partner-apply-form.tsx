@@ -12,6 +12,7 @@ import {
 import type { SdkworkPartnerIntlValue } from "../partner-intl.ts";
 
 export interface SdkworkPartnerApplyFormProps {
+  readonly initialInviteCode?: string;
   readonly intl: SdkworkPartnerIntlValue;
   readonly isSubmitting: boolean;
   readonly onClose: () => void;
@@ -20,6 +21,7 @@ export interface SdkworkPartnerApplyFormProps {
 }
 
 export function SdkworkPartnerApplyForm({
+  initialInviteCode,
   intl,
   isSubmitting,
   onClose,
@@ -36,7 +38,7 @@ export function SdkworkPartnerApplyForm({
     contactEmail: "",
     contactName: "",
     contactPhone: "",
-    inviteCode: "",
+    inviteCode: initialInviteCode?.trim() ?? "",
     subjectName: "",
     targetLevelNo: levels[0]?.levelNo ?? 1,
   }));

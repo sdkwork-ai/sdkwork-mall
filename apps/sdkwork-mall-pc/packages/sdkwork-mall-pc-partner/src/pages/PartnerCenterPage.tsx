@@ -91,6 +91,7 @@ function SdkworkPartnerCenterContent({
 
         {state.isApplyFormOpen && state.program ? (
           <SdkworkPartnerApplyForm
+            initialInviteCode={readInviteFromLocation()}
             intl={intl}
             isSubmitting={state.isSubmitting}
             onClose={controller.closeApplyForm}
@@ -128,4 +129,12 @@ export function SdkworkMallPartnerCenterPage({
       <SdkworkPartnerCenterContent controller={controller} />
     </SdkworkPartnerIntlProvider>
   );
+}
+
+/** Reads `?invite=CODE` from a shared recruitment link. */
+function readInviteFromLocation(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+  return new URLSearchParams(window.location.search).get("invite")?.trim() ?? "";
 }

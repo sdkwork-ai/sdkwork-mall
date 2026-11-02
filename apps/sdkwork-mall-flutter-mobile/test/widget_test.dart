@@ -16,6 +16,23 @@ void main() {
     expect(find.text('我的'), findsWidgets);
   });
 
+  testWidgets('bottom tabs pair outline and filled glyphs', (tester) async {
+    await tester.pumpWidget(const SdkworkMallFlutterMobileShell());
+
+    final bar = tester.widget<BottomNavigationBar>(
+      find.byType(BottomNavigationBar),
+    );
+    expect(bar.items, hasLength(4));
+    expect((bar.items[0].icon as Icon).icon, Icons.home_outlined);
+    expect((bar.items[0].activeIcon as Icon).icon, Icons.home);
+    expect((bar.items[1].icon as Icon).icon, Icons.category_outlined);
+    expect((bar.items[1].activeIcon as Icon).icon, Icons.category);
+    expect(find.byIcon(Icons.shopping_cart_outlined), findsWidgets);
+    expect((bar.items[2].activeIcon as Icon).icon, Icons.shopping_cart);
+    expect((bar.items[3].icon as Icon).icon, Icons.person_outline);
+    expect((bar.items[3].activeIcon as Icon).icon, Icons.person);
+  });
+
   testWidgets('shell switches to the cart tab and shows the empty state', (
     tester,
   ) async {

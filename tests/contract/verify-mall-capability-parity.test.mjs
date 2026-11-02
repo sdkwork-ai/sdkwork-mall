@@ -301,10 +301,8 @@ test("Flutter route and tab registries cover every required capability", () => {
         registries.flutter.has(implementation.route),
         `${capability.id}: Flutter route ${implementation.route} is not registered in buildSdkworkMallRoutes()`,
       );
-      const builderClass = shellSource
-        .split("\n")
-        .find((line) => line.includes(`'${implementation.route}':`));
-      const className = builderClass?.match(/=>\s*(?:const\s+)?([A-Za-z0-9_]+)\(/u)?.[1];
+      const builderClasses = readFlutterRouteBuilderClasses(shellSource);
+      const className = builderClasses.get(implementation.route);
       assert.ok(className, `${capability.id}: Flutter route ${implementation.route} has no page builder`);
       assert.ok(
         dartSources.some((source) => source.includes(`class ${className}`)),
@@ -556,20 +554,31 @@ function readMiniProgramPageTitles() {
   return titles;
 }
 
-/** route path -> AppBar title of the page class that buildSdkworkMallRoutes() builds. */
-function readFlutterPageTitles() {
-  const shellSource = readText(contract.platforms.flutter.routeRegistry);
-  const classByRoute = new Map();
-  for (const line of shellSource.split("\n")) {
-    const routeMatch = line.match(/'(\/[a-z0-9-]+)':\s*\(context\)\s*=>/u);
+/**
+ * route path -> page class, tolerant of `dart format` splitting the arrow from
+ * the constructor onto the following line.
+ */
+function readFlutterRouteBuilderClasses(shellSource) {
+  const lines = shellSource.split("\n");
+  const classes = new Map();
+  for (let index = 0; index < lines.length; index += 1) {
+    const routeMatch = lines[index].match(/'(\/[a-z0-9-]+)':\s*\(context\)\s*=>/u);
     if (!routeMatch) {
       continue;
     }
-    const classMatch = line.match(/=>\s*(?:const\s+)?([A-Za-z0-9_]+)\(/u);
+    const window = `${lines[index]}\n${lines[index + 1] ?? ""}\n${lines[index + 2] ?? ""}`;
+    const classMatch = window.match(/=>\s*(?:const\s+)?([A-Za-z0-9_]+)\(/u);
     if (classMatch) {
-      classByRoute.set(routeMatch[1], classMatch[1]);
+      classes.set(routeMatch[1], classMatch[1]);
     }
   }
+  return classes;
+}
+
+/** route path -> AppBar title of the page class that buildSdkworkMallRoutes() builds. */
+function readFlutterPageTitles() {
+  const shellSource = readText(contract.platforms.flutter.routeRegistry);
+  const classByRoute = readFlutterRouteBuilderClasses(shellSource);
 
   const dartSources = collectFiles(
     toAbsolute(contract.platforms.flutter.pageRoot),

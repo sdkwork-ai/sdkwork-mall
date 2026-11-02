@@ -168,7 +168,7 @@ cd apps/sdkwork-mall-flutter-mobile && flutter analyze --no-pub && flutter test 
 ```
 
 Observed on this change: typecheck clean, 49 packages typechecked, 109 node
-contract tests and 191 vitest tests passed, Flutter analyze clean and 34 Flutter
+contract tests and 200 vitest tests passed, Flutter analyze clean and 35 Flutter
 tests passed.
 
 ## 8. Residual risks

@@ -212,6 +212,13 @@ Page({
     validating: false,
   } as PartnerPageData,
 
+  onLoad(options: Record<string, string | undefined>) {
+    const invite = (options.invite ?? "").trim();
+    if (invite) {
+      this.setData({ "form.inviteCode": invite, inviteInput: invite });
+    }
+  },
+
   onShow() {
     if (!isLoggedIn()) {
       this.setData({
