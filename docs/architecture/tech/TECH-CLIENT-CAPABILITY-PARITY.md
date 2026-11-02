@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 103/103 pass
+pnpm test:node                                                     → 106/106 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -193,7 +193,7 @@ pnpm test:node                                                     → 103/103 p
   (tests/contract/verify-payment-channel-wiring.test.mjs           → 4/4)
   (tests/contract/verify-notifications-feed.test.mjs               → 4/4)
   (tests/contract/verify-first-load-split.test.mjs                 → 2/2)
-  (tests/contract/verify-runtime-env-profiles.test.mjs             → 2/2)
+  (tests/contract/verify-runtime-env-profiles.test.mjs             → 5/5)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -675,6 +675,18 @@ Each file now declares its own identity and host family:
 `tests/contract/verify-runtime-env-profiles.test.mjs` also checks that the browser
 runtime-env files (generator-owned by `align-browser-runtime-env.mjs`) keep their
 declared environment/profile identity.
+
+The browser roots had a second half of the same defect: nothing ever read the
+served profile document, so both H5 and PC silently used same-origin
+`/app/v3/api` even for `cloud.*` profiles, and every runtime-env file still
+carried legacy `sdkBaseUrls` / `publicRuntime` blocks pointing at
+`127.0.0.1:18080-18083`. Both `main.tsx` boots now fetch `/runtime-env.json`,
+publish it as `globalThis.SDKWORK_RUNTIME_ENV`, and only then dynamically import
+`App`, so the shared SDK resolver picks `SDKWORK_API_BASE_URL` (bare origin) for
+cross-origin profiles while same-origin profiles keep relative paths. The legacy
+loopback blocks were removed from all 24 browser runtime-env files, and the gate
+asserts no document carries a loopback origin plus that `cloud.production` targets
+`https://api.sdkwork.com`.
 
 ### 6.2 Per-package typecheck
 

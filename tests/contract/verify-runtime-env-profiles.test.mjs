@@ -82,3 +82,57 @@ test("the browser runtime-env files report the environment their name declares",
   }
   assert.deepEqual(failures, [], failures.join("\n"));
 });
+
+test("browser runtime-env documents never carry loopback origins", () => {
+  const failures = [];
+  const collect = (value, label, out) => {
+    if (typeof value === "string") {
+      if (/127\.0\.0\.1|localhost/u.test(value)) {
+        out.push(`${label}=${value}`);
+      }
+      return;
+    }
+    if (value && typeof value === "object") {
+      for (const [key, entry] of Object.entries(value)) {
+        collect(entry, `${label}.${key}`, out);
+      }
+    }
+  };
+  for (const root of BROWSER_ENV_ROOTS) {
+    for (const fileName of listJsonFiles(root)) {
+      if (!fileName.startsWith("runtime-env.")) {
+        continue;
+      }
+      const values = JSON.parse(readFileSync(path.join(workspaceRoot, root, fileName), "utf8"));
+      collect(values, `${root}/${fileName}`, failures);
+    }
+  }
+  assert.deepEqual(failures, [], failures.join("\n"));
+});
+
+test("cloud production documents target the production API origin", () => {
+  for (const root of BROWSER_ENV_ROOTS) {
+    const values = JSON.parse(
+      readFileSync(path.join(workspaceRoot, root, "runtime-env.cloud.production.json"), "utf8"),
+    );
+    assert.equal(values.appApiBaseUrl, "https://api.sdkwork.com", `${root} appApiBaseUrl`);
+    assert.equal(values.sdkBaseUrl, "https://api.sdkwork.com", `${root} sdkBaseUrl`);
+    assert.ok(
+      Array.isArray(values.cloudApiBaseUrls) &&
+        values.cloudApiBaseUrls.includes("https://api.sdkwork.com"),
+      `${root} cloudApiBaseUrls`,
+    );
+  }
+});
+
+test("both browser boots install the runtime-env bridge before rendering", () => {
+  for (const mainPath of [
+    "apps/sdkwork-mall-h5/src/main.tsx",
+    "apps/sdkwork-mall-pc/src/main.tsx",
+  ]) {
+    const main = readFileSync(path.join(workspaceRoot, mainPath), "utf8");
+    assert.match(main, /fetch\("\/runtime-env\.json"/u, `${mainPath} must fetch the runtime document`);
+    assert.match(main, /SDKWORK_RUNTIME_ENV/u, `${mainPath} must publish the bridge global`);
+    assert.match(main, /await import\("\.\/App"\)/u, `${mainPath} must render after installing the bridge`);
+  }
+});
