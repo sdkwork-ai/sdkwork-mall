@@ -390,6 +390,28 @@ error widget with the branded `SdkworkFatalErrorView`. The H5/PC roots already
 had route-level error boundaries. `tests/contract/verify-mobile-failure-handling.test.mjs`
 pins both mobile roots.
 
+### 6.1.13 Browser first-load budget
+
+Both browser roots shipped one oversized entry chunk (H5 1,035 KB raw / 246 KB
+gzip, PC 972 KB / 221 KB gzip) that mixed React, the UI primitives and the whole
+app graph, so every deploy invalidated all of it.
+
+Vite 8 runs Rolldown, so the roots now use `build.rollupOptions.output.advancedChunks`
+to isolate two stable groups — `vendor-react` (react, react-dom, scheduler,
+react-router) and `vendor-ui` (@radix-ui, lucide-react, sonner, cmdk). Measured
+on the standalone dev build:
+
+| Root | Entry before | Entry after | Stable vendor chunks |
+| --- | --- | --- | --- |
+| H5 | 1,035 KB / 245.6 KB gz | 852 KB / 180.5 KB gz | 70.4 KB gz (react) + 6.0 KB gz (ui) |
+| PC | 972 KB / 220.7 KB gz | 770 KB / 158.3 KB gz | 53.2 KB gz (react) + ui |
+
+First visit bytes stay roughly flat (H5 +~5%); a repeat visit with an unchanged
+vendor re-downloads only the app entry, about 65 KB gzip smaller on H5 and 62 KB
+on PC. Splitting the SDKWork workspace runtime into its own group was measured
+and rejected: it produced eight-plus extra vendor chunks, added first-visit
+bytes, and increased request count without a caching win worth the trade.
+
 ### 6.2 Per-package typecheck
 
 Every active client package on both browser roots carries its own `tsconfig.json`, so

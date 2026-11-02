@@ -189,6 +189,31 @@ function resolveMallH5DevProxyTarget({
   );
 }
 
+// Vite 8 runs Rolldown; `output.advancedChunks` is its native splitting
+// primitive. React/router and the icon/UI primitives are stable across releases,
+// so isolating them lets a repeat visitor reuse them from cache while only the
+// app chunk is re-downloaded after a deploy.
+const STABLE_VENDOR_CHUNK_GROUPS = [
+  {
+    name: "vendor-react",
+    test: (id: string) =>
+      ["/node_modules/react/", "/node_modules/react-dom/", "/node_modules/scheduler/", "/node_modules/react-router"].some(
+        (fragment) => id.includes(fragment),
+      ),
+    priority: 30,
+    maxSize: 512 * 1024,
+  },
+  {
+    name: "vendor-ui",
+    test: (id: string) =>
+      ["/node_modules/@radix-ui/", "/node_modules/lucide-react/", "/node_modules/sonner/", "/node_modules/cmdk/"].some(
+        (fragment) => id.includes(fragment),
+      ),
+    priority: 25,
+    maxSize: 512 * 1024,
+  },
+];
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, appRoot, "");
   const bootstrapAccessToken = env.SDKWORK_ACCESS_TOKEN ?? process.env.SDKWORK_ACCESS_TOKEN;
@@ -294,6 +319,13 @@ export default defineConfig(({ mode }) => {
   },
   build: {
     outDir: resolveBrowserDistOutDir(resolveViteEnvironment(mode, env)),
+    rollupOptions: {
+      output: {
+        advancedChunks: {
+          groups: STABLE_VENDOR_CHUNK_GROUPS,
+        },
+      },
+    },
     sourcemap: mode !== "production",
   },
   server: {
