@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
+  createMallH5CheckoutQuote,
   listMallH5Addresses,
   listMallH5PaymentMethods,
   listMallH5SelectableCoupons,
@@ -12,6 +13,7 @@ import {
   type MallH5PaymentMethodOption,
   type MallH5SelectableCoupon,
 } from "../cart-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 function parseCartItemIds(rawItems: string | null): string[] {
   if (!rawItems) {
@@ -40,68 +42,59 @@ export function SdkworkMallH5CheckoutPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+
+  const loadCheckout = useCallback(async () => {
+    // Address / payment-channel / coupon lookups are enrichments: losing one
+    // must not deny the buyer a payable amount.
+    const [addressRows, methodRows, couponRows] = await Promise.all([
+      listMallH5Addresses().catch(() => [] as MallH5AddressOption[]),
+      listMallH5PaymentMethods().catch(() => [] as MallH5PaymentMethodOption[]),
+      listMallH5SelectableCoupons().catch(() => [] as MallH5SelectableCoupon[]),
+    ]);
+    setAddresses(addressRows);
+    setPaymentMethods(methodRows);
+    setCoupons(couponRows);
+    setSelectedAddressId((current) =>
+      current || addressRows.find((row) => row.isDefault)?.id || addressRows[0]?.id || "",
+    );
+    setSelectedMethodCode((current) => current || methodRows[0]?.code || "");
+    // The quote is the authoritative payable amount: a failed quote blocks
+    // submission instead of letting the buyer order an unknown total.
+    setQuote(await createMallH5CheckoutQuote({ cartItemIds }));
+  }, [cartItemIds]);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
-    const addressesTask = listMallH5Addresses()
-      .then((rows) => {
-        if (!active) {
-          return;
-        }
-        setAddresses(rows);
-        const fallback = rows.find((row) => row.isDefault) ?? rows[0];
-        if (fallback) {
-          setSelectedAddressId(fallback.id);
-        }
-      })
-      .catch(() => {
-        // 地址为可选增强，失败时允许不选。
-      });
-    const methodsTask = listMallH5PaymentMethods()
-      .then((rows) => {
-        if (!active) {
-          return;
-        }
-        setPaymentMethods(rows);
-        if (rows[0]) {
-          setSelectedMethodCode(rows[0].code);
-        }
-      })
-      .catch(() => {
-        // 支付方式加载失败时提交前再校验。
-      });
-    const couponsTask = listMallH5SelectableCoupons()
-      .then((rows) => {
-        if (active) {
-          setCoupons(rows);
-        }
-      })
-      .catch(() => {
-        // 优惠券为可选增强，加载失败时不阻塞结算。
-      });
-    const quoteTask = import("../cart-service")
-      .then((module) => module.createMallH5CheckoutQuote({ cartItemIds }))
-      .then((checkoutQuote) => {
-        if (active) {
-          setQuote(checkoutQuote);
-        }
-      })
+    setQuoteError(null);
+    loadCheckout()
       .catch((cause: unknown) => {
         if (active) {
-          setMessage(cause instanceof Error ? cause.message : "结算报价加载失败");
+          setQuoteError(cause instanceof Error ? cause.message : "结算报价加载失败");
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
         }
       });
-
-    void Promise.allSettled([addressesTask, methodsTask, couponsTask, quoteTask]).finally(() => {
-      if (active) {
-        setLoading(false);
-      }
-    });
     return () => {
       active = false;
     };
-  }, [cartItemIds]);
+  }, [loadCheckout]);
+
+  const retryLoadCheckout = useCallback(() => {
+    setLoading(true);
+    setQuoteError(null);
+    loadCheckout()
+      .catch((cause: unknown) => {
+        setQuoteError(cause instanceof Error ? cause.message : "结算报价加载失败");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [loadCheckout]);
 
   const payableAmount = useMemo(() => quote?.payableAmountCny ?? null, [quote]);
   const selectedCoupon = coupons.find((coupon) => coupon.id === selectedCouponId) ?? null;
@@ -113,6 +106,10 @@ export function SdkworkMallH5CheckoutPage() {
     }
     if (!selectedMethodCode) {
       setMessage("请选择支付方式");
+      return;
+    }
+    if (!quote) {
+      setMessage("结算报价未就绪，请先重试刷新金额");
       return;
     }
     setBusy(true);
@@ -158,6 +155,7 @@ export function SdkworkMallH5CheckoutPage() {
   return (
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">确认订单</h1>
+      {quoteError ? <SdkworkMallH5ErrorState message={quoteError} onRetry={retryLoadCheckout} /> : null}
       {cartItemIds.length > 0 ? (
         <p className="sdk-h5-muted">已选择 {cartItemIds.length} 件购物车商品参与结算</p>
       ) : null}
@@ -255,6 +253,7 @@ export function SdkworkMallH5CheckoutPage() {
       </section>
 
       <section className="sdk-h5-checkout-summary">
+        {quote?.originalAmountCny != null ? <p>商品金额：¥{quote.originalAmountCny.toFixed(2)}</p> : null}
         {quote?.discountAmountCny ? <p>优惠：-¥{quote.discountAmountCny.toFixed(2)}</p> : null}
         {selectedCoupon?.discountAmountCny != null ? (
           <p>已选优惠券：{selectedCoupon.title}（-¥{selectedCoupon.discountAmountCny.toFixed(2)}）</p>
@@ -268,7 +267,7 @@ export function SdkworkMallH5CheckoutPage() {
 
       <button
         className="sdk-h5-button sdk-h5-button-primary sdk-h5-button-block"
-        disabled={busy}
+        disabled={busy || !quote}
         onClick={() => void handleSubmit()}
         type="button"
       >

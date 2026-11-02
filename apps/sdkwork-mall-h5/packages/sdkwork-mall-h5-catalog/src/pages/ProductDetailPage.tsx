@@ -23,6 +23,7 @@ import {
   type MallH5ProductDetail,
   type MallH5ProductOffer,
 } from "../catalog-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 import {
   isMallH5Favorite,
   recordMallH5Footprint,
@@ -59,6 +60,7 @@ export function SdkworkMallH5ProductDetailPage() {
   const [showCompact, setShowCompact] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -73,30 +75,30 @@ export function SdkworkMallH5ProductDetailPage() {
     toastTimer = window.setTimeout(() => setToast(null), 2200);
   }, []);
 
-  useEffect(() => {
+  const loadDetail = useCallback(async () => {
     if (!productId) {
       return;
     }
+    const record = await retrieveMallH5ProductDetail(productId);
+    if (record) {
+      recordMallH5Footprint({
+        id: record.id,
+        imageUrl: record.imageUrl,
+        title: record.title,
+      });
+    }
+    setDetail(record);
+    setSelectedSkuId(record?.skus[0]?.id ?? "");
+  }, [productId]);
+
+  useEffect(() => {
     let active = true;
     setLoading(true);
-    retrieveMallH5ProductDetail(productId)
-      .then((record) => {
-        if (!active) {
-          return;
-        }
-        if (record) {
-          recordMallH5Footprint({
-            id: record.id,
-            imageUrl: record.imageUrl,
-            title: record.title,
-          });
-        }
-        setDetail(record);
-        setSelectedSkuId(record?.skus[0]?.id ?? "");
-      })
+    setLoadError(null);
+    loadDetail()
       .catch((cause: unknown) => {
         if (active) {
-          setMessage(cause instanceof Error ? cause.message : "商品加载失败");
+          setLoadError(cause instanceof Error ? cause.message : "商品加载失败");
         }
       })
       .finally(() => {
@@ -107,7 +109,19 @@ export function SdkworkMallH5ProductDetailPage() {
     return () => {
       active = false;
     };
-  }, [productId]);
+  }, [loadDetail]);
+
+  const retryLoadDetail = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    loadDetail()
+      .catch((cause: unknown) => {
+        setLoadError(cause instanceof Error ? cause.message : "商品加载失败");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [loadDetail]);
 
   useEffect(() => {
     let active = true;
@@ -313,6 +327,18 @@ export function SdkworkMallH5ProductDetailPage() {
     return <div className="sdk-h5-page sdk-h5-loading">加载商品...</div>;
   }
 
+  if (loadError && !detail) {
+    return (
+      <div className="sdk-h5-page">
+        <h1 className="sdk-h5-visually-hidden">商品详情</h1>
+        <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoadDetail} />
+        <div className="sdk-h5-center">
+          <Link className="sdk-h5-button" to="/">回到首页</Link>
+        </div>
+      </div>
+    );
+  }
+
   if (!detail) {
     return (
       <div className="sdk-h5-page">
@@ -373,17 +399,26 @@ export function SdkworkMallH5ProductDetailPage() {
         <span className="sdk-h5-pdp-compact-title">{detail.title}</span>
       </header>
 
+      {loadError ? <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoadDetail} /> : null}
+
       {/* 画廊 */}
       <section className="sdk-h5-pdp-gallery">
         {titleBar}
         {galleryImages.length > 0 ? (
           <>
             <div
+              aria-label="查看商品大图"
               className="sdk-h5-pdp-gallery-track"
               onClick={() => setPreviewOpen(true)}
-              onKeyDown={() => {}}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setPreviewOpen(true);
+                }
+              }}
               ref={galleryRef}
-              role="presentation"
+              role="button"
+              tabIndex={0}
               onScroll={handleGalleryScroll}
             >
               {galleryImages.map((image, index) => (

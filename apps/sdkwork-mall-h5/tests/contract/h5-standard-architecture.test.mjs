@@ -371,3 +371,36 @@ test("H5 pages use the shared error state instead of a bare error div", () => {
     `Use SdkworkMallH5ErrorState (or a notice tone for validation messages):\n${violations.join("\n")}`,
   );
 });
+
+test("H5 pages that report a load failure expose the shared recovery path", () => {
+  // Reporting "<x>加载失败" in a transient toast or a warning notice leaves the
+  // buyer with a broken screen and no way to retry short of reloading the app.
+  // Any page that can surface a load-failure message must render the shared
+  // retry banner, so the recovery path is guaranteed by construction.
+  const packagesRoot = fileURLToPath(new URL("../../packages/", import.meta.url));
+  const violations = [];
+  for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const pagesDirectory = join(packagesRoot, entry.name, "src", "pages");
+    if (!existsSync(pagesDirectory)) {
+      continue;
+    }
+    for (const file of readdirSync(pagesDirectory)) {
+      if (!file.endsWith(".tsx")) {
+        continue;
+      }
+      const source = readFileSync(join(pagesDirectory, file), "utf8");
+      if (source.includes("加载失败") && !source.includes("SdkworkMallH5ErrorState")) {
+        violations.push(`${entry.name}/${file}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    `A page that reports a load failure must render SdkworkMallH5ErrorState with a retry:\n${violations.join("\n")}`,
+  );
+});

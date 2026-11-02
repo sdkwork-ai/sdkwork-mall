@@ -256,14 +256,26 @@ export async function submitMallH5CheckoutOrder(
     throw new Error("订单创建失败");
   }
 
-  if (input.couponId) {
-    await remote.promotions.discountApplications.create({
-      orderId,
-      userCouponId: input.couponId,
-    });
-  }
-
   const warnings: string[] = [];
+
+  if (input.couponId) {
+    // The discount application is keyed by order, so it can only run after the
+    // order exists. A rejected coupon must not surface as a failed checkout
+    // (the order is already created and will be paid): record it as a warning
+    // so the payment-result page tells the buyer the coupon did not apply.
+    try {
+      await remote.promotions.discountApplications.create({
+        orderId,
+        userCouponId: input.couponId,
+      });
+    } catch (cause: unknown) {
+      warnings.push(
+        cause instanceof Error
+          ? `优惠券未生效：${cause.message}`
+          : "优惠券未生效，将按原价结算。",
+      );
+    }
+  }
   if (input.useWallet) {
     try {
       await remote.wallet.holds.create({ assetType: "cash", orderId });

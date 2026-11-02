@@ -19,6 +19,7 @@ import {
   type MallH5AfterSalesOrderContext,
   type MallH5AfterSalesRequest,
 } from "../aftersales-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const MAX_EVIDENCE_FILES = 6;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -51,6 +52,7 @@ export function SdkworkMallH5AfterSalesPage() {
   const [loadingOrder, setLoadingOrder] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     setRequests(await listMallH5AfterSalesRequests());
@@ -61,7 +63,7 @@ export function SdkworkMallH5AfterSalesPage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setMessage(cause instanceof Error ? cause.message : "售后列表加载失败");
+          setLoadError(cause instanceof Error ? cause.message : "售后列表加载失败");
         }
       })
       .finally(() => {
@@ -72,6 +74,18 @@ export function SdkworkMallH5AfterSalesPage() {
     return () => {
       active = false;
     };
+  }, [reload]);
+
+  const retryLoad = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    reload()
+      .catch((cause: unknown) => {
+        setLoadError(cause instanceof Error ? cause.message : "售后列表加载失败");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [reload]);
 
   const applyOrderContext = useCallback((context: MallH5AfterSalesOrderContext) => {
@@ -253,6 +267,8 @@ export function SdkworkMallH5AfterSalesPage() {
   return (
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">售后</h1>
+
+      {loadError ? <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoad} /> : null}
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-warning">{message}</div> : null}
 

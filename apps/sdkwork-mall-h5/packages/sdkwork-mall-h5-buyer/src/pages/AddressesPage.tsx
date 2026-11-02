@@ -15,6 +15,7 @@ import {
   parseMallH5RegionSelection,
   type MallH5RegionSelection,
 } from "../regions";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 interface EditingState {
   address?: MallH5Address;
@@ -54,6 +55,7 @@ export function SdkworkMallH5AddressesPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditingState>({ open: false });
   const [form, setForm] = useState<AddressFormState>({
     addressDetail: "",
@@ -71,7 +73,7 @@ export function SdkworkMallH5AddressesPage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setMessage(cause instanceof Error ? cause.message : "地址加载失败");
+          setLoadError(cause instanceof Error ? cause.message : "地址加载失败");
         }
       })
       .finally(() => {
@@ -82,6 +84,18 @@ export function SdkworkMallH5AddressesPage() {
     return () => {
       active = false;
     };
+  }, [reload]);
+
+  const retryLoad = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    reload()
+      .catch((cause: unknown) => {
+        setLoadError(cause instanceof Error ? cause.message : "地址加载失败");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [reload]);
 
   const cityOptions = useMemo(() => {
@@ -175,6 +189,8 @@ export function SdkworkMallH5AddressesPage() {
   return (
     <div className="sdk-h5-page">
           <h1 className="sdk-h5-visually-hidden">地址管理</h1>
+
+      {loadError ? <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoad} /> : null}
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-danger" role="alert">{message}</div> : null}
 

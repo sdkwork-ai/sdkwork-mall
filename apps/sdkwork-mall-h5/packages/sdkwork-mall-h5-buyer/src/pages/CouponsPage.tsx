@@ -8,6 +8,7 @@ import {
   type MallH5ClaimableCoupon,
   type MallH5UserCoupon,
 } from "../coupons-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5CouponsPage() {
   const [coupons, setCoupons] = useState<MallH5UserCoupon[]>([]);
@@ -16,6 +17,7 @@ export function SdkworkMallH5CouponsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     setCoupons(await listMallH5UserCoupons());
@@ -27,7 +29,7 @@ export function SdkworkMallH5CouponsPage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setMessage(cause instanceof Error ? cause.message : "优惠券加载失败");
+          setLoadError(cause instanceof Error ? cause.message : "优惠券加载失败");
         }
       })
       .finally(() => {
@@ -38,6 +40,18 @@ export function SdkworkMallH5CouponsPage() {
     return () => {
       active = false;
     };
+  }, [reload]);
+
+  const retryLoad = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    reload()
+      .catch((cause: unknown) => {
+        setLoadError(cause instanceof Error ? cause.message : "优惠券加载失败");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [reload]);
 
   async function runAction(action: () => Promise<void>, successMessage: string) {
@@ -61,6 +75,8 @@ export function SdkworkMallH5CouponsPage() {
   return (
     <div className="sdk-h5-page">
           <h1 className="sdk-h5-visually-hidden">领券中心</h1>
+
+      {loadError ? <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoad} /> : null}
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-warning">{message}</div> : null}
 

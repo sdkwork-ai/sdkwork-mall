@@ -7,6 +7,7 @@ import {
 } from "../invoices-service";
 
 import { SdkworkMallH5SelectCell } from "../components/ActionSheet";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5InvoicesPage() {
   const [invoices, setInvoices] = useState<MallH5Invoice[]>([]);
@@ -18,6 +19,7 @@ export function SdkworkMallH5InvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     setInvoices(await listMallH5Invoices());
@@ -28,7 +30,7 @@ export function SdkworkMallH5InvoicesPage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setMessage(cause instanceof Error ? cause.message : "发票加载失败");
+          setLoadError(cause instanceof Error ? cause.message : "发票加载失败");
         }
       })
       .finally(() => {
@@ -39,6 +41,18 @@ export function SdkworkMallH5InvoicesPage() {
     return () => {
       active = false;
     };
+  }, [reload]);
+
+  const retryLoad = useCallback(() => {
+    setLoading(true);
+    setLoadError(null);
+    reload()
+      .catch((cause: unknown) => {
+        setLoadError(cause instanceof Error ? cause.message : "发票加载失败");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [reload]);
 
   async function handleSubmit() {
@@ -78,6 +92,8 @@ export function SdkworkMallH5InvoicesPage() {
   return (
     <div className="sdk-h5-page">
           <h1 className="sdk-h5-visually-hidden">发票</h1>
+
+      {loadError ? <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoad} /> : null}
 
       {message ? <div className="sdk-h5-notice sdk-h5-notice-warning">{message}</div> : null}
 
