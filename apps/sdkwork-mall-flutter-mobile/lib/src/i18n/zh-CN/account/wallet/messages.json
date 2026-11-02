@@ -1,0 +1,22 @@
+{
+  "wallet": {
+    "title": "钱包",
+    "loginRequired": "请先登录后查看钱包",
+    "cashBalance": "现金余额",
+    "points": "积分",
+    "ledgerTitle": "现金流水",
+    "ledgerEmpty": "暂无流水记录",
+    "ledgerFallback": "钱包变动",
+    "pendingNote": "充值与提现将在支付渠道接入后开放。"
+  },
+  "points": {
+    "title": "积分中心",
+    "loginRequired": "请先登录后查看积分",
+    "balance": "积分余额",
+    "lotsTitle": "积分分批",
+    "ledgerTitle": "积分明细",
+    "ledgerEmpty": "暂无积分记录",
+    "ledgerFallback": "积分变动",
+    "expires": "{{time}} 过期"
+  }
+}

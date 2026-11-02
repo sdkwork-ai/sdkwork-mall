@@ -35,7 +35,7 @@ class _SdkworkWalletPageState extends State<SdkworkWalletPage> {
       }
       setState(() {
         _loading = false;
-        _error = '请先登录后查看钱包';
+        _error = SdkworkI18n.t('wallet.loginRequired');
       });
       return;
     }
@@ -74,7 +74,7 @@ class _SdkworkWalletPageState extends State<SdkworkWalletPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('钱包')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('wallet.title'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -99,9 +99,9 @@ class _SdkworkWalletPageState extends State<SdkworkWalletPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              const Text(
-                                '现金余额',
-                                style: TextStyle(color: Colors.white70),
+                              Text(
+                                SdkworkI18n.t('wallet.cashBalance'),
+                                style: const TextStyle(color: Colors.white70),
                               ),
                               Text(
                                 _cashBalanceCny != null
@@ -120,9 +120,9 @@ class _SdkworkWalletPageState extends State<SdkworkWalletPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              const Text(
-                                '积分',
-                                style: TextStyle(color: Colors.white70),
+                              Text(
+                                SdkworkI18n.t('wallet.points'),
+                                style: const TextStyle(color: Colors.white70),
                               ),
                               Text(
                                 _pointsBalance != null
@@ -142,16 +142,16 @@ class _SdkworkWalletPageState extends State<SdkworkWalletPage> {
                   ),
                   if (_error.isNotEmpty)
                     SdkworkInlineError(message: _error, onRetry: _load),
-                  SdkworkSectionHeader(title: '现金流水'),
+                  SdkworkSectionHeader(title: SdkworkI18n.t('wallet.ledgerTitle')),
                   if (_ledger.isEmpty)
-                    const SdkworkEmptyView(message: '暂无流水记录')
+                    SdkworkEmptyView(message: SdkworkI18n.t('wallet.ledgerEmpty'))
                   else
                     ..._ledger.map(_buildLedgerRow),
-                  const Padding(
-                    padding: EdgeInsets.all(16),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Text(
-                      '充值与提现将在支付渠道接入后开放。',
-                      style: TextStyle(color: Colors.black38, fontSize: 12),
+                      SdkworkI18n.t('wallet.pendingNote'),
+                      style: const TextStyle(color: Colors.black38, fontSize: 12),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -174,7 +174,7 @@ class _SdkworkWalletPageState extends State<SdkworkWalletPage> {
           asString(
             row,
             <String>['summary', 'title', 'remark', 'reason', 'type'],
-            fallback: '钱包变动',
+            fallback: SdkworkI18n.t('wallet.ledgerFallback'),
           ),
         ),
         subtitle: occurredAt.isEmpty ? null : Text(formatTime(occurredAt)),
@@ -217,7 +217,7 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
       }
       setState(() {
         _loading = false;
-        _error = '请先登录后查看积分';
+        _error = SdkworkI18n.t('points.loginRequired');
       });
       return;
     }
@@ -250,7 +250,7 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('积分中心')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('points.title'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -269,9 +269,9 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        const Text(
-                          '积分余额',
-                          style: TextStyle(color: Colors.white70),
+                        Text(
+                          SdkworkI18n.t('points.balance'),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         Text(
                           _balance != null ? formatCny(_balance) : '--',
@@ -287,12 +287,12 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
                   if (_error.isNotEmpty)
                     SdkworkInlineError(message: _error, onRetry: _load),
                   if (_lots.isNotEmpty) ...<Widget>[
-                    SdkworkSectionHeader(title: '积分分批'),
+                    SdkworkSectionHeader(title: SdkworkI18n.t('points.lotsTitle')),
                     ..._lots.map(_buildLotRow),
                   ],
-                  SdkworkSectionHeader(title: '积分明细'),
+                  SdkworkSectionHeader(title: SdkworkI18n.t('points.ledgerTitle')),
                   if (_ledger.isEmpty)
-                    const SdkworkEmptyView(message: '暂无积分记录')
+                    SdkworkEmptyView(message: SdkworkI18n.t('points.ledgerEmpty'))
                   else
                     ..._ledger.map(_buildLedgerRow),
                 ],
@@ -314,7 +314,14 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
             fontWeight: FontWeight.w800,
           ),
         ),
-        trailing: expiresAt.isEmpty ? null : Text('${formatTime(expiresAt)} 过期'),
+        trailing: expiresAt.isEmpty
+            ? null
+            : Text(
+                SdkworkI18n.t(
+                  'points.expires',
+                  params: <String, String>{'time': formatTime(expiresAt)},
+                ),
+              ),
       ),
     );
   }
@@ -329,7 +336,7 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
           asString(
             row,
             <String>['summary', 'title', 'remark', 'reason', 'type'],
-            fallback: '积分变动',
+            fallback: SdkworkI18n.t('points.ledgerFallback'),
           ),
         ),
         subtitle: occurredAt.isEmpty ? null : Text(formatTime(occurredAt)),

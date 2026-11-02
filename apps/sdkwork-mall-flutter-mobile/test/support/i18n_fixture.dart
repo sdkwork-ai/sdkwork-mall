@@ -10,6 +10,7 @@ const List<String> _fragments = <String>[
   'lib/src/i18n/zh-CN/support/after-sales/messages.json',
   'lib/src/i18n/zh-CN/account/buyer-hub/messages.json',
   'lib/src/i18n/zh-CN/account/membership/messages.json',
+  'lib/src/i18n/zh-CN/account/wallet/messages.json',
   'lib/src/i18n/zh-CN/account/settings-invoices/messages.json',
   'lib/src/i18n/zh-CN/checkout/confirm-order/messages.json',
 ];
