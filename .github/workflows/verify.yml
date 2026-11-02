@@ -1,14 +1,15 @@
-name: Verify Mall Workspace
+name: Verify Application
 
+# Thin verification entrypoint. Runner setup, dependency checkouts, toolchain
+# versions, and the install command come from the reusable SDKWork CI workflow
+# and `agent.workflow.json`; this file only selects the triggers and the gate
+# scripts. Never add inline setup, install, or gate commands here — declare them
+# in `agent.workflow.json` or the repository's package scripts instead.
 on:
-  pull_request:
-    branches:
-      - main
-      - master
   push:
     branches:
       - main
-      - master
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -16,70 +17,12 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-24.04
-    defaults:
-      run:
-        working-directory: sdkwork-mall
-    steps:
-      - name: Checkout mall
-        uses: actions/checkout@v4
-        with:
-          path: sdkwork-mall
-
-      - name: Checkout commerce foundation
-        uses: actions/checkout@v4
-        with:
-          repository: sdkwork-ai/sdkwork-commerce
-          path: sdkwork-commerce
-          token: ${{ secrets.SDKWORK_RELEASE_TOKEN || github.token }}
-
-      - name: Checkout appbase
-        uses: actions/checkout@v4
-        with:
-          repository: sdkwork-ai/sdkwork-appbase
-          path: sdkwork-appbase
-          token: ${{ secrets.SDKWORK_RELEASE_TOKEN || github.token }}
-
-      - name: Checkout UI
-        uses: actions/checkout@v4
-        with:
-          repository: sdkwork-ai/sdkwork-ui
-          path: sdkwork-ui
-          token: ${{ secrets.SDKWORK_RELEASE_TOKEN || github.token }}
-
-      - name: Checkout SDK commons
-        uses: actions/checkout@v4
-        with:
-          repository: sdkwork-ai/sdkwork-sdk-commons
-          path: sdkwork-sdk-commons
-          token: ${{ secrets.SDKWORK_RELEASE_TOKEN || github.token }}
-
-      - name: Checkout utils
-        uses: actions/checkout@v4
-        with:
-          repository: sdkwork-ai/sdkwork-utils
-          path: sdkwork-utils
-          token: ${{ secrets.SDKWORK_RELEASE_TOKEN || github.token }}
-
-      - name: Checkout core
-        uses: actions/checkout@v4
-        with:
-          repository: sdkwork-ai/sdkwork-core
-          path: sdkwork-core
-          token: ${{ secrets.SDKWORK_RELEASE_TOKEN || github.token }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.33.0
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify workspace
-        run: pnpm run verify
+    uses: sdkwork-ai/sdkwork-github-workflow/.github/workflows/sdkwork-ci.yml@v1
+    with:
+      config_path: agent.workflow.json
+      scripts: verify
+      install_command: pnpm install --frozen-lockfile
+      os_matrix: '["ubuntu-24.04"]'
+      framework_ref: v1
+    secrets:
+      SDKWORK_RELEASE_TOKEN: ${{ secrets.SDKWORK_RELEASE_TOKEN }}
