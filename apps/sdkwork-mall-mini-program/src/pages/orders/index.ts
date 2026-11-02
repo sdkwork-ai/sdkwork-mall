@@ -54,7 +54,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.login") });
+      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
       return;
     }
     this.loadOrders(1);

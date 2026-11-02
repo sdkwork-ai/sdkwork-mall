@@ -58,7 +58,7 @@ Page({
   },
 
   goLogin() {
-    wx.navigateTo({ url: mpCapabilityUrl("account.login") });
+    wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
   },
 
   goSecurity() {

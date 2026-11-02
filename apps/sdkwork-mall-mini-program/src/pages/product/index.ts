@@ -204,7 +204,7 @@ Page({
       return;
     }
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.login") });
+      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
       return;
     }
     if (this.data.maxQuantity != null && this.data.quantity > this.data.maxQuantity) {

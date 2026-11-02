@@ -42,7 +42,7 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Navigation evidence | same test | A capability page exists but nothing links to it (orphan screen) |
 | Router mounting | same test | A route is declared in `routes.ts` but the PC/H5 router never mounts it (`case "<id>"` / `path="<path>"` missing) |
 | Route identity (mobile) | same test | A capability's canonical route id is missing from `mini-program/src/routes/capabilities.ts` or `flutter-mobile/lib/routes/capability_routes.dart`, or points at a different page/path than the contract |
-| Mini-program navigation | `apps/sdkwork-mall-mini-program/tests/capability-navigation.test.mjs` | A page module hard-codes `/pages/...`, or the registry and `app.json` disagree, or a tab capability is not classified for `wx.switchTab` |
+| Mini-program navigation | `apps/sdkwork-mall-mini-program/tests/capability-navigation.test.mjs` | A page module hard-codes `/pages/...`, the registry and `app.json` disagree, a tab capability is not classified for `wx.switchTab`, a page calls `mpCapabilityUrl` with an id the registry does not publish, or a non-tab capability page has no entry from another page |
 | Link integrity (web) | PC + H5 architecture tests | An in-app `to`/`navigate` link targets a path no route contributes |
 | Orphan screens | PC + H5 architecture tests | A registered route has no in-app entry; the page module resolved from the router is excluded so a page cannot link to itself. PC covers storefront routes (buyer/merchant/admin nav is generated from the registry and asserted as such); H5 covers every non-tab route |
 | Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
@@ -149,12 +149,12 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 48/48 pass
+pnpm test:node                                                     → 50/50 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 7/7
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
-  (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 4/4
+  (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 6/6
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
 pnpm typecheck:packages                                            → 46 packages, 0 failed
 pnpm test:vitest                                                   → 68 files / 169 tests pass

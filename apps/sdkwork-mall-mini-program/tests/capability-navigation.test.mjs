@@ -94,3 +94,64 @@ test("tab capabilities are reachable with switchTab rather than navigateTo", () 
     assert.ok(tabBlock.includes(`"${expected}"`), `tab capability ${expected} must be classified`);
   }
 });
+
+test("every capability id referenced by a page exists in the registry", () => {
+  // mpCapabilityUrl() throws on an unknown id, so a typo is a dead navigation
+  // at runtime. This caught `account.login` being passed while the registry
+  // publishes the canonical `account.mall.login`.
+  const registryIds = new Set(registryEntries().map((entry) => entry.routeId));
+  const violations = [];
+  for (const modulePath of collectPageModules(join(sourceRoot, "pages"))) {
+    const source = readFileSync(modulePath, "utf8");
+    const relative = modulePath.replace(sourceRoot, "").replace(/\\/gu, "/");
+    const referenced = [
+      ...[...source.matchAll(/mpCapabilityUrl\(\s*"([^"]+)"/gu)].map((match) => match[1]),
+      ...[...source.matchAll(/capability:\s*"([^"]+)"/gu)].map((match) => match[1]),
+    ];
+    for (const routeId of referenced) {
+      if (!registryIds.has(routeId)) {
+        violations.push(`${relative} → ${routeId}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    `Unknown capability ids (mpCapabilityUrl would throw at runtime):\n${violations.join("\n")}`,
+  );
+});
+
+test("no mini-program capability page is an orphan screen", () => {
+  // Tab capabilities are entered from the tabBar. Every other capability page
+  // needs an entry from another page module; the owning page directory is
+  // excluded so a page cannot reference itself.
+  const tabRouteIds = new Set([
+    "storefront.mall.home",
+    "storefront.mall.categories",
+    "storefront.mall.cart",
+    "buyer.mall.dashboard",
+  ]);
+  const pagesDirectory = join(sourceRoot, "pages");
+  const allModules = collectPageModules(pagesDirectory);
+
+  const orphans = [];
+  for (const entry of registryEntries()) {
+    if (tabRouteIds.has(entry.routeId)) {
+      continue;
+    }
+    const ownerDirectory = join(pagesDirectory, entry.page.split("/")[1]);
+    const referenced = allModules
+      .filter((modulePath) => !modulePath.startsWith(ownerDirectory))
+      .some((modulePath) => readFileSync(modulePath, "utf8").includes(entry.routeId));
+    if (!referenced) {
+      orphans.push(`${entry.routeId} (${entry.page})`);
+    }
+  }
+
+  assert.deepEqual(
+    orphans,
+    [],
+    `Capability pages with no in-app entry (implemented but unreachable):\n${orphans.join("\n")}`,
+  );
+});
