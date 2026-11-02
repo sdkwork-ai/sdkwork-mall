@@ -70,6 +70,39 @@
     </view>
 
     <view class="mp-card">
+      <view class="mp-flex-between checkout-deduct" bindtap="toggleInvoice">
+        <text>需要开具发票</text>
+        <view class="cart-checkbox {{needInvoice ? 'cart-checkbox-on' : ''}}" />
+      </view>
+      <block wx:if="{{needInvoice}}">
+        <view class="mp-flex checkout-invoice-types">
+          <view
+            class="checkout-invoice-type {{invoiceTitleType === 'personal' ? 'checkout-invoice-type-on' : ''}}"
+            bindtap="selectInvoiceTitleType"
+            data-type="personal"
+          >个人</view>
+          <view
+            class="checkout-invoice-type {{invoiceTitleType === 'company' ? 'checkout-invoice-type-on' : ''}}"
+            bindtap="selectInvoiceTitleType"
+            data-type="company"
+          >企业</view>
+        </view>
+        <view class="mp-field">
+          <text class="mp-field-label">发票抬头</text>
+          <input placeholder="个人姓名或公司名称" value="{{invoiceTitle}}" bindinput="onInvoiceTitleInput" />
+        </view>
+        <view class="mp-field" wx:if="{{invoiceTitleType === 'company'}}">
+          <text class="mp-field-label">税号</text>
+          <input placeholder="15-20 位字母或数字" value="{{invoiceTaxNumber}}" bindinput="onInvoiceTaxNumberInput" />
+        </view>
+        <view class="mp-field">
+          <text class="mp-field-label">接收邮箱（选填）</text>
+          <input placeholder="用于接收电子发票" value="{{invoiceEmail}}" bindinput="onInvoiceEmailInput" />
+        </view>
+      </block>
+    </view>
+
+    <view class="mp-card">
       <view class="mp-flex-between" wx:if="{{originalAmountText}}">
         <text>商品金额</text>
         <text>{{originalAmountText}}</text>

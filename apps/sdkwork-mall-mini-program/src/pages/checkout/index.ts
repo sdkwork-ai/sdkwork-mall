@@ -21,6 +21,11 @@ interface CheckoutData {
   useWallet: boolean;
   usePoints: boolean;
   buyerRemark: string;
+  needInvoice: boolean;
+  invoiceTitleType: "company" | "personal";
+  invoiceTitle: string;
+  invoiceTaxNumber: string;
+  invoiceEmail: string;
   quote: MpCheckoutQuote | null;
   quoteError: string;
   payableText: string;
@@ -44,6 +49,11 @@ Page({
     useWallet: false,
     usePoints: false,
     buyerRemark: "",
+    needInvoice: false,
+    invoiceTitleType: "personal",
+    invoiceTitle: "",
+    invoiceTaxNumber: "",
+    invoiceEmail: "",
     quote: null,
     quoteError: "",
     payableText: "--",
@@ -134,6 +144,29 @@ Page({
     this.setData({ buyerRemark: event.detail.value });
   },
 
+  toggleInvoice() {
+    this.setData({ needInvoice: !this.data.needInvoice });
+  },
+
+  selectInvoiceTitleType(event: MpTapEvent) {
+    this.setData({
+      invoiceTitleType:
+        String(event.currentTarget.dataset.type ?? "") === "company" ? "company" : "personal",
+    });
+  },
+
+  onInvoiceTitleInput(event: MpInputEvent) {
+    this.setData({ invoiceTitle: event.detail.value });
+  },
+
+  onInvoiceTaxNumberInput(event: MpInputEvent) {
+    this.setData({ invoiceTaxNumber: event.detail.value });
+  },
+
+  onInvoiceEmailInput(event: MpInputEvent) {
+    this.setData({ invoiceEmail: event.detail.value });
+  },
+
   goAddress() {
     wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.addresses", { picker: "1" }) });
   },
@@ -147,12 +180,44 @@ Page({
       this.showToast(this.data.quoteError || "应付金额未就绪，请重试");
       return;
     }
+    if (this.data.needInvoice) {
+      if (!this.data.invoiceTitle.trim()) {
+        this.showToast(
+          this.data.invoiceTitleType === "company"
+            ? "请填写发票抬头（公司名称）"
+            : "请填写发票抬头（个人姓名）",
+        );
+        return;
+      }
+      if (this.data.invoiceTitleType === "company") {
+        if (!this.data.invoiceTaxNumber.trim()) {
+          this.showToast("请填写企业税号");
+          return;
+        }
+        if (!/^[A-Z0-9]{15,20}$/.test(this.data.invoiceTaxNumber.trim())) {
+          this.showToast("税号格式不正确（15-20 位字母或数字）");
+          return;
+        }
+      }
+    }
     this.setData({ busy: true });
     try {
       const result = await submitOrder({
         addressId: this.data.selectedAddressId,
         cartItemIds: this.data._cartItemIds,
         couponId: this.data.selectedCouponId || undefined,
+        invoiceForm: this.data.needInvoice
+          ? {
+              email: this.data.invoiceEmail.trim() || undefined,
+              taxNumber:
+                this.data.invoiceTitleType === "company"
+                  ? this.data.invoiceTaxNumber.trim()
+                  : undefined,
+              title: this.data.invoiceTitle.trim(),
+              titleType: this.data.invoiceTitleType,
+            }
+          : undefined,
+        needInvoice: this.data.needInvoice,
         useWallet: this.data.useWallet,
         usePoints: this.data.usePoints,
         buyerRemark: this.data.buyerRemark.trim() || undefined,

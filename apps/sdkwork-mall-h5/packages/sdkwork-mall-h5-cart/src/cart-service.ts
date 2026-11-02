@@ -56,11 +56,20 @@ export interface MallH5CheckoutQuote {
   sessionId: string;
 }
 
+export interface MallH5CheckoutInvoiceForm {
+  email?: string;
+  taxNumber?: string;
+  title: string;
+  titleType: "company" | "personal";
+}
+
 export interface MallH5CheckoutSubmitInput {
   addressId?: string;
   buyerRemark?: string;
   cartItemIds?: string[];
   couponId?: string;
+  invoiceForm?: MallH5CheckoutInvoiceForm;
+  needInvoice?: boolean;
   paymentMethodCode?: string;
   usePoints?: boolean;
   useWallet?: boolean;
@@ -247,6 +256,8 @@ export async function submitMallH5CheckoutOrder(
   const orderResponse = await remote.checkout.sessions.orders.create(quote.sessionId, {
     buyerRemark: input.buyerRemark,
     cartItemIds: input.cartItemIds?.length ? input.cartItemIds : undefined,
+    invoiceForm: input.needInvoice ? input.invoiceForm : undefined,
+    needInvoice: input.needInvoice ?? false,
     quoteId: quote.quoteId,
   });
   const order = unwrapSdkworkCommerceResponse<Record<string, unknown>>(orderResponse) ?? {};

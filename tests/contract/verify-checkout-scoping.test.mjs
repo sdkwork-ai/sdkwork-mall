@@ -126,3 +126,81 @@ test("payment-status polling is bounded on every polling root", () => {
     assertContains(entry, entry.file, read(entry.file), entry.patterns);
   }
 });
+
+/**
+ * Invoice selection is part of the confirm-order surface: a buyer who needs an
+ * invoice must be able to declare it before the order exists. PC shipped it;
+ * the three mobile roots did not, so the order contract's `needInvoice` /
+ * `invoiceForm` fields were unreachable there.
+ */
+const INVOICE_ROOTS = [
+  {
+    name: "pc",
+    service: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-cart/src/cart-service.ts",
+    servicePatterns: ["MallCheckoutInvoiceForm", "needInvoice", "invoiceForm"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-cart/src/pages/CartPage.tsx",
+        patterns: ["发票", "taxNumber", "/^[A-Z0-9]{15,20}$/"],
+      },
+    ],
+  },
+  {
+    name: "h5",
+    service: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/cart-service.ts",
+    servicePatterns: ["MallH5CheckoutInvoiceForm", "needInvoice", "invoiceForm"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
+        patterns: ["需要开具发票", "invoiceForm", "/^[A-Z0-9]{15,20}$/u"],
+      },
+    ],
+  },
+  {
+    name: "miniProgram",
+    service: "apps/sdkwork-mall-mini-program/src/services/cart-service.ts",
+    servicePatterns: ["MpCheckoutInvoiceForm", "needInvoice", "invoiceForm"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-mini-program/src/pages/checkout/index.ts",
+        patterns: ["invoiceForm", "/^[A-Z0-9]{15,20}$/"],
+      },
+      {
+        path: "apps/sdkwork-mall-mini-program/src/pages/checkout/index.wxml",
+        patterns: ["需要开具发票", "onInvoiceTitleInput"],
+      },
+    ],
+  },
+  {
+    name: "flutter",
+    service: "apps/sdkwork-mall-flutter-mobile/lib/services/cart_service.dart",
+    servicePatterns: ["needInvoice", "invoiceForm"],
+    pageFiles: [
+      {
+        path: "apps/sdkwork-mall-flutter-mobile/lib/pages/checkout_page.dart",
+        patterns: ["需要开具发票", "invoiceForm", "r'^[A-Z0-9]{15,20}$'"],
+      },
+    ],
+  },
+];
+
+test("every root lets the buyer declare an invoice at checkout", () => {
+  for (const entry of INVOICE_ROOTS) {
+    const service = read(entry.service);
+    for (const pattern of entry.servicePatterns) {
+      assert.ok(
+        service.includes(pattern),
+        `${entry.name} checkout service must contain ${JSON.stringify(pattern)}`,
+      );
+    }
+    for (const pageFile of entry.pageFiles) {
+      const page = read(pageFile.path);
+      for (const pattern of pageFile.patterns) {
+        assert.ok(
+          page.includes(pattern),
+          `${entry.name} ${pageFile.path} must contain ${JSON.stringify(pattern)}`,
+        );
+      }
+    }
+  }
+});

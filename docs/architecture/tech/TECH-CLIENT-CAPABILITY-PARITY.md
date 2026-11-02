@@ -174,11 +174,11 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 66/66 pass
+pnpm test:node                                                     → 67/67 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
-  (tests/contract/verify-checkout-scoping.test.mjs                 → 4/4)
+  (tests/contract/verify-checkout-scoping.test.mjs                 → 5/5)
   (tests/contract/verify-i18n-catalogue.test.mjs                   → 4/4)
   (tests/contract/verify-after-sales-depth.test.mjs                → 1/1)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
@@ -332,6 +332,19 @@ return or exchange, and refresh the case after submission. The mini-program and
 Flutter transports accept per-request headers so the idempotency key rides the
 same seam as auth. `tests/contract/verify-after-sales-depth.test.mjs` pins the
 submission path and the eligibility predicate on every root.
+
+### 6.1.9 Invoice at checkout
+
+The order command accepts `needInvoice` and `invoiceForm`, and PC shipped the
+form: title type (personal/company), title, company tax number with the
+15–20 character validation, and a receiving email. H5, the mini program and
+Flutter sent neither field, so a buyer on a phone could not declare an invoice
+at all and had to file it after the fact.
+
+All four roots now render the invoice section on confirm-order, validate the
+same way (title required, company tax number required and format-checked), and
+submit `needInvoice` + `invoiceForm` with the order. The checkout contract test
+asserts the fields and the validation on every root.
 
 ### 6.2 Per-package typecheck
 

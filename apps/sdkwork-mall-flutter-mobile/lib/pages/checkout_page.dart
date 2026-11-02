@@ -21,6 +21,11 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
   bool _useWallet = false;
   bool _usePoints = false;
   final TextEditingController _remark = TextEditingController();
+  final TextEditingController _invoiceTitle = TextEditingController();
+  final TextEditingController _invoiceTaxNumber = TextEditingController();
+  final TextEditingController _invoiceEmail = TextEditingController();
+  bool _needInvoice = false;
+  String _invoiceTitleType = 'personal';
   num? _payable;
   num? _originalAmount;
   num? _discountAmount;
@@ -47,6 +52,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
   @override
   void dispose() {
     _remark.dispose();
+    _invoiceTitle.dispose();
+    _invoiceTaxNumber.dispose();
+    _invoiceEmail.dispose();
     super.dispose();
   }
 
@@ -137,6 +145,69 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                           hintText: '选填，给商家留言',
                           border: OutlineInputBorder(),
                         ),
+                      ),
+                    ),
+                    _buildSection(
+                      '发票',
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SwitchListTile(
+                            title: const Text('需要开具发票'),
+                            value: _needInvoice,
+                            onChanged: (value) => setState(() => _needInvoice = value),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          if (_needInvoice) ...[
+                            Row(
+                              children: [
+                                ChoiceChip(
+                                  label: const Text('个人'),
+                                  selected: _invoiceTitleType == 'personal',
+                                  onSelected: (_) => setState(
+                                    () => _invoiceTitleType = 'personal',
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ChoiceChip(
+                                  label: const Text('企业'),
+                                  selected: _invoiceTitleType == 'company',
+                                  onSelected: (_) => setState(
+                                    () => _invoiceTitleType = 'company',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            TextField(
+                              controller: _invoiceTitle,
+                              decoration: const InputDecoration(
+                                labelText: '发票抬头',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            if (_invoiceTitleType == 'company') ...[
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: _invoiceTaxNumber,
+                                decoration: const InputDecoration(
+                                  labelText: '税号',
+                                  hintText: '15-20 位字母或数字',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _invoiceEmail,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
+                                labelText: '接收邮箱（选填）',
+                                hintText: '用于接收电子发票',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     Padding(
@@ -311,6 +382,33 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
           .showSnackBar(const SnackBar(content: Text('应付金额未就绪，请重试')));
       return;
     }
+    if (_needInvoice) {
+      final title = _invoiceTitle.text.trim();
+      if (title.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _invoiceTitleType == 'company' ? '请填写发票抬头（公司名称）' : '请填写发票抬头（个人姓名）',
+            ),
+          ),
+        );
+        return;
+      }
+      if (_invoiceTitleType == 'company') {
+        final taxNumber = _invoiceTaxNumber.text.trim();
+        if (taxNumber.isEmpty) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('请填写企业税号')));
+          return;
+        }
+        if (!RegExp(r'^[A-Z0-9]{15,20}$').hasMatch(taxNumber)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('税号格式不正确（15-20 位字母或数字）')),
+          );
+          return;
+        }
+      }
+    }
     setState(() => _busy = true);
     try {
       final orderId = await MallCommerce.instance.cart.submitOrder(
@@ -318,6 +416,17 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
         cartItemIds: _cartItemIds,
         couponId: _selectedCouponId.isEmpty ? null : _selectedCouponId,
         buyerRemark: _remark.text.trim().isEmpty ? null : _remark.text.trim(),
+        invoiceForm: _needInvoice
+            ? <String, dynamic>{
+                'titleType': _invoiceTitleType,
+                'title': _invoiceTitle.text.trim(),
+                if (_invoiceTitleType == 'company')
+                  'taxNumber': _invoiceTaxNumber.text.trim(),
+                if (_invoiceEmail.text.trim().isNotEmpty)
+                  'email': _invoiceEmail.text.trim(),
+              }
+            : null,
+        needInvoice: _needInvoice,
         useWallet: _useWallet,
         usePoints: _usePoints,
       );

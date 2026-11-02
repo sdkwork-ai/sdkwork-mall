@@ -115,6 +115,8 @@ class CartService {
     List<String>? cartItemIds,
     String? couponId,
     String? buyerRemark,
+    Map<String, dynamic>? invoiceForm,
+    bool needInvoice = false,
     bool useWallet = false,
     bool usePoints = false,
   }) async {
@@ -135,6 +137,8 @@ class CartService {
       body: <String, dynamic>{
         'buyerRemark': buyerRemark,
         'quoteId': quote['quoteId'],
+        'needInvoice': needInvoice,
+        if (needInvoice && invoiceForm != null) 'invoiceForm': invoiceForm,
         if (cartItemIds != null && cartItemIds.isNotEmpty)
           'cartItemIds': cartItemIds,
       },

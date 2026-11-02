@@ -51,6 +51,25 @@
   box-sizing: border-box;
 }
 
+.checkout-invoice-types {
+  margin-top: 16rpx;
+}
+
+.checkout-invoice-type {
+  padding: 10rpx 30rpx;
+  margin-right: 16rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid #e5e7eb;
+  font-size: 26rpx;
+  color: #4b5563;
+}
+
+.checkout-invoice-type-on {
+  border-color: #e93b3d;
+  color: #e93b3d;
+  background: #fef2f2;
+}
+
 .checkout-payable {
   font-size: 34rpx;
 }

@@ -34,11 +34,20 @@ export interface MpCheckoutQuote {
   payableAmountCny: number | null;
 }
 
+export interface MpCheckoutInvoiceForm {
+  email?: string;
+  taxNumber?: string;
+  title: string;
+  titleType: "company" | "personal";
+}
+
 export interface MpSubmitOrderOptions {
   buyerRemark?: string;
   cartItemIds?: string[];
   addressId?: string;
   couponId?: string;
+  invoiceForm?: MpCheckoutInvoiceForm;
+  needInvoice?: boolean;
   usePoints?: boolean;
   useWallet?: boolean;
 }
@@ -148,6 +157,8 @@ export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orde
     body: {
       buyerRemark: options.buyerRemark,
       cartItemIds: options.cartItemIds && options.cartItemIds.length ? options.cartItemIds : undefined,
+      invoiceForm: options.needInvoice ? options.invoiceForm : undefined,
+      needInvoice: options.needInvoice ?? false,
       quoteId: quote.quoteId || undefined,
     },
   });

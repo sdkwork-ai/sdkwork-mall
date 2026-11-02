@@ -39,6 +39,11 @@ export function SdkworkMallH5CheckoutPage() {
   const [useWallet, setUseWallet] = useState(false);
   const [usePoints, setUsePoints] = useState(false);
   const [buyerRemark, setBuyerRemark] = useState("");
+  const [needInvoice, setNeedInvoice] = useState(false);
+  const [invoiceTitleType, setInvoiceTitleType] = useState<"company" | "personal">("personal");
+  const [invoiceTitle, setInvoiceTitle] = useState("");
+  const [invoiceTaxNumber, setInvoiceTaxNumber] = useState("");
+  const [invoiceEmail, setInvoiceEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -112,6 +117,24 @@ export function SdkworkMallH5CheckoutPage() {
       setMessage("结算报价未就绪，请先重试刷新金额");
       return;
     }
+    if (needInvoice) {
+      if (!invoiceTitle.trim()) {
+        setMessage(
+          invoiceTitleType === "company" ? "请填写发票抬头（公司名称）" : "请填写发票抬头（个人姓名）",
+        );
+        return;
+      }
+      if (invoiceTitleType === "company") {
+        if (!invoiceTaxNumber.trim()) {
+          setMessage("请填写企业税号");
+          return;
+        }
+        if (!/^[A-Z0-9]{15,20}$/u.test(invoiceTaxNumber.trim())) {
+          setMessage("税号格式不正确（15-20 位字母或数字）");
+          return;
+        }
+      }
+    }
     setBusy(true);
     setMessage(null);
     try {
@@ -120,6 +143,15 @@ export function SdkworkMallH5CheckoutPage() {
         buyerRemark: buyerRemark.trim() || undefined,
         cartItemIds: cartItemIds.length ? cartItemIds : undefined,
         couponId: selectedCouponId || undefined,
+        invoiceForm: needInvoice
+          ? {
+              email: invoiceEmail.trim() || undefined,
+              taxNumber: invoiceTitleType === "company" ? invoiceTaxNumber.trim() : undefined,
+              title: invoiceTitle.trim(),
+              titleType: invoiceTitleType,
+            }
+          : undefined,
+        needInvoice,
         paymentMethodCode: selectedMethodCode,
         usePoints,
         useWallet,
@@ -250,6 +282,69 @@ export function SdkworkMallH5CheckoutPage() {
           rows={2}
           value={buyerRemark}
         />
+      </section>
+
+      <section className="sdk-h5-section">
+        <h2>发票</h2>
+        <label className="sdk-h5-address-row">
+          <input
+            checked={needInvoice}
+            onChange={(event) => setNeedInvoice(event.target.checked)}
+            type="checkbox"
+          />
+          <span>需要开具发票</span>
+        </label>
+        {needInvoice ? (
+          <>
+            <div className="sdk-h5-address-row">
+              <label>
+                <input
+                  checked={invoiceTitleType === "personal"}
+                  name="invoiceTitleType"
+                  onChange={() => setInvoiceTitleType("personal")}
+                  type="radio"
+                />
+                <span>个人</span>
+              </label>
+              <label>
+                <input
+                  checked={invoiceTitleType === "company"}
+                  name="invoiceTitleType"
+                  onChange={() => setInvoiceTitleType("company")}
+                  type="radio"
+                />
+                <span>企业</span>
+              </label>
+            </div>
+            <label className="sdk-h5-field">
+              发票抬头
+              <input
+                aria-label="发票抬头"
+                onChange={(event) => setInvoiceTitle(event.target.value)}
+                value={invoiceTitle}
+              />
+            </label>
+            {invoiceTitleType === "company" ? (
+              <label className="sdk-h5-field">
+                税号
+                <input
+                  aria-label="税号"
+                  onChange={(event) => setInvoiceTaxNumber(event.target.value)}
+                  value={invoiceTaxNumber}
+                />
+              </label>
+            ) : null}
+            <label className="sdk-h5-field">
+              接收邮箱
+              <input
+                aria-label="接收邮箱"
+                inputMode="email"
+                onChange={(event) => setInvoiceEmail(event.target.value)}
+                value={invoiceEmail}
+              />
+            </label>
+          </>
+        ) : null}
       </section>
 
       <section className="sdk-h5-checkout-summary">
