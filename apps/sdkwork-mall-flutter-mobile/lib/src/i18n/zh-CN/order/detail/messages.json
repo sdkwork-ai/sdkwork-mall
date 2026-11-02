@@ -1,0 +1,25 @@
+{
+  "orderDetail": {
+    "title": "订单详情",
+    "loading": "加载订单详情...",
+    "notFound": "订单不存在",
+    "subjectFallback": "订单",
+    "itemsTitle": "商品清单",
+    "itemFallback": "商品",
+    "infoTitle": "订单信息",
+    "orderNo": "订单号",
+    "createdAt": "下单时间",
+    "totalAmount": "订单总额",
+    "paidAmount": "实付金额",
+    "unpaid": "未支付",
+    "paymentMethod": "支付方式",
+    "actions": {
+      "pay": "去支付",
+      "cancel": "取消订单",
+      "confirmReceipt": "确认收货",
+      "afterSales": "申请售后",
+      "logistics": "查看物流",
+      "back": "返回列表"
+    }
+  }
+}

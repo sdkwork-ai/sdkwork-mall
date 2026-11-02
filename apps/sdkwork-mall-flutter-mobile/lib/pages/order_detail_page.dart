@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
@@ -29,11 +30,16 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('订单详情')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('orderDetail.title'))),
       body: _loading
-          ? const SdkworkLoadingView(label: '加载订单详情...')
+          ? SdkworkLoadingView(label: SdkworkI18n.t('orderDetail.loading'))
           : _detail == null
-              ? SdkworkErrorView(message: _error.isEmpty ? '订单不存在' : _error, onRetry: _load)
+              ? SdkworkErrorView(
+                  message: _error.isEmpty
+                      ? SdkworkI18n.t('orderDetail.notFound')
+                      : _error,
+                  onRetry: _load,
+                )
               : ListView(
                   children: [
                     Container(
@@ -48,11 +54,15 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 4),
-                          Text('${_detail!['subject'] ?? '订单'}'),
+                          Text(
+                            '${_detail!['subject'] ?? SdkworkI18n.t('orderDetail.subjectFallback')}',
+                          ),
                         ],
                       ),
                     ),
-                    const SdkworkSectionHeader(title: '商品清单'),
+                    SdkworkSectionHeader(
+                      title: SdkworkI18n.t('orderDetail.itemsTitle'),
+                    ),
                     for (final item in asList(_detail!['items']))
                       ListTile(
                         leading: ClipRRect(
@@ -74,7 +84,7 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
                           ),
                         ),
                         title: Text(
-                          '${asMap(item['spu'])['title'] ?? item['title'] ?? '商品'}',
+                          '${asMap(item['spu'])['title'] ?? item['title'] ?? SdkworkI18n.t('orderDetail.itemFallback')}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -87,18 +97,32 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
                           ),
                         ),
                       ),
-                    const SdkworkSectionHeader(title: '订单信息'),
-                    _buildMetaRow('订单号', '${_detail!['orderId'] ?? _detail!['id'] ?? widget.orderId}'),
-                    _buildMetaRow('下单时间', formatTime('${_detail!['createdAt'] ?? ''}')),
-                    _buildMetaRow('订单总额', formatCny(asNum(_detail!, ['totalAmount', 'totalAmountCny']))),
+                    SdkworkSectionHeader(
+                      title: SdkworkI18n.t('orderDetail.infoTitle'),
+                    ),
                     _buildMetaRow(
-                      '实付金额',
+                      SdkworkI18n.t('orderDetail.orderNo'),
+                      '${_detail!['orderId'] ?? _detail!['id'] ?? widget.orderId}',
+                    ),
+                    _buildMetaRow(
+                      SdkworkI18n.t('orderDetail.createdAt'),
+                      formatTime('${_detail!['createdAt'] ?? ''}'),
+                    ),
+                    _buildMetaRow(
+                      SdkworkI18n.t('orderDetail.totalAmount'),
+                      formatCny(asNum(_detail!, ['totalAmount', 'totalAmountCny'])),
+                    ),
+                    _buildMetaRow(
+                      SdkworkI18n.t('orderDetail.paidAmount'),
                       asNum(_detail!, ['paidAmount', 'paidAmountCny']) != null
                           ? formatCny(asNum(_detail!, ['paidAmount', 'paidAmountCny']))
-                          : '未支付',
+                          : SdkworkI18n.t('orderDetail.unpaid'),
                     ),
                     if ('${_detail!['paymentMethod'] ?? ''}'.isNotEmpty)
-                      _buildMetaRow('支付方式', '${_detail!['paymentMethod']}'),
+                      _buildMetaRow(
+                        SdkworkI18n.t('orderDetail.paymentMethod'),
+                        '${_detail!['paymentMethod']}',
+                      ),
                     const SizedBox(height: 16),
                   ],
                 ),
@@ -130,17 +154,23 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
         children: [
           if (status == 'PENDING_PAYMENT') ...[
             Expanded(
-              child: FilledButton(onPressed: _pay, child: const Text('去支付')),
+              child: FilledButton(
+                onPressed: _pay,
+                child: Text(SdkworkI18n.t('orderDetail.actions.pay')),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: OutlinedButton(onPressed: _cancel, child: const Text('取消订单')),
+              child: OutlinedButton(
+                onPressed: _cancel,
+                child: Text(SdkworkI18n.t('orderDetail.actions.cancel')),
+              ),
             ),
           ] else if (status == 'PENDING_RECEIPT') ...[
             Expanded(
               child: FilledButton(
                 onPressed: _confirmReceipt,
-                child: const Text('确认收货'),
+                child: Text(SdkworkI18n.t('orderDetail.actions.confirmReceipt')),
               ),
             ),
           ] else ...[
@@ -150,7 +180,7 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: _openAfterSales,
-                  child: const Text('申请售后'),
+                  child: Text(SdkworkI18n.t('orderDetail.actions.afterSales')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -162,7 +192,7 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: _openLogistics,
-                  child: const Text('查看物流'),
+                  child: Text(SdkworkI18n.t('orderDetail.actions.logistics')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -170,7 +200,7 @@ class _SdkworkOrderDetailPageState extends State<SdkworkOrderDetailPage> {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => Navigator.of(context).maybePop(),
-                child: const Text('返回列表'),
+                child: Text(SdkworkI18n.t('orderDetail.actions.back')),
               ),
             ),
           ],
