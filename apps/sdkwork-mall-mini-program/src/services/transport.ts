@@ -5,6 +5,7 @@
  * unwrapping, auth headers, timeouts, and error mapping live in exactly one
  * place. Pages and services never call wx.request directly.
  */
+import { readRuntimeEnv } from "../bootstrap/environment";
 import { getAccessToken, getToken } from "./session";
 
 const DEFAULT_TIMEOUT_MS = 15000;
@@ -52,7 +53,7 @@ export interface MpRawResponse {
 
 function getBaseUrl(): string {
   const app = getApp<{ globalData?: { commerceApiBaseUrl?: string } }>();
-  return app?.globalData?.commerceApiBaseUrl || "https://api-dev.sdkwork.com/app/v3/api";
+  return app?.globalData?.commerceApiBaseUrl || readRuntimeEnv().commerceAppApiBaseUrl;
 }
 
 /**

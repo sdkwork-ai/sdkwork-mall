@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 106/106 pass
+pnpm test:node                                                     → 109/109 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -194,6 +194,7 @@ pnpm test:node                                                     → 106/106 p
   (tests/contract/verify-notifications-feed.test.mjs               → 4/4)
   (tests/contract/verify-first-load-split.test.mjs                 → 2/2)
   (tests/contract/verify-runtime-env-profiles.test.mjs             → 5/5)
+  (tests/contract/verify-mp-runtime-env.test.mjs                   → 3/3)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -687,6 +688,25 @@ cross-origin profiles while same-origin profiles keep relative paths. The legacy
 loopback blocks were removed from all 24 browser runtime-env files, and the gate
 asserts no document carries a loopback origin plus that `cloud.production` targets
 `https://api.sdkwork.com`.
+
+### 6.1.28 Mini-program runtime environment (manifest + release fallback)
+
+The mini program resolves its API base URL from `agent.app.config.json` at build
+time (`scripts/build-runtime.mjs`), but the manifest only declared `development`
+and `production`, so test/staging/demo builds exited with
+`unknown environment`. Two further gaps mattered more:
+
+- `transport.getBaseUrl()` hard-coded `https://api-dev.sdkwork.com/app/v3/api` as
+  its last resort, so a release build without injection silently targeted dev;
+- `readRuntimeEnv()` also defaulted to the dev host regardless of release channel.
+
+The manifest now declares all five lifecycle environments with the canonical
+hosts (`api-dev` / `api-test` / `api-staging` / `api-demo` / `api`), the transport
+falls back through `readRuntimeEnv()`, and that resolver inspects
+`wx.getAccountInfoSync().miniProgram.envVersion` so a `release` bundle defaults to
+`https://api.sdkwork.com/app/v3/api` while trial/develop builds stay on dev.
+`tests/contract/verify-mp-runtime-env.test.mjs` pins the manifest matrix, the
+build-time derivation and the release fallback.
 
 ### 6.2 Per-package typecheck
 
