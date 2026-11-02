@@ -1,0 +1,65 @@
+{
+  "home": {
+    "banners": {
+      "recommendAria": "推荐",
+      "carouselAria": "轮播导航",
+      "bannerAria": "第 {{index}} 张横幅",
+      "quality": {
+        "title": "品质生活，一站购齐",
+        "subtitle": "平台自营与品牌商家"
+      },
+      "new": {
+        "title": "新品首发",
+        "subtitle": "每周上新"
+      },
+      "coupon": {
+        "title": "领券中心",
+        "subtitle": "领券下单更划算"
+      },
+      "member": {
+        "title": "会员专区",
+        "subtitle": "专属价与积分回馈"
+      }
+    },
+    "seckill": {
+      "title": "限时秒杀",
+      "countdownAria": "距结束倒计时",
+      "goBuy": "去抢购",
+      "titleMatch": "秒杀,闪购"
+    },
+    "price": {
+      "inquiry": "询价",
+      "sold": "已售 {{count}}"
+    },
+    "error": {
+      "load": "首页加载失败"
+    },
+    "quick": {
+      "aria": "快捷入口",
+      "categories": "分类逛",
+      "new": "新品",
+      "hot": "热卖",
+      "activity": "活动",
+      "coupon": "领券"
+    },
+    "loading": "加载中...",
+    "categoriesAria": "分类导航",
+    "couponEntry": {
+      "aria": "领券中心入口",
+      "text": "领券中心 · 天天领福利"
+    },
+    "sections": {
+      "shops": "热门店铺",
+      "footprint": "最近浏览",
+      "hot": "热卖推荐",
+      "new": "新品上市",
+      "more": "更多服务"
+    },
+    "more": {
+      "help": "帮助中心",
+      "tv": "电视购物",
+      "orders": "我的订单",
+      "settings": "设置"
+    }
+  }
+}

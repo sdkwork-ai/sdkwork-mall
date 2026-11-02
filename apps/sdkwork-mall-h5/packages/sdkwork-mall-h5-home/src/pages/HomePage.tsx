@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   Aperture,
@@ -21,10 +22,10 @@ import { readMallH5Footprint } from "@sdkwork/mall-h5-buyer/favorites-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const HOME_BANNERS = [
-  { id: "banner-quality", linkUrl: "/categories", subtitle: "平台自营与品牌商家", title: "品质生活，一站购齐" },
-  { id: "banner-new", linkUrl: "/search?q=new", subtitle: "每周上新", title: "新品首发" },
-  { id: "banner-coupon", linkUrl: "/buyer/coupons", subtitle: "领券下单更划算", title: "领券中心" },
-  { id: "banner-member", linkUrl: "/buyer/membership", subtitle: "专属价与积分回馈", title: "会员专区" },
+  { id: "banner-quality", linkUrl: "/categories", subtitleKey: "home.banners.quality.subtitle", titleKey: "home.banners.quality.title" },
+  { id: "banner-new", linkUrl: "/search?q=new", subtitleKey: "home.banners.new.subtitle", titleKey: "home.banners.new.title" },
+  { id: "banner-coupon", linkUrl: "/buyer/coupons", subtitleKey: "home.banners.coupon.subtitle", titleKey: "home.banners.coupon.title" },
+  { id: "banner-member", linkUrl: "/buyer/membership", subtitleKey: "home.banners.member.subtitle", titleKey: "home.banners.member.title" },
 ];
 
 const CATEGORY_ICONS: readonly LucideIcon[] = [Cpu, Headphones, HomeIcon, Shirt, Coffee, Watch, Gem, Aperture, ShoppingBag];
@@ -39,6 +40,7 @@ function formatCountdown(totalSeconds: number): string {
 }
 
 function BannerCarousel() {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -51,19 +53,19 @@ function BannerCarousel() {
   }, []);
 
   return (
-    <section aria-label="推荐" className="sdk-h5-banner-carousel">
+    <section aria-label={t("home.banners.recommendAria")} className="sdk-h5-banner-carousel">
       <div className="sdk-h5-banner-track" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
         {HOME_BANNERS.map((banner) => (
           <Link className="sdk-h5-banner" key={banner.id} to={banner.linkUrl}>
-            <h1>{banner.title}</h1>
-            <p>{banner.subtitle}</p>
+            <h1>{t(banner.titleKey)}</h1>
+            <p>{t(banner.subtitleKey)}</p>
           </Link>
         ))}
       </div>
-      <div className="sdk-h5-banner-dots" role="tablist" aria-label="轮播导航">
+      <div className="sdk-h5-banner-dots" role="tablist" aria-label={t("home.banners.carouselAria")}>
         {HOME_BANNERS.map((banner, index) => (
           <button
-            aria-label={`第 ${index + 1} 张横幅`}
+            aria-label={t("home.banners.bannerAria", { index: index + 1 })}
             aria-selected={index === activeIndex}
             className={index === activeIndex ? "sdk-h5-banner-dot sdk-h5-banner-dot-active" : "sdk-h5-banner-dot"}
             key={banner.id}
@@ -78,6 +80,7 @@ function BannerCarousel() {
 }
 
 function SeckillFloor({ offer, products }: { offer: MallH5HomeOffer | undefined; products: MallH5HomeSnapshot["hotProducts"] }) {
+  const { t } = useTranslation();
   const [remainingSeconds, setRemainingSeconds] = useState(() => {
     if (!offer?.endAt) {
       return 0;
@@ -104,12 +107,12 @@ function SeckillFloor({ offer, products }: { offer: MallH5HomeOffer | undefined;
   return (
     <section className="sdk-h5-section sdk-h5-seckill">
       <header className="sdk-h5-seckill-header">
-        <h2>限时秒杀</h2>
-        <span className="sdk-h5-seckill-countdown" aria-label="距结束倒计时">
+        <h2>{t("home.seckill.title")}</h2>
+        <span className="sdk-h5-seckill-countdown" aria-label={t("home.seckill.countdownAria")}>
           {formatCountdown(remainingSeconds)}
         </span>
         <Link className="sdk-h5-seckill-more" to={`/activity/${offer.id}`}>
-          {offer.discountText || "去抢购"} <ArrowRight aria-hidden="true" size={12} />
+          {offer.discountText || t("home.seckill.goBuy")} <ArrowRight aria-hidden="true" size={12} />
         </Link>
       </header>
       {offer.highlight ? <p className="sdk-h5-muted">{offer.highlight}</p> : null}
@@ -120,7 +123,7 @@ function SeckillFloor({ offer, products }: { offer: MallH5HomeOffer | undefined;
               {product.imageUrl ? <img alt={product.title} loading="lazy" src={product.imageUrl} /> : <Search aria-hidden="true" size={20} />}
             </div>
             <div className="sdk-h5-seckill-price">
-              {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "询价"}
+              {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : t("home.price.inquiry")}
             </div>
           </Link>
         ))}
@@ -130,6 +133,7 @@ function SeckillFloor({ offer, products }: { offer: MallH5HomeOffer | undefined;
 }
 
 function ProductCard({ product }: { product: MallH5HomeSnapshot["hotProducts"][number] }) {
+  const { t } = useTranslation();
   return (
     <Link className="sdk-h5-product-card" to={`/product/${product.id}`}>
       <div className="sdk-h5-product-image">
@@ -137,14 +141,19 @@ function ProductCard({ product }: { product: MallH5HomeSnapshot["hotProducts"][n
       </div>
       <div className="sdk-h5-product-title">{product.title}</div>
       <div className="sdk-h5-product-meta">
-        {product.priceCny != null ? <strong>¥{product.priceCny.toFixed(2)}</strong> : <strong>询价</strong>}
-        {product.sales != null ? <span>已售 {product.sales}</span> : null}
+        {product.priceCny != null ? (
+          <strong>¥{product.priceCny.toFixed(2)}</strong>
+        ) : (
+          <strong>{t("home.price.inquiry")}</strong>
+        )}
+        {product.sales != null ? <span>{t("home.price.sold", { count: product.sales })}</span> : null}
       </div>
     </Link>
   );
 }
 
 export function SdkworkMallH5HomePage() {
+  const { t } = useTranslation();
   const [snapshot, setSnapshot] = useState<MallH5HomeSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const footprint = readMallH5Footprint().slice(0, 6);
@@ -160,7 +169,7 @@ export function SdkworkMallH5HomePage() {
       })
       .catch((cause: unknown) => {
         if (active) {
-          setError(cause instanceof Error ? cause.message : "首页加载失败");
+          setError(cause instanceof Error ? cause.message : t("home.error.load"));
         }
       })
       .finally(() => {
@@ -171,30 +180,35 @@ export function SdkworkMallH5HomePage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [t]);
 
-  const flashOffer = useMemo(
-    () => snapshot?.offers.find((offer) => offer.title.includes("秒杀") || offer.title.includes("闪购")) ?? snapshot?.offers[0],
-    [snapshot],
-  );
+  const flashOffer = useMemo(() => {
+    // Campaign titles are server data; the tokens that identify a seckill are
+    // catalogue copy so a locale can describe its own campaign naming.
+    const tokens = t("home.seckill.titleMatch").split(",").map((token) => token.trim()).filter(Boolean);
+    return (
+      snapshot?.offers.find((offer) => tokens.some((token) => offer.title.includes(token)))
+      ?? snapshot?.offers[0]
+    );
+  }, [snapshot, t]);
 
   return (
     <div className="sdk-h5-page">
       <BannerCarousel />
 
-      <section aria-label="快捷入口" className="sdk-h5-quick-row">
-        <Link className="sdk-h5-quick-item" to="/categories">分类逛</Link>
-        <Link className="sdk-h5-quick-item" to="/search?q=new">新品</Link>
-        <Link className="sdk-h5-quick-item" to="/search?sort=sales">热卖</Link>
-        <Link className="sdk-h5-quick-item" to="/activity">活动</Link>
-        <Link className="sdk-h5-quick-item" to="/buyer/coupons">领券</Link>
+      <section aria-label={t("home.quick.aria")} className="sdk-h5-quick-row">
+        <Link className="sdk-h5-quick-item" to="/categories">{t("home.quick.categories")}</Link>
+        <Link className="sdk-h5-quick-item" to="/search?q=new">{t("home.quick.new")}</Link>
+        <Link className="sdk-h5-quick-item" to="/search?sort=sales">{t("home.quick.hot")}</Link>
+        <Link className="sdk-h5-quick-item" to="/activity">{t("home.quick.activity")}</Link>
+        <Link className="sdk-h5-quick-item" to="/buyer/coupons">{t("home.quick.coupon")}</Link>
       </section>
 
-      {loading ? <div className="sdk-h5-loading">加载中...</div> : null}
+      {loading ? <div className="sdk-h5-loading">{t("home.loading")}</div> : null}
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {snapshot?.categories.length ? (
-        <section aria-label="分类导航" className="sdk-h5-section">
+        <section aria-label={t("home.categoriesAria")} className="sdk-h5-section">
           <div className="sdk-h5-category-grid">
             {snapshot.categories.slice(0, 9).map((category, index) => {
               const Icon = CATEGORY_ICONS[index % CATEGORY_ICONS.length];
@@ -211,15 +225,15 @@ export function SdkworkMallH5HomePage() {
 
       <SeckillFloor offer={flashOffer} products={snapshot?.hotProducts ?? []} />
 
-      <Link aria-label="领券中心入口" className="sdk-h5-coupon-entry" to="/buyer/coupons">
+      <Link aria-label={t("home.couponEntry.aria")} className="sdk-h5-coupon-entry" to="/buyer/coupons">
         <Ticket aria-hidden="true" size={18} />
-        <span>领券中心 · 天天领福利</span>
+        <span>{t("home.couponEntry.text")}</span>
         <ArrowRight aria-hidden="true" size={14} />
       </Link>
 
       {snapshot?.featuredShops.length ? (
         <section className="sdk-h5-section">
-          <h2>热门店铺</h2>
+          <h2>{t("home.sections.shops")}</h2>
           <div className="sdk-h5-chip-row">
             {snapshot.featuredShops.map((shop) => (
               <Link key={shop.id} to={`/shop/${shop.id}`}>{shop.name}</Link>
@@ -230,7 +244,7 @@ export function SdkworkMallH5HomePage() {
 
       {footprint.length > 0 ? (
         <section className="sdk-h5-section">
-          <h2>最近浏览</h2>
+          <h2>{t("home.sections.footprint")}</h2>
           <div className="sdk-h5-chip-row">
             {footprint.map((item) => (
               <Link key={`${item.id}-${item.viewedAt}`} to={`/product/${item.id}`}>{item.title || item.id}</Link>
@@ -241,7 +255,7 @@ export function SdkworkMallH5HomePage() {
 
       {snapshot?.hotProducts.length ? (
         <section className="sdk-h5-section">
-          <h2>热卖推荐</h2>
+          <h2>{t("home.sections.hot")}</h2>
           <div className="sdk-h5-product-grid">
             {snapshot.hotProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -252,7 +266,7 @@ export function SdkworkMallH5HomePage() {
 
       {snapshot?.newProducts.length ? (
         <section className="sdk-h5-section">
-          <h2>新品上市</h2>
+          <h2>{t("home.sections.new")}</h2>
           <div className="sdk-h5-product-grid">
             {snapshot.newProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -262,21 +276,21 @@ export function SdkworkMallH5HomePage() {
       ) : null}
 
       {/* 服务入口：让帮助中心 / 电视购物 / 设置 这些非交易页在首页可达，
-          避免出现"已实现但无入口"的孤儿页面。 */}
+          避免出现「已实现但无入口」的孤儿页面。 */}
       <section className="sdk-h5-section">
-        <h2>更多服务</h2>
+        <h2>{t("home.sections.more")}</h2>
         <div className="sdk-h5-quick-grid">
           <Link className="sdk-h5-quick-grid-item" to="/help">
-            <span>帮助中心</span>
+            <span>{t("home.more.help")}</span>
           </Link>
           <Link className="sdk-h5-quick-grid-item" to="/tv">
-            <span>电视购物</span>
+            <span>{t("home.more.tv")}</span>
           </Link>
           <Link className="sdk-h5-quick-grid-item" to="/buyer/orders">
-            <span>我的订单</span>
+            <span>{t("home.more.orders")}</span>
           </Link>
           <Link className="sdk-h5-quick-grid-item" to="/buyer/settings">
-            <span>设置</span>
+            <span>{t("home.more.settings")}</span>
           </Link>
         </div>
       </section>
