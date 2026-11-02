@@ -350,6 +350,7 @@ export function SkuManagementPage() {
                 </p>
               </div>
               <button
+                aria-label="Close"
                 className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
                 onClick={closeDrawer}
                 type="button"

@@ -1,4 +1,4 @@
-import { BrowserRouter, HashRouter, useLocation } from "react-router-dom";
+import { BrowserRouter, HashRouter, matchPath, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { SdkworkAppErrorBoundary } from "@sdkwork/appbase-pc-react";
 import { SdkworkSessionAuthBrowserRoot } from "@sdkwork/auth-pc-react";
@@ -37,6 +37,18 @@ function MallLayout() {
   useEffect(() => runtime.session.subscribe((snapshot) => {
     setIsAuthenticated(hasSdkworkMallPcAuthenticatedSession(snapshot));
   }), []);
+
+  // The document title is the page name in the browser tab, history entries and
+  // assistive-tech announcements. Without this the tab kept the entry document
+  // title on every route.
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    const appName = runtime.config.appDisplayName;
+    const matched = runtime.routes.find((route) => matchPath(route.path, location.pathname));
+    document.title = matched?.title ? `${matched.title} · ${appName}` : appName;
+  }, [location.pathname]);
 
   const shell = useMemo(() => (
     <SdkworkMallPcSurfaceShell

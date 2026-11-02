@@ -174,13 +174,14 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 68/68 pass
+pnpm test:node                                                     → 71/71 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
   (tests/contract/verify-checkout-scoping.test.mjs                 → 6/6)
   (tests/contract/verify-i18n-catalogue.test.mjs                   → 4/4)
   (tests/contract/verify-after-sales-depth.test.mjs                → 1/1)
+  (tests/contract/verify-browser-page-titles.test.mjs              → 3/3)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -358,6 +359,17 @@ check (non-empty, at least 8 characters) with an applied/remove state, and send
 both fields with the order. Fees stay server-quoted: no client-side fee math.
 The checkout contract test asserts the fields, the selector and the redemption
 control on every root.
+
+### 6.1.11 Browser page titles
+
+H5 and PC are single-page apps: the tab title only changes if the shell writes
+it. Both kept the entry document title (SDKWork 商城) on every route, so browser
+history, bookmarks and assistive-technology announcements showed the same name
+for a product page, an order and the wallet. The H5 shell now publishes the
+matched route title (`<page> · SDKWork 商城`) on every navigation, the PC root
+does the same from its route contributions, and
+`tests/contract/verify-browser-page-titles.test.mjs` pins both plus the shared
+entry-document title.
 
 ### 6.2 Per-package typecheck
 

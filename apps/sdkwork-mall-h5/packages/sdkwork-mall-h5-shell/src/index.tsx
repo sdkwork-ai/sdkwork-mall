@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { SdkworkMobileNavBar } from '@sdkwork/shell-mobile-react/navbar';
 import { matchPath, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -152,6 +152,19 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
     matchPath(route.path, location.pathname),
   );
   const navbarTitle = matchedRoute?.title ?? runtime.config.appDisplayName;
+
+  // The document title is the page name in the browser tab, history entries and
+  // assistive-tech announcements. Without this the tab kept the entry document
+  // title ("SDKWork 商城") on every route, including deep links.
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    const appName = runtime.config.appDisplayName;
+    document.title = navbarTitle && navbarTitle !== appName
+      ? `${navbarTitle} · ${appName}`
+      : appName;
+  }, [navbarTitle, runtime.config.appDisplayName]);
 
   function handleSearchSubmit() {
     const trimmed = keyword.trim();
