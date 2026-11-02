@@ -6,6 +6,7 @@ import 'package:sdkwork_mall_flutter_mobile/src/i18n/runtime.dart';
 const List<String> _fragments = <String>[
   'lib/src/i18n/zh-CN/support/help/messages.json',
   'lib/src/i18n/zh-CN/account/buyer-hub/messages.json',
+  'lib/src/i18n/zh-CN/account/settings-invoices/messages.json',
 ];
 
 /// Installs the authored zh-CN fragments into the runtime for widget tests.

@@ -28,6 +28,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(runtime, /installForTest/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/support\/help\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
 
   const main = read(`${appRoot}/lib/main.dart`);
   assert.match(main, /await SdkworkI18n\.load\(\)/u);
@@ -35,6 +36,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   const pubspec = read(`${appRoot}/pubspec.yaml`);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/support\/help\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
 });
 
 test("migrated pages resolve every string from the catalogue", () => {
@@ -50,9 +52,16 @@ test("migrated pages resolve every string from the catalogue", () => {
   assert.match(buyerPage, /SdkworkI18n\.t\(entry\['labelKey'\]/u);
   assert.match(buyerPage, /SdkworkI18n\.t\('buyerHub\.logout\.confirm'\)/u);
 
+  const settingsPage = read(`${appRoot}/lib/pages/settings_and_invoices.dart`);
+  assert.match(settingsPage, /SdkworkI18n\.t\('invoices\.title'\)/u);
+  assert.match(settingsPage, /SdkworkI18n\.t\('invoices\.titleRequired'\)/u);
+  assert.match(settingsPage, /SdkworkI18n\.t\(statusKey\)/u);
+  assert.match(settingsPage, /SdkworkI18n\.t\('settings\.logoutConfirm'\)/u);
+
   for (const pagePath of [
     `${appRoot}/lib/pages/help_page.dart`,
     `${appRoot}/lib/pages/buyer_page.dart`,
+    `${appRoot}/lib/pages/settings_and_invoices.dart`,
   ]) {
     const page = read(pagePath);
     const literalChinese = [...page.matchAll(/'[^'\n]*[\u4e00-\u9fff][^'\n]*'/gu)].map(

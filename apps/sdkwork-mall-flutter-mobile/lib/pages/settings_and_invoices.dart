@@ -6,6 +6,7 @@ import '../bootstrap/environment.dart';
 import '../bootstrap/session.dart';
 import '../services/commerce.dart';
 import '../services/favorites_service.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
@@ -19,12 +20,15 @@ class SdkworkInvoicesPage extends StatefulWidget {
 }
 
 class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
-  static const _titleTypeLabels = <String>['个人', '企业'];
+  static const _titleTypeKeys = <String>[
+    'invoices.titleTypePersonal',
+    'invoices.titleTypeCompany',
+  ];
   static const _titleTypeValues = <String>['personal', 'company'];
-  static const _statusTexts = <String, String>{
-    'pending': '待开具',
-    'issued': '已开具',
-    'cancelled': '已作废',
+  static const _statusKeys = <String, String>{
+    'pending': 'invoices.status.pending',
+    'issued': 'invoices.status.issued',
+    'cancelled': 'invoices.status.cancelled',
   };
 
   bool _loading = true;
@@ -45,7 +49,7 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
     } else {
       setState(() {
         _loading = false;
-        _message = '请先登录后管理发票';
+        _message = SdkworkI18n.t('invoices.loginRequired');
       });
     }
   }
@@ -87,12 +91,12 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
   Future<void> _submit() async {
     final title = _title.text.trim();
     if (title.isEmpty) {
-      setState(() => _message = '请填写发票抬头');
+      setState(() => _message = SdkworkI18n.t('invoices.titleRequired'));
       return;
     }
     final titleType = _titleTypeValues[_titleTypeIndex];
     if (titleType == 'company' && _taxNumber.text.trim().isEmpty) {
-      setState(() => _message = '企业抬头需要填写税号');
+      setState(() => _message = SdkworkI18n.t('invoices.taxRequired'));
       return;
     }
     setState(() {
@@ -112,8 +116,9 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('开票申请已提交')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SdkworkI18n.t('invoices.submitted'))),
+      );
       await _reload();
     } catch (cause) {
       if (!mounted) {
@@ -130,7 +135,7 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('发票')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('invoices.title'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -146,7 +151,9 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
                         style: const TextStyle(color: Colors.redAccent),
                       ),
                     ),
-                  SdkworkSectionHeader(title: '申请开票'),
+                  SdkworkSectionHeader(
+                    title: SdkworkI18n.t('invoices.applySection'),
+                  ),
                   Card(
                     margin: EdgeInsets.zero,
                     child: Padding(
@@ -155,14 +162,17 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           SegmentedButton<int>(
-                            segments: _titleTypeLabels
-                                .map(
-                                  (label) => ButtonSegment<int>(
-                                    value: _titleTypeLabels.indexOf(label),
-                                    label: Text(label),
+                            segments: <ButtonSegment<int>>[
+                              for (var index = 0;
+                                  index < _titleTypeKeys.length;
+                                  index += 1)
+                                ButtonSegment<int>(
+                                  value: index,
+                                  label: Text(
+                                    SdkworkI18n.t(_titleTypeKeys[index]),
                                   ),
-                                )
-                                .toList(),
+                                ),
+                            ],
                             selected: <int>{_titleTypeIndex},
                             onSelectionChanged: (selection) => setState(
                               () => _titleTypeIndex = selection.first,
@@ -171,19 +181,20 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
                           const SizedBox(height: 12),
                           TextField(
                             controller: _title,
-                            decoration: const InputDecoration(
-                              labelText: '发票抬头',
-                              hintText: '个人或企业名称',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: SdkworkI18n.t('invoices.titleLabel'),
+                              hintText: SdkworkI18n.t('invoices.titleHint'),
+                              border: const OutlineInputBorder(),
                             ),
                           ),
                           if (_titleTypeIndex == 1) ...<Widget>[
                             const SizedBox(height: 12),
                             TextField(
                               controller: _taxNumber,
-                              decoration: const InputDecoration(
-                                labelText: '税号',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText:
+                                    SdkworkI18n.t('invoices.taxNumberLabel'),
+                                border: const OutlineInputBorder(),
                               ),
                             ),
                           ],
@@ -191,31 +202,37 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
                           TextField(
                             controller: _email,
                             keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              labelText: '接收邮箱（选填）',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: SdkworkI18n.t('invoices.emailLabel'),
+                              border: const OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 12),
                           TextField(
                             controller: _orderId,
-                            decoration: const InputDecoration(
-                              labelText: '关联订单号（选填）',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: SdkworkI18n.t('invoices.orderIdLabel'),
+                              border: const OutlineInputBorder(),
                             ),
                           ),
                           const SizedBox(height: 16),
                           FilledButton(
                             onPressed: _busy ? null : _submit,
-                            child: Text(_busy ? '提交中...' : '提交开票申请'),
+                            child: Text(
+                              _busy
+                                  ? SdkworkI18n.t('invoices.submitting')
+                                  : SdkworkI18n.t('invoices.submit'),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  SdkworkSectionHeader(title: '我的发票'),
+                  SdkworkSectionHeader(
+                    title: SdkworkI18n.t('invoices.listSection'),
+                  ),
                   if (_invoices.isEmpty)
-                    const SdkworkEmptyView(message: '暂无发票')
+                    SdkworkEmptyView(message: SdkworkI18n.t('invoices.empty'))
                   else
                     ..._invoices.map(_buildInvoiceRow),
                 ],
@@ -227,15 +244,20 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
   Widget _buildInvoiceRow(Map<String, dynamic> row) {
     final amount = asNum(row, <String>['amountCny', 'amount', 'totalAmount']);
     final status = asString(row, <String>['status', 'statusName'], fallback: 'pending');
+    final statusKey = _statusKeys[status.toLowerCase()];
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         title: Text(
-          asString(row, <String>['title', 'invoiceTitle', 'header'], fallback: '发票'),
+          asString(
+            row,
+            <String>['title', 'invoiceTitle', 'header'],
+            fallback: SdkworkI18n.t('invoices.fallbackTitle'),
+          ),
         ),
         subtitle: amount != null ? Text(formatCny(amount)) : null,
         trailing: Text(
-          _statusTexts[status.toLowerCase()] ?? status,
+          statusKey == null ? status : SdkworkI18n.t(statusKey),
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ),
@@ -261,11 +283,11 @@ class SdkworkSettingsPage extends StatelessWidget {
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(SdkworkI18n.t('settings.cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('确定'),
+            child: Text(SdkworkI18n.t('settings.confirm')),
           ),
         ],
       ),
@@ -273,8 +295,9 @@ class SdkworkSettingsPage extends StatelessWidget {
     if (confirmed ?? false) {
       onConfirm();
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('已完成')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(SdkworkI18n.t('settings.done'))),
+        );
       }
     }
   }
@@ -283,34 +306,36 @@ class SdkworkSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final environment = SdkworkMallFlutterEnvironment.fromDefineValues();
     return Scaffold(
-      appBar: AppBar(title: const Text('设置')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('settings.title'))),
       body: ListView(
         children: <Widget>[
-          const SdkworkSectionHeader(title: '本地数据'),
+          SdkworkSectionHeader(
+            title: SdkworkI18n.t('settings.sections.localData'),
+          ),
           Card(
             margin: EdgeInsets.zero,
             child: Column(
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.history_outlined),
-                  title: const Text('清空浏览足迹'),
-                  subtitle: const Text('移除本机保存的浏览记录'),
+                  title: Text(SdkworkI18n.t('settings.clearFootprint')),
+                  subtitle: Text(SdkworkI18n.t('settings.clearFootprintHint')),
                   onTap: () => _confirm(
                     context,
-                    title: '清空浏览足迹',
-                    content: '确定清空全部浏览记录？',
+                    title: SdkworkI18n.t('settings.clearFootprint'),
+                    content: SdkworkI18n.t('settings.clearFootprintConfirm'),
                     onConfirm: () =>
                         unawaited(SdkworkFavoritesStore.clearFootprint()),
                   ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.favorite_outline),
-                  title: const Text('清空收藏'),
-                  subtitle: const Text('移除本机保存的全部收藏'),
+                  title: Text(SdkworkI18n.t('settings.clearFavorites')),
+                  subtitle: Text(SdkworkI18n.t('settings.clearFavoritesHint')),
                   onTap: () => _confirm(
                     context,
-                    title: '清空收藏',
-                    content: '确定移除全部收藏？',
+                    title: SdkworkI18n.t('settings.clearFavorites'),
+                    content: SdkworkI18n.t('settings.clearFavoritesConfirm'),
                     onConfirm: () =>
                         unawaited(SdkworkFavoritesStore.clearFavorites()),
                   ),
@@ -318,7 +343,9 @@ class SdkworkSettingsPage extends StatelessWidget {
               ],
             ),
           ),
-          const SdkworkSectionHeader(title: '账号'),
+          SdkworkSectionHeader(
+            title: SdkworkI18n.t('settings.sections.account'),
+          ),
           Card(
             margin: EdgeInsets.zero,
             child: ListenableBuilder(
@@ -326,35 +353,41 @@ class SdkworkSettingsPage extends StatelessWidget {
               builder: (context, _) => ListTile(
                 leading: const Icon(Icons.person_outline),
                 title: Text(
-                  SdkworkSession.instance.isLoggedIn ? '退出登录' : '登录',
+                  SdkworkSession.instance.isLoggedIn
+                      ? SdkworkI18n.t('settings.logout')
+                      : SdkworkI18n.t('settings.login'),
                 ),
                 subtitle: Text(
-                  SdkworkSession.instance.isLoggedIn ? '清除本机会话凭证' : '登录后同步订单与售后',
+                  SdkworkSession.instance.isLoggedIn
+                      ? SdkworkI18n.t('settings.logoutHint')
+                      : SdkworkI18n.t('settings.loginHint'),
                 ),
                 onTap: SdkworkSession.instance.isLoggedIn
                     ? () => _confirm(
                           context,
-                          title: '退出登录',
-                          content: '确定退出当前账号？',
+                          title: SdkworkI18n.t('settings.logout'),
+                          content: SdkworkI18n.t('settings.logoutConfirm'),
                           onConfirm: () => SdkworkSession.instance.signOut(),
                         )
                     : () => Navigator.of(context).pushNamed('/login'),
               ),
             ),
           ),
-          const SdkworkSectionHeader(title: '关于'),
+          SdkworkSectionHeader(
+            title: SdkworkI18n.t('settings.sections.about'),
+          ),
           Card(
             margin: EdgeInsets.zero,
             child: Column(
               children: <Widget>[
-                const ListTile(
-                  leading: Icon(Icons.info_outline),
-                  title: Text('SDKWork Mall'),
-                  subtitle: Text('Flutter 移动商城'),
+                ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: Text(SdkworkI18n.t('settings.aboutName')),
+                  subtitle: Text(SdkworkI18n.t('settings.aboutSubtitle')),
                 ),
                 ListTile(
                   leading: const Icon(Icons.dns_outlined),
-                  title: const Text('环境'),
+                  title: Text(SdkworkI18n.t('settings.environment')),
                   subtitle: Text(
                     '${environment.environment} · ${environment.deploymentProfile}'
                     ' · ${environment.commerceAppApiBaseUrl}',
