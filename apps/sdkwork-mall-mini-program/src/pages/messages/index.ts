@@ -1,10 +1,16 @@
+import { t } from "../../i18n";
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatTime } from "../../utils/format";
-import { listMessageRows, type MpMessageRow } from "../../services/messages-service";
+import { listNotices } from "../../services/im-service";
 
-interface MpMessageRowView extends MpMessageRow {
+interface MpMessageRowView {
+  id: string;
+  categoryText: string;
+  summary: string;
   timeText: string;
+  title: string;
+  unread: boolean;
   targetUrl: string;
 }
 
@@ -12,6 +18,24 @@ interface MessagesData {
   rows: MpMessageRowView[];
   loading: boolean;
   error: string;
+  loadingText: string;
+  retryText: string;
+  emptyText: string;
+  viewText: string;
+  footnoteText: string;
+}
+
+function categoryLabel(category: string): string {
+  switch (category) {
+    case "trade":
+      return t("messages.categories.trade");
+    case "system":
+      return t("messages.categories.system");
+    case "notice":
+      return t("messages.categories.notice");
+    default:
+      return t("messages.categories.other");
+  }
 }
 
 Page({
@@ -19,26 +43,38 @@ Page({
     rows: [],
     loading: true,
     error: "",
+    loadingText: t("messages.loading"),
+    retryText: t("messages.retry"),
+    emptyText: t("messages.empty"),
+    viewText: t("messages.view"),
+    footnoteText: t("messages.footnote"),
   } as MessagesData,
 
   onShow() {
-    this.loadRows();
+    void this.loadRows();
   },
 
   async loadRows() {
     this.setData({ loading: true, error: "" });
     try {
-      const rows = await listMessageRows();
+      const page = await listNotices();
       this.setData({
-        rows: rows.map((row) => ({
-          ...row,
-          timeText: row.occurredAt ? formatTime(row.occurredAt) : "",
-          targetUrl: row.type === "order" ? mpCapabilityUrl("buyer.mall.orders") : mpCapabilityUrl("buyer.mall.after-sales"),
+        rows: page.items.map((notice) => ({
+          categoryText: categoryLabel(notice.category),
+          id: notice.notificationId,
+          summary: notice.body,
+          targetUrl: mpCapabilityUrl("buyer.mall.im.notices"),
+          timeText: notice.requestedAt ? formatTime(notice.requestedAt) : "",
+          title: notice.title,
+          unread: notice.status === "unread",
         })),
         loading: false,
       });
     } catch (cause) {
-      this.setData({ loading: false, error: errorMessage(cause, "消息加载失败") });
+      this.setData({
+        loading: false,
+        error: errorMessage(cause, t("messages.errors.loadFailed")),
+      });
     }
   },
 
