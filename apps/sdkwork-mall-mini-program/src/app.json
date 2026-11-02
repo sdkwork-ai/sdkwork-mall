@@ -47,10 +47,30 @@
     "color": "#6b7280",
     "selectedColor": "#e93b3d",
     "list": [
-      { "pagePath": "pages/home/index", "text": "首页" },
-      { "pagePath": "pages/category/index", "text": "分类" },
-      { "pagePath": "pages/cart/index", "text": "购物车" },
-      { "pagePath": "pages/buyer/index", "text": "我的" }
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "assets/tabbar/home-outline.png",
+        "selectedIconPath": "assets/tabbar/home-filled.png"
+      },
+      {
+        "pagePath": "pages/category/index",
+        "text": "分类",
+        "iconPath": "assets/tabbar/category-outline.png",
+        "selectedIconPath": "assets/tabbar/category-filled.png"
+      },
+      {
+        "pagePath": "pages/cart/index",
+        "text": "购物车",
+        "iconPath": "assets/tabbar/cart-outline.png",
+        "selectedIconPath": "assets/tabbar/cart-filled.png"
+      },
+      {
+        "pagePath": "pages/buyer/index",
+        "text": "我的",
+        "iconPath": "assets/tabbar/profile-outline.png",
+        "selectedIconPath": "assets/tabbar/profile-filled.png"
+      }
     ]
   },
   "sitemapLocation": "sitemap.json"
