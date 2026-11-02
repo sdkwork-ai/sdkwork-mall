@@ -1,65 +1,78 @@
+import { t } from "../../i18n";
 import { type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 
 interface HelpSection {
-  items: string[];
-  title: string;
+  titleKey: string;
+  itemKeys: string[];
 }
 
 interface HelpQuickLink {
   capability: string;
-  label: string;
+  labelKey: string;
 }
 
 const QUICK_LINKS: HelpQuickLink[] = [
-  { label: "订单查询", capability: "buyer.mall.orders" },
-  { label: "售后服务", capability: "buyer.mall.after-sales" },
-  { label: "发票开具", capability: "buyer.mall.invoices" },
-  { label: "消息通知", capability: "buyer.mall.messages" },
-  { label: "礼品卡", capability: "buyer.mall.gift-cards" },
-  { label: "账户安全", capability: "buyer.mall.security" },
+  { labelKey: "help.quick.orders", capability: "buyer.mall.orders" },
+  { labelKey: "help.quick.afterSales", capability: "buyer.mall.after-sales" },
+  { labelKey: "help.quick.invoices", capability: "buyer.mall.invoices" },
+  { labelKey: "help.quick.messages", capability: "buyer.mall.messages" },
+  { labelKey: "help.quick.giftCards", capability: "buyer.mall.gift-cards" },
+  { labelKey: "help.quick.security", capability: "buyer.mall.security" },
 ];
 
 const HELP_SECTIONS: HelpSection[] = [
   {
-    title: "订单与物流",
-    items: [
-      "在买家中心「我的订单」查看订单状态与物流信息",
-      "未发货前可联系客服尝试修改收货地址",
-      "支付成功后可在「支付结果」页查看支付单号",
+    titleKey: "help.sections.orders.title",
+    itemKeys: [
+      "help.sections.orders.item0",
+      "help.sections.orders.item1",
+      "help.sections.orders.item2",
     ],
   },
   {
-    title: "售后服务",
-    items: [
-      "已完成订单可在「我的评价」查看待评价商品",
-      "在「售后中心」发起退款、退货或换货申请",
-      "售后进度同步至「消息中心」",
+    titleKey: "help.sections.afterSales.title",
+    itemKeys: [
+      "help.sections.afterSales.item0",
+      "help.sections.afterSales.item1",
+      "help.sections.afterSales.item2",
     ],
   },
   {
-    title: "发票与资产",
-    items: [
-      "「发票」页申请电子/纸质发票",
-      "「优惠券」「积分」「我的钱包」统一管理优惠资产",
-      "「礼品卡」页预留红包与礼品卡入口（待 SDK）",
-      "会员权益在「会员中心」查看与续费",
+    titleKey: "help.sections.assets.title",
+    itemKeys: [
+      "help.sections.assets.item0",
+      "help.sections.assets.item1",
+      "help.sections.assets.item2",
+      "help.sections.assets.item3",
     ],
   },
   {
-    title: "账户安全",
-    items: [
-      "通过登录页重新认证以修改密码与绑定手机",
-      "「账户与安全」查看当前登录账户信息",
-      "异常登录请及时修改密码并联系平台客服",
+    titleKey: "help.sections.security.title",
+    itemKeys: [
+      "help.sections.security.item0",
+      "help.sections.security.item1",
+      "help.sections.security.item2",
     ],
   },
 ];
 
 Page({
   data: {
-    sections: HELP_SECTIONS,
-    quickLinks: QUICK_LINKS,
+    title: t("help.title"),
+    subtitle: t("help.subtitle"),
+    quickTitle: t("help.quick.title"),
+    sections: HELP_SECTIONS.map((section) => ({
+      title: t(section.titleKey),
+      items: section.itemKeys.map((itemKey) => t(itemKey)),
+    })),
+    quickLinks: QUICK_LINKS.map((link) => ({
+      label: t(link.labelKey),
+      capability: link.capability,
+    })),
+    contactTitle: t("help.contact.title"),
+    contactOnline: t("help.contact.online"),
+    contactHours: t("help.contact.hours"),
   },
 
   goQuickLink(event: MpTapEvent) {

@@ -24,6 +24,7 @@ function read(relativePath) {
 test("the runtime flattens authored fragments and exposes lookups", () => {
   const runtime = read(`${appRoot}/src/i18n/index.ts`);
   assert.match(runtime, /from "\.\/zh-CN\/account\/buyer-hub\/messages"/u);
+  assert.match(runtime, /from "\.\/zh-CN\/support\/help\/messages"/u);
   assert.match(runtime, /export function t\(/u);
   assert.match(runtime, /export function hasMessage\(/u);
   assert.match(runtime, /\{\{\$\{name\}\}\}/u);
@@ -31,11 +32,14 @@ test("the runtime flattens authored fragments and exposes lookups", () => {
   const fragment = read(`${appRoot}/src/i18n/zh-CN/account/buyer-hub/messages.js`);
   assert.match(fragment, /buyerHub/u);
 
+  const helpFragment = read(`${appRoot}/src/i18n/zh-CN/support/help/messages.js`);
+  assert.match(helpFragment, /help:/u);
+
   const declarations = read(`${appRoot}/src/i18n/zh-CN/account/buyer-hub/messages.d.ts`);
   assert.match(declarations, /export = messages;/u);
 });
 
-test("the buyer hub resolves every label from the catalogue", () => {
+test("the buyer hub and help centre resolve every label from the catalogue", () => {
   const page = read(`${appRoot}/src/pages/buyer/index.ts`);
   assert.match(page, /labelKey: "buyerHub\.orders\.all"/u);
   assert.match(page, /label: t\(entry\.labelKey\)/u);
@@ -43,8 +47,28 @@ test("the buyer hub resolves every label from the catalogue", () => {
   assert.match(page, /t\("buyerHub\.logout\.title"\)/u);
   assert.doesNotMatch(page, /label: "全部订单"/u);
 
-  const chineseLiterals = [...page.matchAll(/"[^"\n]*[\u4e00-\u9fff][^"\n]*"/gu)]
-    .map((match) => match[0])
-    .filter((literal) => !literal.startsWith('"{{'));
-  assert.deepEqual(chineseLiterals, [], "buyer hub must not inline Chinese copy");
+  const helpPage = read(`${appRoot}/src/pages/help/index.ts`);
+  assert.match(helpPage, /labelKey: "help\.quick\.orders"/u);
+  assert.match(helpPage, /title: t\(section\.titleKey\)/u);
+  assert.match(helpPage, /items: section\.itemKeys\.map\(\(itemKey\) => t\(itemKey\)\)/u);
+  assert.match(helpPage, /t\("help\.contact\.hours"\)/u);
+
+  for (const tsPath of [
+    `${appRoot}/src/pages/buyer/index.ts`,
+    `${appRoot}/src/pages/help/index.ts`,
+  ]) {
+    const source = read(tsPath);
+    const chineseLiterals = [...source.matchAll(/"[^"\n]*[\u4e00-\u9fff][^"\n]*"/gu)]
+      .map((match) => match[0])
+      .filter((literal) => !literal.startsWith('"{{'));
+    assert.deepEqual(chineseLiterals, [], `${tsPath} must not inline Chinese copy`);
+  }
+
+  // The help template now renders catalogue-driven data only.
+  const helpTemplate = read(`${appRoot}/src/pages/help/index.wxml`);
+  assert.deepEqual(
+    [...helpTemplate.matchAll(/[\u4e00-\u9fff]+/gu)].map((match) => match[0]),
+    [],
+    "help template must not inline Chinese copy",
+  );
 });

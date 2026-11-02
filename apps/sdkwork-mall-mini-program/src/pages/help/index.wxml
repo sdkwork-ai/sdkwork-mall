@@ -1,11 +1,11 @@
 <view class="page-help">
   <view class="mp-card">
-    <view class="mp-card-title">帮助中心</view>
-    <view class="mp-muted">常见问题与自助服务入口</view>
+    <view class="mp-card-title">{{title}}</view>
+    <view class="mp-muted">{{subtitle}}</view>
   </view>
 
   <view class="mp-card">
-    <view class="mp-card-title">快捷入口</view>
+    <view class="mp-card-title">{{quickTitle}}</view>
     <view class="help-quick-grid">
       <view
         class="help-quick-item"
@@ -23,10 +23,10 @@
   </view>
 
   <view class="mp-card">
-    <view class="mp-card-title">联系客服</view>
+    <view class="mp-card-title">{{contactTitle}}</view>
     <view class="mp-row help-contact" bindtap="goChats">
-      <text class="help-contact-label">在线客服</text>
-      <text class="mp-muted">工作日 9:00–22:00 ></text>
+      <text class="help-contact-label">{{contactOnline}}</text>
+      <text class="mp-muted">{{contactHours}} ></text>
     </view>
   </view>
 </view>

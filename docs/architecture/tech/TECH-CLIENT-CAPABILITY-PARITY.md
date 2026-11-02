@@ -512,10 +512,11 @@ flattens authored fragments into `a.b.c` keys and exposes a synchronous
 `.d.ts` declarations, because the mini-program module system resolves JavaScript
 at runtime rather than JSON.
 
-The buyer hub is the first migrated page (order shortcuts,
-asset/service/account menus and the logout dialog), dropping its hard-coded count
-378 → 353. `tests/contract/verify-mp-i18n-runtime.test.mjs` pins the runtime, the
-fragment wiring and the no-literal rule for migrated pages.
+The buyer hub (order shortcuts, asset/service/account menus and the logout dialog)
+and the help centre (FAQ sections, quick links, contact rows) are the first
+migrated pages, dropping the mini-program's hard-coded count 378 → 330.
+`tests/contract/verify-mp-i18n-runtime.test.mjs` pins the runtime, the fragment
+wiring and the no-literal rule for migrated pages and their WXML templates.
 
 ### 6.2 Per-package typecheck
 
