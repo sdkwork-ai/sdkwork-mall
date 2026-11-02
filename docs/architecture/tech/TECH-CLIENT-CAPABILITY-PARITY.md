@@ -201,7 +201,7 @@ pnpm typecheck:packages                                            → 46 packag
 pnpm test:vitest                                                   → 70 files / 177 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
-flutter test                                                       → 25/25 pass
+flutter test                                                       → 23/23 pass
 node ../sdkwork-specs/tools/verify-repo.mjs --root .               → passed
 node ../sdkwork-specs/tools/check-application-layering.mjs --root .→ passed
 node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
@@ -573,6 +573,20 @@ and order detail pay actions route through `/cashier`. The inline order-service
 
 `tests/contract/verify-payment-channel-wiring.test.mjs` pins the extraction and
 every handoff site.
+
+### 6.1.23 Real notifications in the message centre (H5, mini program, Flutter)
+
+Every mobile message centre used to synthesize its feed locally: the pages merged
+the latest orders and after-sales requests into pseudo-notification rows, even
+though each root already had a real notices plane (`GET /notifications`: iM port on
+H5, transport-seam call on the mini program, generated client on Flutter).
+
+The H5 `/buyer/messages` route now renders the real notifications page, and the
+mini-program and Flutter message centres load the notices API directly (category
+badges, unread marker, timestamps, link into the notice detail). Their local
+composition services and pages were deleted, and the shipment-logistics assertions
+that shared a test file kept their own focused test. This also removed 78
+hard-coded strings across the three roots.
 
 ### 6.2 Per-package typecheck
 
