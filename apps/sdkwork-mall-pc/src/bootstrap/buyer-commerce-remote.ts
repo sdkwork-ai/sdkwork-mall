@@ -1,16 +1,18 @@
 import { getSdkworkCommerceService } from "@sdkwork/mall-commerce-service";
 import { configureSdkworkAfterSalesRemotePort } from "@sdkwork/mall-pc-after-sales";
-import { configureSdkworkMessagesRemotePort } from "@sdkwork/mall-pc-messages";
+import { configureSdkworkMessagesNotificationsPort } from "@sdkwork/mall-pc-messages";
 import { configureSdkworkReviewsRemotePort } from "@sdkwork/mall-pc-reviews";
 import { createDriveUploadImageService } from "@sdkwork/drive-upload-image-core";
 import { configureMallAfterSalesMediaRuntimePort } from "@sdkwork/mall-pc-after-sales";
 import { createSdkworkMallPcDriveAppClient } from "./driveClient";
 import { createSdkworkMallPcSessionTokenManager } from "./sessionTokenManager";
+import type { SdkworkMallPcSdkClientInventory } from "./sdkClients";
 import { SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD } from "./uploadDeclaration";
 import type { SdkworkMallPcRuntimeConfig } from "./environment";
 
 export function configureSdkworkMallPcBuyerCommerceRemotePorts(input: {
   config: SdkworkMallPcRuntimeConfig;
+  sdkClients: SdkworkMallPcSdkClientInventory;
   tokenManager: ReturnType<typeof createSdkworkMallPcSessionTokenManager>;
 }): void {
   configureSdkworkMallPcBuyerAfterSalesMediaPort(input.config, input.tokenManager);
@@ -22,12 +24,15 @@ export function configureSdkworkMallPcBuyerCommerceRemotePorts(input: {
     },
   });
 
-  configureSdkworkMessagesRemotePort({
-    listAfterSalesRequests(query) {
-      return commerce().afterSales.requests.list(query);
+  configureSdkworkMessagesNotificationsPort({
+    listNotifications(query) {
+      return input.sdkClients.imAppClient.notifications.list({
+        cursor: query.cursor,
+        pageSize: query.pageSize,
+      });
     },
-    listOrders(query) {
-      return commerce().orders.list(query);
+    retrieveNotification(notificationId) {
+      return input.sdkClients.imAppClient.notifications.retrieve(notificationId);
     },
   });
 

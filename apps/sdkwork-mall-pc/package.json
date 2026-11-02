@@ -35,6 +35,7 @@
     "@sdkwork/iam-contracts": "workspace:*",
     "@sdkwork/iam-credential-entry": "workspace:*",
     "@sdkwork/iam-runtime": "workspace:*",
+    "@sdkwork/im-app-sdk": "workspace:*",
     "@sdkwork/mall-commerce-sdk-ports": "workspace:*",
     "@sdkwork/mall-commerce-service": "workspace:*",
     "@sdkwork/mall-pc-activity": "workspace:*",

@@ -1542,6 +1542,9 @@ importers:
       '@sdkwork/iam-runtime':
         specifier: workspace:*
         version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-runtime
+      '@sdkwork/im-app-sdk':
+        specifier: workspace:*
+        version: link:../../../sdkwork-im/sdks/sdkwork-im-app-sdk/sdkwork-im-app-sdk-typescript
       '@sdkwork/mall-commerce-sdk-ports':
         specifier: workspace:*
         version: link:packages/sdkwork-mall-commerce-sdk-ports

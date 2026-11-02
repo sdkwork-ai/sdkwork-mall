@@ -10,6 +10,7 @@ import { normalizeSdkworkApiBaseUrl } from "@sdkwork/runtime-bootstrap";
 import { createClient as createAccountAppClient } from "@sdkwork/account-app-sdk";
 import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk/domains";
 import { createClient as createCommerceBackendClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
+import { createClient as createImAppClient } from "@sdkwork/im-app-sdk";
 import { createClient as createMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import { createClient as createOrderAppClient } from "@sdkwork/order-app-sdk";
 import { createClient as createPaymentAppClient } from "@sdkwork/payment-app-sdk";
@@ -134,6 +135,9 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
   const membershipAppClient = createMembershipAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.membership),
   );
+  const imAppClient = createImAppClient(
+    createAppClientConfig("sdkwork-im-app-sdk"),
+  );
   const orderAppClient = createOrderAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.order),
   );
@@ -148,6 +152,7 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
   commerceAppClient.setTokenManager(tokenManager);
   commerceBackendClient?.setTokenManager(tokenManager);
   membershipAppClient.setTokenManager(tokenManager);
+  imAppClient.setTokenManager(tokenManager);
   orderAppClient.setTokenManager(tokenManager);
   paymentAppClient.setTokenManager(tokenManager);
   promotionAppClient.setTokenManager(tokenManager);
@@ -160,6 +165,7 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
       : undefined,
     commerceAppClient,
     commerceBackendClient,
+    imAppClient,
     membershipAppClient,
     orderAppClient,
     paymentAppClient,
@@ -169,6 +175,7 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
         "sdkwork-account-app-sdk",
         "sdkwork-commerce-app-sdk",
         "sdkwork-iam-app-sdk",
+        "sdkwork-im-app-sdk",
         "sdkwork-membership-app-sdk",
         "sdkwork-order-app-sdk",
         "sdkwork-payment-app-sdk",

@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 94/94 pass
+pnpm test:node                                                     → 98/98 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -191,6 +191,7 @@ pnpm test:node                                                     → 94/94 pas
   (tests/contract/verify-invoice-tax-validation.test.mjs          → 2/2)
   (tests/contract/verify-membership-purchase.test.mjs             → 4/4)
   (tests/contract/verify-payment-channel-wiring.test.mjs           → 4/4)
+  (tests/contract/verify-notifications-feed.test.mjs               → 4/4)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -587,6 +588,21 @@ badges, unread marker, timestamps, link into the notice detail). Their local
 composition services and pages were deleted, and the shipment-logistics assertions
 that shared a test file kept their own focused test. This also removed 78
 hard-coded strings across the three roots.
+
+### 6.1.24 Real notifications in the PC message centre
+
+The PC message centre was the last synthesized feed: it merged the latest orders
+and after-sales requests into pseudo-message rows and told the buyer to wait for a
+"T1 message API". The notifications plane already exists, so the bootstrap now
+creates the generated `@sdkwork/im-app-sdk` client (token-manager wired like every
+other family, registered in the SDK-family inventory) and satisfies a
+notifications port with its `notifications.list` / `notifications.retrieve`.
+
+The message centre loads that real data with cursor pagination, category tabs
+(交易/系统/提醒), unread markers, expandable detail retrieved on demand and a retry
+action on failure. `tests/contract/verify-mall-standard-architecture.test.mjs` was
+updated to pin the new port and loader, and the i18n baseline was refreshed for the
+new PC page copy (1452 → 1463).
 
 ### 6.2 Per-package typecheck
 

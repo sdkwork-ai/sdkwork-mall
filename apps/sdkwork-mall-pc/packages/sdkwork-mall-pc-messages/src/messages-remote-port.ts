@@ -1,19 +1,28 @@
-export interface SdkworkMessagesRemotePort {
-  listAfterSalesRequests(query: Record<string, unknown>): Promise<unknown>;
-  listOrders(query: Record<string, unknown>): Promise<unknown>;
+/**
+ * Remote port for the IM notification plane.
+ *
+ * The port is satisfied by the app bootstrap with the generated
+ * `@sdkwork/im-app-sdk` notifications client, so this package never touches the
+ * SDK transport directly (building-block rule: pages -> service -> port).
+ */
+export interface SdkworkMessagesNotificationsPort {
+  listNotifications(query: { cursor?: string; pageSize?: number }): Promise<unknown>;
+  retrieveNotification(notificationId: string): Promise<unknown>;
 }
 
-let messagesRemotePort: SdkworkMessagesRemotePort | null = null;
+let messagesNotificationsPort: SdkworkMessagesNotificationsPort | null = null;
 
-export function configureSdkworkMessagesRemotePort(port: SdkworkMessagesRemotePort | null): void {
-  messagesRemotePort = port;
+export function configureSdkworkMessagesNotificationsPort(
+  port: SdkworkMessagesNotificationsPort | null,
+): void {
+  messagesNotificationsPort = port;
 }
 
-export function getSdkworkMessagesRemotePort(): SdkworkMessagesRemotePort {
-  if (!messagesRemotePort) {
+export function getSdkworkMessagesNotificationsPort(): SdkworkMessagesNotificationsPort {
+  if (!messagesNotificationsPort) {
     throw new Error(
-      "SDKWork messages remote port is not configured. Call configureSdkworkMessagesRemotePort() from mall PC bootstrap.",
+      "SDKWork messages notifications port is not configured. Call configureSdkworkMessagesNotificationsPort() from mall PC bootstrap.",
     );
   }
-  return messagesRemotePort;
+  return messagesNotificationsPort;
 }

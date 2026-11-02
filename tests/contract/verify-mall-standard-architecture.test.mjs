@@ -582,8 +582,8 @@ test("mall PC CMS remote persistence and route permission guards are wired", () 
   assert.match(reviewsServiceSource, /loadMallPendingReviewOrders/);
 
   const messagesServiceSource = read("apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-messages/src/messages-service.ts");
-  assert.match(messagesServiceSource, /getSdkworkMessagesRemotePort/);
-  assert.match(messagesServiceSource, /loadMallMessageCenterRows/);
+  assert.match(messagesServiceSource, /getSdkworkMessagesNotificationsPort/);
+  assert.match(messagesServiceSource, /loadMallMessageCenterPage/);
 
   const shopSource = read("apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-shop/src/pages/ShopPage.tsx");
   assert.match(shopSource, /toggleMallShopFavorite/);

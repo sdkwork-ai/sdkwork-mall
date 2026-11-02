@@ -1,46 +1,80 @@
-import { unwrapSdkworkPaymentResponse } from "@sdkwork/payment-service";
+import { getSdkworkMessagesNotificationsPort } from "./messages-remote-port";
 
-import { getSdkworkMessagesRemotePort } from "./messages-remote-port";
+export type MallMessageCategory = "notice" | "other" | "system" | "trade";
 
 export interface MallMessageRow {
   body: string;
-  createdAt?: string;
+  category: MallMessageCategory;
   id: string;
+  requestedAt?: string;
+  status: string;
   title: string;
-  type: "after-sales" | "order";
 }
 
-export async function loadMallMessageCenterRows(): Promise<MallMessageRow[]> {
-  const remote = getSdkworkMessagesRemotePort();
-  const [ordersResult, afterSalesResult] = await Promise.allSettled([
-    remote.listOrders({ page: 1, page_size: 10 }),
-    remote.listAfterSalesRequests({ page: 1, page_size: 10 }),
-  ]);
+export interface MallMessagePage {
+  items: MallMessageRow[];
+  nextCursor?: string;
+}
 
-  const rows: MallMessageRow[] = [];
-  if (ordersResult.status === "fulfilled") {
-    const payload = unwrapSdkworkPaymentResponse(ordersResult.value) as { items?: Record<string, unknown>[] };
-    for (const item of payload.items ?? []) {
-      rows.push({
-        id: `order-${String(item.id ?? "")}`,
-        type: "order",
-        title: `订单更新：${String(item.subject ?? item.id ?? "")}`,
-        body: `状态：${String(item.status ?? "unknown")}`,
-        createdAt: typeof item.createdAt === "string" ? item.createdAt : undefined,
-      });
+function readString(record: Record<string, unknown>, keys: readonly string[], fallback = ""): string {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value) {
+      return value;
     }
   }
-  if (afterSalesResult.status === "fulfilled") {
-    const payload = unwrapSdkworkPaymentResponse(afterSalesResult.value) as { items?: Record<string, unknown>[] };
-    for (const item of payload.items ?? []) {
-      rows.push({
-        id: `after-sales-${String(item.id ?? "")}`,
-        type: "after-sales",
-        title: `售后更新：${String(item.id ?? "")}`,
-        body: `状态：${String(item.status ?? "processing")}`,
-        createdAt: typeof item.createdAt === "string" ? item.createdAt : undefined,
-      });
-    }
-  }
-  return rows;
+  return fallback;
+}
+
+function normalizeCategory(value: string): MallMessageCategory {
+  const normalized = value.toLowerCase();
+  return normalized === "system" || normalized === "trade" || normalized === "notice"
+    ? normalized
+    : "other";
+}
+
+function mapRow(record: Record<string, unknown>): MallMessageRow {
+  return {
+    body: readString(record, ["body"]),
+    category: normalizeCategory(readString(record, ["category"], "system")),
+    id: readString(record, ["notificationId", "id"]),
+    requestedAt: readString(record, ["requestedAt"]) || undefined,
+    status: readString(record, ["status"], "read"),
+    title: readString(record, ["title"], "消息通知"),
+  };
+}
+
+/**
+ * Loads the buyer's notifications from the real notifications plane.
+ *
+ * No local synthesis: rows come straight from `GET /notifications` through the
+ * generated IM client, so titles, categories, bodies and unread state are
+ * server-owned.
+ */
+export async function loadMallMessageCenterPage(cursor?: string): Promise<MallMessagePage> {
+  const response = await getSdkworkMessagesNotificationsPort().listNotifications({
+    cursor: cursor || undefined,
+    pageSize: 20,
+  });
+  const payload = (response ?? {}) as {
+    items?: unknown;
+    pageInfo?: { nextCursor?: string };
+  };
+  const items = Array.isArray(payload.items)
+    ? payload.items.filter(
+        (entry): entry is Record<string, unknown> =>
+          Boolean(entry) && typeof entry === "object",
+      )
+    : [];
+  return {
+    items: items.map(mapRow).filter((row) => row.id !== ""),
+    nextCursor: typeof payload.pageInfo?.nextCursor === "string" ? payload.pageInfo.nextCursor : undefined,
+  };
+}
+
+export async function retrieveMallMessage(notificationId: string): Promise<MallMessageRow | null> {
+  const record = await getSdkworkMessagesNotificationsPort().retrieveNotification(notificationId);
+  return record && typeof record === "object"
+    ? mapRow(record as Record<string, unknown>)
+    : null;
 }
