@@ -1,0 +1,43 @@
+{
+  "membership": {
+    "title": "会员中心",
+    "loading": "加载会员信息...",
+    "loadFailed": "会员信息加载失败",
+    "defaultLevel": "普通会员",
+    "heroSubtitle": "开通会员享专属价、积分回馈与优先客服",
+    "benefits": {
+      "title": "会员权益",
+      "price": {
+        "title": "会员专属价",
+        "description": "会员商品专属优惠价"
+      },
+      "points": {
+        "title": "积分回馈",
+        "description": "下单积分多倍累计"
+      },
+      "support": {
+        "title": "优先客服",
+        "description": "专属客服优先接入"
+      },
+      "afterSales": {
+        "title": "售后保障",
+        "description": "会员专属售后通道"
+      }
+    },
+    "plans": {
+      "title": "会员方案",
+      "empty": "方案即将上线，敬请期待",
+      "duration": "{{days}} 天",
+      "recommended": "推荐",
+      "open": "立即开通",
+      "renew": "立即续费",
+      "opening": "开通中...",
+      "success": "会员开通成功",
+      "pending": "已提交，权益到账后生效",
+      "failed": "开通失败，请稍后再试",
+      "signInRequired": "请先登录后开通会员",
+      "payFailed": "获取支付方式失败，请稍后再试",
+      "expire": "有效期至 {{date}}"
+    }
+  }
+}

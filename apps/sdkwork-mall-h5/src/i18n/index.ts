@@ -19,6 +19,7 @@ import home from "./zh-CN/storefront/home/messages.json";
 import buyerHub from "./zh-CN/account/buyer-hub/messages.json";
 import addresses from "./zh-CN/account/addresses/messages.json";
 import invoices from "./zh-CN/account/invoices/messages.json";
+import membership from "./zh-CN/account/membership/messages.json";
 import orderDetail from "./zh-CN/order/detail/messages.json";
 import orderList from "./zh-CN/order/list/messages.json";
 
@@ -35,6 +36,7 @@ export const SDKWORK_MALL_H5_I18N_RESOURCES = {
       ...help,
       ...home,
       ...invoices,
+      ...membership,
       ...orderDetail,
       ...orderList,
       ...paymentResult,

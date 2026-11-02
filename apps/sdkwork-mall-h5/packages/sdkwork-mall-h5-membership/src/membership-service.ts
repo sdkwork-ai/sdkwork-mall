@@ -1,58 +1,104 @@
 import {
   getSdkworkMembershipService,
   hasSdkworkMembershipSession,
+  requireSdkworkMembershipSession,
+  toNullableSdkworkMembershipNumber,
+  toSdkworkMembershipMutationStatus,
+  toSdkworkMembershipNumber,
+  toSdkworkMembershipOptionalString,
+  unwrapSdkworkMembershipPageItems,
   unwrapSdkworkMembershipResponse,
 } from "@sdkwork/membership-service";
 
 export interface MallH5MembershipStatus {
+  expireTime?: string;
+  isMember: boolean;
+  /** Server-provided plan name; empty when the backend sends none. */
   levelName: string;
-  status: string;
 }
 
-export interface MallH5MembershipPlan {
-  id: string;
-  title: string;
+export interface MallH5MembershipPackage {
+  description?: string;
+  durationDays: number | null;
+  id: number;
+  name: string;
+  priceCny: number | null;
+  recommended: boolean;
 }
 
-function readString(record: Record<string, unknown>, keys: readonly string[]): string {
-  for (const key of keys) {
-    const value = record[key];
-    if (value !== undefined && value !== null && String(value).trim() !== "") {
-      return String(value);
-    }
+export interface MallH5MembershipPurchaseResult {
+  amountCny: number | null;
+  orderId?: string;
+  packageName?: string;
+  status: "completed" | "failed" | "pending";
+}
+
+function mapStatus(payload: unknown): MallH5MembershipStatus | null {
+  const record = unwrapSdkworkMembershipResponse<Record<string, unknown> | null>(payload);
+  if (!record) {
+    return null;
   }
-  return "";
+  const isMember = Boolean(record.active);
+  return {
+    expireTime: toSdkworkMembershipOptionalString(record.expireTime),
+    isMember,
+    levelName: toSdkworkMembershipOptionalString(record.planName) ?? "",
+  };
 }
 
+function mapPackages(payload: unknown): MallH5MembershipPackage[] {
+  return unwrapSdkworkMembershipPageItems<Record<string, unknown>>(payload).map(
+    (row, index) => ({
+      description: toSdkworkMembershipOptionalString(row.description),
+      durationDays: toNullableSdkworkMembershipNumber(row.durationDays),
+      id: toSdkworkMembershipNumber(row.id) || index + 1,
+      name: toSdkworkMembershipOptionalString(row.name) || `#${index + 1}`,
+      priceCny: toNullableSdkworkMembershipNumber(row.price),
+      recommended: Boolean(row.recommended),
+    }),
+  );
+}
+
+/**
+ * Loads the membership centre: purchasable packages are public, current status
+ * needs a session. A failure in either lookup must not hide the packages.
+ */
 export async function loadMallH5Membership(): Promise<{
-  plans: MallH5MembershipPlan[];
+  packages: MallH5MembershipPackage[];
   status: MallH5MembershipStatus | null;
 }> {
-  if (!hasSdkworkMembershipSession()) {
-    return { plans: [], status: null };
-  }
   const service = getSdkworkMembershipService();
-  const [statusPayload, plansPayload] = await Promise.all([
-    service.memberships.current.status.retrieve().catch(() => null),
-    service.memberships.plans.list({ page: 1, pageSize: 20 }).catch(() => null),
-  ]);
-  const status = statusPayload
-    ? (unwrapSdkworkMembershipResponse<Record<string, unknown>>(statusPayload) ?? {})
-    : {};
-  const plansPage = plansPayload
-    ? (unwrapSdkworkMembershipResponse<{ content?: Record<string, unknown>[]; items?: Record<string, unknown>[] }>(plansPayload) ?? {})
-    : {};
-  const rows = plansPage.content ?? plansPage.items ?? [];
+  const packagesPayload = await service.memberships.packages.list().catch(() => null);
+  const packages = packagesPayload ? mapPackages(packagesPayload) : [];
+  let status: MallH5MembershipStatus | null = null;
+  if (hasSdkworkMembershipSession()) {
+    const statusPayload = await service.memberships.current.status.retrieve().catch(() => null);
+    status = statusPayload ? mapStatus(statusPayload) : null;
+  }
+  return { packages, status };
+}
+
+/**
+ * Purchases/renews a membership package. The membership service charges the
+ * selected payment method server-side and returns the resulting status, so the
+ * mobile client never assembles a payment intent itself.
+ */
+export async function purchaseMallH5Membership(input: {
+  packageId: number;
+  paymentMethod?: string;
+}): Promise<MallH5MembershipPurchaseResult> {
+  requireSdkworkMembershipSession("请先登录后开通会员");
+  const payload = await getSdkworkMembershipService().memberships.purchases.create({
+    packageId: input.packageId,
+    paymentMethod: toSdkworkMembershipOptionalString(input.paymentMethod),
+  });
+  const record = unwrapSdkworkMembershipResponse<Record<string, unknown>>(payload) ?? {};
   return {
-    plans: rows.map((row, index) => ({
-      id: readString(row, ["id", "planId"]) || `plan-${index + 1}`,
-      title: readString(row, ["title", "name", "levelName"]) || `会员方案 ${index + 1}`,
-    })),
-    status: status.levelName || status.status
-      ? {
-          levelName: readString(status, ["levelName", "level"]) || "普通会员",
-          status: readString(status, ["status", "statusName"]) || "active",
-        }
-      : null,
+    amountCny: toNullableSdkworkMembershipNumber(record.amount),
+    orderId: toSdkworkMembershipOptionalString(record.orderId),
+    packageName: toSdkworkMembershipOptionalString(record.packageName),
+    status: toSdkworkMembershipMutationStatus(
+      toSdkworkMembershipOptionalString(record.status),
+    ),
   };
 }
