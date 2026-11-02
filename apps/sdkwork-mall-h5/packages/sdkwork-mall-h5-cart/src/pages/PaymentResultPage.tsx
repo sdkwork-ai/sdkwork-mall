@@ -112,7 +112,11 @@ export function SdkworkMallH5PaymentResultPage() {
         setMessage(t("paymentResult.noPaymentMethod"));
         return;
       }
-      const nextPaymentId = await retryMallH5OrderPayment(orderId, paymentMethod);
+      const { paymentId: nextPaymentId, paymentUrl } = await retryMallH5OrderPayment(orderId, paymentMethod);
+      if (paymentUrl) {
+        window.location.assign(paymentUrl);
+        return;
+      }
       if (nextPaymentId) {
         window.location.assign(
           `/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}&paymentId=${encodeURIComponent(nextPaymentId)}&paymentMethod=${encodeURIComponent(paymentMethod)}`,

@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 90/90 pass
+pnpm test:node                                                     → 92/92 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -190,6 +190,7 @@ pnpm test:node                                                     → 90/90 pas
   (tests/contract/verify-mp-i18n-runtime.test.mjs                 → 2/2)
   (tests/contract/verify-invoice-tax-validation.test.mjs          → 2/2)
   (tests/contract/verify-membership-purchase.test.mjs             → 4/4)
+  (tests/contract/verify-payment-channel-wiring.test.mjs           → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -547,7 +548,18 @@ through their transport seams. The membership service performs the charge
 server-side; the clients only name the channel.
 `tests/contract/verify-membership-purchase.test.mjs` pins all three flows.
 
-### 6.2 Per-package typecheck
+### 6.1.22 Payment channel handoff (H5)
+
+Creating a payment used to keep only the payment id and navigate to the result
+page, so when the backend returned an Alipay/WeChat H5 cashier URL the buyer could
+never complete the charge — the result page simply polled a pending payment.
+
+`payMallH5Order` and the retry path now return `{ paymentId, paymentUrl,
+paymentParams }`, extracting `paymentUrl` / `payUrl` / `mwebUrl` / `cashierUrl` /
+`redirectUrl` from the response or its `paymentParams`. The order list, order detail
+and payment-result retry flows hand the buyer to the channel URL when present and
+fall back to the result page otherwise. `tests/contract/verify-payment-channel-wiring.test.mjs`
+pins the extraction and the three handoff sites.
 
 ### 6.2 Per-package typecheck
 

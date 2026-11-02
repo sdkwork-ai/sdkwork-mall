@@ -71,7 +71,13 @@ export function SdkworkMallH5OrderDetailPage() {
     setError(null);
     try {
       const paymentMethod = detail.paymentMethod || recallMallH5PaymentMethod() || "WECHAT";
-      const { paymentId } = await payMallH5Order({ orderId: detail.id, paymentMethod });
+      const { paymentId, paymentUrl } = await payMallH5Order({ orderId: detail.id, paymentMethod });
+      // Real channel cashier URL wins: the buyer completes payment on the
+      // channel page, which then returns to the payment-result route.
+      if (paymentUrl) {
+        window.location.assign(paymentUrl);
+        return;
+      }
       const query = new URLSearchParams({ orderId: detail.id, status: "pending" });
       if (paymentId) {
         query.set("paymentId", paymentId);

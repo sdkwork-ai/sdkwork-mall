@@ -338,11 +338,44 @@ export async function retrieveMallH5OrderPaymentSuccess(
   }
 }
 
+export interface MallH5PaymentRetryStart {
+  paymentId?: string;
+  /** Channel cashier URL; present when the backend returns one. */
+  paymentUrl?: string;
+}
+
+const PAYMENT_URL_KEYS = [
+  "paymentUrl",
+  "payUrl",
+  "mwebUrl",
+  "cashierUrl",
+  "redirectUrl",
+] as const;
+
+function readPaymentUrl(payment: Record<string, unknown>): string | undefined {
+  const params =
+    payment.paymentParams && typeof payment.paymentParams === "object"
+      ? (payment.paymentParams as Record<string, unknown>)
+      : {};
+  for (const key of PAYMENT_URL_KEYS) {
+    for (const source of [payment, params]) {
+      const value = source[key];
+      if (typeof value === "string" && /^https?:\/\//u.test(value.trim())) {
+        return value.trim();
+      }
+    }
+  }
+  return undefined;
+}
+
 export async function retryMallH5OrderPayment(
   orderId: string,
   paymentMethod: string,
-): Promise<string | undefined> {
+): Promise<MallH5PaymentRetryStart> {
   const response = await getSdkworkCommerceService().orders.pay(orderId, { paymentMethod });
   const payment = unwrapSdkworkCommerceResponse<Record<string, unknown>>(response) ?? {};
-  return readId(payment.paymentId ?? payment.id) || undefined;
+  return {
+    paymentId: readId(payment.paymentId ?? payment.id) || undefined,
+    paymentUrl: readPaymentUrl(payment),
+  };
 }

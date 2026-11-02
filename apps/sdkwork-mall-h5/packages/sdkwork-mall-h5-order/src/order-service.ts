@@ -285,10 +285,46 @@ export async function loadMallH5OrderDetail(orderId: string): Promise<MallH5Orde
   };
 }
 
+export interface MallH5OrderPaymentStart {
+  paymentId?: string;
+  /** Channel cashier URL (Alipay/WeChat H5 pay). Present when the backend returns one. */
+  paymentUrl?: string;
+  /** Raw channel parameters (prepay ids, signatures) for native bridges. */
+  paymentParams?: Record<string, unknown>;
+}
+
+const PAYMENT_URL_KEYS = [
+  "paymentUrl",
+  "payUrl",
+  "mwebUrl",
+  "cashierUrl",
+  "redirectUrl",
+] as const;
+
+/** Extracts a channel cashier URL from a payment response (top level or params). */
+function readPaymentUrl(payload: Record<string, unknown> | null): string | undefined {
+  if (!payload) {
+    return undefined;
+  }
+  const params =
+    payload.paymentParams && typeof payload.paymentParams === "object"
+      ? (payload.paymentParams as Record<string, unknown>)
+      : {};
+  for (const key of PAYMENT_URL_KEYS) {
+    for (const source of [payload, params]) {
+      const value = source[key];
+      if (typeof value === "string" && /^https?:\/\//u.test(value.trim())) {
+        return value.trim();
+      }
+    }
+  }
+  return undefined;
+}
+
 export async function payMallH5Order(input: {
   orderId: string;
   paymentMethod: string;
-}): Promise<{ paymentId?: string }> {
+}): Promise<MallH5OrderPaymentStart> {
   requireSdkworkOrderSession("请先登录后管理订单。");
   const response = await getSdkworkOrderService().orders.payments.create(
     input.orderId,
@@ -302,7 +338,11 @@ export async function payMallH5Order(input: {
   const paymentId = payload
     ? toSdkworkOrderOptionalString(payload.paymentId ?? payload.id)
     : undefined;
-  return { paymentId };
+  return {
+    paymentId,
+    paymentParams: payload?.paymentParams as Record<string, unknown> | undefined,
+    paymentUrl: readPaymentUrl(payload),
+  };
 }
 
 export async function confirmMallH5OrderReceipt(input: { orderId: string }): Promise<void> {
