@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
@@ -20,10 +21,22 @@ class SdkworkHomePage extends StatefulWidget {
 
 class _SdkworkHomePageState extends State<SdkworkHomePage> {
   static const _banners = <Map<String, String>>[
-    {'title': '品质生活，一站购齐', 'subtitle': '平台自营与品牌商家'},
-    {'title': '新品首发', 'subtitle': '每周上新'},
-    {'title': '领券中心', 'subtitle': '领券下单更划算'},
-    {'title': '会员专区', 'subtitle': '专属价与积分回馈'},
+    {
+      'titleKey': 'home.banners.quality.title',
+      'subtitleKey': 'home.banners.quality.subtitle',
+    },
+    {
+      'titleKey': 'home.banners.newArrival.title',
+      'subtitleKey': 'home.banners.newArrival.subtitle',
+    },
+    {
+      'titleKey': 'home.banners.coupon.title',
+      'subtitleKey': 'home.banners.coupon.subtitle',
+    },
+    {
+      'titleKey': 'home.banners.member.title',
+      'subtitleKey': 'home.banners.member.subtitle',
+    },
   ];
 
   List<Map<String, dynamic>> _categories = const [];
@@ -60,9 +73,9 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
                     _buildQuickEntries(),
                     if (_categories.isNotEmpty) _buildCategoryGrid(),
                     if (_seckillOffer != null) _buildSeckillFloor(),
-                    const SdkworkSectionHeader(title: '热卖推荐'),
+                    SdkworkSectionHeader(title: SdkworkI18n.t('home.hot')),
                     if (_hotProducts.isEmpty)
-                      const SdkworkEmptyView(message: '暂无推荐商品')
+                      SdkworkEmptyView(message: SdkworkI18n.t('home.hotEmpty'))
                     else
                       GridView.count(
                         crossAxisCount: 2,
@@ -95,17 +108,17 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Map<String, dynamic>>[
-            {'label': '分类逛', 'tab': 1},
-            {'label': '活动', 'route': '/activity'},
-            {'label': '热卖', 'sort': 'sales'},
-            {'label': '新品', 'sort': 'newest'},
-            {'label': '领券', 'route': '/coupons'},
-            {'label': '订单', 'route': '/orders'},
+            {'labelKey': 'home.quick.categories', 'tab': 1},
+            {'labelKey': 'home.quick.activity', 'route': '/activity'},
+            {'labelKey': 'home.quick.hot', 'sort': 'sales'},
+            {'labelKey': 'home.quick.newArrival', 'sort': 'newest'},
+            {'labelKey': 'home.quick.coupon', 'route': '/coupons'},
+            {'labelKey': 'home.quick.orders', 'route': '/orders'},
           ]
               .map(
                 (entry) => TextButton(
                   onPressed: () => _openEntry(entry),
-                  child: Text('${entry['label']}'),
+                  child: Text(SdkworkI18n.t('${entry['labelKey']}')),
                 ),
               )
               .toList(),
@@ -147,9 +160,9 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            const Text(
-              '限时秒杀',
-              style: TextStyle(
+            Text(
+              SdkworkI18n.t('home.seckill.title'),
+              style: const TextStyle(
                 color: Color(0xFFE93B3D),
                 fontWeight: FontWeight.w700,
               ),
@@ -168,7 +181,7 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
             ),
             const Spacer(),
             Text(
-              '${offer['discountText'] ?? offer['highlight'] ?? '进行中'}',
+              '${offer['discountText'] ?? offer['highlight'] ?? SdkworkI18n.t('home.seckill.ongoing')}',
               style: const TextStyle(color: Color(0xFFE93B3D), fontSize: 12),
             ),
           ],
@@ -195,10 +208,15 @@ class _SdkworkHomePageState extends State<SdkworkHomePage> {
       return;
     }
     final offers = results[2]! as List<Map<String, dynamic>>;
+    final titleTokens = SdkworkI18n.t('home.seckill.titleMatch')
+        .split(',')
+        .map((token) => token.trim())
+        .where((token) => token.isNotEmpty)
+        .toList();
     Map<String, dynamic>? flashOffer;
     for (final offer in offers) {
       final title = '${offer['title']}';
-      if (title.contains('秒杀') || title.contains('闪购')) {
+      if (titleTokens.any(title.contains)) {
         flashOffer = offer;
         break;
       }
@@ -323,7 +341,7 @@ class _HomeBannerCarouselState extends State<_HomeBannerCarousel> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${banner['title']}',
+                      SdkworkI18n.t('${banner['titleKey']}'),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -332,7 +350,7 @@ class _HomeBannerCarouselState extends State<_HomeBannerCarousel> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '${banner['subtitle']}',
+                      SdkworkI18n.t('${banner['subtitleKey']}'),
                       style: const TextStyle(color: Colors.white70),
                     ),
                   ],

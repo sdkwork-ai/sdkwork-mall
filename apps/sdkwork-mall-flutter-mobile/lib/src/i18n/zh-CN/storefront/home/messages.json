@@ -1,0 +1,37 @@
+{
+  "home": {
+    "hot": "热卖推荐",
+    "hotEmpty": "暂无推荐商品",
+    "seckill": {
+      "title": "限时秒杀",
+      "ongoing": "进行中",
+      "titleMatch": "秒杀,闪购"
+    },
+    "banners": {
+      "quality": {
+        "title": "品质生活，一站购齐",
+        "subtitle": "平台自营与品牌商家"
+      },
+      "newArrival": {
+        "title": "新品首发",
+        "subtitle": "每周上新"
+      },
+      "coupon": {
+        "title": "领券中心",
+        "subtitle": "领券下单更划算"
+      },
+      "member": {
+        "title": "会员专区",
+        "subtitle": "专属价与积分回馈"
+      }
+    },
+    "quick": {
+      "categories": "分类逛",
+      "activity": "活动",
+      "hot": "热卖",
+      "newArrival": "新品",
+      "coupon": "领券",
+      "orders": "订单"
+    }
+  }
+}
