@@ -159,25 +159,45 @@ function createIdempotencyKey(): string {
   return `as-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/**
- * Submits the buyer's return tracking number
- * (`POST /after_sales/requests/{id}/return_shipments`), idempotent per submit.
- */
-export async function createReturnShipment(input: {
+export interface MpReturnShipmentInput {
   carrierCode: string;
   carrierName?: string;
   requestId: string;
   trackingNo: string;
-}): Promise<Record<string, unknown>> {
-  return request({
-    path: `/after_sales/requests/${input.requestId}/return_shipments`,
+}
+
+/** Wire body for the return-shipment command (tracking number is trimmed). */
+export function buildReturnShipmentBody(input: MpReturnShipmentInput): Record<string, unknown> {
+  return {
+    carrierCode: input.carrierCode,
+    carrierName: input.carrierName,
+    shipmentDirection: "buyer_return",
+    trackingNo: input.trackingNo.trim(),
+  };
+}
+
+/** Full request descriptor, exported so the idempotency header is testable. */
+export function buildReturnShipmentRequest(
+  input: MpReturnShipmentInput,
+  idempotencyKey: string = createIdempotencyKey(),
+): {
+  body: Record<string, unknown>;
+  headers: Record<string, string>;
+  method: "POST";
+  path: string;
+} {
+  return {
+    body: buildReturnShipmentBody(input),
+    headers: { "Idempotency-Key": idempotencyKey },
     method: "POST",
-    body: {
-      carrierCode: input.carrierCode,
-      carrierName: input.carrierName,
-      shipmentDirection: "buyer_return",
-      trackingNo: input.trackingNo.trim(),
-    },
-    headers: { "Idempotency-Key": createIdempotencyKey() },
-  });
+    path: `/after_sales/requests/${input.requestId}/return_shipments`,
+  };
+}
+
+/**
+ * Submits the buyer's return tracking number
+ * (`POST /after_sales/requests/{id}/return_shipments`), idempotent per submit.
+ */
+export async function createReturnShipment(input: MpReturnShipmentInput): Promise<Record<string, unknown>> {
+  return request(buildReturnShipmentRequest(input));
 }

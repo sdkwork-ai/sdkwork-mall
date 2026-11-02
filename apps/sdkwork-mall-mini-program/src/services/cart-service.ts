@@ -143,6 +143,26 @@ export async function createCheckoutQuote(options: { cartItemIds?: string[] } = 
   };
 }
 
+/**
+ * Builds the checkout order body. Exported so the money-path fields
+ * (`cartItemIds`, `deliveryMethod`, `giftCardCode`, `needInvoice`/`invoiceForm`,
+ * `quoteId`) are unit-tested instead of only string-matched in a contract test.
+ */
+export function buildCheckoutOrderBody(
+  options: MpSubmitOrderOptions,
+  quote: Pick<MpCheckoutQuote, "quoteId">,
+): Record<string, unknown> {
+  return {
+    buyerRemark: options.buyerRemark,
+    cartItemIds: options.cartItemIds && options.cartItemIds.length ? options.cartItemIds : undefined,
+    deliveryMethod: options.deliveryMethod,
+    giftCardCode: options.giftCardCode,
+    invoiceForm: options.needInvoice ? options.invoiceForm : undefined,
+    needInvoice: options.needInvoice ?? false,
+    quoteId: quote.quoteId || undefined,
+  };
+}
+
 export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orderId: string; quote: MpCheckoutQuote; warnings: string[] }> {
   const quote = await createCheckoutQuote({ cartItemIds: options.cartItemIds });
 
@@ -157,15 +177,7 @@ export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orde
   const order = await request({
     path: `/checkout/sessions/${quote.sessionId}/orders`,
     method: "POST",
-    body: {
-      buyerRemark: options.buyerRemark,
-      cartItemIds: options.cartItemIds && options.cartItemIds.length ? options.cartItemIds : undefined,
-      deliveryMethod: options.deliveryMethod,
-      giftCardCode: options.giftCardCode,
-      invoiceForm: options.needInvoice ? options.invoiceForm : undefined,
-      needInvoice: options.needInvoice ?? false,
-      quoteId: quote.quoteId || undefined,
-    },
+    body: buildCheckoutOrderBody(options, quote),
   });
   const orderId = String(order.id ?? order.orderId ?? "");
   if (!orderId) {

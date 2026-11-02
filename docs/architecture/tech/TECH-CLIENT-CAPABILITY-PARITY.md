@@ -191,7 +191,7 @@ pnpm test:node                                                     → 75/75 pas
 pnpm typecheck                                                     → clean (both roots)
 pnpm build:h5:dev / pnpm build:pc:dev                              → PASS (standalone/dev)
 pnpm typecheck:packages                                            → 46 packages, 0 failed
-pnpm test:vitest                                                   → 68 files / 169 tests pass
+pnpm test:vitest                                                   → 70 files / 177 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
 flutter test                                                       → 23/23 pass
@@ -411,6 +411,26 @@ vendor re-downloads only the app entry, about 65 KB gzip smaller on H5 and 62 KB
 on PC. Splitting the SDKWork workspace runtime into its own group was measured
 and rejected: it produced eight-plus extra vendor chunks, added first-visit
 bytes, and increased request count without a caching win worth the trade.
+
+### 6.1.14 Money-path payload tests
+
+The checkout and after-sales contract tests prove a field or control exists in
+source; they cannot prove the wire body is assembled correctly. Two behavioral
+suites now cover the payloads that decide what the buyer is charged:
+
+- `apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/tests/checkout-payload.test.ts`
+  injects a fake commerce service and asserts the exact
+  `checkout.sessions.orders.create` body: scoped `cartItemIds`,
+  `deliveryMethod`, `giftCardCode`, `needInvoice`/`invoiceForm` gating and
+  `quoteId`, plus the post-order coupon/payment flow.
+- `apps/sdkwork-mall-mini-program/tests/checkout-payload.test.ts` exercises the
+  exported `buildCheckoutOrderBody` and `buildReturnShipmentRequest` builders:
+  invoice omission, empty-cart-id omission, tracking-number trimming, the
+  `buyer_return` direction and the `Idempotency-Key` header.
+
+Supporting refactor: the mini-program services now export pure builders
+(`buildCheckoutOrderBody`, `buildReturnShipmentBody`, `buildReturnShipmentRequest`)
+so the payload can be tested without a live transport.
 
 ### 6.2 Per-package typecheck
 

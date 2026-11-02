@@ -54,10 +54,14 @@ function walk(directory, extensions, collected = []) {
     }
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) {
-      if (["node_modules", "dist", "build", ".dart_tool"].includes(entry.name)) {
+      if (["node_modules", "dist", "build", ".dart_tool", "tests", "__tests__"].includes(entry.name)) {
         continue;
       }
       walk(fullPath, extensions, collected);
+      continue;
+    }
+    // Test fixtures and assertions are not user-facing copy.
+    if (/\.(test|spec)\.[cm]?[jt]sx?$/u.test(entry.name)) {
       continue;
     }
     if (extensions.some((extension) => entry.name.endsWith(extension))) {

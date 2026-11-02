@@ -12,16 +12,17 @@ long):
 
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
-| PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 121 | 1645 | 0 |
-| H5 | none — literal zh-CN | 68 | 584 | 390 (`regions.ts`) |
+| PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
+| H5 | none — literal zh-CN | 64 | 536 | 390 (`regions.ts`) |
 | Mini program | none — literal zh-CN | 66 | 375 | 302 (province/city picker data) |
 | Flutter | none — literal zh-CN | 38 | 567 | 230 (province/city picker data) |
 
-3171 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
-The count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
+2930 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+Test fixtures and assertions are excluded: they are not user-facing copy, and
+counting them made every new behavioral test look like an i18n regression. The
+count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
 root adds copy without an explicit baseline update, so the backlog can only grow
-through a reviewable decision. Checkout invoice/delivery copy added since the
-first assessment is already inside the committed baseline.
+through a reviewable decision.
 
 ## 2. What Already Exists
 
