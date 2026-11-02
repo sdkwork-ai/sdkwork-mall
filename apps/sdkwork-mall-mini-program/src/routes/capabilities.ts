@@ -48,6 +48,7 @@ export const MP_CAPABILITY_ROUTES: readonly MpCapabilityRoute[] = [
   { routeId: "buyer.mall.wallet", page: "pages/wallet/index" },
   { routeId: "buyer.mall.points", page: "pages/points/index" },
   { routeId: "buyer.mall.membership", page: "pages/membership/index" },
+  { routeId: "buyer.mall.distribution", page: "pages/partner/index" },
   { routeId: "buyer.mall.invoices", page: "pages/invoices/index" },
   { routeId: "buyer.mall.im.chats", page: "pages/chats/index" },
   { routeId: "buyer.mall.im.chat", page: "pages/chat/index" },

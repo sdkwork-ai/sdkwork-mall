@@ -1,0 +1,43 @@
+import { createSdkworkPartnerJoinPort, createSdkworkPartnerService } from "@sdkwork/mall-partner-service";
+import type {
+  SdkworkPartnerCenterPort,
+  SdkworkPartnerService,
+} from "@sdkwork/mall-partner-service";
+import type { SdkworkAppClient } from "@sdkwork/partner-app-sdk";
+
+export const SDKWORK_MALL_PARTNER_SDK_FAMILY = "sdkwork-partner-app-sdk" as const;
+
+let sdkworkPartnerServiceProvider: (() => SdkworkPartnerService) | null = null;
+
+/** Injects the runtime partner service once from the application bootstrap. */
+export function configureSdkworkPartnerServiceProvider(
+  provider: (() => SdkworkPartnerService) | null,
+): void {
+  sdkworkPartnerServiceProvider = provider;
+}
+
+export function getSdkworkPartnerService(): SdkworkPartnerService {
+  if (!sdkworkPartnerServiceProvider) {
+    throw new Error("Sdkwork partner service provider is not configured.");
+  }
+  return sdkworkPartnerServiceProvider();
+}
+
+export interface CreateSdkworkMallPartnerServiceInput {
+  /**
+   * Composed partner app client. Only the `join` namespace is required; the
+   * type stays structural so a narrower mock is valid in tests.
+   */
+  readonly partnerAppClient: Pick<SdkworkAppClient, "join">;
+  readonly centerPort?: SdkworkPartnerCenterPort | null;
+}
+
+/** Composes the mall partner service over the composed partner app SDK. */
+export function createSdkworkMallPartnerService(
+  input: CreateSdkworkMallPartnerServiceInput,
+): SdkworkPartnerService {
+  return createSdkworkPartnerService({
+    center: input.centerPort ?? null,
+    join: createSdkworkPartnerJoinPort(input.partnerAppClient),
+  });
+}

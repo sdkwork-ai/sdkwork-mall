@@ -5,6 +5,55 @@ import '../services/commerce.dart';
 import '../src/i18n/runtime.dart';
 import 'widgets.dart';
 
+/// 订单快捷入口：筛选值、文案 key、统计字段与图标.
+class _OrderShortcut {
+  const _OrderShortcut({
+    required this.status,
+    required this.labelKey,
+    required this.statisticKey,
+    required this.icon,
+  });
+
+  final String status;
+  final String labelKey;
+  final String statisticKey;
+  final IconData icon;
+}
+
+/// 五个入口各用一个能区分状态的图标（钱包 / 包裹 / 货车 / 对勾）.
+const List<_OrderShortcut> _orderShortcuts = <_OrderShortcut>[
+  _OrderShortcut(
+    status: '',
+    labelKey: 'buyerHub.orders.all',
+    statisticKey: 'totalOrders',
+    icon: Icons.receipt_long_outlined,
+  ),
+  _OrderShortcut(
+    status: 'PENDING_PAYMENT',
+    labelKey: 'buyerHub.orders.pendingPayment',
+    statisticKey: 'pendingPayment',
+    icon: Icons.account_balance_wallet_outlined,
+  ),
+  _OrderShortcut(
+    status: 'PENDING_SHIPMENT',
+    labelKey: 'buyerHub.orders.pendingShipment',
+    statisticKey: 'pendingShipment',
+    icon: Icons.inventory_2_outlined,
+  ),
+  _OrderShortcut(
+    status: 'PENDING_RECEIPT',
+    labelKey: 'buyerHub.orders.pendingReceipt',
+    statisticKey: 'pendingReceipt',
+    icon: Icons.local_shipping_outlined,
+  ),
+  _OrderShortcut(
+    status: 'COMPLETED',
+    labelKey: 'buyerHub.orders.completed',
+    statisticKey: 'completed',
+    icon: Icons.check_circle_outline,
+  ),
+];
+
 /// 我的: 会话用户 / 订单入口统计 / 常用服务 / 退出登录.
 class SdkworkBuyerPage extends StatefulWidget {
   const SdkworkBuyerPage({super.key});
@@ -124,44 +173,21 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
         Card(
           margin: EdgeInsets.zero,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Map<String, String>>[
-                {'status': '', 'labelKey': 'buyerHub.orders.all', 'key': 'totalOrders'},
-                {'status': 'PENDING_PAYMENT', 'labelKey': 'buyerHub.orders.pendingPayment', 'key': 'pendingPayment'},
-                {'status': 'PENDING_SHIPMENT', 'labelKey': 'buyerHub.orders.pendingShipment', 'key': 'pendingShipment'},
-                {'status': 'PENDING_RECEIPT', 'labelKey': 'buyerHub.orders.pendingReceipt', 'key': 'pendingReceipt'},
-                {'status': 'COMPLETED', 'labelKey': 'buyerHub.orders.completed', 'key': 'completed'},
-              ]
-                  .map(
-                    (entry) => InkWell(
-                      onTap: () => Navigator.of(context).pushNamed(
-                        '/orders',
-                        arguments: entry['status'],
-                      ),
-                      child: SizedBox(
-                        width: 68,
-                        child: Column(
-                          children: [
-                            Text(
-                              '${_statistics[entry['key']] ?? ''}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              SdkworkI18n.t(entry['labelKey'] ?? ''),
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ],
-                        ),
-                      ),
+              children: <Widget>[
+                for (final shortcut in _orderShortcuts)
+                  _SdkworkOrderShortcut(
+                    icon: shortcut.icon,
+                    label: SdkworkI18n.t(shortcut.labelKey),
+                    count: _statisticCount(shortcut.statisticKey),
+                    onTap: () => Navigator.of(context).pushNamed(
+                      '/orders',
+                      arguments: shortcut.status,
                     ),
-                  )
-                  .toList(),
+                  ),
+              ],
             ),
           ),
         ),
@@ -228,6 +254,15 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
     }
   }
 
+  /// 统计字段可能是数字或数字字符串；缺失/异常统一按 0 处理（不渲染角标）.
+  int _statisticCount(String key) {
+    final value = _statistics[key];
+    if (value is num) {
+      return value.toInt();
+    }
+    return int.tryParse('${value ?? ''}') ?? 0;
+  }
+
   void _logout() {
     showDialog<void>(
       context: context,
@@ -246,6 +281,99 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
             },
             child: Text(SdkworkI18n.t('buyerHub.logout.confirmAction')),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 单个订单快捷入口：状态图标 + 待办角标 + 文案.
+class _SdkworkOrderShortcut extends StatelessWidget {
+  const _SdkworkOrderShortcut({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final int count;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 64,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            children: <Widget>[
+              _SdkworkOrderShortcutIcon(icon: icon, count: count),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .labelMedium
+                    ?.copyWith(color: const Color(0xFF374151)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 状态图标；有数字时在右上角叠一个红色待办角标.
+class _SdkworkOrderShortcutIcon extends StatelessWidget {
+  const _SdkworkOrderShortcutIcon({required this.icon, required this.count});
+
+  final IconData icon;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          Center(
+            child: Icon(icon, size: 24, color: const Color(0xFF4B5563)),
+          ),
+          if (count > 0)
+            Positioned(
+              top: -6,
+              right: -10,
+              child: Container(
+                height: 16,
+                constraints: const BoxConstraints(minWidth: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE93B3D),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: Text(
+                  count > 99 ? '99+' : '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

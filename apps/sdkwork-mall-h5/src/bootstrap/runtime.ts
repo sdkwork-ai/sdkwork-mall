@@ -2,6 +2,7 @@ import type { SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
 import { configureMallH5AfterSalesMediaRuntimePort } from "@sdkwork/mall-h5-buyer";
 
 import { configureSdkworkMallH5Providers } from "./commerceProviders";
+import { configureSdkworkMallH5PartnerProviders } from "./partnerProviders";
 import {
   resolveSdkworkMallH5RuntimeConfig,
   type SdkworkMallH5RuntimeConfig,
@@ -53,6 +54,7 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
     sdkClients,
   });
   configureSdkworkMallH5ImProviders({ config, tokenManager });
+  configureSdkworkMallH5PartnerProviders(sdkClients);
   configureSdkworkMallH5AfterSalesMediaPort(config, tokenManager);
 
   return {

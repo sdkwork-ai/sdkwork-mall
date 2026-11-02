@@ -22,6 +22,7 @@ class SdkworkI18n {
     'lib/src/i18n/zh-CN/support/after-sales/messages.json',
     'lib/src/i18n/zh-CN/account/buyer-hub/messages.json',
     'lib/src/i18n/zh-CN/account/membership/messages.json',
+    'lib/src/i18n/zh-CN/account/partner/messages.json',
     'lib/src/i18n/zh-CN/account/wallet/messages.json',
     'lib/src/i18n/zh-CN/account/messages/messages.json',
     'lib/src/i18n/zh-CN/account/account-pages/messages.json',

@@ -1,0 +1,172 @@
+<view class="page-partner">
+  <view class="mp-muted partner-eyebrow">{{labels.pageEyebrow}}</view>
+  <view class="mp-title">{{labels.pageTitle}}</view>
+
+  <view wx:if="{{loading}}" class="mp-card">
+    <view class="mp-muted">{{labels.loading}}</view>
+  </view>
+
+  <view wx:elif="{{error}}" class="mp-card">
+    <view class="mp-card-title">{{labels.pageTitle}}</view>
+    <view class="mp-muted partner-error">{{error}}</view>
+    <button class="mp-btn mp-btn-primary" bindtap="retry">{{labels.retry}}</button>
+  </view>
+
+  <block wx:else>
+    <view class="mp-card">
+      <view class="partner-status-title">{{statusTitle}}</view>
+      <view class="mp-muted">{{statusDescription}}</view>
+      <view class="partner-chips">
+        <view class="partner-chip" wx:for="{{summary}}" wx:key="*this">{{item}}</view>
+      </view>
+      <button
+        wx:if="{{membershipState !== 'pending'}}"
+        class="mp-btn mp-btn-primary"
+        bindtap="openForm"
+      >{{membershipState === 'approved' ? labels.actionsReapply : labels.actionsApply}}</button>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">{{labels.centerTitle}}</view>
+      <view class="mp-muted">{{labels.centerNotice}}</view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">{{labels.inviteTitle}}</view>
+      <view class="mp-muted">{{labels.inviteDescription}}</view>
+      <view class="mp-field">
+        <input
+          placeholder="{{labels.invitePlaceholder}}"
+          value="{{inviteInput}}"
+          bindinput="onInviteInput"
+        />
+      </view>
+      <button
+        class="mp-btn mp-btn-plain"
+        disabled="{{!inviteInput || validating}}"
+        bindtap="validateInvite"
+      >{{labels.actionsValidate}}</button>
+      <view wx:if="{{inviteResultTitle}}" class="partner-invite-result {{inviteValid ? 'partner-invite-valid' : 'partner-invite-invalid'}}">
+        <view class="partner-invite-title">{{inviteResultTitle}}</view>
+        <view wx:if="{{inviteResultDetail}}" class="mp-muted">{{inviteResultDetail}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{formOpen}}" class="mp-card">
+      <view class="mp-card-title">{{labels.applyTitle}}</view>
+      <view class="mp-muted">{{labels.applyDescription}}</view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applicantType}}</view>
+        <picker
+          mode="selector"
+          range="{{applicantTypeOptions}}"
+          value="{{form.applicantType === 'ORGANIZATION' ? 1 : 0}}"
+          bindchange="onApplicantTypeChange"
+        >
+          <view class="partner-picker">
+            {{form.applicantType === 'ORGANIZATION' ? labels.applyOrganization : labels.applyIndividual}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applySubjectName}}</view>
+        <input value="{{form.subjectName}}" data-field="subjectName" bindinput="onFieldInput" />
+      </view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applyContactName}}</view>
+        <input value="{{form.contactName}}" data-field="contactName" bindinput="onFieldInput" />
+      </view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applyContactPhone}}</view>
+        <input type="text" value="{{form.contactPhone}}" data-field="contactPhone" bindinput="onFieldInput" />
+      </view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applyContactEmail}}</view>
+        <input type="text" value="{{form.contactEmail}}" data-field="contactEmail" bindinput="onFieldInput" />
+      </view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applyTargetLevel}}</view>
+        <picker
+          mode="selector"
+          range="{{levelOptions}}"
+          range-key="label"
+          bindchange="onTargetLevelChange"
+        >
+          <view class="partner-picker">
+            <block wx:for="{{levelOptions}}" wx:key="value">
+              <block wx:if="{{item.value === form.targetLevelNo}}">{{item.label}}</block>
+            </block>
+          </view>
+        </picker>
+      </view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applyInviteCode}}</view>
+        <input value="{{form.inviteCode}}" data-field="inviteCode" bindinput="onFieldInput" />
+      </view>
+
+      <view class="mp-field">
+        <view class="mp-field-label">{{labels.applyBusinessIntro}}</view>
+        <textarea value="{{form.businessIntro}}" data-field="businessIntro" bindinput="onFieldInput" />
+      </view>
+
+      <view wx:if="{{issues.length}}" class="partner-issues">
+        <view wx:for="{{issues}}" wx:key="*this" class="partner-issue">{{item}}</view>
+      </view>
+
+      <view class="partner-actions">
+        <button class="mp-btn mp-btn-ghost" bindtap="closeForm">{{labels.actionsClose}}</button>
+        <button class="mp-btn mp-btn-primary" disabled="{{submitting}}" bindtap="submit">
+          {{submitting ? labels.actionsSubmitting : labels.applySubmit}}
+        </button>
+      </view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">{{labels.programTitle}}</view>
+      <view class="mp-muted">{{labels.programDescription}}</view>
+      <view wx:if="{{!levels.length}}" class="mp-muted partner-empty">{{levelsEmptyText}}</view>
+      <view class="partner-level" wx:for="{{levels}}" wx:key="levelNo">
+        <view class="partner-level-head">
+          <text class="partner-level-name">{{item.name}}</text>
+          <text class="mp-muted">{{labels.programJoinFee}} {{item.joinFeeText}}</text>
+        </view>
+        <view class="partner-level-meta">
+          {{labels.programCustomerRevenue}} {{item.customerRevenueText}} ·
+          {{labels.programJoinFeeCommission}} {{item.joinFeeCommissionText}}
+        </view>
+        <view wx:if="{{item.benefits.length}}" class="partner-benefits">
+          <view class="mp-muted">{{labels.programBenefits}}</view>
+          <view wx:for="{{item.benefits}}" wx:key="*this" class="partner-benefit">{{item}}</view>
+        </view>
+      </view>
+      <view class="mp-muted partner-rules">{{rulesText}}</view>
+    </view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">{{labels.applicationsTitle}}</view>
+      <view wx:if="{{!applications.length}}" class="mp-muted partner-empty">{{labels.applicationsEmpty}}</view>
+      <view class="partner-application" wx:for="{{applications}}" wx:key="id">
+        <view class="partner-level-head">
+          <text class="partner-level-name">{{item.title}}</text>
+          <text class="mp-muted">{{item.statusText}}</text>
+        </view>
+        <view class="mp-muted">{{item.metaText}}</view>
+        <view wx:if="{{item.reviewComment}}" class="mp-muted">{{labels.reviewComment}}：{{item.reviewComment}}</view>
+        <button
+          wx:if="{{item.canCancel}}"
+          class="mp-btn mp-btn-ghost"
+          disabled="{{cancellingId === item.id}}"
+          data-id="{{item.id}}"
+          bindtap="cancelApplication"
+        >{{labels.actionsCancel}}</button>
+      </view>
+    </view>
+  </block>
+</view>

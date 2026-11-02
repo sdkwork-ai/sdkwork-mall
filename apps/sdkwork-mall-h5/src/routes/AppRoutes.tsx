@@ -58,6 +58,11 @@ const SdkworkMallH5PointsPage = lazy(() =>
 const SdkworkMallH5MembershipPage = lazy(() =>
   import("@sdkwork/mall-h5-membership/membership-page").then((module) => ({ default: module.SdkworkMallH5MembershipPage })),
 );
+const SdkworkMallH5PartnerCenterPage = lazy(() =>
+  import("@sdkwork/mall-h5-partner/partner-page").then((module) => ({
+    default: module.SdkworkMallH5PartnerCenterPage,
+  })),
+);
 const SdkworkMallH5ShopPage = lazy(() =>
   import("@sdkwork/mall-h5-shop/shop-page").then((module) => ({ default: module.SdkworkMallH5ShopPage })),
 );
@@ -231,6 +236,14 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/wallet"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5PartnerCenterPage />
+            </RequireSession>
+          )}
+          path="/buyer/distribution"
         />
         <Route
           element={(

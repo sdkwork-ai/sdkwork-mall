@@ -3,6 +3,7 @@ import type { SdkworkCloudRouterDomainsClient } from "@sdkwork/cloudrouter-app-s
 import type { SdkworkCloudRouterBackendDomainsClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
 import type { SdkworkAppClient as SdkworkMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import type { SdkworkAppClient as SdkworkOrderAppClient } from "@sdkwork/order-app-sdk";
+import type { SdkworkAppClient as SdkworkPartnerAppClient } from "@sdkwork/partner-app-sdk";
 import type { SdkworkAppClient as SdkworkPaymentAppClient } from "@sdkwork/payment-app-sdk";
 import type { SdkworkAppClient as SdkworkPromotionAppClient } from "@sdkwork/promotion-app-sdk";
 
@@ -20,6 +21,7 @@ export interface SdkworkMallH5SdkClientInventory {
   };
   membershipAppClient: SdkworkMembershipAppClient;
   orderAppClient: SdkworkOrderAppClient;
+  partnerAppClient: SdkworkPartnerAppClient;
   paymentAppClient: SdkworkPaymentAppClient;
   promotionAppClient: SdkworkPromotionAppClient;
   sdkFamilies: {
@@ -42,6 +44,7 @@ export function listSdkworkMallH5RegisteredSdkFamilies(
       "sdkwork-im-app-sdk",
       "sdkwork-membership-app-sdk",
       "sdkwork-order-app-sdk",
+      "sdkwork-partner-app-sdk",
       "sdkwork-payment-app-sdk",
       "sdkwork-promotion-app-sdk",
     ],

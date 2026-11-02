@@ -1,0 +1,58 @@
+{
+  "name": "@sdkwork/mall-h5-partner",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mall H5 distribution centre: partner program, join application lifecycle, invite-code validation, and partner-center projections.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./routes": {
+      "types": "./src/routes.ts",
+      "import": "./src/routes.ts",
+      "default": "./src/routes.ts"
+    },
+    "./partner-page": {
+      "types": "./src/pages/PartnerCenterPage.tsx",
+      "import": "./src/pages/PartnerCenterPage.tsx",
+      "default": "./src/pages/PartnerCenterPage.tsx"
+    },
+    "./partner-service": {
+      "types": "./src/partner-service.ts",
+      "import": "./src/partner-service.ts",
+      "default": "./src/partner-service.ts"
+    }
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sdkwork/mall-h5-core": "workspace:*",
+    "@sdkwork/mall-partner-service": "workspace:*",
+    "@sdkwork/partner-app-sdk": "workspace:*",
+    "lucide-react": "catalog:"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-i18next": ">=15.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "h5-react",
+    "domain": "commerce",
+    "capability": "partner",
+    "status": "ready"
+  }
+}

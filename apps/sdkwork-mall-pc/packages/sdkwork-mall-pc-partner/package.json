@@ -1,0 +1,68 @@
+{
+  "name": "@sdkwork/mall-pc-partner",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mall PC distribution centre: partner program, join application lifecycle, invite-code validation, and partner-center projections.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./headless": {
+      "types": "./src/headless.ts",
+      "import": "./src/headless.ts",
+      "default": "./src/headless.ts"
+    },
+    "./routes": {
+      "types": "./src/routes.ts",
+      "import": "./src/routes.ts",
+      "default": "./src/routes.ts"
+    },
+    "./partner-page": {
+      "types": "./src/pages/PartnerCenterPage.tsx",
+      "import": "./src/pages/PartnerCenterPage.tsx",
+      "default": "./src/pages/PartnerCenterPage.tsx"
+    },
+    "./partner-service": {
+      "types": "./src/partner-service.ts",
+      "import": "./src/partner-service.ts",
+      "default": "./src/partner-service.ts"
+    }
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@sdkwork/ui-pc-react": "workspace:*",
+    "react": ">=18.2.0 <20.0.0",
+    "react-dom": ">=18.2.0 <20.0.0",
+    "react-router-dom": ">=7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@sdkwork/ui-pc-react": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@sdkwork/mall-partner-service": "workspace:*",
+    "@sdkwork/mall-pc-core": "workspace:*",
+    "@sdkwork/partner-app-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@testing-library/react": "catalog:",
+    "typescript": "catalog:"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-mall",
+    "architecture": "pc-react",
+    "domain": "commerce",
+    "capability": "partner",
+    "status": "ready"
+  }
+}

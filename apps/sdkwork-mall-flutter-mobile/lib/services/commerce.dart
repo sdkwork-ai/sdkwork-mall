@@ -10,6 +10,7 @@ import 'invoice_service.dart';
 import 'im_service.dart';
 import 'marketing_service.dart';
 import 'order_service.dart';
+import 'partner_service.dart';
 import 'profile_service.dart';
 import 'promotion_service.dart';
 import 'reviews_service.dart';
@@ -33,6 +34,7 @@ class MallCommerce {
         marketing = MarketingService(client),
         im = ImService(client),
         profile = ProfileService(client),
+        partner = PartnerService(client),
         reviews = ReviewsService(OrderService(client));
 
   static MallCommerce? _instance;
@@ -50,6 +52,7 @@ class MallCommerce {
   final MarketingService marketing;
   final ImService im;
   final ProfileService profile;
+  final PartnerService partner;
   final ReviewsService reviews;
 
   static MallCommerce get instance {

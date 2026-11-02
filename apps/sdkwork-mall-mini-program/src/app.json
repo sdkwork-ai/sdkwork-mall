@@ -21,6 +21,7 @@
     "pages/wallet/index",
     "pages/points/index",
     "pages/membership/index",
+    "pages/partner/index",
     "pages/invoices/index",
     "pages/settings/index",
     "pages/shop/index",

@@ -45,6 +45,11 @@ Thumbs.db
 
 # Build artifacts
 
+# Local UI-verification screenshots and temporary golden captures (never commit)
+/.tmp-shots/
+apps/sdkwork-mall-flutter-mobile/test/goldens-tmp/
+apps/sdkwork-mall-flutter-mobile/test/zz_tmp_*.dart
+
 # ---- auto-audited: local artifacts that must never be committed ----
 *.key
 *.pem

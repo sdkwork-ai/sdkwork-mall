@@ -1,6 +1,7 @@
 import type { SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
 
 import { configureSdkworkMallPcProviders } from "./commerceProviders";
+import { configureSdkworkMallPcPartnerProviders } from "./partnerProviders";
 import {
   resolveSdkworkMallPcRuntimeConfig,
   type SdkworkMallPcRuntimeConfig,
@@ -48,6 +49,7 @@ export function createSdkworkMallPcRuntime(): SdkworkMallPcRuntime {
     sdkClients,
     tokenManager,
   });
+  configureSdkworkMallPcPartnerProviders(sdkClients);
 
   return {
     commerceService,

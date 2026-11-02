@@ -1,0 +1,113 @@
+{
+  "partner": {
+    "page": {
+      "eyebrow": "合作伙伴计划",
+      "title": "分销中心",
+      "subtitle": "邀请好友、管理团队、查看佣金与提现进度。",
+      "loading": "正在加载分销中心…",
+      "errorTitle": "分销中心加载失败",
+      "retry": "重试"
+    },
+    "actions": {
+      "apply": "申请成为分销商",
+      "reapply": "重新申请",
+      "cancelApplication": "撤回申请",
+      "validate": "校验邀请码",
+      "copy": "复制链接",
+      "copied": "已复制",
+      "close": "关闭",
+      "submitting": "提交中…",
+      "submit": "提交申请"
+    },
+    "status": {
+      "none": {
+        "title": "还未加入分销计划",
+        "description": "提交加盟申请，审核通过后即可获得专属邀请码与佣金权益。"
+      },
+      "pending": {
+        "title": "申请审核中",
+        "description": "平台正在审核你的加盟申请，审核通过后将自动开通分销权益。"
+      },
+      "approved": {
+        "title": "已成为分销伙伴",
+        "description": "你的分销权益已开通，可分享邀请码发展团队并获取佣金。"
+      },
+      "rejected": {
+        "title": "申请未通过",
+        "description": "你可以查看审核意见后重新提交申请。"
+      },
+      "cancelled": {
+        "title": "申请已撤回",
+        "description": "你可以随时重新提交加盟申请。"
+      }
+    },
+    "statusLabel": {
+      "SUBMITTED": "审核中",
+      "APPROVED": "已通过",
+      "REJECTED": "未通过",
+      "CANCELLED": "已撤回"
+    },
+    "program": {
+      "title": "分销等级与权益",
+      "description": "等级越高，客户收益提成池与加盟费提成池越高。",
+      "empty": "暂未发布可用的分销等级。",
+      "level": "等级",
+      "joinFee": "加盟费",
+      "customerRevenue": "客户收益提成",
+      "joinFeeCommission": "加盟费提成",
+      "benefits": "等级权益",
+      "rules": "结算规则",
+      "profitMargin": "利润返佣基数",
+      "minWithdrawal": "最低提现",
+      "currency": "结算币种"
+    },
+    "center": {
+      "title": "团队与收益",
+      "description": "团队规模、客户数与佣金余额。",
+      "team": "团队人数",
+      "customers": "客户数",
+      "available": "可用余额",
+      "withdrawable": "可提现",
+      "inviteCode": "我的邀请码",
+      "notConfigured": "团队、佣金与提现需要合作伙伴自助端读模型接入后展示；当前已开放加盟申请与邀请码校验。"
+    },
+    "invite": {
+      "title": "邀请码校验",
+      "description": "输入上级伙伴的邀请码，确认邀请关系后再提交申请。",
+      "placeholder": "输入邀请码",
+      "valid": "邀请码有效",
+      "invalid": "邀请码无效",
+      "inviter": "邀请人",
+      "level": "邀请人等级"
+    },
+    "applications": {
+      "title": "我的加盟申请",
+      "empty": "还没有提交过加盟申请。",
+      "targetLevel": "意向等级",
+      "submittedAt": "提交时间",
+      "reviewComment": "审核意见"
+    },
+    "apply": {
+      "title": "加盟申请",
+      "description": "填写联系人与意向等级，平台审核通过后开通分销权益。",
+      "applicantType": "申请主体",
+      "individual": "个人",
+      "organization": "企业 / 机构",
+      "subjectName": "主体名称",
+      "contactName": "联系人",
+      "contactPhone": "联系电话",
+      "contactEmail": "联系邮箱",
+      "targetLevel": "意向等级",
+      "inviteCode": "邀请码（选填）",
+      "businessIntro": "业务介绍（选填）"
+    },
+    "issues": {
+      "subjectNameRequired": "企业 / 机构申请需要填写主体名称。",
+      "contactNameRequired": "请填写联系人。",
+      "contactPhoneInvalid": "请输入有效的联系电话。",
+      "contactEmailInvalid": "请输入有效的邮箱地址。",
+      "targetLevelInvalid": "请选择意向等级。",
+      "inviteCodeTooLong": "邀请码不能超过 64 个字符。"
+    }
+  }
+}

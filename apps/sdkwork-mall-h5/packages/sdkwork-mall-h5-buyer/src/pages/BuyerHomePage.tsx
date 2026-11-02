@@ -17,6 +17,7 @@ import {
   PenLine,
   Receipt,
   Settings,
+  Share2,
   ShieldCheck,
   Star,
   Ticket,
@@ -69,6 +70,7 @@ const TOOL_LINKS = [
 /** 账户：personal data, reviews, gift cards, security, support (PC parity). */
 const ACCOUNT_ENTRIES = [
   { icon: UserRound, labelKey: "buyerHub.account.profile", path: "/buyer/profile" },
+  { icon: Share2, labelKey: "buyerHub.account.partner", path: "/buyer/distribution" },
   { icon: PenLine, labelKey: "buyerHub.account.reviews", path: "/buyer/reviews" },
   { icon: Gift, labelKey: "buyerHub.account.giftCards", path: "/buyer/gift-cards" },
   { icon: ShieldCheck, labelKey: "buyerHub.account.security", path: "/buyer/security" },

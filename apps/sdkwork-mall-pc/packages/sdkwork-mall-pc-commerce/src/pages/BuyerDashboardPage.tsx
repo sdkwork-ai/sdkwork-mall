@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Clock, Gift, Star, Ticket, TrendingUp } from "lucide-react";
+import { Clock, Gift, Share2, Star, Ticket, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge, EmptyState, LoadingBlock, Progress, Separator } from "@sdkwork/ui-pc-react";
 import { loadMallBuyerDashboardSnapshot } from "../buyer-hub-service";
@@ -204,6 +204,7 @@ export function SdkworkMallBuyerDashboardPage() {
         <Link to="/buyer/favorites">我的收藏</Link>
         <Link to="/buyer/footprint">浏览足迹</Link>
         <Link to="/buyer/membership">会员中心</Link>
+        <Link to="/buyer/distribution"><Share2 aria-hidden="true" size={14} /> 分销中心</Link>
         <Link to="/buyer/reviews"><Star aria-hidden="true" size={14} /> 我的评价</Link>
         <Link to="/buyer/messages">消息中心</Link>
         <Link to="/buyer/profile">个人资料</Link>

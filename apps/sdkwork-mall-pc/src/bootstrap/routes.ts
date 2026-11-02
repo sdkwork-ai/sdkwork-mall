@@ -28,6 +28,7 @@ import { sdkworkMallPcMessagesRoutes } from "@sdkwork/mall-pc-messages/routes";
 import { sdkworkMallPcReviewsRoutes } from "@sdkwork/mall-pc-reviews/routes";
 import { sdkworkMallPcAdminShopsRoutes } from "@sdkwork/mall-pc-admin-shops/routes";
 import { sdkworkMallPcOrderRoutes } from "@sdkwork/mall-pc-order/routes";
+import { sdkworkMallPcPartnerRoutes } from "@sdkwork/mall-pc-partner/routes";
 import { sdkworkMallPcPointsRoutes } from "@sdkwork/mall-pc-points/routes";
 import { sdkworkMallPcSearchRoutes } from "@sdkwork/mall-pc-search/routes";
 import { sdkworkMallPcShopRoutes } from "@sdkwork/mall-pc-shop/routes";
@@ -44,6 +45,7 @@ export const sdkworkMallPcRoutes = createSdkworkMallPcRouteRegistry(
   sdkworkMallPcActivityRoutes,
   sdkworkMallPcCommerceRoutes,
   sdkworkMallPcOrderRoutes,
+  sdkworkMallPcPartnerRoutes,
   sdkworkMallPcAfterSalesRoutes,
   sdkworkMallPcAddressRoutes,
   sdkworkMallPcReviewsRoutes,

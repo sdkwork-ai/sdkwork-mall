@@ -87,6 +87,11 @@ const SdkworkInvoicePage = lazy(() =>
 const SdkworkPointsPage = lazy(() =>
   import("@sdkwork/mall-pc-points/points-page").then((module) => ({ default: module.SdkworkPointsPage })),
 );
+const SdkworkMallPartnerCenterPage = lazy(() =>
+  import("@sdkwork/mall-pc-partner/partner-page").then((module) => ({
+    default: module.SdkworkMallPartnerCenterPage,
+  })),
+);
 const SdkworkMallAddressPage = lazy(() =>
   import("@sdkwork/mall-pc-address/buyer-pages").then((module) => ({ default: module.SdkworkMallAddressPage })),
 );
@@ -309,6 +314,8 @@ function resolveRouteScreen(
       return <SdkworkInvoicePage locale={locale} />;
     case "buyer.mall.points":
       return <SdkworkPointsPage locale={locale} />;
+    case "buyer.mall.distribution":
+      return <SdkworkMallPartnerCenterPage locale={locale} />;
     case "merchant.mall.dashboard":
       return <SdkworkMallMerchantDashboardPage />;
     case "merchant.mall.onboarding":

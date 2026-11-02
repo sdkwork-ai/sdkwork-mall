@@ -3,12 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'bootstrap/environment.dart';
+import 'bootstrap/sdkwork_tls_trust.dart';
 import 'bootstrap/session.dart';
 import 'services/commerce.dart';
 import 'shell/mobile_shell.dart';
 import 'src/i18n/runtime.dart';
 
 Future<void> main() async {
+  // The HTTPS trust layer must be installed before any HttpClient exists, so it
+  // runs ahead of binding initialization and every service construction.
+  SdkworkTlsTrust.installForApp();
+
   // A release build must not show a raw red/grey box when a widget fails to
   // build, and async failures outside the widget tree must stay observable
   // instead of being dropped by the zone.

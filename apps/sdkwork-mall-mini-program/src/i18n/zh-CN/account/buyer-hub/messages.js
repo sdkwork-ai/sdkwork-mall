@@ -27,6 +27,7 @@ module.exports = {
     },
     account: {
       profile: "个人资料",
+      partner: "分销中心",
       reviews: "我的评价",
       giftCards: "礼品卡与红包",
       security: "账户与安全",

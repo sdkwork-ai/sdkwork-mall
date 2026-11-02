@@ -73,7 +73,8 @@ test("migrated pages resolve every string from the catalogue", () => {
   const buyerPage = read(`${appRoot}/lib/pages/buyer_page.dart`);
   assert.match(buyerPage, /SdkworkI18n\.t\('buyerHub\.sections\.orders'\)/u);
   assert.match(buyerPage, /SdkworkI18n\.t\(labelKey\)/u);
-  assert.match(buyerPage, /SdkworkI18n\.t\(entry\['labelKey'\]/u);
+  assert.match(buyerPage, /SdkworkI18n\.t\(shortcut\.labelKey\)/u);
+  assert.match(buyerPage, /icon: Icons\.[a-z0-9_]+/u);
   assert.match(buyerPage, /SdkworkI18n\.t\('buyerHub\.logout\.confirm'\)/u);
 
   const settingsPage = read(`${appRoot}/lib/pages/settings_and_invoices.dart`);

@@ -13,6 +13,7 @@ import { createClient as createCommerceBackendClient } from "@sdkwork/cloudroute
 import type { SdkworkAppClient as SdkworkImAppClient } from "@sdkwork/im-app-sdk";
 import { createClient as createMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import { createClient as createOrderAppClient } from "@sdkwork/order-app-sdk";
+import { createClient as createPartnerAppClient } from "@sdkwork/partner-app-sdk";
 import { createClient as createPaymentAppClient } from "@sdkwork/payment-app-sdk";
 import { createClient as createPromotionAppClient } from "@sdkwork/promotion-app-sdk";
 
@@ -31,6 +32,7 @@ const DOMAIN_APP_SDK_FAMILY_IDS = {
   account: "sdkwork-account-app-sdk",
   membership: "sdkwork-membership-app-sdk",
   order: "sdkwork-order-app-sdk",
+  partner: "sdkwork-partner-app-sdk",
   payment: "sdkwork-payment-app-sdk",
   promotion: "sdkwork-promotion-app-sdk",
 } as const;
@@ -82,6 +84,7 @@ export function createSdkworkMallPcIamRuntime(
         : []),
       options.sdkClients.membershipAppClient,
       options.sdkClients.orderAppClient,
+      options.sdkClients.partnerAppClient,
       options.sdkClients.paymentAppClient,
       options.sdkClients.promotionAppClient,
     ] as SdkworkAppbasePcAuthRuntimeSdkClient[],
@@ -138,6 +141,9 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
   const orderAppClient = createOrderAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.order),
   );
+  const partnerAppClient = createPartnerAppClient(
+    createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.partner),
+  );
   const paymentAppClient = createPaymentAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.payment),
   );
@@ -150,6 +156,7 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
   commerceBackendClient?.setTokenManager(tokenManager);
   membershipAppClient.setTokenManager(tokenManager);
   orderAppClient.setTokenManager(tokenManager);
+  partnerAppClient.setTokenManager(tokenManager);
   paymentAppClient.setTokenManager(tokenManager);
   promotionAppClient.setTokenManager(tokenManager);
 
@@ -163,6 +170,7 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
     commerceBackendClient,
     membershipAppClient,
     orderAppClient,
+    partnerAppClient,
     paymentAppClient,
     promotionAppClient,
     sdkFamilies: {
@@ -173,6 +181,7 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
         "sdkwork-im-app-sdk",
         "sdkwork-membership-app-sdk",
         "sdkwork-order-app-sdk",
+        "sdkwork-partner-app-sdk",
         "sdkwork-payment-app-sdk",
         "sdkwork-promotion-app-sdk",
       ],

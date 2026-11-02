@@ -37,6 +37,7 @@ const QUICK_LINKS: Array<{ labelKey: string; capability: string }> = [
 /** 账户区入口（含设置）同样走能力路由。 */
 const ACCOUNT_LINKS: Array<{ labelKey: string; capability: string }> = [
   { labelKey: "buyerHub.account.profile", capability: "buyer.mall.profile" },
+  { labelKey: "buyerHub.account.partner", capability: "buyer.mall.distribution" },
   { labelKey: "buyerHub.account.reviews", capability: "buyer.mall.reviews" },
   { labelKey: "buyerHub.account.giftCards", capability: "buyer.mall.gift-cards" },
   { labelKey: "buyerHub.account.security", capability: "buyer.mall.security" },

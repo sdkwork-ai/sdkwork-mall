@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sdkwork_mall_flutter_mobile/shell/mobile_shell.dart';
@@ -36,5 +37,19 @@ void main() {
     expect(find.text('未登录'), findsOneWidget);
     expect(find.text('点击登录'), findsOneWidget);
     expect(find.text('常用服务'), findsOneWidget);
+  });
+
+  testWidgets('buyer hub renders an icon for every order shortcut', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const SdkworkMallFlutterMobileShell());
+    await tester.tap(find.text('我的'));
+    await tester.pump(const Duration(milliseconds: 300));
+    // 每个状态入口都有独立图标（全部/待付款/待发货/待收货/已完成）。
+    expect(find.byIcon(Icons.receipt_long_outlined), findsWidgets);
+    expect(find.byIcon(Icons.account_balance_wallet_outlined), findsWidgets);
+    expect(find.byIcon(Icons.inventory_2_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.local_shipping_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
   });
 }

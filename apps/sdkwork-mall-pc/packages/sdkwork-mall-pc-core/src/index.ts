@@ -80,6 +80,14 @@ export const sdkworkMallPcAppSdkFamilies = [
     tokenManagerScope: "global-session",
   },
   {
+    authority: "sdkwork-partner-app-api",
+    family: "sdkwork-partner-app-sdk",
+    generationInputSpec: "../sdkwork-partner/sdks/sdkwork-partner-app-sdk/openapi/sdkwork-partner-app-api.sdkgen.json",
+    generatedPackageName: "@sdkwork/partner-app-sdk",
+    surface: "app",
+    tokenManagerScope: "global-session",
+  },
+  {
     authority: "sdkwork-payment-app-api",
     family: "sdkwork-payment-app-sdk",
     generationInputSpec: "../sdkwork-payment/sdks/sdkwork-payment-app-sdk/openapi/sdkwork-payment-app-api.sdkgen.json",
