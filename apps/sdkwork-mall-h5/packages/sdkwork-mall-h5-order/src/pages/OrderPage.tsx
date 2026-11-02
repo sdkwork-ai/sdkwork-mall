@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 
 import {
   cancelMallH5Order,
   confirmMallH5OrderReceipt,
   loadMallH5OrderDashboard,
+  MALL_H5_ORDER_STATUS_LABEL_KEYS,
   payMallH5Order,
   toRemoteOrderStatusFilter,
   type MallH5OrderDashboard,
@@ -14,12 +16,12 @@ import {
 import { recallMallH5PaymentMethod } from "@sdkwork/mall-h5-cart/cart-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
-const STATUS_FILTERS: Array<{ code: "all" | MallH5OrderStatus; label: string }> = [
-  { code: "all", label: "全部" },
-  { code: "pending-payment", label: "待付款" },
-  { code: "pending-shipment", label: "待发货" },
-  { code: "pending-receipt", label: "待收货" },
-  { code: "completed", label: "已完成" },
+const STATUS_FILTERS: Array<{ code: "all" | MallH5OrderStatus; labelKey: string }> = [
+  { code: "all", labelKey: "orderList.filters.all" },
+  { code: "pending-payment", labelKey: "orderList.filters.pendingPayment" },
+  { code: "pending-shipment", labelKey: "orderList.filters.pendingShipment" },
+  { code: "pending-receipt", labelKey: "orderList.filters.pendingReceipt" },
+  { code: "completed", labelKey: "orderList.filters.completed" },
 ];
 
 const STATUS_FILTER_CODES = STATUS_FILTERS.map((filter) => filter.code);
@@ -31,11 +33,8 @@ function parseStatusFilter(value: string | null): "all" | MallH5OrderStatus {
   return "all";
 }
 
-function statusLabel(status: MallH5OrderStatus): string {
-  return STATUS_FILTERS.find((filter) => filter.code === status)?.label ?? "订单";
-}
-
 export function SdkworkMallH5OrderPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeFilter = parseStatusFilter(searchParams.get("status"));
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);
@@ -46,6 +45,10 @@ export function SdkworkMallH5OrderPage() {
   const [loading, setLoading] = useState(true);
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  function statusLabel(status: MallH5OrderStatus): string {
+    return t(MALL_H5_ORDER_STATUS_LABEL_KEYS[status] ?? "orderList.statusFallback");
+  }
 
   const reload = useCallback(async (statusFilter: "all" | MallH5OrderStatus) => {
     const data = await loadMallH5OrderDashboard(1, statusFilter);
@@ -83,7 +86,7 @@ export function SdkworkMallH5OrderPage() {
     reload(activeFilter)
       .catch((cause: unknown) => {
         if (active) {
-          setError(cause instanceof Error ? cause.message : "订单加载失败");
+          setError(cause instanceof Error ? cause.message : t("orderDetail.errors.load"));
         }
       })
       .finally(() => {
@@ -94,7 +97,7 @@ export function SdkworkMallH5OrderPage() {
     return () => {
       active = false;
     };
-  }, [activeFilter, reload]);
+  }, [activeFilter, reload, t]);
 
   async function runOrderAction(orderId: string, action: (id: string) => Promise<void>) {
     setBusyOrderId(orderId);
@@ -103,7 +106,7 @@ export function SdkworkMallH5OrderPage() {
       await action(orderId);
       await reload(activeFilter);
     } catch (cause: unknown) {
-      setError(cause instanceof Error ? cause.message : "操作失败");
+      setError(cause instanceof Error ? cause.message : t("orderDetail.errors.action"));
     } finally {
       setBusyOrderId(null);
     }
@@ -122,7 +125,7 @@ export function SdkworkMallH5OrderPage() {
       query.set("paymentMethod", paymentMethod);
       window.location.assign(`/payment/result?${query.toString()}`);
     } catch (cause: unknown) {
-      setError(cause instanceof Error ? cause.message : "发起支付失败");
+      setError(cause instanceof Error ? cause.message : t("orderDetail.errors.pay"));
       setBusyOrderId(null);
     }
   }
@@ -143,7 +146,7 @@ export function SdkworkMallH5OrderPage() {
             onClick={() => void handlePay(order.id)}
             type="button"
           >
-            去支付
+            {t("orderDetail.actions.pay")}
           </button>
           <button
             className="sdk-h5-button sdk-h5-button-ghost"
@@ -151,7 +154,7 @@ export function SdkworkMallH5OrderPage() {
             onClick={() => void runOrderAction(order.id, (id) => cancelMallH5Order({ orderId: id }))}
             type="button"
           >
-            取消订单
+            {t("orderDetail.actions.cancel")}
           </button>
         </>
       );
@@ -160,7 +163,7 @@ export function SdkworkMallH5OrderPage() {
       return (
         <>
           <Link className="sdk-h5-button sdk-h5-button-secondary" to={`/buyer/logistics?orderId=${encodeURIComponent(order.id)}`}>
-            查看物流
+            {t("orderDetail.actions.logistics")}
           </Link>
           <button
             className="sdk-h5-button sdk-h5-button-primary"
@@ -168,18 +171,18 @@ export function SdkworkMallH5OrderPage() {
             onClick={() => void runOrderAction(order.id, (id) => confirmMallH5OrderReceipt({ orderId: id }))}
             type="button"
           >
-            确认收货
+            {t("orderDetail.actions.confirm")}
           </button>
         </>
       );
     }
     if (order.status === "pending-shipment") {
-      return <span className="sdk-h5-muted">商家备货中</span>;
+      return <span className="sdk-h5-muted">{t("orderList.merchantPreparing")}</span>;
     }
     if (order.status === "completed" || order.status === "refunding" || order.status === "refunded") {
       return (
         <Link className="sdk-h5-button sdk-h5-button-secondary" to={`/buyer/after-sales?orderId=${encodeURIComponent(order.id)}`}>
-          {order.status === "completed" ? "申请售后" : "售后详情"}
+          {order.status === "completed" ? t("orderList.afterSalesApply") : t("orderList.afterSalesDetail")}
         </Link>
       );
     }
@@ -187,12 +190,12 @@ export function SdkworkMallH5OrderPage() {
   }
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载订单...</div>;
+    return <div className="sdk-h5-page sdk-h5-loading">{t("orderList.loading")}</div>;
   }
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">我的订单</h1>
+      <h1 className="sdk-h5-visually-hidden">{t("orderList.title")}</h1>
       <div className="sdk-h5-sort-row">
         {STATUS_FILTERS.map((filter) => (
           <button
@@ -201,7 +204,7 @@ export function SdkworkMallH5OrderPage() {
             onClick={() => setSearchParams(filter.code === "all" ? {} : { status: filter.code })}
             type="button"
           >
-            {filter.label}
+            {t(filter.labelKey)}
           </button>
         ))}
       </div>
@@ -209,7 +212,7 @@ export function SdkworkMallH5OrderPage() {
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {orders.length === 0 ? (
-        <div className="sdk-h5-empty">暂无订单</div>
+        <div className="sdk-h5-empty">{t("orderList.empty")}</div>
       ) : (
         <>
         <div className="sdk-h5-order-list">
@@ -230,7 +233,7 @@ export function SdkworkMallH5OrderPage() {
                   className="sdk-h5-button sdk-h5-button-ghost"
                   to={`/buyer/orders/${encodeURIComponent(order.id)}`}
                 >
-                  订单详情
+                  {t("orderList.detail")}
                 </Link>
                 {renderAction(order)}
               </footer>
@@ -245,7 +248,7 @@ export function SdkworkMallH5OrderPage() {
               onClick={() => void loadMoreOrders()}
               type="button"
             >
-              {loadingMore ? "加载中..." : "加载更多订单"}
+              {loadingMore ? t("orderList.loadingMore") : t("orderList.loadMore")}
             </button>
           </div>
         ) : null}

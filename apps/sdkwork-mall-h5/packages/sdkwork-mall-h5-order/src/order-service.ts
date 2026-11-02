@@ -21,6 +21,20 @@ export type MallH5OrderStatus =
   | "refunding"
   | "unknown";
 
+/** Catalogue keys for order statuses; pages translate them through `t()`. */
+export const MALL_H5_ORDER_STATUS_LABEL_KEYS: Record<MallH5OrderStatus, string> = {
+  cancelled: "orderDetail.status.cancelled",
+  completed: "orderDetail.status.completed",
+  expired: "orderDetail.status.expired",
+  paid: "orderDetail.status.paid",
+  "pending-payment": "orderDetail.status.pendingPayment",
+  "pending-receipt": "orderDetail.status.pendingReceipt",
+  "pending-shipment": "orderDetail.status.pendingShipment",
+  refunded: "orderDetail.status.refunded",
+  refunding: "orderDetail.status.refunding",
+  unknown: "orderDetail.status.unknown",
+};
+
 export interface MallH5OrderSummary {
   createdAt: string;
   id: string;

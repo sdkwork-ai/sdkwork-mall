@@ -6,25 +6,12 @@ import {
   cancelMallH5Order,
   confirmMallH5OrderReceipt,
   loadMallH5OrderDetail,
+  MALL_H5_ORDER_STATUS_LABEL_KEYS,
   payMallH5Order,
   type MallH5OrderDetail,
-  type MallH5OrderStatus,
 } from "../order-service";
 import { recallMallH5PaymentMethod } from "@sdkwork/mall-h5-cart/cart-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
-
-const STATUS_KEYS: Record<MallH5OrderStatus, string> = {
-  cancelled: "orderDetail.status.cancelled",
-  completed: "orderDetail.status.completed",
-  expired: "orderDetail.status.expired",
-  paid: "orderDetail.status.paid",
-  "pending-payment": "orderDetail.status.pendingPayment",
-  "pending-receipt": "orderDetail.status.pendingReceipt",
-  "pending-shipment": "orderDetail.status.pendingShipment",
-  refunded: "orderDetail.status.refunded",
-  refunding: "orderDetail.status.refunding",
-  unknown: "orderDetail.status.unknown",
-};
 
 export function SdkworkMallH5OrderDetailPage() {
   const { t } = useTranslation();
@@ -117,7 +104,7 @@ export function SdkworkMallH5OrderDetailPage() {
   return (
     <div className="sdk-h5-page">
       <section className="sdk-h5-order-status-hero">
-        <h1>{t(STATUS_KEYS[detail.status])}</h1>
+        <h1>{t(MALL_H5_ORDER_STATUS_LABEL_KEYS[detail.status])}</h1>
         <p>{t("orderDetail.orderNo", { id: detail.id })}</p>
       </section>
 

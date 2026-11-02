@@ -19,6 +19,7 @@ import home from "./zh-CN/storefront/home/messages.json";
 import buyerHub from "./zh-CN/account/buyer-hub/messages.json";
 import addresses from "./zh-CN/account/addresses/messages.json";
 import orderDetail from "./zh-CN/order/detail/messages.json";
+import orderList from "./zh-CN/order/list/messages.json";
 
 export const SDKWORK_MALL_H5_DEFAULT_LOCALE = "zh-CN";
 
@@ -33,6 +34,7 @@ export const SDKWORK_MALL_H5_I18N_RESOURCES = {
       ...help,
       ...home,
       ...orderDetail,
+      ...orderList,
       ...paymentResult,
       ...productDetail,
     },

@@ -1,0 +1,21 @@
+{
+  "orderList": {
+    "title": "我的订单",
+    "loading": "加载订单...",
+    "loadingMore": "加载中...",
+    "loadMore": "加载更多订单",
+    "empty": "暂无订单",
+    "statusFallback": "订单",
+    "merchantPreparing": "商家备货中",
+    "detail": "订单详情",
+    "afterSalesApply": "申请售后",
+    "afterSalesDetail": "售后详情",
+    "filters": {
+      "all": "全部",
+      "pendingPayment": "待付款",
+      "pendingShipment": "待发货",
+      "pendingReceipt": "待收货",
+      "completed": "已完成"
+    }
+  }
+}
