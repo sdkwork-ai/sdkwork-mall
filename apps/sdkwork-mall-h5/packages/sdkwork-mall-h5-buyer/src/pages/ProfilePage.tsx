@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
 import { loadMallH5Profile, type MallH5Profile } from "../profile-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const PROFILE_FIELDS: ReadonlyArray<{ key: keyof MallH5Profile; label: string }> = [
   { key: "displayName", label: "昵称" },
@@ -46,7 +47,7 @@ export function SdkworkMallH5ProfilePage() {
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">个人资料</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-section">
         <h2>基本资料</h2>

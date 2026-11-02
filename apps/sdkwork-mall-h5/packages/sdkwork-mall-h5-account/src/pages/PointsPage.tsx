@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { loadMallH5Points, type MallH5PointsSummary } from "../account-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5PointsPage() {
   const [summary, setSummary] = useState<MallH5PointsSummary | null>(null);
@@ -38,7 +39,7 @@ export function SdkworkMallH5PointsPage() {
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">我的积分</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-wallet-hero">
         <div className="sdk-h5-wallet-hero-label">可用积分</div>

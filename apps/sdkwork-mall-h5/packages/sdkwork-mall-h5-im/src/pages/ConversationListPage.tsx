@@ -6,6 +6,7 @@ import {
   listMallH5ChatConversations,
   type MallH5ChatConversation,
 } from "../im-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 /** Mirrors the im-h5 ChatList time formatting (today/yesterday/date). */
 function formatConversationTime(value: string): string {
@@ -69,7 +70,7 @@ export function SdkworkMallH5ConversationListPage() {
       </nav>
 
       {loading ? <div className="sdk-h5-loading">加载会话...</div> : null}
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
       {!loading && !error && conversations.length === 0 ? (
         <div className="sdk-h5-empty">暂无会话</div>
       ) : null}

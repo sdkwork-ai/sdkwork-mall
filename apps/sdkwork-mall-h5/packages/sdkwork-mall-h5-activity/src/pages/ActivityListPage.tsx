@@ -8,6 +8,7 @@ import {
   listMallH5Activities,
   type MallH5Activity,
 } from "../activity-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5ActivityListPage() {
   const [activities, setActivities] = useState<MallH5Activity[]>([]);
@@ -45,7 +46,7 @@ export function SdkworkMallH5ActivityListPage() {
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">活动会场</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {activities.length === 0 ? (
         <div className="sdk-h5-empty">暂无进行中的活动</div>

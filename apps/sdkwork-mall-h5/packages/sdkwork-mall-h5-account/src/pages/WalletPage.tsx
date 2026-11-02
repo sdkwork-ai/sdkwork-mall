@@ -6,6 +6,7 @@ import {
   type MallH5CashLedgerEntry,
   type MallH5WalletOverview,
 } from "../account-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5WalletPage() {
   const [overview, setOverview] = useState<MallH5WalletOverview | null>(null);
@@ -46,7 +47,7 @@ export function SdkworkMallH5WalletPage() {
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">钱包</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-wallet-hero">
         <div className="sdk-h5-wallet-hero-label">现金余额（元）</div>

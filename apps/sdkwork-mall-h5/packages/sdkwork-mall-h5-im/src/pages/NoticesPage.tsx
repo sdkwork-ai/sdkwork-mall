@@ -6,6 +6,7 @@ import {
   type MallH5Notice,
 } from "../im-service";
 import { formatMallH5Timestamp } from "@sdkwork/mall-h5-commons";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const CATEGORY_LABELS: Record<string, string> = {
   system: "系统",
@@ -83,7 +84,7 @@ export function SdkworkMallH5NoticesPage() {
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">消息通知</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {notices.length === 0 ? (
         <div className="sdk-h5-empty">暂无消息，订单动态与优惠提醒都会出现在这里</div>

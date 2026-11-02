@@ -5,6 +5,7 @@ import {
   loadMallH5OrderLogistics,
   type MallH5ShipmentLogistics,
 } from "../order-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5LogisticsPage() {
   const [searchParams] = useSearchParams();
@@ -51,7 +52,7 @@ export function SdkworkMallH5LogisticsPage() {
       </div>
 
       {!orderId && !shipmentId ? <div className="sdk-h5-notice sdk-h5-notice-warning">缺少订单参数，请从订单列表进入。</div> : null}
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
       {loading ? <div className="sdk-h5-loading">加载物流...</div> : null}
       {!loading && !error && (orderId || shipmentId) && shipments.length === 0 ? (
         <div className="sdk-h5-empty">商家尚未发货，发货后可在此查看物流轨迹。</div>

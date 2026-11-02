@@ -10,6 +10,7 @@ import {
   type MallH5CartLine,
   type MallH5CartSnapshot,
 } from "../cart-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 interface MallH5CartShopGroup {
   shopId: string;
@@ -227,7 +228,7 @@ export function SdkworkMallH5CartPage() {
         </button>
       </div>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <div className="sdk-h5-cart-list">
         {shopGroups.map((group) => {

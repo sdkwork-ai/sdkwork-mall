@@ -40,6 +40,7 @@
     "src"
   ],
   "dependencies": {
+    "@sdkwork/mall-h5-commons": "workspace:*",
     "@sdkwork/mall-h5-cart": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*",
     "@sdkwork/order-service": "workspace:*"

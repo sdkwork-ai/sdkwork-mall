@@ -264,7 +264,7 @@ export function SdkworkMallH5CheckoutPage() {
         </p>
       </section>
 
-      {message ? <div className="sdk-h5-error" role="alert">{message}</div> : null}
+      {message ? <div className="sdk-h5-notice sdk-h5-notice-danger" role="alert">{message}</div> : null}
 
       <button
         className="sdk-h5-button sdk-h5-button-primary sdk-h5-button-block"

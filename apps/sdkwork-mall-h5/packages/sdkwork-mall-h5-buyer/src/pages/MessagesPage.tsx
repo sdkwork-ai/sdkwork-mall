@@ -6,6 +6,7 @@ import {
   loadMallH5MessageRows,
   type MallH5MessageRow,
 } from "../messages-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5MessagesPage() {
   const [rows, setRows] = useState<MallH5MessageRow[]>([]);
@@ -43,7 +44,7 @@ export function SdkworkMallH5MessagesPage() {
     <div className="sdk-h5-page">
           <h1 className="sdk-h5-visually-hidden">消息中心</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {rows.length === 0 ? (
         <div className="sdk-h5-empty">暂无消息</div>

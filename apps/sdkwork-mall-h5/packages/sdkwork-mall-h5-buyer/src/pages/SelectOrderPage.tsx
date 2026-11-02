@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { completeOrderPick } from "../order-pick-channel";
 import { loadMallH5BuyerOrders } from "../buyer-service";
 import { formatMallH5Cny } from "@sdkwork/mall-h5-commons";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const STATUS_TEXT: Record<string, string> = {
   cancelled: "已取消",
@@ -75,7 +76,7 @@ export function SdkworkMallH5SelectOrderPage() {
       <h1 className="sdk-h5-visually-hidden">选择订单</h1>
       <div className="sdk-h5-cell-group">
         {loading ? <div className="sdk-h5-loading">加载订单...</div> : null}
-        {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+        {error ? <SdkworkMallH5ErrorState message={error} /> : null}
         {!loading && orders.length === 0 ? (
           <div className="sdk-h5-empty">暂无可选订单</div>
         ) : null}

@@ -30,6 +30,7 @@
     "src"
   ],
   "dependencies": {
+    "@sdkwork/mall-h5-commons": "workspace:*",
     "@sdkwork/mall-commerce-service": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*"
   },

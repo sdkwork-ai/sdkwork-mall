@@ -8,6 +8,7 @@ import {
   type MallH5ChatMessage,
 } from "../im-service";
 import { formatMallH5Timestamp } from "@sdkwork/mall-h5-commons";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const DEFAULT_CONVERSATION_ID = "cs-conv-1";
 
@@ -82,7 +83,7 @@ export function SdkworkMallH5ChatPage() {
   return (
     <div className="sdk-h5-page sdk-h5-chat">
       <h1 className="sdk-h5-visually-hidden">客服会话</h1>
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <div className="sdk-h5-chat-stream" ref={streamRef}>
         {loading ? <div className="sdk-h5-loading">加载会话...</div> : null}

@@ -162,11 +162,11 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 53/53 pass
+pnpm test:node                                                     → 54/54 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
-  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 8/8
+  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 9/9
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 6/6
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
@@ -213,6 +213,16 @@ got no page heading unless the page rendered one. Six page components
 render an `<h1>` (visually hidden via `.sdk-h5-visually-hidden`, the pattern the
 other pages already used), and the H5 architecture test fails when a page
 component loses it.
+
+### 6.1.2 Shared load-failure state (H5)
+
+Fourteen H5 data pages rendered a bare red `<div>` on load failure with no
+recovery path other than reloading the whole app. `@sdkwork/mall-h5-commons`
+now owns the domain-neutral error/retry primitive `SdkworkMallH5ErrorState`
+(alert semantics preserved, retry defaults to a page reload and can be
+overridden), every page that can fail a load uses it, and form/action validation
+messages use the `sdk-h5-notice-danger` tone instead of the error banner. The H5
+architecture test fails when a page renders `sdk-h5-error` directly.
 
 ### 6.2 Per-package typecheck while the root gate is upstream-blocked
 

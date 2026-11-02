@@ -338,3 +338,36 @@ test("every H5 page component exposes an accessible page heading", () => {
   assert.ok(pages > 0, "expected H5 page components");
   assert.deepEqual(missing, [], `H5 page components without a <h1> heading:\n${missing.join("\n")}`);
 });
+
+test("H5 pages use the shared error state instead of a bare error div", () => {
+  // Load failures used to render a red div with no recovery path: the user had
+  // to reload the whole app. The shared `SdkworkMallH5ErrorState` keeps the
+  // alert semantics and offers a retry, and form/action messages use the notice
+  // tone instead of the error banner.
+  const packagesRoot = fileURLToPath(new URL("../../packages/", import.meta.url));
+  const violations = [];
+  for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const pagesDirectory = join(packagesRoot, entry.name, "src", "pages");
+    if (!existsSync(pagesDirectory)) {
+      continue;
+    }
+    for (const file of readdirSync(pagesDirectory)) {
+      if (!file.endsWith(".tsx")) {
+        continue;
+      }
+      const source = readFileSync(join(pagesDirectory, file), "utf8");
+      if (source.includes("sdk-h5-error")) {
+        violations.push(`${entry.name}/${file}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    `Use SdkworkMallH5ErrorState (or a notice tone for validation messages):\n${violations.join("\n")}`,
+  );
+});

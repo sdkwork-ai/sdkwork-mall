@@ -12,6 +12,7 @@ import {
   type MallH5OrderSummary,
 } from "../order-service";
 import { recallMallH5PaymentMethod } from "@sdkwork/mall-h5-cart/cart-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const STATUS_FILTERS: Array<{ code: "all" | MallH5OrderStatus; label: string }> = [
   { code: "all", label: "全部" },
@@ -205,7 +206,7 @@ export function SdkworkMallH5OrderPage() {
         ))}
       </div>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {orders.length === 0 ? (
         <div className="sdk-h5-empty">暂无订单</div>

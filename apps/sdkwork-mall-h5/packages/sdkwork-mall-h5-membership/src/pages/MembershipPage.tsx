@@ -6,6 +6,7 @@ import {
   type MallH5MembershipPlan,
   type MallH5MembershipStatus,
 } from "../membership-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 /** 会员权益展示位（静态权益目录；开通后的动态权益随方案下发）。 */
 const MEMBER_BENEFITS = [
@@ -53,7 +54,7 @@ export function SdkworkMallH5MembershipPage() {
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">会员中心</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-banner">
         <Crown aria-hidden="true" size={22} />

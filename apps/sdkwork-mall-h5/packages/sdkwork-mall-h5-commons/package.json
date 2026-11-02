@@ -3,15 +3,23 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Shared mobile helpers for the mall H5 root.",
+  "description": "Shared mobile helpers and domain-neutral UI primitives for the mall H5 root.",
   "exports": {
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./error-state": {
+      "types": "./src/ErrorState.tsx",
+      "import": "./src/ErrorState.tsx",
+      "default": "./src/ErrorState.tsx"
     }
   },
   "files": ["src"],
+  "peerDependencies": {
+    "react": ">=18.2.0 <20.0.0"
+  },
   "sdkwork": {
     "workspace": "sdkwork-mall",
     "architecture": "h5-react",

@@ -10,6 +10,7 @@ import {
   type MallH5OrderStatus,
 } from "../order-service";
 import { recallMallH5PaymentMethod } from "@sdkwork/mall-h5-cart/cart-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const STATUS_LABELS: Record<MallH5OrderStatus, string> = {
   cancelled: "已取消",
@@ -118,7 +119,7 @@ export function SdkworkMallH5OrderDetailPage() {
         <p>订单号：{detail.id}</p>
       </section>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-section">
         <h2>商品清单</h2>

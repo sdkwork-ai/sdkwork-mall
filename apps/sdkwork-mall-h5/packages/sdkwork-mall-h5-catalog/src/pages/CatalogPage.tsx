@@ -13,6 +13,7 @@ import {
   readMallH5SearchHistory,
   recordMallH5SearchHistory,
 } from "../search-history-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const SORT_OPTIONS = [
   { code: "", label: "综合" },
@@ -213,7 +214,7 @@ export function SdkworkMallH5CatalogPage() {
   const productArea = (
     <>
       {loading ? <div className="sdk-h5-loading">加载中...</div> : null}
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
       {!loading && !error && items.length === 0 ? (
         <div className="sdk-h5-empty">暂无匹配商品</div>
       ) : null}

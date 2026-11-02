@@ -33,6 +33,7 @@ import {
   readSdkworkMallH5SessionDisplayName,
   type SdkworkMallH5SessionSnapshot,
 } from "@sdkwork/mall-h5-core/session";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const EMPTY_SESSION: SdkworkMallH5SessionSnapshot = {};
 
@@ -144,7 +145,7 @@ export function SdkworkMallH5BuyerHomePage() {
         </button>
       </section>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-section">
         <h2>我的订单</h2>

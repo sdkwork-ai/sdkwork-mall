@@ -5,6 +5,7 @@ import {
   loadMallH5PendingReviewOrders,
   type MallH5PendingReviewOrder,
 } from "../reviews-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5ReviewsPage() {
   const [orders, setOrders] = useState<MallH5PendingReviewOrder[]>([]);
@@ -41,7 +42,7 @@ export function SdkworkMallH5ReviewsPage() {
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">我的评价</h1>
 
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-section">
         <h2>待评价</h2>

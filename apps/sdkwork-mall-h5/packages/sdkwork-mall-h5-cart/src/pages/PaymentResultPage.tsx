@@ -112,7 +112,7 @@ export function SdkworkMallH5PaymentResultPage() {
         </div>
       ))}
 
-      {message ? <div className="sdk-h5-error" role="alert">{message}</div> : null}
+      {message ? <div className="sdk-h5-notice sdk-h5-notice-danger" role="alert">{message}</div> : null}
 
       <div className="sdk-h5-action-row">
         {orderId ? <Link className="sdk-h5-button sdk-h5-button-secondary" to="/buyer/orders">查看订单</Link> : null}

@@ -395,6 +395,10 @@ body {
 }
 
 .sdk-h5-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
   background: #fee2e2;
   color: #991b1b;
   border-radius: 0.6rem;

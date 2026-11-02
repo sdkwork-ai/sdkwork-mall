@@ -18,6 +18,7 @@ import {
 
 import { loadMallH5HomeSnapshot, type MallH5HomeOffer, type MallH5HomeSnapshot } from "../home-service";
 import { readMallH5Footprint } from "@sdkwork/mall-h5-buyer/favorites-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const HOME_BANNERS = [
   { id: "banner-quality", linkUrl: "/categories", subtitle: "平台自营与品牌商家", title: "品质生活，一站购齐" },
@@ -190,7 +191,7 @@ export function SdkworkMallH5HomePage() {
       </section>
 
       {loading ? <div className="sdk-h5-loading">加载中...</div> : null}
-      {error ? <div className="sdk-h5-error" role="alert">{error}</div> : null}
+      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {snapshot?.categories.length ? (
         <section aria-label="分类导航" className="sdk-h5-section">

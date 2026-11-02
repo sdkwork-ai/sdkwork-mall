@@ -1,5 +1,4 @@
-export const SDKWORK_MALL_H5_CART_COUNT_STORAGE_KEY = "sdkwork-mall-h5-cart-count";
-export const SDKWORK_MALL_H5_SESSION_STORAGE_KEY = "sdkwork-mall-h5-session";
+export const SDKWORK_MALL_H5_CART_COUNT_STORAGE_KEY = "sdkwork-mall-h5-cart-count";export const SDKWORK_MALL_H5_SESSION_STORAGE_KEY = "sdkwork-mall-h5-session";
 export const SDKWORK_MALL_H5_CART_COUNT_EVENT = "sdkwork-mall-h5-cart-count-changed";
 
 export function formatMallH5Cny(value: number | null | undefined): string {
@@ -59,3 +58,5 @@ export function subscribeMallH5CartCount(onChange: () => void): () => void {
     window.removeEventListener("storage", onChange);
   };
 }
+
+export * from "./ErrorState";

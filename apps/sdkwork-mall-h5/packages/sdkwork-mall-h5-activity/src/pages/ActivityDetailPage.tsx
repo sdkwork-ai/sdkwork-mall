@@ -7,6 +7,7 @@ import {
   retrieveMallH5Activity,
   type MallH5Activity,
 } from "../activity-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5ActivityDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -49,7 +50,7 @@ export function SdkworkMallH5ActivityDetailPage() {
   if (error || !activity) {
     return (
       <div className="sdk-h5-page">
-        <div className="sdk-h5-error" role="alert">{error ?? "活动不存在或已结束"}</div>
+        <SdkworkMallH5ErrorState message={error ?? "活动不存在或已结束"} />
         <div className="sdk-h5-center">
           <Link className="sdk-h5-button sdk-h5-button-ghost" to="/activity">返回活动会场</Link>
         </div>

@@ -6,6 +6,7 @@ import {
   retrieveMallH5Shop,
   type MallH5ShopDetail,
 } from "../shop-service";
+import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5ShopPage() {
   const { shopId } = useParams<{ shopId: string }>();
@@ -49,7 +50,7 @@ export function SdkworkMallH5ShopPage() {
   if (error || !shop) {
     return (
       <div className="sdk-h5-page">
-        <div className="sdk-h5-error" role="alert">{error ?? "店铺不存在或已关闭"}</div>
+        <SdkworkMallH5ErrorState message={error ?? "店铺不存在或已关闭"} />
         <div className="sdk-h5-center">
           <Link className="sdk-h5-button sdk-h5-button-ghost" to="/">回到首页</Link>
         </div>
