@@ -131,6 +131,19 @@
               >取消</button>
             </view>
           </view>
+          <button
+            class="mp-btn mp-btn-plain aftersales-progress-entry"
+            bindtap="toggleProgress"
+            data-id="{{item.id}}"
+          >{{progressRequestId === item.id ? '收起进度' : '处理进度'}}</button>
+          <view wx:if="{{progressRequestId === item.id}}" class="aftersales-progress">
+            <view wx:if="{{progressLoading}}" class="mp-muted">加载进度...</view>
+            <view wx:elif="{{progressEvents.length === 0}}" class="mp-empty">暂无进度</view>
+            <view wx:for="{{progressEvents}}" wx:key="index" class="aftersales-progress-item">
+              <view class="aftersales-progress-action">{{item.action}}</view>
+              <view wx:if="{{item.at}}" class="mp-muted">{{item.at}}</view>
+            </view>
+          </view>
         </view>
         <view class="aftersales-side">
           <text class="mp-muted">{{item.statusLabel}}</text>

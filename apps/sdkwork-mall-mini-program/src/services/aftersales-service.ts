@@ -166,6 +166,29 @@ export interface MpReturnShipmentInput {
   trackingNo: string;
 }
 
+/** One entry of the after-sales progress timeline. */
+export interface MpAfterSalesEvent {
+  action: string;
+  at: string;
+}
+
+/**
+ * Loads the progress timeline of one after-sales request
+ * (`GET /after_sales/requests/{id}/events`). PC has shown this since the process
+ * screen landed; the mobile roots had no way to see refund progress.
+ */
+export async function listAfterSalesEvents(requestId: string): Promise<MpAfterSalesEvent[]> {
+  const payload = await request({
+    path: `/after_sales/requests/${requestId}/events`,
+    query: { page: 1, page_size: 20 },
+  });
+  const rows = Array.isArray(payload.items) ? payload.items : [];
+  return rows.map((item) => ({
+    action: String(item.eventType ?? item.action ?? item.toStatus ?? "event"),
+    at: String(item.createdAt ?? ""),
+  }));
+}
+
 /** Wire body for the return-shipment command (tracking number is trimmed). */
 export function buildReturnShipmentBody(input: MpReturnShipmentInput): Record<string, unknown> {
   return {

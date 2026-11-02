@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 79/79 pass
+pnpm test:node                                                     → 80/80 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -186,6 +186,7 @@ pnpm test:node                                                     → 79/79 pas
   (tests/contract/verify-i18n-readiness.test.mjs                   → 2/2)
   (tests/contract/verify-search-depth.test.mjs                     → 1/1)
   (tests/contract/verify-h5-i18n-runtime.test.mjs                  → 3/3)
+  (tests/contract/verify-after-sales-depth.test.mjs                → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -461,6 +462,23 @@ readiness baseline was refreshed).
 every key either migrated page uses exists in the merged catalogue (a missing key
 would render the identifier itself), and neither page carries hard-coded user
 copy.
+
+### 6.1.17 After-sales progress timeline
+
+A refund the buyer cannot follow becomes a support ticket. PC rendered the
+`GET /after_sales/requests/{id}/events` timeline; H5, the mini program and
+Flutter showed only a status label, so a buyer had no way to see whether a
+request was reviewed, approved or refunded.
+
+Every mobile root now loads the timeline on demand (`处理进度` toggles an
+expandable list with the event action and timestamp, cached per request and
+closed on collapse), and H5 renders it through the `afterSales.progress.*`
+catalogue keys. `tests/contract/verify-after-sales-depth.test.mjs` pins the
+service call and the page rendering on all four roots.
+
+The nine new strings that the three catalogue-less roots needed are recorded in
+the refreshed i18n baseline (mini program 375 → 378, Flutter 567 → 571, H5 +1
+for the session-guard message).
 
 ### 6.2 Per-package typecheck
 

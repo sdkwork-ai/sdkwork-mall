@@ -13,11 +13,11 @@ long):
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
-| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support}` fragments | 58 | 384 | 390 (`regions.ts`) |
-| Mini program | none — literal zh-CN | 66 | 375 | 302 (province/city picker data) |
-| Flutter | none — literal zh-CN | 38 | 567 | 230 (province/city picker data) |
+| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support}` fragments | 58 | 385 | 390 (`regions.ts`) |
+| Mini program | none — literal zh-CN | 66 | 378 | 302 (province/city picker data) |
+| Flutter | none — literal zh-CN | 38 | 571 | 230 (province/city picker data) |
 
-2778 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2786 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a

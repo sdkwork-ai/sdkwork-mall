@@ -1,0 +1,10 @@
+{
+  "afterSales": {
+    "progress": {
+      "toggle": "处理进度",
+      "loading": "加载进度...",
+      "empty": "暂无进度",
+      "failed": "进度加载失败"
+    }
+  }
+}

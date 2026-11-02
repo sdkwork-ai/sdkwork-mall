@@ -137,6 +137,17 @@ class AfterSalesService {
 
   static String _createIdempotencyKey() =>
       'as-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(0x7fffffff)}';
+
+  /// 售后单的处理进度时间线
+  /// (`GET /after_sales/requests/{id}/events`)。PC 端已有该视图，移动端此前
+  /// 只能看到状态标签，买家无法确认退款进行到哪一步。
+  Future<List<Map<String, dynamic>>> listEvents(String requestId) async {
+    final payload = await _client.request(
+      '/after_sales/requests/$requestId/events',
+      query: <String, String>{'page': '1', 'page_size': '20'},
+    );
+    return asList(payload['items']);
+  }
 }
 
 /// 买家可选的退货物流公司。

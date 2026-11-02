@@ -116,3 +116,24 @@
   color: #9ca3af;
   background: #fff;
 }
+
+.aftersales-progress-entry {
+  font-size: 24rpx;
+  padding: 6rpx 20rpx;
+  margin: 12rpx 0 0;
+}
+
+.aftersales-progress {
+  margin-top: 12rpx;
+  padding-left: 20rpx;
+  border-left: 2rpx solid #e5e7eb;
+}
+
+.aftersales-progress-item {
+  padding: 8rpx 0;
+}
+
+.aftersales-progress-action {
+  font-size: 26rpx;
+  font-weight: 600;
+}

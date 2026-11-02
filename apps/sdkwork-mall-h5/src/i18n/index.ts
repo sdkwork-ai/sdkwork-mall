@@ -14,6 +14,7 @@ import confirmOrder from "./zh-CN/checkout/confirm-order/messages.json";
 import paymentResult from "./zh-CN/checkout/payment-result/messages.json";
 import productDetail from "./zh-CN/catalog/product-detail/messages.json";
 import help from "./zh-CN/support/help/messages.json";
+import afterSales from "./zh-CN/support/after-sales/messages.json";
 import home from "./zh-CN/storefront/home/messages.json";
 import buyerHub from "./zh-CN/account/buyer-hub/messages.json";
 
@@ -25,6 +26,7 @@ export const SDKWORK_MALL_H5_I18N_RESOURCES = {
     translation: {
       ...buyerHub,
       ...confirmOrder,
+      ...afterSales,
       ...help,
       ...home,
       ...paymentResult,

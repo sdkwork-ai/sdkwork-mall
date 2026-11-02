@@ -68,6 +68,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
   String _returnFormRequestId = '';
   String _returnCarrierCode = afterSalesReturnCarriers.first['code']!;
   bool _returnBusy = false;
+  String _progressRequestId = '';
+  List<Map<String, dynamic>> _progressEvents = const <Map<String, dynamic>>[];
+  bool _progressLoading = false;
 
   @override
   void initState() {
@@ -366,8 +369,87 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
               child: const Text('填写退货物流'),
             ),
         ],
+        TextButton(
+          onPressed: () => _toggleProgress(requestId),
+          child: Text(_progressRequestId == requestId ? '收起进度' : '处理进度'),
+        ),
+        if (_progressRequestId == requestId) _buildProgressTimeline(),
       ],
     );
+  }
+
+  Widget _buildProgressTimeline() {
+    final theme = Theme.of(context);
+    if (_progressLoading) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text('加载进度...', style: theme.textTheme.bodySmall),
+      );
+    }
+    if (_progressEvents.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.only(bottom: 12),
+        child: SdkworkEmptyView(message: '暂无进度'),
+      );
+    }
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(left: 12),
+      decoration: BoxDecoration(
+        border: Border(left: BorderSide(color: theme.dividerColor)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final event in _progressEvents)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    asString(event, ['eventType', 'action', 'toStatus'], fallback: 'event'),
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  if (asString(event, ['createdAt']).isNotEmpty)
+                    Text(
+                      asString(event, ['createdAt']),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _toggleProgress(String requestId) async {
+    if (_progressRequestId == requestId) {
+      setState(() => _progressRequestId = '');
+      return;
+    }
+    setState(() {
+      _progressRequestId = requestId;
+      _progressEvents = const <Map<String, dynamic>>[];
+      _progressLoading = true;
+    });
+    try {
+      final events = await MallCommerce.instance.afterSales.listEvents(requestId);
+      if (mounted && _progressRequestId == requestId) {
+        setState(() {
+          _progressEvents = events;
+          _progressLoading = false;
+        });
+      }
+    } catch (cause) {
+      if (mounted) {
+        setState(() {
+          _progressLoading = false;
+          _message = '$cause';
+        });
+      }
+    }
   }
 
   Widget _buildReturnForm() {

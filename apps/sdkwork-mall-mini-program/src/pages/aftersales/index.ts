@@ -6,6 +6,7 @@ import {
   cancelRequest,
   createRequest,
   createReturnShipment,
+  listAfterSalesEvents,
   listRequests,
   RETURN_CARRIERS,
   type MpAfterSalesEvidenceItem,
@@ -56,6 +57,9 @@ interface AftersalesData {
   returnCarrierIndex: number;
   returnTrackingNo: string;
   returnBusy: boolean;
+  progressRequestId: string;
+  progressEvents: Array<{ action: string; at: string }>;
+  progressLoading: boolean;
   loading: boolean;
   loadingOrder: boolean;
   busy: boolean;
@@ -82,6 +86,9 @@ Page({
     returnCarrierIndex: 0,
     returnTrackingNo: "",
     returnBusy: false,
+    progressRequestId: "",
+    progressEvents: [],
+    progressLoading: false,
     loading: true,
     loadingOrder: false,
     busy: false,
@@ -355,6 +362,29 @@ Page({
       this.setData({
         returnBusy: false,
         error: errorMessage(cause, "退货物流提交失败"),
+      });
+    }
+  },
+
+  async toggleProgress(event: MpTapEvent) {
+    const requestId = `${event.currentTarget.dataset.id ?? ""}`;
+    if (!requestId) {
+      return;
+    }
+    if (this.data.progressRequestId === requestId) {
+      this.setData({ progressRequestId: "" });
+      return;
+    }
+    this.setData({ progressRequestId: requestId, progressEvents: [], progressLoading: true });
+    try {
+      const events = await listAfterSalesEvents(requestId);
+      if (this.data.progressRequestId === requestId) {
+        this.setData({ progressEvents: events, progressLoading: false });
+      }
+    } catch (cause) {
+      this.setData({
+        progressLoading: false,
+        error: errorMessage(cause, "进度加载失败"),
       });
     }
   },

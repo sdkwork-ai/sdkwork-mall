@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { SdkworkMallH5Cell, SdkworkMallH5SelectCell } from "../components/ActionSheet";
@@ -13,10 +14,12 @@ import {
   createMallH5AfterSalesRequest,
   createMallH5AfterSalesReturnShipment,
   listMallH5AfterSalesRequests,
+  loadMallH5AfterSalesEvents,
   loadMallH5AfterSalesOrderContext,
   MALL_H5_AFTER_SALES_REASON_PRESETS,
   MALL_H5_AFTER_SALES_TYPES,
   MALL_H5_RETURN_CARRIERS,
+  type MallH5AfterSalesEvent,
   type MallH5AfterSalesEvidenceItem,
   type MallH5AfterSalesOrderContext,
   type MallH5AfterSalesRequest,
@@ -39,6 +42,7 @@ function formatCny(amount: number | null): string {
 }
 
 export function SdkworkMallH5AfterSalesPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const presetOrderId = searchParams.get("orderId") ?? "";
@@ -59,6 +63,10 @@ export function SdkworkMallH5AfterSalesPage() {
   const [returnCarrierCode, setReturnCarrierCode] = useState<string>(MALL_H5_RETURN_CARRIERS[0].code);
   const [returnTrackingNo, setReturnTrackingNo] = useState("");
   const [returnBusy, setReturnBusy] = useState(false);
+  const [progressRequestId, setProgressRequestId] = useState("");
+  const [progressEvents, setProgressEvents] = useState<MallH5AfterSalesEvent[]>([]);
+  const [progressLoading, setProgressLoading] = useState(false);
+  const [progressError, setProgressError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     setRequests(await listMallH5AfterSalesRequests());
@@ -253,6 +261,25 @@ export function SdkworkMallH5AfterSalesPage() {
       setMessage(cause instanceof Error ? cause.message : "撤销失败");
     } finally {
       setBusy(false);
+    }
+  }
+
+  /** 展开/收起某个售后单的处理进度（按需拉取事件）。 */
+  async function toggleProgress(requestId: string) {
+    if (progressRequestId === requestId) {
+      setProgressRequestId("");
+      return;
+    }
+    setProgressRequestId(requestId);
+    setProgressEvents([]);
+    setProgressError(null);
+    setProgressLoading(true);
+    try {
+      setProgressEvents(await loadMallH5AfterSalesEvents(requestId));
+    } catch (cause: unknown) {
+      setProgressError(cause instanceof Error ? cause.message : t("afterSales.progress.failed"));
+    } finally {
+      setProgressLoading(false);
     }
   }
 
@@ -493,6 +520,42 @@ export function SdkworkMallH5AfterSalesPage() {
                       填写退货物流
                     </button>
                   )
+                ) : null}
+                <button
+                  className="sdk-h5-link-button"
+                  onClick={() => void toggleProgress(request.id)}
+                  type="button"
+                >
+                  {t("afterSales.progress.toggle")}
+                </button>
+                {progressRequestId === request.id ? (
+                  <div>
+                    {progressLoading ? (
+                      <p className="sdk-h5-muted">{t("afterSales.progress.loading")}</p>
+                    ) : null}
+                    {progressError ? (
+                      <p className="sdk-h5-notice sdk-h5-notice-danger" role="alert">
+                        {progressError}
+                      </p>
+                    ) : null}
+                    {!progressLoading && !progressError && progressEvents.length === 0 ? (
+                      <p className="sdk-h5-muted">{t("afterSales.progress.empty")}</p>
+                    ) : null}
+                    {progressEvents.length > 0 ? (
+                      <ol className="sdk-h5-tracking">
+                        {progressEvents.map((event, index) => (
+                          <li key={`${event.action}-${event.at ?? index}`}>
+                            <div className="sdk-h5-tracking-text">{event.action}</div>
+                            {event.at ? (
+                              <div className="sdk-h5-tracking-meta">
+                                {new Date(event.at).toLocaleString("zh-CN")}
+                              </div>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ol>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
               <div>

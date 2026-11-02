@@ -1,8 +1,33 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { configureSdkworkCommerceServiceProvider, type SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
 import { configureSdkworkOrderAppServiceProvider, type SdkworkOrderAppService } from "@sdkwork/order-service";
+
+// The page resolves its progress copy through i18n. Initialise a test-local
+// instance (the app runtime lives at the app root, which a package test must not
+// import) so the page renders real zh-CN text instead of raw keys.
+void i18n.use(initReactI18next).init({
+  fallbackLng: "zh-CN",
+  interpolation: { escapeValue: false },
+  lng: "zh-CN",
+  resources: {
+    "zh-CN": {
+      translation: {
+        afterSales: {
+          progress: {
+            toggle: "处理进度",
+            loading: "加载进度...",
+            empty: "暂无进度",
+            failed: "进度加载失败",
+          },
+        },
+      },
+    },
+  },
+});
 
 import {
   configureCommerceServiceMockSession,
