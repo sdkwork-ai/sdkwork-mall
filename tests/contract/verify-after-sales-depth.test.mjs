@@ -55,7 +55,7 @@ const ROOTS = [
     service: "apps/sdkwork-mall-flutter-mobile/lib/services/after_sales_service.dart",
     servicePatterns: ["/return_shipments", "Idempotency-Key", "createReturnShipment"],
     page: "apps/sdkwork-mall-flutter-mobile/lib/pages/after_sales_page.dart",
-    pagePatterns: ["填写退货物流", "_submitReturnShipment", "status == 'APPROVED'"],
+    pagePatterns: ["afterSales.list.returnEntry", "_submitReturnShipment", "status == 'APPROVED'"],
   },
 ];
 
@@ -116,7 +116,7 @@ const TIMELINE_ROOTS = [
     service: "apps/sdkwork-mall-flutter-mobile/lib/services/after_sales_service.dart",
     servicePatterns: ["listEvents(", "/events"],
     page: "apps/sdkwork-mall-flutter-mobile/lib/pages/after_sales_page.dart",
-    pagePatterns: ["_toggleProgress", "_progressEvents", "处理进度"],
+    pagePatterns: ["_toggleProgress", "_progressEvents", "afterSales.list.progressToggle"],
   },
 ];
 

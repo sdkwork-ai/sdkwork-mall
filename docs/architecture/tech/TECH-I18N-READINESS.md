@@ -15,9 +15,9 @@ long):
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
 | H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 54 | 283 | 390 (`regions.ts`) |
 | Mini program | none — literal zh-CN | 66 | 378 | 302 (province/city picker data) |
-| Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/help,account/*,checkout/confirm-order}` fragments | 34 | 411 | 230 (province/city picker data) |
+| Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,checkout/confirm-order}` fragments | 33 | 349 | 230 (province/city picker data) |
 
-2524 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2462 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -110,14 +110,14 @@ authored fragments into a synchronous message map (`t(key, {params})` with
 `runApp`, and degrades to the key when a fragment is missing. Fragments live under
 `lib/src/i18n/<locale>/<domain>/<capability>/messages.json` and are declared in
 `pubspec.yaml`. Migrated surfaces: the help centre, the buyer hub, the
-settings/invoices pages and the confirm-order page (27 + 38 + 44 + 51 strings),
-all resolved from `help.*` / `buyerHub.*` / `invoices.*` / `settings.*` /
-`checkout.*`. The checkout page covers the address/delivery/coupon/deduction/
-gift-card/remark/invoice sections, the summary rows and every validation message,
-with delivery options declared as labelKey/descriptionKey pairs. Widget tests
-install the fragments from disk through `test/support/i18n_fixture.dart`, so the
-suite does not depend on asset-bundle resolution. Flutter's hard-coded count
-dropped 571 → 411.
+settings/invoices pages, the confirm-order page and the after-sales centre
+(27 + 38 + 44 + 51 + 56 strings), all resolved from `help.*` / `buyerHub.*` /
+`invoices.*` / `settings.*` / `checkout.*` / `afterSales.*`. The after-sales page
+covers the apply form, evidence grid, records list, return-shipment form, progress
+timeline, type/status/reason/carrier labels and every validation message; the
+carrier list itself only carries `nameKey` references now. Widget tests install the
+fragments from disk through `test/support/i18n_fixture.dart`, so the suite does not
+depend on asset-bundle resolution. Flutter's hard-coded count dropped 571 → 349.
 
 **S3 — locale switching and verification.**
 Locale store per root, `Accept-Language` propagation through the transport seams,

@@ -7,31 +7,32 @@ import '../bootstrap/commerce_transport.dart';
 import '../services/after_sales_service.dart';
 import '../services/commerce.dart';
 import '../services/drive_upload_service.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
 
-const Map<String, String> _afterSalesTypeLabels = <String, String>{
-  'refund': '仅退款',
-  'return': '退货退款',
-  'exchange': '换货',
+const Map<String, String> _afterSalesTypeKeys = <String, String>{
+  'refund': 'afterSales.type.refund',
+  'return': 'afterSales.type.return',
+  'exchange': 'afterSales.type.exchange',
 };
 
-const Map<String, String> _afterSalesStatusLabels = <String, String>{
-  'PENDING': '待审核',
-  'REVIEWING': '审核中',
-  'APPROVED': '已通过',
-  'REJECTED': '已拒绝',
-  'COMPLETED': '已完成',
-  'CANCELLED': '已撤销',
+const Map<String, String> _afterSalesStatusKeys = <String, String>{
+  'PENDING': 'afterSales.status.pending',
+  'REVIEWING': 'afterSales.status.reviewing',
+  'APPROVED': 'afterSales.status.approved',
+  'REJECTED': 'afterSales.status.rejected',
+  'COMPLETED': 'afterSales.status.completed',
+  'CANCELLED': 'afterSales.status.cancelled',
 };
 
 const List<Map<String, String>> _reasonPresets = <Map<String, String>>[
-  {'code': 'not-as-described', 'label': '商品与描述不符'},
-  {'code': 'quality-issue', 'label': '质量问题'},
-  {'code': 'missing-item', 'label': '少件/漏发'},
-  {'code': 'shipping-issue', 'label': '发货/物流问题'},
-  {'code': 'change-mind', 'label': '多拍/错拍/不想要了'},
-  {'code': 'other', 'label': '其他'},
+  {'code': 'not-as-described', 'labelKey': 'afterSales.reason.notAsDescribed'},
+  {'code': 'quality-issue', 'labelKey': 'afterSales.reason.qualityIssue'},
+  {'code': 'missing-item', 'labelKey': 'afterSales.reason.missingItem'},
+  {'code': 'shipping-issue', 'labelKey': 'afterSales.reason.shippingIssue'},
+  {'code': 'change-mind', 'labelKey': 'afterSales.reason.changeMind'},
+  {'code': 'other', 'labelKey': 'afterSales.reason.other'},
 ];
 
 /// 售后中心：申请（订单预填、契约创建体）与记录撤销。
@@ -91,9 +92,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('售后中心')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('afterSales.page.title'))),
       body: _loading
-          ? const SdkworkLoadingView(label: '加载售后...')
+          ? SdkworkLoadingView(label: SdkworkI18n.t('afterSales.page.loading'))
           : ListView(
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
@@ -124,7 +125,10 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('申请售后', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              SdkworkI18n.t('afterSales.apply.title'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -132,9 +136,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                   child: TextField(
                     controller: _orderId,
                     enabled: _orderItems.isEmpty,
-                    decoration: const InputDecoration(
-                      labelText: '订单号',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: SdkworkI18n.t('afterSales.apply.orderLabel'),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -142,29 +146,47 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                 _orderItems.isEmpty
                     ? FilledButton.tonal(
                         onPressed: _loadingOrder ? null : _loadOrder,
-                        child: Text(_loadingOrder ? '读取中...' : '读取订单'),
+                        child: Text(
+                          _loadingOrder
+                              ? SdkworkI18n.t('afterSales.apply.reading')
+                              : SdkworkI18n.t('afterSales.apply.readOrder'),
+                        ),
                       )
                     : TextButton(
                         onPressed: _busy ? null : _clearOrder,
-                        child: const Text('更换订单'),
+                        child: Text(
+                          SdkworkI18n.t('afterSales.apply.changeOrder'),
+                        ),
                       ),
               ],
             ),
             if (_orderItems.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                '${_orderItems.length} 项商品'
-                '${_amount.text.isNotEmpty ? ' · 申请金额 ¥${_amount.text}' : ''}',
+                _amount.text.isNotEmpty
+                    ? SdkworkI18n.t(
+                        'afterSales.apply.orderSummaryAmount',
+                        params: <String, String>{
+                          'amount': _amount.text,
+                          'count': '${_orderItems.length}',
+                        },
+                      )
+                    : SdkworkI18n.t(
+                        'afterSales.apply.orderSummary',
+                        params: <String, String>{
+                          'count': '${_orderItems.length}',
+                        },
+                      ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
-              children: _afterSalesTypeLabels.entries
+              children: _afterSalesTypeKeys.entries
                   .map(
                     (entry) => ChoiceChip(
-                      label: Text(entry.value),
+                      label: Text(SdkworkI18n.t(entry.value)),
                       selected: _type == entry.key,
                       onSelected: (_) => setState(() => _type = entry.key),
                     ),
@@ -174,15 +196,15 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _reasonCode,
-              decoration: const InputDecoration(
-                labelText: '售后原因',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: SdkworkI18n.t('afterSales.apply.reasonLabel'),
+                border: const OutlineInputBorder(),
               ),
               items: _reasonPresets
                   .map(
                     (preset) => DropdownMenuItem<String>(
                       value: preset['code'],
-                      child: Text(preset['label']!),
+                      child: Text(SdkworkI18n.t(preset['labelKey']!)),
                     ),
                   )
                   .toList(),
@@ -192,10 +214,10 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
             TextField(
               controller: _description,
               maxLength: 200,
-              decoration: const InputDecoration(
-                labelText: '问题描述（选填）',
-                hintText: '补充描述有助于加快审核',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: SdkworkI18n.t('afterSales.apply.descriptionLabel'),
+                hintText: SdkworkI18n.t('afterSales.apply.descriptionHint'),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
@@ -203,16 +225,19 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
               controller: _amount,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: '售后金额（元）',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: SdkworkI18n.t('afterSales.apply.amountLabel'),
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '凭证上传（可选，最多 $_maxEvidenceFiles 张）',
+                SdkworkI18n.t(
+                  'afterSales.apply.evidenceLabel',
+                  params: <String, String>{'count': '$_maxEvidenceFiles'},
+                ),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
@@ -223,7 +248,11 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: _busy ? null : _submit,
-                child: Text(_busy ? '提交中...' : '提交申请'),
+                child: Text(
+                  _busy
+                      ? SdkworkI18n.t('afterSales.apply.submitting')
+                      : SdkworkI18n.t('afterSales.apply.submit'),
+                ),
               ),
             ),
           ],
@@ -277,7 +306,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                 child: ColoredBox(
                   color: const Color(0x8C111827),
                   child: Text(
-                    item['state'] == 'uploading' ? '上传中...' : '已上传',
+                    item['state'] == 'uploading'
+                        ? SdkworkI18n.t('afterSales.apply.evidenceUploading')
+                        : SdkworkI18n.t('afterSales.apply.evidenceUploaded'),
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.white, fontSize: 10),
                   ),
@@ -309,12 +340,17 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('售后记录', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              SdkworkI18n.t('afterSales.list.title'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             const SizedBox(height: 8),
             if (_requests.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: SdkworkEmptyView(message: '暂无售后记录'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: SdkworkEmptyView(
+                  message: SdkworkI18n.t('afterSales.list.empty'),
+                ),
               )
             else
               for (final request in _requests) _buildRequestTile(request),
@@ -332,11 +368,11 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(
-            '${_afterSalesTypeLabels[_typeKey(request)] ?? _typeKey(request)}'
+            '${_afterSalesTypeKeys[_typeKey(request)] == null ? _typeKey(request) : SdkworkI18n.t(_afterSalesTypeKeys[_typeKey(request)]!)}'
             ' · ¥${asString(request, ['requestedAmount'])}',
           ),
           subtitle: Text(
-            '订单 ${asString(request, ['orderId'])}'
+            '${SdkworkI18n.t('afterSales.list.orderNo', params: <String, String>{'id': asString(request, ['orderId'])})}'
             '${asString(request, ['afterSalesNo']).isNotEmpty ? ' · ${asString(request, ['afterSalesNo'])}' : ''}',
           ),
           trailing: Row(
@@ -350,7 +386,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                 const SizedBox(width: 8),
                 TextButton(
                   onPressed: _busy ? null : () => _cancel(request),
-                  child: const Text('撤销'),
+                  child: Text(SdkworkI18n.t('afterSales.list.cancel')),
                 ),
               ],
             ],
@@ -366,12 +402,16 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                 _returnTracking.clear();
                 _returnCarrierCode = afterSalesReturnCarriers.first['code']!;
               }),
-              child: const Text('填写退货物流'),
+              child: Text(SdkworkI18n.t('afterSales.list.returnEntry')),
             ),
         ],
         TextButton(
           onPressed: () => _toggleProgress(requestId),
-          child: Text(_progressRequestId == requestId ? '收起进度' : '处理进度'),
+          child: Text(
+            _progressRequestId == requestId
+                ? SdkworkI18n.t('afterSales.list.progressCollapse')
+                : SdkworkI18n.t('afterSales.list.progressToggle'),
+          ),
         ),
         if (_progressRequestId == requestId) _buildProgressTimeline(),
       ],
@@ -383,13 +423,18 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
     if (_progressLoading) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: Text('加载进度...', style: theme.textTheme.bodySmall),
+        child: Text(
+          SdkworkI18n.t('afterSales.list.progressLoading'),
+          style: theme.textTheme.bodySmall,
+        ),
       );
     }
     if (_progressEvents.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.only(bottom: 12),
-        child: SdkworkEmptyView(message: '暂无进度'),
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: SdkworkEmptyView(
+          message: SdkworkI18n.t('afterSales.list.progressEmpty'),
+        ),
       );
     }
     return Container(
@@ -460,7 +505,10 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
         children: [
           Row(
             children: [
-              Text('物流公司', style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                SdkworkI18n.t('afterSales.return.carrierLabel'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(width: 12),
               DropdownButton<String>(
                 value: _returnCarrierCode,
@@ -475,7 +523,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                   for (final carrier in afterSalesReturnCarriers)
                     DropdownMenuItem<String>(
                       value: carrier['code']!,
-                      child: Text(carrier['name']!),
+                      child: Text(SdkworkI18n.t(carrier['nameKey']!)),
                     ),
                 ],
               ),
@@ -483,9 +531,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
           ),
           TextField(
             controller: _returnTracking,
-            decoration: const InputDecoration(
-              labelText: '退货物流单号',
-              hintText: '请输入快递单号',
+            decoration: InputDecoration(
+              labelText: SdkworkI18n.t('afterSales.return.trackingLabel'),
+              hintText: SdkworkI18n.t('afterSales.return.trackingHint'),
             ),
           ),
           const SizedBox(height: 8),
@@ -493,7 +541,11 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
             children: [
               FilledButton(
                 onPressed: _returnBusy ? null : _submitReturnShipment,
-                child: Text(_returnBusy ? '提交中...' : '提交退货物流'),
+                child: Text(
+                  _returnBusy
+                      ? SdkworkI18n.t('afterSales.return.submitting')
+                      : SdkworkI18n.t('afterSales.return.submit'),
+                ),
               ),
               const SizedBox(width: 8),
               TextButton(
@@ -503,7 +555,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                           _returnFormRequestId = '';
                           _returnTracking.clear();
                         }),
-                child: const Text('取消'),
+                child: Text(SdkworkI18n.t('afterSales.return.cancel')),
               ),
             ],
           ),
@@ -521,7 +573,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
   Future<void> _submitReturnShipment() async {
     final trackingNo = _returnTracking.text.trim();
     if (trackingNo.isEmpty) {
-      setState(() => _message = '请填写退货物流单号');
+      setState(() => _message = SdkworkI18n.t('afterSales.errors.trackingRequired'));
       return;
     }
     final carrier = afterSalesReturnCarriers.firstWhere(
@@ -536,7 +588,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
       await MallCommerce.instance.afterSales.createReturnShipment(
         requestId: _returnFormRequestId,
         carrierCode: carrier['code']!,
-        carrierName: carrier['name'],
+        carrierName: carrier['nameKey'] == null
+            ? null
+            : SdkworkI18n.t(carrier['nameKey']!),
         trackingNo: trackingNo,
       );
       if (!mounted) {
@@ -548,7 +602,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
         _returnTracking.clear();
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('退货物流已提交')),
+        SnackBar(
+          content: Text(SdkworkI18n.t('afterSales.errors.returnSubmitted')),
+        ),
       );
       await _reloadRequests();
     } catch (cause) {
@@ -567,7 +623,8 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
 
   String _statusLabel(Map<String, dynamic> request) {
     final status = asString(request, ['status']).toUpperCase();
-    return _afterSalesStatusLabels[status] ?? status;
+    final key = _afterSalesStatusKeys[status];
+    return key == null ? status : SdkworkI18n.t(key);
   }
 
   bool _revokable(Map<String, dynamic> request) {
@@ -599,7 +656,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
   Future<void> _loadOrder() async {
     final orderId = _orderId.text.trim();
     if (orderId.isEmpty) {
-      setState(() => _message = '请填写订单号');
+      setState(() => _message = SdkworkI18n.t('afterSales.errors.orderRequired'));
       return;
     }
     setState(() {
@@ -668,7 +725,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
       try {
         final bytes = await File(xfile.path).readAsBytes();
         if (bytes.length > _maxEvidenceBytes) {
-          throw const SdkworkApiException('单张凭证不能超过 5MB');
+          throw SdkworkApiException(
+        SdkworkI18n.t('afterSales.errors.evidenceTooLarge'),
+      );
         }
         final reference = await uploadDriveImage(
           client: MallCommerce.instance.client,
@@ -713,16 +772,16 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
 
   Future<void> _submit() async {
     if (_orderItems.isEmpty) {
-      setState(() => _message = '请先读取订单');
+      setState(() => _message = SdkworkI18n.t('afterSales.errors.readOrderFirst'));
       return;
     }
     final amount = num.tryParse(_amount.text.trim());
     if (amount == null || amount <= 0) {
-      setState(() => _message = '请填写有效的售后金额');
+      setState(() => _message = SdkworkI18n.t('afterSales.errors.amountInvalid'));
       return;
     }
     if (_evidence.any((item) => item['state'] == 'uploading')) {
-      setState(() => _message = '凭证仍在上传中，请稍候');
+      setState(() => _message = SdkworkI18n.t('afterSales.errors.evidenceUploading'));
       return;
     }
     setState(() {
@@ -762,7 +821,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
         return;
       }
       setState(() {
-        _message = '售后申请已提交';
+        _message = SdkworkI18n.t('afterSales.errors.submitted');
         _evidence = const <Map<String, dynamic>>[];
       });
       await _reloadRequests();

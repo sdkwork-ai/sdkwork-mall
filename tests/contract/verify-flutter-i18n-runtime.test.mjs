@@ -30,6 +30,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/checkout\/confirm-order\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/support\/after-sales\/messages\.json/u);
 
   const main = read(`${appRoot}/lib/main.dart`);
   assert.match(main, /await SdkworkI18n\.load\(\)/u);
@@ -39,6 +40,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/checkout\/confirm-order\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/support\/after-sales\/messages\.json/u);
 });
 
 test("migrated pages resolve every string from the catalogue", () => {
@@ -66,11 +68,18 @@ test("migrated pages resolve every string from the catalogue", () => {
   assert.match(checkoutPage, /SdkworkI18n\.t\(method\['labelKey'\]!\)/u);
   assert.match(checkoutPage, /SdkworkI18n\.t\('checkout\.invoice\.taxInvalid'\)/u);
 
+  const afterSalesPage = read(`${appRoot}/lib/pages/after_sales_page.dart`);
+  assert.match(afterSalesPage, /SdkworkI18n\.t\('afterSales\.page\.title'\)/u);
+  assert.match(afterSalesPage, /SdkworkI18n\.t\(preset\['labelKey'\]!\)/u);
+  assert.match(afterSalesPage, /SdkworkI18n\.t\(carrier\['nameKey'\]!\)/u);
+  assert.match(afterSalesPage, /SdkworkI18n\.t\('afterSales\.errors\.submitted'\)/u);
+
   for (const pagePath of [
     `${appRoot}/lib/pages/help_page.dart`,
     `${appRoot}/lib/pages/buyer_page.dart`,
     `${appRoot}/lib/pages/settings_and_invoices.dart`,
     `${appRoot}/lib/pages/checkout_page.dart`,
+    `${appRoot}/lib/pages/after_sales_page.dart`,
   ]) {
     const page = read(pagePath);
     const literalChinese = [...page.matchAll(/'[^'\n]*[\u4e00-\u9fff][^'\n]*'/gu)].map(

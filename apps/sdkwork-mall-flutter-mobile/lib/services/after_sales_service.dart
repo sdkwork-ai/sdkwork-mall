@@ -150,12 +150,12 @@ class AfterSalesService {
   }
 }
 
-/// 买家可选的退货物流公司。
+/// 买家可选的退货物流公司（名称走 i18n 目录，服务层只保留 code 与 key）。
 const List<Map<String, String>> afterSalesReturnCarriers = [
-  {'code': 'SF', 'name': '顺丰速运'},
-  {'code': 'ZTO', 'name': '中通快递'},
-  {'code': 'YTO', 'name': '圆通速递'},
-  {'code': 'YUNDA', 'name': '韵达速递'},
-  {'code': 'JD', 'name': '京东物流'},
-  {'code': 'OTHER', 'name': '其他'},
+  {'code': 'SF', 'nameKey': 'afterSales.carrier.sf'},
+  {'code': 'ZTO', 'nameKey': 'afterSales.carrier.zto'},
+  {'code': 'YTO', 'nameKey': 'afterSales.carrier.yto'},
+  {'code': 'YUNDA', 'nameKey': 'afterSales.carrier.yunda'},
+  {'code': 'JD', 'nameKey': 'afterSales.carrier.jd'},
+  {'code': 'OTHER', 'nameKey': 'afterSales.carrier.other'},
 ];
