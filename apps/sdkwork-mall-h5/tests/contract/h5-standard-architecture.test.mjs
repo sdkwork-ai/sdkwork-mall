@@ -178,3 +178,41 @@ function matchesRoutePath(registered, target) {
     (segment, index) => segment.startsWith(":") || segment === targetSegments[index],
   );
 }
+
+test("mall H5 capability packages are individually typecheckable", () => {
+  // The root `tsc` resolves the app bootstrap, which imports the federated
+  // commerce facade. While that facade subpath is missing upstream, only
+  // per-package typechecks can prove a capability package is sound, so every
+  // package the app root declares must carry its own tsconfig.
+  const manifest = JSON.parse(read("../../package.json"));
+  const declared = Object.keys({
+    ...(manifest.dependencies ?? {}),
+    ...(manifest.devDependencies ?? {}),
+  }).filter((name) => name.startsWith("@sdkwork/mall-h5-"));
+  assert.ok(declared.length > 0, "the H5 app root must declare its capability packages");
+
+  const packagesRoot = fileURLToPath(new URL("../../packages/", import.meta.url));
+  const missing = [];
+  for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const packageJsonPath = join(packagesRoot, entry.name, "package.json");
+    if (!existsSync(packageJsonPath)) {
+      continue;
+    }
+    const packageName = JSON.parse(readFileSync(packageJsonPath, "utf8")).name;
+    if (!declared.includes(packageName)) {
+      continue;
+    }
+    if (!existsSync(join(packagesRoot, entry.name, "tsconfig.json"))) {
+      missing.push(entry.name);
+    }
+  }
+
+  assert.deepEqual(
+    missing,
+    [],
+    `H5 packages must declare tsconfig.json so scripts/typecheck-mall-packages.mjs covers them: ${missing.join(", ")}`,
+  );
+});

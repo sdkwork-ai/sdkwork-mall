@@ -147,14 +147,14 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 45/45 pass
+pnpm test:node                                                     → 46/46 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 15/15)
-  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 5/5
+  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 6/6
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 4/4
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
-pnpm typecheck:packages                                            → 33 packages, 0 failed
+pnpm typecheck:packages                                            → 46 packages, 0 failed
 pnpm test:vitest                                                   → 68 files / 169 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
@@ -185,15 +185,17 @@ mounted route (`to="…"`, `navigate("…")`, and template-literal links, with
 
 The root `pnpm typecheck` fails on the missing `./domains` facade (section 5),
 which would otherwise hide any regression in the capability packages. Every
-active client package carries its own `tsconfig.json`, so
+active client package on both browser roots carries its own `tsconfig.json`, so
 `scripts/typecheck-mall-packages.mjs` (`pnpm typecheck:packages`) typechecks
-each package in isolation and `pnpm check` runs it *before* the root typecheck.
-`tests/contract/verify-mall-standard-architecture.test.mjs` asserts that every
-active package declares a `tsconfig.json`, so a new package cannot silently
-escape the gate. Inactive legacy packages (billing, checkout, offer, pricing,
-subscription, membership-purchase, entitlement, payment) are declared by no app
-root, are excluded from the root tsconfig, and are reported as skipped rather
-than hidden.
+each package in isolation — 33 PC packages plus 13 H5 packages — and
+`pnpm check` runs it *before* the root typecheck. Both
+`tests/contract/verify-mall-standard-architecture.test.mjs` and
+`apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture.test.mjs` assert
+that every active package declares a `tsconfig.json`, so a new package cannot
+silently escape the gate. Inactive legacy packages (billing, checkout, offer,
+pricing, subscription, membership-purchase, entitlement, payment) are declared
+by no app root, are excluded from the root tsconfig, and are reported as
+skipped rather than hidden.
 
 Flutter visual review: `flutter test -DVISUAL_CAPTURE=true --update-goldens
 test/visual_capture_test.dart` now captures the help, reviews, gift-card,
