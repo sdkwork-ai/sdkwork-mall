@@ -22,7 +22,10 @@ interface CheckoutData {
   usePoints: boolean;
   buyerRemark: string;
   quote: MpCheckoutQuote | null;
+  quoteError: string;
   payableText: string;
+  originalAmountText: string;
+  discountAmountText: string;
   itemCount: number;
   loading: boolean;
   busy: boolean;
@@ -42,7 +45,10 @@ Page({
     usePoints: false,
     buyerRemark: "",
     quote: null,
+    quoteError: "",
     payableText: "--",
+    originalAmountText: "",
+    discountAmountText: "",
     itemCount: 0,
     loading: true,
     busy: false,
@@ -68,17 +74,32 @@ Page({
   async bootstrap() {
     this.setData({ loading: true, error: "" });
     try {
-      const [addresses, coupons, quote] = await Promise.all([
+      const [addresses, coupons] = await Promise.all([
         listAddresses().catch(() => []),
         listUserCoupons().catch(() => []),
-        createCheckoutQuote({ cartItemIds: this.data._cartItemIds }).catch(() => null),
       ]);
+      // The quote is the authoritative payable amount. A failed quote must be
+      // visible and must block submission instead of ordering an unknown total.
+      let quote: MpCheckoutQuote | null = null;
+      let quoteError = "";
+      try {
+        quote = await createCheckoutQuote({ cartItemIds: this.data._cartItemIds });
+      } catch (cause) {
+        quoteError = errorMessage(cause, "应付金额加载失败");
+      }
       const defaultAddress = addresses.find((address) => address.isDefault) || addresses[0];
       this.setData({
         addresses,
         coupons,
         quote,
+        quoteError,
         payableText: quote && quote.payableAmountCny != null ? formatCny(quote.payableAmountCny) : "--",
+        originalAmountText:
+          quote && quote.originalAmountCny != null ? formatCny(quote.originalAmountCny) : "",
+        discountAmountText:
+          quote && quote.discountAmountCny != null && quote.discountAmountCny > 0
+            ? formatCny(quote.discountAmountCny)
+            : "",
         selectedAddressId: defaultAddress ? defaultAddress.id : "",
         loading: false,
       });
@@ -122,6 +143,10 @@ Page({
       this.showToast("请选择收货地址");
       return;
     }
+    if (!this.data.quote) {
+      this.showToast(this.data.quoteError || "应付金额未就绪，请重试");
+      return;
+    }
     this.setData({ busy: true });
     try {
       const result = await submitOrder({
@@ -132,7 +157,20 @@ Page({
         usePoints: this.data.usePoints,
         buyerRemark: this.data.buyerRemark.trim() || undefined,
       });
-      wx.redirectTo({ url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: result.orderId }) });
+      const next = () =>
+        wx.redirectTo({ url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: result.orderId }) });
+      if (result.warnings.length > 0) {
+        // The order exists and will be paid: tell the buyer which deduction did
+        // not apply before sending them to the cashier.
+        wx.showModal({
+          title: "部分优惠未生效",
+          content: result.warnings.join("\n"),
+          showCancel: false,
+          complete: next,
+        });
+      } else {
+        next();
+      }
     } catch (cause) {
       this.showToast(errorMessage(cause, "提交订单失败"));
       this.setData({ busy: false });

@@ -232,27 +232,27 @@ export function SdkworkMallH5ProductDetailPage() {
     [detail],
   );
 
-  async function handleAddToCart(): Promise<boolean> {
+  async function handleAddToCart(): Promise<string | null> {
     if (!detail || !selectedSku) {
-      return false;
+      return null;
     }
     if (maxQuantity != null && quantity > maxQuantity) {
       showToast(`库存不足，最多可购 ${maxQuantity} 件`);
-      return false;
+      return null;
     }
     setBusy(true);
     try {
-      await addMallH5CartItem({
+      const cartItemId = await addMallH5CartItem({
         productId: detail.id,
         quantity,
         skuId: selectedSku.id,
       });
       bumpLocalCartBadge(quantity);
       showToast("已加入购物车");
-      return true;
+      return cartItemId ?? "";
     } catch (cause: unknown) {
       showToast(cause instanceof Error ? cause.message : "加入购物车失败");
-      return false;
+      return null;
     } finally {
       setBusy(false);
     }
@@ -262,10 +262,14 @@ export function SdkworkMallH5ProductDetailPage() {
     if (!detail || !selectedSku) {
       return;
     }
-    void handleAddToCart().then((added) => {
-      if (added) {
-        navigate("/cart");
+    // 立即购买 settles only the line just created. Falling back to the cart
+    // (never to a whole-cart checkout) keeps the buyer from paying for
+    // unrelated cart lines when the line id is unavailable.
+    void handleAddToCart().then((cartItemId) => {
+      if (cartItemId === null) {
+        return;
       }
+      navigate(cartItemId ? `/checkout?items=${encodeURIComponent(cartItemId)}` : "/cart");
     });
   }
 

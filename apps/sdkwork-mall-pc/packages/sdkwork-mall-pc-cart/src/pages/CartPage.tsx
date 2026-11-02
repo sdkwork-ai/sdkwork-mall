@@ -400,13 +400,22 @@ export function SdkworkMallCheckoutPage() {
   const [giftCardApplied, setGiftCardApplied] = useState<string | null>(null);
   const [giftCardError, setGiftCardError] = useState<string | null>(null);
 
+  // "立即购买" scopes the checkout to the line it just created; the cart entry
+  // link passes no `items`, which keeps whole-cart checkout intact.
+  const [params] = useSearchParams();
+  const rawCartItemIds = params.get("items") ?? "";
+  const cartItemIds = useMemo(
+    () => rawCartItemIds.split(",").map((id) => id.trim()).filter(Boolean),
+    [rawCartItemIds],
+  );
+
   useEffect(() => {
     let active = true;
     async function load() {
       try {
         const [checkoutContext, checkoutQuote] = await Promise.all([
           loadMallCheckoutContext(),
-          createMallCheckoutQuote(),
+          createMallCheckoutQuote(cartItemIds),
         ]);
         if (!active) {
           return;
@@ -435,11 +444,20 @@ export function SdkworkMallCheckoutPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [cartItemIds]);
+
+  const checkoutItems = useMemo(() => {
+    if (!context) {
+      return [];
+    }
+    return cartItemIds.length
+      ? context.cart.items.filter((item) => cartItemIds.includes(item.id))
+      : context.cart.items;
+  }, [cartItemIds, context]);
 
   const shopGroups = useMemo(
-    () => (context ? groupCartItemsByShop(context.cart.items) : []),
-    [context],
+    () => groupCartItemsByShop(checkoutItems),
+    [checkoutItems],
   );
 
   // 应付金额以服务端报价为准；配送费按报价口径推导展示，避免前端另算一笔。
@@ -501,6 +519,7 @@ export function SdkworkMallCheckoutPage() {
       const result = await submitMallCheckoutOrder({
         addressId: selectedAddressId || undefined,
         buyerRemark: buyerRemark.trim() || undefined,
+        cartItemIds: cartItemIds.length ? cartItemIds : undefined,
         couponId: selectedCouponId || undefined,
         deliveryMethod: selectedDeliveryMethod,
         giftCardCode: giftCardApplied ?? undefined,
@@ -528,11 +547,15 @@ export function SdkworkMallCheckoutPage() {
     return <LoadingBlock label="加载结算信息..." />;
   }
 
-  if (!context || context.cart.items.length === 0) {
+  if (!context || checkoutItems.length === 0) {
     return (
       <EmptyState
         actions={<Link to="/cart">返回购物车</Link>}
-        description="请先在购物车中选择商品"
+        description={
+          cartItemIds.length
+            ? "所选商品已失效，请返回购物车重新选择"
+            : "请先在购物车中选择商品"
+        }
         title="暂无可结算商品"
       />
     );
@@ -541,6 +564,9 @@ export function SdkworkMallCheckoutPage() {
   return (
     <div className="sdkwork-mall-pc-checkout-page">
       <h1>确认订单</h1>
+      {cartItemIds.length > 0 ? (
+        <p>已选择 {checkoutItems.length} 件购物车商品参与结算</p>
+      ) : null}
 
       {/* 按店拆单的商品清单 */}
       <section>

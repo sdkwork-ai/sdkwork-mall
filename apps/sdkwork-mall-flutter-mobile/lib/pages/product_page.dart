@@ -383,7 +383,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
     }
     setState(() => _busy = true);
     try {
-      await MallCommerce.instance.cart.addToCart(
+      final cartItemId = await MallCommerce.instance.cart.addToCart(
         spuId: widget.productId,
         skuId: '${sku['id']}',
         quantity: _quantity,
@@ -392,8 +392,15 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
         return;
       }
       if (buyNow) {
-        // 立即购买：商品已入购物车，直接进入结算（整单结算当前购物车）。
-        Navigator.of(context).pushNamed('/checkout');
+        // 立即购买 settles only the line just created. Without the line id the
+        // buyer is kept on the page rather than sent to a whole-cart checkout.
+        if (cartItemId == null || cartItemId.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('已加入购物车，请在购物车中选择结算')),
+          );
+        } else {
+          Navigator.of(context).pushNamed('/checkout', arguments: cartItemId);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('已加入购物车')),

@@ -1,3 +1,4 @@
+import { errorMessage } from "../types/common";
 import { request } from "./transport";
 
 export interface MpCartItem {
@@ -130,7 +131,7 @@ export async function createCheckoutQuote(options: { cartItemIds?: string[] } = 
   };
 }
 
-export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orderId: string; quote: MpCheckoutQuote }> {
+export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orderId: string; quote: MpCheckoutQuote; warnings: string[] }> {
   const quote = await createCheckoutQuote({ cartItemIds: options.cartItemIds });
 
   if (options.addressId) {
@@ -155,30 +156,39 @@ export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orde
     throw new Error("订单创建失败");
   }
 
+  const warnings: string[] = [];
+
   if (options.couponId) {
-    await request({
-      path: "/promotions/discount_applications",
-      method: "POST",
-      body: { orderId, userCouponId: options.couponId },
-    });
+    // Coupon application is keyed by order, so it runs after the order exists.
+    // A rejected coupon must not surface as a failed checkout: the order will
+    // still be paid, so the buyer is warned instead.
+    try {
+      await request({
+        path: "/promotions/discount_applications",
+        method: "POST",
+        body: { orderId, userCouponId: options.couponId },
+      });
+    } catch (cause) {
+      warnings.push(`优惠券未生效：${errorMessage(cause, "优惠券不可用")}`);
+    }
   }
 
   if (options.useWallet) {
     try {
       await request({ path: "/wallet/holds", method: "POST", body: { assetType: "cash", orderId } });
-    } catch (error) {
-      // 钱包抵扣为可选增强，失败时订单全额支付。
+    } catch (cause) {
+      warnings.push(`钱包抵扣未生效：${errorMessage(cause, "余额不可用")}`);
     }
   }
   if (options.usePoints) {
     try {
       await request({ path: "/wallet/holds", method: "POST", body: { assetType: "points", orderId } });
-    } catch (error) {
-      // 积分抵扣为可选增强，失败时订单全额支付。
+    } catch (cause) {
+      warnings.push(`积分抵扣未生效：${errorMessage(cause, "积分不可用")}`);
     }
   }
 
-  return { orderId, quote };
+  return { orderId, quote, warnings };
 }
 
 export async function payOrder(orderId: string, paymentMethod: string): Promise<string> {

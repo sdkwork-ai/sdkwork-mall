@@ -755,22 +755,24 @@ export function SdkworkMallProductDetailPage() {
     value: row.value,
   }));
 
-  async function handleAddToCart() {
+  async function handleAddToCart(): Promise<string | undefined> {
     if (!selectedSku?.id) {
       setMessage("请选择规格");
-      return;
+      return undefined;
     }
     setBusy(true);
     setMessage(null);
     try {
-      await addMallProductToCart({
+      const cartItemId = await addMallProductToCart({
         productId: detail!.id,
         skuId: selectedSku.id,
         quantity,
       });
       setMessage("已加入购物车");
+      return cartItemId;
     } catch (cause: unknown) {
       setMessage(cause instanceof Error ? cause.message : "加入购物车失败");
+      return undefined;
     } finally {
       setBusy(false);
     }
@@ -957,8 +959,14 @@ export function SdkworkMallProductDetailPage() {
             <Button
               disabled={busy || stockStatus.tone === "danger"}
               onClick={async () => {
-                await handleAddToCart();
-                navigate("/checkout");
+                // 立即购买 settles only the line just created. Falling back to
+                // the cart (never to a whole-cart checkout) keeps the buyer from
+                // paying for unrelated cart lines if the line id is unavailable.
+                const cartItemId = await handleAddToCart();
+                if (cartItemId === undefined) {
+                  return;
+                }
+                navigate(cartItemId ? `/checkout?items=${encodeURIComponent(cartItemId)}` : "/cart");
               }}
               type="button"
               variant="primary"

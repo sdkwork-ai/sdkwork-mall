@@ -191,14 +191,10 @@ Page({
   async confirmSkuPopup() {
     const mode = this.data.skuPopupMode;
     this.setData({ skuPopupOpen: false });
-    if (mode === "buy") {
-      await this.addToCart(true);
-    } else {
-      await this.addToCart(false);
-    }
+    await this.addToCart(mode === "buy");
   },
 
-  async addToCart(goCart: boolean) {
+  async addToCart(goCheckout: boolean) {
     if (!this.data.detail) {
       return;
     }
@@ -217,13 +213,25 @@ Page({
     }
     this.setData({ busy: true });
     try {
-      await addToCart({
+      const record = await addToCart({
         spuId: this.data.detail.id,
         skuId: sku.id,
         quantity: this.data.quantity,
       });
-      if (goCart) {
-        wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.cart"), fail() { wx.switchTab({ url: mpCapabilityUrl("storefront.mall.cart") }); } });
+      if (goCheckout) {
+        // 立即购买 settles only the line just created. Without the line id the
+        // buyer is sent to the cart to choose, never to a whole-cart checkout.
+        const item = (record.item ?? record.cartItem ?? record) as Record<string, unknown>;
+        const cartItemId = String(item.id ?? item.cartItemId ?? record.id ?? "");
+        const target = cartItemId
+          ? mpCapabilityUrl("storefront.mall.checkout", { items: cartItemId })
+          : mpCapabilityUrl("storefront.mall.cart");
+        wx.navigateTo({
+          url: target,
+          fail() {
+            wx.switchTab({ url: mpCapabilityUrl("storefront.mall.cart") });
+          },
+        });
       } else {
         this.showToast("已加入购物车");
       }

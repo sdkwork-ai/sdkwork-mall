@@ -343,12 +343,27 @@ export async function addMallProductToCart(input: {
   productId: string;
   quantity: number;
   skuId: string;
-}) {
-  return getSdkworkCatalogRemotePort().createCartItem({
+}): Promise<string | undefined> {
+  const response = await getSdkworkCatalogRemotePort().createCartItem({
     spuId: input.productId,
     skuId: input.skuId,
     quantity: input.quantity,
   });
+  // "立即购买" needs the created line id to scope the checkout to that item.
+  // The envelope may nest the line or return it at the root; read defensively.
+  const payload = unwrapSdkworkPaymentResponse(response) as Record<string, unknown> | null;
+  if (!payload) {
+    return undefined;
+  }
+  const item = (payload.item ?? payload.cartItem ?? payload) as Record<string, unknown>;
+  const id = item.id ?? item.cartItemId ?? payload.id;
+  if (typeof id === "string" && id) {
+    return id;
+  }
+  if (typeof id === "number" && Number.isFinite(id)) {
+    return String(id);
+  }
+  return undefined;
 }
 
 export async function retrieveMallCategory(categoryId: string): Promise<{ id: string; name: string } | null> {

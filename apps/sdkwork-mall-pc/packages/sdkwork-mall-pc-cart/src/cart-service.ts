@@ -67,6 +67,8 @@ export interface MallCheckoutInvoiceForm {
 export interface MallCheckoutSubmitInput {
   addressId?: string;
   buyerRemark?: string;
+  /** Selected cart lines; empty means "the whole current cart". */
+  cartItemIds?: string[];
   couponId?: string;
   deliveryMethod?: string;
   giftCardCode?: string;
@@ -254,9 +256,11 @@ export async function loadMallCheckoutContext(): Promise<MallCheckoutContext> {
   };
 }
 
-export async function createMallCheckoutQuote(): Promise<MallCheckoutQuote> {
+export async function createMallCheckoutQuote(cartItemIds?: string[]): Promise<MallCheckoutQuote> {
   const remote = getSdkworkCartRemotePort();
-  const sessionResponse = await remote.createCheckoutSession({});
+  const sessionResponse = await remote.createCheckoutSession(
+    cartItemIds?.length ? { cartItemIds } : {},
+  );
   const session = unwrapSdkworkPaymentResponse(sessionResponse) as Record<string, unknown>;
   const sessionId = readSessionId(session);
   let quoteId = readQuoteId(session);
@@ -280,7 +284,7 @@ export async function submitMallCheckoutOrder(
   input: MallCheckoutSubmitInput,
 ): Promise<MallCheckoutSubmitResult> {
   const remote = getSdkworkCartRemotePort();
-  const quote = await createMallCheckoutQuote();
+  const quote = await createMallCheckoutQuote(input.cartItemIds);
 
   if (input.addressId) {
     await remote.setDefaultAddress({ addressId: input.addressId });
@@ -288,6 +292,7 @@ export async function submitMallCheckoutOrder(
 
   const orderResponse = await remote.createCheckoutOrder(quote.sessionId, {
     buyerRemark: input.buyerRemark,
+    cartItemIds: input.cartItemIds?.length ? input.cartItemIds : undefined,
     deliveryMethod: input.deliveryMethod,
     giftCardCode: input.giftCardCode,
     invoiceForm: input.invoiceForm,
@@ -301,14 +306,26 @@ export async function submitMallCheckoutOrder(
     throw new Error("订单创建失败");
   }
 
-  if (input.couponId) {
-    await remote.createDiscountApplication({
-      orderId,
-      userCouponId: input.couponId,
-    });
-  }
-
   const warnings: string[] = [];
+
+  if (input.couponId) {
+    // The discount application is keyed by order, so it can only run after the
+    // order exists. A rejected coupon must not surface as a failed checkout
+    // (the order is already created and will be paid): record a warning so the
+    // payment-result page tells the buyer the coupon did not apply.
+    try {
+      await remote.createDiscountApplication({
+        orderId,
+        userCouponId: input.couponId,
+      });
+    } catch (cause: unknown) {
+      warnings.push(
+        cause instanceof Error
+          ? `优惠券未生效：${cause.message}`
+          : "优惠券未生效，将按原价结算。",
+      );
+    }
+  }
 
   if (input.useWallet) {
     try {

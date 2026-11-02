@@ -30,12 +30,14 @@ class CartService {
     }).toList();
   }
 
-  Future<void> addToCart({
+  /// Adds one line and returns the created cart item id when the backend
+  /// exposes it. "立即购买" needs that id to scope the checkout to this line.
+  Future<String?> addToCart({
     required String spuId,
     required String skuId,
     required int quantity,
   }) async {
-    await _client.request(
+    final payload = await _client.request(
       '/cart/items',
       method: 'POST',
       body: <String, dynamic>{
@@ -44,6 +46,9 @@ class CartService {
         'quantity': quantity,
       },
     );
+    final item = asMap(payload['item'] ?? payload['cartItem'] ?? payload);
+    final id = item['id'] ?? item['cartItemId'] ?? payload['id'];
+    return id == null ? null : '$id';
   }
 
   Future<void> updateCartItem(String cartItemId, int quantity) async {

@@ -69,9 +69,23 @@
       />
     </view>
 
-    <view class="mp-card mp-flex-between">
-      <text>应付金额</text>
-      <text class="mp-price checkout-payable">{{payableText}}</text>
+    <view class="mp-card">
+      <view class="mp-flex-between" wx:if="{{originalAmountText}}">
+        <text>商品金额</text>
+        <text>{{originalAmountText}}</text>
+      </view>
+      <view class="mp-flex-between" wx:if="{{discountAmountText}}">
+        <text>优惠</text>
+        <text>-{{discountAmountText}}</text>
+      </view>
+      <view class="mp-flex-between">
+        <text>应付金额</text>
+        <text class="mp-price checkout-payable">{{payableText}}</text>
+      </view>
+      <view wx:if="{{quoteError}}" class="mp-error">
+        <text>{{quoteError}}</text>
+        <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+      </view>
     </view>
 
     <view class="checkout-footer">

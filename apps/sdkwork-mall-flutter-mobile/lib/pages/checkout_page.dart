@@ -22,6 +22,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
   bool _usePoints = false;
   final TextEditingController _remark = TextEditingController();
   num? _payable;
+  num? _originalAmount;
+  num? _discountAmount;
+  String _quoteError = '';
   int _itemCount = 0;
   bool _loading = true;
   bool _busy = false;
@@ -138,18 +141,46 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Row(
+                      child: Column(
                         children: [
-                          const Text('应付'),
-                          const Spacer(),
-                          Text(
-                            _payable != null ? formatCny(_payable) : '--',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
+                          if (_originalAmount != null)
+                            Row(
+                              children: [
+                                const Text('商品金额'),
+                                const Spacer(),
+                                Text(formatCny(_originalAmount)),
+                              ],
                             ),
+                          if (_discountAmount != null && _discountAmount! > 0)
+                            Row(
+                              children: [
+                                const Text('优惠'),
+                                const Spacer(),
+                                Text('-${formatCny(_discountAmount)}'),
+                              ],
+                            ),
+                          Row(
+                            children: [
+                              const Text('应付'),
+                              const Spacer(),
+                              Text(
+                                _payable != null ? formatCny(_payable) : '--',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
                           ),
+                          if (_quoteError.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: SdkworkInlineError(
+                                message: _quoteError,
+                                onRetry: _bootstrap,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -223,14 +254,21 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
       final coupons = await commerce.cart
           .listUserCoupons()
           .catchError((_) => <Map<String, dynamic>>[]);
+      num? original;
+      num? discount;
       num? payable;
+      String quoteError = '';
       try {
         final quote = await commerce.cart.createCheckoutQuote(
           cartItemIds: cartItemIds,
         );
+        original = quote['originalAmountCny'] as num?;
+        discount = quote['discountAmountCny'] as num?;
         payable = quote['payableAmountCny'] as num?;
-      } catch (_) {
-        // 报价失败不阻塞结算，提交时再校验。
+      } catch (cause) {
+        // 报价是应付金额的唯一权威来源: 失败必须可见并阻止提交,
+        // 不能让买家在金额未知的情况下下单。
+        quoteError = '$cause';
       }
       if (!mounted) {
         return;
@@ -245,6 +283,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
         _addresses = addresses;
         _coupons = coupons;
         _payable = payable;
+        _originalAmount = original;
+        _discountAmount = discount;
+        _quoteError = quoteError;
         _selectedAddressId = fallback == null ? '' : '${fallback['id']}';
         _loading = false;
       });
@@ -263,6 +304,11 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
     if (_selectedAddressId.isEmpty) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('请选择收货地址')));
+      return;
+    }
+    if (_quoteError.isNotEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('应付金额未就绪，请重试')));
       return;
     }
     setState(() => _busy = true);

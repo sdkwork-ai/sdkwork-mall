@@ -51,6 +51,16 @@ function readImage(value: unknown): string | undefined {
   return typeof value === "string" && value ? value : undefined;
 }
 
+function readId(value: unknown): string | undefined {
+  if (typeof value === "string" && value) {
+    return value;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return undefined;
+}
+
 export async function listMallH5Categories(): Promise<MallH5CategoryOption[]> {
   const response = await getSdkworkCommerceService().catalog.categories.list({
     page: 1,
@@ -160,12 +170,16 @@ export async function addMallH5CartItem(input: {
   productId: string;
   quantity: number;
   skuId: string;
-}): Promise<void> {
-  await getSdkworkCommerceService().cart.items.create({
+}): Promise<string | undefined> {
+  const response = await getSdkworkCommerceService().cart.items.create({
     quantity: input.quantity,
     skuId: input.skuId,
     spuId: input.productId,
   });
+  // "立即购买" needs the created line id to scope the checkout to that item.
+  const payload = unwrapSdkworkCommerceResponse<Record<string, unknown>>(response) ?? {};
+  const item = (payload.item ?? payload.cartItem ?? payload) as Record<string, unknown>;
+  return readId(item.id ?? item.cartItemId ?? payload.id);
 }
 
 
