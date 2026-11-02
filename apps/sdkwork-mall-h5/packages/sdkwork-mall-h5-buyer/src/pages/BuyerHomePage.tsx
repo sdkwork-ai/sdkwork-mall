@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -37,45 +38,46 @@ import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const EMPTY_SESSION: SdkworkMallH5SessionSnapshot = {};
 
-const ORDER_ENTRIES: Array<{ code: "all" | MallH5OrderStatus; label: string }> = [
-  { code: "all", label: "全部订单" },
-  { code: "pending-payment", label: "待付款" },
-  { code: "pending-shipment", label: "待发货" },
-  { code: "pending-receipt", label: "待收货" },
-  { code: "completed", label: "已完成" },
+const ORDER_ENTRIES: Array<{ code: "all" | MallH5OrderStatus; labelKey: string }> = [
+  { code: "all", labelKey: "buyerHub.orders.all" },
+  { code: "pending-payment", labelKey: "buyerHub.orders.pendingPayment" },
+  { code: "pending-shipment", labelKey: "buyerHub.orders.pendingShipment" },
+  { code: "pending-receipt", labelKey: "buyerHub.orders.pendingReceipt" },
+  { code: "completed", labelKey: "buyerHub.orders.completed" },
 ];
 
 /** 我的资产：钱包 / 积分 / 会员 — list rows with chevrons (JD-order parity
  * with the Flutter 我的资产 card). */
 const ASSET_ENTRIES = [
-  { icon: Wallet, label: "钱包", path: "/buyer/wallet" },
-  { icon: Star, label: "积分", path: "/buyer/points" },
-  { icon: Crown, label: "会员", path: "/buyer/membership" },
+  { icon: Wallet, labelKey: "buyerHub.assets.wallet", path: "/buyer/wallet" },
+  { icon: Star, labelKey: "buyerHub.assets.points", path: "/buyer/points" },
+  { icon: Crown, labelKey: "buyerHub.assets.membership", path: "/buyer/membership" },
 ] as const;
 
 /** 常用服务：clean 2×4 grid (the flat 11-item grid wrapped awkwardly). */
 const TOOL_LINKS = [
-  { icon: MapPin, label: "地址管理", path: "/buyer/addresses" },
-  { icon: Ticket, label: "领券中心", path: "/buyer/coupons" },
-  { icon: FileText, label: "售后", path: "/buyer/after-sales" },
-  { icon: Receipt, label: "发票", path: "/buyer/invoices" },
-  { icon: Heart, label: "收藏", path: "/buyer/favorites" },
-  { icon: History, label: "足迹", path: "/buyer/footprint" },
-  { icon: Bell, label: "消息中心", path: "/buyer/messages" },
-  { icon: MessageSquare, label: "客服会话", path: "/buyer/chats" },
+  { icon: MapPin, labelKey: "buyerHub.services.addresses", path: "/buyer/addresses" },
+  { icon: Ticket, labelKey: "buyerHub.services.coupons", path: "/buyer/coupons" },
+  { icon: FileText, labelKey: "buyerHub.services.afterSales", path: "/buyer/after-sales" },
+  { icon: Receipt, labelKey: "buyerHub.services.invoices", path: "/buyer/invoices" },
+  { icon: Heart, labelKey: "buyerHub.services.favorites", path: "/buyer/favorites" },
+  { icon: History, labelKey: "buyerHub.services.footprint", path: "/buyer/footprint" },
+  { icon: Bell, labelKey: "buyerHub.services.messages", path: "/buyer/messages" },
+  { icon: MessageSquare, labelKey: "buyerHub.services.chats", path: "/buyer/chats" },
 ] as const;
 
 /** 账户：personal data, reviews, gift cards, security, support (PC parity). */
 const ACCOUNT_ENTRIES = [
-  { icon: UserRound, label: "个人资料", path: "/buyer/profile" },
-  { icon: PenLine, label: "我的评价", path: "/buyer/reviews" },
-  { icon: Gift, label: "礼品卡与红包", path: "/buyer/gift-cards" },
-  { icon: ShieldCheck, label: "账户与安全", path: "/buyer/security" },
-  { icon: Settings, label: "设置", path: "/buyer/settings" },
-  { icon: LifeBuoy, label: "帮助中心", path: "/help" },
+  { icon: UserRound, labelKey: "buyerHub.account.profile", path: "/buyer/profile" },
+  { icon: PenLine, labelKey: "buyerHub.account.reviews", path: "/buyer/reviews" },
+  { icon: Gift, labelKey: "buyerHub.account.giftCards", path: "/buyer/gift-cards" },
+  { icon: ShieldCheck, labelKey: "buyerHub.account.security", path: "/buyer/security" },
+  { icon: Settings, labelKey: "buyerHub.account.settings", path: "/buyer/settings" },
+  { icon: LifeBuoy, labelKey: "buyerHub.account.help", path: "/help" },
 ] as const;
 
 export function SdkworkMallH5BuyerHomePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export function SdkworkMallH5BuyerHomePage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setError(cause instanceof Error ? cause.message : "加载失败");
+          setError(cause instanceof Error ? cause.message : t("buyerHub.loadFailed"));
         }
       })
       .finally(() => {
@@ -110,7 +112,7 @@ export function SdkworkMallH5BuyerHomePage() {
     return () => {
       active = false;
     };
-  }, [reload]);
+  }, [reload, t]);
 
   const entryCount = (code: "all" | MallH5OrderStatus): number => {
     const statistics = dashboard?.statistics;
@@ -133,22 +135,28 @@ export function SdkworkMallH5BuyerHomePage() {
 
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">我的</h1>
+      <h1 className="sdk-h5-visually-hidden">{t("buyerHub.title")}</h1>
       <section className="sdk-h5-buyer-hero">
         <div className="sdk-h5-buyer-avatar" aria-hidden="true">{displayName.slice(0, 1)}</div>
         <div>
           <strong>{displayName}</strong>
-          <p>{loading ? "加载中..." : error ? "登录后同步订单信息" : "欢迎回来"}</p>
+          <p>
+            {loading
+              ? t("buyerHub.loading")
+              : error
+                ? t("buyerHub.loginHint")
+                : t("buyerHub.greeting")}
+          </p>
         </div>
         <button className="sdk-h5-buyer-logout" onClick={handleLogout} type="button">
-          <LogOut aria-hidden="true" size={14} /> 退出登录
+          <LogOut aria-hidden="true" size={14} /> {t("buyerHub.logout")}
         </button>
       </section>
 
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-section">
-        <h2>我的订单</h2>
+        <h2>{t("buyerHub.orders.title")}</h2>
         <div className="sdk-h5-order-entries">
           {ORDER_ENTRIES.map((entry) => (
             <Link
@@ -157,7 +165,7 @@ export function SdkworkMallH5BuyerHomePage() {
               to={entry.code === "all" ? "/buyer/orders" : `/buyer/orders?status=${entry.code}`}
             >
               <PackageSearch aria-hidden="true" size={18} />
-              <span>{entry.label}</span>
+              <span>{t(entry.labelKey)}</span>
               <strong>{entryCount(entry.code)}</strong>
             </Link>
           ))}
@@ -165,16 +173,16 @@ export function SdkworkMallH5BuyerHomePage() {
       </section>
 
       <section className="sdk-h5-section">
-        <h2>我的资产</h2>
+        <h2>{t("buyerHub.assets.title")}</h2>
         <div className="sdk-h5-asset-list">
           {ASSET_ENTRIES.map((entry) => {
             const Icon = entry.icon;
             return (
-              <Link className="sdk-h5-asset-row" key={entry.label} to={entry.path}>
+              <Link className="sdk-h5-asset-row" key={entry.labelKey} to={entry.path}>
                 <span className="sdk-h5-asset-icon" aria-hidden="true">
                   <Icon size={18} />
                 </span>
-                <span className="sdk-h5-asset-label">{entry.label}</span>
+                <span className="sdk-h5-asset-label">{t(entry.labelKey)}</span>
                 <ChevronRight aria-hidden="true" size={16} />
               </Link>
             );
@@ -183,14 +191,14 @@ export function SdkworkMallH5BuyerHomePage() {
       </section>
 
       <section className="sdk-h5-section">
-        <h2>常用服务</h2>
+        <h2>{t("buyerHub.services.title")}</h2>
         <div className="sdk-h5-quick-grid">
           {TOOL_LINKS.map((link) => {
             const Icon = link.icon;
             return (
-              <Link className="sdk-h5-quick-grid-item" key={link.label} to={link.path}>
+              <Link className="sdk-h5-quick-grid-item" key={link.labelKey} to={link.path}>
                 <Icon aria-hidden="true" size={20} />
-                <span>{link.label}</span>
+                <span>{t(link.labelKey)}</span>
               </Link>
             );
           })}
@@ -198,16 +206,16 @@ export function SdkworkMallH5BuyerHomePage() {
       </section>
 
       <section className="sdk-h5-section">
-        <h2>账户</h2>
+        <h2>{t("buyerHub.account.title")}</h2>
         <div className="sdk-h5-asset-list">
           {ACCOUNT_ENTRIES.map((entry) => {
             const Icon = entry.icon;
             return (
-              <Link className="sdk-h5-asset-row" key={entry.label} to={entry.path}>
+              <Link className="sdk-h5-asset-row" key={entry.labelKey} to={entry.path}>
                 <span className="sdk-h5-asset-icon" aria-hidden="true">
                   <Icon size={18} />
                 </span>
-                <span className="sdk-h5-asset-label">{entry.label}</span>
+                <span className="sdk-h5-asset-label">{t(entry.labelKey)}</span>
                 <ChevronRight aria-hidden="true" size={16} />
               </Link>
             );

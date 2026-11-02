@@ -1,0 +1,44 @@
+{
+  "buyerHub": {
+    "title": "我的",
+    "greeting": "欢迎回来",
+    "loading": "加载中...",
+    "loginHint": "登录后同步订单信息",
+    "loadFailed": "加载失败",
+    "logout": "退出登录",
+    "orders": {
+      "title": "我的订单",
+      "all": "全部订单",
+      "pendingPayment": "待付款",
+      "pendingShipment": "待发货",
+      "pendingReceipt": "待收货",
+      "completed": "已完成"
+    },
+    "assets": {
+      "title": "我的资产",
+      "wallet": "钱包",
+      "points": "积分",
+      "membership": "会员"
+    },
+    "services": {
+      "title": "常用服务",
+      "addresses": "地址管理",
+      "coupons": "领券中心",
+      "afterSales": "售后",
+      "invoices": "发票",
+      "favorites": "收藏",
+      "footprint": "足迹",
+      "messages": "消息中心",
+      "chats": "客服会话"
+    },
+    "account": {
+      "title": "账户",
+      "profile": "个人资料",
+      "reviews": "我的评价",
+      "giftCards": "礼品卡与红包",
+      "security": "账户与安全",
+      "settings": "设置",
+      "help": "帮助中心"
+    }
+  }
+}

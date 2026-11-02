@@ -15,13 +15,21 @@ import paymentResult from "./zh-CN/checkout/payment-result/messages.json";
 import productDetail from "./zh-CN/catalog/product-detail/messages.json";
 import help from "./zh-CN/support/help/messages.json";
 import home from "./zh-CN/storefront/home/messages.json";
+import buyerHub from "./zh-CN/account/buyer-hub/messages.json";
 
 export const SDKWORK_MALL_H5_DEFAULT_LOCALE = "zh-CN";
 
 /** One merged translation tree per locale, composed from authored fragments. */
 export const SDKWORK_MALL_H5_I18N_RESOURCES = {
   "zh-CN": {
-    translation: { ...confirmOrder, ...help, ...home, ...paymentResult, ...productDetail },
+    translation: {
+      ...buyerHub,
+      ...confirmOrder,
+      ...help,
+      ...home,
+      ...paymentResult,
+      ...productDetail,
+    },
   },
 } as const;
 
