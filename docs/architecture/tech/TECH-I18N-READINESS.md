@@ -13,11 +13,11 @@ long):
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
-| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support}` fragments | 56 | 312 | 390 (`regions.ts`) |
+| H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 55 | 296 | 390 (`regions.ts`) |
 | Mini program | none — literal zh-CN | 66 | 378 | 302 (province/city picker data) |
 | Flutter | none — literal zh-CN | 38 | 571 | 230 (province/city picker data) |
 
-2713 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2697 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -85,13 +85,14 @@ highest first, keeping the existing `sdkwork` prefix conventions.
 initialises i18next with `initReactI18next` and composes authored fragments from
 `i18n/<locale>/<domain>/<capability>/` (`zh-CN/checkout/payment-result`,
 `zh-CN/checkout/confirm-order`, `zh-CN/catalog/product-detail`,
-`zh-CN/storefront/home`, `zh-CN/account/buyer-hub`, `zh-CN/account/addresses` and
-`zh-CN/support/{help,after-sales}`), imported once from `main.tsx`; the default
-locale is unchanged, so no visible copy moved. Eight surfaces are migrated:
-payment-result, confirm-order, product detail, storefront home, the buyer hub, the
-address book, the help centre and the after-sales centre (apply form, evidence
-upload, records list, return shipment, progress timeline, validation and failure
-messages). H5's hard-coded count dropped 536 → 312 and the baseline was refreshed.
+`zh-CN/storefront/home`, `zh-CN/account/buyer-hub`, `zh-CN/account/addresses`,
+`zh-CN/support/{help,after-sales}` and `zh-CN/order/detail`), imported once from
+`main.tsx`; the default locale is unchanged, so no visible copy moved. Nine
+surfaces are migrated: payment-result, confirm-order, product detail, storefront
+home, the buyer hub, the address book, the help centre, the after-sales centre and
+the order detail page (status labels, item list, order fields, pay/cancel/confirm/
+after-sales actions). H5's hard-coded count dropped 536 → 296 and the baseline was
+refreshed.
 
 The after-sales service no longer owns display copy either: request types,
 reasons, statuses and return carriers are exported as `<…>LabelKey` / `nameKey`

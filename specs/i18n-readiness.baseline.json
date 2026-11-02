@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "roots": {
     "pc": 1452,
-    "h5": 312,
+    "h5": 296,
     "miniProgram": 378,
     "flutter": 571
   },
-  "total": 2713
+  "total": 2697
 }

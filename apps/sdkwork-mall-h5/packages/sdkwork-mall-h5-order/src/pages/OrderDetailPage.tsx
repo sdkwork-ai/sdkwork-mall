@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -12,20 +13,21 @@ import {
 import { recallMallH5PaymentMethod } from "@sdkwork/mall-h5-cart/cart-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
-const STATUS_LABELS: Record<MallH5OrderStatus, string> = {
-  cancelled: "已取消",
-  completed: "已完成",
-  expired: "已超时",
-  paid: "已支付",
-  "pending-payment": "待付款",
-  "pending-receipt": "待收货",
-  "pending-shipment": "待发货",
-  refunded: "已退款",
-  refunding: "退款中",
-  unknown: "处理中",
+const STATUS_KEYS: Record<MallH5OrderStatus, string> = {
+  cancelled: "orderDetail.status.cancelled",
+  completed: "orderDetail.status.completed",
+  expired: "orderDetail.status.expired",
+  paid: "orderDetail.status.paid",
+  "pending-payment": "orderDetail.status.pendingPayment",
+  "pending-receipt": "orderDetail.status.pendingReceipt",
+  "pending-shipment": "orderDetail.status.pendingShipment",
+  refunded: "orderDetail.status.refunded",
+  refunding: "orderDetail.status.refunding",
+  unknown: "orderDetail.status.unknown",
 };
 
 export function SdkworkMallH5OrderDetailPage() {
+  const { t } = useTranslation();
   const { orderId = "" } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<MallH5OrderDetail | null>(null);
@@ -48,7 +50,7 @@ export function SdkworkMallH5OrderDetailPage() {
     reload()
       .catch((cause: unknown) => {
         if (active) {
-          setError(cause instanceof Error ? cause.message : "订单加载失败");
+          setError(cause instanceof Error ? cause.message : t("orderDetail.errors.load"));
         }
       })
       .finally(() => {
@@ -59,7 +61,7 @@ export function SdkworkMallH5OrderDetailPage() {
     return () => {
       active = false;
     };
-  }, [orderId, reload]);
+  }, [orderId, reload, t]);
 
   async function runAction(action: () => Promise<void>) {
     setBusy(true);
@@ -68,7 +70,7 @@ export function SdkworkMallH5OrderDetailPage() {
       await action();
       await reload();
     } catch (cause: unknown) {
-      setError(cause instanceof Error ? cause.message : "操作失败");
+      setError(cause instanceof Error ? cause.message : t("orderDetail.errors.action"));
     } finally {
       setBusy(false);
     }
@@ -90,21 +92,21 @@ export function SdkworkMallH5OrderDetailPage() {
       query.set("paymentMethod", paymentMethod);
       window.location.assign(`/payment/result?${query.toString()}`);
     } catch (cause: unknown) {
-      setError(cause instanceof Error ? cause.message : "发起支付失败");
+      setError(cause instanceof Error ? cause.message : t("orderDetail.errors.pay"));
       setBusy(false);
     }
   }
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载订单详情...</div>;
+    return <div className="sdk-h5-page sdk-h5-loading">{t("orderDetail.loading")}</div>;
   }
 
   if (!detail) {
     return (
       <div className="sdk-h5-page">
-        <div className="sdk-h5-empty">{error ?? "订单不存在"}</div>
+        <div className="sdk-h5-empty">{error ?? t("orderDetail.notFound")}</div>
         <div className="sdk-h5-center">
-          <Link className="sdk-h5-button" to="/buyer/orders">返回订单列表</Link>
+          <Link className="sdk-h5-button" to="/buyer/orders">{t("orderDetail.actions.back")}</Link>
         </div>
       </div>
     );
@@ -115,16 +117,16 @@ export function SdkworkMallH5OrderDetailPage() {
   return (
     <div className="sdk-h5-page">
       <section className="sdk-h5-order-status-hero">
-        <h1>{STATUS_LABELS[detail.status]}</h1>
-        <p>订单号：{detail.id}</p>
+        <h1>{t(STATUS_KEYS[detail.status])}</h1>
+        <p>{t("orderDetail.orderNo", { id: detail.id })}</p>
       </section>
 
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       <section className="sdk-h5-section">
-        <h2>商品清单</h2>
+        <h2>{t("orderDetail.sections.items")}</h2>
         {detail.items.length === 0 ? (
-          <p className="sdk-h5-muted">暂无商品明细</p>
+          <p className="sdk-h5-muted">{t("orderDetail.itemsEmpty")}</p>
         ) : (
           <div className="sdk-h5-cart-list">
             {detail.items.map((item) => (
@@ -144,7 +146,11 @@ export function SdkworkMallH5OrderDetailPage() {
                   )}
                   {item.skuName ? <div className="sdk-h5-cart-sku">{item.skuName}</div> : null}
                   <div className="sdk-h5-product-meta">
-                    <strong>{item.priceCny != null ? `¥${item.priceCny.toFixed(2)}` : "询价"}</strong>
+                    <strong>
+                      {item.priceCny != null
+                        ? `¥${item.priceCny.toFixed(2)}`
+                        : t("orderDetail.priceInquiry")}
+                    </strong>
                     <span>x{item.quantity}</span>
                   </div>
                 </div>
@@ -155,23 +161,27 @@ export function SdkworkMallH5OrderDetailPage() {
       </section>
 
       <section className="sdk-h5-section">
-        <h2>订单信息</h2>
+        <h2>{t("orderDetail.sections.info")}</h2>
         <dl className="sdk-h5-spec-list">
           <div>
-            <dt>下单时间</dt>
+            <dt>{t("orderDetail.fields.createdAt")}</dt>
             <dd>{new Date(detail.createdAt).toLocaleString("zh-CN")}</dd>
           </div>
           <div>
-            <dt>订单总额</dt>
+            <dt>{t("orderDetail.fields.total")}</dt>
             <dd>{detail.totalAmountCny != null ? `¥${detail.totalAmountCny.toFixed(2)}` : "--"}</dd>
           </div>
           <div>
-            <dt>实付金额</dt>
-            <dd>{detail.paidAmountCny != null ? `¥${detail.paidAmountCny.toFixed(2)}` : "未支付"}</dd>
+            <dt>{t("orderDetail.fields.paid")}</dt>
+            <dd>
+              {detail.paidAmountCny != null
+                ? `¥${detail.paidAmountCny.toFixed(2)}`
+                : t("orderDetail.unpaid")}
+            </dd>
           </div>
           {detail.paymentMethod ? (
             <div>
-              <dt>支付方式</dt>
+              <dt>{t("orderDetail.fields.paymentMethod")}</dt>
               <dd>{detail.paymentMethod}</dd>
             </div>
           ) : null}
@@ -186,7 +196,7 @@ export function SdkworkMallH5OrderDetailPage() {
             onClick={() => void handlePay()}
             type="button"
           >
-            去支付
+            {t("orderDetail.actions.pay")}
           </button>
         ) : null}
         {payableNow ? (
@@ -196,7 +206,7 @@ export function SdkworkMallH5OrderDetailPage() {
             onClick={() => void runAction(() => cancelMallH5Order({ orderId: detail.id }))}
             type="button"
           >
-            取消订单
+            {t("orderDetail.actions.cancel")}
           </button>
         ) : null}
         {detail.status === "pending-receipt" ? (
@@ -205,7 +215,7 @@ export function SdkworkMallH5OrderDetailPage() {
               className="sdk-h5-button sdk-h5-button-secondary"
               to={`/buyer/logistics?orderId=${encodeURIComponent(detail.id)}`}
             >
-              查看物流
+              {t("orderDetail.actions.logistics")}
             </Link>
             <button
               className="sdk-h5-button sdk-h5-button-primary"
@@ -213,7 +223,7 @@ export function SdkworkMallH5OrderDetailPage() {
               onClick={() => void runAction(() => confirmMallH5OrderReceipt({ orderId: detail.id }))}
               type="button"
             >
-              确认收货
+              {t("orderDetail.actions.confirm")}
             </button>
           </>
         ) : null}
@@ -222,11 +232,11 @@ export function SdkworkMallH5OrderDetailPage() {
             className="sdk-h5-button sdk-h5-button-secondary"
             to={`/buyer/after-sales?orderId=${encodeURIComponent(detail.id)}`}
           >
-            申请售后
+            {t("orderDetail.actions.afterSales")}
           </Link>
         ) : null}
         <button className="sdk-h5-button sdk-h5-button-ghost" onClick={() => navigate("/buyer/orders")} type="button">
-          返回列表
+          {t("orderDetail.actions.back")}
         </button>
       </div>
     </div>
