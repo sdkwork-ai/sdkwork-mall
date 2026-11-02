@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
@@ -33,9 +34,21 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
 
   /// 配送方式；运费由服务端按选择计入报价。
   static const List<Map<String, String>> _deliveryMethods = [
-    {'code': 'standard', 'label': '普通配送', 'description': '3-5 天送达 · 免费'},
-    {'code': 'express', 'label': '极速达', 'description': '次日送达 · ¥12.00'},
-    {'code': 'sf', 'label': '顺丰速运', 'description': '当日达 · ¥22.00'},
+    {
+      'code': 'standard',
+      'labelKey': 'checkout.delivery.standard.label',
+      'descriptionKey': 'checkout.delivery.standard.description',
+    },
+    {
+      'code': 'express',
+      'labelKey': 'checkout.delivery.express.label',
+      'descriptionKey': 'checkout.delivery.express.description',
+    },
+    {
+      'code': 'sf',
+      'labelKey': 'checkout.delivery.sf.label',
+      'descriptionKey': 'checkout.delivery.sf.description',
+    },
   ];
   num? _payable;
   num? _originalAmount;
@@ -73,9 +86,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('确认订单')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('checkout.title'))),
       body: _loading
-          ? const SdkworkLoadingView(label: '加载结算信息...')
+          ? SdkworkLoadingView(label: SdkworkI18n.t('checkout.loading'))
           : _error.isNotEmpty
               ? SdkworkErrorView(message: _error, onRetry: _bootstrap)
               : ListView(
@@ -84,14 +97,17 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                         child: Text(
-                          '已选择 $_itemCount 件购物车商品参与结算',
+                          SdkworkI18n.t(
+                            'checkout.selectedCount',
+                            params: <String, String>{'count': '$_itemCount'},
+                          ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ),
                     _buildSection(
-                      '收货地址',
+                      SdkworkI18n.t('checkout.address.title'),
                       _addresses.isEmpty
-                          ? const Text('请先在「我的」中添加收货地址')
+                          ? Text(SdkworkI18n.t('checkout.address.empty'))
                           : RadioGroup<String>(
                               groupValue: _selectedAddressId,
                               onChanged: (value) =>
@@ -104,7 +120,7 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                             ),
                     ),
                     _buildSection(
-                      '配送方式',
+                      SdkworkI18n.t('checkout.delivery.title'),
                       RadioGroup<String>(
                         groupValue: _deliveryMethod,
                         onChanged: (value) => setState(
@@ -115,8 +131,12 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                             for (final method in _deliveryMethods)
                               RadioListTile<String>(
                                 value: method['code']!,
-                                title: Text(method['label']!),
-                                subtitle: Text(method['description']!),
+                                title: Text(
+                                  SdkworkI18n.t(method['labelKey']!),
+                                ),
+                                subtitle: Text(
+                                  SdkworkI18n.t(method['descriptionKey']!),
+                                ),
                                 contentPadding: EdgeInsets.zero,
                               ),
                           ],
@@ -124,7 +144,7 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                       ),
                     ),
                     _buildSection(
-                      '优惠券',
+                      SdkworkI18n.t('checkout.coupon.title'),
                       Column(
                         children: [
                           RadioGroup<String>(
@@ -133,34 +153,37 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                                 setState(() => _selectedCouponId = value ?? ''),
                             child: Column(
                               children: [
-                                _buildCouponRow('', '不使用优惠券'),
+                                _buildCouponRow(
+                                  '',
+                                  SdkworkI18n.t('checkout.coupon.none'),
+                                ),
                                 for (final coupon in _coupons)
                                   _buildCouponRow(
                                     '${coupon['id']}',
                                     '${coupon['title']}'
                                     '${coupon['discountAmountCny'] != null ? ' ¥${coupon['discountAmountCny']}' : ''}'
-                                    '${(asNum(coupon, ['minSpendCny']) ?? 0) > 0 ? '（满 ¥${coupon['minSpendCny']} 可用）' : '（无门槛）'}',
+                                    '${(asNum(coupon, ['minSpendCny']) ?? 0) > 0 ? SdkworkI18n.t('checkout.coupon.minSpend', params: <String, String>{'amount': '${coupon['minSpendCny']}'}) : SdkworkI18n.t('checkout.coupon.noThreshold')}',
                                   ),
                               ],
                             ),
                           ),
                           if (_coupons.isEmpty)
-                            const Text('暂无可用优惠券，可到领券中心领取。'),
+                            Text(SdkworkI18n.t('checkout.coupon.empty')),
                         ],
                       ),
                     ),
                     _buildSection(
-                      '抵扣',
+                      SdkworkI18n.t('checkout.deduct.title'),
                       Column(
                         children: [
                           SwitchListTile(
-                            title: const Text('钱包余额抵扣'),
+                            title: Text(SdkworkI18n.t('checkout.deduct.wallet')),
                             value: _useWallet,
                             onChanged: (value) => setState(() => _useWallet = value),
                             contentPadding: EdgeInsets.zero,
                           ),
                           SwitchListTile(
-                            title: const Text('积分抵扣'),
+                            title: Text(SdkworkI18n.t('checkout.deduct.points')),
                             value: _usePoints,
                             onChanged: (value) => setState(() => _usePoints = value),
                             contentPadding: EdgeInsets.zero,
@@ -169,21 +192,32 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                       ),
                     ),
                     _buildSection(
-                      '礼品卡',
+                      SdkworkI18n.t('checkout.giftCard.title'),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (_giftCardApplied.isNotEmpty)
                             Row(
                               children: [
-                                Expanded(child: Text('已使用礼品卡 $_giftCardApplied')),
+                                Expanded(
+                                  child: Text(
+                                    SdkworkI18n.t(
+                                      'checkout.giftCard.applied',
+                                      params: <String, String>{
+                                        'code': _giftCardApplied,
+                                      },
+                                    ),
+                                  ),
+                                ),
                                 TextButton(
                                   onPressed: () => setState(() {
                                     _giftCardApplied = '';
                                     _giftCardCode.clear();
                                     _giftCardError = '';
                                   }),
-                                  child: const Text('移除'),
+                                  child: Text(
+                                    SdkworkI18n.t('checkout.giftCard.remove'),
+                                  ),
                                 ),
                               ],
                             )
@@ -193,16 +227,20 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                                 Expanded(
                                   child: TextField(
                                     controller: _giftCardCode,
-                                    decoration: const InputDecoration(
-                                      hintText: '输入礼品卡卡号',
-                                      border: OutlineInputBorder(),
+                                    decoration: InputDecoration(
+                                      hintText: SdkworkI18n.t(
+                                        'checkout.giftCard.placeholder',
+                                      ),
+                                      border: const OutlineInputBorder(),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 OutlinedButton(
                                   onPressed: _applyGiftCard,
-                                  child: const Text('使用'),
+                                  child: Text(
+                                    SdkworkI18n.t('checkout.giftCard.apply'),
+                                  ),
                                 ),
                               ],
                             ),
@@ -221,23 +259,23 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                       ),
                     ),
                     _buildSection(
-                      '买家留言',
+                      SdkworkI18n.t('checkout.remark.title'),
                       TextField(
                         controller: _remark,
                         maxLength: 200,
-                        decoration: const InputDecoration(
-                          hintText: '选填，给商家留言',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          hintText: SdkworkI18n.t('checkout.remark.placeholder'),
+                          border: const OutlineInputBorder(),
                         ),
                       ),
                     ),
                     _buildSection(
-                      '发票',
+                      SdkworkI18n.t('checkout.invoice.title'),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SwitchListTile(
-                            title: const Text('需要开具发票'),
+                            title: Text(SdkworkI18n.t('checkout.invoice.need')),
                             value: _needInvoice,
                             onChanged: (value) => setState(() => _needInvoice = value),
                             contentPadding: EdgeInsets.zero,
@@ -246,7 +284,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                             Row(
                               children: [
                                 ChoiceChip(
-                                  label: const Text('个人'),
+                                  label: Text(
+                                    SdkworkI18n.t('checkout.invoice.personal'),
+                                  ),
                                   selected: _invoiceTitleType == 'personal',
                                   onSelected: (_) => setState(
                                     () => _invoiceTitleType = 'personal',
@@ -254,7 +294,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                                 ),
                                 const SizedBox(width: 8),
                                 ChoiceChip(
-                                  label: const Text('企业'),
+                                  label: Text(
+                                    SdkworkI18n.t('checkout.invoice.company'),
+                                  ),
                                   selected: _invoiceTitleType == 'company',
                                   onSelected: (_) => setState(
                                     () => _invoiceTitleType = 'company',
@@ -264,19 +306,25 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                             ),
                             TextField(
                               controller: _invoiceTitle,
-                              decoration: const InputDecoration(
-                                labelText: '发票抬头',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: SdkworkI18n.t(
+                                  'checkout.invoice.titleLabel',
+                                ),
+                                border: const OutlineInputBorder(),
                               ),
                             ),
                             if (_invoiceTitleType == 'company') ...[
                               const SizedBox(height: 8),
                               TextField(
                                 controller: _invoiceTaxNumber,
-                                decoration: const InputDecoration(
-                                  labelText: '税号',
-                                  hintText: '15-20 位字母或数字',
-                                  border: OutlineInputBorder(),
+                                decoration: InputDecoration(
+                                  labelText: SdkworkI18n.t(
+                                    'checkout.invoice.taxNumberLabel',
+                                  ),
+                                  hintText: SdkworkI18n.t(
+                                    'checkout.invoice.taxHint',
+                                  ),
+                                  border: const OutlineInputBorder(),
                                 ),
                               ),
                             ],
@@ -284,10 +332,14 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                             TextField(
                               controller: _invoiceEmail,
                               keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(
-                                labelText: '接收邮箱（选填）',
-                                hintText: '用于接收电子发票',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: SdkworkI18n.t(
+                                  'checkout.invoice.emailLabel',
+                                ),
+                                hintText: SdkworkI18n.t(
+                                  'checkout.invoice.emailHint',
+                                ),
+                                border: const OutlineInputBorder(),
                               ),
                             ),
                           ],
@@ -301,7 +353,7 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                           if (_originalAmount != null)
                             Row(
                               children: [
-                                const Text('商品金额'),
+                                Text(SdkworkI18n.t('checkout.summary.goods')),
                                 const Spacer(),
                                 Text(formatCny(_originalAmount)),
                               ],
@@ -309,14 +361,14 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
                           if (_discountAmount != null && _discountAmount! > 0)
                             Row(
                               children: [
-                                const Text('优惠'),
+                                Text(SdkworkI18n.t('checkout.summary.discount')),
                                 const Spacer(),
                                 Text('-${formatCny(_discountAmount)}'),
                               ],
                             ),
                           Row(
                             children: [
-                              const Text('应付'),
+                              Text(SdkworkI18n.t('checkout.summary.payable')),
                               const Spacer(),
                               Text(
                                 _payable != null ? formatCny(_payable) : '--',
@@ -346,7 +398,11 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
           padding: const EdgeInsets.all(16),
           child: FilledButton(
             onPressed: _busy ? null : _submit,
-            child: Text(_busy ? '提交中...' : '提交订单'),
+            child: Text(
+              _busy
+                  ? SdkworkI18n.t('checkout.submitting')
+                  : SdkworkI18n.t('checkout.submit'),
+            ),
           ),
         ),
       ),
@@ -374,9 +430,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
           text: '${address['receiverName']} ${address['receiverPhone']}',
           children: [
             if (address['isDefault'] == true)
-              const TextSpan(
-                text: '  默认',
-                style: TextStyle(color: Color(0xFFE93B3D), fontSize: 12),
+              TextSpan(
+                text: '  ${SdkworkI18n.t('checkout.address.default')}',
+                style: const TextStyle(color: Color(0xFFE93B3D), fontSize: 12),
               ),
           ],
         ),
@@ -458,11 +514,11 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
   void _applyGiftCard() {
     final code = _giftCardCode.text.trim();
     if (code.isEmpty) {
-      setState(() => _giftCardError = '请输入礼品卡卡号');
+      setState(() => _giftCardError = SdkworkI18n.t('checkout.giftCard.required'));
       return;
     }
     if (code.length < 8) {
-      setState(() => _giftCardError = '礼品卡卡号格式不正确');
+      setState(() => _giftCardError = SdkworkI18n.t('checkout.giftCard.invalid'));
       return;
     }
     setState(() {
@@ -474,13 +530,15 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
 
   Future<void> _submit() async {
     if (_selectedAddressId.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('请选择收货地址')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SdkworkI18n.t('checkout.errors.addressRequired'))),
+      );
       return;
     }
     if (_quoteError.isNotEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('应付金额未就绪，请重试')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SdkworkI18n.t('checkout.errors.quoteNotReady'))),
+      );
       return;
     }
     if (_needInvoice) {
@@ -489,7 +547,9 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              _invoiceTitleType == 'company' ? '请填写发票抬头（公司名称）' : '请填写发票抬头（个人姓名）',
+                _invoiceTitleType == 'company'
+                  ? SdkworkI18n.t('checkout.invoice.titleRequiredCompany')
+                  : SdkworkI18n.t('checkout.invoice.titleRequiredPersonal'),
             ),
           ),
         );
@@ -498,13 +558,14 @@ class _SdkworkCheckoutPageState extends State<SdkworkCheckoutPage> {
       if (_invoiceTitleType == 'company') {
         final taxNumber = _invoiceTaxNumber.text.trim();
         if (taxNumber.isEmpty) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('请填写企业税号')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(SdkworkI18n.t('checkout.invoice.taxRequired'))),
+          );
           return;
         }
         if (!RegExp(r'^[A-Z0-9]{15,20}$').hasMatch(taxNumber)) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('税号格式不正确（15-20 位字母或数字）')),
+            SnackBar(content: Text(SdkworkI18n.t('checkout.invoice.taxInvalid'))),
           );
           return;
         }

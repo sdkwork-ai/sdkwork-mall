@@ -178,7 +178,7 @@ const INVOICE_ROOTS = [
     pageFiles: [
       {
         path: "apps/sdkwork-mall-flutter-mobile/lib/pages/checkout_page.dart",
-        patterns: ["需要开具发票", "invoiceForm", "r'^[A-Z0-9]{15,20}$'"],
+        patterns: ["checkout.invoice.need", "invoiceForm", "r'^[A-Z0-9]{15,20}$'"],
       },
     ],
   },
@@ -256,7 +256,7 @@ const DELIVERY_ROOTS = [
     pageFiles: [
       {
         path: "apps/sdkwork-mall-flutter-mobile/lib/pages/checkout_page.dart",
-        patterns: ["配送方式", "礼品卡", "_deliveryMethods"],
+        patterns: ["checkout.delivery.title", "checkout.giftCard.title", "_deliveryMethods"],
       },
     ],
   },

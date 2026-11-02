@@ -17,6 +17,7 @@ class SdkworkI18n {
     'lib/src/i18n/zh-CN/support/help/messages.json',
     'lib/src/i18n/zh-CN/account/buyer-hub/messages.json',
     'lib/src/i18n/zh-CN/account/settings-invoices/messages.json',
+    'lib/src/i18n/zh-CN/checkout/confirm-order/messages.json',
   ];
 
   static final Map<String, String> _messages = <String, String>{};
