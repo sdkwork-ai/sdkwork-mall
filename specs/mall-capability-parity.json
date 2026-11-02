@@ -556,7 +556,7 @@
         "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-commerce/src/pages/BuyerGiftCardsPage.tsx",
         "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/GiftCardsPage.tsx",
         "apps/sdkwork-mall-mini-program/src/pages/gift-cards/index.ts",
-        "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_account_pages.dart"
+        "apps/sdkwork-mall-flutter-mobile/lib/src/i18n/zh-CN/account/account-pages/messages.json"
       ]
     },
     {

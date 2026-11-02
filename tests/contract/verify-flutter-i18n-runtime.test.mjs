@@ -34,6 +34,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/wallet\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/messages\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/catalog\/search\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/account-pages\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/order\/detail\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/marketing\/pages\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
@@ -53,6 +54,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/wallet\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/messages\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/catalog\/search\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/account-pages\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/order\/detail\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/marketing\/pages\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
@@ -127,6 +129,12 @@ test("migrated pages resolve every string from the catalogue", () => {
   assert.match(orderDetailPage, /'orderDetail\.paidAmount'/u);
   assert.match(orderDetailPage, /'orderDetail\.notFound'/u);
 
+  const buyerAccountPages = read(`${appRoot}/lib/pages/buyer_account_pages.dart`);
+  assert.match(buyerAccountPages, /SdkworkI18n\.t\('accountPages\.giftCards\.title'\)/u);
+  assert.match(buyerAccountPages, /'accountPages\.profile\.securityTitle'/u);
+  assert.match(buyerAccountPages, /'accountPages\.security\.settingsTitle'/u);
+  assert.match(buyerAccountPages, /SdkworkI18n\.t\('accountPages\.loginNow'\)/u);
+
   for (const pagePath of [
     `${appRoot}/lib/pages/help_page.dart`,
     `${appRoot}/lib/pages/buyer_page.dart`,
@@ -139,6 +147,7 @@ test("migrated pages resolve every string from the catalogue", () => {
     `${appRoot}/lib/pages/marketing_pages.dart`,
     `${appRoot}/lib/pages/search_page.dart`,
     `${appRoot}/lib/pages/order_detail_page.dart`,
+    `${appRoot}/lib/pages/buyer_account_pages.dart`,
   ]) {
     const page = read(pagePath);
     const literalChinese = [...page.matchAll(/'[^'\n]*[\u4e00-\u9fff][^'\n]*'/gu)].map(

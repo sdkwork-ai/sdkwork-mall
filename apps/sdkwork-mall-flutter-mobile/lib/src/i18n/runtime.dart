@@ -24,6 +24,7 @@ class SdkworkI18n {
     'lib/src/i18n/zh-CN/account/membership/messages.json',
     'lib/src/i18n/zh-CN/account/wallet/messages.json',
     'lib/src/i18n/zh-CN/account/messages/messages.json',
+    'lib/src/i18n/zh-CN/account/account-pages/messages.json',
     'lib/src/i18n/zh-CN/account/settings-invoices/messages.json',
     'lib/src/i18n/zh-CN/checkout/confirm-order/messages.json',
     'lib/src/i18n/zh-CN/checkout/cashier/messages.json',

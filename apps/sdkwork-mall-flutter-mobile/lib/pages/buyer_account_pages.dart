@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../bootstrap/session.dart';
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import 'widgets.dart';
 
 /// 礼品卡与红包：commerce gift-cards 合约前的预留入口。
@@ -15,7 +16,7 @@ class SdkworkGiftCardsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('礼品卡与红包')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('accountPages.giftCards.title'))),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: <Widget>[
@@ -26,15 +27,18 @@ class SdkworkGiftCardsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text('功能说明', style: theme.textTheme.titleSmall),
+                  Text(
+                    SdkworkI18n.t('accountPages.giftCards.featureTitle'),
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   Text(
-                    '礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API。',
+                    SdkworkI18n.t('accountPages.giftCards.requirement'),
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '当前版本仅预留入口；合约落地后在此接入余额、领取记录与兑换流程。',
+                    SdkworkI18n.t('accountPages.giftCards.placeholder'),
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -48,16 +52,19 @@ class SdkworkGiftCardsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Text('可用资产', style: theme.textTheme.titleSmall),
+                  Text(
+                    SdkworkI18n.t('accountPages.giftCards.assetsTitle'),
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 8),
                   Text(
-                    '暂无礼品卡与红包，兑换记录将在合约上线后同步。',
+                    SdkworkI18n.t('accountPages.giftCards.empty'),
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: 12),
                   FilledButton.tonal(
                     onPressed: () => Navigator.of(context).pushNamed('/wallet'),
-                    child: const Text('查看我的钱包'),
+                    child: Text(SdkworkI18n.t('accountPages.giftCards.wallet')),
                   ),
                 ],
               ),
@@ -122,14 +129,16 @@ class _SdkworkProfilePageState extends State<SdkworkProfilePage> {
     final theme = Theme.of(context);
     if (!SdkworkSession.instance.isLoggedIn) {
       return Scaffold(
-        appBar: AppBar(title: const Text('个人资料')),
-        body: const SdkworkLoginRequired(message: '登录后查看个人资料'),
+        appBar: AppBar(title: Text(SdkworkI18n.t('accountPages.profile.title'))),
+        body: SdkworkLoginRequired(
+          message: SdkworkI18n.t('accountPages.profile.loginRequired'),
+        ),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('个人资料')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('accountPages.profile.title'))),
       body: _loading
-          ? const SdkworkLoadingView(label: '加载个人资料...')
+          ? SdkworkLoadingView(label: SdkworkI18n.t('accountPages.profile.loading'))
           : ListView(
               padding: const EdgeInsets.only(bottom: 24),
               children: <Widget>[
@@ -137,7 +146,7 @@ class _SdkworkProfilePageState extends State<SdkworkProfilePage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: Text(
-                      '账户摘要暂不可用，已展示本地会话身份。',
+                      SdkworkI18n.t('accountPages.profile.degraded'),
                       style: theme.textTheme.bodySmall,
                     ),
                   ),
@@ -168,8 +177,8 @@ class _SdkworkProfilePageState extends State<SdkworkProfilePage> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   child: ListTile(
                     leading: const Icon(Icons.lock_outline),
-                    title: const Text('账户与安全'),
-                    subtitle: const Text('登录密码、绑定手机与设备管理'),
+                    title: Text(SdkworkI18n.t('accountPages.profile.securityTitle')),
+                    subtitle: Text(SdkworkI18n.t('accountPages.profile.securitySubtitle')),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.of(context).pushNamed('/security'),
                   ),
@@ -177,7 +186,7 @@ class _SdkworkProfilePageState extends State<SdkworkProfilePage> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    '头像与实名认证等扩展资料由 IAM 账户中心提供。',
+                    SdkworkI18n.t('accountPages.profile.iamNote'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall,
                   ),
@@ -229,18 +238,22 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
     final theme = Theme.of(context);
     if (!SdkworkSession.instance.isLoggedIn) {
       return Scaffold(
-        appBar: AppBar(title: const Text('账户与安全')),
-        body: const SdkworkLoginRequired(message: '登录后查看账户与安全信息'),
+        appBar: AppBar(title: Text(SdkworkI18n.t('accountPages.security.title'))),
+        body: SdkworkLoginRequired(
+          message: SdkworkI18n.t('accountPages.security.loginRequired'),
+        ),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('账户与安全')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('accountPages.security.title'))),
       body: _loading
-          ? const SdkworkLoadingView(label: '加载账户信息...')
+          ? SdkworkLoadingView(label: SdkworkI18n.t('accountPages.security.loading'))
           : ListView(
               padding: const EdgeInsets.only(bottom: 24),
               children: <Widget>[
-                const SdkworkSectionHeader(title: '登录信息'),
+                SdkworkSectionHeader(
+                  title: SdkworkI18n.t('accountPages.security.loginInfoTitle'),
+                ),
                 Card(
                   margin: const EdgeInsets.symmetric(horizontal: 12),
                   child: Column(
@@ -255,27 +268,35 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
                         .toList(),
                   ),
                 ),
-                const SdkworkSectionHeader(title: '安全设置'),
+                SdkworkSectionHeader(
+                  title: SdkworkI18n.t('accountPages.security.settingsTitle'),
+                ),
                 Card(
                   margin: const EdgeInsets.symmetric(horizontal: 12),
                   child: Column(
                     children: <Widget>[
                       ListTile(
                         leading: const Icon(Icons.password),
-                        title: const Text('修改密码'),
-                        subtitle: const Text('前往登录页重新认证'),
+                        title: Text(SdkworkI18n.t('accountPages.security.changePassword')),
+                        subtitle: Text(
+                          SdkworkI18n.t('accountPages.security.changePasswordSubtitle'),
+                        ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => Navigator.of(context).pushNamed('/login'),
                       ),
-                      const ListTile(
-                        leading: Icon(Icons.phone_iphone),
-                        title: Text('绑定手机'),
-                        subtitle: Text('由 IAM 认证路由提供'),
+                      ListTile(
+                        leading: const Icon(Icons.phone_iphone),
+                        title: Text(SdkworkI18n.t('accountPages.security.bindPhone')),
+                        subtitle: Text(
+                          SdkworkI18n.t('accountPages.security.bindPhoneSubtitle'),
+                        ),
                       ),
-                      const ListTile(
-                        leading: Icon(Icons.shield_outlined),
-                        title: Text('登录保护'),
-                        subtitle: Text('遵循平台安全策略'),
+                      ListTile(
+                        leading: const Icon(Icons.shield_outlined),
+                        title: Text(SdkworkI18n.t('accountPages.security.loginProtection')),
+                        subtitle: Text(
+                          SdkworkI18n.t('accountPages.security.loginProtectionSubtitle'),
+                        ),
                       ),
                     ],
                   ),
@@ -285,7 +306,7 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
                   child: Column(
                     children: <Widget>[
                       Text(
-                        '设备管理与二次验证由 IAM 账户中心统一受理；发现异常登录请立即修改密码。',
+                        SdkworkI18n.t('accountPages.security.iamNote'),
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall,
                       ),
@@ -293,7 +314,7 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
                       FilledButton.tonal(
                         onPressed: () =>
                             Navigator.of(context).pushNamed('/login'),
-                        child: const Text('重新登录'),
+                        child: Text(SdkworkI18n.t('accountPages.security.relogin')),
                       ),
                     ],
                   ),
@@ -306,9 +327,10 @@ class _SdkworkSecurityPageState extends State<SdkworkSecurityPage> {
 
 /// 未登录占位：账户类页面统一给出登录提示与入口，而不是展示空字段。
 class SdkworkLoginRequired extends StatelessWidget {
-  const SdkworkLoginRequired({super.key, required this.message});
+  const SdkworkLoginRequired({super.key, required this.message, this.actionLabel});
 
   final String message;
+  final String? actionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -324,7 +346,7 @@ class SdkworkLoginRequired extends StatelessWidget {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.of(context).pushNamed('/login'),
-              child: const Text('立即登录'),
+              child: Text(actionLabel ?? SdkworkI18n.t('accountPages.loginNow')),
             ),
           ],
         ),

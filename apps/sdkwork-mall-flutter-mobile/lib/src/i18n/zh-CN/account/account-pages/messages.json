@@ -1,0 +1,38 @@
+{
+  "accountPages": {
+    "loginNow": "立即登录",
+    "giftCards": {
+      "title": "礼品卡与红包",
+      "featureTitle": "功能说明",
+      "requirement": "礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API。",
+      "placeholder": "当前版本仅预留入口；合约落地后在此接入余额、领取记录与兑换流程。",
+      "assetsTitle": "可用资产",
+      "empty": "暂无礼品卡与红包，兑换记录将在合约上线后同步。",
+      "wallet": "查看我的钱包"
+    },
+    "profile": {
+      "title": "个人资料",
+      "loginRequired": "登录后查看个人资料",
+      "loading": "加载个人资料...",
+      "degraded": "账户摘要暂不可用，已展示本地会话身份。",
+      "securityTitle": "账户与安全",
+      "securitySubtitle": "登录密码、绑定手机与设备管理",
+      "iamNote": "头像与实名认证等扩展资料由 IAM 账户中心提供。"
+    },
+    "security": {
+      "title": "账户与安全",
+      "loginRequired": "登录后查看账户与安全信息",
+      "loading": "加载账户信息...",
+      "loginInfoTitle": "登录信息",
+      "settingsTitle": "安全设置",
+      "changePassword": "修改密码",
+      "changePasswordSubtitle": "前往登录页重新认证",
+      "bindPhone": "绑定手机",
+      "bindPhoneSubtitle": "由 IAM 认证路由提供",
+      "loginProtection": "登录保护",
+      "loginProtectionSubtitle": "遵循平台安全策略",
+      "iamNote": "设备管理与二次验证由 IAM 账户中心统一受理；发现异常登录请立即修改密码。",
+      "relogin": "重新登录"
+    }
+  }
+}
