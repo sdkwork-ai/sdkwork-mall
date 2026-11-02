@@ -200,24 +200,12 @@ class _SdkworkOrdersPageState extends State<SdkworkOrdersPage> {
   }
 
   Future<void> _pay(String orderId) async {
-    try {
-      final paymentId = await MallCommerce.instance.orders.payOrder(orderId, 'WECHAT');
-      if (!mounted) {
-        return;
-      }
-      Navigator.of(context).pushReplacementNamed(
-        '/payment-result',
-        arguments: <String, String>{
-          'orderId': orderId,
-          'paymentId': paymentId,
-          'paymentMethod': 'WECHAT',
-        },
-      );
-    } catch (cause) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$cause')));
-      }
+    // The cashier owns the real channel handoff, so every pay entry funnels
+    // through the same page.
+    if (!mounted) {
+      return;
     }
+    Navigator.of(context).pushNamed('/cashier', arguments: orderId);
   }
 
   Future<void> _cancel(String orderId) async {

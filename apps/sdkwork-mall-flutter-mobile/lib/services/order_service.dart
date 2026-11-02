@@ -93,15 +93,6 @@ class OrderService {
   Future<Map<String, dynamic>> getOrderDetail(String orderId) =>
       _client.request('/orders/$orderId');
 
-  Future<String> payOrder(String orderId, String paymentMethod) async {
-    final payment = await _client.request(
-      '/orders/$orderId/payments',
-      method: 'POST',
-      body: <String, dynamic>{'paymentMethod': paymentMethod},
-    );
-    return asString(payment, ['paymentId', 'id']);
-  }
-
   Future<void> cancelOrder(String orderId) async {
     await _client.request(
       '/orders/$orderId/cancellations',

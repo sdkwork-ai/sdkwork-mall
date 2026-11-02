@@ -186,12 +186,44 @@ class CartService {
     return orderId;
   }
 
-  Future<String> payOrder(String orderId, String paymentMethod) async {
+  /// Creates a payment and returns the channel handoff data.
+  ///
+  /// [paymentUrl] is the cashier/redirect URL the backend returned (top level or
+  /// inside `paymentParams`); empty when the channel has no browser flow.
+  Future<({String paymentId, String paymentUrl})> payOrder(
+    String orderId,
+    String paymentMethod,
+  ) async {
     final payment = await _client.request(
       '/orders/$orderId/payments',
       method: 'POST',
       body: <String, dynamic>{'paymentMethod': paymentMethod},
     );
-    return asString(payment, ['paymentId', 'id']);
+    return (
+      paymentId: asString(payment, ['paymentId', 'id']),
+      paymentUrl: _readPaymentUrl(payment),
+    );
+  }
+
+  static const _paymentUrlKeys = <String>[
+    'paymentUrl',
+    'payUrl',
+    'mwebUrl',
+    'cashierUrl',
+    'redirectUrl',
+  ];
+
+  static String _readPaymentUrl(Map<String, dynamic> payment) {
+    final params = payment['paymentParams'];
+    final paramMap = params is Map<String, dynamic> ? params : const <String, dynamic>{};
+    for (final key in _paymentUrlKeys) {
+      for (final source in <Map<String, dynamic>>[payment, paramMap]) {
+        final value = source[key];
+        if (value is String && RegExp(r'^https?://').hasMatch(value.trim())) {
+          return value.trim();
+        }
+      }
+    }
+    return '';
   }
 }

@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 93/93 pass
+pnpm test:node                                                     → 94/94 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -190,7 +190,7 @@ pnpm test:node                                                     → 93/93 pas
   (tests/contract/verify-mp-i18n-runtime.test.mjs                 → 2/2)
   (tests/contract/verify-invoice-tax-validation.test.mjs          → 2/2)
   (tests/contract/verify-membership-purchase.test.mjs             → 4/4)
-  (tests/contract/verify-payment-channel-wiring.test.mjs           → 3/3)
+  (tests/contract/verify-payment-channel-wiring.test.mjs           → 4/4)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -565,6 +565,11 @@ calls `wx.requestPayment` with the prepay payload (`timeStamp`, `nonceStr`,
 `package`, `paySign`, `signType`), copies an H5/QR cashier link to the clipboard
 when only a URL is available, and the order-detail pay action now routes through the
 cashier instead of creating a payment inline.
+
+Flutter: `cart.payOrder` returns `({ paymentId, paymentUrl })`; the cashier shows
+the channel link in a dialog with one-tap clipboard copy, and both the order list
+and order detail pay actions route through `/cashier`. The inline order-service
+`payOrder` was removed so a payment cannot be created outside that handoff.
 
 `tests/contract/verify-payment-channel-wiring.test.mjs` pins the extraction and
 every handoff site.

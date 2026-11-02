@@ -65,3 +65,27 @@ test("the mini-program cashier invokes the native WeChat cashier", () => {
   const orderDetail = read("apps/sdkwork-mall-mini-program/src/pages/order-detail/index.ts");
   assert.match(orderDetail, /storefront\.mall\.payment-cashier/u);
 });
+
+test("the Flutter cashier surfaces the channel URL and routes pay actions through itself", () => {
+  const cartService = read("apps/sdkwork-mall-flutter-mobile/lib/services/cart_service.dart");
+  assert.match(cartService, /\(\{String paymentId, String paymentUrl\}\)> payOrder/u);
+  assert.match(cartService, /_readPaymentUrl\(payment\)/u);
+  assert.match(cartService, /'mwebUrl'/u);
+
+  const cashier = read("apps/sdkwork-mall-flutter-mobile/lib/pages/cashier_page.dart");
+  assert.match(cashier, /payment\.paymentUrl\.isNotEmpty/u);
+  assert.match(cashier, /Clipboard\.setData\(ClipboardData\(text: paymentUrl\)\)/u);
+  assert.match(cashier, /SdkworkI18n\.t\('cashier\.linkTitle'\)/u);
+
+  for (const pagePath of [
+    "apps/sdkwork-mall-flutter-mobile/lib/pages/orders_page.dart",
+    "apps/sdkwork-mall-flutter-mobile/lib/pages/order_detail_page.dart",
+  ]) {
+    const page = read(pagePath);
+    assert.match(page, /pushNamed\('\/cashier'/u, `${pagePath} must route pay through the cashier`);
+  }
+
+  const orderService = read("apps/sdkwork-mall-flutter-mobile/lib/services/order_service.dart");
+  assert.doesNotMatch(orderService, /payOrder\(/u);
+});
+

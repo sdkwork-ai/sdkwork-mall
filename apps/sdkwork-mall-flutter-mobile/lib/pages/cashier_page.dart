@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import 'widgets.dart';
 
 /// 收银台: 选择支付渠道并发起支付.
@@ -29,19 +31,27 @@ class _SdkworkCashierPageState extends State<SdkworkCashierPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('收银台')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('cashier.title'))),
       body: _loading
-          ? const SdkworkLoadingView(label: '加载收银台...')
+          ? SdkworkLoadingView(label: SdkworkI18n.t('cashier.loading'))
           : ListView(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('订单号：${widget.orderId}'),
+                  child: Text(
+                    SdkworkI18n.t(
+                      'cashier.orderNo',
+                      params: <String, String>{'id': widget.orderId},
+                    ),
+                  ),
                 ),
                 if (_error.isNotEmpty) SdkworkErrorView(message: _error, onRetry: _load),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('选择支付方式', style: Theme.of(context).textTheme.titleSmall),
+                  child: Text(
+                    SdkworkI18n.t('cashier.methodsTitle'),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ),
                 RadioGroup<String>(
                   groupValue: _selectedCode,
@@ -57,9 +67,9 @@ class _SdkworkCashierPageState extends State<SdkworkCashierPage> {
                   ),
                 ),
                 if (_methods.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('暂无可用支付渠道，请稍后重试。'),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(SdkworkI18n.t('cashier.methodsEmpty')),
                   ),
               ],
             ),
@@ -71,14 +81,18 @@ class _SdkworkCashierPageState extends State<SdkworkCashierPage> {
             children: [
               FilledButton(
                 onPressed: _paying || _selectedCode.isEmpty ? null : _pay,
-                child: Text(_paying ? '支付中...' : '立即支付'),
+                child: Text(
+                  _paying
+                      ? SdkworkI18n.t('cashier.paying')
+                      : SdkworkI18n.t('cashier.pay'),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pushReplacementNamed(
                   '/orders',
                   arguments: 'PENDING_PAYMENT',
                 ),
-                child: const Text('稍后支付'),
+                child: Text(SdkworkI18n.t('cashier.later')),
               ),
             ],
           ),
@@ -116,17 +130,21 @@ class _SdkworkCashierPageState extends State<SdkworkCashierPage> {
   Future<void> _pay() async {
     setState(() => _paying = true);
     try {
-      final paymentId = await MallCommerce.instance.cart
+      final payment = await MallCommerce.instance.cart
           .payOrder(widget.orderId, _selectedCode);
+      if (payment.paymentUrl.isNotEmpty && mounted) {
+        // Flutter cannot host the channel SDK, so the buyer finishes the
+        // charge in a browser: show the link and copy it on request.
+        await _showCashierLink(payment.paymentUrl);
+      }
       if (!mounted) {
         return;
       }
-      // 真实渠道接入后此处调用渠道 SDK 拉起收银台；模拟渠道直接轮询结果。
       Navigator.of(context).pushReplacementNamed(
         '/payment-result',
         arguments: <String, String>{
           'orderId': widget.orderId,
-          'paymentId': paymentId,
+          'paymentId': payment.paymentId,
           'paymentMethod': _selectedCode,
         },
       );
@@ -135,7 +153,45 @@ class _SdkworkCashierPageState extends State<SdkworkCashierPage> {
         return;
       }
       setState(() => _paying = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$cause')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SdkworkI18n.t('cashier.errors.payFailed'))),
+      );
     }
+  }
+
+  Future<void> _showCashierLink(String paymentUrl) async {
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(SdkworkI18n.t('cashier.linkTitle')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(SdkworkI18n.t('cashier.linkHint')),
+            const SizedBox(height: 12),
+            SelectableText(paymentUrl),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: paymentUrl));
+              if (!dialogContext.mounted) {
+                return;
+              }
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(content: Text(SdkworkI18n.t('cashier.copied'))),
+              );
+            },
+            child: Text(SdkworkI18n.t('cashier.copy')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(SdkworkI18n.t('cashier.pay')),
+          ),
+        ],
+      ),
+    );
   }
 }
