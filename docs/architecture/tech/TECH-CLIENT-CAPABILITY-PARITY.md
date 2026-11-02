@@ -132,15 +132,12 @@ the same realized subset and the same honest notice instead of diverging:
 | Buyer reviews | T1 product-review API not landed | Lists completed orders as review candidates; media upload copy states the pending contract |
 | Gift cards / red packets | Commerce gift-cards API not landed | Reserved entry with wallet fallback |
 
-Known platform-level dependency gap (tracked outside this contract): the
-composed federated transport `@sdkwork/cloudrouter-app-sdk/domains` and
+Known platform-level dependency gap, resolved 2026-11-02: the composed
+federated transport `@sdkwork/cloudrouter-app-sdk/domains` and
 `@sdkwork/cloudrouter-backend-sdk/domains` are imported by
-`apps/*/src/bootstrap/{sdkClients,iamRuntime}.ts`, but the sibling
-`sdkwork-cloudrouter` SDK family in this checkout does not yet publish the
-`./domains` subpath (`package.json#exports` has only `"."`).
-
-Consequences observed on 2026-11-02, before and after this parity work
-(identical baseline and current state):
+`apps/*/src/bootstrap/{sdkClients,iamRuntime}.ts`. The sibling
+`sdkwork-cloudrouter` SDK families published only `"."` and no `./domains`
+subpath, so the imports failed to resolve:
 
 ```text
 pnpm typecheck
@@ -152,24 +149,40 @@ vite build (apps/sdkwork-mall-h5)
   ["module","browser","production","import"] from package @sdkwork/cloudrouter-app-sdk
 ```
 
-The fix belongs upstream: publish the `./domains` composed facade in the
-`sdkwork-cloudrouter` SDK family per `APP_SDK_INTEGRATION_SPEC.md` §9 /
-`SDK_WORKSPACE_GENERATION_SPEC.md` composed-facade rules, then regenerate. Until
-that lands, the four client roots' own gates (contract tests, vitest,
-`flutter analyze`/`flutter test`, mini-program `tsc`) are the enforceable
-regression surface, and they are green.
+The fix landed upstream in the `sdkwork-cloudrouter` SDK family, per
+`APP_SDK_INTEGRATION_SPEC.md` §9 / `SDK_WORKSPACE_GENERATION_SPEC.md`
+composed-facade rules: the family now carries an authored
+`src/domains/index.ts` facade over the generator-owned
+`generated/commerce-server-openapi/**` transport, exports `./domains` from
+`package.json`, and re-exports the transport types. The facade groups the
+generated commerce transports under `client.commerce.*` and keeps the
+`setTokenManager()` seam the IAM runtime installs. No generated file was
+hand-edited and no local SDK fork was introduced.
+
+After the facade landed, the same commands that were previously blocked pass:
+
+```text
+pnpm typecheck        → clean (both browser roots)
+pnpm build:h5:dev     → PASS dist/standalone/dev/
+pnpm build:pc:dev     → PASS dist/standalone/dev/
+```
+
+Retained residual upstream gaps are business-contract gaps, not build gaps, and
+stay listed in section 5's table above.
 
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 54/54 pass
+pnpm test:node                                                     → 56/56 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
-  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 9/9
+  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
+pnpm typecheck                                                     → clean (both roots)
+pnpm build:h5:dev / pnpm build:pc:dev                              → PASS (standalone/dev)
 pnpm typecheck:packages                                            → 46 packages, 0 failed
 pnpm test:vitest                                                   → 68 files / 169 tests pass
 mini program: npx tsc --noEmit                                     → clean
@@ -224,6 +237,14 @@ overridden), every page that can fail a load uses it, and form/action validation
 messages use the `sdk-h5-notice-danger` tone instead of the error banner. The H5
 architecture test fails when a page renders `sdk-h5-error` directly.
 
+A second pass closed the remaining escape hatch. Six pages (product detail,
+checkout, coupons, addresses, invoices, after-sales) reported load failures
+through a transient toast instead of the banner, and product detail misreported
+every failure as 商品不存在或已下架 with no retry. All six now render the banner
+with a page-scoped retry, checkout refuses to submit without an authoritative
+quote, and the architecture test fails when a page can say `加载失败` without
+rendering `SdkworkMallH5ErrorState`.
+
 ### 6.1.3 Recoverable failures (mini program)
 
 The same audit on the mini program found 23 pages rendering an error state, of
@@ -236,6 +257,12 @@ a page renders `mp-error` without pull-down or a retry binding. The login form
 is the one exemption: its error is a rejected credential, retried by submitting
 the form again.
 
+The gate originally keyed off the `mp-error` class, so the product page — which
+rendered its failure through `mp-empty` — escaped it. The product page now
+separates a failed load (retryable `mp-error` block) from an off-shelf product
+(empty state with 回到首页), and the gate keys off `{{error}}` so rendering an
+error through another class can no longer bypass recovery.
+
 ### 6.1.4 Recoverable failures (Flutter)
 
 The Flutter root already had `SdkworkErrorView`, but four full-page error states
@@ -246,14 +273,14 @@ page's loader; the asset pages and chat use the new compact
 `SdkworkInlineError`, which keeps the surrounding data visible and still offers
 重试. `test/error_recovery_test.dart` fails when a full-page error view has no
 `onRetry` or a page renders a bare `Text(_error` row.
-### 6.2 Per-package typecheck while the root gate is upstream-blocked
+### 6.2 Per-package typecheck
 
-The root `pnpm typecheck` fails on the missing `./domains` facade (section 5),
-which would otherwise hide any regression in the capability packages. Every
-active client package on both browser roots carries its own `tsconfig.json`, so
+Every active client package on both browser roots carries its own `tsconfig.json`, so
 `scripts/typecheck-mall-packages.mjs` (`pnpm typecheck:packages`) typechecks
 each package in isolation — 33 PC packages plus 13 H5 packages — and
-`pnpm check` runs it *before* the root typecheck. Both
+`pnpm check` runs it *before* the root typecheck. The per-package pass stays
+valuable now that the root gate is unblocked: it localizes a failure to the
+package that owns it instead of returning one root-wide diagnostic list. Both
 `tests/contract/verify-mall-standard-architecture.test.mjs` and
 `apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture.test.mjs` assert
 that every active package declares a `tsconfig.json`, so a new package cannot
