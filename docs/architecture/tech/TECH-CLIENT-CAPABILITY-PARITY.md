@@ -119,11 +119,12 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 31/31 pass
+pnpm test:node                                                     → 33/33 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 9/9)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 13/13)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 4/4
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
+  (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
 pnpm test:vitest                                                   → 67 files / 167 tests pass
 mini program: npx tsc --noEmit                                     → clean
 flutter analyze                                                    → no issues
@@ -133,6 +134,11 @@ node ../sdkwork-specs/tools/check-application-layering.mjs --root .→ passed
 node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
 pnpm check:capability-parity                                       → 36 capabilities, 0 gaps
 ```
+
+Flutter visual review: `flutter test -DVISUAL_CAPTURE=true --update-goldens
+test/visual_capture_test.dart` now captures the help, reviews, gift-card,
+profile and account-security surfaces alongside the shell tabs. Goldens are
+local review artifacts and are not committed.
 
 Before this change the H5 and mini-program architecture tests were not wired
 into any package script (vitest only collects `*.test.ts(x)`, `test:node` only
