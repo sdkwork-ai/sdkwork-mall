@@ -1,5 +1,10 @@
 export interface SdkworkAfterSalesRemotePort {
   createAfterSalesRequest(body: Record<string, unknown>): Promise<unknown>;
+  createReturnShipment(
+    afterSalesRequestId: string,
+    body: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<unknown>;
   listAfterSalesEvents(afterSalesRequestId: string, query: Record<string, unknown>): Promise<unknown>;
   listAfterSalesRequests(query: Record<string, unknown>): Promise<unknown>;
   listReturnShipments(afterSalesRequestId: string, query: Record<string, unknown>): Promise<unknown>;

@@ -5,7 +5,9 @@ import {
   AFTER_SALES_TYPES,
   cancelRequest,
   createRequest,
+  createReturnShipment,
   listRequests,
+  RETURN_CARRIERS,
   type MpAfterSalesEvidenceItem,
   type MpAfterSalesItemInput,
 } from "../../services/aftersales-service";
@@ -46,8 +48,14 @@ interface AftersalesData {
     requestedAmount: string;
     typeLabel: string;
     statusLabel: string;
+    returnable: boolean;
     revokable: boolean;
   }>;
+  returnCarriers: ReadonlyArray<{ code: string; name: string }>;
+  returnFormRequestId: string;
+  returnCarrierIndex: number;
+  returnTrackingNo: string;
+  returnBusy: boolean;
   loading: boolean;
   loadingOrder: boolean;
   busy: boolean;
@@ -69,6 +77,11 @@ Page({
     amount: "",
     evidence: [],
     requests: [],
+    returnCarriers: RETURN_CARRIERS,
+    returnFormRequestId: "",
+    returnCarrierIndex: 0,
+    returnTrackingNo: "",
+    returnBusy: false,
     loading: true,
     loadingOrder: false,
     busy: false,
@@ -293,6 +306,56 @@ Page({
       this.setData({ error: errorMessage(cause, "撤销失败") });
     } finally {
       this.setData({ busy: false });
+    }
+  },
+
+  openReturnForm(event: MpTapEvent) {
+    this.setData({
+      returnFormRequestId: `${event.currentTarget.dataset.id ?? ""}`,
+      returnCarrierIndex: 0,
+      returnTrackingNo: "",
+    });
+  },
+
+  closeReturnForm() {
+    this.setData({ returnFormRequestId: "", returnTrackingNo: "" });
+  },
+
+  onReturnCarrierChange(event: MpPickerChangeEvent) {
+    this.setData({ returnCarrierIndex: Number(event.detail.value) || 0 });
+  },
+
+  onReturnTrackingInput(event: MpInputEvent) {
+    this.setData({ returnTrackingNo: event.detail.value });
+  },
+
+  async submitReturnShipment() {
+    const requestId = this.data.returnFormRequestId;
+    if (!requestId) {
+      return;
+    }
+    const trackingNo = this.data.returnTrackingNo.trim();
+    if (!trackingNo) {
+      this.setData({ error: "请填写退货物流单号" });
+      return;
+    }
+    const carrier = this.data.returnCarriers[this.data.returnCarrierIndex];
+    this.setData({ returnBusy: true, error: "" });
+    try {
+      await createReturnShipment({
+        requestId,
+        carrierCode: carrier.code,
+        carrierName: carrier.name,
+        trackingNo,
+      });
+      this.setData({ returnBusy: false, returnFormRequestId: "", returnTrackingNo: "" });
+      wx.showToast({ title: "退货物流已提交", icon: "success" });
+      await this.reloadRequests();
+    } catch (cause) {
+      this.setData({
+        returnBusy: false,
+        error: errorMessage(cause, "退货物流提交失败"),
+      });
     }
   },
 

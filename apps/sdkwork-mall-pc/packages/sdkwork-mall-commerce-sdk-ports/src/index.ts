@@ -49,7 +49,7 @@ export const APP_COMMERCE_METHOD_TREE = {
   afterSales: {
     requests: { list: true, create: true, retrieve: true, update: true },
     events: { list: true },
-    returnShipments: { list: true },
+    returnShipments: { list: true, create: true },
   },
   wallet: {
     overview: { retrieve: true },

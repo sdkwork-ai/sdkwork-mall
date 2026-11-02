@@ -237,3 +237,51 @@ export async function cancelMallH5AfterSalesRequest(requestId: string): Promise<
     status: "CANCELLED",
   });
 }
+
+/** Carriers offered when the buyer ships the goods back. */
+export const MALL_H5_RETURN_CARRIERS = [
+  { code: "SF", name: "顺丰速运" },
+  { code: "ZTO", name: "中通快递" },
+  { code: "YTO", name: "圆通速递" },
+  { code: "YUNDA", name: "韵达速递" },
+  { code: "JD", name: "京东物流" },
+  { code: "OTHER", name: "其他" },
+] as const;
+
+export interface MallH5ReturnShipmentInput {
+  carrierCode: string;
+  carrierName?: string;
+  requestId: string;
+  trackingNo: string;
+}
+
+function createIdempotencyKey(): string {
+  const cryptoApi = globalThis.crypto;
+  if (cryptoApi && typeof cryptoApi.randomUUID === "function") {
+    return cryptoApi.randomUUID();
+  }
+  return `as-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Submits the buyer's return tracking number
+ * (`POST /after_sales/requests/{id}/return_shipments`). The command is
+ * idempotent per submit so a retry cannot create a duplicate shipment.
+ */
+export async function createMallH5AfterSalesReturnShipment(
+  input: MallH5ReturnShipmentInput,
+): Promise<void> {
+  if (!hasSdkworkOrderSession()) {
+    throw new Error("请先登录后填写退货物流。");
+  }
+  await getSdkworkCommerceService().afterSales.returnShipments.create(
+    input.requestId,
+    {
+      carrierCode: input.carrierCode,
+      carrierName: input.carrierName,
+      shipmentDirection: "buyer_return",
+      trackingNo: input.trackingNo.trim(),
+    },
+    { idempotencyKey: createIdempotencyKey() },
+  );
+}

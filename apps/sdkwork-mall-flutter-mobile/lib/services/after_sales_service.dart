@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../bootstrap/commerce_transport.dart';
 import '../utils/json.dart';
 
@@ -112,4 +114,37 @@ class AfterSalesService {
         method: 'PATCH',
         body: <String, dynamic>{'status': 'CANCELLED'},
       );
+
+  /// 退货/换货审核通过后回填寄回物流
+  /// (`POST /after_sales/requests/{id}/return_shipments`)。
+  Future<Map<String, dynamic>> createReturnShipment({
+    required String requestId,
+    required String carrierCode,
+    String? carrierName,
+    required String trackingNo,
+  }) =>
+      _client.request(
+        '/after_sales/requests/$requestId/return_shipments',
+        method: 'POST',
+        body: <String, dynamic>{
+          'carrierCode': carrierCode,
+          'carrierName': carrierName,
+          'shipmentDirection': 'buyer_return',
+          'trackingNo': trackingNo.trim(),
+        },
+        headers: <String, String>{'Idempotency-Key': _createIdempotencyKey()},
+      );
+
+  static String _createIdempotencyKey() =>
+      'as-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(0x7fffffff)}';
 }
+
+/// 买家可选的退货物流公司。
+const List<Map<String, String>> afterSalesReturnCarriers = [
+  {'code': 'SF', 'name': '顺丰速运'},
+  {'code': 'ZTO', 'name': '中通快递'},
+  {'code': 'YTO', 'name': '圆通速递'},
+  {'code': 'YUNDA', 'name': '韵达速递'},
+  {'code': 'JD', 'name': '京东物流'},
+  {'code': 'OTHER', 'name': '其他'},
+];

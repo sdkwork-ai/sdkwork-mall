@@ -16,6 +16,7 @@ import {
 function usePort(overrides: Partial<SdkworkAfterSalesRemotePort> = {}): SdkworkAfterSalesRemotePort {
   const port: SdkworkAfterSalesRemotePort = {
     createAfterSalesRequest: vi.fn().mockResolvedValue({ code: 0 }),
+    createReturnShipment: vi.fn().mockResolvedValue({ code: 0 }),
     listAfterSalesEvents: vi.fn().mockResolvedValue({ code: 0, data: { items: [] } }),
     listAfterSalesRequests: vi.fn().mockResolvedValue({ code: 0, data: { items: [] } }),
     listReturnShipments: vi.fn().mockResolvedValue({ code: 0, data: { items: [] } }),

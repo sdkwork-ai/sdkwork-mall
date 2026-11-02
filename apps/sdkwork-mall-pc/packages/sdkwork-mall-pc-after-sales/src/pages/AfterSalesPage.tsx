@@ -4,12 +4,15 @@ import { Button, EmptyState, LoadingBlock, StatusNotice } from "@sdkwork/ui-pc-r
 
 import {
   AFTER_SALES_TYPES,
+  canMallAfterSalesReturn,
   createEmptyAfterSalesForm,
   createMallAfterSalesRequest,
+  createMallAfterSalesReturnShipment,
   formatAfterSalesCurrencyCny,
   listMallAfterSalesRows,
   loadMallAfterSalesDetail,
   loadMallAfterSalesOrderContext,
+  MALL_AFTER_SALES_RETURN_CARRIERS,
   revokeMallAfterSalesRequest,
   STATUS_LABELS,
   validateAfterSalesForm,
@@ -78,6 +81,11 @@ export function SdkworkMallAfterSalesPage() {
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null);
   const [events, setEvents] = useState<Array<{ action: string; at?: string }>>([]);
   const [returnShipments, setReturnShipments] = useState<Array<{ id: string; status: string; tracking?: string }>>([]);
+  const [returnCarrierCode, setReturnCarrierCode] = useState<string>(
+    MALL_AFTER_SALES_RETURN_CARRIERS[0].code,
+  );
+  const [returnTrackingNo, setReturnTrackingNo] = useState("");
+  const [returnBusy, setReturnBusy] = useState(false);
 
   const reload = useCallback(async () => {
     setRows(await listMallAfterSalesRows());
@@ -285,6 +293,39 @@ export function SdkworkMallAfterSalesPage() {
       setMessage("撤销失败，请稍后重试");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleSubmitReturnShipment() {
+    if (!selectedRow) {
+      return;
+    }
+    const trackingNo = returnTrackingNo.trim();
+    if (!trackingNo) {
+      setMessage("请填写退货物流单号");
+      return;
+    }
+    setReturnBusy(true);
+    setMessage(null);
+    try {
+      const carrier = MALL_AFTER_SALES_RETURN_CARRIERS.find(
+        (entry) => entry.code === returnCarrierCode,
+      );
+      await createMallAfterSalesReturnShipment({
+        carrierCode: returnCarrierCode,
+        carrierName: carrier?.name,
+        requestId: selectedRow.id,
+        trackingNo,
+      });
+      setReturnTrackingNo("");
+      setMessage("退货物流已提交");
+      const snapshot = await loadMallAfterSalesDetail(selectedRow.id);
+      setEvents(snapshot.events);
+      setReturnShipments(snapshot.returnShipments);
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "退货物流提交失败");
+    } finally {
+      setReturnBusy(false);
     }
   }
 
@@ -693,6 +734,44 @@ export function SdkworkMallAfterSalesPage() {
                   </li>
                 ))}
               </ul>
+            </div>
+          ) : null}
+
+          {selectedRow && canMallAfterSalesReturn(selectedRow) ? (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold">填写退货物流</h3>
+              <div className="mt-3 flex flex-wrap items-end gap-3">
+                <label className="text-sm">
+                  物流公司
+                  <select
+                    className="mt-1 w-full rounded-lg border border-[var(--sdk-color-border-default)] bg-[var(--sdk-color-surface-panel)] px-3 py-2 text-sm"
+                    onChange={(event) => setReturnCarrierCode(event.target.value)}
+                    value={returnCarrierCode}
+                  >
+                    {MALL_AFTER_SALES_RETURN_CARRIERS.map((carrier) => (
+                      <option key={carrier.code} value={carrier.code}>
+                        {carrier.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-sm">
+                  退货物流单号
+                  <input
+                    className="mt-1 w-full rounded-lg border border-[var(--sdk-color-border-default)] bg-[var(--sdk-color-surface-panel)] px-3 py-2 text-sm"
+                    onChange={(event) => setReturnTrackingNo(event.target.value)}
+                    placeholder="请输入快递单号"
+                    value={returnTrackingNo}
+                  />
+                </label>
+                <Button
+                  disabled={returnBusy}
+                  onClick={() => void handleSubmitReturnShipment()}
+                  type="button"
+                >
+                  {returnBusy ? "提交中..." : "提交退货物流"}
+                </Button>
+              </div>
             </div>
           ) : null}
         </section>

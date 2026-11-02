@@ -50,6 +50,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
   final TextEditingController _orderId = TextEditingController();
   final TextEditingController _description = TextEditingController();
   final TextEditingController _amount = TextEditingController();
+  final TextEditingController _returnTracking = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
 
   static const _maxEvidenceFiles = 6;
@@ -64,6 +65,9 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
   bool _loadingOrder = false;
   bool _busy = false;
   String? _message;
+  String _returnFormRequestId = '';
+  String _returnCarrierCode = afterSalesReturnCarriers.first['code']!;
+  bool _returnBusy = false;
 
   @override
   void initState() {
@@ -77,6 +81,7 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
     _orderId.dispose();
     _description.dispose();
     _amount.dispose();
+    _returnTracking.dispose();
     super.dispose();
   }
 
@@ -309,38 +314,170 @@ class _SdkworkAfterSalesPageState extends State<SdkworkAfterSalesPage> {
                 child: SdkworkEmptyView(message: '暂无售后记录'),
               )
             else
-              for (final request in _requests)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    '${_afterSalesTypeLabels[_typeKey(request)] ?? _typeKey(request)}'
-                    ' · ¥${asString(request, ['requestedAmount'])}',
-                  ),
-                  subtitle: Text(
-                    '订单 ${asString(request, ['orderId'])}'
-                    '${asString(request, ['afterSalesNo']).isNotEmpty ? ' · ${asString(request, ['afterSalesNo'])}' : ''}',
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _statusLabel(request),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      if (_revokable(request)) ...[
-                        const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: _busy ? null : () => _cancel(request),
-                          child: const Text('撤销'),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+              for (final request in _requests) _buildRequestTile(request),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildRequestTile(Map<String, dynamic> request) {
+    final requestId = asString(request, ['id']);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            '${_afterSalesTypeLabels[_typeKey(request)] ?? _typeKey(request)}'
+            ' · ¥${asString(request, ['requestedAmount'])}',
+          ),
+          subtitle: Text(
+            '订单 ${asString(request, ['orderId'])}'
+            '${asString(request, ['afterSalesNo']).isNotEmpty ? ' · ${asString(request, ['afterSalesNo'])}' : ''}',
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _statusLabel(request),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              if (_revokable(request)) ...[
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: _busy ? null : () => _cancel(request),
+                  child: const Text('撤销'),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (_returnable(request)) ...[
+          if (_returnFormRequestId == requestId)
+            _buildReturnForm()
+          else
+            TextButton(
+              onPressed: () => setState(() {
+                _returnFormRequestId = requestId;
+                _returnTracking.clear();
+                _returnCarrierCode = afterSalesReturnCarriers.first['code']!;
+              }),
+              child: const Text('填写退货物流'),
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildReturnForm() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text('物流公司', style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(width: 12),
+              DropdownButton<String>(
+                value: _returnCarrierCode,
+                onChanged: _returnBusy
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() => _returnCarrierCode = value);
+                        }
+                      },
+                items: [
+                  for (final carrier in afterSalesReturnCarriers)
+                    DropdownMenuItem<String>(
+                      value: carrier['code']!,
+                      child: Text(carrier['name']!),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          TextField(
+            controller: _returnTracking,
+            decoration: const InputDecoration(
+              labelText: '退货物流单号',
+              hintText: '请输入快递单号',
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              FilledButton(
+                onPressed: _returnBusy ? null : _submitReturnShipment,
+                child: Text(_returnBusy ? '提交中...' : '提交退货物流'),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: _returnBusy
+                    ? null
+                    : () => setState(() {
+                          _returnFormRequestId = '';
+                          _returnTracking.clear();
+                        }),
+                child: const Text('取消'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _returnable(Map<String, dynamic> request) {
+    final status = asString(request, ['status']).toUpperCase();
+    final type = _typeKey(request);
+    return status == 'APPROVED' && (type == 'return' || type == 'exchange');
+  }
+
+  Future<void> _submitReturnShipment() async {
+    final trackingNo = _returnTracking.text.trim();
+    if (trackingNo.isEmpty) {
+      setState(() => _message = '请填写退货物流单号');
+      return;
+    }
+    final carrier = afterSalesReturnCarriers.firstWhere(
+      (entry) => entry['code'] == _returnCarrierCode,
+      orElse: () => afterSalesReturnCarriers.first,
+    );
+    setState(() {
+      _returnBusy = true;
+      _message = null;
+    });
+    try {
+      await MallCommerce.instance.afterSales.createReturnShipment(
+        requestId: _returnFormRequestId,
+        carrierCode: carrier['code']!,
+        carrierName: carrier['name'],
+        trackingNo: trackingNo,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _returnBusy = false;
+        _returnFormRequestId = '';
+        _returnTracking.clear();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('退货物流已提交')),
+      );
+      await _reloadRequests();
+    } catch (cause) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _returnBusy = false;
+        _message = '$cause';
+      });
+    }
   }
 
   String _typeKey(Map<String, dynamic> request) =>

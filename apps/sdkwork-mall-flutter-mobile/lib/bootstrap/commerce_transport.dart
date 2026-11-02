@@ -25,6 +25,7 @@ class SdkworkMallFlutterCommerceClient {
     String path, {
     String method = 'GET',
     Map<String, dynamic>? body,
+    Map<String, String>? headers,
     Map<String, String>? query,
   }) async {
     var url = '${appApiBaseUrl.replaceAll(RegExp(r'/+$'), '')}$path';
@@ -51,6 +52,9 @@ class SdkworkMallFlutterCommerceClient {
     final accessToken = SdkworkSession.instance.accessToken;
     if (accessToken.isNotEmpty) {
       request.headers.set('Access-Token', accessToken);
+    }
+    if (headers != null) {
+      headers.forEach((key, value) => request.headers.set(key, value));
     }
     if (body != null) {
       request.write(jsonEncode(body));

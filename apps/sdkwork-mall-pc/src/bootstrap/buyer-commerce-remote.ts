@@ -35,6 +35,13 @@ export function configureSdkworkMallPcBuyerCommerceRemotePorts(input: {
     createAfterSalesRequest(body) {
       return commerce().afterSales.requests.create(body);
     },
+    createReturnShipment(afterSalesRequestId, body, idempotencyKey) {
+      return commerce().afterSales.returnShipments.create(
+        afterSalesRequestId,
+        body,
+        { idempotencyKey },
+      );
+    },
     listAfterSalesEvents(afterSalesRequestId, query) {
       return commerce().afterSales.events.list(afterSalesRequestId, query);
     },

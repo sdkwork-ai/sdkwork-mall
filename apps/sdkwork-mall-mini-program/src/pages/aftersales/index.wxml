@@ -96,6 +96,41 @@
           </view>
           <view class="mp-muted">订单 {{item.orderId}}</view>
           <view class="mp-muted">¥{{item.requestedAmount || '0.00'}}</view>
+          <button
+            wx:if="{{item.returnable && returnFormRequestId !== item.id}}"
+            class="mp-btn mp-btn-plain aftersales-return-entry"
+            bindtap="openReturnForm"
+            data-id="{{item.id}}"
+          >填写退货物流</button>
+          <view wx:if="{{returnFormRequestId === item.id}}" class="mp-field aftersales-return-form">
+            <text class="mp-field-label">物流公司</text>
+            <picker
+              range="{{returnCarriers}}"
+              range-key="name"
+              value="{{returnCarrierIndex}}"
+              bindchange="onReturnCarrierChange"
+            >
+              <view class="aftersales-picker">{{returnCarriers[returnCarrierIndex].name}}</view>
+            </picker>
+            <text class="mp-field-label">退货物流单号</text>
+            <input
+              placeholder="请输入快递单号"
+              value="{{returnTrackingNo}}"
+              bindinput="onReturnTrackingInput"
+            />
+            <view class="aftersales-return-actions">
+              <button
+                class="mp-btn mp-btn-primary"
+                disabled="{{returnBusy}}"
+                bindtap="submitReturnShipment"
+              >{{returnBusy ? '提交中...' : '提交'}}</button>
+              <button
+                class="mp-btn mp-btn-ghost"
+                disabled="{{returnBusy}}"
+                bindtap="closeReturnForm"
+              >取消</button>
+            </view>
+          </view>
         </view>
         <view class="aftersales-side">
           <text class="mp-muted">{{item.statusLabel}}</text>

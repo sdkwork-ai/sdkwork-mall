@@ -174,12 +174,13 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 65/65 pass
+pnpm test:node                                                     → 66/66 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
   (tests/contract/verify-checkout-scoping.test.mjs                 → 4/4)
   (tests/contract/verify-i18n-catalogue.test.mjs                   → 4/4)
+  (tests/contract/verify-after-sales-depth.test.mjs                → 1/1)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -316,6 +317,21 @@ kept a phone awake and the gateway busy; H5 did not poll at all. All three now
 poll at the same three-second interval for at most 20 attempts (60 seconds),
 then stop with 支付结果确认超时 and offer 刷新状态. The PC result screen keeps its
 single fetch and adds the same manual refresh.
+
+### 6.1.8 After-sales return tracking
+
+The commerce API accepts `POST /after_sales/requests/{id}/return_shipments`, but
+no root exposed it: a buyer could apply for a return, be approved, and then have
+no way to tell the merchant which carrier shipped the goods back, so the refund
+could not progress. PC also already listed return shipments but could not create
+one.
+
+All four roots now submit the buyer's carrier and tracking number with an
+`Idempotency-Key`, offer the action only when the request is approved for a
+return or exchange, and refresh the case after submission. The mini-program and
+Flutter transports accept per-request headers so the idempotency key rides the
+same seam as auth. `tests/contract/verify-after-sales-depth.test.mjs` pins the
+submission path and the eligibility predicate on every root.
 
 ### 6.2 Per-package typecheck
 

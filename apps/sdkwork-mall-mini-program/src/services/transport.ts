@@ -16,6 +16,8 @@ export interface MpRequestOptions {
   path: string;
   method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
   body?: Record<string, unknown>;
+  /** Extra request headers, e.g. the `Idempotency-Key` of a command. */
+  headers?: Record<string, string>;
   query?: Record<string, string | number | boolean | undefined>;
   timeoutMs?: number;
 }
@@ -59,7 +61,7 @@ function getBaseUrl(): string {
  * HTTP/problem errors reject with a SdkworkRequestError.
  */
 export function request(options: MpRequestOptions): Promise<MpPayload> {
-  const { path, method = "GET", body, query, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
+  const { path, method = "GET", body, headers, query, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
   let url = `${getBaseUrl()}${path}`;
   if (query) {
     const search = Object.keys(query)
@@ -72,6 +74,9 @@ export function request(options: MpRequestOptions): Promise<MpPayload> {
   }
 
   const header: Record<string, string> = { "content-type": "application/json" };
+  if (headers) {
+    Object.assign(header, headers);
+  }
   const token = getToken();
   if (token) {
     header.authorization = `Bearer ${token}`;

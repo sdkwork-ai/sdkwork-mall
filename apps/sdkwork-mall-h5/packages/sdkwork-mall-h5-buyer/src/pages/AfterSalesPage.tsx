@@ -11,10 +11,12 @@ import {
 import {
   cancelMallH5AfterSalesRequest,
   createMallH5AfterSalesRequest,
+  createMallH5AfterSalesReturnShipment,
   listMallH5AfterSalesRequests,
   loadMallH5AfterSalesOrderContext,
   MALL_H5_AFTER_SALES_REASON_PRESETS,
   MALL_H5_AFTER_SALES_TYPES,
+  MALL_H5_RETURN_CARRIERS,
   type MallH5AfterSalesEvidenceItem,
   type MallH5AfterSalesOrderContext,
   type MallH5AfterSalesRequest,
@@ -53,6 +55,10 @@ export function SdkworkMallH5AfterSalesPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [returnFormRequestId, setReturnFormRequestId] = useState("");
+  const [returnCarrierCode, setReturnCarrierCode] = useState<string>(MALL_H5_RETURN_CARRIERS[0].code);
+  const [returnTrackingNo, setReturnTrackingNo] = useState("");
+  const [returnBusy, setReturnBusy] = useState(false);
 
   const reload = useCallback(async () => {
     setRequests(await listMallH5AfterSalesRequests());
@@ -250,6 +256,41 @@ export function SdkworkMallH5AfterSalesPage() {
     }
   }
 
+  /** 退货/换货审核通过后，买家需要回填寄回物流。 */
+  function canSubmitReturnShipment(request: MallH5AfterSalesRequest): boolean {
+    return request.status === "approved" && (request.type === "return" || request.type === "exchange");
+  }
+
+  async function handleReturnShipment() {
+    if (!returnFormRequestId) {
+      return;
+    }
+    const trackingNo = returnTrackingNo.trim();
+    if (!trackingNo) {
+      setMessage("请填写退货物流单号");
+      return;
+    }
+    setReturnBusy(true);
+    setMessage(null);
+    try {
+      const carrier = MALL_H5_RETURN_CARRIERS.find((entry) => entry.code === returnCarrierCode);
+      await createMallH5AfterSalesReturnShipment({
+        carrierCode: returnCarrierCode,
+        carrierName: carrier?.name,
+        requestId: returnFormRequestId,
+        trackingNo,
+      });
+      setMessage("退货物流已提交");
+      setReturnFormRequestId("");
+      setReturnTrackingNo("");
+      await reload();
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "退货物流提交失败");
+    } finally {
+      setReturnBusy(false);
+    }
+  }
+
   function clearPreset() {
     setOrderContext(null);
     setAmount("");
@@ -392,6 +433,67 @@ export function SdkworkMallH5AfterSalesPage() {
                     ? ` · ${MALL_H5_AFTER_SALES_REASON_PRESETS.find((preset) => preset.code === request.reason)?.label ?? request.reason}`
                     : ""}
                 </div>
+                {canSubmitReturnShipment(request) ? (
+                  returnFormRequestId === request.id ? (
+                    <div className="sdk-h5-return-shipment-form">
+                      <label className="sdk-h5-field">
+                        物流公司
+                        <select
+                          aria-label="物流公司"
+                          onChange={(event) => setReturnCarrierCode(event.target.value)}
+                          value={returnCarrierCode}
+                        >
+                          {MALL_H5_RETURN_CARRIERS.map((carrier) => (
+                            <option key={carrier.code} value={carrier.code}>
+                              {carrier.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="sdk-h5-field">
+                        退货物流单号
+                        <input
+                          aria-label="退货物流单号"
+                          onChange={(event) => setReturnTrackingNo(event.target.value)}
+                          placeholder="请输入快递单号"
+                          value={returnTrackingNo}
+                        />
+                      </label>
+                      <div className="sdk-h5-action-row">
+                        <button
+                          className="sdk-h5-button sdk-h5-button-primary"
+                          disabled={returnBusy}
+                          onClick={() => void handleReturnShipment()}
+                          type="button"
+                        >
+                          {returnBusy ? "提交中..." : "提交退货物流"}
+                        </button>
+                        <button
+                          className="sdk-h5-button sdk-h5-button-ghost"
+                          disabled={returnBusy}
+                          onClick={() => {
+                            setReturnFormRequestId("");
+                            setReturnTrackingNo("");
+                          }}
+                          type="button"
+                        >
+                          取消
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="sdk-h5-link-button"
+                      onClick={() => {
+                        setReturnFormRequestId(request.id);
+                        setReturnTrackingNo("");
+                      }}
+                      type="button"
+                    >
+                      填写退货物流
+                    </button>
+                  )
+                ) : null}
               </div>
               <div>
                 <span className="sdk-h5-muted">{request.statusLabel}</span>

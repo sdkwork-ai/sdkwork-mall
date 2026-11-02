@@ -39,6 +39,8 @@ export interface MpAfterSalesRow {
   orderId: string;
   reasonCode: string;
   requestedAmount: string;
+  /** 退货/换货审核通过后，买家可回填寄回物流。 */
+  returnable: boolean;
   revokable: boolean;
   status: string;
   statusLabel: string;
@@ -124,6 +126,7 @@ export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSale
         (AFTER_SALES_TYPES.find((entry) => entry.value === type) || { label: type }).label,
       status,
       statusLabel: STATUS_LABELS[status] || status || "处理中",
+      returnable: status === "APPROVED" && (type === "return" || type === "exchange"),
       revokable: status === "PENDING" || status === "REVIEWING",
     };
   });
@@ -139,5 +142,42 @@ export async function cancelRequest(requestId: string): Promise<Record<string, u
     path: `/after_sales/requests/${requestId}`,
     method: "PATCH",
     body: { status: "CANCELLED" },
+  });
+}
+
+/** Carriers offered when the buyer ships the goods back. */
+export const RETURN_CARRIERS = [
+  { code: "SF", name: "顺丰速运" },
+  { code: "ZTO", name: "中通快递" },
+  { code: "YTO", name: "圆通速递" },
+  { code: "YUNDA", name: "韵达速递" },
+  { code: "JD", name: "京东物流" },
+  { code: "OTHER", name: "其他" },
+] as const;
+
+function createIdempotencyKey(): string {
+  return `as-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Submits the buyer's return tracking number
+ * (`POST /after_sales/requests/{id}/return_shipments`), idempotent per submit.
+ */
+export async function createReturnShipment(input: {
+  carrierCode: string;
+  carrierName?: string;
+  requestId: string;
+  trackingNo: string;
+}): Promise<Record<string, unknown>> {
+  return request({
+    path: `/after_sales/requests/${input.requestId}/return_shipments`,
+    method: "POST",
+    body: {
+      carrierCode: input.carrierCode,
+      carrierName: input.carrierName,
+      shipmentDirection: "buyer_return",
+      trackingNo: input.trackingNo.trim(),
+    },
+    headers: { "Idempotency-Key": createIdempotencyKey() },
   });
 }

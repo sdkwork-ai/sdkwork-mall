@@ -347,3 +347,54 @@ export async function revokeMallAfterSalesRequest(rowId: string): Promise<void> 
     status: "CANCELLED",
   });
 }
+
+/** Carriers offered when the buyer ships the goods back. */
+export const MALL_AFTER_SALES_RETURN_CARRIERS = [
+  { code: "SF", name: "顺丰速运" },
+  { code: "ZTO", name: "中通快递" },
+  { code: "YTO", name: "圆通速递" },
+  { code: "YUNDA", name: "韵达速递" },
+  { code: "JD", name: "京东物流" },
+  { code: "OTHER", name: "其他" },
+] as const;
+
+export interface MallAfterSalesReturnShipmentInput {
+  carrierCode: string;
+  carrierName?: string;
+  requestId: string;
+  trackingNo: string;
+}
+
+/** 退货/换货审核通过后，买家可回填寄回物流。 */
+export function canMallAfterSalesReturn(
+  row: Pick<AfterSalesRow, "status" | "type">,
+): boolean {
+  return row.status === "approved" && (row.type === "return" || row.type === "exchange");
+}
+
+function createReturnShipmentIdempotencyKey(): string {
+  const cryptoApi = globalThis.crypto;
+  if (cryptoApi && typeof cryptoApi.randomUUID === "function") {
+    return cryptoApi.randomUUID();
+  }
+  return `as-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+/**
+ * Submits the buyer's return tracking number
+ * (`POST /after_sales/requests/{id}/return_shipments`), idempotent per submit.
+ */
+export async function createMallAfterSalesReturnShipment(
+  input: MallAfterSalesReturnShipmentInput,
+): Promise<void> {
+  await getSdkworkAfterSalesRemotePort().createReturnShipment(
+    input.requestId,
+    {
+      carrierCode: input.carrierCode,
+      carrierName: input.carrierName,
+      shipmentDirection: "buyer_return",
+      trackingNo: input.trackingNo.trim(),
+    },
+    createReturnShipmentIdempotencyKey(),
+  );
+}
