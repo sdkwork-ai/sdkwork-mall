@@ -1,6 +1,9 @@
 <view class="page-aftersales">
   <view wx:if="{{loading}}" class="mp-loading">加载售后...</view>
-  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
 
   <block wx:if="{{!loading}}">
     <view class="mp-card">

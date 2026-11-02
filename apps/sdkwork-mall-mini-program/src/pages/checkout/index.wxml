@@ -1,6 +1,9 @@
 <view class="page-checkout">
   <view wx:if="{{loading}}" class="mp-loading">加载结算信息...</view>
-  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
 
   <block wx:if="{{!loading}}">
     <view wx:if="{{itemCount}}" class="mp-muted checkout-count">已选择 {{itemCount}} 件购物车商品参与结算</view>

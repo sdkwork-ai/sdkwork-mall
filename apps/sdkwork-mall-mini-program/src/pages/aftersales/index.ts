@@ -295,4 +295,8 @@ Page({
       this.setData({ busy: false });
     }
   },
+
+  retry() {
+    void this.loadOrder(); void this.reloadRequests();
+  },
 });

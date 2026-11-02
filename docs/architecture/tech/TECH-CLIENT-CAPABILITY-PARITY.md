@@ -168,7 +168,7 @@ pnpm test:node                                                     → 54/54 pas
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 9/9
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
-  (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 6/6
+  (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
 pnpm typecheck:packages                                            → 46 packages, 0 failed
 pnpm test:vitest                                                   → 68 files / 169 tests pass
@@ -223,6 +223,18 @@ now owns the domain-neutral error/retry primitive `SdkworkMallH5ErrorState`
 overridden), every page that can fail a load uses it, and form/action validation
 messages use the `sdk-h5-notice-danger` tone instead of the error banner. The H5
 architecture test fails when a page renders `sdk-h5-error` directly.
+
+### 6.1.3 Recoverable failures (mini program)
+
+The same audit on the mini program found 23 pages rendering an error state, of
+which only 7 could recover (pull-down refresh) and one had a retry action. Every
+error block now carries a 重试 action bound to the page's own loader (pull-down
+refresh remains where it already existed), `app.wxss` lays the message and the
+action out on one line, and
+`apps/sdkwork-mall-mini-program/tests/capability-navigation.test.mjs` fails when
+a page renders `mp-error` without pull-down or a retry binding. The login form
+is the one exemption: its error is a rejected credential, retried by submitting
+the form again.
 
 ### 6.2 Per-package typecheck while the root gate is upstream-blocked
 

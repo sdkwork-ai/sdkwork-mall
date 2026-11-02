@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { strict as assert } from "node:assert";
@@ -153,5 +153,42 @@ test("no mini-program capability page is an orphan screen", () => {
     orphans,
     [],
     `Capability pages with no in-app entry (implemented but unreachable):\n${orphans.join("\n")}`,
+  );
+});
+
+test("every mini-program error state offers a recovery path", () => {
+  // A page that renders an error with no way to retry forces the buyer to kill
+  // and reopen the mini program. Pages either enable pull-down refresh or bind
+  // a retry action in the error block. The login form is exempt: its error is a
+  // rejected credential, retried by submitting the form again.
+  const pagesRoot = join(sourceRoot, "pages");
+  const exempt = new Set(["login"]);
+  const violations = [];
+
+  for (const entry of readdirSync(pagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory() || exempt.has(entry.name)) {
+      continue;
+    }
+    const wxmlPath = join(pagesRoot, entry.name, "index.wxml");
+    const jsonPath = join(pagesRoot, entry.name, "index.json");
+    if (!existsSync(wxmlPath)) {
+      continue;
+    }
+    const wxml = readFileSync(wxmlPath, "utf8");
+    if (!wxml.includes("mp-error")) {
+      continue;
+    }
+    const pullDown = existsSync(jsonPath)
+      ? Boolean(JSON.parse(readFileSync(jsonPath, "utf8")).enablePullDownRefresh)
+      : false;
+    if (!pullDown && !wxml.includes('bindtap="retry"')) {
+      violations.push(entry.name);
+    }
+  }
+
+  assert.deepEqual(
+    violations,
+    [],
+    `Error states with no retry or pull-down recovery:\n${violations.join("\n")}`,
   );
 });

@@ -142,4 +142,8 @@ Page({
     }
     this.setData({ _toastTimer: setTimeout(() => this.setData({ toast: "" }), 2200) });
   },
+
+  retry() {
+    void this.reload();
+  },
 });

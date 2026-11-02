@@ -212,3 +212,17 @@ page {
   width: 100%;
   box-sizing: border-box;
 }
+
+/* 错误态内的恢复入口：与错误文案同一行，右对齐 */
+.mp-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.mp-error-retry {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  padding: 6rpx 20rpx;
+}

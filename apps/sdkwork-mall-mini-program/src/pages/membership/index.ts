@@ -39,4 +39,8 @@ Page({
       this.setData({ loading: false, message: errorMessage(cause, "会员信息加载失败") });
     }
   },
+
+  retry() {
+    void this.load();
+  },
 });

@@ -66,4 +66,8 @@ Page({
     };
     this.setData({ notices });
   },
+
+  retry() {
+    void this.load();
+  },
 });

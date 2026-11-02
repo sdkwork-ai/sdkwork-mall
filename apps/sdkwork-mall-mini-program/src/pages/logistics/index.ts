@@ -25,6 +25,8 @@ interface LogisticsData {
   loading: boolean;
   error: string;
   missingOrder: boolean;
+  _orderId: string;
+  _shipmentId: string;
 }
 
 Page({
@@ -33,10 +35,19 @@ Page({
     loading: true,
     error: "",
     missingOrder: false,
+    _orderId: "",
+    _shipmentId: "",
   } as LogisticsData,
 
   onLoad(options: Record<string, string | undefined>) {
-    this.loadLogistics(options.orderId || "", options.shipmentId || "");
+    const orderId = options.orderId || "";
+    const shipmentId = options.shipmentId || "";
+    this.setData({ _orderId: orderId, _shipmentId: shipmentId });
+    this.loadLogistics(orderId, shipmentId);
+  },
+
+  retry() {
+    void this.loadLogistics(this.data._orderId, this.data._shipmentId);
   },
 
   async loadLogistics(orderId: string, shipmentId: string) {

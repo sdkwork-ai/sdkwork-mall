@@ -84,4 +84,8 @@ Page({
       this.setData({ loading: false, message: errorMessage(cause, "积分加载失败") });
     }
   },
+
+  retry() {
+    void this.load();
+  },
 });

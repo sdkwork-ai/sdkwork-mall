@@ -1,6 +1,9 @@
 <view class="page-address">
   <view wx:if="{{loading}}" class="mp-loading">加载地址...</view>
-  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
 
   <view wx:if="{{!loading && addresses.length === 0}}" class="mp-empty">还没有收货地址</view>
 

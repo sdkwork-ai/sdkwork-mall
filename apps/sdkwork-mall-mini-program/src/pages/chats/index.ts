@@ -69,4 +69,8 @@ Page({
   goNotices() {
     wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.notices") });
   },
+
+  retry() {
+    void this.load();
+  },
 });

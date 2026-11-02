@@ -72,4 +72,8 @@ Page({
       wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.activity-detail", { id: id }) });
     }
   },
+
+  retry() {
+    void this.load();
+  },
 });

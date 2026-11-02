@@ -1,6 +1,9 @@
 <view class="page-membership">
   <view wx:if="{{loading}}" class="mp-loading">加载会员信息...</view>
-  <view wx:if="{{message}}" class="mp-error">{{message}}</view>
+  <view wx:if="{{message}}" class="mp-error">
+    <text>{{message}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
 
   <block wx:if="{{!loading}}">
     <view class="membership-hero">

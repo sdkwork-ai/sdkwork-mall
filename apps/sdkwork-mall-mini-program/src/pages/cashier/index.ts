@@ -77,4 +77,8 @@ Page({
   cancel() {
     wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders", { status: "PENDING_PAYMENT" }) });
   },
+
+  retry() {
+    void this.loadMethods();
+  },
 });

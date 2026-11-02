@@ -5,7 +5,10 @@
 
   <view wx:if="{{missingOrder}}" class="mp-empty">缺少订单参数，请从订单列表进入。</view>
   <view wx:if="{{loading}}" class="mp-loading">加载物流...</view>
-  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
   <view wx:if="{{!loading && !missingOrder && shipments.length === 0}}" class="mp-empty">商家尚未发货，发货后可在此查看物流轨迹。</view>
 
   <view class="logistics-list">

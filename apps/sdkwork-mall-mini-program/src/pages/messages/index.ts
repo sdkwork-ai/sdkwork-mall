@@ -48,4 +48,8 @@ Page({
       wx.navigateTo({ url });
     }
   },
+
+  retry() {
+    void this.loadRows();
+  },
 });
