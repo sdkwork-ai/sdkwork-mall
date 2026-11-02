@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 75/75 pass
+pnpm test:node                                                     → 76/76 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -184,6 +184,7 @@ pnpm test:node                                                     → 75/75 pas
   (tests/contract/verify-browser-page-titles.test.mjs              → 3/3)
   (tests/contract/verify-mobile-failure-handling.test.mjs          → 2/2)
   (tests/contract/verify-i18n-readiness.test.mjs                   → 2/2)
+  (tests/contract/verify-search-depth.test.mjs                     → 1/1)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -431,6 +432,18 @@ suites now cover the payloads that decide what the buyer is charged:
 Supporting refactor: the mini-program services now export pure builders
 (`buildCheckoutOrderBody`, `buildReturnShipmentBody`, `buildReturnShipmentRequest`)
 so the payload can be tested without a live transport.
+
+### 6.1.15 Search depth
+
+A shopper expects two affordances on the search screen: hot terms to start from
+and a local history to return to. H5, the mini program and Flutter had both; PC
+had CMS-driven hot terms but never recorded a history, so a PC buyer lost every
+previous query on navigation.
+
+PC now records each effective keyword newest-first (de-duplicated, capped at ten,
+stored under `sdkwork-mall-pc-search-history`), renders them as chips with a
+清空 action, and hides the row when empty. `tests/contract/verify-search-depth.test.mjs`
+pins hot terms plus history on all four roots.
 
 ### 6.2 Per-package typecheck
 

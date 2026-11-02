@@ -1,8 +1,7 @@
 import { formatMoney } from "@sdkwork/utils/money";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Sparkles, TrendingUp, X } from "lucide-react";
-import {
+import { History, Search, Sparkles, TrendingUp, X } from "lucide-react";import {
   Badge,
   Button,
   Checkbox,
@@ -32,6 +31,35 @@ const sortOptions = [
 ] as const;
 
 const PAGE_SIZE = 20;
+const SEARCH_HISTORY_KEY = "sdkwork-mall-pc-search-history";
+const SEARCH_HISTORY_LIMIT = 10;
+
+/** Local search history: a buyer expectation on every other root. */
+function readSearchHistory(): string[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
+    const raw = window.localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((entry): entry is string => typeof entry === "string").slice(0, SEARCH_HISTORY_LIMIT)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeSearchHistory(entries: string[]): void {
+  try {
+    window.localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(entries));
+  } catch {
+    // Private mode or a full quota: history is a convenience, not a requirement.
+  }
+}
 
 function formatCny(value: number | null): string {
   return value == null ? "询价" : (formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "询价");
@@ -119,6 +147,25 @@ export function SdkworkMallSearchPage() {
   }, [query, sort, categoryId, shopId, page]);
 
   const [hotKeywords, setHotKeywords] = useState<MallCmsHotKeyword[]>(() => listEnabledMallCmsHotKeywords());
+  const [history, setHistory] = useState<string[]>(() => readSearchHistory());
+
+  // Record every effective keyword once, newest first, de-duplicated and capped.
+  useEffect(() => {
+    const keyword = query.trim();
+    if (!keyword) {
+      return;
+    }
+    setHistory((current) => {
+      const next = [keyword, ...current.filter((entry) => entry !== keyword)].slice(0, SEARCH_HISTORY_LIMIT);
+      writeSearchHistory(next);
+      return next;
+    });
+  }, [query]);
+
+  function clearSearchHistory() {
+    writeSearchHistory([]);
+    setHistory([]);
+  }
 
   useEffect(() => {
     let active = true;
@@ -388,6 +435,21 @@ export function SdkworkMallSearchPage() {
                 {keyword.keyword}
               </Link>
             ))}
+          </div>
+        ) : null}
+
+        {/* 搜索历史 */}
+        {history.length > 0 ? (
+          <div className="sdkwork-mall-pc-chip-row">
+            <History className="sdkwork-mall-pc-chip-row-icon" />
+            {history.map((keyword) => (
+              <Link key={keyword} to={`/search?q=${encodeURIComponent(keyword)}`}>
+                {keyword}
+              </Link>
+            ))}
+            <button onClick={clearSearchHistory} type="button">
+              清空
+            </button>
           </div>
         ) : null}
 
