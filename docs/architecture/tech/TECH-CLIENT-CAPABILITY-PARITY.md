@@ -451,10 +451,11 @@ pins hot terms plus history on all four roots.
 H5 was the last browser root without any i18n mechanism: every string was a
 literal in TSX. It now initialises i18next (`initReactI18next`, zh-CN JSON
 fragments under `i18n/<locale>/<domain>/<capability>/`) once from `main.tsx`, so
-copy changes are fragment diffs and a new locale is a resource addition. Two
-surfaces are migrated: payment-result and confirm-order — all copy resolves
-through `t("paymentResult.*")` / `t("checkout.*")` with identical zh-CN text, and
-the H5 hard-coded count dropped 536 → 498 (the readiness baseline was refreshed).
+copy changes are fragment diffs and a new locale is a resource addition. Three
+surfaces are migrated: payment-result, confirm-order and the help centre — all
+copy resolves through `t("paymentResult.*")` / `t("checkout.*")` / `t("help.*")`
+with identical zh-CN text, and the H5 hard-coded count dropped 536 → 475 (the
+readiness baseline was refreshed).
 
 `tests/contract/verify-h5-i18n-runtime.test.mjs` proves the runtime initialises,
 every key either migrated page uses exists in the merged catalogue (a missing key

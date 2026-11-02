@@ -12,12 +12,13 @@ import { initReactI18next } from "react-i18next";
 
 import confirmOrder from "./zh-CN/checkout/confirm-order/messages.json";
 import paymentResult from "./zh-CN/checkout/payment-result/messages.json";
+import help from "./zh-CN/support/help/messages.json";
 
 export const SDKWORK_MALL_H5_DEFAULT_LOCALE = "zh-CN";
 
 /** One merged translation tree per locale, composed from authored fragments. */
 export const SDKWORK_MALL_H5_I18N_RESOURCES = {
-  "zh-CN": { translation: { ...confirmOrder, ...paymentResult } },
+  "zh-CN": { translation: { ...confirmOrder, ...help, ...paymentResult } },
 } as const;
 
 void i18n.use(initReactI18next).init({
