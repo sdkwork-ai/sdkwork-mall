@@ -10,7 +10,7 @@ export const sdkworkMallPcInvoiceRoutes = [
     path: "/buyer/invoices",
     screen: "dashboard",
     surface: "buyer",
-    title: "发票管理",
+    title: "发票",
     titleKey: "invoice.routes.dashboard.title",
   },
 ] as const satisfies readonly SdkworkMallPcRouteContribution[];

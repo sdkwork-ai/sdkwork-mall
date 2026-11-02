@@ -255,7 +255,7 @@ class _SdkworkPointsPageState extends State<SdkworkPointsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('我的积分')),
+      appBar: AppBar(title: const Text('积分中心')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

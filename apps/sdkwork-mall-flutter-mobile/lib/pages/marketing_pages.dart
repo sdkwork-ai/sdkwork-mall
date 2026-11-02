@@ -69,7 +69,7 @@ class _SdkworkShopPageState extends State<SdkworkShopPage> {
   Widget build(BuildContext context) {
     final shop = _shop;
     return Scaffold(
-      appBar: AppBar(title: const Text('店铺')),
+      appBar: AppBar(title: const Text('店铺首页')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : shop == null

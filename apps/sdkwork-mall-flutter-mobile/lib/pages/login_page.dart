@@ -31,7 +31,7 @@ class _SdkworkLoginPageState extends State<SdkworkLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('登录 SDKWork 商城')),
+      appBar: AppBar(title: const Text('登录')),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 20),
         children: [

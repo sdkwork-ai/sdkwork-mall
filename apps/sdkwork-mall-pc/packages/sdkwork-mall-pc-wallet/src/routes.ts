@@ -10,7 +10,7 @@ export const sdkworkMallPcWalletRoutes = [
     path: "/buyer/wallet",
     screen: "dashboard",
     surface: "buyer",
-    title: "我的钱包",
+    title: "钱包",
     titleKey: "wallet.routes.dashboard.title",
   },
 ] as const satisfies readonly SdkworkMallPcRouteContribution[];

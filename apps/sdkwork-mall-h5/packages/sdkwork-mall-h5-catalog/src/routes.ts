@@ -22,7 +22,7 @@ export const sdkworkMallH5CatalogRoutes = [
     path: "/categories/:categoryId",
     screen: "categories",
     surface: "storefront",
-    title: "类目商品",
+    title: "分类商品",
     titleKey: "catalog.routes.category-detail.title",
   },
   {

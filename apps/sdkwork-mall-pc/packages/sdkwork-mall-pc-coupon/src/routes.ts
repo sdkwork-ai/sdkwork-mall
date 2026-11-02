@@ -10,7 +10,7 @@ export const sdkworkMallPcCouponRoutes = [
     path: "/buyer/coupons",
     screen: "dashboard",
     surface: "buyer",
-    title: "优惠券",
+    title: "领券中心",
     titleKey: "coupon.routes.dashboard.title",
   },
 ] as const satisfies readonly SdkworkMallPcRouteContribution[];

@@ -32,7 +32,7 @@
   "capabilities": [
     {
       "id": "storefront.home",
-      "title": "商城首页",
+      "title": "首页",
       "surface": "storefront",
       "canonicalRouteId": "storefront.mall.home",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -45,7 +45,7 @@
     },
     {
       "id": "storefront.categories",
-      "title": "商品分类",
+      "title": "分类",
       "surface": "storefront",
       "canonicalRouteId": "storefront.mall.categories",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -58,7 +58,7 @@
     },
     {
       "id": "storefront.category-detail",
-      "title": "分类商品列表",
+      "title": "分类商品",
       "surface": "storefront",
       "canonicalRouteId": "storefront.mall.category-detail",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -97,7 +97,7 @@
     },
     {
       "id": "storefront.shop-home",
-      "title": "店铺主页",
+      "title": "店铺首页",
       "surface": "storefront",
       "canonicalRouteId": "storefront.mall.shop",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -110,7 +110,7 @@
     },
     {
       "id": "storefront.activity-list",
-      "title": "活动列表",
+      "title": "活动会场",
       "surface": "storefront",
       "canonicalRouteId": "storefront.mall.activity-list",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -149,7 +149,7 @@
     },
     {
       "id": "storefront.checkout",
-      "title": "结算下单",
+      "title": "确认订单",
       "surface": "storefront",
       "canonicalRouteId": "storefront.mall.checkout",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -162,7 +162,7 @@
     },
     {
       "id": "storefront.payment",
-      "title": "支付（收银台渠道选择与发起支付）",
+      "title": "收银台",
       "surface": "storefront",
       "canonicalRouteId": "storefront.mall.payment-cashier",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -208,7 +208,7 @@
     },
     {
       "id": "buyer.dashboard",
-      "title": "买家中心",
+      "title": "我的",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.dashboard",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -260,7 +260,7 @@
     },
     {
       "id": "buyer.addresses",
-      "title": "收货地址",
+      "title": "地址管理",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.addresses",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -273,7 +273,7 @@
     },
     {
       "id": "buyer.after-sales",
-      "title": "售后服务",
+      "title": "售后中心",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.after-sales",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -286,7 +286,7 @@
     },
     {
       "id": "buyer.coupons",
-      "title": "优惠券",
+      "title": "领券中心",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.coupons",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -416,7 +416,7 @@
     },
     {
       "id": "buyer.wallet",
-      "title": "我的钱包",
+      "title": "钱包",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.wallet",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -429,7 +429,7 @@
     },
     {
       "id": "buyer.points",
-      "title": "我的积分",
+      "title": "积分中心",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.points",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -455,7 +455,7 @@
     },
     {
       "id": "buyer.invoices",
-      "title": "发票管理",
+      "title": "发票",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.invoices",
       "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
@@ -468,7 +468,7 @@
     },
     {
       "id": "buyer.im-conversations",
-      "title": "客服会话列表",
+      "title": "消息",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.im.chats",
       "requiredOn": ["h5", "miniProgram", "flutter"],
@@ -481,7 +481,7 @@
     },
     {
       "id": "buyer.im-chat",
-      "title": "客服会话",
+      "title": "联系客服",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.im.chat",
       "requiredOn": ["h5", "miniProgram", "flutter"],
@@ -494,7 +494,7 @@
     },
     {
       "id": "buyer.notices",
-      "title": "平台公告",
+      "title": "消息通知",
       "surface": "buyer",
       "canonicalRouteId": "buyer.mall.im.notices",
       "requiredOn": ["h5", "miniProgram", "flutter"],

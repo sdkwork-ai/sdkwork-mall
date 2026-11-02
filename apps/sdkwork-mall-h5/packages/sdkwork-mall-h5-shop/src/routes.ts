@@ -10,7 +10,7 @@ export const sdkworkMallH5ShopRoutes = [
     path: "/shop/:shopId",
     screen: "shop",
     surface: "storefront",
-    title: "店铺",
+    title: "店铺首页",
     titleKey: "shop.routes.shop.title",
   },
 ] as const satisfies readonly SdkworkMallH5RouteContribution[];

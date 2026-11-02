@@ -22,7 +22,7 @@ export const sdkworkMallH5AccountRoutes = [
     path: "/buyer/points",
     screen: "points",
     surface: "buyer",
-    title: "积分",
+    title: "积分中心",
     titleKey: "account.routes.points.title",
   },
 ] as const satisfies readonly SdkworkMallH5RouteContribution[];

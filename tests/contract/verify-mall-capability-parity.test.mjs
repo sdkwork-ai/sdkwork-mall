@@ -81,6 +81,7 @@ function readRouteContributions(platform) {
         platform,
         screen: field("screen"),
         surface: field("surface"),
+        title: field("title"),
         titleKey: field("titleKey"),
       });
     }
@@ -488,3 +489,107 @@ test("platform roots referenced by the contract exist", () => {
     assert.ok(statSync(rootPath).isDirectory(), `${platform} root is not a directory: ${configuration.root}`);
   }
 });
+
+test("every root shows the same capability title to the user", () => {
+  // A buyer switching devices should read the same screen name. The contract
+  // title is the canonical label; PC/H5 route contributions, mini-program page
+  // json and Flutter AppBar must all show it.
+  const mismatches = [];
+  const flutterTitles = readFlutterPageTitles();
+  const miniProgramTitles = readMiniProgramPageTitles();
+
+  for (const capability of contract.capabilities) {
+    const rows = [];
+
+    const pcImplementation = capability.implementations.pc;
+    if (pcImplementation?.routeId && !pcImplementation.fusedInto) {
+      rows.push(["pc", registries.pc.get(pcImplementation.routeId)?.title]);
+    }
+    const h5Implementation = capability.implementations.h5;
+    if (h5Implementation?.routeId && !h5Implementation.fusedInto) {
+      rows.push(["h5", registries.h5.get(h5Implementation.routeId)?.title]);
+    }
+    const mpImplementation = capability.implementations.miniProgram;
+    if (mpImplementation?.page && !mpImplementation.fusedInto) {
+      rows.push(["miniProgram", miniProgramTitles.get(mpImplementation.page)]);
+    }
+    const flutterImplementation = capability.implementations.flutter;
+    if (flutterImplementation?.route) {
+      rows.push(["flutter", flutterTitles.get(flutterImplementation.route)]);
+    }
+
+    for (const [platform, shown] of rows) {
+      if (typeof shown !== "string" || shown === "") {
+        // The Flutter search screen puts a text field in the AppBar instead of a
+        // static title, which is the conventional mobile search UX.
+        if (platform === "flutter" && capability.id === "storefront.search") {
+          continue;
+        }
+        mismatches.push(
+          `${capability.id}: ${platform} title could not be resolved (no static page title found)`,
+        );
+        continue;
+      }
+      if (shown !== capability.title) {
+        mismatches.push(`${capability.id}: ${platform} shows "${shown}", canonical is "${capability.title}"`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    mismatches,
+    [],
+    `Capability titles drift across roots:\n${mismatches.join("\n")}`,
+  );
+});
+
+function readMiniProgramPageTitles() {
+  const titles = new Map();
+  const pageRoot = toAbsolute(contract.platforms.miniProgram.pageRoot);
+  for (const page of registries.miniProgram) {
+    const jsonPath = path.join(pageRoot, `${page}.json`);
+    if (!existsSync(jsonPath)) {
+      continue;
+    }
+    titles.set(page, JSON.parse(readFileSync(jsonPath, "utf8")).navigationBarTitleText);
+  }
+  return titles;
+}
+
+/** route path -> AppBar title of the page class that buildSdkworkMallRoutes() builds. */
+function readFlutterPageTitles() {
+  const shellSource = readText(contract.platforms.flutter.routeRegistry);
+  const classByRoute = new Map();
+  for (const line of shellSource.split("\n")) {
+    const routeMatch = line.match(/'(\/[a-z0-9-]+)':\s*\(context\)\s*=>/u);
+    if (!routeMatch) {
+      continue;
+    }
+    const classMatch = line.match(/=>\s*(?:const\s+)?([A-Za-z0-9_]+)\(/u);
+    if (classMatch) {
+      classByRoute.set(routeMatch[1], classMatch[1]);
+    }
+  }
+
+  const dartSources = collectFiles(
+    toAbsolute(contract.platforms.flutter.pageRoot),
+    (filePath) => filePath.endsWith(".dart"),
+  ).map((filePath) => readFileSync(filePath, "utf8"));
+
+  const titles = new Map();
+  for (const [route, className] of classByRoute) {
+    for (const source of dartSources) {
+      const classIndex = source.indexOf(`class ${className}`);
+      if (classIndex < 0) {
+        continue;
+      }
+      const window = source.slice(classIndex, classIndex + 6000);
+      const titleMatch = window.match(/AppBar\(\s*title:\s*(?:const\s+)?Text\(\s*'([^']+)'/u);
+      if (titleMatch) {
+        titles.set(route, titleMatch[1]);
+      }
+      break;
+    }
+  }
+  return titles;
+}

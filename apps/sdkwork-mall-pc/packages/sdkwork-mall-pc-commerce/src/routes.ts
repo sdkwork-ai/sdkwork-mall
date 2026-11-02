@@ -10,7 +10,7 @@ export const sdkworkMallPcCommerceRoutes = [
     path: "/buyer",
     screen: "dashboard",
     surface: "buyer",
-    title: "买家中心",
+    title: "我的",
     titleKey: "commerce.routes.dashboard.title",
   },
   {

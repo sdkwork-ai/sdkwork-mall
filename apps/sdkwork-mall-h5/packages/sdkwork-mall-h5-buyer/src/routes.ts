@@ -46,7 +46,7 @@ export const sdkworkMallH5BuyerRoutes = [
     path: "/buyer/after-sales",
     screen: "after-sales",
     surface: "buyer",
-    title: "售后",
+    title: "售后中心",
     titleKey: "buyer.routes.after-sales.title",
   },
   {

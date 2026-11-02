@@ -22,7 +22,7 @@ export const sdkworkMallPcCartRoutes = [
     path: "/checkout",
     screen: "checkout",
     surface: "storefront",
-    title: "结算",
+    title: "确认订单",
     titleKey: "cart.routes.checkout.title",
   },
   {

@@ -50,6 +50,7 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
 | Title-key convention | same test | A route title key does not follow `<namespace>.routes.<screen>.title` |
 | Shared copy | same test | The upstream notice or buyer-hub label is reworded on one root |
+| Capability title | same test | The screen name a user reads differs between roots: the contract `title` is canonical, and PC/H5 route titles, mini-program `navigationBarTitleText` and Flutter `AppBar` must all show it |
 | Human report | `pnpm check:capability-parity` | Prints the matrix, the documented asymmetries, and exits non-zero when a required cell is missing |
 
 `pnpm check` runs the parity test; `pnpm verify` additionally runs the matrix
@@ -111,8 +112,18 @@ named-route table in debug builds).
 PC-only by design: `admin.*` platform governance, `merchant.*` seller console,
 and the inactive `app.commerce.*` legacy SaaS dashboards.
 
-## 5. Upstream Gaps Represented, Not Hidden
+## 4.1 Canonical Screen Names
 
+The contract `title` is the canonical label a buyer reads for a capability, and
+every root must show exactly that string (PC/H5 route `title`, mini-program
+`navigationBarTitleText`, Flutter `AppBar`). Auditing the three web+mobile roots
+found 17 capabilities whose screen name drifted — the same screen was labelled
+收银台 on one root and 确认订单 on another, 消息中心 vs 消息, 钱包 vs 我的钱包,
+售后 vs 售后中心. All titles are now aligned and the gate fails on any drift.
+
+The only documented exception is the Flutter search screen, whose AppBar hosts a
+search field instead of a static title — the conventional mobile search UX.
+## 5. Upstream Gaps Represented, Not Hidden
 Two capabilities have no published upstream contract yet. All four roots ship
 the same realized subset and the same honest notice instead of diverging:
 
@@ -151,8 +162,8 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 51/51 pass
-  (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
+pnpm test:node                                                     → 52/52 pass
+  (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 8/8
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5

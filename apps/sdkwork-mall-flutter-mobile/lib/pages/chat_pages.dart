@@ -56,7 +56,7 @@ class _SdkworkChatsPageState extends State<SdkworkChatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('消息中心')),
+      appBar: AppBar(title: const Text('消息')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -220,7 +220,7 @@ class _SdkworkChatPageState extends State<SdkworkChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('客服会话')),
+      appBar: AppBar(title: const Text('联系客服')),
       body: Column(
         children: <Widget>[
           if (_error.isNotEmpty)

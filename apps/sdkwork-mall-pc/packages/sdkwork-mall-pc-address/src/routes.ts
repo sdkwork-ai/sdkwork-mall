@@ -10,7 +10,7 @@ export const sdkworkMallPcAddressRoutes = [
     path: "/buyer/addresses",
     screen: "addresses",
     surface: "buyer",
-    title: "收货地址",
+    title: "地址管理",
     titleKey: "address.routes.addresses.title",
   },
 ] as const satisfies readonly SdkworkMallPcRouteContribution[];

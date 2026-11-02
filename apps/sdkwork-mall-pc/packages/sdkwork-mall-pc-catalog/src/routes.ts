@@ -10,7 +10,7 @@ export const sdkworkMallPcCatalogRoutes = [
     path: "/categories",
     screen: "categories",
     surface: "storefront",
-    title: "类目频道",
+    title: "分类",
     titleKey: "catalog.routes.categories.title",
   },
   {
@@ -22,7 +22,7 @@ export const sdkworkMallPcCatalogRoutes = [
     path: "/categories/:categoryId",
     screen: "category-detail",
     surface: "storefront",
-    title: "类目详情",
+    title: "分类商品",
     titleKey: "catalog.routes.categoryDetail.title",
   },
   {
