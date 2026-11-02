@@ -1,21 +1,39 @@
 <view class="page-membership">
-  <view wx:if="{{loading}}" class="mp-loading">加载会员信息...</view>
+  <view wx:if="{{loading}}" class="mp-loading">{{loadingText}}</view>
   <view wx:if="{{message}}" class="mp-error">
     <text>{{message}}</text>
-    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
   </view>
 
   <block wx:if="{{!loading}}">
     <view class="membership-hero">
-      <view class="membership-label">当前等级</view>
-      <view class="membership-level">{{status ? status.levelName : "普通会员"}}</view>
-      <view class="mp-muted membership-status" wx:if="{{status}}">状态：{{status.status}}</view>
+      <view class="membership-label">{{levelLabel}}</view>
+      <view class="membership-level">{{status ? status.levelName : defaultLevel}}</view>
+      <view class="mp-muted membership-status" wx:if="{{status}}">{{status.status}}</view>
     </view>
 
     <view class="mp-card">
-      <view class="mp-card-title">会员方案</view>
-      <view wx:if="{{plans.length === 0}}" class="mp-empty">暂无可选方案</view>
-      <view class="plan-row" wx:for="{{plans}}" wx:key="id">{{item.title}}</view>
+      <view class="mp-card-title">{{plansTitle}}</view>
+      <view wx:if="{{packages.length === 0}}" class="mp-empty">{{plansEmpty}}</view>
+      <view class="plan-row" wx:for="{{packages}}" wx:key="id">
+        <view class="mp-flex-between">
+          <view>
+            <view class="plan-name">
+              {{item.name}}
+              <text wx:if="{{item.recommended}}" class="plan-recommended">★</text>
+            </view>
+            <view class="mp-muted" wx:if="{{item.durationText}}">{{item.durationText}}</view>
+            <view class="mp-muted" wx:if="{{item.description}}">{{item.description}}</view>
+            <view class="mp-price">{{item.priceText}}</view>
+          </view>
+          <button
+            class="mp-btn mp-btn-primary"
+            disabled="{{busyPackageId !== null}}"
+            bindtap="purchase"
+            data-id="{{item.id}}"
+          >{{busyPackageId === item.id ? openingText : (isMember ? renewText : openText)}}</button>
+        </view>
+      </view>
     </view>
   </block>
 </view>

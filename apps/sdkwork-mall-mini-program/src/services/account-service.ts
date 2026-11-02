@@ -45,6 +45,21 @@ export interface MpMembershipPlan {
   title: string;
 }
 
+/** A purchasable membership package (`GET /memberships/packages`). */
+export interface MpMembershipPackage {
+  description: string;
+  durationDays: number | null;
+  id: number;
+  name: string;
+  priceCny: number | null;
+  recommended: boolean;
+}
+
+export interface MpMembershipPurchaseResult {
+  orderId?: string;
+  status: "completed" | "failed" | "pending";
+}
+
 function pageItems(payload: MpRecord): MpRecord[] {
   return asRecordList(payload.items);
 }
@@ -121,4 +136,48 @@ export async function listMembershipPlans(): Promise<MpMembershipPlan[]> {
     id: asString(asRecord(row), ["id", "planId"]) || `plan-${index + 1}`,
     title: asString(asRecord(row), ["title", "name", "levelName"], `会员方案 ${index + 1}`),
   }));
+}
+
+/** Purchasable packages; public data, so a guest still sees the catalogue. */
+export async function listMembershipPackages(): Promise<MpMembershipPackage[]> {
+  const payload = await request({
+    path: "/memberships/packages",
+    query: { page: 1, page_size: PAGE_SIZE },
+  }).catch(() => ({}) as MpRecord);
+  return pageItems(payload).map((row, index) => {
+    const record = asRecord(row);
+    return {
+      description: asString(record, ["description"]),
+      durationDays: asNumber(record, ["durationDays"]),
+      id: asNumber(record, ["id"]) ?? index + 1,
+      name: asString(record, ["name"], `#${index + 1}`),
+      priceCny: asNumber(record, ["price"]),
+      recommended: Boolean(record.recommended),
+    };
+  });
+}
+
+/**
+ * Charges a membership package. The membership service performs the payment
+ * server-side and returns the resulting status; the client only names the
+ * channel it wants to pay with.
+ */
+export async function purchaseMembership(input: {
+  packageId: number;
+  paymentMethod?: string;
+}): Promise<MpMembershipPurchaseResult> {
+  const payload = await request({
+    path: "/memberships/purchases",
+    body: {
+      packageId: input.packageId,
+      paymentMethod: input.paymentMethod,
+    },
+    method: "POST",
+  });
+  const record = asRecord(payload);
+  const raw = asString(record, ["status"]).toLowerCase();
+  return {
+    orderId: asString(record, ["orderId"]) || undefined,
+    status: raw.includes("complete") ? "completed" : raw.includes("pending") ? "pending" : "failed",
+  };
 }

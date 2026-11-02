@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 88/88 pass
+pnpm test:node                                                     → 89/89 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -190,7 +190,7 @@ pnpm test:node                                                     → 88/88 pas
   (tests/contract/verify-flutter-i18n-runtime.test.mjs            → 2/2)
   (tests/contract/verify-mp-i18n-runtime.test.mjs                 → 2/2)
   (tests/contract/verify-invoice-tax-validation.test.mjs          → 2/2)
-  (tests/contract/verify-membership-purchase.test.mjs             → 2/2)
+  (tests/contract/verify-membership-purchase.test.mjs             → 3/3)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -533,22 +533,25 @@ respective catalogues; the PC create form also requires a tax number for company
 titles. `tests/contract/verify-invoice-tax-validation.test.mjs` pins the regex on
 each root and proves the message stays byte-identical.
 
-### 6.1.21 H5 membership purchase
+### 6.1.21 Mobile membership purchase (H5 + mini program)
 
 The member centre was display-only on mobile: it listed plans with an "opening
 soon" note, so a mobile buyer could not become a member even though the PC
 subscription page could charge a package.
 
-H5 now lists the purchasable membership packages (name, duration, price,
-recommended flag), charges the first available payment channel through
+H5 lists purchasable membership packages (name, duration, price, recommended
+flag), charges the first available payment channel through
 `memberships.purchases.create`, and reports the resulting status (`completed` →
-success + refresh, `pending` → on its way, `failed` → retry). The membership
-service performs the charge server-side; the client only names the channel.
-`tests/contract/verify-membership-purchase.test.mjs` pins the service call and the
-payable action.
+success + refresh, `pending` → on its way, `failed` → retry). The mini program does
+the same over its transport (`/memberships/packages`, `POST /memberships/purchases`)
+with the channel taken from the payment-method list. The membership service
+performs the charge server-side; the clients only name the channel.
+`tests/contract/verify-membership-purchase.test.mjs` pins both flows.
 
-Known gap: the mini program and Flutter member centres are still display-only; the
-same membership API is available to them.
+Known gap: the Flutter member centre is still display-only; the same membership API
+is available to it.
+
+### 6.2 Per-package typecheck
 
 ### 6.2 Per-package typecheck
 

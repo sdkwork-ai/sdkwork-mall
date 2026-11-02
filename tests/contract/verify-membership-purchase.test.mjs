@@ -33,6 +33,19 @@ test("the H5 membership service purchases packages through the membership API", 
   assert.match(service, /memberships\.packages\.list/u);
 });
 
+test("the mini-program member centre purchases packages", () => {
+  const service = read("apps/sdkwork-mall-mini-program/src/services/account-service.ts");
+  assert.match(service, /export async function purchaseMembership/u);
+  assert.match(service, /path: "\/memberships\/purchases"/u);
+  assert.match(service, /export async function listMembershipPackages/u);
+
+  const page = read("apps/sdkwork-mall-mini-program/src/pages/membership/index.ts");
+  assert.match(page, /purchaseMembership\(\{ packageId, paymentMethod \}\)/u);
+  assert.match(page, /membership\.plans\.success/u);
+  assert.match(page, /membership\.plans\.pending/u);
+  assert.doesNotMatch(page, /暂无可选方案/u);
+});
+
 test("the member centre offers a payable action and reports the result", () => {
   const page = read(pagePath);
   assert.match(page, /purchaseMallH5Membership\(\{ packageId, paymentMethod \}\)/u);

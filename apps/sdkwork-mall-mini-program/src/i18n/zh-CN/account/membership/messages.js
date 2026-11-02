@@ -1,0 +1,29 @@
+// Authored zh-CN messages for the membership centre; see buyer-hub/messages.js
+// for the storage rationale (JS data + sibling .d.ts).
+module.exports = {
+  membership: {
+    title: "会员中心",
+    loading: "加载会员信息...",
+    retry: "重试",
+    loginRequired: "请先登录后查看会员信息",
+    levelLabel: "当前等级",
+    defaultLevel: "普通会员",
+    statusLabel: "状态：{{status}}",
+    plans: {
+      title: "会员方案",
+      empty: "暂无可选方案",
+      duration: "{{days}} 天",
+      recommended: "推荐",
+      open: "立即开通",
+      renew: "立即续费",
+      opening: "开通中...",
+      success: "会员开通成功",
+      pending: "已提交，权益到账后生效",
+      failed: "开通失败，请稍后再试",
+      payFailed: "获取支付方式失败，请稍后再试",
+    },
+    errors: {
+      load: "会员信息加载失败",
+    },
+  },
+};
