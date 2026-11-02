@@ -10,7 +10,7 @@ import { normalizeSdkworkApiBaseUrl } from "@sdkwork/runtime-bootstrap";
 import { createClient as createAccountAppClient } from "@sdkwork/account-app-sdk";
 import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk/domains";
 import { createClient as createCommerceBackendClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
-import { createClient as createImAppClient } from "@sdkwork/im-app-sdk";
+import type { SdkworkAppClient as SdkworkImAppClient } from "@sdkwork/im-app-sdk";
 import { createClient as createMembershipAppClient } from "@sdkwork/membership-app-sdk";
 import { createClient as createOrderAppClient } from "@sdkwork/order-app-sdk";
 import { createClient as createPaymentAppClient } from "@sdkwork/payment-app-sdk";
@@ -135,9 +135,6 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
   const membershipAppClient = createMembershipAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.membership),
   );
-  const imAppClient = createImAppClient(
-    createAppClientConfig("sdkwork-im-app-sdk"),
-  );
   const orderAppClient = createOrderAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.order),
   );
@@ -152,7 +149,6 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
   commerceAppClient.setTokenManager(tokenManager);
   commerceBackendClient?.setTokenManager(tokenManager);
   membershipAppClient.setTokenManager(tokenManager);
-  imAppClient.setTokenManager(tokenManager);
   orderAppClient.setTokenManager(tokenManager);
   paymentAppClient.setTokenManager(tokenManager);
   promotionAppClient.setTokenManager(tokenManager);
@@ -165,7 +161,6 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
       : undefined,
     commerceAppClient,
     commerceBackendClient,
-    imAppClient,
     membershipAppClient,
     orderAppClient,
     paymentAppClient,
@@ -184,6 +179,29 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
       backendAdmin: ["sdkwork-commerce-backend-sdk", "sdkwork-iam-backend-sdk"],
     },
   };
+}
+
+/**
+ * Loads the IM notifications client on demand.
+ *
+ * Notifications are only rendered by the message-centre route, so the SDK
+ * family is code-split out of the first-load bundle and created on the first
+ * notification call.
+ */
+export async function loadSdkworkMallPcImAppClient(
+  config: SdkworkMallPcRuntimeConfig,
+  tokenManager: ReturnType<typeof createSdkworkMallPcSessionTokenManager>,
+): Promise<SdkworkImAppClient> {
+  const { createClient } = await import("@sdkwork/im-app-sdk");
+  return createClient({
+    authMode: "dual-token",
+    baseUrl: normalizeGeneratedSdkBaseUrl(
+      resolveDependencyAppApiBaseUrl(config, "sdkwork-im-app-sdk"),
+      APP_API_PREFIX,
+    ),
+    platform: "pc",
+    tokenManager,
+  });
 }
 
 function createAppbaseGeneratedAppClient(

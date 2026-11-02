@@ -20,8 +20,9 @@ function read(relativePath) {
 test("the PC message centre reads the IM notifications client", () => {
   const remote = read("apps/sdkwork-mall-pc/src/bootstrap/buyer-commerce-remote.ts");
   assert.match(remote, /configureSdkworkMessagesNotificationsPort/u);
-  assert.match(remote, /imAppClient\.notifications\.list/u);
-  assert.match(remote, /imAppClient\.notifications\.retrieve/u);
+  assert.match(remote, /loadSdkworkMallPcImAppClient/u);
+  assert.match(remote, /client\.notifications\.list/u);
+  assert.match(remote, /client\.notifications\.retrieve/u);
 
   const service = read("apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-messages/src/messages-service.ts");
   assert.match(service, /getSdkworkMessagesNotificationsPort/u);

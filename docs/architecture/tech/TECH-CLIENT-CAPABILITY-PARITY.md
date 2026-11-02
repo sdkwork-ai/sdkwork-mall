@@ -629,7 +629,7 @@ The membership empty state copy was also corrected on H5 ("方案即将上线，
 to match the mini program and Flutter ("暂无可选方案"), since membership purchase
 has shipped on every root.
 
-### 6.1.26 First-load split (H5)
+### 6.1.26 First-load split (H5 + PC)
 
 The H5 bootstrap used to import the IM notifications client and the drive
 uploader statically even though both are only reachable from lazy routes (chat,
@@ -645,8 +645,13 @@ chunk and delayed first paint.
 - the SDK inventory no longer carries `imAppClient`; the IM family stays declared
   in the family list because the root still consumes it.
 
-Measured dev build entry chunk: **864.3 KB → 729.7 KB raw** (gzip **186.0 KB →
-158.9 KB**). `tests/contract/verify-first-load-split.test.mjs` pins the split.
+The PC root had the same problem with its notifications client and now uses the
+same pattern (`loadSdkworkMallPcImAppClient` awaited inside the message-centre
+port); its static `imAppClient` inventory entry was removed.
+
+Measured dev entry chunks: H5 **864.3 KB → 729.7 KB raw** (gzip **186.0 KB →
+158.9 KB**), PC **864.3 KB → 728.0 KB raw** (gzip 145.1 KB).
+`tests/contract/verify-first-load-split.test.mjs` pins both splits.
 
 ### 6.2 Per-package typecheck
 

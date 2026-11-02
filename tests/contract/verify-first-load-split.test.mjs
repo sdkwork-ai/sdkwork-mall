@@ -34,6 +34,19 @@ test("the H5 runtime boot does not statically import the IM or drive clients", (
   assert.doesNotMatch(imProviders, /sdkClients\.imAppClient/u);
 });
 
+test("the PC runtime boot does not statically import the IM client", () => {
+  const iamRuntime = read("apps/sdkwork-mall-pc/src/bootstrap/iamRuntime.ts");
+  assert.match(iamRuntime, /await import\("@sdkwork\/im-app-sdk"\)/u);
+  assert.doesNotMatch(iamRuntime, /import \{ createClient as createImAppClient \}/u);
+
+  const remote = read("apps/sdkwork-mall-pc/src/bootstrap/buyer-commerce-remote.ts");
+  assert.match(remote, /loadSdkworkMallPcImAppClient/u);
+  assert.doesNotMatch(remote, /sdkClients\.imAppClient/u);
+
+  const inventory = read("apps/sdkwork-mall-pc/src/bootstrap/sdkClients.ts");
+  assert.doesNotMatch(inventory, /imAppClient:/u);
+});
+
 test("the H5 SDK inventory no longer carries a static IM client", () => {
   const inventory = read("apps/sdkwork-mall-h5/src/bootstrap/sdkClients.ts");
   assert.doesNotMatch(inventory, /imAppClient:/u);

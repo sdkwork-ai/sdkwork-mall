@@ -125,7 +125,6 @@ export function configureSdkworkMallPcProviders(input: {
   configureSdkworkMallPcStorefrontCommerceRemotePorts();
   configureSdkworkMallPcBuyerCommerceRemotePorts({
     config: input.config,
-    sdkClients: input.sdkClients,
     tokenManager: input.tokenManager,
   });
   configureSdkworkMallPcCommerceBuyerHubRemotePort();

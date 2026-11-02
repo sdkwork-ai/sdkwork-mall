@@ -6,13 +6,12 @@ import { createDriveUploadImageService } from "@sdkwork/drive-upload-image-core"
 import { configureMallAfterSalesMediaRuntimePort } from "@sdkwork/mall-pc-after-sales";
 import { createSdkworkMallPcDriveAppClient } from "./driveClient";
 import { createSdkworkMallPcSessionTokenManager } from "./sessionTokenManager";
-import type { SdkworkMallPcSdkClientInventory } from "./sdkClients";
+import { loadSdkworkMallPcImAppClient } from "./iamRuntime";
 import { SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD } from "./uploadDeclaration";
 import type { SdkworkMallPcRuntimeConfig } from "./environment";
 
 export function configureSdkworkMallPcBuyerCommerceRemotePorts(input: {
   config: SdkworkMallPcRuntimeConfig;
-  sdkClients: SdkworkMallPcSdkClientInventory;
   tokenManager: ReturnType<typeof createSdkworkMallPcSessionTokenManager>;
 }): void {
   configureSdkworkMallPcBuyerAfterSalesMediaPort(input.config, input.tokenManager);
@@ -24,15 +23,23 @@ export function configureSdkworkMallPcBuyerCommerceRemotePorts(input: {
     },
   });
 
+  let imClientPromise: ReturnType<typeof loadSdkworkMallPcImAppClient> | null = null;
+  const getImClient = () => {
+    imClientPromise ??= loadSdkworkMallPcImAppClient(input.config, input.tokenManager);
+    return imClientPromise;
+  };
+
   configureSdkworkMessagesNotificationsPort({
-    listNotifications(query) {
-      return input.sdkClients.imAppClient.notifications.list({
+    async listNotifications(query) {
+      const client = await getImClient();
+      return client.notifications.list({
         cursor: query.cursor,
         pageSize: query.pageSize,
       });
     },
-    retrieveNotification(notificationId) {
-      return input.sdkClients.imAppClient.notifications.retrieve(notificationId);
+    async retrieveNotification(notificationId) {
+      const client = await getImClient();
+      return client.notifications.retrieve(notificationId);
     },
   });
 
