@@ -852,3 +852,146 @@ test("mall PC in-app links resolve to a mounted route", () => {
     `Links target paths the PC router does not mount:\n${unresolved.join("\n")}`,
   );
 });
+
+test("no PC storefront route is an orphan screen", () => {
+  // Buyer, merchant and backend-admin routes are rendered into the shell nav
+  // from the route registry itself (surface filters below), so they are
+  // reachable by construction. Storefront pages are only reachable through
+  // in-app links, so an unreferenced storefront route is a dead page.
+  const shellSource = readFileSync(
+    path.join(mallPackagesRoot, "sdkwork-mall-pc-shell", "src", "index.tsx"),
+    "utf8",
+  );
+  for (const surface of ["buyer", "merchant", "backend-admin"]) {
+    assert.ok(
+      shellSource.includes(`surface === "${surface}"`),
+      `the shell must generate the ${surface} navigation from the route registry`,
+    );
+  }
+
+  const pageModules = collectPcPageModules();
+  const linkSources = collectFiles(mallPackagesRoot, (filePath) => /\.(tsx|ts)$/u.test(filePath))
+    .concat(collectFiles(path.join(mallRoot, "src"), (filePath) => /\.(tsx|ts)$/u.test(filePath)))
+    .filter((file) => !file.endsWith("routes.ts") && !file.endsWith("AppRoutes.tsx"));
+
+  const records = collectRouteRecordsFromPackages();
+  const storefrontRouteIds = [...records]
+    .filter(([, route]) => route.surface === "storefront" && route.path !== "/")
+    .map(([routeId]) => routeId);
+  const unresolvedModules = storefrontRouteIds.filter((routeId) => !pageModules.get(routeId));
+  assert.deepEqual(
+    unresolvedModules,
+    [],
+    `storefront routes must mount a lazy page module the orphan check can exclude: ${unresolvedModules.join(", ")}`,
+  );
+
+  const orphans = [];
+  for (const [routeId, route] of records) {
+    if (route.surface !== "storefront" || route.path === "/") {
+      continue;
+    }
+    const ownModule = pageModules.get(routeId);
+    const needle = route.path.split("/:")[0];
+    const linked = linkSources.some((file) => {
+      if (ownModule && path.resolve(file) === path.resolve(ownModule)) {
+        return false;
+      }
+      const source = readFileSync(file, "utf8");
+      return source.includes(`"${needle}`) || source.includes(`\`${needle}`);
+    });
+    if (!linked) {
+      orphans.push(`${routeId} (${route.path})`);
+    }
+  }
+
+  assert.deepEqual(
+    orphans,
+    [],
+    `Storefront routes with no in-app entry (implemented but unreachable):\n${orphans.join("\n")}`,
+  );
+});
+
+function collectRouteRecordsFromPackages() {
+  const records = new Map();
+  for (const directory of activeMallPackages) {
+    const routesPath = path.join(mallPackagesRoot, directory, "src", "routes.ts");
+    if (!existsSync(routesPath)) {
+      continue;
+    }
+    const source = readFileSync(routesPath, "utf8");
+    for (const match of source.matchAll(/\{[^{}]*?id:\s*"([^"]+)"[^{}]*?\}/gs)) {
+      const block = match[0];
+      const field = (name) => (block.match(new RegExp(`${name}:\\s*"([^"]*)"`)) ?? [])[1] ?? "";
+      records.set(match[1], { path: field("path"), surface: field("surface") });
+    }
+  }
+  return records;
+}
+
+/** route id -> resolved page module file, read from the AppRoutes lazy map + case switch. */
+function collectPcPageModules() {
+  const routerSource = readFileSync(path.join(mallRoot, "src", "AppRoutes.tsx"), "utf8");
+  const lazyModules = new Map();
+  for (const match of routerSource.matchAll(/const (\w+) = lazy\(\(\)[\s\S]*?import\("([^"]+)"\)/gu)) {
+    lazyModules.set(match[1], match[2]);
+  }
+  // The switch uses case fall-through for routes that share a page, so collect
+  // consecutive `case` labels until the `return <Component` that serves them.
+  const componentByRouteId = new Map();
+  const pendingCaseIds = [];
+  for (const line of routerSource.split("\n")) {
+    const inline = line.match(/^\s*case "([^"]+)":\s*return <(\w+)/u);
+    if (inline) {
+      componentByRouteId.set(inline[1], inline[2]);
+      pendingCaseIds.length = 0;
+      continue;
+    }
+    const caseMatch = line.match(/^\s*case "([^"]+)":\s*$/u);
+    if (caseMatch) {
+      pendingCaseIds.push(caseMatch[1]);
+      continue;
+    }
+    const returnMatch = line.match(/^\s*return <(\w+)/u);
+    if (returnMatch && pendingCaseIds.length > 0) {
+      for (const routeId of pendingCaseIds) {
+        componentByRouteId.set(routeId, returnMatch[1]);
+      }
+      pendingCaseIds.length = 0;
+      continue;
+    }
+    if (/^\s*default:/u.test(line)) {
+      pendingCaseIds.length = 0;
+    }
+  }
+
+  const packageDirectories = new Map();
+  for (const entry of readdirSync(mallPackagesRoot, { withFileTypes: true })) {
+    const packageJsonPath = path.join(mallPackagesRoot, entry.name, "package.json");
+    if (!entry.isDirectory() || !existsSync(packageJsonPath)) {
+      continue;
+    }
+    packageDirectories.set(JSON.parse(readFileSync(packageJsonPath, "utf8")).name, path.join(mallPackagesRoot, entry.name));
+  }
+
+  const modules = new Map();
+  for (const [routeId, component] of componentByRouteId) {
+    const specifier = lazyModules.get(component);
+    if (!specifier) {
+      continue;
+    }
+    const parts = specifier.split("/");
+    const packageName = specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0];
+    const subpath = specifier.slice(packageName.length).replace(/^\//u, "");
+    const packageDirectory = packageDirectories.get(packageName);
+    if (!packageDirectory) {
+      continue;
+    }
+    const exportsMap = JSON.parse(readFileSync(path.join(packageDirectory, "package.json"), "utf8")).exports ?? {};
+    const entry = exportsMap[subpath ? `./${subpath}` : "."];
+    const relativeModule = entry?.import ?? entry?.default;
+    if (typeof relativeModule === "string") {
+      modules.set(routeId, path.join(packageDirectory, relativeModule));
+    }
+  }
+  return modules;
+}
