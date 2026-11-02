@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../bootstrap/session.dart';
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
@@ -354,8 +355,10 @@ class SdkworkMembershipPage extends StatefulWidget {
 class _SdkworkMembershipPageState extends State<SdkworkMembershipPage> {
   bool _loading = true;
   String _error = '';
+  String _message = '';
   Map<String, dynamic>? _status;
-  List<Map<String, dynamic>> _plans = const <Map<String, dynamic>>[];
+  List<Map<String, dynamic>> _packages = const <Map<String, dynamic>>[];
+  int? _busyPackageId;
 
   @override
   void initState() {
@@ -370,28 +373,27 @@ class _SdkworkMembershipPageState extends State<SdkworkMembershipPage> {
       }
       setState(() {
         _loading = false;
-        _error = '请先登录后查看会员信息';
+        _error = SdkworkI18n.t('membership.loginRequired');
       });
       return;
     }
     setState(() {
       _loading = true;
       _error = '';
+      _message = '';
     });
     try {
       final account = MallCommerce.instance.account;
-      final results = await Future.wait(<Future<Object?>>[
+      final results = await Future.wait<Object?>(<Future<Object?>>[
         account.getMembershipStatus(),
-        account.listMembershipPlans(),
+        account.listMembershipPackages(),
       ]);
-      final status = results[0] as Map<String, dynamic>?;
-      final plans = results[1] as List<Map<String, dynamic>>;
       if (!mounted) {
         return;
       }
       setState(() {
-        _status = status;
-        _plans = plans;
+        _status = results[0] as Map<String, dynamic>?;
+        _packages = results[1] as List<Map<String, dynamic>>;
         _loading = false;
       });
     } catch (cause) {
@@ -405,20 +407,67 @@ class _SdkworkMembershipPageState extends State<SdkworkMembershipPage> {
     }
   }
 
+  Future<void> _purchase(int packageId) async {
+    setState(() {
+      _busyPackageId = packageId;
+      _message = '';
+    });
+    try {
+      // The membership service charges the selected channel server-side; the
+      // client only names the channel it wants to pay with.
+      String? paymentMethod;
+      try {
+        final methods = await MallCommerce.instance.cart.listPaymentMethods();
+        if (methods.isNotEmpty) {
+          final code = asString(methods.first, <String>['code']);
+          paymentMethod = code.isEmpty ? null : code;
+        }
+      } catch (_) {
+        paymentMethod = null;
+      }
+      if (paymentMethod == null) {
+        setState(() => _message = SdkworkI18n.t('membership.plans.payFailed'));
+        return;
+      }
+      final result = await MallCommerce.instance.account.purchaseMembership(
+        packageId: packageId,
+        paymentMethod: paymentMethod,
+      );
+      if (result.status == 'completed') {
+        setState(() => _message = SdkworkI18n.t('membership.plans.success'));
+        await _load();
+        return;
+      }
+      setState(() {
+        _message = result.status == 'pending'
+            ? SdkworkI18n.t('membership.plans.pending')
+            : SdkworkI18n.t('membership.plans.failed');
+      });
+    } catch (cause) {
+      if (mounted) {
+        setState(() => _message = '$cause');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _busyPackageId = null);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final levelName = asString(
-          _status ?? const <String, dynamic>{},
-          <String>['levelName', 'level'],
-          fallback: '普通会员',
-        ),
-        statusName = asString(
+      _status ?? const <String, dynamic>{},
+      <String>['levelName', 'level', 'planName'],
+      fallback: SdkworkI18n.t('membership.defaultLevel'),
+    );
+    final statusName = asString(
       _status ?? const <String, dynamic>{},
       <String>['status', 'statusName'],
       fallback: 'active',
     );
     return Scaffold(
-      appBar: AppBar(title: const Text('会员中心')),
+      appBar: AppBar(title: Text(SdkworkI18n.t('membership.title'))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -435,9 +484,9 @@ class _SdkworkMembershipPageState extends State<SdkworkMembershipPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Text(
-                        '当前等级',
-                        style: TextStyle(color: Colors.white70),
+                      Text(
+                        SdkworkI18n.t('membership.levelLabel'),
+                        style: const TextStyle(color: Colors.white70),
                       ),
                       Text(
                         levelName,
@@ -449,7 +498,10 @@ class _SdkworkMembershipPageState extends State<SdkworkMembershipPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '状态：$statusName',
+                        SdkworkI18n.t(
+                          'membership.statusLabel',
+                          params: <String, String>{'status': statusName},
+                        ),
                         style: const TextStyle(color: Colors.white70),
                       ),
                     ],
@@ -457,24 +509,67 @@ class _SdkworkMembershipPageState extends State<SdkworkMembershipPage> {
                 ),
                 if (_error.isNotEmpty)
                   SdkworkInlineError(message: _error, onRetry: _load),
-                SdkworkSectionHeader(title: '会员方案'),
-                if (_plans.isEmpty)
-                  const SdkworkEmptyView(message: '暂无可选方案')
+                if (_message.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      _message,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
+                SdkworkSectionHeader(title: SdkworkI18n.t('membership.plans.title')),
+                if (_packages.isEmpty)
+                  SdkworkEmptyView(message: SdkworkI18n.t('membership.plans.empty'))
                 else
-                  ..._plans.map(
-                    (plan) => Card(
+                  ..._packages.map((pkg) {
+                    final packageId = asNum(pkg, <String>['id'])?.toInt();
+                    final price = asNum(pkg, <String>['price']);
+                    final durationDays = asNum(pkg, <String>['durationDays']);
+                    final busy = _busyPackageId == packageId;
+                    final isMember = statusName.toLowerCase() == 'active';
+                    return Card(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
                         title: Text(
                           asString(
-                            plan,
-                            <String>['title', 'name', 'levelName'],
-                            fallback: '会员方案',
+                            pkg,
+                            <String>['name', 'title'],
+                            fallback: SdkworkI18n.t('membership.plans.title'),
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            if (durationDays != null)
+                              Text(
+                                SdkworkI18n.t(
+                                  'membership.plans.duration',
+                                  params: <String, String>{'days': '${durationDays.toInt()}'},
+                                ),
+                              ),
+                            if (asString(pkg, <String>['description']).isNotEmpty)
+                              Text(asString(pkg, <String>['description'])),
+                            Text(
+                              formatCny(price),
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                          ],
+                        ),
+                        trailing: FilledButton(
+                          onPressed: packageId == null || _busyPackageId != null
+                              ? null
+                              : () => _purchase(packageId),
+                          child: Text(
+                            busy
+                                ? SdkworkI18n.t('membership.plans.opening')
+                                : isMember
+                                    ? SdkworkI18n.t('membership.plans.renew')
+                                    : SdkworkI18n.t('membership.plans.open'),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
               ],
             ),
     );

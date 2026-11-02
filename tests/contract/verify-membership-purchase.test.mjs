@@ -46,6 +46,19 @@ test("the mini-program member centre purchases packages", () => {
   assert.doesNotMatch(page, /暂无可选方案/u);
 });
 
+test("the Flutter member centre purchases packages", () => {
+  const service = read("apps/sdkwork-mall-flutter-mobile/lib/services/account_service.dart");
+  assert.match(service, /Future<\(\{String\? orderId, String status\}\)> purchaseMembership/u);
+  assert.match(service, /'\/memberships\/purchases'/u);
+  assert.match(service, /listMembershipPackages/u);
+
+  const page = read("apps/sdkwork-mall-flutter-mobile/lib/pages/account_pages.dart");
+  assert.match(page, /purchaseMembership\(\s*packageId: packageId/u);
+  assert.match(page, /SdkworkI18n\.t\('membership\.plans\.success'\)/u);
+  assert.match(page, /SdkworkI18n\.t\('membership\.plans\.pending'\)/u);
+  assert.doesNotMatch(page, /暂无方案/u);
+});
+
 test("the member centre offers a payable action and reports the result", () => {
   const page = read(pagePath);
   assert.match(page, /purchaseMallH5Membership\(\{ packageId, paymentMethod \}\)/u);

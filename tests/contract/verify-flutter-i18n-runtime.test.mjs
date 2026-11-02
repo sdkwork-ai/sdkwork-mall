@@ -28,6 +28,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(runtime, /installForTest/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/support\/help\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/membership\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/checkout\/confirm-order\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/support\/after-sales\/messages\.json/u);
@@ -38,6 +39,7 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   const pubspec = read(`${appRoot}/pubspec.yaml`);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/support\/help\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/buyer-hub\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/membership\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/checkout\/confirm-order\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/support\/after-sales\/messages\.json/u);

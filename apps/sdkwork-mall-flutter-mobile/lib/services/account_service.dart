@@ -68,6 +68,40 @@ class AccountService {
     return asList(payload['items']);
   }
 
+  /// 可购买的会员套餐（公开读，游客也能看到目录）。
+  Future<List<Map<String, dynamic>>> listMembershipPackages() async {
+    final payload = await _safe(
+      '/memberships/packages',
+      query: <String, String>{'page': '1', 'page_size': '$_pageSize'},
+    );
+    return asList(payload['items']);
+  }
+
+  /// 购买会员套餐：会员服务在服务端完成扣款，客户端只指定支付通道。
+  Future<({String? orderId, String status})> purchaseMembership({
+    required int packageId,
+    String? paymentMethod,
+  }) async {
+    final payload = await _client.request(
+      '/memberships/purchases',
+      method: 'POST',
+      body: <String, dynamic>{
+        'packageId': packageId,
+        'paymentMethod': ?paymentMethod,
+      },
+    );
+    final raw = asString(payload, <String>['status']).toLowerCase();
+    final orderId = asString(payload, <String>['orderId']);
+    return (
+      orderId: orderId.isEmpty ? null : orderId,
+      status: raw.contains('complete')
+          ? 'completed'
+          : raw.contains('pending')
+              ? 'pending'
+              : 'failed',
+    );
+  }
+
   /// 资产读取为展示型增强：失败时返回空对象，由页面呈现空态。
   Future<Map<String, dynamic>> _safe(
     String path, {
