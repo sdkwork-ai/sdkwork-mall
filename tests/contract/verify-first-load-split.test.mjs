@@ -42,6 +42,10 @@ test("the PC runtime boot does not statically import the IM client", () => {
   const remote = read("apps/sdkwork-mall-pc/src/bootstrap/buyer-commerce-remote.ts");
   assert.match(remote, /loadSdkworkMallPcImAppClient/u);
   assert.doesNotMatch(remote, /sdkClients\.imAppClient/u);
+  assert.doesNotMatch(remote, /from "@sdkwork\/drive-upload-image-core"/u);
+  assert.doesNotMatch(remote, /from "\.\/driveClient"/u);
+  assert.match(remote, /import\("@sdkwork\/drive-upload-image-core"\)/u);
+  assert.match(remote, /import\("\.\/driveClient"\)/u);
 
   const inventory = read("apps/sdkwork-mall-pc/src/bootstrap/sdkClients.ts");
   assert.doesNotMatch(inventory, /imAppClient:/u);

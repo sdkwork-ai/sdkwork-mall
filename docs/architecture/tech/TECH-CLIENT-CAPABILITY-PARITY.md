@@ -647,10 +647,11 @@ chunk and delayed first paint.
 
 The PC root had the same problem with its notifications client and now uses the
 same pattern (`loadSdkworkMallPcImAppClient` awaited inside the message-centre
-port); its static `imAppClient` inventory entry was removed.
+port); its static `imAppClient` inventory entry was removed. Its after-sales media
+port also imports the drive uploader and client on first upload.
 
 Measured dev entry chunks: H5 **864.3 KB → 729.7 KB raw** (gzip **186.0 KB →
-158.9 KB**), PC **864.3 KB → 728.0 KB raw** (gzip 145.1 KB).
+158.9 KB**), PC **864.3 KB → 660.3 KB raw** (gzip 145.1 KB → **134.1 KB**).
 `tests/contract/verify-first-load-split.test.mjs` pins both splits.
 
 ### 6.2 Per-package typecheck

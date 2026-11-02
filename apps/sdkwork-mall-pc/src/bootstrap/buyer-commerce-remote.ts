@@ -2,9 +2,7 @@ import { getSdkworkCommerceService } from "@sdkwork/mall-commerce-service";
 import { configureSdkworkAfterSalesRemotePort } from "@sdkwork/mall-pc-after-sales";
 import { configureSdkworkMessagesNotificationsPort } from "@sdkwork/mall-pc-messages";
 import { configureSdkworkReviewsRemotePort } from "@sdkwork/mall-pc-reviews";
-import { createDriveUploadImageService } from "@sdkwork/drive-upload-image-core";
 import { configureMallAfterSalesMediaRuntimePort } from "@sdkwork/mall-pc-after-sales";
-import { createSdkworkMallPcDriveAppClient } from "./driveClient";
 import { createSdkworkMallPcSessionTokenManager } from "./sessionTokenManager";
 import { loadSdkworkMallPcImAppClient } from "./iamRuntime";
 import { SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD } from "./uploadDeclaration";
@@ -81,21 +79,25 @@ export function configureSdkworkMallPcBuyerCommerceRemotePorts(input: {
  * The media port binds the declared after-sales evidence intent
  * (`SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD`) to the composed drive
  * uploader; evidence snapshot items carry the returned `drive://` reference
- * next to their declared file metadata. Hosts that never compose this port
- * get a refuse-with-hint picker instead of a local-only fake upload.
+ * next to their declared file metadata. The uploader is imported on first use so
+ * the drive SDK family stays out of the first-load bundle.
  */
 function configureSdkworkMallPcBuyerAfterSalesMediaPort(
   config: SdkworkMallPcRuntimeConfig,
   tokenManager: ReturnType<typeof createSdkworkMallPcSessionTokenManager>,
 ): void {
-  const driveClient = createSdkworkMallPcDriveAppClient(config, tokenManager);
-  const imageService = createDriveUploadImageService({
-    uploader: driveClient.uploader,
-    declaration: SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD,
-  });
-
   configureMallAfterSalesMediaRuntimePort({
     async uploadImages(files: File[]): Promise<string[]> {
+      const [{ createDriveUploadImageService }, { createSdkworkMallPcDriveAppClient }] =
+        await Promise.all([
+          import("@sdkwork/drive-upload-image-core"),
+          import("./driveClient"),
+        ]);
+      const driveClient = createSdkworkMallPcDriveAppClient(config, tokenManager);
+      const imageService = createDriveUploadImageService({
+        uploader: driveClient.uploader,
+        declaration: SDKWORK_MALL_PC_AFTER_SALES_EVIDENCE_UPLOAD,
+      });
       const references: string[] = [];
       for (const file of files) {
         const uploaded = await imageService.upload({
