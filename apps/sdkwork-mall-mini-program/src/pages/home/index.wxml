@@ -1,6 +1,6 @@
 <view class="page-home">
   <view class="home-search" bindtap="goQuickEntry" data-capability="storefront.mall.search">
-    <view class="home-search-box">搜索商品 / 品牌 / 店铺</view>
+    <view class="home-search-box">{{searchPlaceholder}}</view>
   </view>
 
   <swiper class="home-banner" indicator-dots autoplay circular interval="4200">
@@ -22,11 +22,11 @@
     >{{item.label}}</view>
   </view>
 
-  <view wx:if="{{loading}}" class="mp-loading">加载中...</view>
+  <view wx:if="{{loading}}" class="mp-loading">{{loadingText}}</view>
   <view wx:if="{{error}}" class="mp-error">{{error}}</view>
 
   <view wx:if="{{categories.length}}" class="mp-card">
-    <view class="mp-card-title">分类导航</view>
+    <view class="mp-card-title">{{categoriesTitle}}</view>
     <view class="home-category-grid">
       <view
         class="home-category-item"
@@ -41,16 +41,16 @@
   <view wx:if="{{seckillOffer}}" class="mp-card">
     <view class="mp-flex-between">
       <view class="mp-flex">
-        <text class="home-seckill-title">限时秒杀</text>
+        <text class="home-seckill-title">{{seckillTitle}}</text>
         <text class="home-seckill-countdown">{{seckillCountdown}}</text>
       </view>
-      <text class="home-seckill-more">{{seckillOffer.discountText || '进行中'}}</text>
+      <text class="home-seckill-more">{{seckillOffer.discountText || seckillOngoing}}</text>
     </view>
     <view class="home-seckill-highlight" wx:if="{{seckillOffer.highlight}}">{{seckillOffer.highlight}}</view>
   </view>
 
   <view wx:if="{{hotProducts.length}}" class="home-products">
-    <view class="mp-card-title home-products-title">热卖推荐</view>
+    <view class="mp-card-title home-products-title">{{hotTitle}}</view>
     <view class="mp-product-grid">
       <view
         class="mp-product-card"
@@ -67,7 +67,7 @@
           <view class="mp-product-title">{{item.title}}</view>
           <view class="mp-product-meta">
             <text class="mp-price">{{item.priceText}}</text>
-            <text class="mp-product-sales" wx:if="{{item.sales}}">已售 {{item.sales}}</text>
+            <text class="mp-product-sales" wx:if="{{item.salesLabel}}">{{item.salesLabel}}</text>
           </view>
         </view>
       </view>

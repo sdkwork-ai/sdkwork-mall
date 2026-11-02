@@ -14,10 +14,10 @@ long):
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
 | H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 54 | 283 | 390 (`regions.ts`) |
-| Mini program | `src/i18n` runtime + `zh-CN/{account/buyer-hub,support/help}` JS fragments | 64 | 330 | 302 (province/city picker data) |
+| Mini program | `src/i18n` runtime + `zh-CN/{account/buyer-hub,support/help,storefront/home}` JS fragments | 62 | 310 | 302 (province/city picker data) |
 | Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,checkout/confirm-order}` fragments | 33 | 349 | 230 (province/city picker data) |
 
-2414 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2394 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -110,11 +110,12 @@ fragments into `a.b.c` keys and exposes a synchronous `t(key, params)` with
 JavaScript at runtime (not JSON), copy lives in plain-object
 `src/i18n/<locale>/<domain>/<capability>/messages.js` files with sibling
 `messages.d.ts` declarations for typing. Migrated surfaces: the buyer hub (order
-shortcuts, asset/service/account menus, logout dialog) and the help centre (FAQ
-sections, quick links, contact rows). Their hard-coded count dropped 378 → 330, and
-the help template now renders catalogue-driven data only.
+shortcuts, asset/service/account menus, logout dialog), the help centre (FAQ
+sections, quick links, contact rows) and the storefront home (banners, quick
+entries, seckill/sold labels, loading/error states). Their hard-coded count dropped
+378 → 310, and both templates render catalogue-driven data only.
 `tests/contract/verify-mp-i18n-runtime.test.mjs` pins the runtime, the fragment
-wiring and the no-literal rule (including the WXML template).
+wiring and the no-literal rule (including WXML templates).
 
 **S2b — Flutter runtime (started).** `lib/src/i18n/runtime.dart` flattens the
 authored fragments into a synchronous message map (`t(key, {params})` with

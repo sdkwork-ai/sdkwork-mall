@@ -10,6 +10,7 @@
  */
 import buyerHub from "./zh-CN/account/buyer-hub/messages";
 import help from "./zh-CN/support/help/messages";
+import home from "./zh-CN/storefront/home/messages";
 
 const messages: Record<string, string> = {};
 
@@ -27,6 +28,7 @@ function collect(node: Record<string, unknown>, prefix: string): void {
 
 collect(buyerHub as Record<string, unknown>, "");
 collect(help as Record<string, unknown>, "");
+collect(home as Record<string, unknown>, "");
 
 /** Resolves `key` with `{{name}}` placeholder interpolation. */
 export function t(
