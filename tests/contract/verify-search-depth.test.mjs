@@ -33,7 +33,7 @@ const ROOTS = [
   {
     name: "flutter",
     file: "apps/sdkwork-mall-flutter-mobile/lib/pages/search_page.dart",
-    patterns: ["_hotKeywords", "_history", "搜索历史"],
+    patterns: ["_hotKeywords", "_history", "search.history"],
   },
 ];
 

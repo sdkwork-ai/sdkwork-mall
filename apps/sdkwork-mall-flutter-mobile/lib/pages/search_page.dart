@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/commerce.dart';
+import '../src/i18n/runtime.dart';
 import '../utils/format.dart';
 import '../utils/json.dart';
 import 'widgets.dart';
@@ -14,12 +15,19 @@ class SdkworkSearchPage extends StatefulWidget {
 }
 
 class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
-  static const _hotKeywords = <String>['手机', '笔记本', '大米', '人体工学椅', '新品', '旗舰'];
+  static List<String> get _hotKeywords => <String>[
+        SdkworkI18n.t('search.hotKeywords.phone'),
+        SdkworkI18n.t('search.hotKeywords.laptop'),
+        SdkworkI18n.t('search.hotKeywords.rice'),
+        SdkworkI18n.t('search.hotKeywords.chair'),
+        SdkworkI18n.t('search.hotKeywords.newArrival'),
+        SdkworkI18n.t('search.hotKeywords.flagship'),
+      ];
   static const _sorts = <Map<String, String>>[
-    {'code': '', 'label': '综合'},
-    {'code': 'sales', 'label': '销量'},
-    {'code': 'price_asc', 'label': '价格↑'},
-    {'code': 'price_desc', 'label': '价格↓'},
+    {'code': '', 'labelKey': 'search.sort.all'},
+    {'code': 'sales', 'labelKey': 'search.sort.sales'},
+    {'code': 'price_asc', 'labelKey': 'search.sort.priceAsc'},
+    {'code': 'price_desc', 'labelKey': 'search.sort.priceDesc'},
   ];
 
   final TextEditingController _keyword = TextEditingController();
@@ -68,14 +76,14 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
         title: TextField(
           controller: _keyword,
           textInputAction: TextInputAction.search,
-          decoration: const InputDecoration(
-            hintText: '搜索商品 / 品牌 / 店铺',
+          decoration: InputDecoration(
+            hintText: SdkworkI18n.t('search.hint'),
             border: InputBorder.none,
           ),
           onSubmitted: (_) => _search(),
         ),
         actions: [
-          TextButton(onPressed: _search, child: const Text('搜索')),
+          TextButton(onPressed: _search, child: Text(SdkworkI18n.t('search.action'))),
         ],
       ),
       body: _loading && _products.isEmpty
@@ -90,12 +98,12 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
               },
               child: ListView(
                 children: [
-                  _buildChips('热搜', _hotKeywords, (keyword) {
+                  _buildChips(SdkworkI18n.t('search.hot'), _hotKeywords, (keyword) {
                     _keyword.text = keyword;
                     _search();
                   }),
                   if (_history.isNotEmpty)
-                    _buildChipsWithClear('搜索历史', _history, (keyword) {
+                    _buildChipsWithClear(SdkworkI18n.t('search.history'), _history, (keyword) {
                       _keyword.text = keyword;
                       _search();
                     }),
@@ -109,7 +117,7 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
                             (sort) => Padding(
                               padding: const EdgeInsets.only(left: 8),
                               child: ChoiceChip(
-                                label: Text('${sort['label']}'),
+                                label: Text(SdkworkI18n.t('${sort['labelKey']}')),
                                 selected: _activeSort == sort['code'],
                                 onSelected: (_) {
                                   setState(() => _activeSort = '${sort['code']}');
@@ -123,7 +131,7 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
                   ),
                   if (_error.isNotEmpty) SdkworkErrorView(message: _error, onRetry: () => _loadProducts(reset: true)),
                   if (_products.isEmpty && !_loading)
-                    const SdkworkEmptyView(message: '暂无匹配商品'),
+                    SdkworkEmptyView(message: SdkworkI18n.t('search.empty')),
                   GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
@@ -148,8 +156,17 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
                         _products.isEmpty
                             ? ''
                             : _products.length >= _total
-                                ? '已展示全部 $_total 件'
-                                : '上拉加载更多（${_products.length}/$_total）',
+                                ? SdkworkI18n.t(
+                                    'search.allShown',
+                                    params: <String, String>{'total': '$_total'},
+                                  )
+                                : SdkworkI18n.t(
+                                    'search.loadMore',
+                                    params: <String, String>{
+                                      'loaded': '${_products.length}',
+                                      'total': '$_total',
+                                    },
+                                  ),
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ),
@@ -195,7 +212,7 @@ class _SdkworkSearchPageState extends State<SdkworkSearchPage> {
             top: 8,
             child: TextButton(
               onPressed: _clearHistory,
-              child: const Text('清空'),
+              child: Text(SdkworkI18n.t('search.clear')),
             ),
           ),
         ],

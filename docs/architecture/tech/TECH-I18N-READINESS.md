@@ -15,9 +15,9 @@ long):
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 87 | 1463 | 0 |
 | H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 52 | 254 | 390 (`regions.ts`) |
 | Mini program | `src/i18n` runtime + `zh-CN/{account/*,support/*,storefront/home,checkout/*}` JS fragments | 52 | 216 | 302 (province/city picker data) |
-| Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,storefront/home,catalog/product-detail,marketing/pages,checkout/*}` fragments | 27 | 230 | 230 (province/city picker data) |
+| Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,storefront/home,catalog/*,marketing/pages,checkout/*}` fragments | 28 | 212 | 230 (province/city picker data) |
 
-2163 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2145 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -127,13 +127,14 @@ authored fragments into a synchronous message map (`t(key, {params})` with
 `lib/src/i18n/<locale>/<domain>/<capability>/messages.json` and are declared in
 `pubspec.yaml`. Migrated surfaces: the help centre, the buyer hub, the
 settings/invoices pages, the confirm-order page, the after-sales centre, the
-membership centre, the storefront home, product detail, the wallet/points pages and
-the marketing pages (27 + 38 + 44 + 51 + 56 + 20 + 26 + 18 + 28 strings), all
-resolved from `help.*` / `buyerHub.*` / `invoices.*` / `settings.*` / `checkout.*`
-/ `afterSales.*` / `membership.*` / `home.*` / `productDetail.*` / `wallet.*` /
-`points.*` / `marketing.*`. Widget tests install the fragments from disk through
+membership centre, the storefront home, product detail, the wallet/points pages,
+the marketing pages and search (search hint/action, sort labels, hot keywords,
+history, empty state and pagination counters). All copy resolves from `help.*` /
+`buyerHub.*` / `invoices.*` / `settings.*` / `checkout.*` / `afterSales.*` /
+`membership.*` / `home.*` / `productDetail.*` / `wallet.*` / `points.*` /
+`marketing.*` / `search.*`. Widget tests install the fragments from disk through
 `test/support/i18n_fixture.dart`, so the suite does not depend on asset-bundle
-resolution. Flutter's hard-coded count dropped 571 → 251.
+resolution. Flutter's hard-coded count dropped 571 → 212.
 
 **S3 — locale switching and verification.**
 Locale store per root, `Accept-Language` propagation through the transport seams,

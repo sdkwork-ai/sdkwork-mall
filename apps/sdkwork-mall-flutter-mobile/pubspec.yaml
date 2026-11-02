@@ -65,6 +65,7 @@ flutter:
     - lib/src/i18n/zh-CN/support/help/messages.json
     - lib/src/i18n/zh-CN/storefront/home/messages.json
     - lib/src/i18n/zh-CN/catalog/product-detail/messages.json
+    - lib/src/i18n/zh-CN/catalog/search/messages.json
     - lib/src/i18n/zh-CN/marketing/pages/messages.json
     - lib/src/i18n/zh-CN/support/after-sales/messages.json
     - lib/src/i18n/zh-CN/account/buyer-hub/messages.json

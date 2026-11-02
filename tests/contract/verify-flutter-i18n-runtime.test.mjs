@@ -32,9 +32,12 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/storefront\/home\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/catalog\/product-detail\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/wallet\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/messages\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/catalog\/search\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/marketing\/pages\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/checkout\/confirm-order\/messages\.json/u);
+  assert.match(runtime, /lib\/src\/i18n\/zh-CN\/checkout\/cashier\/messages\.json/u);
   assert.match(runtime, /lib\/src\/i18n\/zh-CN\/support\/after-sales\/messages\.json/u);
 
   const main = read(`${appRoot}/lib/main.dart`);
@@ -47,9 +50,12 @@ test("the runtime loads authored fragments and exposes synchronous lookups", () 
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/storefront\/home\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/catalog\/product-detail\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/wallet\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/messages\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/catalog\/search\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/marketing\/pages\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/account\/settings-invoices\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/checkout\/confirm-order\/messages\.json/u);
+  assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/checkout\/cashier\/messages\.json/u);
   assert.match(pubspec, /lib\/src\/i18n\/zh-CN\/support\/after-sales\/messages\.json/u);
 });
 
@@ -107,6 +113,12 @@ test("migrated pages resolve every string from the catalogue", () => {
   assert.match(marketingPages, /'marketing\.activity\.phase\.active'/u);
   assert.match(marketingPages, /SdkworkI18n\.t\('marketing\.activity\.detailTitle'\)/u);
 
+  const searchPage = read(`${appRoot}/lib/pages/search_page.dart`);
+  assert.match(searchPage, /SdkworkI18n\.t\('search\.hint'\)/u);
+  assert.match(searchPage, /'search\.sort\.sales'/u);
+  assert.match(searchPage, /'search\.hotKeywords\.phone'/u);
+  assert.match(searchPage, /'search\.allShown'/u);
+
   for (const pagePath of [
     `${appRoot}/lib/pages/help_page.dart`,
     `${appRoot}/lib/pages/buyer_page.dart`,
@@ -117,6 +129,7 @@ test("migrated pages resolve every string from the catalogue", () => {
     `${appRoot}/lib/pages/product_page.dart`,
     `${appRoot}/lib/pages/account_pages.dart`,
     `${appRoot}/lib/pages/marketing_pages.dart`,
+    `${appRoot}/lib/pages/search_page.dart`,
   ]) {
     const page = read(pagePath);
     const literalChinese = [...page.matchAll(/'[^'\n]*[\u4e00-\u9fff][^'\n]*'/gu)].map(

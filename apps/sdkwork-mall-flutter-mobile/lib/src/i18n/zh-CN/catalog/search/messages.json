@@ -1,0 +1,26 @@
+{
+  "search": {
+    "hint": "搜索商品 / 品牌 / 店铺",
+    "action": "搜索",
+    "hot": "热搜",
+    "history": "搜索历史",
+    "clear": "清空",
+    "empty": "暂无匹配商品",
+    "allShown": "已展示全部 {{total}} 件",
+    "loadMore": "上拉加载更多（{{loaded}}/{{total}}）",
+    "sort": {
+      "all": "综合",
+      "sales": "销量",
+      "priceAsc": "价格↑",
+      "priceDesc": "价格↓"
+    },
+    "hotKeywords": {
+      "phone": "手机",
+      "laptop": "笔记本",
+      "rice": "大米",
+      "chair": "人体工学椅",
+      "newArrival": "新品",
+      "flagship": "旗舰"
+    }
+  }
+}
