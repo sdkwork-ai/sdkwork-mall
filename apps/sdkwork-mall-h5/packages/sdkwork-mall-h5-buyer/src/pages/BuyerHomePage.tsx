@@ -5,15 +5,20 @@ import {
   ChevronRight,
   Crown,
   FileText,
+  Gift,
   Heart,
   History,
+  LifeBuoy,
   LogOut,
   MapPin,
   MessageSquare,
   PackageSearch,
+  PenLine,
   Receipt,
+  ShieldCheck,
   Star,
   Ticket,
+  UserRound,
   Wallet,
 } from "lucide-react";
 
@@ -56,6 +61,15 @@ const TOOL_LINKS = [
   { icon: History, label: "足迹", path: "/buyer/footprint" },
   { icon: Bell, label: "消息中心", path: "/buyer/messages" },
   { icon: MessageSquare, label: "客服会话", path: "/buyer/chats" },
+] as const;
+
+/** 账户：personal data, reviews, gift cards, security, support (PC parity). */
+const ACCOUNT_ENTRIES = [
+  { icon: UserRound, label: "个人资料", path: "/buyer/profile" },
+  { icon: PenLine, label: "我的评价", path: "/buyer/reviews" },
+  { icon: Gift, label: "礼品卡与红包", path: "/buyer/gift-cards" },
+  { icon: ShieldCheck, label: "账户与安全", path: "/buyer/security" },
+  { icon: LifeBuoy, label: "帮助中心", path: "/help" },
 ] as const;
 
 export function SdkworkMallH5BuyerHomePage() {
@@ -173,6 +187,24 @@ export function SdkworkMallH5BuyerHomePage() {
               <Link className="sdk-h5-quick-grid-item" key={link.label} to={link.path}>
                 <Icon aria-hidden="true" size={20} />
                 <span>{link.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="sdk-h5-section">
+        <h2>账户</h2>
+        <div className="sdk-h5-asset-list">
+          {ACCOUNT_ENTRIES.map((entry) => {
+            const Icon = entry.icon;
+            return (
+              <Link className="sdk-h5-asset-row" key={entry.label} to={entry.path}>
+                <span className="sdk-h5-asset-icon" aria-hidden="true">
+                  <Icon size={18} />
+                </span>
+                <span className="sdk-h5-asset-label">{entry.label}</span>
+                <ChevronRight aria-hidden="true" size={16} />
               </Link>
             );
           })}

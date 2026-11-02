@@ -8,6 +8,7 @@ Specs: ARCHITECTURE_DECISION_SPEC.md, DOCUMENTATION_SPEC.md
 ## Document Map
 
 - Add `TECH-<topic>.md` shards in this directory when the architecture grows beyond one reviewable screen.
+- [TECH-CLIENT-CAPABILITY-PARITY.md](TECH-CLIENT-CAPABILITY-PARITY.md) — cross-client capability contract for PC / H5 / mini program / Flutter.
 
 ## 1. Architecture Overview
 
@@ -109,6 +110,9 @@ components never construct SDK clients or raw HTTP.
 - `pnpm verify` (typecheck + contract tests + vitest + composition + CORS
   gates) from the repository root.
 - `pnpm test:node` — `tests/contract/verify-mall-standard-architecture.test.mjs`.
+- `pnpm test:node` — `tests/contract/verify-mall-capability-parity.test.mjs`
+  enforces the cross-client capability matrix (`TECH-CLIENT-CAPABILITY-PARITY.md`);
+  `pnpm check:capability-parity` prints the matrix and fails on any required gap.
 - Spec tools: `check-app-sdk-consumer-imports`, `check-workspace-member-protocol`,
   `check-dependency-list-completeness`, `check-application-layering`,
   `check-vite-workspace-aliases`, `check-browser-dist-layout`,

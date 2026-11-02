@@ -1,0 +1,545 @@
+{
+  "$comment": "Canonical mall capability parity contract. One entry per business capability; every client root that must ship it is listed in requiredOn and must resolve an implementation. Enforced by tests/contract/verify-mall-capability-parity.test.mjs; reported by scripts/mall-capability-parity-report.mjs. Authority: APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md section 7 (route identity alignment) and section 11 (cross-architecture alignment verification).",
+  "schemaVersion": 1,
+  "applicationCode": "sdkwork-mall",
+  "updatedAt": "2026-11-02",
+  "platforms": {
+    "pc": {
+      "root": "apps/sdkwork-mall-pc",
+      "architecture": "pc-react",
+      "routeRegistry": "apps/sdkwork-mall-pc/packages/*/src/routes.ts",
+      "router": "apps/sdkwork-mall-pc/src/AppRoutes.tsx"
+    },
+    "h5": {
+      "root": "apps/sdkwork-mall-h5",
+      "architecture": "h5-react",
+      "routeRegistry": "apps/sdkwork-mall-h5/packages/*/src/routes.ts",
+      "router": "apps/sdkwork-mall-h5/src/routes/AppRoutes.tsx"
+    },
+    "miniProgram": {
+      "root": "apps/sdkwork-mall-mini-program",
+      "architecture": "wechat-mini-program",
+      "pageRegistry": "apps/sdkwork-mall-mini-program/src/app.json",
+      "pageRoot": "apps/sdkwork-mall-mini-program/src"
+    },
+    "flutter": {
+      "root": "apps/sdkwork-mall-flutter-mobile",
+      "architecture": "flutter-mobile",
+      "routeRegistry": "apps/sdkwork-mall-flutter-mobile/lib/shell/mobile_shell.dart",
+      "pageRoot": "apps/sdkwork-mall-flutter-mobile/lib"
+    }
+  },
+  "capabilities": [
+    {
+      "id": "storefront.home",
+      "title": "商城首页",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.home",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.home" },
+        "h5": { "routeId": "storefront.mall.home" },
+        "miniProgram": { "page": "pages/home/index" },
+        "flutter": { "tab": "home" }
+      }
+    },
+    {
+      "id": "storefront.categories",
+      "title": "商品分类",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.categories",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.categories" },
+        "h5": { "routeId": "storefront.mall.categories" },
+        "miniProgram": { "page": "pages/category/index" },
+        "flutter": { "tab": "category" }
+      }
+    },
+    {
+      "id": "storefront.category-detail",
+      "title": "分类商品列表",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.category-detail",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.category-detail" },
+        "h5": { "routeId": "storefront.mall.category-detail" },
+        "miniProgram": { "page": "pages/category/index", "fusedInto": "storefront.categories" },
+        "flutter": { "tab": "category", "fusedInto": "storefront.categories" }
+      }
+    },
+    {
+      "id": "storefront.search",
+      "title": "搜索",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.search",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.search" },
+        "h5": { "routeId": "storefront.mall.search" },
+        "miniProgram": { "page": "pages/search/index" },
+        "flutter": { "route": "/search" }
+      }
+    },
+    {
+      "id": "storefront.product-detail",
+      "title": "商品详情",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.product-detail",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.product-detail" },
+        "h5": { "routeId": "storefront.mall.product-detail" },
+        "miniProgram": { "page": "pages/product/index" },
+        "flutter": { "route": "/product" }
+      }
+    },
+    {
+      "id": "storefront.shop-home",
+      "title": "店铺主页",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.shop",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.shop" },
+        "h5": { "routeId": "storefront.mall.shop" },
+        "miniProgram": { "page": "pages/shop/index" },
+        "flutter": { "route": "/shop" }
+      }
+    },
+    {
+      "id": "storefront.activity-list",
+      "title": "活动列表",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.activity-list",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.activity-list" },
+        "h5": { "routeId": "storefront.mall.activity-list" },
+        "miniProgram": { "page": "pages/activity/index" },
+        "flutter": { "route": "/activity" }
+      }
+    },
+    {
+      "id": "storefront.activity-detail",
+      "title": "活动详情",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.activity-detail",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.activity-detail" },
+        "h5": { "routeId": "storefront.mall.activity-detail" },
+        "miniProgram": { "page": "pages/activity-detail/index" },
+        "flutter": { "route": "/activity-detail" }
+      }
+    },
+    {
+      "id": "storefront.cart",
+      "title": "购物车",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.cart",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.cart" },
+        "h5": { "routeId": "storefront.mall.cart" },
+        "miniProgram": { "page": "pages/cart/index" },
+        "flutter": { "tab": "cart" }
+      }
+    },
+    {
+      "id": "storefront.checkout",
+      "title": "结算下单",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.checkout",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.checkout" },
+        "h5": { "routeId": "storefront.mall.checkout" },
+        "miniProgram": { "page": "pages/checkout/index" },
+        "flutter": { "route": "/checkout" }
+      }
+    },
+    {
+      "id": "storefront.payment",
+      "title": "支付（收银台渠道选择与发起支付）",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.payment-cashier",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.payment-cashier" },
+        "h5": { "routeId": "storefront.mall.checkout", "fusedInto": "storefront.checkout" },
+        "miniProgram": { "page": "pages/cashier/index" },
+        "flutter": { "route": "/cashier" }
+      },
+      "notes": "H5 fuses payment-channel selection and pay submission into checkout plus the order-list 去支付 action; the capability is still present end to end."
+    },
+    {
+      "id": "storefront.payment-result",
+      "title": "支付结果",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.payment-result",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.payment-result" },
+        "h5": { "routeId": "storefront.mall.payment-result" },
+        "miniProgram": { "page": "pages/payment-result/index" },
+        "flutter": { "route": "/payment-result" }
+      }
+    },
+    {
+      "id": "storefront.help",
+      "title": "帮助中心",
+      "surface": "storefront",
+      "canonicalRouteId": "storefront.mall.help",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "storefront.mall.help" },
+        "h5": { "routeId": "storefront.mall.help" },
+        "miniProgram": { "page": "pages/help/index" },
+        "flutter": { "route": "/help" }
+      },
+      "navigationEvidence": [
+        { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/help" },
+        { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/help/index" },
+        { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/help" }
+      ]
+    },
+    {
+      "id": "buyer.dashboard",
+      "title": "买家中心",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.dashboard",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.dashboard" },
+        "h5": { "routeId": "buyer.mall.dashboard" },
+        "miniProgram": { "page": "pages/buyer/index" },
+        "flutter": { "tab": "buyer" }
+      }
+    },
+    {
+      "id": "buyer.orders",
+      "title": "我的订单",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.orders",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.orders" },
+        "h5": { "routeId": "buyer.mall.orders" },
+        "miniProgram": { "page": "pages/orders/index" },
+        "flutter": { "route": "/orders" }
+      }
+    },
+    {
+      "id": "buyer.order-detail",
+      "title": "订单详情",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.orders.detail",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.orders.detail" },
+        "h5": { "routeId": "buyer.mall.orders.detail" },
+        "miniProgram": { "page": "pages/order-detail/index" },
+        "flutter": { "route": "/order-detail" }
+      }
+    },
+    {
+      "id": "buyer.logistics",
+      "title": "物流跟踪",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.orders.logistics",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.orders.logistics" },
+        "h5": { "routeId": "buyer.mall.orders.logistics" },
+        "miniProgram": { "page": "pages/logistics/index" },
+        "flutter": { "route": "/logistics" }
+      }
+    },
+    {
+      "id": "buyer.addresses",
+      "title": "收货地址",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.addresses",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.addresses" },
+        "h5": { "routeId": "buyer.mall.addresses" },
+        "miniProgram": { "page": "pages/address/index" },
+        "flutter": { "route": "/address" }
+      }
+    },
+    {
+      "id": "buyer.after-sales",
+      "title": "售后服务",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.after-sales",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.after-sales" },
+        "h5": { "routeId": "buyer.mall.after-sales" },
+        "miniProgram": { "page": "pages/aftersales/index" },
+        "flutter": { "route": "/after-sales" }
+      }
+    },
+    {
+      "id": "buyer.coupons",
+      "title": "优惠券",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.coupons",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.coupons" },
+        "h5": { "routeId": "buyer.mall.coupons" },
+        "miniProgram": { "page": "pages/coupons/index" },
+        "flutter": { "route": "/coupons" }
+      }
+    },
+    {
+      "id": "buyer.favorites",
+      "title": "我的收藏",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.favorites",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.favorites" },
+        "h5": { "routeId": "buyer.mall.favorites" },
+        "miniProgram": { "page": "pages/favorites/index" },
+        "flutter": { "route": "/favorites" }
+      }
+    },
+    {
+      "id": "buyer.footprint",
+      "title": "浏览足迹",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.footprint",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.footprint" },
+        "h5": { "routeId": "buyer.mall.footprint" },
+        "miniProgram": { "page": "pages/footprint/index" },
+        "flutter": { "route": "/footprint" }
+      }
+    },
+    {
+      "id": "buyer.messages",
+      "title": "消息中心",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.messages",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.messages" },
+        "h5": { "routeId": "buyer.mall.messages" },
+        "miniProgram": { "page": "pages/messages/index" },
+        "flutter": { "route": "/messages" }
+      }
+    },
+    {
+      "id": "buyer.reviews",
+      "title": "我的评价",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.reviews",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.reviews" },
+        "h5": { "routeId": "buyer.mall.reviews" },
+        "miniProgram": { "page": "pages/reviews/index" },
+        "flutter": { "route": "/reviews" }
+      },
+      "navigationEvidence": [
+        { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/reviews" },
+        { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/reviews/index" },
+        { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/reviews" }
+      ],
+      "notes": "T1 product-review API is not landed; all clients expose the same realized subset (completed orders awaiting review) and the same honest upstream notice."
+    },
+    {
+      "id": "buyer.gift-cards",
+      "title": "礼品卡与红包",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.gift-cards",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.gift-cards" },
+        "h5": { "routeId": "buyer.mall.gift-cards" },
+        "miniProgram": { "page": "pages/gift-cards/index" },
+        "flutter": { "route": "/gift-cards" }
+      },
+      "navigationEvidence": [
+        { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/gift-cards" },
+        { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/gift-cards/index" },
+        { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/gift-cards" }
+      ],
+      "notes": "Commerce gift-card/red-packet API is not landed; every client ships the same reserved entry with wallet fallback instead of diverging."
+    },
+    {
+      "id": "buyer.profile",
+      "title": "个人资料",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.profile",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.profile" },
+        "h5": { "routeId": "buyer.mall.profile" },
+        "miniProgram": { "page": "pages/profile/index" },
+        "flutter": { "route": "/profile" }
+      },
+      "navigationEvidence": [
+        { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/profile" },
+        { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/profile/index" },
+        { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/profile" }
+      ]
+    },
+    {
+      "id": "buyer.security",
+      "title": "账户与安全",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.security",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.security" },
+        "h5": { "routeId": "buyer.mall.security" },
+        "miniProgram": { "page": "pages/security/index" },
+        "flutter": { "route": "/security" }
+      },
+      "navigationEvidence": [
+        { "platform": "h5", "file": "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx", "contains": "/buyer/security" },
+        { "platform": "miniProgram", "file": "apps/sdkwork-mall-mini-program/src/pages/buyer/index.wxml", "contains": "pages/security/index" },
+        { "platform": "flutter", "file": "apps/sdkwork-mall-flutter-mobile/lib/pages/buyer_page.dart", "contains": "/security" }
+      ]
+    },
+    {
+      "id": "buyer.wallet",
+      "title": "我的钱包",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.wallet",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.wallet" },
+        "h5": { "routeId": "buyer.mall.wallet" },
+        "miniProgram": { "page": "pages/wallet/index" },
+        "flutter": { "route": "/wallet" }
+      }
+    },
+    {
+      "id": "buyer.points",
+      "title": "我的积分",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.points",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.points" },
+        "h5": { "routeId": "buyer.mall.points" },
+        "miniProgram": { "page": "pages/points/index" },
+        "flutter": { "route": "/points" }
+      }
+    },
+    {
+      "id": "buyer.membership",
+      "title": "会员中心",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.membership",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.membership" },
+        "h5": { "routeId": "buyer.mall.membership" },
+        "miniProgram": { "page": "pages/membership/index" },
+        "flutter": { "route": "/membership" }
+      }
+    },
+    {
+      "id": "buyer.invoices",
+      "title": "发票管理",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.invoices",
+      "requiredOn": ["pc", "h5", "miniProgram", "flutter"],
+      "implementations": {
+        "pc": { "routeId": "buyer.mall.invoices" },
+        "h5": { "routeId": "buyer.mall.invoices" },
+        "miniProgram": { "page": "pages/invoices/index" },
+        "flutter": { "route": "/invoices" }
+      }
+    },
+    {
+      "id": "buyer.im-conversations",
+      "title": "客服会话列表",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.im.chats",
+      "requiredOn": ["h5", "miniProgram", "flutter"],
+      "implementations": {
+        "h5": { "routeId": "buyer.mall.im.chats" },
+        "miniProgram": { "page": "pages/chats/index" },
+        "flutter": { "route": "/chats" }
+      },
+      "notes": "IM is a mobile customer-service surface; the PC root ships the message centre only (follow-up tracked by buyer.im-conversations in the PC backlog)."
+    },
+    {
+      "id": "buyer.im-chat",
+      "title": "客服会话",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.im.chat",
+      "requiredOn": ["h5", "miniProgram", "flutter"],
+      "implementations": {
+        "h5": { "routeId": "buyer.mall.im.chat" },
+        "miniProgram": { "page": "pages/chat/index" },
+        "flutter": { "route": "/chat" }
+      }
+    },
+    {
+      "id": "buyer.notices",
+      "title": "平台公告",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.im.notices",
+      "requiredOn": ["h5", "miniProgram", "flutter"],
+      "implementations": {
+        "h5": { "routeId": "buyer.mall.im.notices" },
+        "miniProgram": { "page": "pages/notices/index" },
+        "flutter": { "route": "/notices" }
+      }
+    },
+    {
+      "id": "buyer.settings",
+      "title": "设置",
+      "surface": "buyer",
+      "canonicalRouteId": "buyer.mall.settings",
+      "requiredOn": ["miniProgram", "flutter"],
+      "implementations": {
+        "miniProgram": { "page": "pages/settings/index" },
+        "flutter": { "route": "/settings" }
+      },
+      "notes": "H5 and PC have no separate settings screen; logout and cache actions live on the buyer dashboard."
+    },
+    {
+      "id": "account.login",
+      "title": "登录",
+      "surface": "account",
+      "canonicalRouteId": "account.mall.login",
+      "requiredOn": ["miniProgram", "flutter"],
+      "implementations": {
+        "miniProgram": { "page": "pages/login/index" },
+        "flutter": { "route": "/login" }
+      },
+      "notes": "PC and H5 delegate login to the shared IAM auth-gate routes."
+    }
+  ],
+  "platformExtras": {
+    "h5": [
+      {
+        "routeId": "storefront.mall.tv",
+        "reason": "H5-only TV showcase surface (docs/architecture/decisions/0001-tv-client-deferred.md)."
+      },
+      {
+        "routeId": "buyer.mall.aftersales.select-order",
+        "reason": "H5-specific order picker that opens the after-sales form from the after-sales centre; mini-program and Flutter enter the same capability from order detail."
+      }
+    ],
+    "pc": []
+  },
+  "pcOnlyRoutePrefixes": [
+    "admin.",
+    "merchant.",
+    "app.commerce."
+  ],
+  "pcOnlyReason": "Platform governance (admin), seller console (merchant), and the inactive legacy SaaS dashboards are intentionally PC-only; mobile roots ship the buyer and storefront journeys."
+}

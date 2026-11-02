@@ -5,6 +5,7 @@ import '../pages/account_pages.dart';
 import '../pages/after_sales_page.dart';
 import '../pages/address_page.dart';
 import '../pages/buyer_page.dart';
+import '../pages/buyer_account_pages.dart';
 import '../pages/cart_page.dart';
 import '../pages/cashier_page.dart';
 import '../pages/category_page.dart';
@@ -13,6 +14,7 @@ import '../pages/checkout_page.dart';
 import '../pages/coupons_page.dart';
 import '../pages/favorites_page.dart';
 import '../pages/home_page.dart';
+import '../pages/help_page.dart';
 import '../pages/login_page.dart';
 import '../pages/logistics_page.dart';
 import '../pages/marketing_pages.dart';
@@ -21,6 +23,7 @@ import '../pages/order_detail_page.dart';
 import '../pages/orders_page.dart';
 import '../pages/payment_result_page.dart';
 import '../pages/product_page.dart';
+import '../pages/reviews_page.dart';
 import '../pages/search_page.dart';
 import '../pages/settings_and_invoices.dart';
 
@@ -74,6 +77,11 @@ Map<String, WidgetBuilder> buildSdkworkMallRoutes() => <String, WidgetBuilder>{
             conversationId: '${_routeArguments(context)}',
           ),
       '/notices': (context) => const SdkworkNoticesPage(),
+      '/help': (context) => const SdkworkHelpPage(),
+      '/reviews': (context) => const SdkworkReviewsPage(),
+      '/gift-cards': (context) => const SdkworkGiftCardsPage(),
+      '/profile': (context) => const SdkworkProfilePage(),
+      '/security': (context) => const SdkworkSecurityPage(),
     };
 
 Object? _routeArguments(BuildContext context) =>

@@ -1,0 +1,31 @@
+<view class="page-reviews">
+  <view wx:if="{{loading}}" class="mp-loading">加载评价...</view>
+
+  <block wx:if="{{!loading}}">
+    <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">待评价</view>
+      <view wx:if="{{orders.length === 0}}" class="mp-empty">已完成订单可在这里提交评价</view>
+      <view
+        class="review-row"
+        wx:for="{{orders}}"
+        wx:key="id"
+      >
+        <view class="review-body" bindtap="goOrder" data-id="{{item.id}}">
+          <view class="review-title">{{item.subject}}</view>
+          <view class="mp-muted">订单号 {{item.id}}</view>
+        </view>
+        <view class="review-side">
+          <view class="mp-price" wx:if="{{item.amountText}}">¥{{item.amountText}}</view>
+          <button class="mp-btn mp-btn-ghost review-action" bindtap="goAfterSales" data-id="{{item.id}}">申请售后</button>
+        </view>
+      </view>
+      <view class="review-actions">
+        <button class="mp-btn mp-btn-ghost" bindtap="goOrders">查看全部订单</button>
+      </view>
+    </view>
+
+    <view class="mp-muted review-note">商品晒单与媒体上传需等待 T1 商品评价 API 合约落地。</view>
+  </block>
+</view>

@@ -11,7 +11,9 @@ import 'im_service.dart';
 import 'marketing_service.dart';
 import 'messages_service.dart';
 import 'order_service.dart';
+import 'profile_service.dart';
 import 'promotion_service.dart';
+import 'reviews_service.dart';
 
 /// Composition root for the Flutter commerce building blocks.
 ///
@@ -31,6 +33,8 @@ class MallCommerce {
         invoices = InvoiceService(client),
         marketing = MarketingService(client),
         im = ImService(client),
+        profile = ProfileService(client),
+        reviews = ReviewsService(OrderService(client)),
         messages = MessagesService(
           OrderService(client),
           AfterSalesService(client),
@@ -50,6 +54,8 @@ class MallCommerce {
   final InvoiceService invoices;
   final MarketingService marketing;
   final ImService im;
+  final ProfileService profile;
+  final ReviewsService reviews;
   final MessagesService messages;
 
   static MallCommerce get instance {

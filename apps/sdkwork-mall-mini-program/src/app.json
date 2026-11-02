@@ -29,7 +29,12 @@
     "pages/chats/index",
     "pages/chat/index",
     "pages/notices/index",
-    "pages/login/index"
+    "pages/login/index",
+    "pages/help/index",
+    "pages/reviews/index",
+    "pages/gift-cards/index",
+    "pages/profile/index",
+    "pages/security/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#e93b3d",

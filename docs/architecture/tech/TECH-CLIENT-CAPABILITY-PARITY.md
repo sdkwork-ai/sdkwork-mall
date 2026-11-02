@@ -1,0 +1,140 @@
+# Client Capability Parity
+
+Status: active
+Owner: SDKWork maintainers
+Updated: 2026-11-02
+Specs: APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md (§7 route identity, §11
+cross-architecture alignment), APP_H5_ARCHITECTURE_SPEC.md,
+MINI_PROGRAM_APP_ARCHITECTURE_SPEC.md, FLUTTER_APP_MOBILE_ARCHITECTURE_SPEC.md,
+APP_PC_ARCHITECTURE_SPEC.md
+
+## 1. Why This Contract Exists
+
+SDKWork Mall ships four client roots for one commerce product:
+
+| Field | PC | H5 | Mini program | Flutter |
+| --- | --- | --- | --- | --- |
+| Root | `apps/sdkwork-mall-pc` | `apps/sdkwork-mall-h5` | `apps/sdkwork-mall-mini-program` | `apps/sdkwork-mall-flutter-mobile` |
+| Architecture | `pc-react` | `h5-react` | `weixin-mini-program` | `flutter-mobile` |
+| Route registry | `packages/*/src/routes.ts` | `packages/*/src/routes.ts` | `src/app.json` | `lib/shell/mobile_shell.dart` |
+| Buyer surfaces | storefront + buyer + merchant + admin | storefront + buyer | storefront + buyer | storefront + buyer |
+
+Before this contract, only the PC root had an architecture gate. A capability
+could therefore be dropped from, or silently added to, one client without any
+build noticing — the classic cross-client drift described in
+`APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md` §11.
+
+`specs/mall-capability-parity.json` is now the single source of truth for
+"which commerce capability ships on which client root". Every entry declares
+one business capability, the roots that must ship it, and the concrete artifact
+each root uses (route id, mini-program page, Flutter route or tab).
+
+## 2. Enforcement
+
+| Gate | Command | Failure mode |
+| --- | --- | --- |
+| Contract validation | `node --test tests/contract/verify-mall-capability-parity.test.mjs` | Missing/duplicated capability, unknown platform, malformed canonical route id |
+| Registry resolution | same test | Declared route/page/route-key does not exist in the platform registry |
+| Drift guard (PC) | same test | A new PC storefront/buyer route is not represented in the contract |
+| Drift guard (H5) | same test | A new H5 route is neither in the contract nor in `platformExtras.h5` |
+| Drift guard (MP) | same test | A page in `app.json` is neither in the contract nor declared as an extra |
+| Drift guard (Flutter) | same test | A route in `buildSdkworkMallRoutes()` is not represented |
+| Navigation evidence | same test | A capability page exists but nothing links to it (orphan screen) |
+| Human report | `pnpm check:capability-parity` | Prints the matrix and exits non-zero when a required cell is missing |
+
+`pnpm check` runs the parity test; `pnpm verify` additionally runs the matrix
+report. `pnpm report:capability-parity` prints only gaps.
+
+## 3. Rules For Changing Capability Set
+
+1. Add or remove the capability in `specs/mall-capability-parity.json` first.
+2. Give every required root a concrete implementation artifact.
+3. Keep route identity aligned: the PC route id is canonical, and H5 must reuse
+   it verbatim for the same workflow (`APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md`
+   §7). Presentation differences are fine; identity differences are not.
+4. Declare `navigationEvidence` whenever a capability must be reachable from the
+   buyer hub, so an unlinked screen fails the gate.
+5. When a root genuinely fuses two capabilities into one surface (H5 payment
+   inside checkout, category detail inside the category tab), use `fusedInto`
+   and record the reason in `notes` instead of inventing a duplicate route.
+6. Platform-only surfaces go to `platformExtras` with a written reason, never
+   silently into a capability entry.
+
+## 4. Current Parity Status
+
+36 capabilities × 4 roots, 0 required gaps.
+
+Buyer and storefront capabilities required on **all four** roots: home,
+categories, category detail, search, product detail, shop home, activity list,
+activity detail, cart, checkout, payment, payment result, help, buyer dashboard,
+orders, order detail, logistics, addresses, after-sales, coupons, favourites,
+footprint, messages, reviews, gift cards, profile, account security, wallet,
+points, membership, invoices.
+
+Root-scoped capabilities: IM conversations, chat and notices are required on
+H5/mini program/Flutter (the PC root ships the message centre only); settings is
+required on mini program/Flutter; login is required on mini program/Flutter
+because PC and H5 delegate authentication to the shared IAM auth gate.
+
+PC-only by design: `admin.*` platform governance, `merchant.*` seller console,
+and the inactive `app.commerce.*` legacy SaaS dashboards.
+
+## 5. Upstream Gaps Represented, Not Hidden
+
+Two capabilities have no published upstream contract yet. All four roots ship
+the same realized subset and the same honest notice instead of diverging:
+
+| Capability | Upstream state | Realized behaviour on every root |
+| --- | --- | --- |
+| Buyer reviews | T1 product-review API not landed | Lists completed orders as review candidates; media upload copy states the pending contract |
+| Gift cards / red packets | Commerce gift-cards API not landed | Reserved entry with wallet fallback |
+
+Known platform-level dependency gap (tracked outside this contract): the
+composed federated transport `@sdkwork/cloudrouter-app-sdk/domains` and
+`@sdkwork/cloudrouter-backend-sdk/domains` are imported by
+`apps/*/src/bootstrap/{sdkClients,iamRuntime}.ts`, but the sibling
+`sdkwork-cloudrouter` SDK family in this checkout does not yet publish the
+`./domains` subpath (`package.json#exports` has only `"."`).
+
+Consequences observed on 2026-11-02, before and after this parity work
+(identical baseline and current state):
+
+```text
+pnpm typecheck
+  error TS2307: Cannot find module '@sdkwork/cloudrouter-app-sdk/domains'   (x2 per root)
+  error TS2307: Cannot find module '@sdkwork/cloudrouter-backend-sdk/domains' (x2 per root)
+
+vite build (apps/sdkwork-mall-h5)
+  [rolldown:vite-resolve] "./domains" is not exported under the conditions
+  ["module","browser","production","import"] from package @sdkwork/cloudrouter-app-sdk
+```
+
+The fix belongs upstream: publish the `./domains` composed facade in the
+`sdkwork-cloudrouter` SDK family per `APP_SDK_INTEGRATION_SPEC.md` §9 /
+`SDK_WORKSPACE_GENERATION_SPEC.md` composed-facade rules, then regenerate. Until
+that lands, the four client roots' own gates (contract tests, vitest,
+`flutter analyze`/`flutter test`, mini-program `tsc`) are the enforceable
+regression surface, and they are green.
+
+## 6. Verification Evidence (2026-11-02)
+
+```text
+pnpm test:node                                                     → 31/31 pass
+  (tests/contract/verify-mall-capability-parity.test.mjs           → 9/9)
+  (tests/contract/verify-mall-standard-architecture.test.mjs       → 13/13)
+  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 4/4
+  (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
+pnpm test:vitest                                                   → 67 files / 167 tests pass
+mini program: npx tsc --noEmit                                     → clean
+flutter analyze                                                    → no issues
+flutter test                                                       → 18/18 pass
+node ../sdkwork-specs/tools/verify-repo.mjs --root .               → passed
+node ../sdkwork-specs/tools/check-application-layering.mjs --root .→ passed
+node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs     → passed
+pnpm check:capability-parity                                       → 36 capabilities, 0 gaps
+```
+
+Before this change the H5 and mini-program architecture tests were not wired
+into any package script (vitest only collects `*.test.ts(x)`, `test:node` only
+collected repository-level `*.test.mjs`), so those two roots had no automated
+architecture gate at all. `test:node` now collects all three test roots.

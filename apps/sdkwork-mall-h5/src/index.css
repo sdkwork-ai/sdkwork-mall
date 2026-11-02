@@ -2995,3 +2995,14 @@ html::-webkit-scrollbar {
 .sdk-h5-checkout-summary {
   /* already carry their own 0.9rem surface inset */
 }
+
+/* 帮助中心：静态自助服务条目 */
+.sdk-h5-help-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--sdk-h5-text-muted);
+  line-height: 1.55;
+}

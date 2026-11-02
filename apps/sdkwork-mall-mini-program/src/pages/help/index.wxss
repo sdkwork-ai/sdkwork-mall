@@ -1,0 +1,31 @@
+.help-quick-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.help-quick-item {
+  width: 33.33%;
+  padding: 18rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #374151;
+}
+
+.help-line {
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.7;
+  padding: 6rpx 0;
+}
+
+.help-contact {
+  justify-content: space-between;
+  border-bottom: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.help-contact-label {
+  font-size: 26rpx;
+  color: #374151;
+}

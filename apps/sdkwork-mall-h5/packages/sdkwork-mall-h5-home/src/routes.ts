@@ -25,4 +25,16 @@ export const sdkworkMallH5HomeRoutes = [
     title: "电视购物",
     titleKey: "home.routes.tv.title",
   },
+  {
+    auth: "public",
+    capability: "help",
+    domain: "commerce",
+    id: "storefront.mall.help",
+    packageName: "@sdkwork/mall-h5-home",
+    path: "/help",
+    screen: "help",
+    surface: "storefront",
+    title: "帮助中心",
+    titleKey: "home.routes.help.title",
+  },
 ] as const satisfies readonly SdkworkMallH5RouteContribution[];

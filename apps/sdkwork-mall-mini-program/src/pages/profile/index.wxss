@@ -1,0 +1,37 @@
+.profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.profile-row:last-child {
+  border-bottom: none;
+}
+
+.profile-label {
+  font-size: 26rpx;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.profile-value {
+  font-size: 26rpx;
+  color: #111827;
+  text-align: right;
+  margin-left: 24rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-link {
+  border-radius: 16rpx;
+  justify-content: space-between;
+}
+
+.profile-note {
+  text-align: center;
+  margin-top: 8rpx;
+}

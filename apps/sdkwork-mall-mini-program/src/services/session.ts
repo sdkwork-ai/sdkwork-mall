@@ -77,3 +77,9 @@ export function clearSession(): void {
 export function isLoggedIn(): boolean {
   return Boolean(getToken());
 }
+
+/** IAM user id captured by the login exchange (empty when signed out). */
+export function getUserId(): string {
+  const stored = readSession();
+  return stored ? stored.userId : "";
+}

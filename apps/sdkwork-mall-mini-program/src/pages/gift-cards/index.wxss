@@ -1,0 +1,17 @@
+.gift-line {
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.7;
+  padding: 6rpx 0;
+}
+
+.gift-empty {
+  padding: 40rpx 0;
+  text-align: center;
+}
+
+.gift-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 16rpx;
+}

@@ -1,0 +1,32 @@
+<view class="page-help">
+  <view class="mp-card">
+    <view class="mp-card-title">帮助中心</view>
+    <view class="mp-muted">常见问题与自助服务入口</view>
+  </view>
+
+  <view class="mp-card">
+    <view class="mp-card-title">快捷入口</view>
+    <view class="help-quick-grid">
+      <view
+        class="help-quick-item"
+        wx:for="{{quickLinks}}"
+        wx:key="path"
+        bindtap="goQuickLink"
+        data-path="{{item.path}}"
+      >{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="mp-card" wx:for="{{sections}}" wx:key="title">
+    <view class="mp-card-title">{{item.title}}</view>
+    <view class="help-line" wx:for="{{item.items}}" wx:for-item="line" wx:key="*this">{{line}}</view>
+  </view>
+
+  <view class="mp-card">
+    <view class="mp-card-title">联系客服</view>
+    <view class="mp-row help-contact" bindtap="goChats">
+      <text class="help-contact-label">在线客服</text>
+      <text class="mp-muted">工作日 9:00–22:00 ></text>
+    </view>
+  </view>
+</view>

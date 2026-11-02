@@ -60,6 +60,32 @@
   </view>
 
   <view class="mp-card">
+    <view class="mp-card-title">账户</view>
+    <view class="buyer-asset-list">
+      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/profile/index">
+        <view class="buyer-asset-label">个人资料</view>
+        <view class="buyer-asset-chevron">›</view>
+      </view>
+      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/reviews/index">
+        <view class="buyer-asset-label">我的评价</view>
+        <view class="buyer-asset-chevron">›</view>
+      </view>
+      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/gift-cards/index">
+        <view class="buyer-asset-label">礼品卡与红包</view>
+        <view class="buyer-asset-chevron">›</view>
+      </view>
+      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/security/index">
+        <view class="buyer-asset-label">账户与安全</view>
+        <view class="buyer-asset-chevron">›</view>
+      </view>
+      <view class="buyer-asset-row" bindtap="goQuickLink" data-path="/pages/help/index">
+        <view class="buyer-asset-label">帮助中心</view>
+        <view class="buyer-asset-chevron">›</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="mp-card">
     <view class="mp-card-title">其他</view>
     <view class="buyer-quick-grid">
       <view

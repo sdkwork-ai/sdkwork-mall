@@ -69,15 +69,47 @@
       "types": "./src/pages/SelectOrderPage.tsx",
       "import": "./src/pages/SelectOrderPage.tsx",
       "default": "./src/pages/SelectOrderPage.tsx"
+    },
+    "./reviews-page": {
+      "types": "./src/pages/ReviewsPage.tsx",
+      "import": "./src/pages/ReviewsPage.tsx",
+      "default": "./src/pages/ReviewsPage.tsx"
+    },
+    "./gift-cards-page": {
+      "types": "./src/pages/GiftCardsPage.tsx",
+      "import": "./src/pages/GiftCardsPage.tsx",
+      "default": "./src/pages/GiftCardsPage.tsx"
+    },
+    "./profile-page": {
+      "types": "./src/pages/ProfilePage.tsx",
+      "import": "./src/pages/ProfilePage.tsx",
+      "default": "./src/pages/ProfilePage.tsx"
+    },
+    "./security-page": {
+      "types": "./src/pages/SecurityPage.tsx",
+      "import": "./src/pages/SecurityPage.tsx",
+      "default": "./src/pages/SecurityPage.tsx"
+    },
+    "./profile-service": {
+      "types": "./src/profile-service.ts",
+      "import": "./src/profile-service.ts",
+      "default": "./src/profile-service.ts"
+    },
+    "./reviews-service": {
+      "types": "./src/reviews-service.ts",
+      "import": "./src/reviews-service.ts",
+      "default": "./src/reviews-service.ts"
     }
   },
   "files": [
     "src"
   ],
   "dependencies": {
+    "@sdkwork/mall-commerce-service": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*",
     "@sdkwork/mall-h5-order": "workspace:*",
-    "@sdkwork/order-service": "workspace:*"
+    "@sdkwork/order-service": "workspace:*",
+    "lucide-react": "catalog:"
   },
   "peerDependencies": {
     "react": ">=18.2.0 <20.0.0",

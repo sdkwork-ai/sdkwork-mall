@@ -1,0 +1,22 @@
+<view class="page-profile">
+  <view wx:if="{{loading}}" class="mp-loading">加载个人资料...</view>
+
+  <block wx:if="{{!loading}}">
+    <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+
+    <view class="mp-card">
+      <view class="mp-card-title">基本资料</view>
+      <view class="profile-row" wx:for="{{rows}}" wx:key="label">
+        <text class="profile-label">{{item.label}}</text>
+        <text class="profile-value">{{item.value}}</text>
+      </view>
+    </view>
+
+    <view class="mp-row profile-link" bindtap="goSecurity">
+      <text class="profile-label">账户与安全</text>
+      <text class="mp-muted">登录密码、绑定手机与设备管理 ></text>
+    </view>
+
+    <view class="mp-muted profile-note">头像与实名认证等扩展资料由 IAM 账户中心提供。</view>
+  </block>
+</view>

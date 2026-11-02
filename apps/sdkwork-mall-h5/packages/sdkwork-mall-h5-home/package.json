@@ -24,6 +24,11 @@
       "types": "./src/pages/TvHomePage.tsx",
       "import": "./src/pages/TvHomePage.tsx",
       "default": "./src/pages/TvHomePage.tsx"
+    },
+    "./help-page": {
+      "types": "./src/pages/HelpPage.tsx",
+      "import": "./src/pages/HelpPage.tsx",
+      "default": "./src/pages/HelpPage.tsx"
     }
   },
   "files": [
@@ -32,7 +37,8 @@
   "dependencies": {
     "@sdkwork/mall-commerce-service": "workspace:*",
     "@sdkwork/mall-h5-buyer": "workspace:*",
-    "@sdkwork/mall-h5-core": "workspace:*"
+    "@sdkwork/mall-h5-core": "workspace:*",
+    "lucide-react": "catalog:"
   },
   "peerDependencies": {
     "react": ">=18.2.0 <20.0.0",

@@ -235,6 +235,44 @@ class _SdkworkBuyerPageState extends State<SdkworkBuyerPage> {
             ],
           ),
         ),
+        const SdkworkSectionHeader(title: '账户'),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Column(
+            children: <ListTile>[
+              ListTile(
+                leading: const Icon(Icons.person_outline),
+                title: const Text('个人资料'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/profile'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.rate_review_outlined),
+                title: const Text('我的评价'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/reviews'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.card_giftcard_outlined),
+                title: const Text('礼品卡与红包'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/gift-cards'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.lock_outline),
+                title: const Text('账户与安全'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/security'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.help_outline),
+                title: const Text('帮助中心'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).pushNamed('/help'),
+              ),
+            ],
+          ),
+        ),
         const SdkworkSectionHeader(title: '其他'),
         Card(
           margin: EdgeInsets.zero,

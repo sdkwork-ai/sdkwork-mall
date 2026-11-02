@@ -89,6 +89,22 @@ const SdkworkMallH5NoticesPage = lazy(() =>
   import("@sdkwork/mall-h5-im/notices-page").then((module) => ({ default: module.SdkworkMallH5NoticesPage })),
 );
 
+const SdkworkMallH5HelpPage = lazy(() =>
+  import("@sdkwork/mall-h5-home/help-page").then((module) => ({ default: module.SdkworkMallH5HelpPage })),
+);
+const SdkworkMallH5ReviewsPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/reviews-page").then((module) => ({ default: module.SdkworkMallH5ReviewsPage })),
+);
+const SdkworkMallH5GiftCardsPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/gift-cards-page").then((module) => ({ default: module.SdkworkMallH5GiftCardsPage })),
+);
+const SdkworkMallH5ProfilePage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/profile-page").then((module) => ({ default: module.SdkworkMallH5ProfilePage })),
+);
+const SdkworkMallH5SecurityPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/security-page").then((module) => ({ default: module.SdkworkMallH5SecurityPage })),
+);
+
 function LoadingPlaceholder() {
   return <div className="sdk-h5-loading">加载中...</div>;
 }
@@ -119,6 +135,7 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
       <Routes>
         <Route element={<SdkworkMallH5HomePage />} path="/" />
         <Route element={<SdkworkMallH5TvPage />} path="/tv" />
+        <Route element={<SdkworkMallH5HelpPage />} path="/help" />
         <Route element={<SdkworkMallH5CatalogPage />} path="/categories" />
         <Route element={<SdkworkMallH5CatalogPage />} path="/categories/:categoryId" />
         <Route element={<SdkworkMallH5CatalogPage />} path="/search" />
@@ -254,6 +271,38 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/messages"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5ReviewsPage />
+            </RequireSession>
+          )}
+          path="/buyer/reviews"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5GiftCardsPage />
+            </RequireSession>
+          )}
+          path="/buyer/gift-cards"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5ProfilePage />
+            </RequireSession>
+          )}
+          path="/buyer/profile"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5SecurityPage />
+            </RequireSession>
+          )}
+          path="/buyer/security"
         />
         <Route
           element={(
