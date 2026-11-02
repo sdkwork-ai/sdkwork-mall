@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.client-env-materialization",
+  "application": "sdkwork-mall",
+  "command": "pnpm workflow:materialize-client-env",
+  "deploymentConfig": "sdkwork.deployment.config.json",
+  "sourceIdentity": {
+    "deploymentProfileKeys": [
+      "SDKWORK_MALL_DEPLOYMENT_PROFILE",
+      "SDKWORK_DEPLOYMENT_PROFILE"
+    ],
+    "environmentKeys": [
+      "SDKWORK_MALL_ENVIRONMENT",
+      "SDKWORK_ENVIRONMENT"
+    ],
+    "profileIdKeys": [
+      "SDKWORK_MALL_PROFILE_ID",
+      "SDKWORK_PROFILE_ID"
+    ]
+  },
+  "profiles": [
+    "standalone.development",
+    "standalone.production",
+    "cloud.development",
+    "cloud.production"
+  ],
+  "surfaces": [
+    {
+      "id": "sdkwork-mall-h5",
+      "root": "apps/sdkwork-mall-h5",
+      "format": "vite",
+      "runtimeTarget": "browser",
+      "includePrefixes": [],
+      "includeKeys": [],
+      "bindings": {
+        "VITE_SDKWORK_MALL_PLATFORM_API_GATEWAY_HTTP_URL": {
+          "sources": [
+            "SDKWORK_MALL_PLATFORM_API_GATEWAY_HTTP_URL"
+          ],
+          "required": false
+        },
+        "VITE_SDKWORK_CORS_ALLOWED_ORIGINS": {
+          "sources": [
+            "SDKWORK_CORS_ALLOWED_ORIGINS"
+          ],
+          "required": false
+        }
+      },
+      "constants": {
+        "VITE_SDKWORK_APPLICATION_CODE": "mall",
+        "VITE_SDKWORK_SURFACE": "h5"
+      },
+      "requiredOutputKeys": [
+        "VITE_SDKWORK_ENVIRONMENT",
+        "VITE_SDKWORK_DEPLOYMENT_PROFILE",
+        "VITE_SDKWORK_PROFILE_ID",
+        "VITE_SDKWORK_RUNTIME_TARGET"
+      ]
+    },
+    {
+      "id": "sdkwork-mall-pc",
+      "root": "apps/sdkwork-mall-pc",
+      "format": "vite",
+      "runtimeTarget": "browser",
+      "includePrefixes": [],
+      "includeKeys": [],
+      "bindings": {
+        "VITE_SDKWORK_MALL_PLATFORM_API_GATEWAY_HTTP_URL": {
+          "sources": [
+            "SDKWORK_MALL_PLATFORM_API_GATEWAY_HTTP_URL"
+          ],
+          "required": false
+        },
+        "VITE_SDKWORK_CORS_ALLOWED_ORIGINS": {
+          "sources": [
+            "SDKWORK_CORS_ALLOWED_ORIGINS"
+          ],
+          "required": false
+        }
+      },
+      "constants": {
+        "VITE_SDKWORK_APPLICATION_CODE": "mall",
+        "VITE_SDKWORK_SURFACE": "pc"
+      },
+      "requiredOutputKeys": [
+        "VITE_SDKWORK_ENVIRONMENT",
+        "VITE_SDKWORK_DEPLOYMENT_PROFILE",
+        "VITE_SDKWORK_PROFILE_ID",
+        "VITE_SDKWORK_RUNTIME_TARGET"
+      ]
+    }
+  ]
+}
