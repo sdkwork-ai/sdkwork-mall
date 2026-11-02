@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ChevronLeft,
@@ -45,6 +46,7 @@ interface DeliveryTarget {
 }
 
 export function SdkworkMallH5ProductDetailPage() {
+  const { t } = useTranslation();
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const [detail, setDetail] = useState<MallH5ProductDetail | null>(null);
@@ -98,7 +100,7 @@ export function SdkworkMallH5ProductDetailPage() {
     loadDetail()
       .catch((cause: unknown) => {
         if (active) {
-          setLoadError(cause instanceof Error ? cause.message : "商品加载失败");
+          setLoadError(cause instanceof Error ? cause.message : t("productDetail.loadError"));
         }
       })
       .finally(() => {
@@ -116,12 +118,12 @@ export function SdkworkMallH5ProductDetailPage() {
     setLoadError(null);
     loadDetail()
       .catch((cause: unknown) => {
-        setLoadError(cause instanceof Error ? cause.message : "商品加载失败");
+        setLoadError(cause instanceof Error ? cause.message : t("productDetail.loadError"));
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [loadDetail]);
+  }, [loadDetail, t]);
 
   useEffect(() => {
     let active = true;
@@ -237,7 +239,7 @@ export function SdkworkMallH5ProductDetailPage() {
       return null;
     }
     if (maxQuantity != null && quantity > maxQuantity) {
-      showToast(`库存不足，最多可购 ${maxQuantity} 件`);
+      showToast(t("productDetail.quantity.shortage", { count: maxQuantity }));
       return null;
     }
     setBusy(true);
@@ -248,10 +250,10 @@ export function SdkworkMallH5ProductDetailPage() {
         skuId: selectedSku.id,
       });
       bumpLocalCartBadge(quantity);
-      showToast("已加入购物车");
+      showToast(t("productDetail.toast.addedToCart"));
       return cartItemId ?? "";
     } catch (cause: unknown) {
-      showToast(cause instanceof Error ? cause.message : "加入购物车失败");
+      showToast(cause instanceof Error ? cause.message : t("productDetail.toast.addFailed"));
       return null;
     } finally {
       setBusy(false);
@@ -291,8 +293,8 @@ export function SdkworkMallH5ProductDetailPage() {
     }
     navigator.clipboard
       .writeText(shareUrl)
-      .then(() => showToast("链接已复制，去分享给好友吧"))
-      .catch(() => showToast("分享失败，请稍后再试"));
+      .then(() => showToast(t("productDetail.toast.linkCopied")))
+      .catch(() => showToast(t("productDetail.toast.shareFailed")));
   }
 
   function handleGalleryScroll() {
@@ -318,26 +320,26 @@ export function SdkworkMallH5ProductDetailPage() {
     try {
       await claimMallH5ProductOffer(offerId);
       setOffers((current) => current.filter((offer) => offer.id !== offerId));
-      showToast("领取成功，可在「我的-领券中心」查看");
+      showToast(t("productDetail.promo.claimed"));
       setCouponSheetOpen(false);
     } catch (cause: unknown) {
-      showToast(cause instanceof Error ? cause.message : "领取失败");
+      showToast(cause instanceof Error ? cause.message : t("productDetail.promo.claimFailed"));
     } finally {
       setClaiming(false);
     }
   }
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载商品...</div>;
+    return <div className="sdk-h5-page sdk-h5-loading">{t("productDetail.loading")}</div>;
   }
 
   if (loadError && !detail) {
     return (
       <div className="sdk-h5-page">
-        <h1 className="sdk-h5-visually-hidden">商品详情</h1>
+        <h1 className="sdk-h5-visually-hidden">{t("productDetail.title")}</h1>
         <SdkworkMallH5ErrorState message={loadError} onRetry={retryLoadDetail} />
         <div className="sdk-h5-center">
-          <Link className="sdk-h5-button" to="/">回到首页</Link>
+          <Link className="sdk-h5-button" to="/">{t("productDetail.backHome")}</Link>
         </div>
       </div>
     );
@@ -346,9 +348,9 @@ export function SdkworkMallH5ProductDetailPage() {
   if (!detail) {
     return (
       <div className="sdk-h5-page">
-        <div className="sdk-h5-empty">商品不存在或已下架</div>
+        <div className="sdk-h5-empty">{t("productDetail.notFound")}</div>
         <div className="sdk-h5-center">
-          <Link className="sdk-h5-button" to="/">回到首页</Link>
+          <Link className="sdk-h5-button" to="/">{t("productDetail.backHome")}</Link>
         </div>
       </div>
     );
@@ -357,7 +359,7 @@ export function SdkworkMallH5ProductDetailPage() {
   const titleBar = (
     <>
       <button
-        aria-label="返回"
+        aria-label={t("productDetail.actions.back")}
         className="sdk-h5-pdp-float-btn sdk-h5-pdp-float-back"
         onClick={() => navigate(-1)}
         type="button"
@@ -365,7 +367,7 @@ export function SdkworkMallH5ProductDetailPage() {
         <ChevronLeft aria-hidden="true" size={20} />
       </button>
       <button
-        aria-label="回到首页"
+        aria-label={t("productDetail.actions.home")}
         className="sdk-h5-pdp-float-btn"
         onClick={() => navigate("/")}
         type="button"
@@ -373,7 +375,7 @@ export function SdkworkMallH5ProductDetailPage() {
         <Home aria-hidden="true" size={18} />
       </button>
       <button
-        aria-label="分享"
+        aria-label={t("productDetail.actions.share")}
         className="sdk-h5-pdp-float-btn"
         onClick={handleShare}
         type="button"
@@ -387,18 +389,18 @@ export function SdkworkMallH5ProductDetailPage() {
     <div className="sdk-h5-page sdk-h5-pdp">
       {/* 上滑浮出的搜索头 */}
       <button
-        aria-label="搜索商品"
+        aria-label={t("productDetail.actions.search")}
         className={showSearchBar ? "sdk-h5-pdp-searchbar sdk-h5-pdp-searchbar-show" : "sdk-h5-pdp-searchbar"}
         onClick={() => navigate("/search")}
         type="button"
       >
-        搜索商品 / 品牌 / 店铺
+        {t("productDetail.search.placeholder")}
       </button>
 
       {/* 滚动后的紧凑头部 */}
       <header className={showCompact ? "sdk-h5-pdp-compact sdk-h5-pdp-compact-show" : "sdk-h5-pdp-compact"}>
         <span className="sdk-h5-pdp-compact-price">
-          {displayPrice != null ? `¥${displayPrice.toFixed(2)}` : "询价"}
+          {displayPrice != null ? `¥${displayPrice.toFixed(2)}` : t("productDetail.price.inquiry")}
         </span>
         <span className="sdk-h5-pdp-compact-title">{detail.title}</span>
       </header>
@@ -411,7 +413,7 @@ export function SdkworkMallH5ProductDetailPage() {
         {galleryImages.length > 0 ? (
           <>
             <div
-              aria-label="查看商品大图"
+              aria-label={t("productDetail.gallery.viewLarge")}
               className="sdk-h5-pdp-gallery-track"
               onClick={() => setPreviewOpen(true)}
               onKeyDown={(event) => {
@@ -427,7 +429,11 @@ export function SdkworkMallH5ProductDetailPage() {
             >
               {galleryImages.map((image, index) => (
                 <div className="sdk-h5-pdp-gallery-slide" key={`${image}-${index}`}>
-                  <img alt={`${detail.title} 图片 ${index + 1}`} loading={index === 0 ? "eager" : "lazy"} src={image} />
+                  <img
+                    alt={t("productDetail.gallery.imageAlt", { index: index + 1, title: detail.title })}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    src={image}
+                  />
                 </div>
               ))}
             </div>
@@ -435,10 +441,10 @@ export function SdkworkMallH5ProductDetailPage() {
               {activeImage + 1}/{galleryImages.length}
             </span>
             {galleryImages.length > 1 ? (
-              <div className="sdk-h5-pdp-gallery-dots" role="tablist" aria-label="图片导航">
+              <div className="sdk-h5-pdp-gallery-dots" role="tablist" aria-label={t("productDetail.gallery.navigation")}>
                 {galleryImages.map((image, index) => (
                   <button
-                    aria-label={`查看第 ${index + 1} 张图片`}
+                    aria-label={t("productDetail.gallery.viewImage", { index: index + 1 })}
                     aria-selected={index === activeImage}
                     className={index === activeImage ? "sdk-h5-pdp-gallery-dot sdk-h5-pdp-gallery-dot-active" : "sdk-h5-pdp-gallery-dot"}
                     key={`${image}-dot-${index}`}
@@ -454,7 +460,7 @@ export function SdkworkMallH5ProductDetailPage() {
             ) : null}
           </>
         ) : (
-          <div className="sdk-h5-pdp-gallery-fallback">暂无主图</div>
+          <div className="sdk-h5-pdp-gallery-fallback">{t("productDetail.gallery.fallback")}</div>
         )}
       </section>
 
@@ -462,10 +468,10 @@ export function SdkworkMallH5ProductDetailPage() {
       <section className="sdk-h5-pdp-summary">
         <div className="sdk-h5-pdp-price-row">
           <span className="sdk-h5-pdp-price">
-            {displayPrice != null ? <>¥{displayPrice.toFixed(2)}</> : "询价"}
+            {displayPrice != null ? <>¥{displayPrice.toFixed(2)}</> : t("productDetail.price.inquiry")}
           </span>
           <button
-            aria-label={favoriteFlag ? "取消收藏" : "收藏商品"}
+            aria-label={favoriteFlag ? t("productDetail.actions.unfavorite") : t("productDetail.actions.favorite")}
             className={favoriteFlag ? "sdk-h5-pdp-fav sdk-h5-pdp-fav-on" : "sdk-h5-pdp-fav"}
             onClick={() => setFavoriteFlag(toggleMallH5Favorite({
               id: detail.id,
@@ -476,15 +482,17 @@ export function SdkworkMallH5ProductDetailPage() {
             type="button"
           >
             <Heart aria-hidden="true" size={16} />
-            {favoriteFlag ? "已收藏" : "收藏"}
+            {favoriteFlag ? t("productDetail.actions.favorited") : t("productDetail.actions.favoriteShort")}
           </button>
         </div>
         <h1 className="sdk-h5-pdp-title">{detail.title}</h1>
         <p className="sdk-h5-pdp-sales">
-          {detail.sales != null ? <span>已售 {detail.sales}</span> : null}
-          {maxQuantity != null ? <span> · 库存 {maxQuantity}</span> : null}
-          {stockUrgent ? <em className="sdk-h5-pdp-stock-urgent"> · 仅剩 {maxQuantity} 件</em> : null}
-          {soldOut ? <em className="sdk-h5-pdp-stock-urgent"> · 暂时售罄</em> : null}
+          {detail.sales != null ? <span>{t("productDetail.stats.sales", { count: detail.sales })}</span> : null}
+          {maxQuantity != null ? <span> · {t("productDetail.stats.stock", { count: maxQuantity })}</span> : null}
+          {stockUrgent ? (
+            <em className="sdk-h5-pdp-stock-urgent"> · {t("productDetail.stats.onlyLeft", { count: maxQuantity })}</em>
+          ) : null}
+          {soldOut ? <em className="sdk-h5-pdp-stock-urgent"> · {t("productDetail.stats.soldOut")}</em> : null}
         </p>
       </section>
 
@@ -496,7 +504,7 @@ export function SdkworkMallH5ProductDetailPage() {
           type="button"
         >
           <span className="sdk-h5-pdp-row-label">
-            <Ticket aria-hidden="true" size={14} /> 促销
+            <Ticket aria-hidden="true" size={14} /> {t("productDetail.promo.row")}
           </span>
           <span className="sdk-h5-pdp-row-value">
             {offers.slice(0, 2).map((offer) => (
@@ -504,38 +512,46 @@ export function SdkworkMallH5ProductDetailPage() {
                 {offer.discountText || offer.title}
               </span>
             ))}
-            {offers.length > 2 ? <span className="sdk-h5-muted">等 {offers.length} 项优惠</span> : null}
+            {offers.length > 2 ? (
+              <span className="sdk-h5-muted">{t("productDetail.promo.more", { count: offers.length })}</span>
+            ) : null}
           </span>
-          <span className="sdk-h5-pdp-row-link">领券</span>
+          <span className="sdk-h5-pdp-row-link">{t("productDetail.promo.claim")}</span>
         </button>
       ) : null}
 
       {/* 送至 */}
       <div className="sdk-h5-pdp-row">
         <span className="sdk-h5-pdp-row-label">
-          <MapPin aria-hidden="true" size={14} /> 送至
+          <MapPin aria-hidden="true" size={14} /> {t("productDetail.delivery.label")}
         </span>
         {delivery ? (
           <span className="sdk-h5-pdp-row-value sdk-h5-pdp-delivery">
             {delivery.addressLine.length > 24 ? `${delivery.addressLine.slice(0, 24)}…` : delivery.addressLine}
-            <small>（{delivery.receiverName} 收）</small>
+            <small>{t("productDetail.delivery.receiver", { name: delivery.receiverName })}</small>
           </span>
         ) : (
           <Link className="sdk-h5-pdp-row-value sdk-h5-pdp-delivery" to="/buyer/addresses">
-            请填写收货地址
+            {t("productDetail.delivery.addressRequired")}
           </Link>
         )}
-        <span className="sdk-h5-pdp-row-link">{soldOut ? "无货" : "有货"}</span>
+        <span className="sdk-h5-pdp-row-link">
+          {soldOut ? t("productDetail.delivery.outOfStock") : t("productDetail.delivery.inStock")}
+        </span>
       </div>
 
       {/* 规格 */}
       {detail.skus.length > 0 ? (
         <section className="sdk-h5-section">
-          <h2>选择规格</h2>
+          <h2>{t("productDetail.sku.select")}</h2>
           <div className="sdk-h5-chip-row">
             {detail.skus.map((sku) => (
               <button
-                aria-label={`${sku.title}${sku.stock != null ? `，库存 ${sku.stock}` : ""}`}
+                aria-label={
+                  sku.stock != null
+                    ? t("productDetail.sku.optionStock", { count: sku.stock, title: sku.title })
+                    : sku.title
+                }
                 className={sku.id === (selectedSku?.id ?? "") ? "sdk-h5-chip sdk-h5-chip-active" : "sdk-h5-chip"}
                 key={sku.id}
                 onClick={() => selectSku(sku.id)}
@@ -546,7 +562,10 @@ export function SdkworkMallH5ProductDetailPage() {
             ))}
           </div>
           <p className="sdk-h5-pdp-selected">
-            已选 {selectedSku?.title ?? "默认规格"} × {quantity}
+            {t("productDetail.sku.selected", {
+              quantity,
+              title: selectedSku?.title ?? t("productDetail.sku.default"),
+            })}
             {selectedSku?.priceCny != null ? <strong>　¥{selectedSku.priceCny.toFixed(2)}</strong> : null}
           </p>
         </section>
@@ -554,10 +573,10 @@ export function SdkworkMallH5ProductDetailPage() {
 
       {/* 数量 */}
       <section className="sdk-h5-section">
-        <h2>购买数量</h2>
+        <h2>{t("productDetail.quantity.title")}</h2>
         <div className="sdk-h5-quantity">
           <button
-            aria-label="减少数量"
+            aria-label={t("productDetail.quantity.decrease")}
             disabled={quantity <= 1}
             onClick={() => setQuantity((value) => Math.max(1, value - 1))}
             type="button"
@@ -566,7 +585,7 @@ export function SdkworkMallH5ProductDetailPage() {
           </button>
           <span aria-live="polite">{quantity}</span>
           <button
-            aria-label="增加数量"
+            aria-label={t("productDetail.quantity.increase")}
             disabled={maxQuantity != null && quantity >= maxQuantity}
             onClick={() => setQuantity((value) => (maxQuantity != null ? Math.min(maxQuantity, value + 1) : value + 1))}
             type="button"
@@ -575,7 +594,7 @@ export function SdkworkMallH5ProductDetailPage() {
           </button>
         </div>
         {maxQuantity != null && quantity >= maxQuantity && !soldOut ? (
-          <p className="sdk-h5-muted">已达当前规格库存上限</p>
+          <p className="sdk-h5-muted">{t("productDetail.quantity.limit")}</p>
         ) : null}
       </section>
 
@@ -583,11 +602,11 @@ export function SdkworkMallH5ProductDetailPage() {
       {detail.shopId ? (
         <Link className="sdk-h5-pdp-row" to={`/shop/${detail.shopId}`}>
           <span className="sdk-h5-pdp-row-label">
-            <Home aria-hidden="true" size={14} /> 店铺
+            <Home aria-hidden="true" size={14} /> {t("productDetail.shop.label")}
           </span>
           <span className="sdk-h5-pdp-row-value">{detail.shopName || detail.shopId}</span>
           <span className="sdk-h5-pdp-row-link">
-            进入店铺 <ChevronRight aria-hidden="true" size={12} />
+            {t("productDetail.shop.enter")} <ChevronRight aria-hidden="true" size={12} />
           </span>
         </Link>
       ) : null}
@@ -595,7 +614,7 @@ export function SdkworkMallH5ProductDetailPage() {
       {/* 规格 */}
       {detail.specs.length > 0 ? (
         <section className="sdk-h5-section">
-          <h2>规格参数</h2>
+          <h2>{t("productDetail.specs.title")}</h2>
           <dl className="sdk-h5-spec-list">
             {detail.specs.map((spec) => (
               <div key={spec.name}>
@@ -610,26 +629,26 @@ export function SdkworkMallH5ProductDetailPage() {
       {/* 商品介绍 */}
       {detail.description ? (
         <section className="sdk-h5-section">
-          <h2>商品介绍</h2>
+          <h2>{t("productDetail.description.title")}</h2>
           <p className="sdk-h5-pdp-description">{detail.description}</p>
         </section>
       ) : null}
 
       {/* 评价 */}
       <section className="sdk-h5-section sdk-h5-pdp-reviews">
-        <h2>商品评价</h2>
+        <h2>{t("productDetail.reviews.title")}</h2>
         <div className="sdk-h5-pdp-reviews-stars" aria-hidden="true">
           {[1, 2, 3, 4, 5].map((star) => (
             <Star key={star} size={16} />
           ))}
         </div>
-        <p>评价体系即将上线，下单后可评价晒单。</p>
+        <p>{t("productDetail.reviews.pending")}</p>
       </section>
 
       {/* 看了又看 */}
       {recommendations.length > 0 ? (
         <section className="sdk-h5-section">
-          <h2>看了又看</h2>
+          <h2>{t("productDetail.recommendations.title")}</h2>
           <div className="sdk-h5-pdp-recs">
             {recommendations.map((product) => (
               <Link className="sdk-h5-pdp-rec-card" key={product.id} to={`/product/${product.id}`}>
@@ -638,7 +657,7 @@ export function SdkworkMallH5ProductDetailPage() {
                 </div>
                 <div className="sdk-h5-pdp-rec-title">{product.title}</div>
                 <div className="sdk-h5-pdp-rec-price">
-                  {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "询价"}
+                  {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : t("productDetail.price.inquiry")}
                 </div>
               </Link>
             ))}
@@ -651,16 +670,16 @@ export function SdkworkMallH5ProductDetailPage() {
 
       {/* 底部操作栏 */}
       <div className="sdk-h5-pdp-actions">
-        <Link aria-label="回到首页" className="sdk-h5-pdp-action-icon" to="/">
+        <Link aria-label={t("productDetail.actions.home")} className="sdk-h5-pdp-action-icon" to="/">
           <Home aria-hidden="true" size={20} />
-          <span>首页</span>
+          <span>{t("productDetail.actions.home")}</span>
         </Link>
-        <Link aria-label="联系客服" className="sdk-h5-pdp-action-icon" to="/buyer/chat">
+        <Link aria-label={t("productDetail.actions.contact")} className="sdk-h5-pdp-action-icon" to="/buyer/chat">
           <MessageCircle aria-hidden="true" size={20} />
-          <span>客服</span>
+          <span>{t("productDetail.actions.customerService")}</span>
         </Link>
         <button
-          aria-label={favoriteFlag ? "取消收藏" : "收藏商品"}
+          aria-label={favoriteFlag ? t("productDetail.actions.unfavorite") : t("productDetail.actions.favorite")}
           className={favoriteFlag ? "sdk-h5-pdp-action-icon sdk-h5-pdp-action-fav-on" : "sdk-h5-pdp-action-icon"}
           onClick={() => setFavoriteFlag(toggleMallH5Favorite({
             id: detail.id,
@@ -671,7 +690,7 @@ export function SdkworkMallH5ProductDetailPage() {
           type="button"
         >
           <Heart aria-hidden="true" size={20} />
-          <span>{favoriteFlag ? "已收藏" : "收藏"}</span>
+          <span>{favoriteFlag ? t("productDetail.actions.favorited") : t("productDetail.actions.favoriteShort")}</span>
         </button>
         <button
           className="sdk-h5-button sdk-h5-button-secondary sdk-h5-pdp-action-cart"
@@ -679,7 +698,7 @@ export function SdkworkMallH5ProductDetailPage() {
           onClick={() => void handleAddToCart()}
           type="button"
         >
-          <ShoppingCart aria-hidden="true" size={16} /> 加入购物车
+          <ShoppingCart aria-hidden="true" size={16} /> {t("productDetail.actions.addToCart")}
         </button>
         <button
           className="sdk-h5-button sdk-h5-button-primary sdk-h5-pdp-action-buy"
@@ -687,7 +706,7 @@ export function SdkworkMallH5ProductDetailPage() {
           onClick={handleBuyNow}
           type="button"
         >
-          {soldOut ? "已售罄" : "立即购买"}
+          {soldOut ? t("productDetail.actions.soldOut") : t("productDetail.actions.buyNow")}
         </button>
       </div>
 
@@ -699,11 +718,17 @@ export function SdkworkMallH5ProductDetailPage() {
             onClick={(event) => event.stopPropagation()}
             onKeyDown={() => {}}
             role="dialog"
-            aria-label="领取优惠券"
+            aria-label={t("productDetail.promo.sheetTitle")}
           >
             <header className="sdk-h5-pdp-sheet-head">
-              <strong>领取优惠券</strong>
-              <button aria-label="关闭" onClick={() => setCouponSheetOpen(false)} type="button">关闭</button>
+              <strong>{t("productDetail.promo.sheetTitle")}</strong>
+              <button
+                aria-label={t("productDetail.gallery.close")}
+                onClick={() => setCouponSheetOpen(false)}
+                type="button"
+              >
+                {t("productDetail.gallery.close")}
+              </button>
             </header>
             {offers.map((offer) => (
               <div className="sdk-h5-pdp-sheet-row" key={offer.id}>
@@ -718,7 +743,7 @@ export function SdkworkMallH5ProductDetailPage() {
                   onClick={() => void handleClaim(offer.id)}
                   type="button"
                 >
-                  领取
+                  {t("productDetail.promo.claimNow")}
                 </button>
               </div>
             ))}
@@ -729,14 +754,22 @@ export function SdkworkMallH5ProductDetailPage() {
       {/* 全屏看图 */}
       {previewOpen && galleryImages.length > 0 ? (
         <div className="sdk-h5-pdp-preview" onClick={() => setPreviewOpen(false)} onKeyDown={() => {}} role="presentation">
-          <button aria-label="关闭大图" className="sdk-h5-pdp-preview-close" onClick={() => setPreviewOpen(false)} type="button">
-            关闭
+          <button
+            aria-label={t("productDetail.gallery.closeLarge")}
+            className="sdk-h5-pdp-preview-close"
+            onClick={() => setPreviewOpen(false)}
+            type="button"
+          >
+            {t("productDetail.gallery.close")}
           </button>
-          <img alt={`${detail.title} 大图`} src={galleryImages[activeImage]} />
+          <img
+            alt={t("productDetail.gallery.largeAlt", { title: detail.title })}
+            src={galleryImages[activeImage]}
+          />
           {galleryImages.length > 1 ? (
             <>
               <button
-                aria-label="上一张"
+                aria-label={t("productDetail.gallery.previous")}
                 className="sdk-h5-pdp-preview-nav"
                 disabled={activeImage === 0}
                 onClick={(event) => {
@@ -751,7 +784,7 @@ export function SdkworkMallH5ProductDetailPage() {
                 {activeImage + 1}/{galleryImages.length}
               </span>
               <button
-                aria-label="下一张"
+                aria-label={t("productDetail.gallery.next")}
                 className="sdk-h5-pdp-preview-nav"
                 disabled={activeImage === galleryImages.length - 1}
                 onClick={(event) => {

@@ -1,0 +1,100 @@
+{
+  "productDetail": {
+    "loading": "加载商品...",
+    "loadError": "商品加载失败",
+    "title": "商品详情",
+    "backHome": "回到首页",
+    "notFound": "商品不存在或已下架",
+    "search": {
+      "placeholder": "搜索商品 / 品牌 / 店铺"
+    },
+    "price": {
+      "inquiry": "询价"
+    },
+    "actions": {
+      "back": "返回",
+      "home": "回到首页",
+      "share": "分享",
+      "search": "搜索商品",
+      "favorite": "收藏商品",
+      "unfavorite": "取消收藏",
+      "favorited": "已收藏",
+      "favoriteShort": "收藏",
+      "customerService": "客服",
+      "contact": "联系客服",
+      "addToCart": "加入购物车",
+      "buyNow": "立即购买",
+      "soldOut": "已售罄"
+    },
+    "gallery": {
+      "fallback": "暂无主图",
+      "viewLarge": "查看商品大图",
+      "navigation": "图片导航",
+      "imageAlt": "{{title}} 图片 {{index}}",
+      "viewImage": "查看第 {{index}} 张图片",
+      "largeAlt": "{{title}} 大图",
+      "close": "关闭",
+      "closeLarge": "关闭大图",
+      "previous": "上一张",
+      "next": "下一张"
+    },
+    "stats": {
+      "sales": "已售 {{count}}",
+      "stock": "库存 {{count}}",
+      "onlyLeft": "仅剩 {{count}} 件",
+      "soldOut": "暂时售罄"
+    },
+    "promo": {
+      "row": "促销",
+      "more": "等 {{count}} 项优惠",
+      "claim": "领券",
+      "sheetTitle": "领取优惠券",
+      "claimNow": "领取",
+      "claimed": "领取成功，可在「我的-领券中心」查看",
+      "claimFailed": "领取失败"
+    },
+    "delivery": {
+      "label": "送至",
+      "receiver": "（{{name}} 收）",
+      "addressRequired": "请填写收货地址",
+      "inStock": "有货",
+      "outOfStock": "无货"
+    },
+    "sku": {
+      "select": "选择规格",
+      "selected": "已选 {{title}} × {{quantity}}",
+      "default": "默认规格",
+      "optionStock": "{{title}}，库存 {{count}}"
+    },
+    "quantity": {
+      "title": "购买数量",
+      "decrease": "减少数量",
+      "increase": "增加数量",
+      "limit": "已达当前规格库存上限",
+      "shortage": "库存不足，最多可购 {{count}} 件"
+    },
+    "shop": {
+      "label": "店铺",
+      "enter": "进入店铺"
+    },
+    "specs": {
+      "title": "规格参数"
+    },
+    "description": {
+      "title": "商品介绍"
+    },
+    "reviews": {
+      "title": "商品评价",
+      "pending": "评价体系即将上线，下单后可评价晒单。"
+    },
+    "recommendations": {
+      "title": "看了又看"
+    },
+    "toast": {
+      "addedToCart": "已加入购物车",
+      "addFailed": "加入购物车失败",
+      "linkCopied": "链接已复制，去分享给好友吧",
+      "shareFailed": "分享失败，请稍后再试"
+    }
+  }
+}

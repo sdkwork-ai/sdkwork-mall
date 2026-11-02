@@ -13,11 +13,11 @@ long):
 | Root | i18n mechanism | Files with copy | Hard-coded strings | Locale data (excluded) |
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
-| H5 | i18next runtime + `zh-CN/{checkout,support}` fragments | 61 | 475 | 390 (`regions.ts`) |
+| H5 | i18next runtime + `zh-CN/{checkout,catalog,support}` fragments | 60 | 431 | 390 (`regions.ts`) |
 | Mini program | none — literal zh-CN | 66 | 375 | 302 (province/city picker data) |
 | Flutter | none — literal zh-CN | 38 | 567 | 230 (province/city picker data) |
 
-2869 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2825 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -84,16 +84,13 @@ highest first, keeping the existing `sdkwork` prefix conventions.
 **S2a — H5 runtime (started).** `apps/sdkwork-mall-h5/src/i18n/index.ts`
 initialises i18next with `initReactI18next` and composes authored fragments from
 `i18n/<locale>/<domain>/<capability>/` (`zh-CN/checkout/payment-result`,
-`zh-CN/checkout/confirm-order` and `zh-CN/support/help`), imported once from
-`main.tsx`; the default locale is unchanged, so no visible copy moved. Three
-surfaces are migrated: payment-result, confirm-order (sections, delivery/invoice/
-gift-card copy, validation messages, summary, submit states) and the help centre
-(all FAQ copy, quick links, contact rows). Every string resolves through
-`t("paymentResult.*")` / `t("checkout.*")` / `t("help.*")`, and
-`tests/contract/verify-h5-i18n-runtime.test.mjs` proves the runtime initialises,
-every key each page uses (including keys declared in page constants) exists in
-the catalogue, and no migrated page carries hard-coded user copy. H5's hard-coded
-count dropped 536 → 475 and the baseline was refreshed.
+`zh-CN/checkout/confirm-order`, `zh-CN/catalog/product-detail` and
+`zh-CN/support/help`), imported once from `main.tsx`; the default locale is
+unchanged, so no visible copy moved. Four surfaces are migrated: payment-result,
+confirm-order, product detail (gallery a11y labels, price/stats, promo, delivery,
+SKU/quantity, shop, specs, description, review notice, recommendations, action
+bar, coupon sheet and the full-screen preview) and the help centre. H5's
+hard-coded count dropped 536 → 431 and the baseline was refreshed.
 
 **S3 — locale switching and verification.**
 Locale store per root, `Accept-Language` propagation through the transport seams,
