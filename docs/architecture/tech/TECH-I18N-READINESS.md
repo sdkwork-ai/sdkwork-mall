@@ -14,10 +14,10 @@ long):
 | --- | --- | --- | --- | --- |
 | PC | i18next + per-package `*-copy.ts` and `commerce-intl.tsx`; route `titleKey` | 114 | 1452 | 0 |
 | H5 | i18next runtime + `zh-CN/{checkout,catalog,storefront,account,support,order}` fragments | 54 | 283 | 390 (`regions.ts`) |
-| Mini program | none — literal zh-CN | 66 | 378 | 302 (province/city picker data) |
+| Mini program | `src/i18n` runtime + `zh-CN/account/buyer-hub` JS fragment | 65 | 353 | 302 (province/city picker data) |
 | Flutter | `SdkworkI18n` runtime + `lib/src/i18n/zh-CN/{support/*,account/*,checkout/confirm-order}` fragments | 33 | 349 | 230 (province/city picker data) |
 
-2462 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
+2437 user-facing strings remain hard-coded (`specs/i18n-readiness.baseline.json`).
 Test fixtures and assertions are excluded: they are not user-facing copy, and
 counting them made every new behavioral test look like an i18n regression. The
 count is a **ceiling**, not a target: `pnpm check:i18n-baseline` fails when a
@@ -104,6 +104,16 @@ Component tests render pages whose copy resolves through the runtime, so
 `vitest.setup.ts` initialises the H5 i18n instance once; no test has to stub
 translation resources.
 
+**S2c — mini-program runtime (started).** `src/i18n/index.ts` flattens authored
+fragments into `a.b.c` keys and exposes a synchronous `t(key, params)` with
+`{{name}}` interpolation. Because the mini-program module system resolves
+JavaScript at runtime (not JSON), copy lives in plain-object
+`src/i18n/<locale>/<domain>/<capability>/messages.js` files with sibling
+`messages.d.ts` declarations for typing. The buyer hub is the first migrated page
+(order shortcuts, asset/service/account menus, logout dialog); its hard-coded count
+dropped 378 → 353. `tests/contract/verify-mp-i18n-runtime.test.mjs` pins the
+runtime, the fragment wiring and the no-literal rule.
+
 **S2b — Flutter runtime (started).** `lib/src/i18n/runtime.dart` flattens the
 authored fragments into a synchronous message map (`t(key, {params})` with
 `{{name}}` interpolation), loads them once from `rootBundle` in `main()` before
@@ -141,5 +151,6 @@ baseline snapshot for H5.
 | S1b wiring | parity title gate: every root still shows the contract title |
 | S2 H5 runtime | `tests/contract/verify-h5-i18n-runtime.test.mjs` (runtime, key coverage, no literal copy on migrated pages) |
 | S2 Flutter runtime | `tests/contract/verify-flutter-i18n-runtime.test.mjs` + `test/i18n_runtime_test.dart` |
+| S2 mini-program runtime | `tests/contract/verify-mp-i18n-runtime.test.mjs` |
 | S2 per root | existing architecture gates per root, plus catalogue reachability test |
 | S3 locale switch | Flutter visual capture with the pseudo-locale; H5 baseline screenshot |

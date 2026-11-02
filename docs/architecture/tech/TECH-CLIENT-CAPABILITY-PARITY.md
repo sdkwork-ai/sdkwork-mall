@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 82/82 pass
+pnpm test:node                                                     → 84/84 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -188,6 +188,7 @@ pnpm test:node                                                     → 82/82 pas
   (tests/contract/verify-h5-i18n-runtime.test.mjs                  → 3/3)
   (tests/contract/verify-after-sales-depth.test.mjs                → 2/2)
   (tests/contract/verify-flutter-i18n-runtime.test.mjs            → 2/2)
+  (tests/contract/verify-mp-i18n-runtime.test.mjs                 → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -500,6 +501,20 @@ parity gate resolves Flutter `AppBar` titles declared as `SdkworkI18n.t(...)`
 through the fragments. Flutter's hard-coded count dropped 571 → 349.
 
 `tests/contract/verify-flutter-i18n-runtime.test.mjs` pins the runtime, the
+fragment wiring and the no-literal rule for migrated pages.
+
+### 6.1.19 Mini-program i18n runtime
+
+The mini-program was the last root without a mechanism. `src/i18n/index.ts`
+flattens authored fragments into `a.b.c` keys and exposes a synchronous
+`t(key, params)`. Copy is authored as plain-object
+`src/i18n/<locale>/<domain>/<capability>/messages.js` fragments with sibling
+`.d.ts` declarations, because the mini-program module system resolves JavaScript
+at runtime rather than JSON.
+
+The buyer hub is the first migrated page (order shortcuts,
+asset/service/account menus and the logout dialog), dropping its hard-coded count
+378 → 353. `tests/contract/verify-mp-i18n-runtime.test.mjs` pins the runtime, the
 fragment wiring and the no-literal rule for migrated pages.
 
 ### 6.2 Per-package typecheck

@@ -1,14 +1,15 @@
+import { t } from "../../i18n";
 import { type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getOrderStatistics } from "../../services/order-service";
 import { isLoggedIn, clearSession } from "../../services/session";
 
-const ORDER_ENTRIES: Array<{ status: string; label: string; count: string | number }> = [
-  { status: "all", label: "全部订单", count: "" },
-  { status: "PENDING_PAYMENT", label: "待付款", count: "" },
-  { status: "PENDING_SHIPMENT", label: "待发货", count: "" },
-  { status: "PENDING_RECEIPT", label: "待收货", count: "" },
-  { status: "COMPLETED", label: "已完成", count: "" },
+const ORDER_ENTRIES: Array<{ status: string; labelKey: string; count: string | number }> = [
+  { status: "all", labelKey: "buyerHub.orders.all", count: "" },
+  { status: "PENDING_PAYMENT", labelKey: "buyerHub.orders.pendingPayment", count: "" },
+  { status: "PENDING_SHIPMENT", labelKey: "buyerHub.orders.pendingShipment", count: "" },
+  { status: "PENDING_RECEIPT", labelKey: "buyerHub.orders.pendingReceipt", count: "" },
+  { status: "COMPLETED", labelKey: "buyerHub.orders.completed", count: "" },
 ];
 
 /**
@@ -16,35 +17,35 @@ const ORDER_ENTRIES: Array<{ status: string; label: string; count: string | numb
  * `routes/capabilities.ts` 统一解析：改页面路径只需改注册表，
  * 且与 PC / H5 / Flutter 共用同一套 route id。
  */
-const ASSET_LINKS: Array<{ label: string; capability: string }> = [
-  { label: "钱包", capability: "buyer.mall.wallet" },
-  { label: "我的积分", capability: "buyer.mall.points" },
-  { label: "会员中心", capability: "buyer.mall.membership" },
+const ASSET_LINKS: Array<{ labelKey: string; capability: string }> = [
+  { labelKey: "buyerHub.assets.wallet", capability: "buyer.mall.wallet" },
+  { labelKey: "buyerHub.assets.points", capability: "buyer.mall.points" },
+  { labelKey: "buyerHub.assets.membership", capability: "buyer.mall.membership" },
 ];
 
-const QUICK_LINKS: Array<{ label: string; capability: string }> = [
-  { label: "我的收藏", capability: "buyer.mall.favorites" },
-  { label: "浏览足迹", capability: "buyer.mall.footprint" },
-  { label: "地址管理", capability: "buyer.mall.addresses" },
-  { label: "领券中心", capability: "buyer.mall.coupons" },
-  { label: "售后中心", capability: "buyer.mall.after-sales" },
-  { label: "发票", capability: "buyer.mall.invoices" },
-  { label: "消息中心", capability: "buyer.mall.messages" },
-  { label: "客服会话", capability: "buyer.mall.im.chats" },
+const QUICK_LINKS: Array<{ labelKey: string; capability: string }> = [
+  { labelKey: "buyerHub.services.favorites", capability: "buyer.mall.favorites" },
+  { labelKey: "buyerHub.services.footprint", capability: "buyer.mall.footprint" },
+  { labelKey: "buyerHub.services.addresses", capability: "buyer.mall.addresses" },
+  { labelKey: "buyerHub.services.coupons", capability: "buyer.mall.coupons" },
+  { labelKey: "buyerHub.services.afterSales", capability: "buyer.mall.after-sales" },
+  { labelKey: "buyerHub.services.invoices", capability: "buyer.mall.invoices" },
+  { labelKey: "buyerHub.services.messages", capability: "buyer.mall.messages" },
+  { labelKey: "buyerHub.services.chats", capability: "buyer.mall.im.chats" },
 ];
 
 /** 账户区入口（含设置）同样走能力路由。 */
-const ACCOUNT_LINKS: Array<{ label: string; capability: string }> = [
-  { label: "个人资料", capability: "buyer.mall.profile" },
-  { label: "我的评价", capability: "buyer.mall.reviews" },
-  { label: "礼品卡与红包", capability: "buyer.mall.gift-cards" },
-  { label: "账户与安全", capability: "buyer.mall.security" },
-  { label: "设置", capability: "buyer.mall.settings" },
-  { label: "帮助中心", capability: "storefront.mall.help" },
+const ACCOUNT_LINKS: Array<{ labelKey: string; capability: string }> = [
+  { labelKey: "buyerHub.account.profile", capability: "buyer.mall.profile" },
+  { labelKey: "buyerHub.account.reviews", capability: "buyer.mall.reviews" },
+  { labelKey: "buyerHub.account.giftCards", capability: "buyer.mall.gift-cards" },
+  { labelKey: "buyerHub.account.security", capability: "buyer.mall.security" },
+  { labelKey: "buyerHub.account.settings", capability: "buyer.mall.settings" },
+  { labelKey: "buyerHub.account.help", capability: "storefront.mall.help" },
 ];
 
-const OTHER_LINKS: Array<{ label: string; capability: string }> = [
-  { label: "活动会场", capability: "storefront.mall.activity-list" },
+const OTHER_LINKS: Array<{ labelKey: string; capability: string }> = [
+  { labelKey: "buyerHub.others.activity", capability: "storefront.mall.activity-list" },
 ];
 
 interface BuyerData {
@@ -56,14 +57,30 @@ interface BuyerData {
   otherLinks: Array<{ label: string; capability: string }>;
 }
 
+function resolveOrderEntries(
+  counts?: (status: string) => string | number,
+): BuyerData["orderEntries"] {
+  return ORDER_ENTRIES.map((entry) => ({
+    status: entry.status,
+    label: t(entry.labelKey),
+    count: counts ? counts(entry.status) : entry.count,
+  }));
+}
+
+function resolveLinks(
+  links: Array<{ labelKey: string; capability: string }>,
+): Array<{ label: string; capability: string }> {
+  return links.map((link) => ({ label: t(link.labelKey), capability: link.capability }));
+}
+
 Page({
   data: {
     loggedIn: false,
-    orderEntries: ORDER_ENTRIES,
-    assetLinks: ASSET_LINKS,
-    quickLinks: QUICK_LINKS,
-    accountLinks: ACCOUNT_LINKS,
-    otherLinks: OTHER_LINKS,
+    orderEntries: resolveOrderEntries(),
+    assetLinks: resolveLinks(ASSET_LINKS),
+    quickLinks: resolveLinks(QUICK_LINKS),
+    accountLinks: resolveLinks(ACCOUNT_LINKS),
+    otherLinks: resolveLinks(OTHER_LINKS),
   } as BuyerData,
 
   onShow() {
@@ -99,10 +116,7 @@ Page({
         return "";
       };
       this.setData({
-        orderEntries: ORDER_ENTRIES.map((entry) => ({
-          ...entry,
-          count: countFor(entry.status),
-        })),
+        orderEntries: resolveOrderEntries(countFor),
       });
     } catch (cause) {
       // 统计为增强信息，失败时保持空态。
@@ -133,12 +147,12 @@ Page({
 
   logout() {
     wx.showModal({
-      title: "退出登录",
-      content: "确定退出当前账号？",
+      title: t("buyerHub.logout.title"),
+      content: t("buyerHub.logout.confirm"),
       success: (result) => {
         if (result.confirm) {
           clearSession();
-          this.setData({ loggedIn: false, orderEntries: ORDER_ENTRIES });
+          this.setData({ loggedIn: false, orderEntries: resolveOrderEntries() });
         }
       },
     });
