@@ -184,7 +184,7 @@ export function SdkworkMallH5PaymentResultPage() {
           </button>
         ) : null}
         <Link className="sdk-h5-button sdk-h5-button-ghost" to="/">
-          {t("common.continueShopping")}
+          {t("paymentResult.continueShopping")}
         </Link>
       </div>
     </div>

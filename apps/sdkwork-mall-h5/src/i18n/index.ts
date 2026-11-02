@@ -1,19 +1,22 @@
 /**
  * H5 i18n runtime (TECH-I18N-READINESS S2 for the H5 root).
  *
- * The catalogue is a plain JSON resource so copy changes are reviewable diffs and
- * a new locale is a resource addition rather than a code change. The default
- * locale stays zh-CN, so shipping this runtime does not change any visible text.
+ * Authored messages live under `i18n/<locale>/<domain>/<capability>/<fragment>.json`
+ * per the i18n standard, so copy changes stay reviewable fragments instead of one
+ * locale monolith. This module composes those fragments into the i18next resource
+ * and is imported once from `main.tsx`. The default locale stays zh-CN, so
+ * shipping the runtime does not change any visible text.
  */
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
-import zhCN from "./messages.zh-CN.json";
+import paymentResult from "./zh-CN/checkout/payment-result/messages.json";
 
 export const SDKWORK_MALL_H5_DEFAULT_LOCALE = "zh-CN";
 
+/** One merged translation tree per locale, composed from authored fragments. */
 export const SDKWORK_MALL_H5_I18N_RESOURCES = {
-  "zh-CN": { translation: zhCN },
+  "zh-CN": { translation: { ...paymentResult } },
 } as const;
 
 void i18n.use(initReactI18next).init({

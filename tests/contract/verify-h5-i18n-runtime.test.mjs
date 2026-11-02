@@ -13,7 +13,8 @@ import test from "node:test";
  * `t("...")` key used by the migrated payment-result surface resolves.
  */
 const workspaceRoot = path.resolve(import.meta.dirname, "..", "..");
-const cataloguePath = "apps/sdkwork-mall-h5/src/i18n/messages.zh-CN.json";
+const cataloguePath =
+  "apps/sdkwork-mall-h5/src/i18n/zh-CN/checkout/payment-result/messages.json";
 const paymentResultPath =
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/PaymentResultPage.tsx";
 

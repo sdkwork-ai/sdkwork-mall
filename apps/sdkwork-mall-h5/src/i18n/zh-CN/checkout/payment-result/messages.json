@@ -1,7 +1,4 @@
 {
-  "common": {
-    "continueShopping": "继续购物"
-  },
   "paymentResult": {
     "loading": "查询支付结果...",
     "title": {
@@ -22,6 +19,7 @@
     "viewOrders": "查看订单",
     "retryPay": "重新支付",
     "retrying": "重试中...",
+    "continueShopping": "继续购物",
     "noPaymentMethod": "暂无可用支付方式，请稍后再试。",
     "retryPending": "支付重试已发起，请稍后查看订单状态。",
     "retryFailed": "支付重试失败，请稍后再试。"
