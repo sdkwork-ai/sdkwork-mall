@@ -2213,6 +2213,10 @@ a {
   color: var(--sdk-color-success);
 }
 
+.sdkwork-mall-pc-cms-error {
+  color: var(--sdk-color-danger, #dc2626);
+}
+
 .sdkwork-mall-pc-forbidden {
   padding: 2rem;
   border-radius: 0.75rem;

@@ -11,6 +11,8 @@ import { invalidateMallCmsConfigCache, loadMallCmsConfigRemote, saveMallCmsConfi
 export function SdkworkMallAdminCmsPage() {
   const [config, setConfig] = useState<MallCmsConfig>(() => defaultMallCmsConfig());
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -67,20 +69,37 @@ export function SdkworkMallAdminCmsPage() {
         <div className="sdkwork-mall-pc-cms-actions">
           <Link to="/">预览前台</Link>
           <Button
+            disabled={saving}
             onClick={() => {
-              void saveMallCmsConfigRemote(config).then((savedConfig) => {
-                invalidateMallCmsConfigCache();
-                setConfig(savedConfig);
-                setSaved(true);
-              });
+              // A rejected save used to be an unhandled rejection: the operator
+              // got no feedback and nothing was persisted.
+              setSaving(true);
+              setSaveError(null);
+              void saveMallCmsConfigRemote(config)
+                .then((savedConfig) => {
+                  invalidateMallCmsConfigCache();
+                  setConfig(savedConfig);
+                  setSaved(true);
+                })
+                .catch((cause: unknown) => {
+                  setSaveError(cause instanceof Error ? cause.message : "保存失败，请稍后重试");
+                })
+                .finally(() => {
+                  setSaving(false);
+                });
             }}
             type="button"
           >
-            保存配置
+            {saving ? "保存中..." : "保存配置"}
           </Button>
         </div>
       </header>
       {saved ? <p className="sdkwork-mall-pc-cms-saved">配置已保存。</p> : null}
+      {saveError ? (
+        <p className="sdkwork-mall-pc-cms-error" role="alert">
+          {saveError}
+        </p>
+      ) : null}
 
       <section>
         <h2>首页轮播</h2>
