@@ -1,0 +1,615 @@
+{
+  "schemaVersion": 1,
+  "capabilityCount": 36,
+  "platforms": [
+    "pc",
+    "h5",
+    "miniProgram",
+    "flutter"
+  ],
+  "capabilities": [
+    {
+      "cells": {
+        "pc": "not-required",
+        "h5": "not-required",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "account.login",
+      "requiredOn": [
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "account"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.addresses",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.after-sales",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.coupons",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok(tab)"
+      },
+      "id": "buyer.dashboard",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.favorites",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.footprint",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.gift-cards",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "not-required",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.im-chat",
+      "requiredOn": [
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "not-required",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.im-conversations",
+      "requiredOn": [
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.invoices",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.logistics",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.membership",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.messages",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "not-required",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.notices",
+      "requiredOn": [
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.order-detail",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.orders",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.points",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.profile",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.reviews",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.security",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.settings",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "buyer.wallet",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "buyer"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.activity-detail",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.activity-list",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok(tab)"
+      },
+      "id": "storefront.cart",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok(tab)"
+      },
+      "id": "storefront.categories",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok(tab)"
+      },
+      "id": "storefront.category-detail",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.checkout",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.help",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok(tab)"
+      },
+      "id": "storefront.home",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.payment",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.payment-result",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.product-detail",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.search",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    },
+    {
+      "cells": {
+        "pc": "ok",
+        "h5": "ok",
+        "miniProgram": "ok",
+        "flutter": "ok"
+      },
+      "id": "storefront.shop-home",
+      "requiredOn": [
+        "pc",
+        "h5",
+        "miniProgram",
+        "flutter"
+      ],
+      "surface": "storefront"
+    }
+  ],
+  "gaps": [],
+  "documentedAsymmetries": [
+    {
+      "absentOn": [
+        "pc",
+        "h5"
+      ],
+      "id": "account.login",
+      "reason": "PC and H5 delegate login to the shared IAM auth-gate routes."
+    },
+    {
+      "absentOn": [
+        "pc"
+      ],
+      "id": "buyer.im-chat",
+      "reason": "Blocked upstream, not deferred: sdkwork-im-app-sdk currently generates notifications plus a thin chat surface (knowledgebase/archive) only - no conversation list and no message send. The mobile roots reach the federation chat plane through their own transport, while the PC root forbids raw HTTP in capability packages (gate: mall PC active packages avoid raw HTTP transport), so PC chat waits for the generated app SDK to expose conversations and messages."
+    },
+    {
+      "absentOn": [
+        "pc"
+      ],
+      "id": "buyer.im-conversations",
+      "reason": "Blocked upstream, not deferred: sdkwork-im-app-sdk currently generates notifications plus a thin chat surface (knowledgebase/archive) only - no conversation list and no message send. The mobile roots reach the federation chat plane through their own transport, while the PC root forbids raw HTTP in capability packages (gate: mall PC active packages avoid raw HTTP transport), so PC chat waits for the generated app SDK to expose conversations and messages."
+    },
+    {
+      "absentOn": [
+        "pc"
+      ],
+      "id": "buyer.notices",
+      "reason": "Blocked upstream, not deferred: sdkwork-im-app-sdk currently generates notifications plus a thin chat surface (knowledgebase/archive) only - no conversation list and no message send. The mobile roots reach the federation chat plane through their own transport, while the PC root forbids raw HTTP in capability packages (gate: mall PC active packages avoid raw HTTP transport), so PC chat waits for the generated app SDK to expose conversations and messages."
+    }
+  ]
+}

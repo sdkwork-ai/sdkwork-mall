@@ -11,8 +11,10 @@
  *   node scripts/mall-capability-parity-report.mjs            # full matrix
  *   node scripts/mall-capability-parity-report.mjs --gaps     # only missing cells
  *   node scripts/mall-capability-parity-report.mjs --json     # machine output
+ *   node scripts/mall-capability-parity-report.mjs --write    # refresh specs/capability-parity.snapshot.json
+ *   node scripts/mall-capability-parity-report.mjs --check    # fail when the committed snapshot is stale
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -24,6 +26,9 @@ const platforms = Object.keys(contract.platforms);
 const args = new Set(process.argv.slice(2));
 const gapsOnly = args.has("--gaps");
 const asJson = args.has("--json");
+const writeSnapshot = args.has("--write");
+const checkSnapshot = args.has("--check");
+const snapshotPath = path.join(workspaceRoot, "specs", "capability-parity.snapshot.json");
 
 const routeRegistries = {
   pc: new Set(readRouteIds("pc")),
@@ -135,6 +140,81 @@ const rows = contract.capabilities.map((capability) => {
 });
 
 const missing = rows.filter((row) => row.requiredGaps.length > 0);
+
+/**
+ * Deterministic, diffable snapshot of the coverage matrix. Committing it makes
+ * every coverage change a reviewable diff instead of a claim in a message.
+ */
+function buildSnapshot() {
+  return {
+    schemaVersion: 1,
+    capabilityCount: rows.length,
+    platforms,
+    capabilities: rows
+      .map((row) => ({
+        cells: Object.fromEntries(
+          platforms.map((platform) => {
+            const cell = row.cells[platform];
+            const required = row.capability.requiredOn.includes(platform);
+            if (!required && !cell.covered) {
+              return [platform, "not-required"];
+            }
+            if (!cell.covered) {
+              return [platform, "missing"];
+            }
+            return [platform, cell.detail === "tab" ? "ok(tab)" : "ok"];
+          }),
+        ),
+        id: row.capability.id,
+        requiredOn: row.capability.requiredOn,
+        surface: row.capability.surface,
+      }))
+      .sort((left, right) => (left.id < right.id ? -1 : 1)),
+    gaps: missing
+      .map((row) => ({ id: row.capability.id, missingOn: row.requiredGaps }))
+      .sort((left, right) => (left.id < right.id ? -1 : 1)),
+    documentedAsymmetries: contract.capabilities
+      .map((capability) => ({
+        absentOn: platforms.filter((platform) => !capability.requiredOn.includes(platform)),
+        id: capability.id,
+        reason: String(capability.notes ?? "").replace(/\s+/gu, " ").trim() || null,
+      }))
+      .filter((entry) => entry.absentOn.length > 0)
+      .sort((left, right) => (left.id < right.id ? -1 : 1)),
+  };
+}
+
+function serializeSnapshot(snapshot) {
+  return `${JSON.stringify(snapshot, null, 2)}\n`;
+}
+
+const snapshot = buildSnapshot();
+
+if (writeSnapshot) {
+  writeFileSync(snapshotPath, serializeSnapshot(snapshot), "utf8");
+  process.stdout.write(
+    `wrote ${path.relative(workspaceRoot, snapshotPath)} (${snapshot.capabilityCount} capabilities, ${snapshot.gaps.length} gaps)\n`,
+  );
+}
+
+if (checkSnapshot) {
+  if (!existsSync(snapshotPath)) {
+    process.stdout.write(
+      `missing ${path.relative(workspaceRoot, snapshotPath)}: run pnpm parity:snapshot\n`,
+    );
+    process.exit(1);
+  }
+  const committed = readFileSync(snapshotPath, "utf8");
+  const expected = serializeSnapshot(snapshot);
+  if (committed !== expected) {
+    process.stdout.write(
+      `capability snapshot is stale: ${path.relative(workspaceRoot, snapshotPath)} differs from the live matrix.\n` +
+        "Run pnpm parity:snapshot and review the diff.\n",
+    );
+    process.exit(1);
+  }
+  process.stdout.write("capability snapshot matches the live matrix.\n");
+}
 
 if (asJson) {
   process.stdout.write(

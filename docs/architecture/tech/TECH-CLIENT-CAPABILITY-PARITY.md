@@ -162,9 +162,10 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 52/52 pass
+pnpm test:node                                                     → 53/53 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 16/16)
+  (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 8/8
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 6/6
@@ -229,15 +230,27 @@ pricing, subscription, membership-purchase, entitlement, payment) are declared
 by no app root, are excluded from the root tsconfig, and are reported as
 skipped rather than hidden.
 
+### 6.3 Versioned coverage snapshot
+
+`specs/capability-parity.snapshot.json` is the committed evidence of the matrix:
+36 capabilities, the roots that must ship each, which roots resolve, and the
+documented asymmetries with their reasons. It is generated from the live
+contract + registries, so a coverage change becomes a reviewable diff instead of
+a claim in a commit message.
+
+```bash
+pnpm parity:snapshot          # refresh after an intended coverage change
+pnpm check:parity-snapshot    # fail when the committed snapshot is stale
+```
+
+`pnpm verify` runs the check, and
+`tests/contract/verify-capability-snapshot.test.mjs` runs the same check inside
+`pnpm test:node`, so a stale snapshot fails the ordinary regression run too.
+
 Flutter visual review: `flutter test -DVISUAL_CAPTURE=true --update-goldens
 test/visual_capture_test.dart` now captures the help, reviews, gift-card,
 profile and account-security surfaces alongside the shell tabs. Goldens are
 local review artifacts and are not committed.
-
-Before this change the H5 and mini-program architecture tests were not wired
-into any package script (vitest only collects `*.test.ts(x)`, `test:node` only
-collected repository-level `*.test.mjs`), so those two roots had no automated
-architecture gate at all. `test:node` now collects all three test roots.
 
 Before this change the H5 and mini-program architecture tests were not wired
 into any package script (vitest only collects `*.test.ts(x)`, `test:node` only
