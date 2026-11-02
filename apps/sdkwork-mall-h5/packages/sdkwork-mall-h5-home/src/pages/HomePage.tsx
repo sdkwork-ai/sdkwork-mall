@@ -259,6 +259,26 @@ export function SdkworkMallH5HomePage() {
           </div>
         </section>
       ) : null}
+
+      {/* 服务入口：让帮助中心 / 电视购物 / 设置 这些非交易页在首页可达，
+          避免出现"已实现但无入口"的孤儿页面。 */}
+      <section className="sdk-h5-section">
+        <h2>更多服务</h2>
+        <div className="sdk-h5-quick-grid">
+          <Link className="sdk-h5-quick-grid-item" to="/help">
+            <span>帮助中心</span>
+          </Link>
+          <Link className="sdk-h5-quick-grid-item" to="/tv">
+            <span>电视购物</span>
+          </Link>
+          <Link className="sdk-h5-quick-grid-item" to="/buyer/orders">
+            <span>我的订单</span>
+          </Link>
+          <Link className="sdk-h5-quick-grid-item" to="/buyer/settings">
+            <span>设置</span>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

@@ -216,3 +216,95 @@ test("mall H5 capability packages are individually typecheckable", () => {
     `H5 packages must declare tsconfig.json so scripts/typecheck-mall-packages.mjs covers them: ${missing.join(", ")}`,
   );
 });
+
+test("no H5 capability route is an orphan screen", () => {
+  // The inverse of the link check: a registered route that nothing links to is
+  // implemented but unreachable. The page module for each path is resolved from
+  // the router, so a page's own self-reference cannot satisfy the check. Tab
+  // roots are entered from the tab bar and are exempt.
+  const packagesRoot = fileURLToPath(new URL("../../packages/", import.meta.url));
+  const appRoot = fileURLToPath(new URL("../../", import.meta.url));
+  const routerSource = read("../../src/routes/AppRoutes.tsx");
+  const tabPaths = new Set(["/", "/categories", "/cart", "/buyer"]);
+
+  const packageDirectories = new Map();
+  for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+    const packageJsonPath = join(packagesRoot, entry.name, "package.json");
+    if (!existsSync(packageJsonPath)) {
+      continue;
+    }
+    packageDirectories.set(
+      JSON.parse(readFileSync(packageJsonPath, "utf8")).name,
+      join(packagesRoot, entry.name),
+    );
+  }
+
+  const lazyModules = new Map();
+  for (const match of routerSource.matchAll(/const (\w+) = lazy\(\(\)[\s\S]*?import\("([^"]+)"\)/gu)) {
+    lazyModules.set(match[1], match[2]);
+  }
+
+  const pageModuleByPath = new Map();
+  for (const segment of routerSource.split("<Route").slice(1)) {
+    const pathMatch = segment.match(/path="([^"]+)"/u);
+    const componentMatch = segment.match(/<([A-Z]\w+)/u);
+    if (!pathMatch || !componentMatch) {
+      continue;
+    }
+    const specifier = lazyModules.get(componentMatch[1]);
+    if (!specifier) {
+      continue;
+    }
+    const [packageName, ...subpathParts] = specifier.split("/");
+    const packageNameWithScope = specifier.startsWith("@")
+      ? [packageName, subpathParts.shift()].join("/")
+      : packageName;
+    const subpath = subpathParts.join("/");
+    const packageDirectory = packageDirectories.get(packageNameWithScope);
+    if (!packageDirectory) {
+      continue;
+    }
+    const exportsMap = JSON.parse(readFileSync(join(packageDirectory, "package.json"), "utf8")).exports ?? {};
+    const entry = exportsMap[subpath ? `./${subpath}` : "."];
+    const relativeModule = entry?.import ?? entry?.default;
+    if (typeof relativeModule !== "string") {
+      continue;
+    }
+    pageModuleByPath.set(pathMatch[1], join(packageDirectory, relativeModule));
+  }
+
+  const linkSources = collectTsx(packagesRoot)
+    .concat(collectTsx(join(appRoot, "src")))
+    .filter((file) => !file.endsWith("routes.ts") && !file.endsWith("AppRoutes.tsx"));
+
+  const orphans = [];
+  for (const registered of collectRoutePaths(packagesRoot)) {
+    if (tabPaths.has(registered)) {
+      continue;
+    }
+    const needle = registered.split("/:")[0];
+    if (!needle) {
+      continue;
+    }
+    const ownModule = pageModuleByPath.get(registered);
+    const linked = linkSources.some((file) => {
+      if (ownModule && file === ownModule) {
+        return false;
+      }
+      const source = readFileSync(file, "utf8");
+      return source.includes(`"${needle}`) || source.includes(`\`${needle}`);
+    });
+    if (!linked) {
+      orphans.push(registered);
+    }
+  }
+
+  assert.deepEqual(
+    orphans,
+    [],
+    `Routes with no in-app entry (implemented but unreachable):\n${orphans.join("\n")}`,
+  );
+});

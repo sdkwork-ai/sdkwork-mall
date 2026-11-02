@@ -43,6 +43,8 @@ each root uses (route id, mini-program page, Flutter route or tab).
 | Router mounting | same test | A route is declared in `routes.ts` but the PC/H5 router never mounts it (`case "<id>"` / `path="<path>"` missing) |
 | Route identity (mobile) | same test | A capability's canonical route id is missing from `mini-program/src/routes/capabilities.ts` or `flutter-mobile/lib/routes/capability_routes.dart`, or points at a different page/path than the contract |
 | Mini-program navigation | `apps/sdkwork-mall-mini-program/tests/capability-navigation.test.mjs` | A page module hard-codes `/pages/...`, or the registry and `app.json` disagree, or a tab capability is not classified for `wx.switchTab` |
+| Link integrity (web) | PC + H5 architecture tests | An in-app `to`/`navigate` link targets a path no route contributes |
+| Orphan screens (H5) | `apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture.test.mjs` | A registered route has no in-app entry; the page module resolved from the router is excluded so a page cannot link to itself |
 | Auth alignment | same test | The same capability is public on one web root and auth-required on the other |
 | Title-key convention | same test | A route title key does not follow `<namespace>.routes.<screen>.title` |
 | Shared copy | same test | The upstream notice or buyer-hub label is reworded on one root |
@@ -147,10 +149,10 @@ regression surface, and they are green.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 46/46 pass
+pnpm test:node                                                     → 47/47 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 14/14)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 15/15)
-  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 6/6
+  (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 7/7
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 4/4
   (apps/sdkwork-mall-mini-program/tests/currency-format)           → 2/2)
@@ -180,6 +182,13 @@ mounted route (`to="…"`, `navigate("…")`, and template-literal links, with
   (`/admin/products/new`) and `admin.commerce.product-admin.edit`
   (`/admin/products/:productId/edit`), AppRoutes mounts them with the matching
   `CatalogAdmin sectionId`, and the links point at them.
+
+The inverse check runs on H5: every registered route must have at least one
+in-app entry, where the page module resolved from the router is excluded so a
+page cannot satisfy the check by linking to itself. It found `storefront.mall.tv`
+(`/tv`) reachable from nowhere — the TV showcase was implemented and routed but
+had no entry point. The H5 home page now carries a 更多服务 row (帮助中心 /
+电视购物 / 我的订单 / 设置), so the TV surface is discoverable instead of dead.
 
 ### 6.2 Per-package typecheck while the root gate is upstream-blocked
 
