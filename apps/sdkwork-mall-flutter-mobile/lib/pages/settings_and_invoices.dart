@@ -99,6 +99,11 @@ class _SdkworkInvoicesPageState extends State<SdkworkInvoicesPage> {
       setState(() => _message = SdkworkI18n.t('invoices.taxRequired'));
       return;
     }
+    if (titleType == 'company' &&
+        !RegExp(r'^[A-Z0-9]{15,20}$').hasMatch(_taxNumber.text.trim())) {
+      setState(() => _message = SdkworkI18n.t('invoices.taxInvalid'));
+      return;
+    }
     setState(() {
       _busy = true;
       _message = '';

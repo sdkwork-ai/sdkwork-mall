@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   createMallH5Invoice,
@@ -10,6 +11,7 @@ import { SdkworkMallH5SelectCell } from "../components/ActionSheet";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 export function SdkworkMallH5InvoicesPage() {
+  const { t } = useTranslation();
   const [invoices, setInvoices] = useState<MallH5Invoice[]>([]);
   const [titleType, setTitleType] = useState("personal");
   const [title, setTitle] = useState("");
@@ -62,6 +64,10 @@ export function SdkworkMallH5InvoicesPage() {
     }
     if (titleType === "company" && !taxNumber.trim()) {
       setMessage("企业抬头需要填写税号");
+      return;
+    }
+    if (titleType === "company" && !/^[A-Z0-9]{15,20}$/u.test(taxNumber.trim())) {
+      setMessage(t("invoices.taxInvalid"));
       return;
     }
     setBusy(true);

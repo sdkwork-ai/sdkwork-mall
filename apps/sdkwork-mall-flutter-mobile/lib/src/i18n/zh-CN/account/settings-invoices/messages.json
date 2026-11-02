@@ -15,6 +15,7 @@
     "submitted": "开票申请已提交",
     "titleRequired": "请填写发票抬头",
     "taxRequired": "企业抬头需要填写税号",
+    "taxInvalid": "税号格式不正确（15-20 位字母或数字）",
     "listSection": "我的发票",
     "empty": "暂无发票",
     "fallbackTitle": "发票",

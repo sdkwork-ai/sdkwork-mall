@@ -9,6 +9,7 @@
  * resolves only JavaScript at runtime.
  */
 import buyerHub from "./zh-CN/account/buyer-hub/messages";
+import invoices from "./zh-CN/account/invoices/messages";
 import help from "./zh-CN/support/help/messages";
 import home from "./zh-CN/storefront/home/messages";
 
@@ -27,6 +28,7 @@ function collect(node: Record<string, unknown>, prefix: string): void {
 }
 
 collect(buyerHub as Record<string, unknown>, "");
+collect(invoices as Record<string, unknown>, "");
 collect(help as Record<string, unknown>, "");
 collect(home as Record<string, unknown>, "");
 

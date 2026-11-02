@@ -174,7 +174,7 @@ stay listed in section 5's table above.
 ## 6. Verification Evidence (2026-11-02)
 
 ```text
-pnpm test:node                                                     → 84/84 pass
+pnpm test:node                                                     → 86/86 pass
   (tests/contract/verify-mall-capability-parity.test.mjs           → 15/15)
   (tests/contract/verify-mall-standard-architecture.test.mjs       → 17/17)
   (tests/contract/verify-capability-snapshot.test.mjs              → 1/1)
@@ -189,6 +189,7 @@ pnpm test:node                                                     → 84/84 pas
   (tests/contract/verify-after-sales-depth.test.mjs                → 2/2)
   (tests/contract/verify-flutter-i18n-runtime.test.mjs            → 2/2)
   (tests/contract/verify-mp-i18n-runtime.test.mjs                 → 2/2)
+  (tests/contract/verify-invoice-tax-validation.test.mjs          → 2/2)
   (apps/sdkwork-mall-h5/tests/contract/h5-standard-architecture)   → 10/10
   (apps/sdkwork-mall-mini-program/tests/mp-standard-architecture)  → 5/5
   (apps/sdkwork-mall-mini-program/tests/capability-navigation)     → 7/7
@@ -516,6 +517,18 @@ The buyer hub, the help centre and the storefront home are the first migrated
 pages, dropping the mini-program's hard-coded count 378 → 310.
 `tests/contract/verify-mp-i18n-runtime.test.mjs` pins the runtime, the fragment
 wiring and the no-literal rule for migrated pages and their WXML templates.
+
+### 6.1.20 Invoice tax-number validation
+
+A company invoice is keyed by the 15–20 character unified social credit code.
+Checkout paths rejected malformed codes, but the standalone invoice centres on H5,
+the mini program and Flutter accepted any text, so the merchant received invoices
+the tax system later rejects — a failure the buyer only discovers after issuance.
+
+All three invoice centres now validate `^[A-Z0-9]{15,20}$` before submitting and
+surface one shared message (`税号格式不正确（15-20 位字母或数字）`) from their
+respective catalogues. `tests/contract/verify-invoice-tax-validation.test.mjs` pins
+the regex and proves the message stays byte-identical across roots.
 
 ### 6.2 Per-package typecheck
 

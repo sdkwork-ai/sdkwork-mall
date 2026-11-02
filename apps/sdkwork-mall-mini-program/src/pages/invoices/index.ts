@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import {
   errorMessage,
   type MpInputEvent,
@@ -114,6 +115,13 @@ Page({
     }
     if (titleType === "company" && !this.data.taxNumber.trim()) {
       this.showToast("企业抬头需要填写税号");
+      return;
+    }
+    if (
+      titleType === "company" &&
+      !/^[A-Z0-9]{15,20}$/.test(this.data.taxNumber.trim())
+    ) {
+      this.showToast(t("invoices.taxInvalid"));
       return;
     }
     this.setData({ busy: true, message: "" });
