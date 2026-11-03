@@ -1,0 +1,36 @@
+[runtime]
+environment = "demo"
+config_profile = "dev"
+build_mode = "demo"
+deployment_mode = "server"
+runtime_target = "server"
+app_key = "sdkwork-mall-pc"
+
+[sdk_base_urls]
+sdk_base_url = "https://demo-api.sdkwork.com"
+app_api_base_url = "https://demo-api.sdkwork.com/app/v3/api"
+backend_api_base_url = "https://demo-api.sdkwork.com/backend/v3/api"
+
+[server]
+bind = "0.0.0.0:18082"
+external_scheme = "https"
+trust_forwarded_headers = true
+
+[database]
+engine = "postgresql"
+host = "db.demo.internal"
+port = 5432
+database = "sdkwork_ai_demo"
+schema = "sdkwork_ai_demo"
+username = "sdkwork_ai_demo"
+password_file = "/etc/sdkwork/database/database.secret"
+ssl_mode = "require"
+max_connections = 20
+
+[redis]
+enabled = true
+host = "redis.demo.internal"
+port = 6379
+database = 0
+password_file = "/etc/sdkwork/commerce-pc/redis.secret"
+key_prefix = "sdkwork-mall-pc:demo"

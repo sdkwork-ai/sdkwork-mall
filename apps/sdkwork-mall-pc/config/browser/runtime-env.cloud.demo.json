@@ -5,7 +5,7 @@
   "runtimeTarget": "browser",
   "browserOriginMode": "cross-origin",
   "configProfile": "dev",
-  "buildMode": "development",
+  "buildMode": "demo",
   "deploymentMode": "web",
   "appKey": "sdkwork-mall-pc",
   "auth": {

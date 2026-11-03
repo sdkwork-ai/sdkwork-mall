@@ -8,6 +8,7 @@ const profileByAlias = new Map([
   ["development", { environment: "development", profile: "dev" }],
   ["dev", { environment: "development", profile: "dev" }],
   ["test", { environment: "test", profile: "test" }],
+  ["demo", { environment: "demo", profile: "dev" }],
   ["staging", { environment: "staging", profile: "staging" }],
   ["production", { environment: "production", profile: "prod" }],
   ["prod", { environment: "production", profile: "prod" }],
@@ -22,13 +23,14 @@ function parseArgs(argv) {
     return [
       profileByAlias.get("development"),
       profileByAlias.get("test"),
+      profileByAlias.get("demo"),
       profileByAlias.get("staging"),
       profileByAlias.get("production"),
     ];
   }
   const profileIndex = argv.indexOf("--profile");
   if (profileIndex === -1 || !argv[profileIndex + 1]) {
-    fail("expected --profile <development|test|staging|production> or --all");
+    fail("expected --profile <development|test|demo|staging|production> or --all");
   }
   const resolved = profileByAlias.get(argv[profileIndex + 1]);
   if (!resolved) {

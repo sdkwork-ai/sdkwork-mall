@@ -154,6 +154,11 @@
       "deployUrl": "https://api-test.sdkwork.com/apps/sdkwork-mall-pc",
       "deployEnv": "test"
     },
+    "demo": {
+      "accessUrl": "https://api-demo.sdkwork.com/apps/sdkwork-mall-pc",
+      "deployUrl": "https://api-demo.sdkwork.com/apps/sdkwork-mall-pc",
+      "deployEnv": "demo"
+    },
     "staging": {
       "accessUrl": "https://api-staging.sdkwork.com/apps/sdkwork-mall-pc",
       "deployUrl": "https://api-staging.sdkwork.com/apps/sdkwork-mall-pc",

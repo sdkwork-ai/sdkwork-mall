@@ -1,0 +1,33 @@
+{
+  "environment": "demo",
+  "deploymentProfile": "cloud",
+  "profileId": "cloud.demo",
+  "runtimeTarget": "browser",
+  "browserOriginMode": "same-origin",
+  "configProfile": "dev",
+  "buildMode": "demo",
+  "deploymentMode": "web",
+  "appKey": "sdkwork-mall-pc",
+  "auth": {
+    "tokenManagerMode": "appbase-global",
+    "tokenStorage": "browser-session",
+    "accessTokenHeader": "Access-Token",
+    "authTokenHeader": "Authorization",
+    "refreshEnabled": true
+  },
+  "i18n": {
+    "defaultLocale": "zh-CN",
+    "supportedLocales": [
+      "zh-CN",
+      "en-US"
+    ],
+    "fallbackLocale": "en-US"
+  },
+  "appApiBaseUrl": "/",
+  "backendApiBaseUrl": "/",
+  "driveAppApiBaseUrl": "/",
+  "appbaseAppApiBaseUrl": "/",
+  "deployAppApiBaseUrl": "/",
+  "openApiBaseUrl": "/",
+  "sdkBaseUrl": "/"
+}

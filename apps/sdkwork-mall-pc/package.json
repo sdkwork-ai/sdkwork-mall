@@ -16,8 +16,10 @@
     "lint": "pnpm run typecheck",
     "build:dev": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment dev",
     "build:test": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment test",
+    "build:demo": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment demo",
     "build:dev:cloud": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment dev --deployment-profile cloud",
     "build:test:cloud": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment test --deployment-profile cloud",
+    "build:demo:cloud": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment demo --deployment-profile cloud",
     "build:staging:cloud": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment staging --deployment-profile cloud",
     "build:prod:cloud": "node ../../../sdkwork-specs/tools/build-browser-client.mjs --app-root . --environment prod --deployment-profile cloud"
   },

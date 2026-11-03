@@ -24,7 +24,9 @@ export function configureSdkworkMallPcAdminCommerceRemotePort(
     sdkClients.commerceBackendClient
       ? {
           admin: createSdkCommandPortAdapter<SdkworkAdminCommerceNamespace>(
-            sdkClients.commerceBackendClient,
+            // The federated client groups every backend transport under
+            // `commerce`; the admin port namespace maps onto that tree.
+            sdkClients.commerceBackendClient.commerce as object,
             {
               argumentRules: {
                 "shops.depositAccount.retrieve": ([query]) => [splitSdkQueryId(query, "shopId")[0]],

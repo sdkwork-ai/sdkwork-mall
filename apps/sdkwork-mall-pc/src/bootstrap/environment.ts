@@ -4,6 +4,7 @@ import { resolveSharedSdkApiBaseUrl } from "./resolveSdkApiBaseUrl";
 export type SdkworkMallPcEnvironment =
   | "development"
   | "test"
+  | "demo"
   | "staging"
   | "production";
 
@@ -63,6 +64,7 @@ export interface SdkworkMallPcRuntimeConfig {
 const environmentByMode: Record<string, SdkworkMallPcEnvironment> = {
   development: "development",
   dev: "development",
+  demo: "demo",
   production: "production",
   prod: "production",
   staging: "staging",
@@ -71,6 +73,7 @@ const environmentByMode: Record<string, SdkworkMallPcEnvironment> = {
 
 const profileByEnvironment: Record<SdkworkMallPcEnvironment, SdkworkMallPcConfigProfile> = {
   development: "dev",
+  demo: "dev",
   production: "prod",
   staging: "staging",
   test: "test",
