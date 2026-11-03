@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* Tailwind v4 only scans files under this app root by default, so the utility
+   classes owned by the workspace-linked IAM auth surface (and the UI primitives
+   it renders) were never generated and the login/register page rendered with no
+   layout at all. These @source roots keep the generated sheet in sync with the
+   packages this app actually mounts. */
+@source "../../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-pc-react/src";
+@source "../../../../sdkwork-appbase/packages/pc-react/foundation/sdkwork-i18n-pc-react/src";
+@source "../../../../sdkwork-ui/sdkwork-ui-pc-react/src";
+
+@theme {
+  /* Mall brand palette: the IAM auth surface renders `primary-*` utilities
+     (tabs, icons, focus rings); map them to the commerce blue used by the
+     storefront instead of the SDKWork default red. */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  --color-primary-950: #172554;
+}
+
 :root {
   --sdk-h5-primary: #2563eb;
   --sdk-h5-text: #111827;
@@ -10,6 +36,9 @@
   --sdk-h5-danger: #dc2626;
   --sdk-h5-warning-bg: #fef3c7;
   --sdk-h5-success-bg: #d1fae5;
+  /* Brand accent consumed by shared SDKWork surfaces (IAM auth primary action,
+     toasts, focus rings). Left unset they fall back to SDKWork red. */
+  --sdk-color-brand-primary: var(--sdk-h5-primary);
   /* Single source of truth for tab-bar clearance: fixed bars on tab surfaces
      and main's gutter must match the rendered tab-bar height exactly. */
   --sdk-h5-tabbar-height: 3.5rem;
@@ -3263,5 +3292,249 @@ a {
     margin: 0;
     max-height: none;
     width: 100%;
+  }
+}
+
+/* ---- IAM auth: login / register on the H5 viewport ------------------------
+ *
+ * @sdkwork/auth-pc-react is a desktop surface: a fixed card, a side rail and
+ * compact controls. On a phone the login/register/recovery screens must become
+ * the app's own screen: full-bleed single column, safe-area aware, 48px primary
+ * action, 16px inputs (iOS never zooms a focused field).
+ *
+ * The class names below are bound by src/bootstrap/authAppearance.tsx; colors
+ * are configured there through the appearance theme tokens, layout is owned
+ * here. Rules are unlayered so they beat the Tailwind utilities the shared
+ * surface carries, and page-scoped with the compound `.sdk-mall-auth-page`
+ * selector (the page element also carries `.sdkwork-auth-surface`) so they beat
+ * the theme <style> the shared surface injects inside the page.
+ */
+
+.sdk-mall-auth-page {
+  align-items: stretch !important;
+  background: var(--sdk-h5-surface) !important;
+  justify-content: flex-start !important;
+  padding: 0 !important;
+}
+
+.sdk-mall-auth-page .sdk-mall-auth-background {
+  display: none;
+}
+
+.sdk-mall-auth-shell {
+  background: var(--sdk-h5-panel);
+  border-radius: 0;
+  box-shadow: none;
+  flex-direction: column !important;
+  margin: 0 auto;
+  max-width: none !important;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.sdk-mall-auth-content {
+  flex: 1;
+  justify-content: flex-start;
+  margin: 0 auto;
+  max-width: 30rem;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 1.75rem)
+    1.4rem
+    calc(env(safe-area-inset-bottom, 0px) + 1.75rem) !important;
+  width: 100%;
+}
+
+.sdk-mall-auth-content > div {
+  justify-content: flex-start;
+  max-width: none;
+  min-height: 0;
+  width: 100%;
+}
+
+.sdk-mall-auth-header {
+  margin-bottom: 1.45rem !important;
+}
+
+.sdk-mall-auth-brand {
+  align-items: center;
+  display: flex;
+  gap: 0.55rem;
+  margin-bottom: 1.4rem;
+}
+
+.sdk-mall-auth-brand-mark {
+  align-items: center;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  border-radius: 0.8rem;
+  box-shadow: 0 10px 20px -10px rgba(37, 99, 235, 0.85);
+  color: #ffffff;
+  display: inline-flex;
+  height: 2.35rem;
+  justify-content: center;
+  width: 2.35rem;
+}
+
+.sdk-mall-auth-brand-name {
+  color: var(--sdk-h5-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.sdk-mall-auth-title {
+  color: var(--sdk-h5-text);
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.sdk-mall-auth-description {
+  color: var(--sdk-h5-text-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin-top: 0.45rem;
+}
+
+/* Method switcher (password / email code / phone code, email or phone
+   registration) becomes a segmented control instead of an underlined tab row:
+   the shared row collapses into one tab per line below `sm`, which reads as a
+   broken list on every phone. */
+.sdk-mall-auth-page .sdkwork-auth-tabs {
+  background: #f1f3f5;
+  border-bottom: 0;
+  border-radius: 0.8rem;
+  padding: 0.22rem;
+}
+
+.sdk-mall-auth-page .sdkwork-auth-tabs .sdkwork-auth-tabs-grid {
+  gap: 0.2rem;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  grid-template-columns: none !important;
+}
+
+.sdk-mall-auth-page .sdkwork-auth-tab-button {
+  border-bottom-width: 0;
+  border-radius: 0.62rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  gap: 0;
+  min-height: 2.4rem;
+  padding: 0.4rem 0.3rem;
+}
+
+.sdk-mall-auth-page .sdkwork-auth-tab-button[data-state="active"] {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.14);
+}
+
+.sdk-mall-auth-page .sdkwork-auth-tab-icon {
+  display: none;
+}
+
+.sdk-mall-auth-page.sdkwork-auth-surface label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* 16px keeps iOS Safari from zooming the viewport when a field receives focus;
+   the shared 44px field frame already meets the touch-target floor. */
+.sdk-mall-auth-page.sdkwork-auth-surface input {
+  font-size: 1rem;
+}
+
+/* Focus affordance: the shared fields are borderless fills with the focus ring
+   suppressed, so a keyboard or touch user gets no indication of the active
+   field. The ring is drawn on the field frame around the inner input. The two
+   shapes below are the icon/code frames (input is a direct child) and the
+   password frame (input sits in a control slot element). */
+.sdk-mall-auth-page.sdkwork-auth-surface div:has(> input:focus),
+.sdk-mall-auth-page.sdkwork-auth-surface div:has(> span > input:focus) {
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35) !important;
+}
+
+/* Invalid field: the shared form only prints a message below the field, which
+   on a phone can sit off-screen once the keyboard is open. Mark the surface
+   itself so the failing input is identifiable without scrolling. */
+.sdk-mall-auth-page.sdkwork-auth-surface div:has(> input[aria-invalid="true"]),
+.sdk-mall-auth-page.sdkwork-auth-surface div:has(> span > input[aria-invalid="true"]) {
+  outline: 1px solid rgba(220, 38, 38, 0.45);
+  outline-offset: -1px;
+}
+
+/* Verification-code row: the shared markup pairs the code input with a second
+   boxed control, which at 360-390px squeezes the input to half width. Make the
+   row one field surface and inline the resend action so it lines up with the
+   identifier and password fields above it. The row is the only direct input
+   container without a leading icon slot. */
+.sdk-mall-auth-page.sdkwork-auth-surface div:has(> input):not(:has(> span)) {
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  padding-right: 0.35rem;
+}
+
+.sdk-mall-auth-page.sdkwork-auth-surface div:has(> input):not(:has(> span)) > input {
+  background: transparent !important;
+  min-width: 0;
+}
+
+.sdk-mall-auth-page.sdkwork-auth-surface div:has(> input):not(:has(> span)) > button {
+  background: transparent !important;
+  color: var(--sdk-h5-primary);
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  height: 2.35rem !important;
+  min-width: 0 !important;
+  padding: 0 0.5rem !important;
+}
+
+.sdk-mall-auth-page.sdkwork-auth-surface button[type="submit"] {
+  border-radius: 0.85rem !important;
+  font-size: 1rem;
+  height: 3rem !important;
+}
+
+@media (min-width: 40rem) {
+  .sdk-mall-auth-page {
+    /* `safe` keeps the card's top edge reachable when it is taller than a
+       short landscape viewport instead of centering it out of scroll range. */
+    align-items: safe center !important;
+    padding: 1.5rem !important;
+  }
+
+  .sdk-mall-auth-shell {
+    border-radius: 1.15rem;
+    box-shadow: 0 28px 64px -34px rgba(15, 23, 42, 0.45);
+    max-width: 26rem !important;
+    min-height: 0;
+  }
+
+  .sdk-mall-auth-content {
+    flex: 0 0 auto;
+    padding: 2rem 1.75rem !important;
+  }
+}
+
+/* Short viewports (small phones, landscape): tighten the vertical rhythm so
+   the primary action stays close to the fold instead of below it. */
+@media (max-height: 45rem) {
+  .sdk-mall-auth-content {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1.1rem) !important;
+  }
+
+  .sdk-mall-auth-brand {
+    margin-bottom: 0.95rem;
+  }
+
+  .sdk-mall-auth-header {
+    margin-bottom: 1rem !important;
+  }
+
+  .sdk-mall-auth-title {
+    font-size: 1.35rem;
   }
 }

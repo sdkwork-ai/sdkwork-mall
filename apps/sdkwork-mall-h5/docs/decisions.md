@@ -28,3 +28,23 @@
   send/receive to the websocket without touching pages. Trade events
   (order created / paid / cancelled / received) are delivered as IM
   notifications so 通知与提醒统一走消息管道.
+- 2026-11-04: the IAM login/register/recovery screens are rendered as a native
+  H5 surface instead of a desktop card squeezed into a phone viewport.
+  `@sdkwork/auth-pc-react` still owns the flows (controller, validation,
+  verification codes, organization selection), but three things are app-owned:
+  (1) `src/index.css` declares `@source` roots for the shared auth and UI
+  packages — Tailwind v4 only scans this app root, so without them every
+  utility class of the auth surface is missing and the screens render with no
+  layout at all (the defect this change fixes); (2) `src/bootstrap/
+  authAppearance.tsx` binds the mall appearance — brand header, commerce color
+  tokens, `--sdk-color-brand-primary`, and the desktop QR/highlight rail hidden
+  (`qrLoginEnabled: false`, `leftRailMode: "highlights-only"`) because a phone
+  cannot scan its own screen; (3) the `.sdk-mall-auth-*` rules own the mobile
+  layout: full-bleed single column with safe-area padding, segmented method
+  switcher, inline resend action on the code field, 48px primary action, 16px
+  inputs (no iOS focus zoom), focus/invalid field states, a compact rhythm
+  under 720px height and a centered card from 640px width up. Migrating to the
+  native `@sdkwork/iam-h5-auth` package stays a follow-up; a full login round
+  trip in dev additionally needs the bootstrap credential (`SDKWORK_ACCESS_TOKEN`)
+  that the dev runner injects, otherwise sign-in fails before dispatch.
+

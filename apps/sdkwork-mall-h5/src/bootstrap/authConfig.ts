@@ -1,24 +1,12 @@
-import type { CSSProperties } from "react";
 import type { SdkworkAuthRuntimeConfig } from "@sdkwork/auth-pc-react";
 
-export interface SdkworkMallH5AuthAppearanceConfig {
-  asidePanelClassName?: string;
-  asidePanelStyle?: CSSProperties;
-  bodyClassName?: string;
-  contentContainerClassName?: string;
-  pageClassName?: string;
-  qrFrameClassName?: string;
-  shellClassName?: string;
-  slotProps?: {
-    asidePanel?: { className?: string; style?: CSSProperties };
-    background?: { className?: string };
-    page?: { className?: string };
-    shell?: { className?: string };
-  };
-  theme?: Record<string, string>;
-}
-
 export type SdkworkMallH5AuthRuntimeConfig = SdkworkAuthRuntimeConfig;
+
+/**
+ * Commerce verification policy: buyer accounts are created from a verified
+ * email or phone, so registration always carries a verification challenge.
+ * Both channels are enabled so either identifier can complete the flow.
+ */
 const COMMERCE_VERIFICATION_POLICY = {
   emailCodeLoginEnabled: true,
   emailRegistrationVerificationRequired: false,
@@ -26,50 +14,24 @@ const COMMERCE_VERIFICATION_POLICY = {
   phoneRegistrationVerificationRequired: false,
 };
 
+/**
+ * IAM auth runtime configuration for the H5 storefront.
+ *
+ * QR login is a desktop affordance (a phone cannot scan its own screen), so the
+ * surface runs without the QR rail and renders only the account flows. The rail
+ * mode stays explicit so the shared surface never falls back to its `qr-only`
+ * default when this config is absent from an embedding host.
+ */
 export function resolveSdkworkMallH5AuthRuntimeConfig(): SdkworkMallH5AuthRuntimeConfig {
   return {
-    leftRailMode: "qr-only",
+    leftRailMode: "highlights-only",
     loginMethods: ["password", "emailCode", "phoneCode"],
     oauthLoginEnabled: false,
     oauthProviders: [],
-    qrLoginEnabled: true,
+    qrLoginEnabled: false,
     recoveryMethods: ["email", "phone"],
     registerMethods: ["email", "phone"],
     verificationPolicy: COMMERCE_VERIFICATION_POLICY,
-  };
-}
-
-export function resolveSdkworkMallH5AuthAppearance(): SdkworkMallH5AuthAppearanceConfig {
-  return {
-    asidePanelClassName: "sdkwork-mall-h5-auth-aside-panel",
-    asidePanelStyle: {
-      backgroundColor: "#f8fafc",
-      backgroundImage: "linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)",
-      color: "#0f172a",
-    },
-    bodyClassName: "sdkwork-mall-h5-auth-body",
-    contentContainerClassName: "sdkwork-mall-h5-auth-content",
-    pageClassName: "sdkwork-mall-h5-auth-page",
-    qrFrameClassName: "sdkwork-mall-h5-auth-qr-frame",
-    shellClassName: "sdkwork-mall-h5-auth-card-shell",
-    slotProps: {
-      asidePanel: {
-        style: {
-          backgroundColor: "#f8fafc",
-          backgroundImage: "linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%)",
-          color: "#0f172a",
-        },
-      },
-      background: {
-        className: "sdkwork-mall-h5-auth-background",
-      },
-      page: {
-        className: "sdkwork-mall-h5-auth-page",
-      },
-      shell: {
-        className: "sdkwork-mall-h5-auth-card-shell",
-      },
-    },
   };
 }
 

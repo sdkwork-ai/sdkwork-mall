@@ -15,6 +15,32 @@ test("mall H5 root is manifest-driven with mobile runtime identity", () => {
   assert.equal(manifest.runtime?.framework, "react-h5");
 });
 
+test("the IAM auth surface keeps the Tailwind sources it renders with", () => {
+  // Regression guard: Tailwind v4 only scans this app root, so the desktop IAM
+  // auth package mounted on /auth/* needs an explicit @source entry. Without it
+  // every utility class the shared surface relies on is missing and the
+  // login/register screens render with no layout at all.
+  const css = read("../../src/index.css");
+  assert.match(
+    css,
+    /@source "[^"]*sdkwork-iam\/apps\/sdkwork-iam-pc\/packages\/sdkwork-auth-pc-react\/src"/u,
+    "index.css must scan @sdkwork/auth-pc-react for the classes it renders",
+  );
+  assert.match(
+    css,
+    /--sdk-color-brand-primary/u,
+    "shared surfaces (IAM primary action, toasts) need the mall brand accent",
+  );
+  assert.match(css, /\.sdk-mall-auth-page\b/u, "the H5 auth layout rules must stay bound");
+
+  const appearance = read("../../src/bootstrap/authAppearance.tsx");
+  assert.match(appearance, /pageClassName: "sdk-mall-auth-page"/u);
+  assert.match(appearance, /asideContainer/u, "the desktop QR/highlight rail is hidden on H5");
+
+  const authConfig = read("../../src/bootstrap/authConfig.ts");
+  assert.match(authConfig, /qrLoginEnabled: false/u, "a phone cannot scan its own screen");
+});
+
 test("mall H5 route ids align with the PC root registry", () => {
   const expectedRouteIds = new Set([
     "storefront.mall.home",

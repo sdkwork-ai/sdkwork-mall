@@ -190,13 +190,23 @@ function SdkworkMallBannerCarousel({ banners }: { banners: MallCmsBanner[] }) {
 function BannerCard({ banner, hidden = false }: { banner: MallCmsBanner; hidden?: boolean }) {
   return (
     <Link
-      className="sdkwork-mall-pc-banner-card"
+      className={
+        banner.imageUrl
+          ? "sdkwork-mall-pc-banner-card sdkwork-mall-pc-banner-card-immersive"
+          : "sdkwork-mall-pc-banner-card"
+      }
       key={banner.id}
       style={hidden ? { display: "none" } : undefined}
       to={banner.linkUrl}
     >
-      {banner.imageUrl ? <img alt={banner.title} src={banner.imageUrl} /> : <Sparkles aria-hidden="true" size={24} />}
-      <div>
+      {banner.imageUrl ? (
+        <img alt={banner.title} className="sdkwork-mall-pc-banner-image" src={banner.imageUrl} />
+      ) : (
+        <span aria-hidden="true" className="sdkwork-mall-pc-banner-watermark">
+          <Sparkles size={180} strokeWidth={1.2} />
+        </span>
+      )}
+      <div className="sdkwork-mall-pc-banner-copy">
         <h2>{banner.title}</h2>
         {banner.subtitle ? <p>{banner.subtitle}</p> : null}
       </div>

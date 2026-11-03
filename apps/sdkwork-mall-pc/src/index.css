@@ -2015,6 +2015,171 @@ a {
   opacity: 1;
 }
 
+/*
+ * 首页顶部轮播：全幅直角 hero。
+ * 尺寸遵循 PC 电商首页主 banner 行业规范：主视觉比例约 2.5:1，
+ * 桌面端高度 320–480px（1200px 内容区约 467px），避免早期 120px 的窄条观感。
+ * 仅作用于首页轮播，目录页复用 .sdkwork-mall-pc-banner-card 的卡片布局保持不变。
+ */
+.sdkwork-mall-pc-banner-carousel {
+  isolation: isolate;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  width: 100%;
+  min-height: 20rem;
+  max-height: 30rem;
+  aspect-ratio: 5 / 2;
+  padding: clamp(1.5rem, 3.2vw, 2.75rem) clamp(1.75rem, 4vw, 3.5rem);
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 84% 14%, rgba(37, 99, 235, 0.12), transparent 54%),
+    radial-gradient(circle at 8% 92%, rgba(249, 115, 22, 0.16), transparent 58%),
+    linear-gradient(112deg, #fff2e3 0%, #ffe5cd 46%, #fffaf4 100%);
+  color: var(--sdk-color-text-primary);
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  max-width: 34rem;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-copy h2 {
+  margin: 0;
+  color: inherit;
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-copy p {
+  margin: 0;
+  color: var(--sdk-color-text-secondary);
+  font-size: clamp(0.95rem, 1.15vw, 1.125rem);
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-watermark {
+  position: absolute;
+  top: 50%;
+  right: clamp(1.5rem, 5vw, 4rem);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: rgba(37, 99, 235, 0.14);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-card:hover .sdkwork-mall-pc-banner-image {
+  transform: scale(1.02);
+}
+
+/* 有主视觉图时压低左侧暗部，保证叠加文案对比度达到 WCAG AA。 */
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-card-immersive::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.82) 0%,
+    rgba(15, 23, 42, 0.5) 46%,
+    rgba(15, 23, 42, 0.12) 100%
+  );
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-card-immersive .sdkwork-mall-pc-banner-copy {
+  color: #ffffff;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-card-immersive .sdkwork-mall-pc-banner-copy p {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-dots {
+  right: auto;
+  bottom: clamp(0.9rem, 2vw, 1.5rem);
+  left: 50%;
+  z-index: 3;
+  padding: 0.3rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(6px);
+  transform: translateX(-50%);
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 0;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 1;
+  transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-dot-active {
+  width: 1.25rem;
+  background: #ffffff;
+}
+
+.sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-dot:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-card {
+    aspect-ratio: 16 / 9;
+    min-height: 13rem;
+    max-height: 22rem;
+    padding: 1.25rem 1.5rem 2.75rem;
+  }
+
+  .sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-copy h2 {
+    font-size: 1.5rem;
+  }
+
+  .sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-copy p {
+    font-size: 0.9rem;
+  }
+
+  .sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-watermark {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-image,
+  .sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-dot {
+    transition: none;
+  }
+
+  .sdkwork-mall-pc-banner-carousel .sdkwork-mall-pc-banner-card:hover .sdkwork-mall-pc-banner-image {
+    transform: none;
+  }
+}
+
 .sdkwork-mall-pc-seckill-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));

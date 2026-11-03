@@ -63,6 +63,7 @@ temp/
 .cache/
 .turbo/
 .next/
+.tmp-carousel/
 
 # Per-environment SDKWork materializations are tracked (ENVIRONMENT_SPEC 5.1.7).
 # Local values (` .env`, `.env.local`, `*.bootstrap.local`) stay ignored above.
