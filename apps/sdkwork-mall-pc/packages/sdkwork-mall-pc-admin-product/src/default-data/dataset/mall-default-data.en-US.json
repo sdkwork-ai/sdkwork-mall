@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 1,
+  "locale": "en-US",
+  "categories": {
+    "digital": "Phones & Digital",
+    "phone": "Smartphones",
+    "tablet": "Tablets",
+    "wearable": "Wearables",
+    "audio": "Audio",
+    "computer": "Computers & Office",
+    "laptop": "Laptops",
+    "monitor": "Monitors",
+    "peripheral": "Keyboards & Mice",
+    "appliance": "Home Appliances",
+    "tv": "Televisions",
+    "refrigerator": "Refrigerators",
+    "washer": "Washers",
+    "kitchen": "Kitchen Appliances",
+    "fashion": "Fashion & Bags",
+    "menswear": "Menswear",
+    "womenswear": "Womenswear",
+    "sneakers": "Sneakers",
+    "bag": "Bags",
+    "beauty": "Beauty & Care",
+    "skincare": "Skincare",
+    "makeup": "Makeup",
+    "haircare": "Hair Care",
+    "grocery": "Grocery & Fresh",
+    "grain": "Rice & Oil",
+    "snacks": "Snacks",
+    "fruit": "Fresh Fruit",
+    "sports": "Sports & Outdoors",
+    "fitness": "Fitness Equipment",
+    "outdoor": "Outdoor Gear",
+    "baby": "Baby & Toys",
+    "formula": "Formula & Food",
+    "toys": "Toys"
+  },
+  "shops": {
+    "official": {
+      "name": "Xingye Mall Official Flagship",
+      "description": "Platform-operated store. Authentic goods shipped direct, free shipping over CNY 99, 7-day returns."
+    },
+    "digital": {
+      "name": "Xingye Digital Flagship",
+      "description": "Official store for Xingye phones, tablets and wearables with nationwide warranty and on-site repair."
+    },
+    "home": {
+      "name": "Yunqi Home Flagship",
+      "description": "Brand-direct major appliances and kitchen appliances with delivery-and-install and trade-in service."
+    },
+    "fashion": {
+      "name": "Shiguang Apparel Flagship",
+      "description": "Everyday workwear and light sportswear in natural merino wool and organic cotton, classics all year round."
+    },
+    "beauty": {
+      "name": "Mubai Beauty Flagship",
+      "description": "Transparent formulas that are kind to sensitive skin; every order includes trial sachets."
+    },
+    "grocery": {
+      "name": "Shanhai Fresh Market",
+      "description": "Sourced at origin, cold-chain next-day delivery, spoiled-produce refund, one-stop daily essentials."
+    },
+    "sports": {
+      "name": "Senyu Sports & Outdoors",
+      "description": "Home fitness and light outdoor gear with setup guidance and a 5-year motor warranty."
+    },
+    "baby": {
+      "name": "Qimu Baby & Kids",
+      "description": "Authentic baby products with traceable origin and one-on-one parenting advisors online."
+    }
+  },
+  "products": {
+    "aurora-x1-pro": {
+      "title": "Xingye AURORA X1 Pro 5G Smartphone",
+      "subtitle": "200MP imaging system, Snapdragon 8 Gen 3, 5400mAh silicon-carbon battery",
+      "description": "A 6.78-inch 2K LTPO eye-care display with 1-120Hz adaptive refresh. The 200MP main camera pairs with a periscope telephoto for 43% better low-light yield, while the 5400mAh silicon-carbon battery supports 120W wired and 50W wireless charging for 80% in 30 minutes.",
+      "skus": {
+        "aurora-x1-pro-256-obsidian": "12GB+256GB Obsidian Black",
+        "aurora-x1-pro-512-obsidian": "16GB+512GB Obsidian Black",
+        "aurora-x1-pro-512-starlight": "16GB+512GB Starlight Silver"
+      }
+    },
+    "aurora-tab-11": {
+      "title": "Xingye AURORA Pad 11 Tablet",
+      "subtitle": "11-inch 144Hz display, magnetic keyboard and stylus support",
+      "description": "An 11-inch 2.8K 144Hz full-screen panel with TUV eye-care certification. The octa-core chip and 8GB base memory keep split-screen multitasking smooth, backed by an 8600mAh battery and quad speakers for both media and note-taking.",
+      "skus": {
+        "aurora-tab-11-8-256": "8GB+256GB Star Grey",
+        "aurora-tab-11-12-512": "12GB+512GB Star Grey"
+      }
+    },
+    "aurora-watch-s": {
+      "title": "Xingye AURORA Watch S Smartwatch",
+      "subtitle": "14-day battery, dual-band GPS, 100+ sport modes",
+      "description": "A 1.43-inch always-on AMOLED display in a 32g titanium case. It offers dual-band five-constellation positioning, continuous blood-oxygen and heart-rate monitoring, and 5ATM water resistance with a typical 14-day battery life.",
+      "skus": {
+        "aurora-watch-s-46-black": "46mm Obsidian Black, fluoroelastomer band",
+        "aurora-watch-s-46-titanium": "46mm Titanium Silver, metal band"
+      }
+    },
+    "echo-buds-3": {
+      "title": "Xingye ECHO Buds 3 True Wireless ANC Earbuds",
+      "subtitle": "48dB hybrid ANC, spatial audio, 8-hour single-charge playback",
+      "description": "A dual-feed noise-cancelling architecture reaches 48dB with a natural transparency mode. The 11mm driver supports LDAC high-resolution audio and spatial audio, with 32 hours total playback including the charging case and wireless charging support.",
+      "skus": {
+        "echo-buds-3-white": "Cloud White",
+        "echo-buds-3-black": "Obsidian Black"
+      }
+    },
+    "nucleus-book-14": {
+      "title": "Xingye NUCLEUS Book 14 Ultrabook",
+      "subtitle": "2.8K 120Hz display, 1.29kg metal chassis, 75Wh battery",
+      "description": "A 14-inch 2.8K 120Hz low blue-light display covering 100% sRGB. The all-metal body weighs 1.29kg and opens to 180 degrees, while the 75Wh battery and 100W fast charging deliver up to 11 hours of office work.",
+      "skus": {
+        "nucleus-book-14-i7-16-1t": "i7 / 16GB / 1TB Space Grey",
+        "nucleus-book-14-i9-32-1t": "i9 / 32GB / 1TB Space Grey"
+      }
+    },
+    "nucleus-monitor-27": {
+      "title": "Xingye NUCLEUS 27-inch 4K Monitor",
+      "subtitle": "4K IPS Black, 98% DCI-P3, 90W power delivery",
+      "description": "A 27-inch 4K IPS Black panel with 2000:1 contrast, factory-calibrated to Delta E below 2. It powers a laptop over a single 90W USB-C cable, includes a built-in KVM and dual 3W speakers, and mounts on a tool-free height-adjustable stand.",
+      "skus": {
+        "nucleus-monitor-27-4k": "27-inch 4K, standard stand",
+        "nucleus-monitor-27-4k-usbc": "27-inch 4K, USB-C 90W"
+      }
+    },
+    "nucleus-keyboard-k8": {
+      "title": "Xingye NUCLEUS K8 Tri-mode Mechanical Keyboard",
+      "subtitle": "Gasket mount, hot-swappable, wired / Bluetooth / 2.4G",
+      "description": "A 75% layout that keeps the full function row, with a gasket mount and five-layer dampening for a soft typing feel. Every key is hot-swappable for three- and five-pin switches, and the 4000mAh battery lasts 200 hours with lighting off.",
+      "skus": {
+        "nucleus-keyboard-k8-87-red": "87-key Red switch, Moon White",
+        "nucleus-keyboard-k8-108-brown": "108-key Brown switch, Space Grey"
+      }
+    },
+    "cloud-home-tv-65": {
+      "title": "Yunqi 65-inch Mini LED Smart TV",
+      "subtitle": "Thousand-zone backlight, 144Hz, Dolby Vision",
+      "description": "A 65-inch Mini LED panel with 1152 dimming zones and 1500nits peak brightness. 144Hz refresh with MEMC, Dolby Vision and Dolby Atmos support, 4GB+64GB storage and no boot ads.",
+      "skus": {
+        "cloud-home-tv-65-standard": "65-inch with standard wall mount",
+        "cloud-home-tv-75-standard": "75-inch with standard wall mount"
+      }
+    },
+    "cloud-home-fridge-520": {
+      "title": "Yunqi 520L Cross-door Frost-free Refrigerator",
+      "subtitle": "A-class efficiency, baby-food zone, full-cavity purification",
+      "description": "A 520L cross-door layout with an independent baby-food zone adjustable from -20C to 5C. Dual-cycle frost-free cooling keeps produce crisp for 7 days, and A-class efficiency uses about 0.85 kWh per day.",
+      "skus": {
+        "cloud-home-fridge-520-grey": "520L Star Rock Grey"
+      }
+    },
+    "cloud-home-washer-10": {
+      "title": "Yunqi 10kg Front-load Washer-Dryer",
+      "subtitle": "Direct-drive inverter, air wash, high-temperature tub clean",
+      "description": "A 10kg washer with 7kg drying capacity driven by a quiet, durable BLDC direct-drive motor. Air wash removes cooking and smoke odours, and 95C tub cleaning with dual spray reduces detergent residue.",
+      "skus": {
+        "cloud-home-washer-10-white": "10kg Polar White"
+      }
+    },
+    "cloud-home-oven-32": {
+      "title": "Yunqi 32L Built-in Steam Oven",
+      "subtitle": "Steam, bake, air-fry and sous-vide in one, 1C precision",
+      "description": "A 32L built-in cavity sized for standard cabinets that steams, bakes, air-fries and slow-cooks. Independent top and bottom control holds 1C precision, with 40 automatic menus and high-temperature steam self-cleaning.",
+      "skus": {
+        "cloud-home-oven-32-black": "32L Obsidian Black"
+      }
+    },
+    "shiguang-merino-coat": {
+      "title": "Shiguang Men's Merino Wool Coat",
+      "subtitle": "90% Australian merino, double-faced wool, relaxed straight cut",
+      "description": "A double-faced cloth in 90% Australian merino wool, hand-finished without lining so it stays crisp yet light. The relaxed straight shoulder line suits both commuting and business, in navy and charcoal.",
+      "skus": {
+        "shiguang-merino-coat-navy-l": "Navy L",
+        "shiguang-merino-coat-navy-xl": "Navy XL",
+        "shiguang-merino-coat-grey-l": "Charcoal L"
+      }
+    },
+    "shiguang-cashmere-sweater": {
+      "title": "Shiguang Women's Cashmere Crewneck Sweater",
+      "subtitle": "100% cashmere, 12-gauge fine knit, soft against skin",
+      "description": "Inner Mongolian 100% cashmere in a 12-gauge fine knit that feels light and smooth. The crewneck drop-shoulder cut flatters the shoulder line and layers easily, with a matching cashmere care comb included.",
+      "skus": {
+        "shiguang-cashmere-sweater-ivory-m": "Ivory M",
+        "shiguang-cashmere-sweater-grey-m": "Smoke Grey M"
+      }
+    },
+    "shiguang-runner-shoes": {
+      "title": "Shiguang LIGHT Runner Cushioned Running Shoes",
+      "subtitle": "Supercritical foam midsole, 218g per shoe, commute and jog",
+      "description": "A supercritical foam midsole returns 68% of energy at just 218g per shoe. The one-piece knit upper breathes and hugs the foot, and the abrasion-resistant rubber outsole handles asphalt and treadmill alike.",
+      "skus": {
+        "shiguang-runner-shoes-42": "42 Cloud White",
+        "shiguang-runner-shoes-43": "43 Cloud White",
+        "shiguang-runner-shoes-44": "44 Obsidian Black"
+      }
+    },
+    "shiguang-canvas-tote": {
+      "title": "Shiguang Canvas Commuter Tote",
+      "subtitle": "16oz heavy canvas, fits a 16-inch laptop, three inner pockets",
+      "description": "A 16oz heavy canvas tote with vegetable-tanned leather handles rated to 12kg. The main compartment holds a 16-inch laptop flat, with three inner pockets and a key clip, and the strap length adjusts for commuting or short trips.",
+      "skus": {
+        "shiguang-canvas-tote-khaki": "Khaki",
+        "shiguang-canvas-tote-black": "Obsidian Black"
+      }
+    },
+    "mubai-hydra-serum": {
+      "title": "Mubai HYDRA Hyaluronic Hydrating Serum 30ml",
+      "subtitle": "Five-weight hyaluronic acid, alcohol-free, fragrance-free",
+      "description": "Five hyaluronic acid weights build a layered hydration network while ectoine soothes and repairs. Free of alcohol, fragrance and colourants, it suits sensitive skin, absorbs quickly and layers under moisturiser.",
+      "skus": {
+        "mubai-hydra-serum-30": "30ml single bottle",
+        "mubai-hydra-serum-30x2": "30ml duo gift box"
+      }
+    },
+    "mubai-velvet-lipstick": {
+      "title": "Mubai VELVET Matte Lipstick",
+      "subtitle": "Velvet matte finish, 8-hour wear, squalane enriched",
+      "description": "A velvet matte texture that colours in one pass and lasts eight hours without transferring. Squalane and vitamin E keep the matte finish comfortable, and the magnetic metal case ships with a matching lip liner.",
+      "skus": {
+        "mubai-velvet-lipstick-01": "#01 Dusty Rose",
+        "mubai-velvet-lipstick-02": "#02 Classic Red"
+      }
+    },
+    "mubai-repair-shampoo": {
+      "title": "Mubai Repair Amino Shampoo 500ml",
+      "subtitle": "Amino-acid surfactants, silicone-free, colour-treated repair",
+      "description": "Amino-acid surfactants cleanse gently without the silicone slip. Hydrolysed keratin and panthenol improve dryness and split ends after colouring or perming, in a 500ml pump bottle for the whole family.",
+      "skus": {
+        "mubai-repair-shampoo-500": "500ml single bottle",
+        "mubai-repair-shampoo-500x2": "500ml twin pack"
+      }
+    },
+    "shanhai-rice-5kg": {
+      "title": "Shanhai Wuchang Daohuaxiang Rice 5kg",
+      "subtitle": "New-season harvest, core growing region, vacuum sealed",
+      "description": "New-season Daohuaxiang No.2 from the Wuchang core region of Heilongjiang, harvested once a year with plump glossy grains. Vacuum sealing preserves the aroma, and the cooked rice is soft, sweet and ideal as a daily staple.",
+      "skus": {
+        "shanhai-rice-5kg-bag": "5kg vacuum bag"
+      }
+    },
+    "shanhai-nuts-gift": {
+      "title": "Shanhai Daily Nut Gift Box, 30 Packs",
+      "subtitle": "Six nuts and dried fruit, individually packed, no added sugar",
+      "description": "Thirty individually packed servings with six nuts and dried fruits including almonds, cashews, walnut kernels and cranberries. Low-temperature roasting keeps the aroma without added sugar or preservatives, perfect for the office or travel.",
+      "skus": {
+        "shanhai-nuts-gift-30": "30-pack box"
+      }
+    },
+    "shanhai-orange-5kg": {
+      "title": "Shanhai Gannan Navel Oranges 5kg",
+      "subtitle": "Shipped from origin, 18:1 sweet-sour ratio, spoiled-fruit refund",
+      "description": "Shipped directly from Gannan, Jiangxi, with 70-80mm fruit and a sweet-sour ratio around 18:1. Orders leave within 24 hours of picking on a cold chain, and any spoiled fruit is refunded on photo evidence.",
+      "skus": {
+        "shanhai-orange-5kg-box": "5kg gift box"
+      }
+    },
+    "senyu-treadmill": {
+      "title": "Senyu Quiet Folding Home Treadmill",
+      "subtitle": "2.5HP quiet motor, folds flat, cushioned deck",
+      "description": "A 2.5HP brushless motor runs as quietly as 55dB, and the six-point cushioned deck reduces impact on knees and ankles. The tool-free folding design stores at 19cm thick for compact homes.",
+      "skus": {
+        "senyu-treadmill-standard": "Standard edition",
+        "senyu-treadmill-smart": "Smart edition with incline control"
+      }
+    },
+    "senyu-tent-3": {
+      "title": "Senyu 3-Person Pop-up Tent",
+      "subtitle": "Three-second setup, double-layer rainproof, silver-coated UV shield",
+      "description": "A hydraulic frame pitches in three seconds beneath a double-layer shell rated PU3000mm. The silver-coated fly reflects UV, a skylight and two doors create cross-ventilation, and the packed weight is only 3.2kg for parks and light camping.",
+      "skus": {
+        "senyu-tent-3-person": "3-person Moss Green"
+      }
+    },
+    "senyu-dumbbell-set": {
+      "title": "Senyu Adjustable Dumbbell Set 20kg",
+      "subtitle": "Fast weight change, rubber-coated grip, pair set",
+      "description": "A dial adjusts each dumbbell from 2.5kg to 10kg in one turn. Rubber-coated plates are quiet and floor-friendly, and the pair ships with storage bases for space-saving strength training at home.",
+      "skus": {
+        "senyu-dumbbell-set-20": "20kg pair"
+      }
+    },
+    "qimu-formula-800": {
+      "title": "Qimu Organic Infant Formula 800g",
+      "subtitle": "Organic milk source, OPO structured fat, traceable batch",
+      "description": "Made from organic pasture milk with OPO structured fat and prebiotic blends that mirror breast-milk fat structure. Each tin carries a unique traceability code covering farm, production and inspection records.",
+      "skus": {
+        "qimu-formula-800-stage1": "800g Stage 1 (0-6 months)",
+        "qimu-formula-800-stage2": "800g Stage 2 (6-12 months)"
+      }
+    },
+    "qimu-blocks-200": {
+      "title": "Qimu Large Building Blocks, 200 Pieces",
+      "subtitle": "Food-grade ABS, rounded edges, build guide included",
+      "description": "Two hundred large blocks in food-grade ABS with polished rounded edges for children aged three and up. A 24-page build guide and storage tub support spatial thinking and hand-eye coordination.",
+      "skus": {
+        "qimu-blocks-200-bucket": "200 pieces, storage tub"
+      }
+    }
+  },
+  "offers": {
+    "seckill-digital": {
+      "title": "Digital Flash Sale",
+      "description": "Two sessions daily at 10:00 and 20:00 with phones and digital gear up to 50% off, limited to 500 units."
+    },
+    "brand-day-home": {
+      "title": "Home Brand Day",
+      "description": "CNY 400 off every CNY 3000 across Yunqi Home, with free delivery and installation."
+    },
+    "member-day-double": {
+      "title": "Member Day Double Points",
+      "description": "On the 8th of every month, official-store orders earn double points and Black Gold members save a further 5%."
+    },
+    "new-launch-aurora": {
+      "title": "New Launch: Xingye AURORA X1 Pro",
+      "description": "Order the AURORA X1 Pro during launch to receive a matching wireless charger, with 12-month interest-free instalments."
+    },
+    "big-promo-618": {
+      "title": "618 Mid-Year Sale",
+      "description": "CNY 50 off every CNY 300 across stores, stackable with platform coupons up to CNY 200."
+    },
+    "limited-rush-beauty": {
+      "title": "Beauty Limited Rush",
+      "description": "A two-hour Mubai Beauty flash with half price on the second serum or lipstick."
+    }
+  },
+  "membership": {
+    "plans": {
+      "silver": {
+        "name": "Silver Member",
+        "benefits": ["CNY 20 birthday voucher", "1.2x points", "Dedicated support line"]
+      },
+      "gold": {
+        "name": "Gold Member",
+        "benefits": ["CNY 50 birthday voucher", "1.5x points", "One free-shipping coupon monthly", "Dedicated support line"]
+      },
+      "platinum": {
+        "name": "Black Gold Member",
+        "benefits": ["CNY 100 birthday voucher", "2x points", "Four free-shipping coupons monthly", "5% off on member day", "Priority dispatch"]
+      },
+      "diamond": {
+        "name": "Diamond Member",
+        "benefits": ["CNY 200 birthday voucher", "3x points", "Unlimited free shipping", "10% off on member day", "Personal concierge", "Early access to new arrivals"]
+      }
+    },
+    "packageGroups": {
+      "monthly": {
+        "name": "Monthly Membership",
+        "description": "Month-to-month subscription, cancel anytime, ideal for trying the benefits."
+      },
+      "yearly": {
+        "name": "Annual Membership",
+        "description": "Yearly subscription with a lower effective monthly price and a welcome gift pack."
+      }
+    },
+    "packages": {
+      "gold-monthly": { "name": "Gold Member: Monthly" },
+      "gold-yearly": { "name": "Gold Member: Annual" },
+      "platinum-yearly": { "name": "Black Gold Member: Annual" },
+      "diamond-yearly": { "name": "Diamond Member: Annual" }
+    }
+  },
+  "cms": {
+    "banners": {
+      "banner-new-launch": {
+        "title": "New Arrivals",
+        "subtitle": "Xingye AURORA X1 Pro imaging flagship now on sale"
+      },
+      "banner-seckill": {
+        "title": "Flash Sale",
+        "subtitle": "Daily at 10:00 and 20:00, digital favourites up to 50% off"
+      },
+      "banner-member-day": {
+        "title": "Member Day",
+        "subtitle": "Double points on the 8th, plus 5% off for Black Gold"
+      },
+      "banner-grocery": {
+        "title": "Fresh Direct",
+        "subtitle": "Origin-sourced next-day delivery, spoiled-produce refund"
+      },
+      "banner-brand": {
+        "title": "Brand Hall",
+        "subtitle": "Official flagship stores with nationwide warranty"
+      }
+    },
+    "floors": {
+      "floor-digital": "Phones & Digital",
+      "floor-appliance": "Home Appliances",
+      "floor-fashion": "Fashion & Bags",
+      "floor-beauty": "Beauty & Care",
+      "floor-grocery": "Grocery & Fresh",
+      "floor-sports": "Sports & Outdoors"
+    },
+    "hotKeywords": {
+      "kw-phone": "phone",
+      "kw-laptop": "laptop",
+      "kw-fridge": "refrigerator",
+      "kw-sneakers": "running shoes",
+      "kw-serum": "serum",
+      "kw-nuts": "nuts",
+      "kw-tent": "tent",
+      "kw-formula": "formula"
+    }
+  }
+}

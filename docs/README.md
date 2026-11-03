@@ -8,6 +8,8 @@ Architecture notes, runbooks, and developer guides for the mall application repo
 | --- | --- |
 | Product PRD | [product/prd/PRD.md](product/prd/PRD.md) |
 | Technical architecture | [architecture/tech/TECH_ARCHITECTURE.md](architecture/tech/TECH_ARCHITECTURE.md) |
+| Default data runbook | [guides/operator/default-data.md](guides/operator/default-data.md) |
+| Default data plan | [engineering/plans/PLAN-20261103-mall-default-data-initialization.md](engineering/plans/PLAN-20261103-mall-default-data-initialization.md) |
 
 ## Application Surfaces
 

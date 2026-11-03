@@ -19,6 +19,16 @@
       "types": "./src/catalog-admin.ts",
       "import": "./src/catalog-admin.ts",
       "default": "./src/catalog-admin.ts"
+    },
+    "./default-data": {
+      "types": "./src/default-data/index.ts",
+      "import": "./src/default-data/index.ts",
+      "default": "./src/default-data/index.ts"
+    },
+    "./default-data-admin-page": {
+      "types": "./src/default-data/pages/DefaultDataPage.tsx",
+      "import": "./src/default-data/pages/DefaultDataPage.tsx",
+      "default": "./src/default-data/pages/DefaultDataPage.tsx"
     }
   },
   "files": [
@@ -30,6 +40,8 @@
   },
   "peerDependencies": {
     "@sdkwork/mall-pc-core": "workspace:*",
+    "@sdkwork/mall-pc-cms": "workspace:*",
+    "@sdkwork/ui-pc-react": "workspace:*",
     "lucide-react": ">=0.468.0 <2.0.0",
     "react": ">=18.2.0 <20.0.0",
     "react-dom": ">=18.2.0 <20.0.0",

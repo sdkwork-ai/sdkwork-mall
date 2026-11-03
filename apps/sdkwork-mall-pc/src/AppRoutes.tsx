@@ -188,6 +188,9 @@ const SdkworkMallAdminAfterSalesPage = lazy(() =>
 const SdkworkMallAdminMarketingPage = lazy(() =>
   import("@sdkwork/mall-pc-admin-marketing/admin-pages").then((module) => ({ default: module.SdkworkMallAdminMarketingPage })),
 );
+const SdkworkMallAdminDefaultDataPage = lazy(() =>
+  import("@sdkwork/mall-pc-admin-product/default-data-admin-page").then((module) => ({ default: module.SdkworkMallDefaultDataPage })),
+);
 const SdkworkMembershipAdminPage = lazy(() =>
   import("@sdkwork/mall-pc-admin-membership/membership-admin-page").then((module) => ({
     default: module.SdkworkMembershipAdminPage,
@@ -370,6 +373,8 @@ function resolveRouteScreen(
       return <SdkworkMallAdminAfterSalesPage />;
     case "admin.mall.marketing":
       return <SdkworkMallAdminMarketingPage />;
+    case "admin.mall.default-data":
+      return <SdkworkMallAdminDefaultDataPage locale={locale} />;
     case "admin.commerce.product-admin.catalog":
       return <CatalogAdmin />;
     case "admin.commerce.product-admin.create":

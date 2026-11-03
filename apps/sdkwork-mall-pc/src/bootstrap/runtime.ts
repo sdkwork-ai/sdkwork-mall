@@ -1,6 +1,7 @@
 import type { SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
 
 import { configureSdkworkMallPcProviders } from "./commerceProviders";
+import { configureSdkworkMallPcDefaultDataProvider } from "./default-data-remote";
 import { configureSdkworkMallPcPartnerProviders } from "./partnerProviders";
 import {
   resolveSdkworkMallPcRuntimeConfig,
@@ -50,6 +51,11 @@ export function createSdkworkMallPcRuntime(): SdkworkMallPcRuntime {
     tokenManager,
   });
   configureSdkworkMallPcPartnerProviders(sdkClients);
+  configureSdkworkMallPcDefaultDataProvider({
+    environment: config.environment,
+    locale: config.i18n.defaultLocale,
+    sdkClients,
+  });
 
   return {
     commerceService,

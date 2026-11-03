@@ -40,4 +40,17 @@ export const sdkworkMallPcAdminProductRoutes = [
     title: "编辑商品",
     titleKey: "admin.commerce.product.routes.edit.title",
   },
+  {
+    auth: "required",
+    capability: "default-data",
+    domain: "commerce",
+    id: "admin.mall.default-data",
+    packageName: "@sdkwork/mall-pc-admin-product",
+    path: "/admin/default-data",
+    permissionHint: "commerce.defaultData.manage",
+    screen: "default-data",
+    surface: "backend-admin",
+    title: "默认数据初始化",
+    titleKey: "admin.commerce.defaultData.routes.defaultData.title",
+  },
 ] as const satisfies readonly SdkworkMallPcRouteContribution[];

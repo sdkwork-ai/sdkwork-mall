@@ -87,7 +87,9 @@
   "contracts": {
     "publicExports": [
       ".",
-      "SdkworkMallPcAdminProductRoutes"
+      "SdkworkMallPcAdminProductRoutes",
+      "./default-data",
+      "./default-data-admin-page"
     ],
     "runtimeEntrypoints": [
       "package.json#scripts.typecheck"
