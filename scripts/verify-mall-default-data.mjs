@@ -185,6 +185,37 @@ function checkDataset() {
       keys.add(entry.key);
     }
   }
+
+  // Demo/standard environments must never render an empty category or shop
+  // page: every leaf category and every shop needs a non-demo product.
+  const standardProducts = (dataset.products ?? []).filter((product) => !product.demoOnly);
+  const coveredCategories = new Set(standardProducts.map((product) => product.categoryKey));
+  const coveredShops = new Set(standardProducts.map((product) => product.shopKey));
+  const leafCategoryKeys = (dataset.categories ?? []).flatMap((category) =>
+    (category.children ?? []).map((child) => child.key),
+  );
+  for (const leaf of leafCategoryKeys) {
+    if (!coveredCategories.has(leaf)) {
+      fail("coverage", `leaf category ${leaf} has no non-demo product; its page would be empty`);
+    }
+  }
+  for (const shop of dataset.shops ?? []) {
+    if (!coveredShops.has(shop.key)) {
+      fail("coverage", `shop ${shop.key} has no non-demo product; its page would be empty`);
+    }
+  }
+  const demoOnlyProducts = (dataset.products ?? []).filter((product) => product.demoOnly).length;
+  if (demoOnlyProducts === 0) {
+    fail("coverage", "the dataset must keep at least one demo-only product so profiles stay distinguishable");
+  }
+  summary.catalogCoverage = {
+    leaves: leafCategoryKeys.length,
+    coveredLeaves: leafCategoryKeys.filter((leaf) => coveredCategories.has(leaf)).length,
+    shops: (dataset.shops ?? []).length,
+    coveredShops: coveredShops.size,
+    demoOnlyProducts,
+  };
+
   return dataset;
 }
 
@@ -339,6 +370,13 @@ if (asJson) {
     process.stdout.write(
       `  profiles ${Object.entries(summary.profiles).map(([environment, profile]) => `${environment}=${profile}`).join(" ")}\n`,
     );
+    if (summary.catalogCoverage) {
+      const coverage = summary.catalogCoverage;
+      process.stdout.write(
+        `  coverage leaves ${coverage.coveredLeaves}/${coverage.leaves} | shops ${coverage.coveredShops}/${coverage.shops} | ` +
+          `demo-only products ${coverage.demoOnlyProducts}\n`,
+      );
+    }
   }
   if (problems.length === 0) {
     process.stdout.write("  no problems found\n");

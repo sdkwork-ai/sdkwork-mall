@@ -28,6 +28,31 @@ operator must curate (taxonomy, self-operated store, membership tiers, CMS frame
 and never demo catalog or campaigns. Override with `profile` when an operator
 needs a different slice in a controlled environment.
 
+## Dataset and coverage
+
+| Domain | Size |
+| --- | --- |
+| Categories | 8 roots + 25 leaves |
+| Shops | 8 (1 self-operated + 4 brand + 3 specialty) |
+| Products / SKUs | 30 SPUs / 54 SKUs |
+| Offers | 6 |
+| Membership | 4 tiers, 2 package groups, 4 packages |
+| Storefront CMS | 5 banners, 6 floors, 8 hot keywords |
+
+Every leaf category and every shop carries at least one non-demo product, so no
+storefront listing page is an empty-state dead end outside production. The
+verifier reports this as the `catalog.coverage` check.
+
+## End-to-end flow guide
+
+`reportMallDefaultDataJourneys(verification)` maps the verification report onto 13
+ordered journeys (home, categories, search, cart, checkout, campaigns, membership,
+coupons, orders, after-sales, admin products, admin shops, admin marketing) with a
+readiness status and the mounted route to open. `DefaultDataPage` renders them
+after verification; transactional journeys (orders, after-sales) are marked as
+data produced by a real purchase and never fabricated by initialization.
+
+
 ## Guarantees
 
 - **Idempotent.** Every entity carries a stable natural key; a rerun reads first

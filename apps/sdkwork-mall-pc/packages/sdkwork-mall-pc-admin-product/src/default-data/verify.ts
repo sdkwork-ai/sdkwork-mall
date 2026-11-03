@@ -138,6 +138,29 @@ export async function verifyMallDefaultData(
         collectNaturalKeys(skuRecords, ["skuNo", "sku_no"]),
       ),
     );
+
+    // Every leaf category and every storefront shop must carry at least one
+    // product, otherwise its page is an empty-state dead end in a demo.
+    const leaves = dataset.categories.flatMap((category) => category.children);
+    const coveredCategories = new Set(dataset.products.map((product) => product.categoryKey));
+    const coveredShops = new Set(dataset.products.map((product) => product.shopKey));
+    const uncovered = [
+      ...leaves
+        .filter((leaf) => !coveredCategories.has(leaf.key))
+        .map((leaf) => `category:${leaf.key}`),
+      ...dataset.shops
+        .filter((shop) => !coveredShops.has(shop.key))
+        .map((shop) => `shop:${shop.key}`),
+    ];
+    const coverageActual = leaves.length + dataset.shops.length - uncovered.length;
+    checks.push({
+      id: "catalog.coverage",
+      label: "Catalog coverage",
+      status: uncovered.length === 0 ? "pass" : coverageActual === 0 ? "fail" : "warn",
+      expected: leaves.length + dataset.shops.length,
+      actual: coverageActual,
+      missing: uncovered,
+    });
   }
 
   if (dataset.offers.length > 0) {

@@ -44,6 +44,16 @@ environment.
    lockfile regeneration that this workspace cannot currently perform (an unrelated
    sibling workspace package is out of sync), so the change stays installable and
    CI-reproducible.
+8. **Demo-ready by construction (second pass).** Initialization is only useful if an
+   operator can then show the whole application, so:
+   - every leaf category and every shop carries at least one non-demo product
+     (`catalog.coverage`), removing empty-state dead ends from the storefront;
+   - the verification report is projected onto 13 ordered journeys
+     (`journeys.ts`) with readiness badges and mounted-route links;
+   - a successful run re-verifies automatically and the flow guide refreshes without
+     a second click;
+   - transactional journeys (orders, after-sales) are explicit: their rows come from
+     a real purchase and are never fabricated by initialization.
 
 ## Regression findings fixed in the same change
 
@@ -58,17 +68,18 @@ environment.
 
 - `pnpm check:default-data` — dataset integrity, locale parity, profile matrix,
   environment assets and build scripts (offline).
-- `pnpm test:vitest` — 42 package and bootstrap tests: dataset rules, plan order,
-  payload builders, dry run, idempotent rerun, failure isolation, production draft
-  policy, verification coverage, CMS preset marking, the SDK port adapter and the
-  admin page's plan/dry-run/verify states.
+- `pnpm test:vitest` — 49 package and bootstrap tests: dataset rules, catalog
+  coverage, journey mapping, plan order, payload builders, dry run, idempotent rerun,
+  failure isolation, production draft policy, verification coverage, CMS preset
+  marking, the SDK port adapter and the admin page's plan/dry-run/verify/flow-guide
+  states.
 - `pnpm verify` — typecheck, architecture contract, composition, CORS, parity, i18n
   catalogues/baseline and the default-data gate.
 
 The i18n readiness ratchet (`specs/i18n-readiness.baseline.json`) was refreshed in
-this change: the PC root gains one new operator page and its copy map (+51
-user-facing literals, 1610 → 1661). The dataset itself is JSON, which the audit
-classifies as locale data rather than copy, so only the page copy is counted.
+this change: the PC root gains the operator page, its copy map and the flow guide
+(+73 user-facing literals, 1610 → 1683). The dataset itself is JSON, which the audit
+classifies as locale data rather than copy, so only page copy is counted.
 
 ### Pre-existing gate failure (not introduced here)
 

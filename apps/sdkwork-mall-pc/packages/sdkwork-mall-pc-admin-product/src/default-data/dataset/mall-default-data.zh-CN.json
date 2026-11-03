@@ -176,6 +176,21 @@
       ]
     },
     {
+      "key": "aurora-x1-standard",
+      "shopKey": "digital",
+      "categoryKey": "phone",
+      "brand": "星野",
+      "title": "星野 AURORA X1 5G 智能手机",
+      "subtitle": "6.4 英寸 120Hz OLED · 5000 万像素主摄 · 80W 快充",
+      "description": "6.4 英寸 120Hz OLED 直屏，2160Hz 高频调光更护眼；5000 万像素主摄支持光学防抖，日常成片稳定；5000mAh 电池配合 80W 有线快充，35 分钟回充 80%。",
+      "productType": "physical",
+      "keywords": ["手机", "5G", "性价比", "星野"],
+      "skus": [
+        { "key": "aurora-x1-standard-256-obsidian", "title": "8GB+256GB 曜石黑", "price": "2799.00", "listPrice": "2999.00", "barcode": "6900000000047" },
+        { "key": "aurora-x1-standard-256-white", "title": "12GB+256GB 星霜白", "price": "2999.00", "listPrice": "3199.00", "barcode": "6900000000048" }
+      ]
+    },
+    {
       "key": "aurora-tab-11",
       "shopKey": "digital",
       "categoryKey": "tablet",
@@ -214,7 +229,6 @@
       "subtitle": "48dB 深度降噪 · 空间音频 · 单次续航 8 小时",
       "description": "双馈降噪架构实现 48dB 深度降噪，通透模式自然不闷耳；11mm 动圈单元支持 LDAC 高清编码与空间音频；配合充电盒总续航 32 小时，支持无线充电。",
       "productType": "physical",
-      "demoOnly": true,
       "keywords": ["耳机", "降噪", "蓝牙", "星野"],
       "skus": [
         { "key": "echo-buds-3-white", "title": "云雾白", "price": "699.00", "listPrice": "799.00", "barcode": "6900000000008" },
@@ -234,6 +248,21 @@
       "skus": [
         { "key": "nucleus-book-14-i7-16-1t", "title": "i7 / 16GB / 1TB 深空灰", "price": "6299.00", "listPrice": "6999.00", "barcode": "6900000000010" },
         { "key": "nucleus-book-14-i9-32-1t", "title": "i9 / 32GB / 1TB 深空灰", "price": "7999.00", "listPrice": "8799.00", "barcode": "6900000000011" }
+      ]
+    },
+    {
+      "key": "nucleus-book-16",
+      "shopKey": "official",
+      "categoryKey": "laptop",
+      "brand": "星野",
+      "title": "星野 NUCLEUS Book 16 创作本",
+      "subtitle": "16 英寸 2.5K 165Hz · 独立显卡 · 双风扇五热管",
+      "description": "16 英寸 2.5K 165Hz 高色域屏，100% DCI-P3 覆盖；独立显卡配合双风扇五热管散热，剪辑与三维渲染更从容；99Wh 电池与 140W 快充兼顾移动办公。",
+      "productType": "physical",
+      "keywords": ["笔记本", "创作", "独立显卡", "星野"],
+      "skus": [
+        { "key": "nucleus-book-16-32-1t", "title": "32GB / 1TB 深空灰", "price": "8999.00", "listPrice": "9799.00", "barcode": "6900000000049" },
+        { "key": "nucleus-book-16-32-2t", "title": "32GB / 2TB 深空灰", "price": "9999.00", "listPrice": "10999.00", "barcode": "6900000000050" }
       ]
     },
     {
@@ -340,6 +369,21 @@
       ]
     },
     {
+      "key": "shiguang-linen-shirt",
+      "shopKey": "fashion",
+      "categoryKey": "menswear",
+      "brand": "拾光",
+      "title": "拾光 男士亚麻短袖衬衫",
+      "subtitle": "100% 亚麻 · 透气不闷汗 · 宽松直筒版型",
+      "description": "选用 100% 天然亚麻，透气吸湿适合夏季通勤；宽松直筒版型搭配落肩袖，内搭外穿都得体；水洗工艺预缩处理，久穿不变形。",
+      "productType": "physical",
+      "keywords": ["衬衫", "亚麻", "夏季", "拾光"],
+      "skus": [
+        { "key": "shiguang-linen-shirt-white-l", "title": "白色 L", "price": "399.00", "listPrice": "459.00", "barcode": "6900000000051" },
+        { "key": "shiguang-linen-shirt-blue-xl", "title": "浅蓝 XL", "price": "399.00", "listPrice": "459.00", "barcode": "6900000000052" }
+      ]
+    },
+    {
       "key": "shiguang-cashmere-sweater",
       "shopKey": "fashion",
       "categoryKey": "womenswear",
@@ -401,6 +445,21 @@
       ]
     },
     {
+      "key": "mubai-cica-cream",
+      "shopKey": "beauty",
+      "categoryKey": "skincare",
+      "brand": "沐白",
+      "title": "沐白 CICA 积雪草舒缓修护面霜 50ml",
+      "subtitle": "10% 积雪草提取物 · 神经酰胺 · 屏障修护",
+      "description": "10% 积雪草提取物搭配神经酰胺与胆固醇，模拟皮肤屏障脂质结构；质地绵密不黏腻，泛红干燥期可厚敷，敏感肌适用。",
+      "productType": "physical",
+      "keywords": ["面霜", "修护", "积雪草", "沐白"],
+      "skus": [
+        { "key": "mubai-cica-cream-50", "title": "50ml 单瓶", "price": "259.00", "listPrice": "299.00", "barcode": "6900000000053" },
+        { "key": "mubai-cica-cream-50x2", "title": "50ml 双瓶装", "price": "469.00", "listPrice": "598.00", "barcode": "6900000000054" }
+      ]
+    },
+    {
       "key": "mubai-velvet-lipstick",
       "shopKey": "beauty",
       "categoryKey": "makeup",
@@ -424,7 +483,6 @@
       "subtitle": "氨基酸表活 · 无硅油 · 染烫修护",
       "description": "氨基酸表活温和清洁，无硅油配方不假滑；添加水解角蛋白与泛醇，改善染烫后干枯分叉；500ml 大容量按压瓶，全家可用。",
       "productType": "physical",
-      "demoOnly": true,
       "keywords": ["洗发水", "氨基酸", "修护", "沐白"],
       "skus": [
         { "key": "mubai-repair-shampoo-500", "title": "500ml 单瓶", "price": "129.00", "listPrice": "159.00", "barcode": "6900000000035" },
@@ -468,7 +526,6 @@
       "subtitle": "产地直发 · 酸甜比 18:1 · 坏果包赔",
       "description": "江西赣南产地直发，果径 70-80mm，酸甜比约 18:1；采摘后 24 小时内发出，冷链运输，坏果拍照即赔。",
       "productType": "physical",
-      "demoOnly": true,
       "keywords": ["脐橙", "水果", "生鲜", "山海"],
       "skus": [
         { "key": "shanhai-orange-5kg-box", "title": "5kg 礼盒装", "price": "69.00", "listPrice": "89.00", "barcode": "6900000000039" }

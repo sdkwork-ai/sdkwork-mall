@@ -81,6 +81,15 @@
         "aurora-x1-pro-512-starlight": "16GB+512GB Starlight Silver"
       }
     },
+    "aurora-x1-standard": {
+      "title": "Xingye AURORA X1 5G Smartphone",
+      "subtitle": "6.4-inch 120Hz OLED, 50MP main camera, 80W charging",
+      "description": "A 6.4-inch 120Hz OLED flat display with 2160Hz high-frequency dimming for eye comfort. The 50MP main camera adds optical stabilisation for consistent everyday shots, and the 5000mAh battery reaches 80% in 35 minutes with 80W wired charging.",
+      "skus": {
+        "aurora-x1-standard-256-obsidian": "8GB+256GB Obsidian Black",
+        "aurora-x1-standard-256-white": "12GB+256GB Frost White"
+      }
+    },
     "aurora-tab-11": {
       "title": "Xingye AURORA Pad 11 Tablet",
       "subtitle": "11-inch 144Hz display, magnetic keyboard and stylus support",
@@ -115,6 +124,15 @@
       "skus": {
         "nucleus-book-14-i7-16-1t": "i7 / 16GB / 1TB Space Grey",
         "nucleus-book-14-i9-32-1t": "i9 / 32GB / 1TB Space Grey"
+      }
+    },
+    "nucleus-book-16": {
+      "title": "Xingye NUCLEUS Book 16 Creator Laptop",
+      "subtitle": "16-inch 2.5K 165Hz, discrete graphics, dual-fan cooling",
+      "description": "A 16-inch 2.5K 165Hz wide-gamut display covering 100% DCI-P3. Discrete graphics with a dual-fan, five-heat-pipe cooler handles editing and 3D rendering, while the 99Wh battery and 140W fast charging keep it portable.",
+      "skus": {
+        "nucleus-book-16-32-1t": "32GB / 1TB Space Grey",
+        "nucleus-book-16-32-2t": "32GB / 2TB Space Grey"
       }
     },
     "nucleus-monitor-27": {
@@ -178,6 +196,15 @@
         "shiguang-merino-coat-grey-l": "Charcoal L"
       }
     },
+    "shiguang-linen-shirt": {
+      "title": "Shiguang Men's Linen Short-sleeve Shirt",
+      "subtitle": "100% linen, breathable, relaxed straight cut",
+      "description": "Woven from 100% natural linen that breathes and wicks moisture for summer commuting. The relaxed straight cut with drop shoulders works tucked in or loose, and a pre-shrunk wash keeps its shape.",
+      "skus": {
+        "shiguang-linen-shirt-white-l": "White L",
+        "shiguang-linen-shirt-blue-xl": "Light Blue XL"
+      }
+    },
     "shiguang-cashmere-sweater": {
       "title": "Shiguang Women's Cashmere Crewneck Sweater",
       "subtitle": "100% cashmere, 12-gauge fine knit, soft against skin",
@@ -213,6 +240,15 @@
       "skus": {
         "mubai-hydra-serum-30": "30ml single bottle",
         "mubai-hydra-serum-30x2": "30ml duo gift box"
+      }
+    },
+    "mubai-cica-cream": {
+      "title": "Mubai CICA Centella Soothing Cream 50ml",
+      "subtitle": "10% centella extract, ceramides, barrier repair",
+      "description": "10% centella extract with ceramides and cholesterol mirrors the skin barrier's lipid structure. The rich yet non-sticky texture can be layered thick during redness or dryness and suits sensitive skin.",
+      "skus": {
+        "mubai-cica-cream-50": "50ml single jar",
+        "mubai-cica-cream-50x2": "50ml duo pack"
       }
     },
     "mubai-velvet-lipstick": {

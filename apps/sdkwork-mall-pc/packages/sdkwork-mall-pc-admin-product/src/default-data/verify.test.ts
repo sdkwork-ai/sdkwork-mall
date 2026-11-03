@@ -7,6 +7,9 @@ import {
   verifyMallDefaultDataInitialization,
 } from "./default-data-service";
 import { buildMallCmsConfigFromDataset, buildMallCmsPresetId } from "./plan";
+import { reportMallDefaultDataJourneys } from "./journeys";
+import { selectMallDefaultDataSlice } from "./profiles";
+import { verifyMallDefaultData } from "./verify";
 import { createFakeMallDefaultDataPort } from "../../tests/default-data-fake-port";
 
 describe("mall default data verification", () => {
@@ -92,5 +95,55 @@ describe("mall default data verification", () => {
     const config = buildMallCmsConfigFromDataset(zhCnDefaultDataset);
     expect(buildMallCmsPresetId("zh-CN")).toBe("v1:zh-CN");
     expect(config.banners[0]?.id.startsWith("mall-cms-banner-")).toBe(true);
+  });
+
+  it("proves every leaf category and shop has a product", async () => {
+    const port = createFakeMallDefaultDataPort();
+    configureMallDefaultDataProvider({ port, environment: "demo", defaultLocale: "zh-CN" });
+    await runMallDefaultDataInitialization();
+
+    const verification = await verifyMallDefaultDataInitialization();
+    const coverage = verification.checks.find((check) => check.id === "catalog.coverage");
+    const leaves = zhCnDefaultDataset.categories.reduce(
+      (total, category) => total + category.children.length,
+      0,
+    );
+    expect(coverage?.expected).toBe(leaves + zhCnDefaultDataset.shops.length);
+    expect(coverage?.status).toBe("pass");
+    expect(coverage?.missing).toEqual([]);
+  });
+
+  it("flags catalog coverage gaps when a leaf category has no product", async () => {
+    const port = createFakeMallDefaultDataPort();
+    configureMallDefaultDataProvider({ port, environment: "demo", defaultLocale: "zh-CN" });
+    await runMallDefaultDataInitialization();
+
+    const dataset = selectMallDefaultDataSlice(zhCnDefaultDataset, "demo");
+    const withoutAudio = {
+      ...dataset,
+      products: dataset.products.filter((product) => product.categoryKey !== "audio"),
+    };
+    const verification = await verifyMallDefaultData({
+      dataset: withoutAudio,
+      environment: "demo",
+      locale: "zh-CN",
+      port,
+      profile: "demo",
+    });
+    const coverage = verification.checks.find((check) => check.id === "catalog.coverage");
+    expect(coverage?.status).toBe("warn");
+    expect(coverage?.missing).toContain("category:audio");
+  });
+
+  it("keeps parity between the coverage check and the journey guide", async () => {
+    const port = createFakeMallDefaultDataPort();
+    configureMallDefaultDataProvider({ port, environment: "demo", defaultLocale: "zh-CN" });
+    await runMallDefaultDataInitialization();
+
+    const verification = await verifyMallDefaultDataInitialization();
+    const journeys = reportMallDefaultDataJourneys(verification);
+    const home = journeys.find((journey) => journey.id === "storefront.home");
+    expect(home?.status).toBe("ready");
+    expect(verification.checks.some((check) => check.id === "catalog.coverage")).toBe(true);
   });
 });

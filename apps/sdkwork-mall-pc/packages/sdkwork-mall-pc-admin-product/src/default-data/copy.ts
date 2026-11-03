@@ -37,6 +37,28 @@ export interface MallDefaultDataCopy {
   readonly labelMissing: string;
   readonly summaryCreated: string;
   readonly summaryPlanned: string;
+  readonly flowSectionTitle: string;
+  readonly flowSectionDescription: string;
+  readonly flowCheckedAt: string;
+  readonly journeyReady: string;
+  readonly journeyPartial: string;
+  readonly journeyBlocked: string;
+  readonly journeyOpen: string;
+  readonly journeyTransactionalNote: string;
+  readonly openStorefront: string;
+  readonly journeyHome: string;
+  readonly journeyCategories: string;
+  readonly journeySearch: string;
+  readonly journeyCart: string;
+  readonly journeyCheckout: string;
+  readonly journeyActivity: string;
+  readonly journeyMembership: string;
+  readonly journeyCoupons: string;
+  readonly journeyOrders: string;
+  readonly journeyAfterSales: string;
+  readonly journeyAdminProducts: string;
+  readonly journeyAdminShops: string;
+  readonly journeyAdminMarketing: string;
   readonly summarySkipped: string;
   readonly summaryFailed: string;
   readonly summaryPending: string;
@@ -91,6 +113,28 @@ const ZH_CN: MallDefaultDataCopy = {
   labelMissing: "缺少",
   summaryCreated: "写入",
   summaryPlanned: "计划写入",
+  flowSectionTitle: "完整流程引导",
+  flowSectionDescription: "按顺序打开下列页面即可完整查看商城效果；标记为「就绪」的流程所需数据已具备。",
+  flowCheckedAt: "最近校验",
+  journeyReady: "就绪",
+  journeyPartial: "部分就绪",
+  journeyBlocked: "待初始化",
+  journeyOpen: "打开",
+  journeyTransactionalNote: "该页面数据在下单后产生，初始化不预置交易数据。",
+  openStorefront: "打开商城首页预览",
+  journeyHome: "商城首页与 CMS 内容",
+  journeyCategories: "类目导航",
+  journeySearch: "搜索与筛选",
+  journeyCart: "购物车",
+  journeyCheckout: "确认订单与支付",
+  journeyActivity: "活动会场与秒杀",
+  journeyMembership: "会员中心与套餐购买",
+  journeyCoupons: "领券中心",
+  journeyOrders: "我的订单",
+  journeyAfterSales: "售后中心",
+  journeyAdminProducts: "后台商品治理",
+  journeyAdminShops: "后台店铺管理",
+  journeyAdminMarketing: "后台营销平台",
   summarySkipped: "跳过",
   summaryFailed: "失败步骤",
   summaryPending: "未执行步骤",
@@ -145,6 +189,28 @@ const EN_US: MallDefaultDataCopy = {
   labelMissing: "Missing",
   summaryCreated: "Written",
   summaryPlanned: "Planned",
+  flowSectionTitle: "End-to-end flow guide",
+  flowSectionDescription: "Open these screens in order to review the whole mall; a journey marked ready already has the data it renders.",
+  flowCheckedAt: "Last checked",
+  journeyReady: "Ready",
+  journeyPartial: "Incomplete",
+  journeyBlocked: "Needs initialization",
+  journeyOpen: "Open",
+  journeyTransactionalNote: "This screen fills in after a real purchase; initialization never fabricates transaction data.",
+  openStorefront: "Open storefront preview",
+  journeyHome: "Storefront home and CMS",
+  journeyCategories: "Category navigation",
+  journeySearch: "Search and filters",
+  journeyCart: "Shopping cart",
+  journeyCheckout: "Checkout and payment",
+  journeyActivity: "Campaign venues and flash sale",
+  journeyMembership: "Membership centre and plans",
+  journeyCoupons: "Coupon centre",
+  journeyOrders: "My orders",
+  journeyAfterSales: "After-sales centre",
+  journeyAdminProducts: "Admin product governance",
+  journeyAdminShops: "Admin shop management",
+  journeyAdminMarketing: "Admin marketing platform",
   summarySkipped: "Skipped",
   summaryFailed: "Failed steps",
   summaryPending: "Not started",
@@ -206,5 +272,39 @@ export function getMallDefaultDataProfileLabel(copy: MallDefaultDataCopy, profil
       return copy.profileDemo;
     default:
       return copy.profileStandard;
+  }
+}
+
+/** Localized title for a journey in the end-to-end walkthrough. */
+export function getMallDefaultDataJourneyTitle(copy: MallDefaultDataCopy, id: string): string {
+  switch (id) {
+    case "storefront.home":
+      return copy.journeyHome;
+    case "storefront.categories":
+      return copy.journeyCategories;
+    case "storefront.search":
+      return copy.journeySearch;
+    case "storefront.cart":
+      return copy.journeyCart;
+    case "storefront.checkout":
+      return copy.journeyCheckout;
+    case "storefront.activity":
+      return copy.journeyActivity;
+    case "buyer.membership":
+      return copy.journeyMembership;
+    case "buyer.coupons":
+      return copy.journeyCoupons;
+    case "buyer.orders":
+      return copy.journeyOrders;
+    case "buyer.after-sales":
+      return copy.journeyAfterSales;
+    case "admin.products":
+      return copy.journeyAdminProducts;
+    case "admin.shops":
+      return copy.journeyAdminShops;
+    case "admin.marketing":
+      return copy.journeyAdminMarketing;
+    default:
+      return id;
   }
 }

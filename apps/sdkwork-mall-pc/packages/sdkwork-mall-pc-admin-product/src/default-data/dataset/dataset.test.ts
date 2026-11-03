@@ -201,4 +201,22 @@ describe("mall default data profiles", () => {
       expect(demoKeys).toContain(key);
     }
   });
+
+  it("gives every leaf category and every shop a product outside production", () => {
+    for (const profile of ["standard", "demo"] as const) {
+      const slice = selectMallDefaultDataSlice(zhCnDefaultDataset, profile);
+      for (const leaf of zhCnDefaultDataset.categories.flatMap((category) => category.children)) {
+        expect(
+          slice.products.some((product) => product.categoryKey === leaf.key),
+          `${profile}: leaf category ${leaf.key} has no product`,
+        ).toBe(true);
+      }
+      for (const shop of zhCnDefaultDataset.shops) {
+        expect(
+          slice.products.some((product) => product.shopKey === shop.key),
+          `${profile}: shop ${shop.key} has no product`,
+        ).toBe(true);
+      }
+    }
+  });
 });

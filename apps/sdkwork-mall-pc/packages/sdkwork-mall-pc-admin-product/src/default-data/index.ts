@@ -56,6 +56,14 @@ export {
   type MallDefaultDataRunRequest,
 } from "./default-data-service";
 export {
+  MALL_DEFAULT_DATA_JOURNEYS,
+  reportMallDefaultDataJourneys,
+  type MallDefaultDataJourney,
+  type MallDefaultDataJourneyId,
+  type MallDefaultDataJourneyReport,
+  type MallDefaultDataJourneyStatus,
+} from "./journeys";
+export {
   getMallDefaultDataCopy,
   getMallDefaultDataEnvironmentLabel,
   getMallDefaultDataProfileLabel,

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { configureMallDefaultDataProvider } from "../default-data-service";
@@ -6,7 +7,11 @@ import { SdkworkMallDefaultDataPage } from "./DefaultDataPage";
 import { createFakeMallDefaultDataPort } from "../../../tests/default-data-fake-port";
 
 function renderPage() {
-  return render(<SdkworkMallDefaultDataPage locale="zh-CN" />);
+  return render(
+    <MemoryRouter>
+      <SdkworkMallDefaultDataPage locale="zh-CN" />
+    </MemoryRouter>,
+  );
 }
 
 describe("mall default data page", () => {
@@ -65,5 +70,38 @@ describe("mall default data page", () => {
     ).toBe("failed");
     const categoryCheck = container.querySelector('[data-default-data-check="catalog.categories"]');
     expect(categoryCheck?.querySelector("[data-check-status]")?.textContent).toBe("缺失");
+  });
+
+  it("walks the operator through the complete flow after initialization", async () => {
+    const port = createFakeMallDefaultDataPort();
+    configureMallDefaultDataProvider({ port, environment: "demo", defaultLocale: "zh-CN" });
+    const { container } = renderPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "执行初始化" }));
+
+    // A successful run re-verifies automatically, so the flow guide is filled
+    // without a second click.
+    await waitFor(
+      () => {
+        expect(container.querySelector("[data-default-data-verification]")).not.toBeNull();
+      },
+      { timeout: 5000 },
+    );
+    expect(
+      container.querySelector("[data-default-data-verification]")?.getAttribute("data-default-data-verification"),
+    ).toBe("ok");
+
+    const guide = container.querySelector("[data-default-data-flow-guide]");
+    expect(guide).not.toBeNull();
+    const journeys = container.querySelectorAll("[data-default-data-journey]");
+    expect(journeys.length).toBeGreaterThanOrEqual(13);
+
+    const homeJourney = container.querySelector('[data-default-data-journey="storefront.home"]');
+    expect(homeJourney?.querySelector("[data-journey-status]")?.getAttribute("data-journey-status")).toBe(
+      "ready",
+    );
+    const ordersJourney = container.querySelector('[data-default-data-journey="buyer.orders"]');
+    expect(ordersJourney?.textContent).toContain("下单后产生");
+    expect(screen.getByText("打开商城首页预览")).toBeTruthy();
   });
 });

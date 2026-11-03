@@ -79,6 +79,24 @@ pnpm audit:default-data        # 人类可读报告
 | membership.package-groups | 会员套餐组完整 |
 | membership.packages | 会员套餐完整 |
 | cms.storefront | 首页 CMS 预设已应用 |
+| catalog.coverage | 每个二级类目、每家店铺都至少有一个商品（非演示档位） |
+
+### 5.1 完整流程引导
+
+“校验数据”成功后，页面下方会生成**完整流程引导**：13 个业务入口按推荐顺序排列，逐项标出
+「就绪 / 部分就绪 / 待初始化」，并提供直达链接。演示与培训时按顺序打开即可看完整个应用：
+
+1. 商城首页与 CMS 内容 → 2. 类目导航 → 3. 搜索与筛选 → 4. 购物车 → 5. 确认订单与支付
+→ 6. 活动会场与秒杀 → 7. 会员中心与套餐购买 → 8. 领券中心 → 9. 我的订单 → 10. 售后中心
+→ 11. 后台商品治理 → 12. 后台店铺管理 → 13. 后台营销平台。
+
+说明：
+
+- 每个流程标注其依赖的校验项；缺哪一项会直接列出，便于回头补齐。
+- 「我的订单」「售后中心」属于**交易型流程**，数据在真实下单后产生，初始化不会伪造交易数据；
+  页面会明确提示这一点。
+- 执行成功的初始化会自动触发一次校验，引导列表实时刷新，无需再次点击。
+- 页面底部固定提供「打开商城首页预览」，演示时一键回到前台。
 
 业务验收建议顺序：首页 → 类目 → 搜索 → 商品详情 → 加购 → 结算 → 支付结果 → 订单 → 售后 → 会员购买。
 
@@ -103,5 +121,9 @@ Mall default data is provisioned per environment from one locale-aware dataset:
   failure, and always seeds production campaigns as drafts.
 - **Entry points**: admin console at `/admin/default-data` (plan → dry run → run →
   verify), plus the offline gate `pnpm check:default-data`.
+- **Demo-ready**: verification projects onto 13 ordered journeys with readiness
+  badges and direct links; every leaf category and shop has a non-demo product, so
+  no storefront listing is an empty-state dead end. A successful run re-verifies
+  automatically. Orders and after-sales stay empty by design until a real purchase.
 
 Authority: `DATABASE_FRAMEWORK_SPEC.md` §6.4, `FRONTEND_SPEC.md`, `TEST_SPEC.md`.
