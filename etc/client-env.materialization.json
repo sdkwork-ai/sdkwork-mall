@@ -20,8 +20,14 @@
   },
   "profiles": [
     "standalone.development",
+    "standalone.test",
+    "standalone.staging",
+    "standalone.demo",
     "standalone.production",
     "cloud.development",
+    "cloud.test",
+    "cloud.staging",
+    "cloud.demo",
     "cloud.production"
   ],
   "surfaces": [
@@ -98,6 +104,22 @@
       ],
       "accessToken": {
         "appId": "sdkwork-mall-pc",
+        "tenantId": "100001",
+        "organizationId": "0",
+        "permissionScope": [
+          "iam:self"
+        ]
+      }
+    },
+    {
+      "id": "sdkwork-mall-mini-program",
+      "root": "apps/sdkwork-mall-mini-program",
+      "format": "mini-program",
+      "runtimeTarget": "mini-program",
+      "includeKeys": [],
+      "bindings": {},
+      "accessToken": {
+        "appId": "sdkwork-mall-mini-program",
         "tenantId": "100001",
         "organizationId": "0",
         "permissionScope": [
