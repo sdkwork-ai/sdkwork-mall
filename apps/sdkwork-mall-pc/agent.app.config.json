@@ -28,7 +28,10 @@
     "platform": "WEB",
     "appId": "sdkwork-mall-pc",
     "organizationId": "0",
-    "tenantId": "100001"
+    "tenantId": "100001",
+    "accessTokenPermissionScope": [
+      "iam:self"
+    ]
   },
   "runtime": {
     "family": "web",
