@@ -25,6 +25,19 @@ export const SdkworkMallPcBackendAdminSdkFamilies = [
     tokenManagerScope: "global-session",
   },
   {
+    // The merchandise capability owner (`sdkwork-merchandise`) implements the
+    // backend catalog module under the Shop backend authority; the composed
+    // consumer family is `sdkwork-shop-backend-sdk`. The mall catalog admin
+    // surface aligns its operations and vocabularies to this authority while
+    // the federated commerce transport is regenerated.
+    authority: "sdkwork-shop-backend-api",
+    family: "sdkwork-shop-backend-sdk",
+    generationInputSpec: "../sdkwork-shop/sdks/sdkwork-shop-backend-sdk/openapi/sdkwork-shop-backend-api.openapi.json",
+    generatedPackageName: "@sdkwork/shop-backend-sdk",
+    surface: "backend-admin",
+    tokenManagerScope: "global-session",
+  },
+  {
     authority: "sdkwork-iam-backend-api",
     family: "sdkwork-iam-backend-sdk",
     generationInputSpec: "../sdkwork-iam/sdks/sdkwork-iam-backend-sdk/openapi/sdkwork-iam-backend-api.openapi.yaml",

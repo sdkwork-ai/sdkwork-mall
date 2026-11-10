@@ -1,3 +1,4 @@
+import { decimalAmountToMinorUnits } from "../merchandiseContract";
 import { readDefaultDataId, readDefaultDataItems, readDefaultDataString } from "./port";
 import type { MallDefaultDataCmsConfigShape, MallDefaultDataPort } from "./port";
 import type {
@@ -125,11 +126,12 @@ export function buildMallCategoryCreateBody(
     readonly sortOrder: number;
   },
 ): Record<string, unknown> {
+  // Authority `CreateCategoryRequest` closed body: categoryNo/name required,
+  // no `status` (create defaults to active).
   return {
     categoryNo: buildMallCategoryNo(input.key),
     parentId: input.parentId,
     name: input.name,
-    status: "active",
     sortOrder: String(input.sortOrder),
   };
 }
@@ -157,40 +159,30 @@ export function buildMallShopCreateBody(
 export function buildMallProductCreateBody(
   input: {
     readonly key: string;
-    readonly brand: string;
     readonly categoryId: string;
     readonly description: string;
     readonly productType: MallDefaultDataDataset["products"][number]["productType"];
     readonly subtitle: string;
     readonly title: string;
-    readonly keywords: readonly string[];
-    readonly shopKey: string;
-    readonly currencyCode: string;
   },
 ): Record<string, unknown> {
+  // Authority `CreateProductRequest` closed body: productNo/title/productType/
+  // categoryId required. Lifecycle rides the `products.publish` command the
+  // plan issues after the SKU loop; dataset brand/keywords/shopKey stay
+  // draft-local until the authority grows a carrier for them.
   return {
-    brand: input.brand,
-    categoryIds: [input.categoryId],
-    description: input.description,
-    productType: input.productType,
-    spuNo: buildMallSpuNo(input.key),
-    status: "active",
-    subtitle: input.subtitle,
+    productNo: buildMallSpuNo(input.key),
     title: input.title,
-    metadata: {
-      [MALL_SEED_METADATA_KEY]: input.key,
-      keywords: input.keywords,
-      shopKey: input.shopKey,
-      currencyCode: input.currencyCode,
-      managedBy: "sdkwork-mall-default-data",
-    },
+    subtitle: input.subtitle || undefined,
+    description: input.description || undefined,
+    productType: input.productType,
+    categoryId: input.categoryId,
   };
 }
 
 export function buildMallSkuCreateBody(
   input: {
     readonly key: string;
-    readonly barcode: string;
     readonly currencyCode: string;
     readonly listPrice: string;
     readonly price: string;
@@ -198,20 +190,26 @@ export function buildMallSkuCreateBody(
     readonly title: string;
   },
 ): Record<string, unknown> {
+  // Authority `CreateSkuRequest` closed body: prices ride the minor-unit wire
+  // rule (`salePriceMinor`/`listPriceMinor` as integer strings), no `status`
+  // (create defaults to draft; the plan publishes at the product level), and
+  // `attributeValueIds` stays omitted until the federated transport
+  // regenerates the authority's `attributeValues` operations.
+  const salePriceMinor = decimalAmountToMinorUnits(input.price);
+  if (!salePriceMinor) {
+    throw new Error(`cannot create sku ${input.key}: price ${input.price} is not a valid decimal amount`);
+  }
+  const listPriceMinor = decimalAmountToMinorUnits(input.listPrice);
   return {
-    attributes: [],
-    barcode: input.barcode,
-    defaultCurrencyCode: input.currencyCode,
-    defaultPriceAmount: input.price,
-    fulfillmentType: "physical",
-    image: null,
-    listPriceAmount: input.listPrice,
     productId: input.productId,
-    salesUnit: null,
     skuNo: buildMallSkuNo(input.key),
-    status: "active",
-    taxCategory: null,
+    name: input.title,
     title: input.title,
+    salePriceMinor,
+    ...(listPriceMinor ? { listPriceMinor } : {}),
+    currencyCode: input.currencyCode,
+    fulfillmentType: "physical",
+    inventoryTracking: "quantity",
   };
 }
 
@@ -455,6 +453,10 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
     context.port.catalog.listSkus(),
   ]);
   const existingProducts = indexByNaturalKey(readDefaultDataItems(productResponse), [
+    // The authority resource key is `productNo`; legacy rows still carry
+    // `spuNo`, so both spellings index the same provisioning key.
+    "productNo",
+    "product_no",
     "spuNo",
     "spu_no",
   ]);
@@ -480,14 +482,10 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       }
       const response = await context.port.catalog.createProduct(
         buildMallProductCreateBody({
-          brand: product.brand,
           categoryId,
-          currencyCode,
           description: product.description,
-          keywords: product.keywords,
           key: product.key,
           productType: product.productType,
-          shopKey: product.shopKey,
           subtitle: product.subtitle,
           title: product.title,
         }),
@@ -518,7 +516,6 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       }
       await context.port.catalog.createSku(
         buildMallSkuCreateBody({
-          barcode: sku.barcode,
           currencyCode,
           key: sku.key,
           listPrice: sku.listPrice,

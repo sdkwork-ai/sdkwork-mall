@@ -111,11 +111,13 @@ export function createFakeMallDefaultDataPort(
         return okList(state.products);
       },
       async createProduct(body) {
-        const spuNo = pickKey(body, ["spuNo"]);
-        failIfRequested(spuNo);
+        // Authority resources key on `productNo`; legacy rows still carry
+        // `spuNo`, so both spellings resolve the natural key.
+        const productNo = pickKey(body, ["productNo", "product_no", "spuNo", "spu_no"]);
+        failIfRequested(productNo);
         const id = nextId("spu");
         state.products.push({ ...body, id });
-        created.push(spuNo);
+        created.push(productNo);
         return okItem(id);
       },
       async publishProduct(productId) {

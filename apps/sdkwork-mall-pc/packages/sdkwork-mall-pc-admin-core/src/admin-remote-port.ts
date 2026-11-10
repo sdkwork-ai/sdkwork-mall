@@ -15,20 +15,19 @@ export interface SdkworkAdminCatalogNamespace {
     list(params?: Record<string, unknown>): Promise<unknown>;
     update(bindingId: string, body: Record<string, unknown>): Promise<unknown>;
   };
-  categorySeeds: {
-    create(body: Record<string, unknown>): Promise<unknown>;
-  };
   priceLists: {
     create(body: Record<string, unknown>): Promise<unknown>;
     list(params?: Record<string, unknown>): Promise<unknown>;
   };
   products: {
+    archive(productId: string, body?: Record<string, unknown>): Promise<unknown>;
     create(body: Record<string, unknown>): Promise<unknown>;
     delete(productId: string): Promise<unknown>;
     management: {
       list(params?: Record<string, unknown>): Promise<unknown>;
       retrieve(productId: string): Promise<unknown>;
     };
+    publish(productId: string, body?: Record<string, unknown>): Promise<unknown>;
     update(productId: string, body: Record<string, unknown>): Promise<unknown>;
   };
   skus: {

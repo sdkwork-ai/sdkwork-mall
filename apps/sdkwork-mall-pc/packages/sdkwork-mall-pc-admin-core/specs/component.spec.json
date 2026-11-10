@@ -73,6 +73,11 @@
         "credentialMode": "authenticated-backend-admin"
       },
       {
+        "workspace": "sdkwork-shop-backend-sdk",
+        "surface": "backend-api",
+        "credentialMode": "authenticated-backend-admin"
+      },
+      {
         "workspace": "sdkwork-iam-backend-sdk",
         "surface": "backend-api",
         "credentialMode": "authenticated-backend-admin"

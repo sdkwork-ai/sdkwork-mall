@@ -37,19 +37,24 @@ import {
   listCommerceAttributes,
   listCommerceCategories,
   listCommerceSkus,
+  publishCommerceProduct,
   retrieveCommerceProduct,
   updateCommerceProduct,
   updateCommerceSku,
 } from './catalogService';
+import {
+  decimalAmountToMinorUnits,
+  normalizeMerchandiseFulfillmentType,
+  normalizeMerchandiseProductType,
+  type MerchandiseProductType,
+  type MerchandiseSkuFulfillmentType,
+} from './merchandiseContract';
 import { ProductAttributeValuePanel } from './ProductAttributeValuePanel';
 import { ProductDetailConfigPanel } from './ProductDetailConfigPanel';
 import { ProductPublishReadinessPanel } from './ProductPublishReadinessPanel';
 import { ProductStoreInventoryPanel } from './ProductStoreInventoryPanel';
 import { SkuMatrixCommercialPanel } from './SkuMatrixCommercialPanel';
-import {
-  buildCommercialProductMetadata,
-  readCommercialProductMetadata,
-} from './productAdminMapping';
+import { readCommercialProductMetadata } from './productAdminMapping';
 import { evaluateProductReadiness } from './productAdminReadiness';
 import {
   DEFAULT_INVENTORY_POLICY,
@@ -167,14 +172,14 @@ export type ProductDraftState = {
   subtitle: string;
   description: string;
   brand: string;
-  productType: 'physical_good' | 'virtual_good' | 'membership' | 'points_recharge' | 'wallet_recharge' | 'subscription' | 'service';
+  productType: MerchandiseProductType;
   spuNo: string;
   defaultPriceAmount: string;
   defaultCurrencyCode: string;
   baseSkuNo: string;
   salesUnit: string;
   taxCategory: string;
-  fulfillmentType: 'physical_shipment' | 'digital_delivery' | 'entitlement_grant' | 'points_credit' | 'wallet_credit' | 'subscription_activation' | 'service_activation' | 'none';
+  fulfillmentType: MerchandiseSkuFulfillmentType;
   selectedCategoryIds: string[];
   shopCategoryIds: string[];
   parameters: ProductParameterDraft[];
@@ -322,14 +327,14 @@ export const DEFAULT_PRODUCT_DRAFT: ProductDraftState = {
   subtitle: '知识库问答、流程自动化、数据分析和多端协作',
   description: '适用于企业团队的 AI 助手服务，支持知识库问答、流程自动化、数据分析和多端协作。',
   brand: 'SdkWork',
-  productType: 'subscription',
+  productType: 'service',
   spuNo: 'SPU-AI-ASSISTANT',
   defaultPriceAmount: '1999.00',
   defaultCurrencyCode: 'CNY',
   baseSkuNo: 'SKU-AI',
   salesUnit: '件',
   taxCategory: 'standard',
-  fulfillmentType: 'subscription_activation',
+  fulfillmentType: 'service',
   selectedCategoryIds: DEFAULT_SELECTED_CATEGORY_IDS,
   shopCategoryIds: [SHOP_CATEGORY_OPTIONS[0]],
   parameters: PARAMETER_ROWS,
@@ -337,7 +342,7 @@ export const DEFAULT_PRODUCT_DRAFT: ProductDraftState = {
   skuDrafts: DEFAULT_SKU_DRAFTS,
   detailConfig: createDefaultDetailConfig(),
   storeVisibility: createDefaultStoreVisibility(),
-  inventoryPolicy: createDefaultInventoryPolicy('subscription'),
+  inventoryPolicy: createDefaultInventoryPolicy('service'),
   categoryAttributeValues: createDefaultCategoryAttributeValues(),
   skuAttributeValues: buildSkuAttributeValuesFromSkuDrafts(DEFAULT_SKU_DRAFTS),
   metadata: {},
@@ -1867,20 +1872,39 @@ export function validateProductDraft(draft: ProductDraftState): string[] {
   return errors;
 }
 
-export function buildProductCreatePayload(draft: ProductDraftState, mode: ProductSubmitMode) {
+/**
+ * Authority `CreateProductRequest` body (`sdkwork-merchandise` backend catalog
+ * module, closed body): `productNo`/`title`/`productType`/`categoryId` are
+ * required and no other property is accepted. Lifecycle transitions ride the
+ * `products.publish` command after create; mall-local commercial state (detail
+ * config, store visibility, readiness) stays draft-local until the platform
+ * exposes a carrier for it.
+ */
+export function buildProductCreatePayload(draft: ProductDraftState) {
+  const categoryId = normalizeSelectedCategoryIds(draft.selectedCategoryIds)[0] ?? '';
+  if (!categoryId) {
+    throw new Error('请选择商品所属类目。');
+  }
   return {
-    brand: draft.brand || null,
-    categoryIds: normalizeSelectedCategoryIds(draft.selectedCategoryIds),
-    description: draft.description || null,
-    productType: draft.productType,
-    spuNo: draft.spuNo,
-    status: mode,
-    subtitle: draft.subtitle || null,
+    productNo: draft.spuNo,
     title: draft.title,
-    metadata: {
-      ...draft.metadata,
-      ...buildCommercialProductMetadata(draft),
-    },
+    subtitle: draft.subtitle || undefined,
+    description: draft.description || undefined,
+    productType: draft.productType,
+    categoryId,
+  };
+}
+
+/**
+ * Authority `UpdateProductRequest` body: the mutable surface plus the explicit
+ * lifecycle status. `description` is three-state on the authority (explicit
+ * `null` clears it); a blank console description keeps the stored text.
+ */
+export function buildProductUpdatePayload(draft: ProductDraftState, mode: ProductSubmitMode) {
+  return {
+    subtitle: draft.subtitle || undefined,
+    description: draft.description || undefined,
+    status: mode === 'active' ? 'active' as const : 'draft' as const,
   };
 }
 
@@ -1888,67 +1912,48 @@ export function buildSkuCreatePayloads(
   draft: ProductDraftState,
   productId: string,
   mode: ProductSubmitMode,
-  attributeIdByName: Map<string, string>,
 ) {
-  return buildSkuMutationPayloads(draft, productId, mode, attributeIdByName).map((sku) => sku.body);
+  return buildSkuMutationPayloads(draft, productId, mode).map((sku) => sku.createBody);
 }
 
 export function buildSkuMutationPayloads(
   draft: ProductDraftState,
   productId: string,
   mode: ProductSubmitMode,
-  attributeIdByName: Map<string, string>,
 ) {
   return draft.skuDrafts
     .filter((sku) => sku.enabled || mode === 'draft' || Boolean(sku.backendSkuId))
-    .map((sku) => ({
-      backendSkuId: sku.backendSkuId,
-      body: {
-        attributes: buildSkuAttributePayloads(draft, sku, attributeIdByName),
-        defaultCurrencyCode: sku.currencyCode || draft.defaultCurrencyCode,
-        defaultPriceAmount: sku.priceAmount || draft.defaultPriceAmount,
-        fulfillmentType: draft.fulfillmentType,
-        barcode: sku.barcode || null,
-        image: sku.image,
-        productId,
-        salesUnit: draft.salesUnit || null,
-        skuNo: sku.skuNo,
-        status: mode === 'draft' ? 'draft' as const : sku.status,
-        taxCategory: draft.taxCategory || null,
+    .map((sku) => {
+      const salePriceMinor = decimalAmountToMinorUnits(sku.priceAmount || draft.defaultPriceAmount);
+      if (!salePriceMinor) {
+        throw new Error(`SKU ${sku.skuNo || sku.title || '未命名'} 售价无效，请填写合法金额。`);
+      }
+      const inventoryManaged = draft.inventoryPolicy?.managed ?? draft.productType === 'physical';
+      const commonBody = {
+        name: sku.title || sku.skuNo,
         title: sku.title,
-      },
-    }));
-}
-
-function buildSkuAttributePayloads(
-  draft: ProductDraftState,
-  sku: ProductSkuDraft,
-  attributeIdByName: Map<string, string>,
-) {
-  const authoredValues = draft.skuAttributeValues.filter((attribute) => (
-    attribute.skuDraftId === sku.id || attribute.specKey === sku.specKey
-  ));
-  if (authoredValues.length > 0) {
-    return authoredValues.map((attribute) => ({
-      attributeId: attributeIdByName.get(attribute.attributeName) || attribute.attributeId || buildEntityNo('ATTR', attribute.attributeName),
-      attributeName: attribute.attributeName,
-      customValue: attribute.value,
-      displayValue: attribute.displayValue || attribute.value,
-      valueCode: attribute.valueCode || slugCode(attribute.displayValue || attribute.value || attribute.attributeName),
-    }));
-  }
-  return sku.specSelections.map((selection) => ({
-    attributeId: attributeIdByName.get(selection.groupName) ?? buildEntityNo('ATTR', selection.groupName),
-    attributeName: selection.groupName,
-    customValue: selection.valueName,
-    displayValue: selection.valueName,
-    valueCode: selection.valueCode,
-  }));
+        salePriceMinor,
+        currencyCode: sku.currencyCode || draft.defaultCurrencyCode,
+        fulfillmentType: draft.fulfillmentType,
+        inventoryTracking: draft.productType === 'physical' && inventoryManaged ? 'quantity' as const : 'none' as const,
+      };
+      return {
+        backendSkuId: sku.backendSkuId,
+        createBody: {
+          ...commonBody,
+          productId,
+          skuNo: sku.skuNo,
+        },
+        updateBody: mode === 'draft'
+          ? { ...commonBody, status: 'draft' as const }
+          : commonBody,
+      };
+    });
 }
 
 export async function ensureSkuAttributeDefinitions(specGroups: ProductSpecGroup[]): Promise<Map<string, string>> {
   const attributeIdByName = new Map<string, string>();
-  const listResult = await listCommerceAttributes({ page: '1', pageSize: '200', status: 'active' });
+  const listResult = await listCommerceAttributes({ page: '1', pageSize: '200' });
   for (const attribute of readCatalogRecords(listResult)) {
     const attributeName = readCatalogString(attribute, ['name']);
     const attributeId = readCatalogString(attribute, ['id']);
@@ -1961,15 +1966,18 @@ export async function ensureSkuAttributeDefinitions(specGroups: ProductSpecGroup
     if (attributeIdByName.has(group.name)) {
       continue;
     }
+    // Authority `CreateAttributeRequest`: the enum dictionary seeds itself
+    // through the inline `values` list, so every enabled spec value becomes one
+    // attribute value row at create time.
     const result = await createCommerceAttribute({
       attributeNo: buildEntityNo('ATTR', group.name),
-      filterable: true,
       name: group.name,
-      required: true,
-      scope: 'sku',
-      searchable: true,
-      status: 'active',
       valueType: 'enum',
+      inputHint: 'select',
+      values: group.values
+        .filter((value) => value.enabled !== false)
+        .map((value) => value.name || value.code || '')
+        .filter((label) => Boolean(label)),
     });
     const item = readCatalogItem(result);
     if (item) {
@@ -1998,20 +2006,25 @@ export async function submitProductDraft(
     throw new Error(errors[0]);
   }
 
-  const attributeIdByName = await ensureSkuAttributeDefinitions(draft.specGroups);
+  await ensureSkuAttributeDefinitions(draft.specGroups);
   const productResult = options.productId
-    ? await updateCommerceProduct(options.productId, buildProductCreatePayload(draft, mode))
-    : await createCommerceProduct(buildProductCreatePayload(draft, mode));
+    ? await updateCommerceProduct(options.productId, buildProductUpdatePayload(draft, mode))
+    : await createCommerceProduct(buildProductCreatePayload(draft));
   const productId = options.productId ?? readCatalogString(readCatalogItem(productResult) ?? {}, ['id']);
   if (!productId) {
     throw new Error('商品创建成功但未返回商品 ID。');
   }
-  const skuPayloads = buildSkuMutationPayloads(draft, productId, mode, attributeIdByName);
+  if (mode === 'active' && !options.productId) {
+    // Authority lifecycle: publishing is the `products.publish` command; a
+    // create body cannot carry a status.
+    await publishCommerceProduct(productId);
+  }
+  const skuPayloads = buildSkuMutationPayloads(draft, productId, mode);
   await Promise.all(
     skuPayloads.map((sku) => (
       sku.backendSkuId
-        ? updateCommerceSku(sku.backendSkuId, sku.body)
-        : createCommerceSku(sku.body)
+        ? updateCommerceSku(sku.backendSkuId, sku.updateBody)
+        : createCommerceSku(sku.createBody)
     ))
   );
   return { productId, skuCount: skuPayloads.length };
@@ -2254,13 +2267,11 @@ function skuBaseNo(skuNo: string): string {
 }
 
 function normalizeProductType(value: string): ProductDraftState['productType'] {
-  const productTypes: ProductDraftState['productType'][] = ['physical_good', 'virtual_good', 'membership', 'points_recharge', 'wallet_recharge', 'subscription', 'service'];
-  return productTypes.includes(value as ProductDraftState['productType']) ? value as ProductDraftState['productType'] : 'physical_good';
+  return normalizeMerchandiseProductType(value);
 }
 
 function normalizeFulfillmentType(value: string): ProductDraftState['fulfillmentType'] {
-  const fulfillmentTypes: ProductDraftState['fulfillmentType'][] = ['physical_shipment', 'digital_delivery', 'entitlement_grant', 'points_credit', 'wallet_credit', 'subscription_activation', 'service_activation', 'none'];
-  return fulfillmentTypes.includes(value as ProductDraftState['fulfillmentType']) ? value as ProductDraftState['fulfillmentType'] : 'none';
+  return normalizeMerchandiseFulfillmentType(value, normalizeMerchandiseProductType(value));
 }
 
 function normalizeSkuStatus(value: string): ProductSkuDraft['status'] {
@@ -2438,7 +2449,7 @@ function createDefaultStoreVisibility(): ProductStoreVisibility {
 }
 
 function createDefaultInventoryPolicy(productType: string): ProductInventoryPolicy {
-  if (productType !== 'physical_good') {
+  if (productType !== 'physical') {
     return {
       ...DEFAULT_INVENTORY_POLICY,
       managed: false,

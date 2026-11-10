@@ -280,6 +280,15 @@ importers:
 
   ../sdkwork-app-topology: {}
 
+  ../sdkwork-appbase/packages/common/foundation/sdkwork-appbase-component-core:
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.12(@types/node@25.9.9)(jsdom@29.1.1)(vite@8.3.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+
   ../sdkwork-appbase/packages/common/foundation/sdkwork-runtime-bootstrap:
     dependencies:
       '@sdkwork/utils':
@@ -292,6 +301,9 @@ importers:
 
   ../sdkwork-appbase/packages/mobile-react/foundation/sdkwork-appbase-mobile-react:
     dependencies:
+      '@sdkwork/appbase-component-core':
+        specifier: workspace:*
+        version: link:../../../common/foundation/sdkwork-appbase-component-core
       '@sdkwork/utils':
         specifier: workspace:*
         version: link:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript
@@ -302,6 +314,15 @@ importers:
       '@sdkwork/ui-pc-react':
         specifier: workspace:*
         version: link:../../../../../sdkwork-ui/sdkwork-ui-pc-react
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   ../sdkwork-appbase/packages/mobile-react/foundation/sdkwork-shell-mobile-react:
     dependencies:
@@ -315,9 +336,15 @@ importers:
       '@sdkwork/ui-pc-react':
         specifier: workspace:*
         version: link:../../../../../sdkwork-ui/sdkwork-ui-pc-react
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
 
   ../sdkwork-appbase/packages/pc-react/foundation/sdkwork-appbase-pc-react:
     dependencies:
+      '@sdkwork/appbase-component-core':
+        specifier: workspace:*
+        version: link:../../../common/foundation/sdkwork-appbase-component-core
       '@sdkwork/runtime-bootstrap':
         specifier: workspace:*
         version: link:../../../common/foundation/sdkwork-runtime-bootstrap
@@ -777,6 +804,10 @@ importers:
       '@sdkwork/ui-mobile-react':
         specifier: workspace:*
         version: link:../../../../../sdkwork-ui/sdkwork-ui-mobile-react
+    devDependencies:
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
 
   ../sdkwork-membership/apps/sdkwork-membership-common/packages/sdkwork-membership-sdk-ports: {}
 
@@ -832,6 +863,17 @@ importers:
         specifier: workspace:*
         version: link:../../../../sdkwork-utils/packages/sdkwork-utils-typescript
 
+  ../sdkwork-merchandise/apps/sdkwork-merchandise-common/packages/sdkwork-merchandise-contracts: {}
+
+  ../sdkwork-merchandise/apps/sdkwork-merchandise-common/packages/sdkwork-merchandise-service:
+    dependencies:
+      '@sdkwork/merchandise-contracts':
+        specifier: workspace:*
+        version: link:../sdkwork-merchandise-contracts
+      '@sdkwork/utils':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript
+
   ../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-contracts: {}
 
   ../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-mobile-react-orders:
@@ -852,6 +894,9 @@ importers:
       '@types/qrcode':
         specifier: 'catalog:'
         version: 1.5.6
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
 
   ../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-sdk-ports: {}
 

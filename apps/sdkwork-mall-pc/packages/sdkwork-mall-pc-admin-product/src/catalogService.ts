@@ -14,12 +14,13 @@ export interface CommerceProductAdminService {
   createCategory(body: Record<string, unknown>): Promise<unknown>;
   updateCategory(categoryId: string, body: Record<string, unknown>): Promise<unknown>;
   deleteCategory(categoryId: string): Promise<unknown>;
-  initializeCategorySeeds(body: Record<string, unknown>): Promise<unknown>;
   listProducts(params?: Record<string, unknown>): Promise<unknown>;
   retrieveProduct(productId: string): Promise<unknown>;
   createProduct(body: Record<string, unknown>): Promise<unknown>;
   updateProduct(productId: string, body: Record<string, unknown>): Promise<unknown>;
   deleteProduct(productId: string): Promise<unknown>;
+  publishProduct(productId: string, body?: Record<string, unknown>): Promise<unknown>;
+  archiveProduct(productId: string, body?: Record<string, unknown>): Promise<unknown>;
   listSkus(params?: Record<string, unknown>): Promise<unknown>;
   createSku(body: Record<string, unknown>): Promise<unknown>;
   updateSku(skuId: string, body: Record<string, unknown>): Promise<unknown>;
@@ -43,12 +44,13 @@ export function createCommerceProductAdminService(
     createCategory: (body) => catalog.categories.create(body),
     updateCategory: (categoryId, body) => catalog.categories.update(categoryId, body),
     deleteCategory: (categoryId) => catalog.categories.delete(categoryId),
-    initializeCategorySeeds: (body) => catalog.categorySeeds.create(body),
     listProducts: (params) => catalog.products.management.list(params),
     retrieveProduct: (productId) => catalog.products.management.retrieve(productId),
     createProduct: (body) => catalog.products.create(body),
     updateProduct: (productId, body) => catalog.products.update(productId, body),
     deleteProduct: (productId) => catalog.products.delete(productId),
+    publishProduct: (productId, body) => catalog.products.publish(productId, body),
+    archiveProduct: (productId, body) => catalog.products.archive(productId, body),
     listSkus: (params) => catalog.skus.list(params),
     createSku: (body) => catalog.skus.create(body),
     updateSku: (skuId, body) => catalog.skus.update(skuId, body),
@@ -121,10 +123,6 @@ export async function deleteCommerceCategory(categoryId: string) {
   return defaultService().deleteCategory(categoryId);
 }
 
-export async function initializeCommerceCategorySeeds(body: Record<string, unknown>) {
-  return defaultService().initializeCategorySeeds(body);
-}
-
 export async function createCommerceProduct(body: Record<string, unknown>) {
   return defaultService().createProduct(body);
 }
@@ -135,6 +133,14 @@ export async function updateCommerceProduct(productId: string, body: Record<stri
 
 export async function deleteCommerceProduct(productId: string) {
   return defaultService().deleteProduct(productId);
+}
+
+export async function publishCommerceProduct(productId: string, body?: Record<string, unknown>) {
+  return defaultService().publishProduct(productId, body);
+}
+
+export async function archiveCommerceProduct(productId: string, body?: Record<string, unknown>) {
+  return defaultService().archiveProduct(productId, body);
 }
 
 export async function createCommerceSku(body: Record<string, unknown>) {

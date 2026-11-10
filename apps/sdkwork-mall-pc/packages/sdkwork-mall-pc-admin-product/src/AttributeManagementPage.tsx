@@ -109,9 +109,18 @@ export function AttributeManagementPage() {
     setSaving(true);
     setError(null);
     setMessage(null);
-    const payload = {
+    // Authority closed bodies: `CreateCategoryAttributeRequest` carries the
+    // binding identity and no `status`; `UpdateCategoryAttributeRequest` owns
+    // the mutable surface plus `status` and accepts neither identifier.
+    const createPayload = {
       categoryId: form.categoryId,
       attributeId: form.attributeId,
+      required: form.required,
+      searchable: form.searchable,
+      filterable: form.filterable,
+      sortOrder: String(Number.parseInt(form.sortOrder, 10) || 0),
+    };
+    const updatePayload = {
       required: form.required,
       searchable: form.searchable,
       filterable: form.filterable,
@@ -120,10 +129,10 @@ export function AttributeManagementPage() {
     };
     try {
       if (editingBindingId) {
-        await updateCommerceCategoryAttribute(editingBindingId, payload);
+        await updateCommerceCategoryAttribute(editingBindingId, updatePayload);
         setMessage('类目属性绑定已更新。');
       } else {
-        await createCommerceCategoryAttribute(payload);
+        await createCommerceCategoryAttribute(createPayload);
         setMessage('类目属性绑定已创建。');
       }
       setEditingBindingId(null);

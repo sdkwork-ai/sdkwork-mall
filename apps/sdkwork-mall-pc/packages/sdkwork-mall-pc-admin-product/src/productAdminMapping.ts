@@ -22,27 +22,13 @@ import {
 
 const COMMERCIAL_METADATA_KEY = 'commercialProductCenter';
 
-export function buildCommercialProductMetadata(draft: CommercialProductDraft): Record<string, unknown> {
-  const readiness = evaluateProductReadiness(draft);
-  return {
-    [COMMERCIAL_METADATA_KEY]: {
-      productDetailConfig: normalizeProductDetailConfig(draft.detailConfig),
-      storeVisibility: normalizeStoreVisibility(draft.storeVisibility),
-      inventoryPolicy: normalizeInventoryPolicy(draft.productType, draft.inventoryPolicy),
-      categoryAttributeValues: normalizeCategoryAttributeValues(draft.categoryAttributeValues),
-      skuAttributeValues: normalizeSkuAttributeValues(draft.skuAttributeValues),
-      publishReadiness: {
-        completed: readiness.completed,
-        total: readiness.total,
-        publishable: readiness.publishable,
-        blockerCount: readiness.blockers.length,
-        warningCount: readiness.warnings.length,
-        issues: readiness.issues,
-      },
-    },
-  };
-}
-
+/**
+ * Reads the mall-local commercial stash from a product record.
+ *
+ * The retired legacy contract carried this state in `metadata`; the authority
+ * write bodies are closed, so the stash survives only as draft-local state and
+ * legacy records still load it for editing.
+ */
 export function readCommercialProductMetadata(record: Record<string, unknown>): Partial<CommercialProductDraft> {
   const metadata = readRecord(record.metadata);
   const commercial = readRecord(metadata?.[COMMERCIAL_METADATA_KEY]);
@@ -130,7 +116,7 @@ export function normalizeStoreVisibility(value: unknown): ProductStoreVisibility
 export function normalizeInventoryPolicy(productType: string, value: unknown): ProductInventoryPolicy {
   const record = readRecord(value);
   if (!record) {
-    if (productType === 'physical_good' || !productType) {
+    if (productType === 'physical' || !productType) {
       return { ...DEFAULT_INVENTORY_POLICY, sourceIds: [...DEFAULT_INVENTORY_POLICY.sourceIds] };
     }
     return {
@@ -142,7 +128,7 @@ export function normalizeInventoryPolicy(productType: string, value: unknown): P
   }
   const readinessMode = readString(record.readinessMode);
   return {
-    managed: readBoolean(record.managed, productType === 'physical_good'),
+    managed: readBoolean(record.managed, productType === 'physical'),
     readinessMode: readinessMode === 'virtual' || readinessMode === 'not_required' ? readinessMode : 'physical',
     sourceIds: readStringArray(record.sourceIds),
     safetyStock: readNumber(record.safetyStock, 0),

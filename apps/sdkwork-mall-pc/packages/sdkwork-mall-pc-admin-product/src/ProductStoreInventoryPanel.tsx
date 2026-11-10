@@ -17,7 +17,7 @@ export function ProductStoreInventoryPanel({
   productType,
   storeVisibility,
 }: ProductStoreInventoryPanelProps) {
-  const physicalRequired = productType === 'physical_good';
+  const physicalRequired = productType === 'physical';
 
   return (
     <section

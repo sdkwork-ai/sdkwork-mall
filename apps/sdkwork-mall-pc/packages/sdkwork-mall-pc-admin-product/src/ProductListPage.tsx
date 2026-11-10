@@ -928,20 +928,16 @@ export function readProductCoverResource(record: ProductRecord): CloudRouterMedi
 
 export function productTypeLabel(productType: string): string {
   switch (productType) {
-    case 'physical_good':
+    case 'physical':
       return '实物商品';
-    case 'virtual_good':
-      return '虚拟商品';
-    case 'membership':
-      return '会员商品';
-    case 'points_recharge':
-      return '积分充值';
-    case 'wallet_recharge':
-      return '钱包充值';
-    case 'subscription':
-      return '订阅服务';
+    case 'digital':
+      return '数字商品';
     case 'service':
       return '服务商品';
+    case 'membership':
+      return '会员商品';
+    case 'points':
+      return '积分商品';
     default:
       return productType || '-';
   }

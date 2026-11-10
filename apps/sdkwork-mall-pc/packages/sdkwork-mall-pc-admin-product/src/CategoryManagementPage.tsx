@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, ChevronRight, Edit3, MoreHorizontal, Plus, RefreshCw, Rocket, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronRight, Edit3, MoreHorizontal, Plus, RefreshCw, Trash2, X } from 'lucide-react';
 import { BusinessStatePanel } from './commerce-admin-primitives';
 import { readApiData, readApiItems } from './commerce-api-result';
 import {
   createCommerceCategory,
   deleteCommerceCategory,
-  initializeCommerceCategorySeeds,
   listCommerceCategories,
   updateCommerceCategory,
 } from './catalogService';
@@ -61,16 +60,6 @@ type CategoryContextMenuState = {
   canMoveDown: boolean;
 };
 
-type SeedSummary = {
-  dataset: string;
-  targetTable: string;
-  requested: number;
-  upserted: number;
-  skipped: number;
-  installDefaultEnabled: boolean;
-  configKey: string;
-};
-
 type CategoryListState = {
   loading: boolean;
   error: string | null;
@@ -82,7 +71,6 @@ type CategoryMessage = {
   text: string;
 };
 
-export const CATEGORY_SEED_DATASETS = ['product'] as const;
 const CATEGORY_LIST_PAGE_SIZE = 200;
 const MAX_CATEGORY_LIST_PAGES = 50;
 
@@ -113,14 +101,11 @@ export function CategoryManagementPage() {
   const [form, setForm] = useState<CategoryFormState>(EMPTY_FORM);
   const [modal, setModal] = useState<CategoryModalState>(CLOSED_MODAL);
   const [contextMenu, setContextMenu] = useState<CategoryContextMenuState | null>(null);
-  const [seedSummaries, setSeedSummaries] = useState<SeedSummary[]>([]);
-  const [seedLoading, setSeedLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<CategoryMessage | null>(null);
 
   const tree = useMemo(() => buildCategoryTree(state.records), [state.records]);
   const columns = useMemo(() => buildCategoryColumns(activePathIds, tree), [activePathIds, tree]);
-  const seedSummaryText = useMemo(() => summarizeSeedResults(seedSummaries), [seedSummaries]);
 
   useEffect(() => {
     void loadCategories();
@@ -147,28 +132,6 @@ export function CategoryManagementPage() {
     }
   }
 
-  async function handleSeedInitialize() {
-    setSeedLoading(true);
-    setMessage(null);
-    try {
-      const result = await initializeCommerceCategorySeeds({
-        datasets: [...CATEGORY_SEED_DATASETS],
-        mode: 'admin_button',
-      });
-      const summaries = readSeedSummaries(result);
-      setSeedSummaries(summaries);
-      setMessage({ tone: 'success', text: summarizeSeedResults(summaries) || '分类初始化完成。' });
-      await loadCategories();
-    } catch (error) {
-      setMessage({
-        tone: 'error',
-        text: error instanceof Error && error.message ? error.message : '分类初始化失败',
-      });
-    } finally {
-      setSeedLoading(false);
-    }
-  }
-
   function openCategoryModal(mode: CategoryModalMode, record?: CategoryRecord | null, parentId?: string | null) {
     const nextRecord = record ?? null;
     setModal({ open: true, mode, record: nextRecord, parentId: parentId ?? nextRecord?.parentId ?? null });
@@ -191,19 +154,19 @@ export function CategoryManagementPage() {
     setSaving(true);
     setMessage(null);
     const categoryNo = form.categoryNo.trim() || generateCategoryNo(state.records);
-    const payload = {
-      categoryNo,
+    const mutablePayload = {
       parentId: form.parentId.trim() || null,
       name: form.name.trim(),
-      status: form.status,
       sortOrder: String(Number.parseInt(form.sortOrder, 10) || 0),
     };
     try {
       if (form.id) {
-        await updateCommerceCategory(form.id, payload);
+        // Authority `UpdateCategoryRequest` owns the lifecycle `status`; the
+        // create body cannot carry one (closed body defaults to active).
+        await updateCommerceCategory(form.id, { ...mutablePayload, status: form.status });
         setMessage({ tone: 'success', text: '分类已更新。' });
       } else {
-        await createCommerceCategory(payload);
+        await createCommerceCategory({ categoryNo, ...mutablePayload });
         setMessage({ tone: 'success', text: '分类已创建。' });
       }
       closeCategoryModal();
@@ -287,12 +250,9 @@ export function CategoryManagementPage() {
         className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-colors duration-300 dark:border-white/10 dark:bg-[#171717]"
         data-admin-category-scroll-shell
       >
-        <CategorySeedInitializePanel
-          seedLoading={seedLoading}
-          seedSummaryText={seedSummaryText}
+        <CategoryToolbar
           onCreateRoot={() => openCategoryModal('create', null, null)}
           onRefresh={() => void loadCategories()}
-          onSeedInitialize={() => void handleSeedInitialize()}
         />
 
         {message ? (
@@ -362,18 +322,12 @@ export function CategoryManagementPage() {
   );
 }
 
-function CategorySeedInitializePanel({
+function CategoryToolbar({
   onCreateRoot,
   onRefresh,
-  onSeedInitialize,
-  seedLoading,
-  seedSummaryText,
 }: {
-  seedLoading: boolean;
-  seedSummaryText: string;
   onCreateRoot: () => void;
   onRefresh: () => void;
-  onSeedInitialize: () => void;
 }) {
   return (
     <div className="shrink-0 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-white/[0.03]" data-admin-category-toolbar>
@@ -388,11 +342,6 @@ function CategorySeedInitializePanel({
           新增分类
         </button>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          {seedSummaryText ? (
-            <div className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200 dark:bg-white/10 dark:text-slate-300 dark:ring-white/10" data-admin-category-seed-summary>
-              {seedSummaryText}
-            </div>
-          ) : null}
           <button
             type="button"
             onClick={onRefresh}
@@ -401,16 +350,6 @@ function CategorySeedInitializePanel({
           >
             <RefreshCw className="h-4 w-4" />
             刷新
-          </button>
-          <button
-            type="button"
-            disabled={seedLoading}
-            onClick={onSeedInitialize}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-lobster-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-lobster-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-lobster-500 dark:hover:bg-lobster-400"
-            data-admin-category-initialize-button
-          >
-            {seedLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
-            {seedLoading ? '初始化中' : '初始化数据'}
           </button>
         </div>
       </div>
@@ -1069,8 +1008,8 @@ function compareCategorySiblings(left: CategoryRecord, right: CategoryRecord): n
 
 async function moveCategorySortOrder(record: CategoryRecord, targetRecord: CategoryRecord): Promise<void> {
   await Promise.all([
-    updateCommerceCategory(record.id, createCategorySortPayload(record, targetRecord.sortOrder)),
-    updateCommerceCategory(targetRecord.id, createCategorySortPayload(targetRecord, record.sortOrder)),
+    updateCommerceCategory(record.id, createCategorySortPayload(targetRecord.sortOrder)),
+    updateCommerceCategory(targetRecord.id, createCategorySortPayload(record.sortOrder)),
   ]);
 }
 
@@ -1096,12 +1035,10 @@ function applyCategoryMoveLocally(
   });
 }
 
-function createCategorySortPayload(record: CategoryRecord, sortOrder: number) {
+function createCategorySortPayload(sortOrder: number) {
+  // Authority `UpdateCategoryRequest`: only the mutable surface — identifiers
+  // and business keys are not writable.
   return {
-    categoryNo: record.categoryNo,
-    parentId: record.parentId,
-    name: record.name,
-    status: record.status,
     sortOrder: String(sortOrder),
   };
 }
@@ -1199,15 +1136,6 @@ function collectCategoryDescendantIds(node: CategoryTreeNode, ids: Set<string>) 
   }
 }
 
-function summarizeSeedResults(summaries: SeedSummary[]): string {
-  if (summaries.length === 0) {
-    return '';
-  }
-  const requested = summaries.reduce((total, item) => total + item.requested, 0);
-  const upserted = summaries.reduce((total, item) => total + item.upserted, 0);
-  return `已初始化 ${summaries.length} 组数据，写入 ${upserted}/${requested}`;
-}
-
 function readCategoryStatus(value: unknown): CategoryStatus {
   return value === 'active' || value === 'inactive' || value === 'archived' ? value : 'active';
 }
@@ -1260,21 +1188,6 @@ export function readCategoryTotal(result: unknown): number | null {
   }
   const record = data as Record<string, unknown>;
   return readNonNegativeInteger(record.total ?? record.totalCount ?? record.total_count);
-}
-
-export function readSeedSummaries(result: unknown): SeedSummary[] {
-  return readApiItems(result).map((item) => {
-    const summary = item as Partial<SeedSummary>;
-    return {
-      dataset: String(summary.dataset ?? ''),
-      targetTable: String(summary.targetTable ?? ''),
-      requested: Number(summary.requested ?? 0) || 0,
-      upserted: Number(summary.upserted ?? 0) || 0,
-      skipped: Number(summary.skipped ?? 0) || 0,
-      installDefaultEnabled: Boolean(summary.installDefaultEnabled),
-      configKey: String(summary.configKey ?? ''),
-    };
-  });
 }
 
 function readNonNegativeInteger(value: unknown): number | null {

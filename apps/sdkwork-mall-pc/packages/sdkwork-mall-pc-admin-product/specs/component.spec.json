@@ -96,7 +96,8 @@
     ],
     "sdkClients": [],
     "sdkDependencies": [
-      "sdkwork-commerce-backend-sdk"
+      "sdkwork-commerce-backend-sdk",
+      "sdkwork-shop-backend-sdk"
     ],
     "dependencyApiExports": [],
     "dependencyApiSurfaces": [],
@@ -107,9 +108,9 @@
     "routeManifest": null
   },
   "integration": {
-    "authority": "sdkwork-commerce owns product center admin UI and service orchestration.",
+    "authority": "sdkwork-merchandise owns the merchandise backend catalog capability (authority sdkwork-shop-backend-api, route manifest sdkwork-routes-merchandise-backend-api); this package owns the product center admin UI and service orchestration over it.",
     "dependencyPolicy": "Consumers integrate through public package exports only.",
-    "sdkPolicy": "Services use @sdkwork/mall-pc-admin-core admin remote port boundaries backed by Commerce backend SDK clients configured in mall PC bootstrap. Raw HTTP, manual auth headers, and Cloud Router backend SDK catalog calls are forbidden.",
+    "sdkPolicy": "Services use @sdkwork/mall-pc-admin-core admin remote port boundaries backed by Commerce backend SDK clients configured in mall PC bootstrap. Raw HTTP, manual auth headers, and Cloud Router backend SDK catalog calls are forbidden. Write payloads follow the sdkwork-merchandise closed-body contract (products.publish/archive lifecycle commands, productNo/categoryId identifiers, minor-unit prices); the federated transport remap for products lifecycle commands is owned by mall PC bootstrap until the transport is regenerated from sdkwork-shop-backend-api.",
     "languagePolicy": "React and TypeScript source follows frontend and backend UI standards."
   },
   "verification": {

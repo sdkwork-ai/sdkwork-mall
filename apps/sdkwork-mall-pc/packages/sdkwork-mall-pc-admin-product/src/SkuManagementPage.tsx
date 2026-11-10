@@ -14,6 +14,12 @@ import {
   listCommerceSkus,
   updateCommerceSku,
 } from './catalogService';
+import {
+  decimalAmountToMinorUnits,
+  minorUnitsToDecimalAmount,
+  normalizeMerchandiseFulfillmentType,
+  type MerchandiseSkuFulfillmentType,
+} from './merchandiseContract';
 import { readProductRecords, readProductString } from './ProductListPage';
 
 type SkuRecord = Record<string, unknown>;
@@ -47,15 +53,7 @@ type SkuFormState = {
   image?: CloudRouterMediaResource;
 };
 
-type SkuFulfillmentType =
-  | 'physical_shipment'
-  | 'digital_delivery'
-  | 'entitlement_grant'
-  | 'points_credit'
-  | 'wallet_credit'
-  | 'subscription_activation'
-  | 'service_activation'
-  | 'none';
+type SkuFulfillmentType = MerchandiseSkuFulfillmentType;
 
 type SkuStatus = 'draft' | 'active' | 'inactive' | 'archived';
 
@@ -73,14 +71,11 @@ const DEFAULT_STATE: SkuPageState = {
 };
 
 const FULFILLMENT_TYPE_OPTIONS: Array<{ value: SkuFulfillmentType; label: string }> = [
-  { value: 'physical_shipment', label: 'Physical shipment' },
-  { value: 'digital_delivery', label: 'Digital delivery' },
-  { value: 'entitlement_grant', label: 'Entitlement grant' },
-  { value: 'points_credit', label: 'Points credit' },
-  { value: 'wallet_credit', label: 'Wallet credit' },
-  { value: 'subscription_activation', label: 'Subscription activation' },
-  { value: 'service_activation', label: 'Service activation' },
-  { value: 'none', label: 'None' },
+  { value: 'physical', label: 'Physical shipment' },
+  { value: 'digital', label: 'Digital delivery' },
+  { value: 'service', label: 'Service fulfillment' },
+  { value: 'membership_activation', label: 'Membership activation' },
+  { value: 'points_topup', label: 'Points top-up' },
 ];
 
 const SKU_STATUS_OPTIONS: Array<{ value: SkuStatus; label: string }> = [
@@ -165,14 +160,18 @@ export function SkuManagementPage() {
       return;
     }
 
-    const mutationBody = buildSkuMutationBody(form);
+    const mutationBodies = buildSkuMutationBodies(form);
+    if (!mutationBodies) {
+      setState((current) => ({ ...current, error: 'Price amount must be a valid decimal amount.' }));
+      return;
+    }
     const skuId = drawer.record ? readSkuString(drawer.record, ['id']) : '';
     setState((current) => ({ ...current, saving: true, error: null }));
     try {
       if (drawer.mode === 'edit' && skuId) {
-        await updateCommerceSku(skuId, mutationBody);
+        await updateCommerceSku(skuId, mutationBodies.updateBody);
       } else {
-        await createCommerceSku(mutationBody);
+        await createCommerceSku(mutationBodies.createBody);
       }
       closeDrawer();
       await loadPage();
@@ -280,7 +279,7 @@ export function SkuManagementPage() {
                         <td className="px-4 py-3">{readSkuString(record, ['title', 'name']) || '-'}</td>
                         <td className="px-4 py-3">
                           {readSkuString(record, ['defaultCurrencyCode', 'currencyCode', 'currency_code']) || 'CNY'}{' '}
-                          {readSkuString(record, ['defaultPriceAmount', 'priceAmount', 'price_amount']) || '0.00'}
+                          {readSkuPriceAmount(record) || '0.00'}
                         </td>
                         <td className="px-4 py-3">
                           <SkuAttributeSummaryPill summary={attributeSummary} />
@@ -597,7 +596,7 @@ function createEmptySkuForm(productOptions: ProductOption[]): SkuFormState {
     skuNo: '',
     defaultPriceAmount: '0.00',
     defaultCurrencyCode: 'CNY',
-    fulfillmentType: 'none',
+    fulfillmentType: 'physical',
     status: 'draft',
     barcode: '',
     image: undefined,
@@ -609,7 +608,7 @@ function readSkuFormState(record: SkuRecord): SkuFormState {
     productId: readSkuString(record, ['productId', 'product_id']),
     title: readSkuString(record, ['title', 'name']),
     skuNo: readSkuString(record, ['skuNo', 'sku_no']),
-    defaultPriceAmount: readSkuString(record, ['defaultPriceAmount', 'priceAmount', 'price_amount']) || '0.00',
+    defaultPriceAmount: readSkuPriceAmount(record),
     defaultCurrencyCode: readSkuString(record, ['defaultCurrencyCode', 'currencyCode', 'currency_code']) || 'CNY',
     fulfillmentType: normalizeSkuFulfillmentType(readSkuString(record, ['fulfillmentType'])),
     status: normalizeSkuStatus(readSkuString(record, ['status'])),
@@ -634,17 +633,40 @@ function validateSkuForm(form: SkuFormState): string | null {
   return null;
 }
 
-function buildSkuMutationBody(form: SkuFormState) {
-  return {
-    barcode: form.barcode || null,
-    defaultCurrencyCode: form.defaultCurrencyCode || 'CNY',
-    defaultPriceAmount: form.defaultPriceAmount || '0.00',
-    fulfillmentType: form.fulfillmentType,
-    image: form.image,
-    productId: form.productId,
-    skuNo: form.skuNo.trim(),
-    status: form.status,
+/**
+ * Authority-shaped SKU mutation bodies (`sdkwork-merchandise` closed bodies).
+ *
+ * `CreateSkuRequest` carries `productId`/`skuNo` and no status; the update
+ * surface accepts neither identifier and owns the lifecycle `status`. Prices
+ * ride the minor-unit wire rule (`salePriceMinor`, CNY fen as a string), so the
+ * console decimal converts before submit. `barcode`/`image` have no authority
+ * carrier and stay draft-local. Variant references (`attributeValueIds`) stay
+ * omitted until the federated transport regenerates the authority's
+ * `attributeValues` operations.
+ */
+function buildSkuMutationBodies(form: SkuFormState) {
+  const salePriceMinor = decimalAmountToMinorUnits(form.defaultPriceAmount);
+  if (!salePriceMinor) {
+    return null;
+  }
+  const commonBody = {
+    name: form.title.trim(),
     title: form.title.trim(),
+    salePriceMinor,
+    currencyCode: form.defaultCurrencyCode || 'CNY',
+    fulfillmentType: form.fulfillmentType,
+    inventoryTracking: 'none' as const,
+  };
+  return {
+    createBody: {
+      ...commonBody,
+      productId: form.productId,
+      skuNo: form.skuNo.trim(),
+    },
+    updateBody: {
+      ...commonBody,
+      status: form.status,
+    },
   };
 }
 
@@ -655,11 +677,17 @@ function normalizeSkuStatus(value: string): SkuStatus {
   return 'draft';
 }
 
+/**
+ * Reads the SKU price for display and editing: the authority carries
+ * `salePriceMinor` (minor-unit string), while records from the retired legacy
+ * contract still use decimal amounts.
+ */
+function readSkuPriceAmount(record: SkuRecord): string {
+  return minorUnitsToDecimalAmount(readSkuString(record, ['salePriceMinor', 'sale_price_minor']))
+    || readSkuString(record, ['defaultPriceAmount', 'priceAmount', 'price_amount'])
+    || '0.00';
+}
+
 function normalizeSkuFulfillmentType(value: string): SkuFulfillmentType {
-  for (const option of FULFILLMENT_TYPE_OPTIONS) {
-    if (option.value === value) {
-      return option.value;
-    }
-  }
-  return 'none';
+  return normalizeMerchandiseFulfillmentType(value);
 }

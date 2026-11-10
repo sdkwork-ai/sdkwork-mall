@@ -63,16 +63,15 @@ describe("mall default data plan", () => {
       parentId: "cat-1",
       sortOrder: 10,
     });
+    // Authority `CreateCategoryRequest`: closed body, no `status` on create.
     expect(category).toEqual({
       categoryNo: "MALL-CAT-PHONE",
       parentId: "cat-1",
       name: "智能手机",
-      status: "active",
       sortOrder: "10",
     });
 
     const sku = buildMallSkuCreateBody({
-      barcode: "6900000000001",
       currencyCode: "CNY",
       key: "aurora-x1-pro-256-obsidian",
       listPrice: "4699.00",
@@ -80,10 +79,12 @@ describe("mall default data plan", () => {
       productId: "spu-1",
       title: "12GB+256GB 曜石黑",
     });
+    // Authority `CreateSkuRequest`: prices ride the minor-unit wire rule.
     expect(sku.skuNo).toBe("MALL-SKU-AURORA-X1-PRO-256-OBSIDIAN");
-    expect(sku.defaultPriceAmount).toBe("4299.00");
-    expect(sku.listPriceAmount).toBe("4699.00");
+    expect(sku.salePriceMinor).toBe("429900");
+    expect(sku.listPriceMinor).toBe("469900");
     expect(sku.productId).toBe("spu-1");
+    expect(sku.inventoryTracking).toBe("quantity");
     expect(buildMallSpuNo("aurora-x1-pro")).toBe("MALL-SPU-AURORA-X1-PRO");
   });
 

@@ -24,10 +24,11 @@ describe("sdkwork-mall-pc-admin-product service", () => {
       categoryCreate: vi.fn().mockResolvedValue({ data: { id: "category-1" } }),
       categoryUpdate: vi.fn().mockResolvedValue({ data: { id: "category-1", name: "Updated" } }),
       categoryDelete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
-      categorySeedsCreate: vi.fn().mockResolvedValue({ data: [{ dataset: "product", requested: 2, upserted: 2 }] }),
       productCreate: vi.fn().mockResolvedValue({ data: { id: "product-1" } }),
       productUpdate: vi.fn().mockResolvedValue({ data: { id: "product-1", title: "Updated" } }),
       productDelete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
+      productPublish: vi.fn().mockResolvedValue({ data: { id: "product-1", status: "active" } }),
+      productArchive: vi.fn().mockResolvedValue({ data: { id: "product-1", status: "archived" } }),
       skuCreate: vi.fn().mockResolvedValue({ data: { id: "sku-1" } }),
       skuUpdate: vi.fn().mockResolvedValue({ data: { id: "sku-1", skuNo: "SKU-1" } }),
       skuDelete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
@@ -61,9 +62,6 @@ describe("sdkwork-mall-pc-admin-product service", () => {
             update: calls.categoryAttributeUpdate,
             delete: calls.categoryAttributeDelete,
           },
-          categorySeeds: {
-            create: calls.categorySeedsCreate,
-          },
           priceLists: {
             list: vi.fn().mockResolvedValue({ data: [{ id: "price-list-1" }] }),
             create: calls.priceListCreate,
@@ -76,6 +74,8 @@ describe("sdkwork-mall-pc-admin-product service", () => {
             create: calls.productCreate,
             update: calls.productUpdate,
             delete: calls.productDelete,
+            publish: calls.productPublish,
+            archive: calls.productArchive,
           },
           skus: {
             list: vi.fn().mockResolvedValue({ data: [{ id: "sku-1" }] }),
@@ -96,9 +96,6 @@ describe("sdkwork-mall-pc-admin-product service", () => {
       data: { id: "category-1", name: "Updated" },
     });
     await expect(service.deleteCategory("category-1")).resolves.toEqual({ data: { deleted: true } });
-    await expect(service.initializeCategorySeeds({ datasets: ["product"] })).resolves.toEqual({
-      data: [{ dataset: "product", requested: 2, upserted: 2 }],
-    });
     await expect(service.listProducts({ status: "active" })).resolves.toEqual({ data: [{ id: "product-1" }] });
     await expect(service.retrieveProduct("product-1")).resolves.toEqual({ data: { id: "product-1" } });
     await expect(service.createProduct({ title: "Product" })).resolves.toEqual({ data: { id: "product-1" } });
@@ -106,6 +103,12 @@ describe("sdkwork-mall-pc-admin-product service", () => {
       data: { id: "product-1", title: "Updated" },
     });
     await expect(service.deleteProduct("product-1")).resolves.toEqual({ data: { deleted: true } });
+    await expect(service.publishProduct("product-1")).resolves.toEqual({
+      data: { id: "product-1", status: "active" },
+    });
+    await expect(service.archiveProduct("product-1")).resolves.toEqual({
+      data: { id: "product-1", status: "archived" },
+    });
     await expect(service.listSkus({ productId: "product-1" })).resolves.toEqual({ data: [{ id: "sku-1" }] });
     await expect(service.createSku({ skuNo: "SKU-1" })).resolves.toEqual({ data: { id: "sku-1" } });
     await expect(service.updateSku("sku-1", { skuNo: "SKU-1" })).resolves.toEqual({
@@ -130,7 +133,8 @@ describe("sdkwork-mall-pc-admin-product service", () => {
     expect(calls.categoryCreate).toHaveBeenCalledWith({ name: "Root" });
     expect(calls.categoryUpdate).toHaveBeenCalledWith("category-1", { name: "Updated" });
     expect(calls.categoryDelete).toHaveBeenCalledWith("category-1");
-    expect(calls.categorySeedsCreate).toHaveBeenCalledWith({ datasets: ["product"] });
+    expect(calls.productPublish).toHaveBeenCalledWith("product-1", undefined);
+    expect(calls.productArchive).toHaveBeenCalledWith("product-1", undefined);
     expect(calls.productRetrieve).toHaveBeenCalledWith("product-1");
     expect(calls.productDelete).toHaveBeenCalledWith("product-1");
     expect(calls.skuDelete).toHaveBeenCalledWith("sku-1");
@@ -210,7 +214,7 @@ describe("sdkwork-mall-pc-admin-product service", () => {
       expect(createPageSource).toContain(marker);
     }
 
-    expect(mappingSource).toContain("buildCommercialProductMetadata");
+    expect(mappingSource).toContain("readCommercialProductMetadata");
     expect(mappingSource).toContain("productDetailConfig");
     expect(mappingSource).toContain("storeVisibility");
     expect(mappingSource).toContain("categoryAttributeValues");
@@ -219,8 +223,14 @@ describe("sdkwork-mall-pc-admin-product service", () => {
     expect(mappingSource).toContain("readProductCommercialSignals");
     expect(readinessSource).toContain("evaluateProductReadiness");
     expect(readinessSource).toContain("Physical products require inventory source policy before publish.");
-    expect(createPageSource).toContain("metadata: {");
-    expect(createPageSource).toContain("buildSkuAttributePayloads");
+    // Authority write contract (`sdkwork-merchandise` closed bodies): the
+    // create payload carries `productNo`, SKU prices ride the minor-unit wire
+    // rule, and publishing is the `products.publish` command.
+    expect(createPageSource).toContain("buildProductCreatePayload");
+    expect(createPageSource).toContain("buildProductUpdatePayload");
+    expect(createPageSource).toContain("productNo: draft.spuNo");
+    expect(createPageSource).toContain("salePriceMinor");
+    expect(createPageSource).toContain("publishCommerceProduct");
     expect(listPageSource).toContain("readProductCommercialSignals");
     expect(listPageSource).toContain("data-admin-product-commercial-signals");
   });

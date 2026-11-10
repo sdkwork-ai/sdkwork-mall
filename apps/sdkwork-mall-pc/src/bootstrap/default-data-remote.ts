@@ -150,6 +150,11 @@ export function createSdkworkMallPcDefaultDataPort(
       createCategory: (body) => commerce.catalog.categories.create(body),
       listProducts: () => commerce.catalog.products.management.list({ ...PROVISIONING_LIST_QUERY }),
       createProduct: (body) => commerce.catalog.products.create(body),
+      // The merchandise authority operation is `products.publish`
+      // (`sdkwork-routes-merchandise-backend-api.route-manifest.json`); the
+      // federated transport still names it under the legacy `catalog.spus`
+      // aggregate, so the mapping stays here until the transport is
+      // regenerated from `sdkwork-shop-backend-api`.
       publishProduct: (productId) => commerce.catalog.spus.publish(productId),
       listSkus: () => commerce.catalog.skus.list({ ...PROVISIONING_LIST_QUERY }),
       createSku: (body) => commerce.catalog.skus.create(body),

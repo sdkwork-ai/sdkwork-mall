@@ -125,7 +125,9 @@ export async function verifyMallDefaultData(
         "catalog.products",
         "Products",
         dataset.products.map((product) => buildMallSpuNo(product.key)),
-        collectNaturalKeys(productRecords, ["spuNo", "spu_no"]),
+        // The authority resource key is `productNo`; legacy rows still carry
+        // `spuNo`, so both spellings verify the same provisioning key.
+        collectNaturalKeys(productRecords, ["productNo", "product_no", "spuNo", "spu_no"]),
       ),
     );
     checks.push(
