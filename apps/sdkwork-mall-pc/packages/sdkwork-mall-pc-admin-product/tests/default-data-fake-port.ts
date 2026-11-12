@@ -4,6 +4,11 @@ import type {
 } from "../src/default-data/port";
 
 export interface FakeMallDefaultDataPortState {
+  brands: Record<string, unknown>[];
+  attributes: Record<string, unknown>[];
+  categoryAttributes: Record<string, unknown>[];
+  priceLists: Record<string, unknown>[];
+  priceListItems: Record<string, unknown>[];
   categories: Record<string, unknown>[];
   shops: Record<string, unknown>[];
   products: Record<string, unknown>[];
@@ -69,6 +74,11 @@ export function createFakeMallDefaultDataPort(
   const created: string[] = [];
   const published: string[] = [];
   const state: FakeMallDefaultDataPortState = {
+    brands: [],
+    attributes: [],
+    categoryAttributes: [],
+    priceLists: [],
+    priceListItems: [],
     categories: [],
     shops: [],
     products: [],
@@ -97,6 +107,70 @@ export function createFakeMallDefaultDataPort(
       },
     },
     catalog: {
+      async listBrands() {
+        return okList(state.brands ?? []);
+      },
+      async createBrand(body) {
+        const brandNo = pickKey(body, ["brandNo"]);
+        const id = nextId("brand");
+        if (state.brands) state.brands.push({ ...body, id });
+        created.push(brandNo);
+        return okItem({ id, version: 0, status: "active" });
+      },
+      async listAttributes() {
+        return okList(state.attributes ?? []);
+      },
+      async createAttribute(body) {
+        const attributeNo = pickKey(body, ["attributeNo"]);
+        const id = nextId("attr");
+        if (state.attributes) {
+          const values = Array.isArray(body.values)
+            ? (body.values as string[]).map((displayValue, index) => ({
+              id: `${id}-v${index + 1}`,
+              valueCode: `V${index + 1}`,
+              displayValue,
+            }))
+            : [];
+          state.attributes.push({ ...body, id, values });
+        }
+        created.push(attributeNo);
+        return okItem({ id, version: 0, status: "active" });
+      },
+      async listAttributeValues(params) {
+        const attributeId = params?.attributeId;
+        const values = (state.attributes ?? [])
+          .filter((attribute) => !attributeId || attribute.id === attributeId)
+          .flatMap((attribute) => (attribute.values ?? []) as Record<string, unknown>[]);
+        return okList(values);
+      },
+      async listCategoryAttributes() {
+        return okList(state.categoryAttributes ?? []);
+      },
+      async listPriceLists() {
+        return okList(state.priceLists ?? []);
+      },
+      async createPriceList(body) {
+        const priceListNo = pickKey(body, ["priceListNo"]);
+        const id = nextId("plist");
+        if (state.priceLists) state.priceLists.push({ ...body, id });
+        created.push(priceListNo);
+        return okItem({ id, version: 0, status: "active" });
+      },
+      async listPriceListItems() {
+        return okList(state.priceListItems ?? []);
+      },
+      async createPriceListItem(body) {
+        const id = nextId("pitem");
+        if (state.priceListItems) state.priceListItems.push({ ...body, id });
+        created.push(String(body.skuId ?? ""));
+        return okItem({ id, version: 0, status: "active" });
+      },
+      async createCategoryAttribute(body) {
+        const id = nextId("binding");
+        if (state.categoryAttributes) state.categoryAttributes.push({ ...body, id });
+        created.push(`${body.categoryId}:${body.attributeId}`);
+        return okItem({ id, version: 0, status: "active" });
+      },
       async listCategories() {
         return okList(state.categories);
       },

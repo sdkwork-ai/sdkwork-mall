@@ -10,6 +10,10 @@ import {
   writeMallCmsConfig,
   type MallCmsConfig,
 } from "@sdkwork/mall-pc-cms/cms-config";
+import {
+  readAccountScopedItem,
+  writeAccountScopedItem,
+} from "@sdkwork/mall-pc-core/session";
 
 import type { SdkworkBackendClient as SdkworkShopBackendClient } from "@sdkwork/shop-backend-sdk";
 
@@ -89,7 +93,7 @@ function readCmsPresetMarker(): string | null {
     return null;
   }
   try {
-    return window.localStorage.getItem(CMS_PRESET_STORAGE_KEY);
+    return readAccountScopedItem(CMS_PRESET_STORAGE_KEY);
   } catch {
     return null;
   }
@@ -100,7 +104,7 @@ function writeCmsPresetMarker(presetId: string): void {
     return;
   }
   try {
-    window.localStorage.setItem(CMS_PRESET_STORAGE_KEY, presetId);
+    writeAccountScopedItem(CMS_PRESET_STORAGE_KEY, presetId);
   } catch {
     // A blocked storage write only means the preset may be reapplied; the
     // storefront configuration itself has already been written.
@@ -142,6 +146,17 @@ export function createSdkworkMallPcDefaultDataPort(
 
   return {
     catalog: {
+      listBrands: () => catalog.brands.list({ ...PROVISIONING_LIST_QUERY }),
+      createBrand: (body) => catalog.brands.create(body),
+      listAttributes: () => catalog.attributes.management.list({ ...PROVISIONING_LIST_QUERY }),
+      createAttribute: (body) => catalog.attributes.create(body),
+      listAttributeValues: (query) => catalog.attributeValues.list(query),
+      listCategoryAttributes: () => catalog.categoryAttributes.list({ ...PROVISIONING_LIST_QUERY }),
+      createCategoryAttribute: (body) => catalog.categoryAttributes.create(body),
+      listPriceLists: () => catalog.priceLists.list({ ...PROVISIONING_LIST_QUERY }),
+      createPriceList: (body) => catalog.priceLists.create(body),
+      listPriceListItems: () => catalog.priceListItems.list({ page: 1, pageSize: 200 }),
+      createPriceListItem: (body) => catalog.priceListItems.create(body),
       listCategories: () => catalog.categories.management.list({ ...PROVISIONING_LIST_QUERY }),
       createCategory: (body) => catalog.categories.create(body),
       listProducts: () => catalog.products.management.list({ ...PROVISIONING_LIST_QUERY }),

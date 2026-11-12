@@ -3,6 +3,7 @@ export {
   createCommerceProductAdminWorkspaceManifest,
 } from './catalogService';
 export * from './AttributeManagementPage';
+export * from './BrandManagementPage';
 export * from './CategoryManagementPage';
 export * from './ProductCreatePage';
 export * from './ProductListPage';

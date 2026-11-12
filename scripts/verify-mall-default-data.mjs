@@ -109,6 +109,37 @@ function checkDataset() {
     }
   }
 
+  // Brands: unique keys, non-empty display fields; products reference them by
+  // `brandKey` the same way they reference shops and leaf categories.
+  const brandKeys = new Set();
+  for (const brand of dataset.brands ?? []) {
+    if (brandKeys.has(brand.key)) fail("dataset", `duplicate brand key ${brand.key}`);
+    brandKeys.add(brand.key);
+    for (const field of ["key", "name", "description"]) {
+      if (!brand[field]) fail("dataset", `brand ${brand.key ?? "?"} is missing ${field}`);
+    }
+  }
+
+  // Spec attributes: bound to leaf categories, non-empty dictionaries, unique
+  // stable keys; SKU spec values must resolve against the binding of the
+  // product's own leaf category.
+  const attributeBindings = new Map();
+  const attributeKeys = new Set();
+  for (const attribute of dataset.categoryAttributes ?? []) {
+    if (attributeKeys.has(attribute.key)) fail("dataset", `duplicate attribute key ${attribute.key}`);
+    attributeKeys.add(attribute.key);
+    if (!leafKeys.has(attribute.categoryKey)) {
+      fail("dataset", `attribute ${attribute.key ?? "?"} references non-leaf category ${attribute.categoryKey}`);
+      continue;
+    }
+    if (!attribute.attributeName) fail("dataset", `attribute ${attribute.key} is missing attributeName`);
+    const values = attribute.values ?? [];
+    if (values.length === 0) fail("dataset", `attribute ${attribute.key} has an empty dictionary`);
+    const bound = attributeBindings.get(attribute.categoryKey) ?? [];
+    bound.push({ attributeName: attribute.attributeName, values: new Set(values) });
+    attributeBindings.set(attribute.categoryKey, bound);
+  }
+
   const productKeys = new Set();
   const skuKeys = new Set();
   const barcodes = new Set();
@@ -118,6 +149,9 @@ function checkDataset() {
     if (!shopKeys.has(product.shopKey)) fail("dataset", `product ${product.key} references unknown shop ${product.shopKey}`);
     if (!leafKeys.has(product.categoryKey)) {
       fail("dataset", `product ${product.key} references non-leaf category ${product.categoryKey}`);
+    }
+    if (!brandKeys.has(product.brandKey)) {
+      fail("dataset", `product ${product.key} references unknown brand ${product.brandKey}`);
     }
     for (const field of ["brand", "title", "subtitle", "description", "productType"]) {
       if (!product[field]) fail("dataset", `product ${product.key} is missing ${field}`);
@@ -135,9 +169,23 @@ function checkDataset() {
       if (Number(sku.price) > Number(sku.listPrice)) {
         fail("dataset", `SKU ${sku.key} sale price exceeds list price`);
       }
-      if (!BARCODE.test(String(sku.barcode ?? ""))) fail("dataset", `SKU ${sku.key} barcode must be EAN-13`);
-      if (barcodes.has(sku.barcode)) fail("dataset", `duplicate barcode ${sku.barcode}`);
-      barcodes.add(sku.barcode);
+      // A barcode is an EAN-13 when present; digital and service goods have no
+      // physical unit to tag and leave it empty.
+      if (sku.barcode) {
+        if (!BARCODE.test(String(sku.barcode))) fail("dataset", `SKU ${sku.key} barcode must be EAN-13`);
+        if (barcodes.has(sku.barcode)) fail("dataset", `duplicate barcode ${sku.barcode}`);
+        barcodes.add(sku.barcode);
+      }
+      for (const [attributeName, valueName] of Object.entries(sku.values ?? {})) {
+        const binding = (attributeBindings.get(product.categoryKey) ?? []).find(
+          (entry) => entry.attributeName === attributeName,
+        );
+        if (!binding) {
+          fail("dataset", `SKU ${sku.key} spec ${attributeName} is not bound to category ${product.categoryKey}`);
+        } else if (!binding.values.has(valueName)) {
+          fail("dataset", `SKU ${sku.key} spec ${attributeName} = ${valueName} is outside the dictionary`);
+        }
+      }
     }
   }
 

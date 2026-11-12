@@ -105,10 +105,15 @@ export function buildMallDefaultDataCode(prefix: string, key: string): string {
 export const MALL_CATEGORY_NO_PREFIX = "MALL-CAT";
 export const MALL_SPU_NO_PREFIX = "MALL-SPU";
 export const MALL_SKU_NO_PREFIX = "MALL-SKU";
+export const MALL_BRAND_NO_PREFIX = "MALL-BRAND";
 export const MALL_SEED_METADATA_KEY = "sdkworkMallSeedKey";
 
 export function buildMallCategoryNo(key: string): string {
   return buildMallDefaultDataCode(MALL_CATEGORY_NO_PREFIX, key);
+}
+
+export function buildMallBrandNo(key: string): string {
+  return buildMallDefaultDataCode(MALL_BRAND_NO_PREFIX, key);
 }
 
 export function buildMallSpuNo(key: string): string {
@@ -141,6 +146,51 @@ export function buildMallCategoryCreateBody(
   };
 }
 
+export function buildMallBrandCreateBody(input: {
+  readonly key: string;
+  readonly name: string;
+  readonly description: string;
+}): Record<string, unknown> {
+  // Authority `CreateBrandRequest` closed body: brandNo/name required, no
+  // `status` (create defaults to active).
+  return {
+    brandNo: buildMallBrandNo(input.key),
+    name: input.name,
+    description: input.description,
+  };
+}
+
+/**
+ * Creates one enum spec attribute with its dictionary seeded inline — the
+ * authority turns every `values` entry into one attribute-value row at create
+ * time, which is what a SKU's `attributeValueIds` reference.
+ */
+export function buildMallAttributeCreateBody(input: {
+  readonly key: string;
+  readonly attributeName: string;
+  readonly values: readonly string[];
+}): Record<string, unknown> {
+  return {
+    attributeNo: buildMallDefaultDataCode("MALL-ATTR", input.key),
+    name: input.attributeName,
+    valueType: "enum",
+    inputHint: "select",
+    values: [...input.values],
+  };
+}
+
+export function buildMallCategoryAttributeCreateBody(input: {
+  readonly categoryId: string;
+  readonly attributeId: string;
+}): Record<string, unknown> {
+  // Authority `CreateCategoryAttributeRequest`: the binding identity is the
+  // pair; role defaults to `parameter` server-side.
+  return {
+    categoryId: input.categoryId,
+    attributeId: input.attributeId,
+  };
+}
+
 export function buildMallShopCreateBody(
   shop: MallDefaultDataDataset["shops"][number],
   organizationId: string,
@@ -164,6 +214,7 @@ export function buildMallShopCreateBody(
 export function buildMallProductCreateBody(
   input: {
     readonly key: string;
+    readonly brandId: string | null;
     readonly categoryId: string;
     readonly description: string;
     readonly productType: MallDefaultDataDataset["products"][number]["productType"];
@@ -172,9 +223,10 @@ export function buildMallProductCreateBody(
   },
 ): Record<string, unknown> {
   // Authority `CreateProductRequest` closed body: productNo/title/productType/
-  // categoryId required. Lifecycle rides the `products.publish` command the
-  // plan issues after the SKU loop; dataset brand/keywords/shopKey stay
-  // draft-local until the authority grows a carrier for them.
+  // categoryId required. The brand rides the authority brand_id column the
+  // dataset resolves by key; lifecycle rides the `products.publish` command the
+  // plan issues after the SKU loop; dataset keywords/shopKey stay draft-local
+  // until the authority grows a carrier for them.
   return {
     productNo: buildMallSpuNo(input.key),
     title: input.title,
@@ -182,6 +234,7 @@ export function buildMallProductCreateBody(
     description: input.description || undefined,
     productType: input.productType,
     categoryId: input.categoryId,
+    ...(input.brandId ? { brandId: input.brandId } : {}),
   };
 }
 
@@ -193,13 +246,14 @@ export function buildMallSkuCreateBody(
     readonly price: string;
     readonly productId: string;
     readonly title: string;
+    readonly productType: MallDefaultDataDataset["products"][number]["productType"];
+    readonly attributeValueIds: readonly string[];
   },
 ): Record<string, unknown> {
   // Authority `CreateSkuRequest` closed body: prices ride the minor-unit wire
   // rule (`salePriceMinor`/`listPriceMinor` as integer strings), no `status`
   // (create defaults to draft; the plan publishes at the product level), and
-  // `attributeValueIds` stays omitted until the federated transport
-  // regenerates the authority's `attributeValues` operations.
+  // the fulfillment carrier follows the product type.
   const salePriceMinor = decimalAmountToMinorUnits(input.price);
   if (!salePriceMinor) {
     throw new Error(`cannot create sku ${input.key}: price ${input.price} is not a valid decimal amount`);
@@ -213,8 +267,14 @@ export function buildMallSkuCreateBody(
     salePriceMinor,
     ...(listPriceMinor ? { listPriceMinor } : {}),
     currencyCode: input.currencyCode,
-    fulfillmentType: "physical",
-    inventoryTracking: "quantity",
+    fulfillmentType: input.productType === "digital"
+      ? "digital"
+      : input.productType === "service"
+        ? "service"
+        : "physical",
+    // A digital or service SKU has no physical unit to count.
+    inventoryTracking: input.productType === "physical" ? "quantity" : "none",
+    ...(input.attributeValueIds.length > 0 ? { attributeValueIds: [...input.attributeValueIds] } : {}),
   };
 }
 
@@ -290,6 +350,16 @@ export interface MallDefaultDataExecutionState {
   readonly productIdByKey: Map<string, string>;
   readonly planIdByKey: Map<string, string>;
   readonly packageGroupIdByKey: Map<string, string>;
+  /** Brand authority ids, keyed by the dataset brand key. */
+  readonly brandIdByKey: Map<string, string>;
+  /** SKU authority ids, keyed by the dataset SKU key. */
+  readonly skuIdByKey: Map<string, string>;
+  /**
+   * Spec dictionary value ids for SKU `attributeValueIds`, keyed by
+   * `${categoryKey}::${attributeName}::${valueName}` — the same natural key the
+   * dataset's SKU spec values are authored against.
+   */
+  readonly attributeValueIdByKey: Map<string, string>;
 }
 
 export function createMallDefaultDataExecutionState(): MallDefaultDataExecutionState {
@@ -299,6 +369,9 @@ export function createMallDefaultDataExecutionState(): MallDefaultDataExecutionS
     productIdByKey: new Map(),
     planIdByKey: new Map(),
     packageGroupIdByKey: new Map(),
+    brandIdByKey: new Map(),
+    skuIdByKey: new Map(),
+    attributeValueIdByKey: new Map(),
   };
 }
 
@@ -333,6 +406,227 @@ export interface MallDefaultDataStep {
 /* ------------------------------------------------------------------------- */
 /* Steps                                                                     */
 /* ------------------------------------------------------------------------- */
+
+async function provisionBrands(
+  context: MallDefaultDataStepContext,
+): Promise<MallDefaultDataStepOutcome> {
+  if (context.dataset.brands.length === 0) {
+    return { status: "skipped", created: 0, skipped: 0, details: [] };
+  }
+  const existing = indexByNaturalKey(
+    readDefaultDataItems(await context.port.catalog.listBrands()),
+    ["brandNo", "brand_no"],
+  );
+  const details: string[] = [];
+  let created = 0;
+  let skipped = 0;
+
+  for (const brand of context.dataset.brands) {
+    context.assertActive();
+    const brandNo = buildMallBrandNo(brand.key);
+    let brandId = existing.get(brandNo) ?? "";
+    if (brandId) {
+      skipped += 1;
+    } else if (context.dryRun) {
+      details.push(`+ ${brandNo} ${brand.name} (dry run)`);
+      created += 1;
+    } else {
+      const response = await context.port.catalog.createBrand(
+        buildMallBrandCreateBody(brand),
+      );
+      brandId = readDefaultDataId(response);
+      created += 1;
+      details.push(`+ ${brandNo} ${brand.name}`);
+    }
+    if (brandId) {
+      context.state.brandIdByKey.set(brand.key, brandId);
+    }
+  }
+
+  return { status: created > 0 ? "created" : "skipped", created, skipped, details };
+}
+
+async function provisionCategoryAttributes(
+  context: MallDefaultDataStepContext,
+): Promise<MallDefaultDataStepOutcome> {
+  if (context.dataset.categoryAttributes.length === 0) {
+    return { status: "skipped", created: 0, skipped: 0, details: [] };
+  }
+  const [attributeResponse, bindingResponse] = await Promise.all([
+    context.port.catalog.listAttributes(),
+    context.port.catalog.listCategoryAttributes(),
+  ]);
+  // Attribute identity rides the business key (`attributeNo`); bindings are
+  // keyed by their `categoryId:attributeId` pair.
+  const existingAttributes = indexByNaturalKey(readDefaultDataItems(attributeResponse), [
+    "attributeNo",
+    "attribute_no",
+  ]);
+  const existingBindingKeys = new Set(
+    readDefaultDataItems(bindingResponse)
+      .map((record) => {
+        const categoryId = readDefaultDataString(record, ["categoryId", "category_id"]);
+        const attributeId = readDefaultDataString(record, ["attributeId", "attribute_id"]);
+        return categoryId && attributeId ? `${categoryId}:${attributeId}` : "";
+      })
+      .filter(Boolean),
+  );
+  const details: string[] = [];
+  let created = 0;
+  let skipped = 0;
+
+  for (const attribute of context.dataset.categoryAttributes) {
+    context.assertActive();
+    const attributeNo = buildMallDefaultDataCode("MALL-ATTR", attribute.key);
+    const categoryId = context.state.categoryIdByKey.get(attribute.categoryKey) ?? "";
+    // On a dry run the categories step wrote no ids, so the binding half of
+    // this entry is reported as a dry-run create rather than resolved.
+    if (context.dryRun) {
+      details.push(`+ ${attributeNo} ${attribute.attributeName} (dry run)`);
+      details.push(`+ 绑定 ${attribute.attributeName} -> ${attribute.categoryKey} (dry run)`);
+      created += 2;
+      continue;
+    }
+    if (!categoryId) {
+      throw new Error(
+        `cannot bind attribute ${attributeNo}: category ${attribute.categoryKey} has no id`,
+      );
+    }
+
+    // Attributes are workspace-scoped (not per category), so the same attribute
+    // name bound to several categories resolves to one attribute record.
+    let attributeId = existingAttributes.get(attributeNo) ?? "";
+    if (attributeId) {
+      skipped += 1;
+    } else {
+      const response = await context.port.catalog.createAttribute(
+        buildMallAttributeCreateBody({
+          key: attribute.key,
+          attributeName: attribute.attributeName,
+          values: attribute.values,
+        }),
+      );
+      attributeId = readDefaultDataId(response);
+      created += 1;
+      details.push(`+ ${attributeNo} ${attribute.attributeName}`);
+    }
+    if (!attributeId) {
+      continue;
+    }
+
+    const bindingKey = `${categoryId}:${attributeId}`;
+    if (existingBindingKeys.has(bindingKey)) {
+      skipped += 1;
+    } else {
+      await context.port.catalog.createCategoryAttribute(
+        buildMallCategoryAttributeCreateBody({ categoryId, attributeId }),
+      );
+      created += 1;
+      details.push(`+ 绑定 ${attribute.attributeName} -> ${attribute.categoryKey}`);
+    }
+
+    if (!context.dryRun) {
+      // The dictionary values created inline ride the attribute; resolve their
+      // ids once so a spec-bearing SKU can reference them.
+      const valueItems = readDefaultDataItems(
+        await context.port.catalog.listAttributeValues({ attributeId, page: 1, pageSize: 200 }),
+      );
+      for (const value of valueItems) {
+        const valueId = readDefaultDataString(value, ["id"]);
+        const valueName = readDefaultDataString(value, ["displayValue", "display_value"]);
+        const valueCode = readDefaultDataString(value, ["valueCode", "value_code"]);
+        if (valueId && (valueName || valueCode)) {
+          context.state.attributeValueIdByKey.set(
+            `${attribute.categoryKey}::${attribute.attributeName}::${valueName || valueCode}`,
+            valueId,
+          );
+        }
+      }
+    }
+  }
+
+  return { status: created > 0 ? "created" : "skipped", created, skipped, details };
+}
+
+/**
+ * Provisions the default retail price ladder.
+ *
+ * One closed price list per dataset currency (`MALL-PRICE-<CODE>`), then one
+ * ladder entry per provisioned SKU at its sale price (`minQuantity = 1`). The
+ * ladder is what a pricing engine reads before falling back to the SKU's own
+ * `salePriceMinor`; seeding it keeps the admin price console from starting
+ * empty. Items key off `state.skuIdByKey`, so a partial rerun resumes the
+ * ladder instead of double-pricing a SKU.
+ */
+async function provisionPriceLists(
+  context: MallDefaultDataStepContext,
+): Promise<MallDefaultDataStepOutcome> {
+  const currencyCode = context.dataset.shops[0]?.defaultCurrencyCode ?? "CNY";
+  const priceListNo = `MALL-PRICE-${currencyCode}`;
+  const skus = context.dataset.products.flatMap((product) =>
+    product.skus.map((sku) => ({ ...sku, productKey: product.key })),
+  );
+  const details: string[] = [];
+  let created = 0;
+  let skipped = 0;
+
+  context.assertActive();
+  const existingLists = indexByNaturalKey(
+    readDefaultDataItems(await context.port.catalog.listPriceLists()),
+    ["priceListNo", "price_list_no"],
+  );
+  let priceListId = existingLists.get(priceListNo) ?? "";
+  if (priceListId) {
+    skipped += 1;
+  } else if (context.dryRun) {
+    details.push(`+ ${priceListNo} (dry run)`);
+    created += 1;
+  } else {
+    const response = await context.port.catalog.createPriceList({
+      priceListNo,
+      currencyCode,
+    });
+    priceListId = readDefaultDataId(response);
+    created += 1;
+    details.push(`+ ${priceListNo}`);
+  }
+  if (!priceListId) {
+    return { status: created > 0 ? "created" : "skipped", created, skipped, details };
+  }
+
+  const existingItems = new Set(
+    readDefaultDataItems(await context.port.catalog.listPriceListItems())
+      .map((record) => readDefaultDataString(record, ["skuId", "sku_id"]))
+      .filter(Boolean),
+  );
+
+  for (const sku of skus) {
+    context.assertActive();
+    const skuId = context.state.skuIdByKey.get(sku.key) ?? "";
+    if (!skuId || existingItems.has(skuId)) {
+      skipped += 1;
+      continue;
+    }
+    const priceMinor = decimalAmountToMinorUnits(sku.price);
+    if (!priceMinor) {
+      throw new Error(`cannot price sku ${sku.key}: price ${sku.price} is not a valid decimal amount`);
+    }
+    if (context.dryRun) {
+      details.push(`+ ${sku.key} @ ${priceMinor} (dry run)`);
+      created += 1;
+      continue;
+    }
+    await context.port.catalog.createPriceListItem({
+      priceListId,
+      skuId,
+      priceMinor,
+      minQuantity: "1",
+    });
+    created += 1;
+  }
+
+  return { status: created > 0 ? "created" : "skipped", created, skipped, details };
+}
 
 async function provisionCategories(
   context: MallDefaultDataStepContext,
@@ -466,6 +760,18 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
     "spu_no",
   ]);
   const existingSkus = indexByNaturalKey(readDefaultDataItems(skuResponse), ["skuNo", "sku_no"]);
+  // Price-ladder provisioning keys off the dataset SKU key, so reruns resolve
+  // pre-existing SKUs through the same natural key the create path used.
+  const skuIdByDatasetKey = new Map<string, string>();
+  for (const [naturalKey, id] of existingSkus) {
+    for (const product of context.dataset.products) {
+      for (const sku of product.skus) {
+        if (buildMallSkuNo(sku.key) === naturalKey) {
+          skuIdByDatasetKey.set(sku.key, id);
+        }
+      }
+    }
+  }
   // Guarded writes need the version each row carried at read time. A
   // provisioned row that is already live needs no publish at all — that is
   // what makes a rerun a no-op instead of a second lifecycle command.
@@ -502,8 +808,10 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       if (!categoryId) {
         throw new Error(`cannot create ${spuNo}: category ${product.categoryKey} has no id`);
       }
+      const brandId = context.state.brandIdByKey.get(product.brandKey) ?? "";
       const response = await context.port.catalog.createProduct(
         buildMallProductCreateBody({
+          brandId: brandId || null,
           categoryId,
           description: product.description,
           key: product.key,
@@ -529,6 +837,9 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       context.assertActive();
       const skuNo = buildMallSkuNo(sku.key);
       if (existingSkus.has(skuNo)) {
+        // Reruns still record the pre-existing id: the price-ladder step keys
+        // its items off this state, so a partial rerun can resume the ladder.
+        context.state.skuIdByKey.set(sku.key, existingSkus.get(skuNo) ?? "");
         skipped += 1;
         continue;
       }
@@ -537,16 +848,29 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
         created += 1;
         continue;
       }
-      await context.port.catalog.createSku(
+      const attributeValueIds = Object.entries(sku.values ?? {})
+        .map(([attributeName, valueName]) =>
+          context.state.attributeValueIdByKey.get(
+            `${product.categoryKey}::${attributeName}::${valueName}`,
+          ))
+        .filter((valueId): valueId is string => Boolean(valueId));
+      context.state.skuIdByKey.set(sku.key, skuIdByDatasetKey.get(sku.key) ?? "");
+      const skuResponse = await context.port.catalog.createSku(
         buildMallSkuCreateBody({
+          attributeValueIds,
           currencyCode,
           key: sku.key,
           listPrice: sku.listPrice,
           price: sku.price,
+          productType: product.productType,
           productId,
           title: sku.title,
         }),
       );
+      const createdSkuId = readDefaultDataId(skuResponse);
+      if (createdSkuId) {
+        context.state.skuIdByKey.set(sku.key, createdSkuId);
+      }
       created += 1;
       details.push(`+ ${skuNo} ${sku.title}`);
     }
@@ -770,6 +1094,11 @@ export function buildMallDefaultDataPlan(
     0,
   );
   const skuCount = dataset.products.reduce((total, product) => total + product.skus.length, 0);
+  const attributeEntityCount = dataset.categoryAttributes.reduce(
+    // One attribute (with its dictionary) plus one category binding each.
+    (total, attribute) => total + 2,
+    0,
+  );
 
   const steps: MallDefaultDataStep[] = [
     {
@@ -778,6 +1107,20 @@ export function buildMallDefaultDataPlan(
       title: "Catalog category tree",
       entityCount: categoryCount,
       run: provisionCategories,
+    },
+    {
+      id: "catalog.brands",
+      domain: "catalog",
+      title: "Catalog brands",
+      entityCount: dataset.brands.length,
+      run: provisionBrands,
+    },
+    {
+      id: "catalog.attributes",
+      domain: "catalog",
+      title: "Category spec attributes",
+      entityCount: attributeEntityCount,
+      run: provisionCategoryAttributes,
     },
     {
       id: "shops.stores",
@@ -792,6 +1135,13 @@ export function buildMallDefaultDataPlan(
       title: "Products and SKUs",
       entityCount: dataset.products.length + skuCount,
       run: provisionProducts,
+    },
+    {
+      id: "catalog.price-lists",
+      domain: "catalog",
+      title: "Retail price ladder",
+      entityCount: 1 + skuCount,
+      run: provisionPriceLists,
     },
     {
       id: "promotions.offers",

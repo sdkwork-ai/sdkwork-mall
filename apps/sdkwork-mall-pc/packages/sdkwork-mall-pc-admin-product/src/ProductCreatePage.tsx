@@ -35,6 +35,7 @@ import {
   createCommerceProduct,
   createCommerceSku,
   listCommerceAttributes,
+  listCommerceBrands,
   listCommerceCategories,
   listCommerceSkus,
   publishCommerceProduct,
@@ -66,6 +67,8 @@ import {
   type ProductSkuAttributeValue,
   type ProductStoreVisibility,
 } from './productAdminTypes';
+
+type BrandOption = { id: string; name: string };
 
 type ProductCreateStep = 'basic' | 'detail';
 type ProductCreatePageMode = 'create' | 'edit';
@@ -173,6 +176,8 @@ export type ProductDraftState = {
   title: string;
   subtitle: string;
   description: string;
+  /** Authority brand id (int64 string); empty means "no brand". */
+  brandId: string;
   brand: string;
   productType: MerchandiseProductType;
   spuNo: string;
@@ -330,6 +335,7 @@ export const DEFAULT_PRODUCT_DRAFT: ProductDraftState = {
   title: '企业版 AI 助手年度订阅服务',
   subtitle: '知识库问答、流程自动化、数据分析和多端协作',
   description: '适用于企业团队的 AI 助手服务，支持知识库问答、流程自动化、数据分析和多端协作。',
+  brandId: '',
   brand: 'SdkWork',
   productType: 'service',
   spuNo: 'SPU-AI-ASSISTANT',
@@ -358,6 +364,7 @@ export function ProductCreatePage({ mode = 'create', productId }: ProductCreateP
   const [step, setStep] = useState<ProductCreateStep>(() => initialProductCreateStep(mode));
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(DEFAULT_SELECTED_CATEGORY_IDS);
   const [categoryTree, setCategoryTree] = useState<ProductCategoryNode[]>(PRODUCT_CATEGORY_TREE);
+  const [brandOptions, setBrandOptions] = useState<BrandOption[]>([]);
   const [categoryLoadError, setCategoryLoadError] = useState<string | null>(null);
   const [attributeDefinitions, setAttributeDefinitions] = useState<ProductAttributeDefinition[]>([]);
   const [draft, setDraft] = useState<ProductDraftState>(() => createDefaultProductDraft());
@@ -368,6 +375,36 @@ export function ProductCreatePage({ mode = 'create', productId }: ProductCreateP
       ? '商品编辑会更新 SPU，并同步更新已有 SKU 或创建新增 SKU。'
       : '商品创建会先创建 SPU，再同步 SKU 属性定义并生成多规格 SKU。',
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    // Brands ride the authority; the selector lists them for product
+    // attribution, mirroring the categories load above.
+    listCommerceBrands({ page: '1', pageSize: '200', status: 'active' })
+      .then((result) => {
+        if (cancelled) {
+          return;
+        }
+        setBrandOptions(
+          readCatalogRecords(result)
+            .map((record) => ({
+              id: readCatalogString(record, ['id']),
+              name: readCatalogString(record, ['name']),
+            }))
+            .filter((option) => option.id && option.name),
+        );
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBrandOptions([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -629,6 +666,7 @@ export function ProductCreatePage({ mode = 'create', productId }: ProductCreateP
         <main className="min-h-0 flex-1 overflow-y-auto pr-1">
           {step === 'basic' ? (
             <ProductCreateStepOne
+              brandOptions={brandOptions}
               categoryLoadError={categoryLoadError}
               categoryTree={categoryTree}
               draft={draft}
@@ -775,6 +813,7 @@ function AssistantItemRow({ item }: { item: AssistantItem }) {
 }
 
 function ProductCreateStepOne({
+  brandOptions,
   categoryLoadError,
   categoryTree,
   draft,
@@ -784,6 +823,7 @@ function ProductCreateStepOne({
   selectedCategoryIds,
   updateDraft,
 }: {
+  brandOptions: BrandOption[];
   categoryLoadError: string | null;
   categoryTree: ProductCategoryNode[];
   draft: ProductDraftState;
@@ -822,6 +862,22 @@ function ProductCreateStepOne({
                 推荐包含核心卖点，避免使用极限词、重复符号和无关热词。
               </div>
             </div>
+          </FormRow>
+
+          <FormRow help="品牌用于商品归档、筛选与店铺品牌页聚合。" label="品牌">
+            <select
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-lobster-400 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+              data-admin-product-brand-select
+              value={draft.brandId}
+              onChange={(event) => updateDraft({ brandId: event.target.value })}
+            >
+              <option value="">无品牌</option>
+              {brandOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
           </FormRow>
 
           <FormRow help="选择准确的叶子类目，后续参数、规格和审核校验会自动匹配。" label="商品类目" required>
@@ -1899,6 +1955,9 @@ export function buildProductCreatePayload(draft: ProductDraftState) {
     description: draft.description || undefined,
     productType: draft.productType,
     categoryId,
+    // The authority carries the brand on the product; an unselected brand is
+    // omitted rather than sent as an empty id.
+    ...(draft.brandId ? { brandId: draft.brandId } : {}),
   };
 }
 
@@ -2124,6 +2183,7 @@ function createProductDraftFromCatalogRecords(product: CatalogRecord, skuRecords
     title: readCatalogString(product, ['title', 'name']) || baseDraft.title,
     subtitle: readCatalogString(product, ['subtitle']) || '',
     description: readCatalogString(product, ['description']) || '',
+    brandId: readCatalogString(product, ['brandId', 'brand_id']) || '',
     brand: readCatalogString(product, ['brand']) || '',
     productType: normalizeProductType(readCatalogString(product, ['productType', 'product_type'])),
     spuNo,

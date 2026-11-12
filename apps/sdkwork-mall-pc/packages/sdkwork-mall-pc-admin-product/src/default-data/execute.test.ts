@@ -17,11 +17,18 @@ function expectedCreatedForDemo(): number {
     0,
   );
   const skus = slice.products.reduce((total, product) => total + product.skus.length, 0);
+  // Each spec attribute creates one attribute (with its inline dictionary) and
+  // one category binding.
+  const attributeEntities = slice.categoryAttributes.length * 2;
   return (
+    slice.brands.length +
     categories +
+    attributeEntities +
+    1 + // the default retail price list
     slice.shops.length +
     slice.products.length +
     skus +
+    skus + // one ladder entry per SKU at min quantity 1
     slice.offers.length +
     slice.membership.plans.length +
     slice.membership.packageGroups.length +

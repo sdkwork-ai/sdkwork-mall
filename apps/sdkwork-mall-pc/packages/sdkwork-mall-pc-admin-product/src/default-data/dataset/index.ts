@@ -138,6 +138,76 @@ export function validateDefaultDataset(dataset: unknown): MallDefaultDataValidat
     }
   });
 
+  const brandKeys = new Set<string>();
+  const brands = Array.isArray(dataset.brands) ? dataset.brands : [];
+  if (brands.length === 0) {
+    fail("$.brands", "at least one brand is required");
+  }
+  brands.forEach((brand, index) => {
+    const path = `$.brands[${index}]`;
+    if (!isRecord(brand)) {
+      fail(path, "brand must be an object");
+      return;
+    }
+    if (!isNonEmptyString(brand.key)) {
+      fail(`${path}.key`, "brand key is required");
+    } else if (brandKeys.has(brand.key)) {
+      fail(`${path}.key`, `duplicate brand key ${brand.key}`);
+    } else {
+      brandKeys.add(brand.key);
+    }
+    if (!isNonEmptyString(brand.name)) {
+      fail(`${path}.name`, "brand name is required");
+    }
+    if (!isNonEmptyString(brand.description)) {
+      fail(`${path}.description`, "brand description is required");
+    }
+  });
+
+  // Spec attributes bind to leaf categories; the dictionary seeds the
+  // authority attribute at create time and every SKU spec value must resolve
+  // against the binding of the product's own leaf category.
+  const attributeBindings = new Map<string, { attributeName: string; values: Set<string> }[]>();
+  const attributeKeys = new Set<string>();
+  const categoryAttributes = Array.isArray(dataset.categoryAttributes)
+    ? dataset.categoryAttributes
+    : [];
+  categoryAttributes.forEach((attribute, index) => {
+    const path = `$.categoryAttributes[${index}]`;
+    if (!isRecord(attribute)) {
+      fail(path, "category attribute must be an object");
+      return;
+    }
+    if (!isNonEmptyString(attribute.key)) {
+      fail(`${path}.key`, "attribute key is required");
+    } else if (attributeKeys.has(attribute.key)) {
+      fail(`${path}.key`, `duplicate attribute key ${attribute.key}`);
+    } else {
+      attributeKeys.add(attribute.key);
+    }
+    if (!isNonEmptyString(attribute.categoryKey) || !childToRoot.has(attribute.categoryKey)) {
+      fail(`${path}.categoryKey`, `attribute must reference a leaf category, got ${String(attribute.categoryKey)}`);
+      return;
+    }
+    if (!isNonEmptyString(attribute.attributeName)) {
+      fail(`${path}.attributeName`, "attributeName is required");
+      return;
+    }
+    const values = Array.isArray(attribute.values) ? attribute.values : [];
+    if (values.length === 0 || values.some((value) => !isNonEmptyString(value))) {
+      fail(`${path}.values`, "an attribute needs at least one non-empty dictionary value");
+      return;
+    }
+    const entry = { attributeName: attribute.attributeName, values: new Set(values.map(String)) };
+    const bound = attributeBindings.get(attribute.categoryKey) ?? [];
+    if (bound.some((existing) => existing.attributeName === entry.attributeName)) {
+      fail(`${path}.attributeName`, `duplicate attribute ${entry.attributeName} on category ${attribute.categoryKey}`);
+      return;
+    }
+    bound.push(entry);
+    attributeBindings.set(attribute.categoryKey, bound);
+  });
+
   const productKeys = new Set<string>();
   const skuKeys = new Set<string>();
   const barcodes = new Set<string>();
@@ -165,6 +235,9 @@ export function validateDefaultDataset(dataset: unknown): MallDefaultDataValidat
       if (!isNonEmptyString(product[field])) {
         fail(`${path}.${field}`, `${field} is required`);
       }
+    }
+    if (!isNonEmptyString(product.brandKey) || !brandKeys.has(product.brandKey)) {
+      fail(`${path}.brandKey`, `product references unknown brand ${String(product.brandKey)}`);
     }
     const skus = Array.isArray(product.skus) ? product.skus : [];
     if (skus.length === 0) {
@@ -197,12 +270,35 @@ export function validateDefaultDataset(dataset: unknown): MallDefaultDataValidat
       if (Number.isFinite(price) && Number.isFinite(listPrice) && price > listPrice) {
         fail(`${skuPath}.price`, "sale price must not exceed the list price");
       }
-      if (!isNonEmptyString(sku.barcode) || !BARCODE_PATTERN.test(sku.barcode)) {
-        fail(`${skuPath}.barcode`, "barcode must be a 13-digit EAN-13 value");
-      } else if (barcodes.has(sku.barcode)) {
-        fail(`${skuPath}.barcode`, `duplicate barcode ${sku.barcode}`);
-      } else {
-        barcodes.add(sku.barcode);
+      // A barcode is an EAN-13 when present; digital and service goods have
+      // no physical unit to tag and leave it empty.
+      if (isNonEmptyString(sku.barcode)) {
+        if (!BARCODE_PATTERN.test(sku.barcode)) {
+          fail(`${skuPath}.barcode`, "barcode must be a 13-digit EAN-13 value");
+        } else if (barcodes.has(sku.barcode)) {
+          fail(`${skuPath}.barcode`, `duplicate barcode ${sku.barcode}`);
+        } else {
+          barcodes.add(sku.barcode);
+        }
+      }
+      const specValues = sku.values;
+      if (specValues !== undefined) {
+        if (!isRecord(specValues)) {
+          fail(`${skuPath}.values`, "spec values must be an attribute-name -> value-name object");
+        } else {
+          const bound = attributeBindings.get(String(product.categoryKey)) ?? [];
+          for (const [attributeName, valueName] of Object.entries(specValues)) {
+            const binding = bound.find((entry) => entry.attributeName === attributeName);
+            if (!binding) {
+              fail(`${skuPath}.values.${attributeName}`, `attribute is not bound to category ${String(product.categoryKey)}`);
+            } else if (!isNonEmptyString(valueName) || !binding.values.has(valueName)) {
+              fail(
+                `${skuPath}.values.${attributeName}`,
+                `value ${String(valueName)} is not in the ${attributeName} dictionary of category ${String(product.categoryKey)}`,
+              );
+            }
+          }
+        }
       }
     });
   });

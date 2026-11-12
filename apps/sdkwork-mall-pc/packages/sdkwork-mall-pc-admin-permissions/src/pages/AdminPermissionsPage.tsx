@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@sdkwork/ui-pc-react";
 import {
   listMallAdminRoleNames,
+  readSelectedMallAdminRole,
   writeSelectedMallAdminRole,
 } from "../role-matrix";
 
@@ -33,23 +34,31 @@ const mallAdminRoles = [
 ] as const;
 
 export function SdkworkMallAdminPermissionsPage() {
-  const [activeRole, setActiveRole] = useState(() =>
-    typeof window === "undefined" ? "超级管理员" : window.localStorage.getItem("sdkwork-mall-pc-admin-role") ?? "超级管理员",
-  );
+  // No default role: an account that never chose one has minimal permissions.
+  const [activeRole, setActiveRole] = useState<string | null>(() => readSelectedMallAdminRole());
 
   useEffect(() => {
-    writeSelectedMallAdminRole(activeRole);
+    if (activeRole) {
+      writeSelectedMallAdminRole(activeRole);
+    }
   }, [activeRole]);
 
   return (
     <div>
       <h1>权限管理</h1>
-      <p>选择当前后台会话生效角色，路由守卫将按 permissionHint 校验访问权限。</p>
+      <p>
+        选择当前后台会话生效角色，路由守卫按 permissionHint 做体验层校验；
+        真正授权始终以服务端对当前会话权限的断言为准。
+      </p>
 
       <section className="sdkwork-mall-pc-form-grid">
         <label>
           当前角色
-          <select onChange={(event) => setActiveRole(event.target.value)} value={activeRole}>
+          <select
+            onChange={(event) => setActiveRole(event.target.value || null)}
+            value={activeRole ?? ""}
+          >
+            <option value="">未选择角色（最小权限）</option>
             {listMallAdminRoleNames().map((roleName) => (
               <option key={roleName} value={roleName}>{roleName}</option>
             ))}

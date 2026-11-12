@@ -7,6 +7,12 @@ import {
 import type { IamAppContext, IamDeploymentMode, IamEnvironment } from "@sdkwork/iam-contracts";
 import type { IamRuntime } from "@sdkwork/iam-runtime";
 import { normalizeSdkworkApiBaseUrl } from "@sdkwork/runtime-bootstrap";
+import {
+  MALL_ACCOUNT_SCOPE_ANONYMOUS,
+  clearMallAccountScopedStorage,
+  currentMallAccountScopeId,
+} from "@sdkwork/mall-pc-core/session";
+import { invalidateMallCmsConfigCache } from "@sdkwork/mall-pc-cms/cms-service";
 import { createClient as createAccountAppClient } from "@sdkwork/account-app-sdk";
 import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk/domains";
 import { createClient as createCommerceBackendClient } from "@sdkwork/cloudrouter-backend-sdk/domains";
@@ -91,7 +97,14 @@ export function createSdkworkMallPcIamRuntime(
       options.sdkClients.promotionAppClient,
     ] as SdkworkAppbasePcAuthRuntimeSdkClient[],
     sessionBridge: {
+      // Sign-out: drop the departing account's favourites, footprint, search
+      // history, CMS fallback and admin role before the session disappears.
       clearSession: () => {
+        clearMallAccountScopedStorage([
+          currentMallAccountScopeId(),
+          MALL_ACCOUNT_SCOPE_ANONYMOUS,
+        ]);
+        invalidateMallCmsConfigCache();
         session.clearSession();
       },
       commitSession: (nextSession) => commitCommerceIamRuntimeSession(session, nextSession as CommerceIamSessionLike),
@@ -263,6 +276,9 @@ function commitCommerceIamRuntimeSession(
   session: SdkworkMallPcSessionStore,
   iamSession: CommerceIamSessionLike,
 ): CommerceIamSessionLike | undefined {
+  // Capture the departing scope before the session is replaced: an account
+  // switch must not leave the previous account's local data readable.
+  const previousScopeId = mallScopeIdOfSnapshot(session.getSnapshot());
   const nextSession: SdkworkMallPcSessionSnapshot = {
     ...session.getSnapshot(),
     accessToken: iamSession.accessToken,
@@ -287,7 +303,18 @@ function commitCommerceIamRuntimeSession(
   }
 
   session.setSession(nextSession);
+  const nextScopeId = mallScopeIdOfSnapshot(session.getSnapshot());
+  if (previousScopeId !== nextScopeId && previousScopeId !== MALL_ACCOUNT_SCOPE_ANONYMOUS) {
+    clearMallAccountScopedStorage([previousScopeId]);
+    invalidateMallCmsConfigCache();
+  }
   return toCommerceIamBridgeSession(session.getSnapshot()) ?? undefined;
+}
+
+function mallScopeIdOfSnapshot(snapshot: SdkworkMallPcSessionSnapshot): string {
+  const tenantId = snapshot.context?.tenantId?.trim();
+  const userId = snapshot.context?.userId?.trim();
+  return tenantId && userId ? `${tenantId}:${userId}` : MALL_ACCOUNT_SCOPE_ANONYMOUS;
 }
 
 function toCommerceIamBridgeSession(

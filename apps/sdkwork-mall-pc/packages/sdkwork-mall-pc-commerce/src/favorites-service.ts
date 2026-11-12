@@ -1,3 +1,9 @@
+import {
+  readAccountScopedItem,
+  removeAccountScopedItem,
+  writeAccountScopedItem,
+} from "@sdkwork/mall-pc-core/session";
+
 const FAVORITES_KEY = "sdkwork-mall-pc-favorites";
 
 export interface MallFavoriteItem {
@@ -5,12 +11,17 @@ export interface MallFavoriteItem {
   title: string;
 }
 
+/**
+ * Buyer favourites are browser-local until the commerce favourites API lands.
+ * They are account-scoped, so a second account on this browser never inherits
+ * the previous account's list.
+ */
 export function readMallFavorites(): MallFavoriteItem[] {
   if (typeof window === "undefined") {
     return [];
   }
   try {
-    const raw = window.localStorage.getItem(FAVORITES_KEY);
+    const raw = readAccountScopedItem(FAVORITES_KEY);
     if (!raw) {
       return [];
     }
@@ -34,7 +45,7 @@ export function toggleMallFavorite(item: MallFavoriteItem): boolean {
   const next = found
     ? existing.filter((entry) => entry.id !== item.id)
     : [{ ...item }, ...existing].slice(0, 100);
-  window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+  writeAccountScopedItem(FAVORITES_KEY, JSON.stringify(next));
   return !found;
 }
 
@@ -43,7 +54,7 @@ export function removeMallFavorite(productId: string) {
     return;
   }
   const next = readMallFavorites().filter((item) => item.id !== productId);
-  window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+  writeAccountScopedItem(FAVORITES_KEY, JSON.stringify(next));
 }
 
 const SHOP_FAVORITES_KEY = "sdkwork-mall-pc-shop-favorites";
@@ -58,7 +69,7 @@ export function readMallShopFavorites(): MallShopFavorite[] {
     return [];
   }
   try {
-    const raw = window.localStorage.getItem(SHOP_FAVORITES_KEY);
+    const raw = readAccountScopedItem(SHOP_FAVORITES_KEY);
     if (!raw) {
       return [];
     }
@@ -82,15 +93,15 @@ export function toggleMallShopFavorite(shop: MallShopFavorite): boolean {
   const next = found
     ? existing.filter((entry) => entry.id !== shop.id)
     : [{ ...shop }, ...existing].slice(0, 50);
-  window.localStorage.setItem(SHOP_FAVORITES_KEY, JSON.stringify(next));
+  writeAccountScopedItem(SHOP_FAVORITES_KEY, JSON.stringify(next));
   return !found;
 }
 
-/** Clears every locally stored favourite (settings screen: clear local data). */
+/** Clears this account's locally stored favourites (settings screen). */
 export function clearMallFavorites(): void {
   if (typeof window === "undefined") {
     return;
   }
-  window.localStorage.removeItem(FAVORITES_KEY);
-  window.localStorage.removeItem(SHOP_FAVORITES_KEY);
+  removeAccountScopedItem(FAVORITES_KEY);
+  removeAccountScopedItem(SHOP_FAVORITES_KEY);
 }

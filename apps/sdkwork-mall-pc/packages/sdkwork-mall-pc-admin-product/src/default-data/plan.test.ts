@@ -18,8 +18,11 @@ describe("mall default data plan", () => {
     const plan = buildMallDefaultDataPlan(zhCnDefaultDataset, "demo");
     expect(plan.map((step) => step.id)).toEqual([
       "catalog.categories",
+      "catalog.brands",
+      "catalog.attributes",
       "shops.stores",
       "catalog.products",
+      "catalog.price-lists",
       "promotions.offers",
       "membership.plans",
       "membership.package-groups",
@@ -48,7 +51,9 @@ describe("mall default data plan", () => {
     const plan = buildMallDefaultDataPlan(slice, "minimal");
     expect(plan.map((step) => step.id)).toEqual([
       "catalog.categories",
+      "catalog.brands",
       "shops.stores",
+      "catalog.price-lists",
       "membership.plans",
       "membership.package-groups",
       "membership.packages",
@@ -72,10 +77,12 @@ describe("mall default data plan", () => {
     });
 
     const sku = buildMallSkuCreateBody({
+      attributeValueIds: ["9001", "9002"],
       currencyCode: "CNY",
       key: "aurora-x1-pro-256-obsidian",
       listPrice: "4699.00",
       price: "4299.00",
+      productType: "physical",
       productId: "spu-1",
       title: "12GB+256GB 曜石黑",
     });
@@ -85,6 +92,7 @@ describe("mall default data plan", () => {
     expect(sku.listPriceMinor).toBe("469900");
     expect(sku.productId).toBe("spu-1");
     expect(sku.inventoryTracking).toBe("quantity");
+    expect(sku.attributeValueIds).toEqual(["9001", "9002"]);
     expect(buildMallSpuNo("aurora-x1-pro")).toBe("MALL-SPU-AURORA-X1-PRO");
   });
 

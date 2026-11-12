@@ -46,6 +46,29 @@ export interface MallDefaultDataCategory {
   readonly children: readonly MallDefaultDataCategoryChild[];
 }
 
+/** One brand the storefront merchandises; products reference it by `brandKey`. */
+export interface MallDefaultDataBrand {
+  readonly key: string;
+  readonly name: string;
+  readonly description: string;
+}
+
+/**
+ * One spec attribute bound to a leaf category, with its enum dictionary.
+ *
+ * The values seed the attribute's dictionary at create time; a product SKU
+ * under this category references them by name, and the plan resolves the
+ * authority value ids.
+ */
+export interface MallDefaultDataCategoryAttribute {
+  /** Stable ASCII natural key; feeds the authority `attributeNo`. */
+  readonly key: string;
+  /** Leaf category key the attribute binds to. */
+  readonly categoryKey: string;
+  readonly attributeName: string;
+  readonly values: readonly string[];
+}
+
 export interface MallDefaultDataShop {
   /** Stable natural key; also written into shop operation config for idempotency. */
   readonly key: string;
@@ -66,13 +89,22 @@ export interface MallDefaultDataSku {
   readonly price: string;
   readonly listPrice: string;
   readonly barcode: string;
+  /**
+   * Spec values (`attribute name -> dictionary value name`) this variant
+   * carries, resolved against the category's bound attributes. Absent for a
+   * single-spec product.
+   */
+  readonly values?: Readonly<Record<string, string>>;
 }
 
 export interface MallDefaultDataProduct {
   readonly key: string;
   readonly shopKey: string;
   readonly categoryKey: string;
+  /** Display brand name, kept in sync with `brandKey`. */
   readonly brand: string;
+  /** Brand the product belongs to; resolved to the authority brand id. */
+  readonly brandKey: string;
   readonly title: string;
   readonly subtitle: string;
   readonly description: string;
@@ -165,7 +197,10 @@ export interface MallDefaultDataCms {
 export interface MallDefaultDataDataset {
   readonly schemaVersion: 1;
   readonly locale: MallDefaultDataLocale;
+  readonly brands: readonly MallDefaultDataBrand[];
   readonly categories: readonly MallDefaultDataCategory[];
+  /** Spec attributes bound to leaf categories, with their enum dictionaries. */
+  readonly categoryAttributes: readonly MallDefaultDataCategoryAttribute[];
   readonly shops: readonly MallDefaultDataShop[];
   readonly products: readonly MallDefaultDataProduct[];
   readonly offers: readonly MallDefaultDataOffer[];

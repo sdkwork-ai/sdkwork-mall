@@ -1,3 +1,9 @@
+import {
+  readAccountScopedItem,
+  removeAccountScopedItem,
+  writeAccountScopedItem,
+} from "@sdkwork/mall-pc-core/session";
+
 const FOOTPRINT_KEY = "sdkwork-mall-pc-footprint";
 
 export interface MallFootprintItem {
@@ -6,12 +12,13 @@ export interface MallFootprintItem {
   viewedAt: string;
 }
 
+/** Browsing footprint is account-scoped: the next account starts empty. */
 export function readMallFootprint(): MallFootprintItem[] {
   if (typeof window === "undefined") {
     return [];
   }
   try {
-    const raw = window.localStorage.getItem(FOOTPRINT_KEY);
+    const raw = readAccountScopedItem(FOOTPRINT_KEY);
     if (!raw) {
       return [];
     }
@@ -30,12 +37,12 @@ export function recordMallFootprint(item: Omit<MallFootprintItem, "viewedAt">) {
     { ...item, viewedAt: new Date().toISOString() },
     ...readMallFootprint().filter((entry) => entry.id !== item.id),
   ].slice(0, 50);
-  window.localStorage.setItem(FOOTPRINT_KEY, JSON.stringify(next));
+  writeAccountScopedItem(FOOTPRINT_KEY, JSON.stringify(next));
 }
 
 export function clearMallFootprint() {
   if (typeof window === "undefined") {
     return;
   }
-  window.localStorage.removeItem(FOOTPRINT_KEY);
+  removeAccountScopedItem(FOOTPRINT_KEY);
 }

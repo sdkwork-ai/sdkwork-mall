@@ -1,4 +1,5 @@
 import { unwrapSdkworkPaymentResponse } from "@sdkwork/payment-service";
+import { currentMallAccountScopeId } from "@sdkwork/mall-pc-core/session";
 
 import {
   defaultMallCmsConfig,
@@ -9,7 +10,23 @@ import { getSdkworkCmsRemotePort } from "./cms-remote-port";
 
 export const MALL_CMS_OFFER_MARKER = "sdkwork-mall-pc-cms-config";
 
-let cachedConfig: MallCmsConfig | null = null;
+/**
+ * The loaded configuration is cached per tenant+account. The previous tenant's
+ * cache must not be served to the next admin session, so every read compares
+ * the scope and drops a stale entry.
+ */
+let cachedConfig: { scopeId: string; config: MallCmsConfig } | null = null;
+
+function readScopedCachedConfig(): MallCmsConfig | null {
+  if (!cachedConfig) {
+    return null;
+  }
+  if (cachedConfig.scopeId !== currentMallAccountScopeId()) {
+    cachedConfig = null;
+    return null;
+  }
+  return cachedConfig.config;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -115,8 +132,9 @@ async function findStorefrontCmsOffer(): Promise<Record<string, unknown> | null>
 }
 
 export async function loadMallCmsConfigRemote(): Promise<MallCmsConfig> {
-  if (cachedConfig) {
-    return cachedConfig;
+  const cached = readScopedCachedConfig();
+  if (cached) {
+    return cached;
   }
 
   try {
@@ -124,7 +142,7 @@ export async function loadMallCmsConfigRemote(): Promise<MallCmsConfig> {
     if (offer) {
       const remoteConfig = readOfferCmsPayload(offer);
       if (remoteConfig) {
-        cachedConfig = remoteConfig;
+        cachedConfig = { scopeId: currentMallAccountScopeId(), config: remoteConfig };
         writeMallCmsConfig(remoteConfig);
         return remoteConfig;
       }
@@ -139,7 +157,7 @@ export async function loadMallCmsConfigRemote(): Promise<MallCmsConfig> {
 export async function saveMallCmsConfigRemote(config: MallCmsConfig): Promise<MallCmsConfig> {
   const nextConfig = { ...config, updatedAt: new Date().toISOString() };
   writeMallCmsConfig(nextConfig);
-  cachedConfig = nextConfig;
+  cachedConfig = { scopeId: currentMallAccountScopeId(), config: nextConfig };
 
   try {
     const remote = getSdkworkCmsRemotePort();

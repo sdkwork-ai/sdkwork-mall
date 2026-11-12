@@ -334,6 +334,22 @@
       "skus": {
         "qimu-blocks-200-bucket": "200 pieces, storage tub"
       }
+    },
+    "aurora-digital-album": {
+      "title": "AURORA Digital Album Annual Listening Pass",
+      "subtitle": "Hi-res audio · offline listening · new releases",
+      "description": "AURORA digital album annual pass: hi-res downloads, concert pre-sale access and a digital keepsake, effective immediately.",
+      "skus": {
+        "aurora-digital-album-year": "Annual Pass"
+      }
+    },
+    "mubai-skin-analysis-service": {
+      "title": "Mubai Skin Analysis Service, One In-store Session",
+      "subtitle": "Professional skin diagnostics · custom skincare plan · member price",
+      "description": "Mubai skin analysis service: instrument-based diagnostics with a custom skincare plan, one in-store session, pairs well with Mubai skincare products.",
+      "skus": {
+        "mubai-skin-analysis-once": "Single Session"
+      }
     }
   },
   "offers": {
@@ -366,19 +382,41 @@
     "plans": {
       "silver": {
         "name": "Silver Member",
-        "benefits": ["CNY 20 birthday voucher", "1.2x points", "Dedicated support line"]
+        "benefits": [
+          "CNY 20 birthday voucher",
+          "1.2x points",
+          "Dedicated support line"
+        ]
       },
       "gold": {
         "name": "Gold Member",
-        "benefits": ["CNY 50 birthday voucher", "1.5x points", "One free-shipping coupon monthly", "Dedicated support line"]
+        "benefits": [
+          "CNY 50 birthday voucher",
+          "1.5x points",
+          "One free-shipping coupon monthly",
+          "Dedicated support line"
+        ]
       },
       "platinum": {
         "name": "Black Gold Member",
-        "benefits": ["CNY 100 birthday voucher", "2x points", "Four free-shipping coupons monthly", "5% off on member day", "Priority dispatch"]
+        "benefits": [
+          "CNY 100 birthday voucher",
+          "2x points",
+          "Four free-shipping coupons monthly",
+          "5% off on member day",
+          "Priority dispatch"
+        ]
       },
       "diamond": {
         "name": "Diamond Member",
-        "benefits": ["CNY 200 birthday voucher", "3x points", "Unlimited free shipping", "10% off on member day", "Personal concierge", "Early access to new arrivals"]
+        "benefits": [
+          "CNY 200 birthday voucher",
+          "3x points",
+          "Unlimited free shipping",
+          "10% off on member day",
+          "Personal concierge",
+          "Early access to new arrivals"
+        ]
       }
     },
     "packageGroups": {
@@ -392,10 +430,18 @@
       }
     },
     "packages": {
-      "gold-monthly": { "name": "Gold Member: Monthly" },
-      "gold-yearly": { "name": "Gold Member: Annual" },
-      "platinum-yearly": { "name": "Black Gold Member: Annual" },
-      "diamond-yearly": { "name": "Diamond Member: Annual" }
+      "gold-monthly": {
+        "name": "Gold Member: Monthly"
+      },
+      "gold-yearly": {
+        "name": "Gold Member: Annual"
+      },
+      "platinum-yearly": {
+        "name": "Black Gold Member: Annual"
+      },
+      "diamond-yearly": {
+        "name": "Diamond Member: Annual"
+      }
     }
   },
   "cms": {
@@ -438,6 +484,36 @@
       "kw-nuts": "nuts",
       "kw-tent": "tent",
       "kw-formula": "formula"
+    }
+  },
+  "brands": {
+    "xingye": {
+      "name": "Xingye",
+      "description": "Xingye Smart: flagship phones, tablets and wearables."
+    },
+    "yunqi": {
+      "name": "Yunqi",
+      "description": "Yunqi Home: big-screen entertainment and smart living appliances."
+    },
+    "shiguang": {
+      "name": "Shiguang",
+      "description": "Shiguang Living: apparel, bags and travel accessories."
+    },
+    "mubai": {
+      "name": "Mubai",
+      "description": "Mubai Care: science-backed premium skincare."
+    },
+    "shanhai": {
+      "name": "Shanhai",
+      "description": "Shanhai Provisions: farm-direct food and fresh produce."
+    },
+    "senyu": {
+      "name": "Senyu",
+      "description": "Senyu Sports: professional fitness and outdoor gear."
+    },
+    "qimu": {
+      "name": "Qimu",
+      "description": "Qimu Mother & Baby: nutrition and educational toys."
     }
   }
 }

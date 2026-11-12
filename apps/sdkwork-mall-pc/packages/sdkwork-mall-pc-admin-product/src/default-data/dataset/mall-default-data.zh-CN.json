@@ -7,10 +7,26 @@
       "name": "手机数码",
       "sortOrder": 10,
       "children": [
-        { "key": "phone", "name": "智能手机", "sortOrder": 10 },
-        { "key": "tablet", "name": "平板电脑", "sortOrder": 20 },
-        { "key": "wearable", "name": "智能穿戴", "sortOrder": 30 },
-        { "key": "audio", "name": "耳机音箱", "sortOrder": 40 }
+        {
+          "key": "phone",
+          "name": "智能手机",
+          "sortOrder": 10
+        },
+        {
+          "key": "tablet",
+          "name": "平板电脑",
+          "sortOrder": 20
+        },
+        {
+          "key": "wearable",
+          "name": "智能穿戴",
+          "sortOrder": 30
+        },
+        {
+          "key": "audio",
+          "name": "耳机音箱",
+          "sortOrder": 40
+        }
       ]
     },
     {
@@ -18,9 +34,21 @@
       "name": "电脑办公",
       "sortOrder": 20,
       "children": [
-        { "key": "laptop", "name": "笔记本电脑", "sortOrder": 10 },
-        { "key": "monitor", "name": "显示器", "sortOrder": 20 },
-        { "key": "peripheral", "name": "键鼠外设", "sortOrder": 30 }
+        {
+          "key": "laptop",
+          "name": "笔记本电脑",
+          "sortOrder": 10
+        },
+        {
+          "key": "monitor",
+          "name": "显示器",
+          "sortOrder": 20
+        },
+        {
+          "key": "peripheral",
+          "name": "键鼠外设",
+          "sortOrder": 30
+        }
       ]
     },
     {
@@ -28,10 +56,26 @@
       "name": "家用电器",
       "sortOrder": 30,
       "children": [
-        { "key": "tv", "name": "电视", "sortOrder": 10 },
-        { "key": "refrigerator", "name": "冰箱", "sortOrder": 20 },
-        { "key": "washer", "name": "洗衣机", "sortOrder": 30 },
-        { "key": "kitchen", "name": "厨房电器", "sortOrder": 40 }
+        {
+          "key": "tv",
+          "name": "电视",
+          "sortOrder": 10
+        },
+        {
+          "key": "refrigerator",
+          "name": "冰箱",
+          "sortOrder": 20
+        },
+        {
+          "key": "washer",
+          "name": "洗衣机",
+          "sortOrder": 30
+        },
+        {
+          "key": "kitchen",
+          "name": "厨房电器",
+          "sortOrder": 40
+        }
       ]
     },
     {
@@ -39,10 +83,26 @@
       "name": "服饰鞋包",
       "sortOrder": 40,
       "children": [
-        { "key": "menswear", "name": "男装", "sortOrder": 10 },
-        { "key": "womenswear", "name": "女装", "sortOrder": 20 },
-        { "key": "sneakers", "name": "运动鞋", "sortOrder": 30 },
-        { "key": "bag", "name": "箱包", "sortOrder": 40 }
+        {
+          "key": "menswear",
+          "name": "男装",
+          "sortOrder": 10
+        },
+        {
+          "key": "womenswear",
+          "name": "女装",
+          "sortOrder": 20
+        },
+        {
+          "key": "sneakers",
+          "name": "运动鞋",
+          "sortOrder": 30
+        },
+        {
+          "key": "bag",
+          "name": "箱包",
+          "sortOrder": 40
+        }
       ]
     },
     {
@@ -50,9 +110,21 @@
       "name": "美妆个护",
       "sortOrder": 50,
       "children": [
-        { "key": "skincare", "name": "护肤", "sortOrder": 10 },
-        { "key": "makeup", "name": "彩妆", "sortOrder": 20 },
-        { "key": "haircare", "name": "洗护", "sortOrder": 30 }
+        {
+          "key": "skincare",
+          "name": "护肤",
+          "sortOrder": 10
+        },
+        {
+          "key": "makeup",
+          "name": "彩妆",
+          "sortOrder": 20
+        },
+        {
+          "key": "haircare",
+          "name": "洗护",
+          "sortOrder": 30
+        }
       ]
     },
     {
@@ -60,9 +132,21 @@
       "name": "食品生鲜",
       "sortOrder": 60,
       "children": [
-        { "key": "grain", "name": "粮油调味", "sortOrder": 10 },
-        { "key": "snacks", "name": "休闲零食", "sortOrder": 20 },
-        { "key": "fruit", "name": "新鲜水果", "sortOrder": 30 }
+        {
+          "key": "grain",
+          "name": "粮油调味",
+          "sortOrder": 10
+        },
+        {
+          "key": "snacks",
+          "name": "休闲零食",
+          "sortOrder": 20
+        },
+        {
+          "key": "fruit",
+          "name": "新鲜水果",
+          "sortOrder": 30
+        }
       ]
     },
     {
@@ -70,8 +154,16 @@
       "name": "运动户外",
       "sortOrder": 70,
       "children": [
-        { "key": "fitness", "name": "健身器材", "sortOrder": 10 },
-        { "key": "outdoor", "name": "户外装备", "sortOrder": 20 }
+        {
+          "key": "fitness",
+          "name": "健身器材",
+          "sortOrder": 10
+        },
+        {
+          "key": "outdoor",
+          "name": "户外装备",
+          "sortOrder": 20
+        }
       ]
     },
     {
@@ -79,8 +171,16 @@
       "name": "母婴玩具",
       "sortOrder": 80,
       "children": [
-        { "key": "formula", "name": "奶粉辅食", "sortOrder": 10 },
-        { "key": "toys", "name": "益智玩具", "sortOrder": 20 }
+        {
+          "key": "formula",
+          "name": "奶粉辅食",
+          "sortOrder": 10
+        },
+        {
+          "key": "toys",
+          "name": "益智玩具",
+          "sortOrder": 20
+        }
       ]
     }
   ],
@@ -168,12 +268,48 @@
       "subtitle": "2 亿像素影像系统 · 第三代骁龙 8 · 5400mAh 硅碳电池",
       "description": "AURORA X1 Pro 采用 6.78 英寸 2K LTPO 护眼屏，支持 1-120Hz 自适应刷新率；2 亿像素主摄搭配潜望长焦，暗光成片率提升 43%；5400mAh 硅碳负极电池支持 120W 有线与 50W 无线快充，30 分钟回充 80%。",
       "productType": "physical",
-      "keywords": ["手机", "5G", "影像旗舰", "星野"],
+      "keywords": [
+        "手机",
+        "5G",
+        "影像旗舰",
+        "星野"
+      ],
       "skus": [
-        { "key": "aurora-x1-pro-256-obsidian", "title": "12GB+256GB 曜石黑", "price": "4299.00", "listPrice": "4699.00", "barcode": "6900000000001" },
-        { "key": "aurora-x1-pro-512-obsidian", "title": "16GB+512GB 曜石黑", "price": "4799.00", "listPrice": "5199.00", "barcode": "6900000000002" },
-        { "key": "aurora-x1-pro-512-starlight", "title": "16GB+512GB 星河银", "price": "4799.00", "listPrice": "5199.00", "barcode": "6900000000003" }
-      ]
+        {
+          "key": "aurora-x1-pro-256-obsidian",
+          "title": "12GB+256GB 曜石黑",
+          "price": "4299.00",
+          "listPrice": "4699.00",
+          "barcode": "6900000000001",
+          "values": {
+            "存储容量": "12GB+256GB",
+            "配色": "曜石黑"
+          }
+        },
+        {
+          "key": "aurora-x1-pro-512-obsidian",
+          "title": "16GB+512GB 曜石黑",
+          "price": "4799.00",
+          "listPrice": "5199.00",
+          "barcode": "6900000000002",
+          "values": {
+            "存储容量": "16GB+512GB",
+            "配色": "曜石黑"
+          }
+        },
+        {
+          "key": "aurora-x1-pro-512-starlight",
+          "title": "16GB+512GB 星河银",
+          "price": "4799.00",
+          "listPrice": "5199.00",
+          "barcode": "6900000000003",
+          "values": {
+            "存储容量": "16GB+512GB",
+            "配色": "星河银"
+          }
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "aurora-x1-standard",
@@ -184,11 +320,37 @@
       "subtitle": "6.4 英寸 120Hz OLED · 5000 万像素主摄 · 80W 快充",
       "description": "6.4 英寸 120Hz OLED 直屏，2160Hz 高频调光更护眼；5000 万像素主摄支持光学防抖，日常成片稳定；5000mAh 电池配合 80W 有线快充，35 分钟回充 80%。",
       "productType": "physical",
-      "keywords": ["手机", "5G", "性价比", "星野"],
+      "keywords": [
+        "手机",
+        "5G",
+        "性价比",
+        "星野"
+      ],
       "skus": [
-        { "key": "aurora-x1-standard-256-obsidian", "title": "8GB+256GB 曜石黑", "price": "2799.00", "listPrice": "2999.00", "barcode": "6900000000047" },
-        { "key": "aurora-x1-standard-256-white", "title": "12GB+256GB 星霜白", "price": "2999.00", "listPrice": "3199.00", "barcode": "6900000000048" }
-      ]
+        {
+          "key": "aurora-x1-standard-256-obsidian",
+          "title": "8GB+256GB 曜石黑",
+          "price": "2799.00",
+          "listPrice": "2999.00",
+          "barcode": "6900000000047",
+          "values": {
+            "存储容量": "8GB+256GB",
+            "配色": "曜石黑"
+          }
+        },
+        {
+          "key": "aurora-x1-standard-256-white",
+          "title": "12GB+256GB 星霜白",
+          "price": "2999.00",
+          "listPrice": "3199.00",
+          "barcode": "6900000000048",
+          "values": {
+            "存储容量": "12GB+256GB",
+            "配色": "星霜白"
+          }
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "aurora-tab-11",
@@ -199,11 +361,37 @@
       "subtitle": "11 英寸 144Hz 高刷屏 · 支持磁吸键盘与手写笔",
       "description": "11 英寸 2.8K 144Hz 全面屏，通过莱茵护眼认证；八核处理器配合 8GB 起步内存，多窗口分屏流畅；内置 8600mAh 电池与四扬声器，影音与笔记场景兼顾。",
       "productType": "physical",
-      "keywords": ["平板", "学习", "办公", "星野"],
+      "keywords": [
+        "平板",
+        "学习",
+        "办公",
+        "星野"
+      ],
       "skus": [
-        { "key": "aurora-tab-11-8-256", "title": "8GB+256GB 星空灰", "price": "3299.00", "listPrice": "3599.00", "barcode": "6900000000004" },
-        { "key": "aurora-tab-11-12-512", "title": "12GB+512GB 星空灰", "price": "3999.00", "listPrice": "4399.00", "barcode": "6900000000005" }
-      ]
+        {
+          "key": "aurora-tab-11-8-256",
+          "title": "8GB+256GB 星空灰",
+          "price": "3299.00",
+          "listPrice": "3599.00",
+          "barcode": "6900000000004",
+          "values": {
+            "存储容量": "8GB+256GB",
+            "配色": "星空灰"
+          }
+        },
+        {
+          "key": "aurora-tab-11-12-512",
+          "title": "12GB+512GB 星空灰",
+          "price": "3999.00",
+          "listPrice": "4399.00",
+          "barcode": "6900000000005",
+          "values": {
+            "存储容量": "12GB+512GB",
+            "配色": "星空灰"
+          }
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "aurora-watch-s",
@@ -214,11 +402,29 @@
       "subtitle": "14 天续航 · 双频 GPS · 100+ 运动模式",
       "description": "1.43 英寸 AMOLED 常显表盘，钛合金表壳仅重 32g；支持双频五星定位、血氧与心率连续监测，游泳级 5ATM 防水；典型场景续航 14 天。",
       "productType": "physical",
-      "keywords": ["智能手表", "运动", "健康", "星野"],
+      "keywords": [
+        "智能手表",
+        "运动",
+        "健康",
+        "星野"
+      ],
       "skus": [
-        { "key": "aurora-watch-s-46-black", "title": "46mm 曜石黑 氟橡胶表带", "price": "1299.00", "listPrice": "1499.00", "barcode": "6900000000006" },
-        { "key": "aurora-watch-s-46-titanium", "title": "46mm 钛银色 金属表带", "price": "1499.00", "listPrice": "1699.00", "barcode": "6900000000007" }
-      ]
+        {
+          "key": "aurora-watch-s-46-black",
+          "title": "46mm 曜石黑 氟橡胶表带",
+          "price": "1299.00",
+          "listPrice": "1499.00",
+          "barcode": "6900000000006"
+        },
+        {
+          "key": "aurora-watch-s-46-titanium",
+          "title": "46mm 钛银色 金属表带",
+          "price": "1499.00",
+          "listPrice": "1699.00",
+          "barcode": "6900000000007"
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "echo-buds-3",
@@ -229,11 +435,35 @@
       "subtitle": "48dB 深度降噪 · 空间音频 · 单次续航 8 小时",
       "description": "双馈降噪架构实现 48dB 深度降噪，通透模式自然不闷耳；11mm 动圈单元支持 LDAC 高清编码与空间音频；配合充电盒总续航 32 小时，支持无线充电。",
       "productType": "physical",
-      "keywords": ["耳机", "降噪", "蓝牙", "星野"],
+      "keywords": [
+        "耳机",
+        "降噪",
+        "蓝牙",
+        "星野"
+      ],
       "skus": [
-        { "key": "echo-buds-3-white", "title": "云雾白", "price": "699.00", "listPrice": "799.00", "barcode": "6900000000008" },
-        { "key": "echo-buds-3-black", "title": "曜石黑", "price": "699.00", "listPrice": "799.00", "barcode": "6900000000009" }
-      ]
+        {
+          "key": "echo-buds-3-white",
+          "title": "云雾白",
+          "price": "699.00",
+          "listPrice": "799.00",
+          "barcode": "6900000000008",
+          "values": {
+            "配色": "云雾白"
+          }
+        },
+        {
+          "key": "echo-buds-3-black",
+          "title": "曜石黑",
+          "price": "699.00",
+          "listPrice": "799.00",
+          "barcode": "6900000000009",
+          "values": {
+            "配色": "曜石黑"
+          }
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "nucleus-book-14",
@@ -244,11 +474,35 @@
       "subtitle": "2.8K 120Hz 屏 · 1.29kg 金属机身 · 75Wh 大电池",
       "description": "14 英寸 2.8K 120Hz 低蓝光屏，100% sRGB 色域；全金属机身重 1.29kg，支持 180° 开合；75Wh 电池配合 100W 快充，办公续航可达 11 小时。",
       "productType": "physical",
-      "keywords": ["笔记本", "办公", "轻薄", "星野"],
+      "keywords": [
+        "笔记本",
+        "办公",
+        "轻薄",
+        "星野"
+      ],
       "skus": [
-        { "key": "nucleus-book-14-i7-16-1t", "title": "i7 / 16GB / 1TB 深空灰", "price": "6299.00", "listPrice": "6999.00", "barcode": "6900000000010" },
-        { "key": "nucleus-book-14-i9-32-1t", "title": "i9 / 32GB / 1TB 深空灰", "price": "7999.00", "listPrice": "8799.00", "barcode": "6900000000011" }
-      ]
+        {
+          "key": "nucleus-book-14-i7-16-1t",
+          "title": "i7 / 16GB / 1TB 深空灰",
+          "price": "6299.00",
+          "listPrice": "6999.00",
+          "barcode": "6900000000010",
+          "values": {
+            "处理器配置": "i7 / 16GB / 1TB"
+          }
+        },
+        {
+          "key": "nucleus-book-14-i9-32-1t",
+          "title": "i9 / 32GB / 1TB 深空灰",
+          "price": "7999.00",
+          "listPrice": "8799.00",
+          "barcode": "6900000000011",
+          "values": {
+            "处理器配置": "i9 / 32GB / 1TB"
+          }
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "nucleus-book-16",
@@ -259,11 +513,35 @@
       "subtitle": "16 英寸 2.5K 165Hz · 独立显卡 · 双风扇五热管",
       "description": "16 英寸 2.5K 165Hz 高色域屏，100% DCI-P3 覆盖；独立显卡配合双风扇五热管散热，剪辑与三维渲染更从容；99Wh 电池与 140W 快充兼顾移动办公。",
       "productType": "physical",
-      "keywords": ["笔记本", "创作", "独立显卡", "星野"],
+      "keywords": [
+        "笔记本",
+        "创作",
+        "独立显卡",
+        "星野"
+      ],
       "skus": [
-        { "key": "nucleus-book-16-32-1t", "title": "32GB / 1TB 深空灰", "price": "8999.00", "listPrice": "9799.00", "barcode": "6900000000049" },
-        { "key": "nucleus-book-16-32-2t", "title": "32GB / 2TB 深空灰", "price": "9999.00", "listPrice": "10999.00", "barcode": "6900000000050" }
-      ]
+        {
+          "key": "nucleus-book-16-32-1t",
+          "title": "32GB / 1TB 深空灰",
+          "price": "8999.00",
+          "listPrice": "9799.00",
+          "barcode": "6900000000049",
+          "values": {
+            "处理器配置": "32GB / 1TB"
+          }
+        },
+        {
+          "key": "nucleus-book-16-32-2t",
+          "title": "32GB / 2TB 深空灰",
+          "price": "9999.00",
+          "listPrice": "10999.00",
+          "barcode": "6900000000050",
+          "values": {
+            "处理器配置": "32GB / 2TB"
+          }
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "nucleus-monitor-27",
@@ -274,11 +552,29 @@
       "subtitle": "4K IPS Black · 98% DCI-P3 · 90W 反向供电",
       "description": "27 英寸 4K IPS Black 面板，对比度 2000:1，出厂逐台校色 ΔE<2；支持 90W USB-C 一线连接笔记本，内置 KVM 与双 3W 扬声器，升降旋转支架免工具安装。",
       "productType": "physical",
-      "keywords": ["显示器", "4K", "设计", "星野"],
+      "keywords": [
+        "显示器",
+        "4K",
+        "设计",
+        "星野"
+      ],
       "skus": [
-        { "key": "nucleus-monitor-27-4k", "title": "27 英寸 4K 标准支架", "price": "1899.00", "listPrice": "2199.00", "barcode": "6900000000012" },
-        { "key": "nucleus-monitor-27-4k-usbc", "title": "27 英寸 4K USB-C 90W", "price": "2299.00", "listPrice": "2599.00", "barcode": "6900000000013" }
-      ]
+        {
+          "key": "nucleus-monitor-27-4k",
+          "title": "27 英寸 4K 标准支架",
+          "price": "1899.00",
+          "listPrice": "2199.00",
+          "barcode": "6900000000012"
+        },
+        {
+          "key": "nucleus-monitor-27-4k-usbc",
+          "title": "27 英寸 4K USB-C 90W",
+          "price": "2299.00",
+          "listPrice": "2599.00",
+          "barcode": "6900000000013"
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "nucleus-keyboard-k8",
@@ -289,11 +585,35 @@
       "subtitle": "Gasket 结构 · 全键热插拔 · 有线/蓝牙/2.4G 三模",
       "description": "75% 紧凑配列保留完整功能区，Gasket 结构与五层填充带来柔和手感；全键热插拔支持三脚与五脚轴体，4000mAh 电池关灯续航 200 小时。",
       "productType": "physical",
-      "keywords": ["键盘", "机械键盘", "办公", "星野"],
+      "keywords": [
+        "键盘",
+        "机械键盘",
+        "办公",
+        "星野"
+      ],
       "skus": [
-        { "key": "nucleus-keyboard-k8-87-red", "title": "87 键 红轴 月白", "price": "499.00", "listPrice": "599.00", "barcode": "6900000000014" },
-        { "key": "nucleus-keyboard-k8-108-brown", "title": "108 键 茶轴 深空灰", "price": "599.00", "listPrice": "699.00", "barcode": "6900000000015" }
-      ]
+        {
+          "key": "nucleus-keyboard-k8-87-red",
+          "title": "87 键 红轴 月白",
+          "price": "499.00",
+          "listPrice": "599.00",
+          "barcode": "6900000000014",
+          "values": {
+            "键盘配列": "87 键"
+          }
+        },
+        {
+          "key": "nucleus-keyboard-k8-108-brown",
+          "title": "108 键 茶轴 深空灰",
+          "price": "599.00",
+          "listPrice": "699.00",
+          "barcode": "6900000000015",
+          "values": {
+            "键盘配列": "108 键"
+          }
+        }
+      ],
+      "brandKey": "xingye"
     },
     {
       "key": "cloud-home-tv-65",
@@ -304,11 +624,29 @@
       "subtitle": "千级分区背光 · 144Hz 高刷 · 杜比视界",
       "description": "65 英寸 Mini LED 面板，1152 个控光分区，峰值亮度 1500nits；144Hz 高刷配合 MEMC 运动补偿，支持杜比视界与杜比全景声；4GB+64GB 存储，开机无广告。",
       "productType": "physical",
-      "keywords": ["电视", "Mini LED", "客厅", "云栖"],
+      "keywords": [
+        "电视",
+        "Mini LED",
+        "客厅",
+        "云栖"
+      ],
       "skus": [
-        { "key": "cloud-home-tv-65-standard", "title": "65 英寸 标准挂架", "price": "4999.00", "listPrice": "5699.00", "barcode": "6900000000016" },
-        { "key": "cloud-home-tv-75-standard", "title": "75 英寸 标准挂架", "price": "6999.00", "listPrice": "7999.00", "barcode": "6900000000017" }
-      ]
+        {
+          "key": "cloud-home-tv-65-standard",
+          "title": "65 英寸 标准挂架",
+          "price": "4999.00",
+          "listPrice": "5699.00",
+          "barcode": "6900000000016"
+        },
+        {
+          "key": "cloud-home-tv-75-standard",
+          "title": "75 英寸 标准挂架",
+          "price": "6999.00",
+          "listPrice": "7999.00",
+          "barcode": "6900000000017"
+        }
+      ],
+      "brandKey": "yunqi"
     },
     {
       "key": "cloud-home-fridge-520",
@@ -319,10 +657,22 @@
       "subtitle": "一级能效 · 母婴变温区 · 全空间除菌净味",
       "description": "520L 大容量十字四门设计，独立母婴变温区支持 -20℃ 至 5℃ 调温；风冷无霜搭配双循环制冷，蔬果保鲜 7 天不脱水；一级能效日耗电约 0.85 度。",
       "productType": "physical",
-      "keywords": ["冰箱", "十字对开", "大容量", "云栖"],
+      "keywords": [
+        "冰箱",
+        "十字对开",
+        "大容量",
+        "云栖"
+      ],
       "skus": [
-        { "key": "cloud-home-fridge-520-grey", "title": "520L 星岩灰", "price": "4599.00", "listPrice": "5299.00", "barcode": "6900000000018" }
-      ]
+        {
+          "key": "cloud-home-fridge-520-grey",
+          "title": "520L 星岩灰",
+          "price": "4599.00",
+          "listPrice": "5299.00",
+          "barcode": "6900000000018"
+        }
+      ],
+      "brandKey": "yunqi"
     },
     {
       "key": "cloud-home-washer-10",
@@ -333,10 +683,22 @@
       "subtitle": "变频直驱 · 空气洗 · 高温筒自洁",
       "description": "10kg 洗涤容量搭配 7kg 烘干，BLDC 变频直驱电机静音耐用；空气洗模式可去除火锅与烟味，95℃ 高温筒自洁配合双喷淋减少残留。",
       "productType": "physical",
-      "keywords": ["洗衣机", "洗烘一体", "变频", "云栖"],
+      "keywords": [
+        "洗衣机",
+        "洗烘一体",
+        "变频",
+        "云栖"
+      ],
       "skus": [
-        { "key": "cloud-home-washer-10-white", "title": "10kg 极地白", "price": "2999.00", "listPrice": "3499.00", "barcode": "6900000000019" }
-      ]
+        {
+          "key": "cloud-home-washer-10-white",
+          "title": "10kg 极地白",
+          "price": "2999.00",
+          "listPrice": "3499.00",
+          "barcode": "6900000000019"
+        }
+      ],
+      "brandKey": "yunqi"
     },
     {
       "key": "cloud-home-oven-32",
@@ -347,10 +709,22 @@
       "subtitle": "蒸烤炸炖四合一 · 1℃ 精准控温 · 自动清洁",
       "description": "32L 嵌入式容量适配标准橱柜，蒸、烤、空气炸、低温慢煮四合一；上下独立控温精度 1℃，内置 40 道自动菜单；高温蒸汽自清洁，免拆洗更省心。",
       "productType": "physical",
-      "keywords": ["蒸烤箱", "厨房", "嵌入式", "云栖"],
+      "keywords": [
+        "蒸烤箱",
+        "厨房",
+        "嵌入式",
+        "云栖"
+      ],
       "skus": [
-        { "key": "cloud-home-oven-32-black", "title": "32L 曜石黑", "price": "2599.00", "listPrice": "2999.00", "barcode": "6900000000020" }
-      ]
+        {
+          "key": "cloud-home-oven-32-black",
+          "title": "32L 曜石黑",
+          "price": "2599.00",
+          "listPrice": "2999.00",
+          "barcode": "6900000000020"
+        }
+      ],
+      "brandKey": "yunqi"
     },
     {
       "key": "shiguang-merino-coat",
@@ -361,12 +735,45 @@
       "subtitle": "90% 澳洲美利奴羊毛 · 双面呢工艺 · 直筒落肩版型",
       "description": "选用 90% 澳洲美利奴羊毛双面呢面料，手工缝制无里衬，挺括而轻盈；直筒落肩版型适配通勤与商务场景，藏青与深灰两色可选。",
       "productType": "physical",
-      "keywords": ["大衣", "羊毛", "通勤", "拾光"],
+      "keywords": [
+        "大衣",
+        "羊毛",
+        "通勤",
+        "拾光"
+      ],
       "skus": [
-        { "key": "shiguang-merino-coat-navy-l", "title": "藏青 L", "price": "1299.00", "listPrice": "1599.00", "barcode": "6900000000021" },
-        { "key": "shiguang-merino-coat-navy-xl", "title": "藏青 XL", "price": "1299.00", "listPrice": "1599.00", "barcode": "6900000000022" },
-        { "key": "shiguang-merino-coat-grey-l", "title": "深灰 L", "price": "1299.00", "listPrice": "1599.00", "barcode": "6900000000023" }
-      ]
+        {
+          "key": "shiguang-merino-coat-navy-l",
+          "title": "藏青 L",
+          "price": "1299.00",
+          "listPrice": "1599.00",
+          "barcode": "6900000000021",
+          "values": {
+            "尺码": "L"
+          }
+        },
+        {
+          "key": "shiguang-merino-coat-navy-xl",
+          "title": "藏青 XL",
+          "price": "1299.00",
+          "listPrice": "1599.00",
+          "barcode": "6900000000022",
+          "values": {
+            "尺码": "XL"
+          }
+        },
+        {
+          "key": "shiguang-merino-coat-grey-l",
+          "title": "深灰 L",
+          "price": "1299.00",
+          "listPrice": "1599.00",
+          "barcode": "6900000000023",
+          "values": {
+            "尺码": "L"
+          }
+        }
+      ],
+      "brandKey": "shiguang"
     },
     {
       "key": "shiguang-linen-shirt",
@@ -377,11 +784,35 @@
       "subtitle": "100% 亚麻 · 透气不闷汗 · 宽松直筒版型",
       "description": "选用 100% 天然亚麻，透气吸湿适合夏季通勤；宽松直筒版型搭配落肩袖，内搭外穿都得体；水洗工艺预缩处理，久穿不变形。",
       "productType": "physical",
-      "keywords": ["衬衫", "亚麻", "夏季", "拾光"],
+      "keywords": [
+        "衬衫",
+        "亚麻",
+        "夏季",
+        "拾光"
+      ],
       "skus": [
-        { "key": "shiguang-linen-shirt-white-l", "title": "白色 L", "price": "399.00", "listPrice": "459.00", "barcode": "6900000000051" },
-        { "key": "shiguang-linen-shirt-blue-xl", "title": "浅蓝 XL", "price": "399.00", "listPrice": "459.00", "barcode": "6900000000052" }
-      ]
+        {
+          "key": "shiguang-linen-shirt-white-l",
+          "title": "白色 L",
+          "price": "399.00",
+          "listPrice": "459.00",
+          "barcode": "6900000000051",
+          "values": {
+            "尺码": "L"
+          }
+        },
+        {
+          "key": "shiguang-linen-shirt-blue-xl",
+          "title": "浅蓝 XL",
+          "price": "399.00",
+          "listPrice": "459.00",
+          "barcode": "6900000000052",
+          "values": {
+            "尺码": "XL"
+          }
+        }
+      ],
+      "brandKey": "shiguang"
     },
     {
       "key": "shiguang-cashmere-sweater",
@@ -392,11 +823,35 @@
       "subtitle": "100% 山羊绒 · 12 针精纺 · 亲肤不扎",
       "description": "选用内蒙古 100% 山羊绒，12 针精纺工艺细腻轻薄；圆领落肩版型修饰肩颈线条，可单穿亦可内搭，附赠同色羊绒护理梳。",
       "productType": "physical",
-      "keywords": ["针织衫", "羊绒", "女装", "拾光"],
+      "keywords": [
+        "针织衫",
+        "羊绒",
+        "女装",
+        "拾光"
+      ],
       "skus": [
-        { "key": "shiguang-cashmere-sweater-ivory-m", "title": "米白 M", "price": "899.00", "listPrice": "1099.00", "barcode": "6900000000024" },
-        { "key": "shiguang-cashmere-sweater-grey-m", "title": "烟灰 M", "price": "899.00", "listPrice": "1099.00", "barcode": "6900000000025" }
-      ]
+        {
+          "key": "shiguang-cashmere-sweater-ivory-m",
+          "title": "米白 M",
+          "price": "899.00",
+          "listPrice": "1099.00",
+          "barcode": "6900000000024",
+          "values": {
+            "尺码": "M"
+          }
+        },
+        {
+          "key": "shiguang-cashmere-sweater-grey-m",
+          "title": "烟灰 M",
+          "price": "899.00",
+          "listPrice": "1099.00",
+          "barcode": "6900000000025",
+          "values": {
+            "尺码": "M"
+          }
+        }
+      ],
+      "brandKey": "shiguang"
     },
     {
       "key": "shiguang-runner-shoes",
@@ -407,12 +862,45 @@
       "subtitle": "超临界发泡中底 · 单只 218g · 城市通勤与慢跑两用",
       "description": "超临界发泡中底提供 68% 回弹，单只重量仅 218g；一体织鞋面透气贴合，耐磨橡胶外底适配柏油与跑步机路面，日常通勤亦可轻松驾驭。",
       "productType": "physical",
-      "keywords": ["跑鞋", "缓震", "运动", "拾光"],
+      "keywords": [
+        "跑鞋",
+        "缓震",
+        "运动",
+        "拾光"
+      ],
       "skus": [
-        { "key": "shiguang-runner-shoes-42", "title": "42 云雾白", "price": "449.00", "listPrice": "549.00", "barcode": "6900000000026" },
-        { "key": "shiguang-runner-shoes-43", "title": "43 云雾白", "price": "449.00", "listPrice": "549.00", "barcode": "6900000000027" },
-        { "key": "shiguang-runner-shoes-44", "title": "44 曜石黑", "price": "449.00", "listPrice": "549.00", "barcode": "6900000000028" }
-      ]
+        {
+          "key": "shiguang-runner-shoes-42",
+          "title": "42 云雾白",
+          "price": "449.00",
+          "listPrice": "549.00",
+          "barcode": "6900000000026",
+          "values": {
+            "鞋码": "42"
+          }
+        },
+        {
+          "key": "shiguang-runner-shoes-43",
+          "title": "43 云雾白",
+          "price": "449.00",
+          "listPrice": "549.00",
+          "barcode": "6900000000027",
+          "values": {
+            "鞋码": "43"
+          }
+        },
+        {
+          "key": "shiguang-runner-shoes-44",
+          "title": "44 曜石黑",
+          "price": "449.00",
+          "listPrice": "549.00",
+          "barcode": "6900000000028",
+          "values": {
+            "鞋码": "44"
+          }
+        }
+      ],
+      "brandKey": "shiguang"
     },
     {
       "key": "shiguang-canvas-tote",
@@ -423,11 +911,29 @@
       "subtitle": "16 安加厚帆布 · 可容纳 16 英寸笔电 · 三层内袋",
       "description": "16 安加厚帆布配合植鞣革提手，承重 12kg；主仓可平放 16 英寸笔记本，内置三层收纳袋与钥匙扣；肩带长度可调，通勤与短途出行皆宜。",
       "productType": "physical",
-      "keywords": ["托特包", "通勤", "帆布", "拾光"],
+      "keywords": [
+        "托特包",
+        "通勤",
+        "帆布",
+        "拾光"
+      ],
       "skus": [
-        { "key": "shiguang-canvas-tote-khaki", "title": "卡其", "price": "399.00", "listPrice": "469.00", "barcode": "6900000000029" },
-        { "key": "shiguang-canvas-tote-black", "title": "曜石黑", "price": "399.00", "listPrice": "469.00", "barcode": "6900000000030" }
-      ]
+        {
+          "key": "shiguang-canvas-tote-khaki",
+          "title": "卡其",
+          "price": "399.00",
+          "listPrice": "469.00",
+          "barcode": "6900000000029"
+        },
+        {
+          "key": "shiguang-canvas-tote-black",
+          "title": "曜石黑",
+          "price": "399.00",
+          "listPrice": "469.00",
+          "barcode": "6900000000030"
+        }
+      ],
+      "brandKey": "shiguang"
     },
     {
       "key": "mubai-hydra-serum",
@@ -438,11 +944,29 @@
       "subtitle": "五重玻尿酸 · 无酒精无香精 · 敏感肌可用",
       "description": "五重不同分子量玻尿酸构建立体保湿网络，配合依克多因舒缓修护；无酒精、无香精、无色素，敏感肌可用；质地清爽易吸收，可叠涂面霜使用。",
       "productType": "physical",
-      "keywords": ["精华", "保湿", "敏感肌", "沐白"],
+      "keywords": [
+        "精华",
+        "保湿",
+        "敏感肌",
+        "沐白"
+      ],
       "skus": [
-        { "key": "mubai-hydra-serum-30", "title": "30ml 单支装", "price": "329.00", "listPrice": "399.00", "barcode": "6900000000031" },
-        { "key": "mubai-hydra-serum-30x2", "title": "30ml 双支礼盒", "price": "599.00", "listPrice": "798.00", "barcode": "6900000000032" }
-      ]
+        {
+          "key": "mubai-hydra-serum-30",
+          "title": "30ml 单支装",
+          "price": "329.00",
+          "listPrice": "399.00",
+          "barcode": "6900000000031"
+        },
+        {
+          "key": "mubai-hydra-serum-30x2",
+          "title": "30ml 双支礼盒",
+          "price": "599.00",
+          "listPrice": "798.00",
+          "barcode": "6900000000032"
+        }
+      ],
+      "brandKey": "mubai"
     },
     {
       "key": "mubai-cica-cream",
@@ -453,11 +977,29 @@
       "subtitle": "10% 积雪草提取物 · 神经酰胺 · 屏障修护",
       "description": "10% 积雪草提取物搭配神经酰胺与胆固醇，模拟皮肤屏障脂质结构；质地绵密不黏腻，泛红干燥期可厚敷，敏感肌适用。",
       "productType": "physical",
-      "keywords": ["面霜", "修护", "积雪草", "沐白"],
+      "keywords": [
+        "面霜",
+        "修护",
+        "积雪草",
+        "沐白"
+      ],
       "skus": [
-        { "key": "mubai-cica-cream-50", "title": "50ml 单瓶", "price": "259.00", "listPrice": "299.00", "barcode": "6900000000053" },
-        { "key": "mubai-cica-cream-50x2", "title": "50ml 双瓶装", "price": "469.00", "listPrice": "598.00", "barcode": "6900000000054" }
-      ]
+        {
+          "key": "mubai-cica-cream-50",
+          "title": "50ml 单瓶",
+          "price": "259.00",
+          "listPrice": "299.00",
+          "barcode": "6900000000053"
+        },
+        {
+          "key": "mubai-cica-cream-50x2",
+          "title": "50ml 双瓶装",
+          "price": "469.00",
+          "listPrice": "598.00",
+          "barcode": "6900000000054"
+        }
+      ],
+      "brandKey": "mubai"
     },
     {
       "key": "mubai-velvet-lipstick",
@@ -468,11 +1010,35 @@
       "subtitle": "丝绒雾面质地 · 8 小时持色 · 添加角鲨烷",
       "description": "丝绒雾面质地一抹显色，8 小时持色不易沾杯；添加角鲨烷与维生素 E，哑光不拔干；磁吸金属管身，附赠同色系唇线笔。",
       "productType": "physical",
-      "keywords": ["口红", "哑光", "彩妆", "沐白"],
+      "keywords": [
+        "口红",
+        "哑光",
+        "彩妆",
+        "沐白"
+      ],
       "skus": [
-        { "key": "mubai-velvet-lipstick-01", "title": "#01 豆沙玫瑰", "price": "199.00", "listPrice": "239.00", "barcode": "6900000000033" },
-        { "key": "mubai-velvet-lipstick-02", "title": "#02 正红", "price": "199.00", "listPrice": "239.00", "barcode": "6900000000034" }
-      ]
+        {
+          "key": "mubai-velvet-lipstick-01",
+          "title": "#01 豆沙玫瑰",
+          "price": "199.00",
+          "listPrice": "239.00",
+          "barcode": "6900000000033",
+          "values": {
+            "色号": "#01 豆沙玫瑰"
+          }
+        },
+        {
+          "key": "mubai-velvet-lipstick-02",
+          "title": "#02 正红",
+          "price": "199.00",
+          "listPrice": "239.00",
+          "barcode": "6900000000034",
+          "values": {
+            "色号": "#02 正红"
+          }
+        }
+      ],
+      "brandKey": "mubai"
     },
     {
       "key": "mubai-repair-shampoo",
@@ -483,11 +1049,29 @@
       "subtitle": "氨基酸表活 · 无硅油 · 染烫修护",
       "description": "氨基酸表活温和清洁，无硅油配方不假滑；添加水解角蛋白与泛醇，改善染烫后干枯分叉；500ml 大容量按压瓶，全家可用。",
       "productType": "physical",
-      "keywords": ["洗发水", "氨基酸", "修护", "沐白"],
+      "keywords": [
+        "洗发水",
+        "氨基酸",
+        "修护",
+        "沐白"
+      ],
       "skus": [
-        { "key": "mubai-repair-shampoo-500", "title": "500ml 单瓶", "price": "129.00", "listPrice": "159.00", "barcode": "6900000000035" },
-        { "key": "mubai-repair-shampoo-500x2", "title": "500ml 双瓶装", "price": "229.00", "listPrice": "318.00", "barcode": "6900000000036" }
-      ]
+        {
+          "key": "mubai-repair-shampoo-500",
+          "title": "500ml 单瓶",
+          "price": "129.00",
+          "listPrice": "159.00",
+          "barcode": "6900000000035"
+        },
+        {
+          "key": "mubai-repair-shampoo-500x2",
+          "title": "500ml 双瓶装",
+          "price": "229.00",
+          "listPrice": "318.00",
+          "barcode": "6900000000036"
+        }
+      ],
+      "brandKey": "mubai"
     },
     {
       "key": "shanhai-rice-5kg",
@@ -498,10 +1082,22 @@
       "subtitle": "当季新米 · 核心产区 · 真空锁鲜",
       "description": "黑龙江五常核心产区当季稻花香 2 号，一年一季，颗粒饱满油亮；真空锁鲜包装锁住米香，蒸煮后软糯回甘，适合日常主食。",
       "productType": "physical",
-      "keywords": ["大米", "五常", "粮油", "山海"],
+      "keywords": [
+        "大米",
+        "五常",
+        "粮油",
+        "山海"
+      ],
       "skus": [
-        { "key": "shanhai-rice-5kg-bag", "title": "5kg 真空袋装", "price": "89.00", "listPrice": "109.00", "barcode": "6900000000037" }
-      ]
+        {
+          "key": "shanhai-rice-5kg-bag",
+          "title": "5kg 真空袋装",
+          "price": "89.00",
+          "listPrice": "109.00",
+          "barcode": "6900000000037"
+        }
+      ],
+      "brandKey": "shanhai"
     },
     {
       "key": "shanhai-nuts-gift",
@@ -512,10 +1108,22 @@
       "subtitle": "6 种坚果果干 · 独立小包 · 无添加蔗糖",
       "description": "每盒 30 包独立装，含巴旦木、腰果、核桃仁、蔓越莓等 6 种坚果果干；低温烘焙保留原香，不添加蔗糖与防腐剂，办公与出行随手补给。",
       "productType": "physical",
-      "keywords": ["坚果", "零食", "礼盒", "山海"],
+      "keywords": [
+        "坚果",
+        "零食",
+        "礼盒",
+        "山海"
+      ],
       "skus": [
-        { "key": "shanhai-nuts-gift-30", "title": "30 包装", "price": "129.00", "listPrice": "159.00", "barcode": "6900000000038" }
-      ]
+        {
+          "key": "shanhai-nuts-gift-30",
+          "title": "30 包装",
+          "price": "129.00",
+          "listPrice": "159.00",
+          "barcode": "6900000000038"
+        }
+      ],
+      "brandKey": "shanhai"
     },
     {
       "key": "shanhai-orange-5kg",
@@ -526,10 +1134,22 @@
       "subtitle": "产地直发 · 酸甜比 18:1 · 坏果包赔",
       "description": "江西赣南产地直发，果径 70-80mm，酸甜比约 18:1；采摘后 24 小时内发出，冷链运输，坏果拍照即赔。",
       "productType": "physical",
-      "keywords": ["脐橙", "水果", "生鲜", "山海"],
+      "keywords": [
+        "脐橙",
+        "水果",
+        "生鲜",
+        "山海"
+      ],
       "skus": [
-        { "key": "shanhai-orange-5kg-box", "title": "5kg 礼盒装", "price": "69.00", "listPrice": "89.00", "barcode": "6900000000039" }
-      ]
+        {
+          "key": "shanhai-orange-5kg-box",
+          "title": "5kg 礼盒装",
+          "price": "69.00",
+          "listPrice": "89.00",
+          "barcode": "6900000000039"
+        }
+      ],
+      "brandKey": "shanhai"
     },
     {
       "key": "senyu-treadmill",
@@ -540,11 +1160,35 @@
       "subtitle": "2.5HP 静音电机 · 折叠收纳 · 减震跑板",
       "description": "2.5HP 无刷静音电机，噪音低至 55dB；跑板六点减震降低膝踝冲击；免安装折叠设计，收纳厚度 19cm，适配小户型居家健身。",
       "productType": "physical",
-      "keywords": ["跑步机", "健身", "静音", "森屿"],
+      "keywords": [
+        "跑步机",
+        "健身",
+        "静音",
+        "森屿"
+      ],
       "skus": [
-        { "key": "senyu-treadmill-standard", "title": "标准版", "price": "3299.00", "listPrice": "3899.00", "barcode": "6900000000040" },
-        { "key": "senyu-treadmill-smart", "title": "智享版 含坡度调节", "price": "3999.00", "listPrice": "4599.00", "barcode": "6900000000041" }
-      ]
+        {
+          "key": "senyu-treadmill-standard",
+          "title": "标准版",
+          "price": "3299.00",
+          "listPrice": "3899.00",
+          "barcode": "6900000000040",
+          "values": {
+            "版本": "标准版"
+          }
+        },
+        {
+          "key": "senyu-treadmill-smart",
+          "title": "智享版 含坡度调节",
+          "price": "3999.00",
+          "listPrice": "4599.00",
+          "barcode": "6900000000041",
+          "values": {
+            "版本": "智享版 含坡度调节"
+          }
+        }
+      ],
+      "brandKey": "senyu"
     },
     {
       "key": "senyu-tent-3",
@@ -555,10 +1199,22 @@
       "subtitle": "3 秒速开 · 双层防雨 · 银胶防晒",
       "description": "液压骨架 3 秒速开，双层结构防雨指数 PU3000mm；外帐银胶涂层反射紫外线，天窗与双侧门形成对流；收纳后仅 3.2kg，适合公园与轻露营。",
       "productType": "physical",
-      "keywords": ["帐篷", "露营", "户外", "森屿"],
+      "keywords": [
+        "帐篷",
+        "露营",
+        "户外",
+        "森屿"
+      ],
       "skus": [
-        { "key": "senyu-tent-3-person", "title": "三人 苔绿", "price": "699.00", "listPrice": "899.00", "barcode": "6900000000042" }
-      ]
+        {
+          "key": "senyu-tent-3-person",
+          "title": "三人 苔绿",
+          "price": "699.00",
+          "listPrice": "899.00",
+          "barcode": "6900000000042"
+        }
+      ],
+      "brandKey": "senyu"
     },
     {
       "key": "senyu-dumbbell-set",
@@ -570,10 +1226,22 @@
       "description": "旋钮式快速调重，单只 2.5kg 至 10kg 无级切换；包胶铁片静音防滑，落地不伤地板；一对装搭配收纳底座，居家力量训练省空间。",
       "productType": "physical",
       "demoOnly": true,
-      "keywords": ["哑铃", "力量训练", "健身", "森屿"],
+      "keywords": [
+        "哑铃",
+        "力量训练",
+        "健身",
+        "森屿"
+      ],
       "skus": [
-        { "key": "senyu-dumbbell-set-20", "title": "20kg 一对装", "price": "399.00", "listPrice": "499.00", "barcode": "6900000000043" }
-      ]
+        {
+          "key": "senyu-dumbbell-set-20",
+          "title": "20kg 一对装",
+          "price": "399.00",
+          "listPrice": "499.00",
+          "barcode": "6900000000043"
+        }
+      ],
+      "brandKey": "senyu"
     },
     {
       "key": "qimu-formula-800",
@@ -584,11 +1252,29 @@
       "subtitle": "有机奶源 · 含 OPO 结构脂 · 溯源可查",
       "description": "甄选有机牧场奶源，添加 OPO 结构脂与益生元组合，贴近母乳脂肪结构；每罐独立溯源码，扫码可查牧场、生产与检验信息。",
       "productType": "physical",
-      "keywords": ["奶粉", "有机", "母婴", "栖木"],
+      "keywords": [
+        "奶粉",
+        "有机",
+        "母婴",
+        "栖木"
+      ],
       "skus": [
-        { "key": "qimu-formula-800-stage1", "title": "800g 1 段（0-6 月）", "price": "328.00", "listPrice": "368.00", "barcode": "6900000000044" },
-        { "key": "qimu-formula-800-stage2", "title": "800g 2 段（6-12 月）", "price": "328.00", "listPrice": "368.00", "barcode": "6900000000045" }
-      ]
+        {
+          "key": "qimu-formula-800-stage1",
+          "title": "800g 1 段（0-6 月）",
+          "price": "328.00",
+          "listPrice": "368.00",
+          "barcode": "6900000000044"
+        },
+        {
+          "key": "qimu-formula-800-stage2",
+          "title": "800g 2 段（6-12 月）",
+          "price": "328.00",
+          "listPrice": "368.00",
+          "barcode": "6900000000045"
+        }
+      ],
+      "brandKey": "qimu"
     },
     {
       "key": "qimu-blocks-200",
@@ -599,9 +1285,71 @@
       "subtitle": "食品级 ABS · 圆角无毛刺 · 附拼搭手册",
       "description": "200 粒大颗粒积木采用食品级 ABS 材质，圆角打磨无毛刺，适配 3 岁以上儿童；附 24 页拼搭手册与收纳桶，锻炼空间想象与手眼协调。",
       "productType": "physical",
-      "keywords": ["积木", "益智", "玩具", "栖木"],
+      "keywords": [
+        "积木",
+        "益智",
+        "玩具",
+        "栖木"
+      ],
       "skus": [
-        { "key": "qimu-blocks-200-bucket", "title": "200 粒 收纳桶装", "price": "199.00", "listPrice": "239.00", "barcode": "6900000000046" }
+        {
+          "key": "qimu-blocks-200-bucket",
+          "title": "200 粒 收纳桶装",
+          "price": "199.00",
+          "listPrice": "239.00",
+          "barcode": "6900000000046"
+        }
+      ],
+      "brandKey": "qimu"
+    },
+    {
+      "key": "aurora-digital-album",
+      "shopKey": "digital",
+      "categoryKey": "audio",
+      "brand": "星野",
+      "brandKey": "xingye",
+      "title": "星野 AURORA 数字专辑 年度聆听权益",
+      "subtitle": "高解析度音源 · 离线畅听 · 新专辑首发",
+      "description": "AURORA 数字专辑年度权益：高解析度音源下载、线下演唱会优先购与专属数字纪念册，购买后即时生效。",
+      "productType": "digital",
+      "keywords": [
+        "数字专辑",
+        "音乐权益",
+        "高解析度"
+      ],
+      "skus": [
+        {
+          "key": "aurora-digital-album-year",
+          "title": "年度权益卡",
+          "price": "128.00",
+          "listPrice": "168.00",
+          "barcode": ""
+        }
+      ]
+    },
+    {
+      "key": "mubai-skin-analysis-service",
+      "shopKey": "beauty",
+      "categoryKey": "skincare",
+      "brand": "沐白",
+      "brandKey": "mubai",
+      "title": "沐白 肌肤检测定制服务 到店一次",
+      "subtitle": "专业仪器检测 · 定制护肤方案 · 会员专享价",
+      "description": "沐白肌肤检测定制服务：仪器检测肌质并出具定制护肤方案，适合与沐白护肤商品搭配购买，到店一次完成。",
+      "productType": "service",
+      "keywords": [
+        "肌肤检测",
+        "定制服务",
+        "到店"
+      ],
+      "skus": [
+        {
+          "key": "mubai-skin-analysis-once",
+          "title": "单次检测服务",
+          "price": "99.00",
+          "listPrice": "199.00",
+          "barcode": ""
+        }
       ]
     }
   ],
@@ -670,28 +1418,50 @@
         "code": "MALL-MEMBER-SILVER",
         "name": "银卡会员",
         "rank": 1,
-        "benefits": ["生日礼券 20 元", "积分加速 1.2 倍", "专属客服通道"]
+        "benefits": [
+          "生日礼券 20 元",
+          "积分加速 1.2 倍",
+          "专属客服通道"
+        ]
       },
       {
         "key": "gold",
         "code": "MALL-MEMBER-GOLD",
         "name": "金卡会员",
         "rank": 2,
-        "benefits": ["生日礼券 50 元", "积分加速 1.5 倍", "每月 1 张免邮券", "专属客服通道"]
+        "benefits": [
+          "生日礼券 50 元",
+          "积分加速 1.5 倍",
+          "每月 1 张免邮券",
+          "专属客服通道"
+        ]
       },
       {
         "key": "platinum",
         "code": "MALL-MEMBER-PLATINUM",
         "name": "黑金会员",
         "rank": 3,
-        "benefits": ["生日礼券 100 元", "积分加速 2 倍", "每月 4 张免邮券", "会员日 95 折", "优先发货"]
+        "benefits": [
+          "生日礼券 100 元",
+          "积分加速 2 倍",
+          "每月 4 张免邮券",
+          "会员日 95 折",
+          "优先发货"
+        ]
       },
       {
         "key": "diamond",
         "code": "MALL-MEMBER-DIAMOND",
         "name": "钻石会员",
         "rank": 4,
-        "benefits": ["生日礼券 200 元", "积分加速 3 倍", "无限免邮", "会员日 9 折", "专属管家服务", "新品优先购"]
+        "benefits": [
+          "生日礼券 200 元",
+          "积分加速 3 倍",
+          "无限免邮",
+          "会员日 9 折",
+          "专属管家服务",
+          "新品优先购"
+        ]
       }
     ],
     "packageGroups": [
@@ -797,22 +1567,234 @@
       }
     ],
     "floors": [
-      { "key": "floor-digital", "title": "手机数码", "productQuery": "手机", "sortOrder": 10 },
-      { "key": "floor-appliance", "title": "家用电器", "productQuery": "家电", "sortOrder": 20 },
-      { "key": "floor-fashion", "title": "服饰鞋包", "productQuery": "服饰", "sortOrder": 30 },
-      { "key": "floor-beauty", "title": "美妆个护", "productQuery": "护肤", "sortOrder": 40 },
-      { "key": "floor-grocery", "title": "食品生鲜", "productQuery": "生鲜", "sortOrder": 50 },
-      { "key": "floor-sports", "title": "运动户外", "productQuery": "健身", "sortOrder": 60 }
+      {
+        "key": "floor-digital",
+        "title": "手机数码",
+        "productQuery": "手机",
+        "sortOrder": 10
+      },
+      {
+        "key": "floor-appliance",
+        "title": "家用电器",
+        "productQuery": "家电",
+        "sortOrder": 20
+      },
+      {
+        "key": "floor-fashion",
+        "title": "服饰鞋包",
+        "productQuery": "服饰",
+        "sortOrder": 30
+      },
+      {
+        "key": "floor-beauty",
+        "title": "美妆个护",
+        "productQuery": "护肤",
+        "sortOrder": 40
+      },
+      {
+        "key": "floor-grocery",
+        "title": "食品生鲜",
+        "productQuery": "生鲜",
+        "sortOrder": 50
+      },
+      {
+        "key": "floor-sports",
+        "title": "运动户外",
+        "productQuery": "健身",
+        "sortOrder": 60
+      }
     ],
     "hotKeywords": [
-      { "key": "kw-phone", "keyword": "手机", "sortOrder": 10 },
-      { "key": "kw-laptop", "keyword": "笔记本", "sortOrder": 20 },
-      { "key": "kw-fridge", "keyword": "冰箱", "sortOrder": 30 },
-      { "key": "kw-sneakers", "keyword": "跑鞋", "sortOrder": 40 },
-      { "key": "kw-serum", "keyword": "精华", "sortOrder": 50 },
-      { "key": "kw-nuts", "keyword": "坚果", "sortOrder": 60 },
-      { "key": "kw-tent", "keyword": "帐篷", "sortOrder": 70 },
-      { "key": "kw-formula", "keyword": "奶粉", "sortOrder": 80 }
+      {
+        "key": "kw-phone",
+        "keyword": "手机",
+        "sortOrder": 10
+      },
+      {
+        "key": "kw-laptop",
+        "keyword": "笔记本",
+        "sortOrder": 20
+      },
+      {
+        "key": "kw-fridge",
+        "keyword": "冰箱",
+        "sortOrder": 30
+      },
+      {
+        "key": "kw-sneakers",
+        "keyword": "跑鞋",
+        "sortOrder": 40
+      },
+      {
+        "key": "kw-serum",
+        "keyword": "精华",
+        "sortOrder": 50
+      },
+      {
+        "key": "kw-nuts",
+        "keyword": "坚果",
+        "sortOrder": 60
+      },
+      {
+        "key": "kw-tent",
+        "keyword": "帐篷",
+        "sortOrder": 70
+      },
+      {
+        "key": "kw-formula",
+        "keyword": "奶粉",
+        "sortOrder": 80
+      }
     ]
-  }
+  },
+  "brands": [
+    {
+      "key": "xingye",
+      "name": "星野",
+      "description": "星野智能：旗舰手机、平板与可穿戴的星系产品线。"
+    },
+    {
+      "key": "yunqi",
+      "name": "云栖",
+      "description": "云栖家电：大屏娱乐与智慧客厅电器。"
+    },
+    {
+      "key": "shiguang",
+      "name": "拾光",
+      "description": "拾光生活：服饰鞋包与出行配件。"
+    },
+    {
+      "key": "mubai",
+      "name": "沐白",
+      "description": "沐白个护：科学配方的高端护肤与洗护。"
+    },
+    {
+      "key": "shanhai",
+      "name": "山海",
+      "description": "山海食材：产地直供的食品生鲜。"
+    },
+    {
+      "key": "senyu",
+      "name": "森屿",
+      "description": "森屿运动：专业健身与户外装备。"
+    },
+    {
+      "key": "qimu",
+      "name": "栖木",
+      "description": "栖木母婴：母婴营养与益智玩具。"
+    }
+  ],
+  "categoryAttributes": [
+    {
+      "categoryKey": "phone",
+      "attributeName": "存储容量",
+      "values": [
+        "8GB+256GB",
+        "12GB+256GB",
+        "16GB+512GB"
+      ],
+      "key": "phone-storage"
+    },
+    {
+      "categoryKey": "phone",
+      "attributeName": "配色",
+      "values": [
+        "曜石黑",
+        "星河银",
+        "星霜白"
+      ],
+      "key": "phone-color"
+    },
+    {
+      "categoryKey": "tablet",
+      "attributeName": "存储容量",
+      "values": [
+        "8GB+256GB",
+        "12GB+512GB"
+      ],
+      "key": "tablet-storage"
+    },
+    {
+      "categoryKey": "tablet",
+      "attributeName": "配色",
+      "values": [
+        "星空灰"
+      ],
+      "key": "tablet-color"
+    },
+    {
+      "categoryKey": "audio",
+      "attributeName": "配色",
+      "values": [
+        "云雾白",
+        "曜石黑"
+      ],
+      "key": "audio-color"
+    },
+    {
+      "categoryKey": "laptop",
+      "attributeName": "处理器配置",
+      "values": [
+        "i7 / 16GB / 1TB",
+        "i9 / 32GB / 1TB",
+        "32GB / 1TB",
+        "32GB / 2TB"
+      ],
+      "key": "laptop-cpu"
+    },
+    {
+      "categoryKey": "peripheral",
+      "attributeName": "键盘配列",
+      "values": [
+        "87 键",
+        "108 键"
+      ],
+      "key": "peripheral-layout"
+    },
+    {
+      "categoryKey": "sneakers",
+      "attributeName": "鞋码",
+      "values": [
+        "42",
+        "43",
+        "44"
+      ],
+      "key": "sneakers-size"
+    },
+    {
+      "categoryKey": "menswear",
+      "attributeName": "尺码",
+      "values": [
+        "L",
+        "XL"
+      ],
+      "key": "menswear-size"
+    },
+    {
+      "categoryKey": "makeup",
+      "attributeName": "色号",
+      "values": [
+        "#01 豆沙玫瑰",
+        "#02 正红"
+      ],
+      "key": "makeup-shade"
+    },
+    {
+      "categoryKey": "fitness",
+      "attributeName": "版本",
+      "values": [
+        "标准版",
+        "智享版 含坡度调节"
+      ],
+      "key": "fitness-edition"
+    },
+    {
+      "categoryKey": "womenswear",
+      "attributeName": "尺码",
+      "values": [
+        "M"
+      ],
+      "key": "womenswear-size"
+    }
+  ]
 }

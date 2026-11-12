@@ -1,5 +1,7 @@
 import {
+  buildMallBrandNo,
   buildMallCategoryNo,
+  buildMallDefaultDataCode,
   buildMallCmsPresetId,
   buildMallSkuNo,
   buildMallSpuNo,
@@ -84,9 +86,11 @@ export async function verifyMallDefaultData(
   const { dataset, port } = options;
   const checks: MallDefaultDataCheck[] = [];
 
-  const [categoryRecords, shopRecords, productRecords, skuRecords, offerRecords, planRecords, groupRecords, packageRecords] =
+  const [categoryRecords, brandRecords, attributeRecords, shopRecords, productRecords, skuRecords, offerRecords, planRecords, groupRecords, packageRecords] =
     await Promise.all([
       port.catalog.listCategories().then(readDefaultDataItems),
+      port.catalog.listBrands().then(readDefaultDataItems),
+      port.catalog.listAttributes().then(readDefaultDataItems),
       port.shops.listShops().then(readDefaultDataItems),
       port.catalog.listProducts().then(readDefaultDataItems),
       port.catalog.listSkus().then(readDefaultDataItems),
@@ -107,6 +111,29 @@ export async function verifyMallDefaultData(
       collectNaturalKeys(categoryRecords, ["categoryNo", "category_no"]),
     ),
   );
+
+  if (dataset.brands.length > 0) {
+    checks.push(
+      buildCheck(
+        "catalog.brands",
+        "Catalog brands",
+        dataset.brands.map((brand) => buildMallBrandNo(brand.key)),
+        collectNaturalKeys(brandRecords, ["brandNo", "brand_no"]),
+      ),
+    );
+  }
+
+  if (dataset.categoryAttributes.length > 0) {
+    checks.push(
+      buildCheck(
+        "catalog.attributes",
+        "Category spec attributes",
+        dataset.categoryAttributes.map((attribute) =>
+          buildMallDefaultDataCode("MALL-ATTR", attribute.key)),
+        collectNaturalKeys(attributeRecords, ["attributeNo", "attribute_no"]),
+      ),
+    );
+  }
 
   if (dataset.shops.length > 0) {
     checks.push(

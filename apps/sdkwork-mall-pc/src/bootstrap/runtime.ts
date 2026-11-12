@@ -1,4 +1,5 @@
 import type { SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
+import { configureMallAccountScopeProvider } from "@sdkwork/mall-pc-core/session";
 
 import { configureSdkworkMallPcProviders } from "./commerceProviders";
 import { configureSdkworkMallPcDefaultDataProvider } from "./default-data-remote";
@@ -37,6 +38,15 @@ export function createSdkworkMallPcRuntime(): SdkworkMallPcRuntime {
   const session = createSdkworkMallPcSessionStore(
     typeof window === "undefined" ? undefined : window.sessionStorage,
   );
+  // Local buyer data (favourites, footprint, search history, CMS fallback and
+  // admin role) is keyed by the live IAM identity, so a second account never
+  // reads the previous account's values.
+  configureMallAccountScopeProvider(() => {
+    const snapshot = session.getSnapshot();
+    const tenantId = snapshot.context?.tenantId?.trim();
+    const userId = snapshot.context?.userId?.trim();
+    return tenantId && userId ? { tenantId, userId } : null;
+  });
   const tokenManager = createSdkworkMallPcSessionTokenManager(session);
   const sdkClients = createSdkworkMallPcSdkClientsWithTokenManager(config, tokenManager);
   const iamRuntime = createSdkworkMallPcIamRuntime({

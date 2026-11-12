@@ -103,6 +103,9 @@ export function selectMallDefaultDataSlice(
   return {
     ...dataset,
     shops: dataset.shops.filter((shop) => shop.businessModel === "self-operated"),
+    // Spec attributes exist to type product variants; a production seed carries
+    // the taxonomy and brands but no products, so no bindings either.
+    categoryAttributes: [],
     products: [],
     offers: [],
     membership: {

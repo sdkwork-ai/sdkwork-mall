@@ -2,6 +2,10 @@ import { formatMoney } from "@sdkwork/utils/money";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { History, Search, Sparkles, TrendingUp, X } from "lucide-react";import {
+  readAccountScopedItem,
+  writeAccountScopedItem,
+} from "@sdkwork/mall-pc-core/session";
+import {
   Badge,
   Button,
   Checkbox,
@@ -34,13 +38,13 @@ const PAGE_SIZE = 20;
 const SEARCH_HISTORY_KEY = "sdkwork-mall-pc-search-history";
 const SEARCH_HISTORY_LIMIT = 10;
 
-/** Local search history: a buyer expectation on every other root. */
+/** Local search history: account-scoped, so another account starts empty. */
 function readSearchHistory(): string[] {
   if (typeof window === "undefined") {
     return [];
   }
   try {
-    const raw = window.localStorage.getItem(SEARCH_HISTORY_KEY);
+    const raw = readAccountScopedItem(SEARCH_HISTORY_KEY);
     if (!raw) {
       return [];
     }
@@ -55,7 +59,7 @@ function readSearchHistory(): string[] {
 
 function writeSearchHistory(entries: string[]): void {
   try {
-    window.localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(entries));
+    writeAccountScopedItem(SEARCH_HISTORY_KEY, JSON.stringify(entries));
   } catch {
     // Private mode or a full quota: history is a convenience, not a requirement.
   }

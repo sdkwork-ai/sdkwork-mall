@@ -32,6 +32,7 @@ describe("sdkwork-mall-pc-admin-product service", () => {
       skuCreate: vi.fn().mockResolvedValue({ data: { id: "sku-1" } }),
       skuUpdate: vi.fn().mockResolvedValue({ data: { id: "sku-1", skuNo: "SKU-1" } }),
       skuDelete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
+      brandCreate: vi.fn().mockResolvedValue({ data: { id: "brand-1" } }),
       attributeCreate: vi.fn().mockResolvedValue({ data: { id: "attribute-1" } }),
       attributeUpdate: vi.fn().mockResolvedValue({ data: { id: "attribute-1", name: "Updated" } }),
       attributeValueCreate: vi.fn().mockResolvedValue({ data: { id: "value-1" } }),
@@ -49,7 +50,7 @@ describe("sdkwork-mall-pc-admin-product service", () => {
           brands: {
             list: vi.fn().mockResolvedValue({ data: [{ id: "brand-1" }] }),
             retrieve: vi.fn().mockResolvedValue({ data: { id: "brand-1" } }),
-            create: vi.fn().mockResolvedValue({ data: { id: "brand-1" } }),
+            create: calls.brandCreate,
             update: vi.fn().mockResolvedValue({ data: { id: "brand-1" } }),
             delete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
           },
@@ -174,6 +175,15 @@ describe("sdkwork-mall-pc-admin-product service", () => {
     await expect(service.deleteCategoryAttribute("binding-1", 4)).resolves.toEqual({ data: { deleted: true } });
     await expect(service.listPriceLists({ page: "1" })).resolves.toEqual({ data: [{ id: "price-list-1" }] });
     await expect(service.createPriceList({ name: "Default" })).resolves.toEqual({ data: { id: "price-list-1" } });
+    await expect(service.listBrands({ page: "1" })).resolves.toEqual({ data: [{ id: "brand-1" }] });
+    await expect(service.retrieveBrand("brand-1")).resolves.toEqual({ data: { id: "brand-1" } });
+    await expect(service.createBrand({ brandNo: "BRAND-0001", name: "星野" })).resolves.toEqual({
+      data: { id: "brand-1" },
+    });
+    await expect(service.updateBrand("brand-1", { name: "星野" }, 2)).resolves.toEqual({
+      data: { id: "brand-1" },
+    });
+    await expect(service.deleteBrand("brand-1", 3)).resolves.toEqual({ data: { deleted: true } });
     await expect(service.listPriceListItems({ priceListId: "price-list-1" })).resolves.toEqual({
       data: [{ id: "item-1" }],
     });
@@ -183,6 +193,7 @@ describe("sdkwork-mall-pc-admin-product service", () => {
     await expect(service.listMedia({ ownerType: "spu" })).resolves.toEqual({ data: [{ id: "media-1" }] });
     await expect(service.createMedia({ ownerType: "spu" })).resolves.toEqual({ data: { id: "media-1" } });
 
+    expect(calls.brandCreate).toHaveBeenCalledWith({ brandNo: "BRAND-0001", name: "星野" });
     expect(calls.categoryCreate).toHaveBeenCalledWith({ name: "Root" });
     expect(calls.categoryUpdate).toHaveBeenCalledWith("category-1", { name: "Updated" }, 3);
     expect(calls.categoryDelete).toHaveBeenCalledWith("category-1", 4);
@@ -282,6 +293,9 @@ describe("sdkwork-mall-pc-admin-product service", () => {
     expect(createPageSource).toContain("buildProductCreatePayload");
     expect(createPageSource).toContain("buildProductUpdatePayload");
     expect(createPageSource).toContain("productNo: draft.spuNo");
+    // The brand selector attributes the product to an authority brand row.
+    expect(createPageSource).toContain("listCommerceBrands");
+    expect(createPageSource).toContain("draft.brandId ? { brandId: draft.brandId }");
     expect(createPageSource).toContain("salePriceMinor");
     expect(createPageSource).toContain("publishCommerceProduct");
     expect(listPageSource).toContain("readProductCommercialSignals");

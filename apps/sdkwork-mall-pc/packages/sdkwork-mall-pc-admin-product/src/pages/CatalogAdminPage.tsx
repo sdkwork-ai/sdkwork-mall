@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { Layers, Package, PackageCheck, Tags } from 'lucide-react';
+import { Layers, Package, PackageCheck, Tag, Tags } from 'lucide-react';
 import { AdminResourceCenter, type AdminResourceSection } from '../commerce-admin-primitives';
 import {
   listCommerceAttributes,
@@ -10,13 +10,15 @@ import {
   listCommerceProducts,
   listCommerceSkus,
 } from '../catalogService';
+import { listCommerceBrands } from '../catalogService';
 import { AttributeManagementPage } from '../AttributeManagementPage';
+import { BrandManagementPage } from '../BrandManagementPage';
 import { CategoryManagementPage } from '../CategoryManagementPage';
 import { ProductCreatePage } from '../ProductCreatePage';
 import { ProductListPage } from '../ProductListPage';
 import { SkuManagementPage } from '../SkuManagementPage';
 
-type CatalogAdminTab = 'categories' | 'products' | 'productCreate' | 'productEdit' | 'skus' | 'attributes' | 'prices';
+type CatalogAdminTab = 'brands' | 'categories' | 'products' | 'productCreate' | 'productEdit' | 'skus' | 'attributes' | 'prices';
 type CatalogAdminGroup = string;
 
 const DEFAULT_PAGE_PARAMS = { page: '1', pageSize: '100' };
@@ -28,7 +30,8 @@ type CatalogAdminProps = {
 
 function resolveCatalogSectionId(sectionId?: string): CatalogAdminTab {
   if (
-    sectionId === 'categories'
+    sectionId === 'brands'
+    || sectionId === 'categories'
     || sectionId === 'products'
     || sectionId === 'productCreate'
     || sectionId === 'productEdit'
@@ -43,6 +46,21 @@ function resolveCatalogSectionId(sectionId?: string): CatalogAdminTab {
 
 function buildCatalogSections(t: ReturnType<typeof useTranslation>['t']): AdminResourceSection<CatalogAdminTab, CatalogAdminGroup>[] {
   return [
+    {
+      id: 'brands',
+      title: t('admin.commerce.catalog.brands.title', 'Brands'),
+      description: t('admin.commerce.catalog.brands.desc', 'Product brands and their display ordering.'),
+      icon: <Tag className="h-4 w-4" />,
+      group: t('admin.commerce.catalog.group.productCenter', 'Product Center'),
+      load: () => listCommerceBrands(DEFAULT_PAGE_PARAMS),
+      columns: [
+        { key: 'id', label: t('admin.col.id', 'ID') },
+        { key: 'brandNo', label: t('admin.col.brandNo', 'Brand No') },
+        { key: 'name', label: t('admin.col.name', 'Name') },
+        { key: 'status', label: t('admin.col.status', 'Status') },
+      ],
+      searchFields: ['id', 'brandNo', 'name', 'status'],
+    },
     {
       id: 'categories',
       title: t('admin.commerce.catalog.categories.title', 'Categories'),
@@ -129,6 +147,10 @@ export function CatalogAdmin({ sectionId }: CatalogAdminProps = {}) {
 
   if (activeSectionId === 'products') {
     return <ProductListPage />;
+  }
+
+  if (activeSectionId === 'brands') {
+    return <BrandManagementPage />;
   }
 
   if (activeSectionId === 'categories') {

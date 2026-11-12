@@ -30,6 +30,11 @@ export interface MallCmsConfig {
   updatedAt: string;
 }
 
+import {
+  readAccountScopedItem,
+  writeAccountScopedItem,
+} from "@sdkwork/mall-pc-core/session";
+
 const CMS_STORAGE_KEY = "sdkwork-mall-pc-cms-config";
 
 export const defaultMallCmsConfig = (): MallCmsConfig => ({
@@ -63,12 +68,16 @@ export const defaultMallCmsConfig = (): MallCmsConfig => ({
   ],
 });
 
+/**
+ * CMS configuration fallback is tenant-scoped: an admin of another tenant must
+ * never read or re-publish the previous tenant's banners/floors/keywords.
+ */
 export function readMallCmsConfig(): MallCmsConfig {
   if (typeof window === "undefined") {
     return defaultMallCmsConfig();
   }
   try {
-    const raw = window.localStorage.getItem(CMS_STORAGE_KEY);
+    const raw = readAccountScopedItem(CMS_STORAGE_KEY);
     if (!raw) {
       return defaultMallCmsConfig();
     }
@@ -89,7 +98,7 @@ export function writeMallCmsConfig(config: MallCmsConfig) {
   if (typeof window === "undefined") {
     return;
   }
-  window.localStorage.setItem(
+  writeAccountScopedItem(
     CMS_STORAGE_KEY,
     JSON.stringify({ ...config, updatedAt: new Date().toISOString() }),
   );

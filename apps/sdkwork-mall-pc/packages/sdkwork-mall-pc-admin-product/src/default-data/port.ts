@@ -36,6 +36,17 @@ export interface MallDefaultDataCmsConfigShape {
 /** Transport surface required to provision the default dataset. */
 export interface MallDefaultDataPort {
   readonly catalog: {
+    listBrands(): Promise<unknown>;
+    createBrand(body: Record<string, unknown>): Promise<unknown>;
+    listAttributes(): Promise<unknown>;
+    createAttribute(body: Record<string, unknown>): Promise<unknown>;
+    listAttributeValues(params?: Record<string, unknown>): Promise<unknown>;
+    listCategoryAttributes(): Promise<unknown>;
+    createCategoryAttribute(body: Record<string, unknown>): Promise<unknown>;
+    listPriceLists(): Promise<unknown>;
+    createPriceList(body: Record<string, unknown>): Promise<unknown>;
+    listPriceListItems(): Promise<unknown>;
+    createPriceListItem(body: Record<string, unknown>): Promise<unknown>;
     listCategories(): Promise<unknown>;
     createCategory(body: Record<string, unknown>): Promise<unknown>;
     listProducts(): Promise<unknown>;
