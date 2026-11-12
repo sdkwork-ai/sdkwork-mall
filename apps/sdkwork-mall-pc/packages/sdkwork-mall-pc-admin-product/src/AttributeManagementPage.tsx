@@ -32,6 +32,8 @@ type CategoryAttributeBinding = {
   filterable: boolean;
   sortOrder: number;
   status: BindingStatus;
+  /** Optimistic-concurrency version; rides every guarded write as `If-Match`. */
+  version: number;
 };
 
 type BindingStatus = 'active' | 'inactive' | 'archived';
@@ -129,7 +131,11 @@ export function AttributeManagementPage() {
     };
     try {
       if (editingBindingId) {
-        await updateCommerceCategoryAttribute(editingBindingId, updatePayload);
+        await updateCommerceCategoryAttribute(
+          editingBindingId,
+          updatePayload,
+          readBindingVersion(editingBindingId),
+        );
         setMessage('类目属性绑定已更新。');
       } else {
         await createCommerceCategoryAttribute(createPayload);
@@ -158,11 +164,16 @@ export function AttributeManagementPage() {
     });
   }
 
+  /** The version the loaded list carried for this binding, for its `If-Match`. */
+  function readBindingVersion(bindingId: string): number {
+    return bindings.find((binding) => binding.id === bindingId)?.version ?? 0;
+  }
+
   async function archiveBinding(binding: CategoryAttributeBinding) {
     setError(null);
     setMessage(null);
     try {
-      await deleteCommerceCategoryAttribute(binding.id);
+      await deleteCommerceCategoryAttribute(binding.id, binding.version);
       setMessage('类目属性绑定已归档。');
       await loadAttributeCenter();
     } catch (archiveError) {
@@ -335,6 +346,7 @@ function readCategoryAttributeBindings(result: unknown): CategoryAttributeBindin
       filterable: Boolean(record.filterable),
       sortOrder: typeof record.sortOrder === 'number' ? record.sortOrder : Number(record.sortOrder ?? 0) || 0,
       status: readBindingStatus(record.status),
+      version: typeof record.version === 'number' ? record.version : Number(record.version ?? 0) || 0,
     };
   }).filter((item) => item.id);
 }

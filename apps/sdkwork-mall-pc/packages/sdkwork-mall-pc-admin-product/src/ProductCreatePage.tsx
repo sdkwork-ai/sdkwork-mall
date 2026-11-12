@@ -155,6 +155,8 @@ export type ProductSkuDraft = {
   stockQuantity: number;
   enabled: boolean;
   status: 'draft' | 'active' | 'inactive' | 'archived';
+  /** Optimistic-concurrency version of the loaded SKU row (0 for a new draft). */
+  version: number;
   specSelections: ProductSkuSpecSelection[];
 };
 
@@ -191,6 +193,8 @@ export type ProductDraftState = {
   categoryAttributeValues: ProductCategoryAttributeValue[];
   skuAttributeValues: ProductSkuAttributeValue[];
   metadata: Record<string, unknown>;
+  /** Optimistic-concurrency version of the loaded product row (0 for a new draft). */
+  productVersion: number;
 };
 
 type SubmitState = {
@@ -346,6 +350,7 @@ export const DEFAULT_PRODUCT_DRAFT: ProductDraftState = {
   categoryAttributeValues: createDefaultCategoryAttributeValues(),
   skuAttributeValues: buildSkuAttributeValuesFromSkuDrafts(DEFAULT_SKU_DRAFTS),
   metadata: {},
+  productVersion: 0,
 };
 
 export function ProductCreatePage({ mode = 'create', productId }: ProductCreatePageProps = {}) {
@@ -1787,6 +1792,7 @@ export function createDefaultProductDraft(): ProductDraftState {
     categoryAttributeValues: DEFAULT_PRODUCT_DRAFT.categoryAttributeValues.map((attribute) => ({ ...attribute })),
     skuAttributeValues: DEFAULT_PRODUCT_DRAFT.skuAttributeValues.map((attribute) => ({ ...attribute })),
     metadata: { ...DEFAULT_PRODUCT_DRAFT.metadata },
+    productVersion: 0,
   };
 }
 
@@ -1843,6 +1849,7 @@ export function generateSkuDraftsFromSpecGroups(
       stockQuantity: index === 0 ? 500 : 260,
       enabled: true,
       status: 'active',
+      version: 0,
       specSelections: combination,
     };
   });
@@ -1939,6 +1946,7 @@ export function buildSkuMutationPayloads(
       };
       return {
         backendSkuId: sku.backendSkuId,
+        version: sku.version,
         createBody: {
           ...commonBody,
           productId,
@@ -2008,7 +2016,11 @@ export async function submitProductDraft(
 
   await ensureSkuAttributeDefinitions(draft.specGroups);
   const productResult = options.productId
-    ? await updateCommerceProduct(options.productId, buildProductUpdatePayload(draft, mode))
+    ? await updateCommerceProduct(
+        options.productId,
+        buildProductUpdatePayload(draft, mode),
+        draft.productVersion,
+      )
     : await createCommerceProduct(buildProductCreatePayload(draft));
   const productId = options.productId ?? readCatalogString(readCatalogItem(productResult) ?? {}, ['id']);
   if (!productId) {
@@ -2016,14 +2028,18 @@ export async function submitProductDraft(
   }
   if (mode === 'active' && !options.productId) {
     // Authority lifecycle: publishing is the `products.publish` command; a
-    // create body cannot carry a status.
-    await publishCommerceProduct(productId);
+    // create body cannot carry a status. The command rides the created row's
+    // version, which a fresh row reports as `0`.
+    await publishCommerceProduct(
+      productId,
+      Number(readCatalogString(readCatalogItem(productResult) ?? {}, ['version'])) || 0,
+    );
   }
   const skuPayloads = buildSkuMutationPayloads(draft, productId, mode);
   await Promise.all(
     skuPayloads.map((sku) => (
       sku.backendSkuId
-        ? updateCommerceSku(sku.backendSkuId, sku.updateBody)
+        ? updateCommerceSku(sku.backendSkuId, sku.updateBody, sku.version)
         : createCommerceSku(sku.createBody)
     ))
   );
@@ -2119,6 +2135,7 @@ function createProductDraftFromCatalogRecords(product: CatalogRecord, skuRecords
     fulfillmentType: firstSku ? normalizeFulfillmentType(readCatalogString(firstSku, ['fulfillmentType'])) : baseDraft.fulfillmentType,
     selectedCategoryIds: normalizeSelectedCategoryIds(categoryIds),
     specGroups: specGroups.length ? specGroups : baseDraft.specGroups,
+    productVersion: Number(readCatalogString(product, ['version'])) || 0,
     skuDrafts: nextSkuDrafts,
     skuAttributeValues: mergeSkuAttributeValues(
       mergeSkuAttributeValues(
@@ -2151,6 +2168,7 @@ function skuDraftFromRecord(record: CatalogRecord): ProductSkuDraft {
     stockQuantity: 0,
     enabled: status !== 'inactive' && status !== 'archived',
     status,
+    version: Number(readCatalogString(record, ['version'])) || 0,
     specSelections,
   };
 }

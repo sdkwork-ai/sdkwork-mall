@@ -16,6 +16,7 @@ import { createClient as createOrderAppClient } from "@sdkwork/order-app-sdk";
 import { createClient as createPartnerAppClient } from "@sdkwork/partner-app-sdk";
 import { createClient as createPaymentAppClient } from "@sdkwork/payment-app-sdk";
 import { createClient as createPromotionAppClient } from "@sdkwork/promotion-app-sdk";
+import { createClient as createShopBackendClient } from "@sdkwork/shop-backend-sdk";
 
 import type { SdkworkMallPcRuntimeConfig } from "./environment";
 import {
@@ -82,6 +83,7 @@ export function createSdkworkMallPcIamRuntime(
       ...(options.sdkClients.commerceBackendClient
         ? [options.sdkClients.commerceBackendClient]
         : []),
+      ...(options.sdkClients.shopBackendClient ? [options.sdkClients.shopBackendClient] : []),
       options.sdkClients.membershipAppClient,
       options.sdkClients.orderAppClient,
       options.sdkClients.partnerAppClient,
@@ -150,10 +152,23 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
   const promotionAppClient = createPromotionAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.promotion),
   );
+  // The Shop backend authority client owns the merchandise catalog module
+  // (`sdkwork-merchandise`) and the shops module; the generated transport
+  // prefixes `/backend/v3/api` itself, so it takes the same origin the federated
+  // commerce backend client uses.
+  const shopBackendClient = config.backendApiBaseUrl
+    ? createShopBackendClient({
+        authMode: "dual-token",
+        baseUrl: normalizeGeneratedSdkBaseUrl(config.backendApiBaseUrl, BACKEND_API_PREFIX),
+        platform: "pc",
+        tokenManager,
+      })
+    : undefined;
 
   accountAppClient.setTokenManager(tokenManager);
   commerceAppClient.setTokenManager(tokenManager);
   commerceBackendClient?.setTokenManager(tokenManager);
+  shopBackendClient?.setTokenManager(tokenManager);
   membershipAppClient.setTokenManager(tokenManager);
   orderAppClient.setTokenManager(tokenManager);
   partnerAppClient.setTokenManager(tokenManager);
@@ -168,6 +183,7 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
       : undefined,
     commerceAppClient,
     commerceBackendClient,
+    shopBackendClient,
     membershipAppClient,
     orderAppClient,
     partnerAppClient,
@@ -185,7 +201,11 @@ export function createSdkworkMallPcSdkClientsWithTokenManager(
         "sdkwork-payment-app-sdk",
         "sdkwork-promotion-app-sdk",
       ],
-      backendAdmin: ["sdkwork-commerce-backend-sdk", "sdkwork-iam-backend-sdk"],
+      backendAdmin: [
+        "sdkwork-commerce-backend-sdk",
+        "sdkwork-shop-backend-sdk",
+        "sdkwork-iam-backend-sdk",
+      ],
     },
   };
 }

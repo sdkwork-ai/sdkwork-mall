@@ -168,8 +168,12 @@ export function SkuManagementPage() {
     const skuId = drawer.record ? readSkuString(drawer.record, ['id']) : '';
     setState((current) => ({ ...current, saving: true, error: null }));
     try {
-      if (drawer.mode === 'edit' && skuId) {
-        await updateCommerceSku(skuId, mutationBodies.updateBody);
+      if (drawer.mode === 'edit' && skuId && drawer.record) {
+        await updateCommerceSku(
+          skuId,
+          mutationBodies.updateBody,
+          readSkuVersion(drawer.record),
+        );
       } else {
         await createCommerceSku(mutationBodies.createBody);
       }
@@ -191,7 +195,7 @@ export function SkuManagementPage() {
     }
     setState((current) => ({ ...current, saving: true, error: null }));
     try {
-      await deleteCommerceSku(skuId);
+      await deleteCommerceSku(skuId, readSkuVersion(record));
       await loadPage();
     } catch (error) {
       setState((current) => ({
@@ -686,6 +690,11 @@ function readSkuPriceAmount(record: SkuRecord): string {
   return minorUnitsToDecimalAmount(readSkuString(record, ['salePriceMinor', 'sale_price_minor']))
     || readSkuString(record, ['defaultPriceAmount', 'priceAmount', 'price_amount'])
     || '0.00';
+}
+
+/** The row version the list carried, for the record's next `If-Match`. */
+function readSkuVersion(record: SkuRecord): number {
+  return Number(readSkuString(record, ['version'])) || 0;
 }
 
 function normalizeSkuFulfillmentType(value: string): SkuFulfillmentType {

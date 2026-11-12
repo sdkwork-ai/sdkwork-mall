@@ -1,40 +1,126 @@
+/**
+ * The merchandise backend catalog capability, authority-verbatim.
+ *
+ * The operation set and vocabularies follow `sdkwork-merchandise` (route
+ * manifest `sdkwork-routes-merchandise-backend-api`, 38 operations under
+ * `/backend/v3/api/catalog/*`). Every guarded write carries the row version the
+ * caller last read (`API_SPEC` section 17): the version rides the write as the
+ * `If-Match` precondition, and a stale caller is answered `412` instead of
+ * silently discarding someone else's write.
+ */
 export interface SdkworkAdminCatalogNamespace {
+  brands: {
+    create(body: Record<string, unknown>): Promise<unknown>;
+    delete(brandId: string, expectedVersion: number): Promise<unknown>;
+    list(params?: Record<string, unknown>): Promise<unknown>;
+    retrieve(brandId: string): Promise<unknown>;
+    update(
+      brandId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
+  };
   attributes: {
     create(body: Record<string, unknown>): Promise<unknown>;
     management: { list(params?: Record<string, unknown>): Promise<unknown> };
+    update(
+      attributeId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
+  };
+  attributeValues: {
+    create(body: Record<string, unknown>): Promise<unknown>;
+    delete(valueId: string, expectedVersion: number): Promise<unknown>;
+    list(params?: Record<string, unknown>): Promise<unknown>;
+    update(
+      valueId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
   };
   categories: {
     create(body: Record<string, unknown>): Promise<unknown>;
-    delete(categoryId: string): Promise<unknown>;
+    delete(categoryId: string, expectedVersion: number): Promise<unknown>;
     management: { list(params?: Record<string, unknown>): Promise<unknown> };
-    update(categoryId: string, body: Record<string, unknown>): Promise<unknown>;
+    retrieve(categoryId: string): Promise<unknown>;
+    update(
+      categoryId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
   };
   categoryAttributes: {
     create(body: Record<string, unknown>): Promise<unknown>;
-    delete(bindingId: string): Promise<unknown>;
+    delete(bindingId: string, expectedVersion: number): Promise<unknown>;
     list(params?: Record<string, unknown>): Promise<unknown>;
-    update(bindingId: string, body: Record<string, unknown>): Promise<unknown>;
+    update(
+      bindingId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
+  };
+  media: {
+    create(body: Record<string, unknown>): Promise<unknown>;
+    delete(mediaId: string, expectedVersion: number): Promise<unknown>;
+    list(params?: Record<string, unknown>): Promise<unknown>;
+    update(
+      mediaId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
+  };
+  priceListItems: {
+    create(body: Record<string, unknown>): Promise<unknown>;
+    delete(itemId: string, expectedVersion: number): Promise<unknown>;
+    list(params?: Record<string, unknown>): Promise<unknown>;
+    update(
+      itemId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
   };
   priceLists: {
     create(body: Record<string, unknown>): Promise<unknown>;
     list(params?: Record<string, unknown>): Promise<unknown>;
+    update(
+      priceListId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
   };
   products: {
-    archive(productId: string, body?: Record<string, unknown>): Promise<unknown>;
+    archive(productId: string, expectedVersion: number): Promise<unknown>;
+    attributes: {
+      update(
+        productId: string,
+        body: Record<string, unknown>,
+        expectedVersion: number,
+      ): Promise<unknown>;
+    };
     create(body: Record<string, unknown>): Promise<unknown>;
-    delete(productId: string): Promise<unknown>;
+    delete(productId: string, expectedVersion: number): Promise<unknown>;
     management: {
       list(params?: Record<string, unknown>): Promise<unknown>;
       retrieve(productId: string): Promise<unknown>;
     };
-    publish(productId: string, body?: Record<string, unknown>): Promise<unknown>;
-    update(productId: string, body: Record<string, unknown>): Promise<unknown>;
+    publish(productId: string, expectedVersion: number): Promise<unknown>;
+    update(
+      productId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
   };
   skus: {
     create(body: Record<string, unknown>): Promise<unknown>;
-    delete(skuId: string): Promise<unknown>;
+    delete(skuId: string, expectedVersion: number): Promise<unknown>;
     list(params?: Record<string, unknown>): Promise<unknown>;
-    update(skuId: string, body: Record<string, unknown>): Promise<unknown>;
+    retrieve(skuId: string): Promise<unknown>;
+    update(
+      skuId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
   };
 }
 

@@ -1,5 +1,10 @@
 import { decimalAmountToMinorUnits } from "../merchandiseContract";
-import { readDefaultDataId, readDefaultDataItems, readDefaultDataString } from "./port";
+import {
+  readDefaultDataId,
+  readDefaultDataItems,
+  readDefaultDataString,
+  readDefaultDataVersion,
+} from "./port";
 import type { MallDefaultDataCmsConfigShape, MallDefaultDataPort } from "./port";
 import type {
   MallDefaultDataDataset,
@@ -461,6 +466,21 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
     "spu_no",
   ]);
   const existingSkus = indexByNaturalKey(readDefaultDataItems(skuResponse), ["skuNo", "sku_no"]);
+  // Guarded writes need the version each row carried at read time. A
+  // provisioned row that is already live needs no publish at all — that is
+  // what makes a rerun a no-op instead of a second lifecycle command.
+  const existingVersionsById = new Map<string, number | null>();
+  const activeProductIds = new Set<string>();
+  for (const record of readDefaultDataItems(productResponse)) {
+    const id = readDefaultDataString(record, ["id"]);
+    if (!id) {
+      continue;
+    }
+    existingVersionsById.set(id, readDefaultDataVersion(record));
+    if (readDefaultDataString(record, ["status"]) === "active") {
+      activeProductIds.add(id);
+    }
+  }
   const currencyCode = context.dataset.shops[0]?.defaultCurrencyCode ?? "CNY";
   const details: string[] = [];
   let created = 0;
@@ -470,6 +490,8 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
     context.assertActive();
     const spuNo = buildMallSpuNo(product.key);
     let productId = existingProducts.get(spuNo) ?? "";
+    let productVersion = productId ? existingVersionsById.get(productId) ?? null : null;
+    let needsPublish = !activeProductIds.has(productId);
     if (productId) {
       skipped += 1;
     } else if (context.dryRun) {
@@ -491,6 +513,7 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
         }),
       );
       productId = readDefaultDataId(response);
+      productVersion = readDefaultDataVersion(response);
       created += 1;
       details.push(`+ ${spuNo} ${product.title}`);
     }
@@ -528,10 +551,16 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       details.push(`+ ${skuNo} ${sku.title}`);
     }
 
-    if (!context.dryRun) {
-      // Publishing is idempotent on the server; a released product becomes
-      // visible in storefront search, category and detail pages.
-      await context.port.catalog.publishProduct(productId);
+    if (!context.dryRun && needsPublish) {
+      // Publishing rides the version recorded at read or create time: the
+      // authority guards the lifecycle command with `If-Match`, so a row
+      // without a version is a provisioning defect rather than a guessable
+      // default. A released product becomes visible in storefront search,
+      // category and detail pages.
+      if (productVersion === null) {
+        throw new Error(`product ${spuNo} was created without a concurrency version`);
+      }
+      await context.port.catalog.publishProduct(productId, productVersion);
     }
   }
 

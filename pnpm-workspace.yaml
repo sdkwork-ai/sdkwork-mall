@@ -52,6 +52,7 @@ packages:
   - "../sdkwork-payment/sdks/sdkwork-payment-app-sdk/sdkwork-payment-app-sdk-typescript"
   - "../sdkwork-im/sdks/sdkwork-im-app-sdk/sdkwork-im-app-sdk-typescript"
   - "../sdkwork-appbase/packages/common/foundation/sdkwork-appbase-component-core"
+  - "../sdkwork-shop/sdks/sdkwork-shop-backend-sdk/sdkwork-shop-backend-sdk-typescript"
   - "../sdkwork-app-topology"
   - "../sdkwork-ui/sdkwork-ui-mobile-react"
   - "../sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript"

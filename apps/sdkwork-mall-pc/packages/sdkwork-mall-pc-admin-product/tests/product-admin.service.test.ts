@@ -33,10 +33,14 @@ describe("sdkwork-mall-pc-admin-product service", () => {
       skuUpdate: vi.fn().mockResolvedValue({ data: { id: "sku-1", skuNo: "SKU-1" } }),
       skuDelete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
       attributeCreate: vi.fn().mockResolvedValue({ data: { id: "attribute-1" } }),
+      attributeUpdate: vi.fn().mockResolvedValue({ data: { id: "attribute-1", name: "Updated" } }),
+      attributeValueCreate: vi.fn().mockResolvedValue({ data: { id: "value-1" } }),
       categoryAttributeCreate: vi.fn().mockResolvedValue({ data: { id: "binding-1" } }),
       categoryAttributeUpdate: vi.fn().mockResolvedValue({ data: { id: "binding-1", required: true } }),
       categoryAttributeDelete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
       priceListCreate: vi.fn().mockResolvedValue({ data: { id: "price-list-1" } }),
+      priceListItemCreate: vi.fn().mockResolvedValue({ data: { id: "item-1" } }),
+      mediaCreate: vi.fn().mockResolvedValue({ data: { id: "media-1" } }),
       productRetrieve: vi.fn().mockResolvedValue({ data: { id: "product-1" } }),
     };
     const commerceService = createCommerceServiceMock({
@@ -47,11 +51,19 @@ describe("sdkwork-mall-pc-admin-product service", () => {
               list: vi.fn().mockResolvedValue({ data: [{ id: "attribute-1" }] }),
             },
             create: calls.attributeCreate,
+            update: calls.attributeUpdate,
+          },
+          attributeValues: {
+            list: vi.fn().mockResolvedValue({ data: [{ id: "value-1" }] }),
+            create: calls.attributeValueCreate,
+            update: vi.fn().mockResolvedValue({ data: { id: "value-1", displayValue: "Updated" } }),
+            delete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
           },
           categories: {
             management: {
               list: vi.fn().mockResolvedValue({ data: [{ id: "category-1" }] }),
             },
+            retrieve: vi.fn().mockResolvedValue({ data: { id: "category-1" } }),
             create: calls.categoryCreate,
             update: calls.categoryUpdate,
             delete: calls.categoryDelete,
@@ -62,14 +74,30 @@ describe("sdkwork-mall-pc-admin-product service", () => {
             update: calls.categoryAttributeUpdate,
             delete: calls.categoryAttributeDelete,
           },
+          media: {
+            list: vi.fn().mockResolvedValue({ data: [{ id: "media-1" }] }),
+            create: calls.mediaCreate,
+            update: vi.fn().mockResolvedValue({ data: { id: "media-1" } }),
+            delete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
+          },
+          priceListItems: {
+            list: vi.fn().mockResolvedValue({ data: [{ id: "item-1" }] }),
+            create: calls.priceListItemCreate,
+            update: vi.fn().mockResolvedValue({ data: { id: "item-1" } }),
+            delete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
+          },
           priceLists: {
             list: vi.fn().mockResolvedValue({ data: [{ id: "price-list-1" }] }),
             create: calls.priceListCreate,
+            update: vi.fn().mockResolvedValue({ data: { id: "price-list-1" } }),
           },
           products: {
             management: {
               list: vi.fn().mockResolvedValue({ data: [{ id: "product-1" }] }),
               retrieve: calls.productRetrieve,
+            },
+            attributes: {
+              update: vi.fn().mockResolvedValue({ data: { id: "product-1" } }),
             },
             create: calls.productCreate,
             update: calls.productUpdate,
@@ -79,6 +107,7 @@ describe("sdkwork-mall-pc-admin-product service", () => {
           },
           skus: {
             list: vi.fn().mockResolvedValue({ data: [{ id: "sku-1" }] }),
+            retrieve: vi.fn().mockResolvedValue({ data: { id: "sku-1" } }),
             create: calls.skuCreate,
             update: calls.skuUpdate,
             delete: calls.skuDelete,
@@ -92,53 +121,70 @@ describe("sdkwork-mall-pc-admin-product service", () => {
 
     await expect(service.listCategories({ page: "1" })).resolves.toEqual({ data: [{ id: "category-1" }] });
     await expect(service.createCategory({ name: "Root" })).resolves.toEqual({ data: { id: "category-1" } });
-    await expect(service.updateCategory("category-1", { name: "Updated" })).resolves.toEqual({
+    await expect(service.updateCategory("category-1", { name: "Updated" }, 3)).resolves.toEqual({
       data: { id: "category-1", name: "Updated" },
     });
-    await expect(service.deleteCategory("category-1")).resolves.toEqual({ data: { deleted: true } });
+    await expect(service.deleteCategory("category-1", 4)).resolves.toEqual({ data: { deleted: true } });
     await expect(service.listProducts({ status: "active" })).resolves.toEqual({ data: [{ id: "product-1" }] });
     await expect(service.retrieveProduct("product-1")).resolves.toEqual({ data: { id: "product-1" } });
     await expect(service.createProduct({ title: "Product" })).resolves.toEqual({ data: { id: "product-1" } });
-    await expect(service.updateProduct("product-1", { title: "Updated" })).resolves.toEqual({
+    await expect(service.updateProduct("product-1", { title: "Updated" }, 7)).resolves.toEqual({
       data: { id: "product-1", title: "Updated" },
     });
-    await expect(service.deleteProduct("product-1")).resolves.toEqual({ data: { deleted: true } });
-    await expect(service.publishProduct("product-1")).resolves.toEqual({
+    await expect(service.deleteProduct("product-1", 8)).resolves.toEqual({ data: { deleted: true } });
+    await expect(service.publishProduct("product-1", 9)).resolves.toEqual({
       data: { id: "product-1", status: "active" },
     });
-    await expect(service.archiveProduct("product-1")).resolves.toEqual({
+    await expect(service.archiveProduct("product-1", 10)).resolves.toEqual({
       data: { id: "product-1", status: "archived" },
     });
     await expect(service.listSkus({ productId: "product-1" })).resolves.toEqual({ data: [{ id: "sku-1" }] });
     await expect(service.createSku({ skuNo: "SKU-1" })).resolves.toEqual({ data: { id: "sku-1" } });
-    await expect(service.updateSku("sku-1", { skuNo: "SKU-1" })).resolves.toEqual({
+    await expect(service.updateSku("sku-1", { skuNo: "SKU-1" }, 5)).resolves.toEqual({
       data: { id: "sku-1", skuNo: "SKU-1" },
     });
-    await expect(service.deleteSku("sku-1")).resolves.toEqual({ data: { deleted: true } });
+    await expect(service.deleteSku("sku-1", 6)).resolves.toEqual({ data: { deleted: true } });
     await expect(service.listAttributes({ scope: "sku" })).resolves.toEqual({ data: [{ id: "attribute-1" }] });
     await expect(service.createAttribute({ name: "Color" })).resolves.toEqual({ data: { id: "attribute-1" } });
+    await expect(service.updateAttribute("attribute-1", { name: "Updated" }, 2)).resolves.toEqual({
+      data: { id: "attribute-1", name: "Updated" },
+    });
+    await expect(service.listAttributeValues({ attributeId: "attribute-1" })).resolves.toEqual({
+      data: [{ id: "value-1" }],
+    });
+    await expect(service.createAttributeValue({ attributeId: "attribute-1" })).resolves.toEqual({
+      data: { id: "value-1" },
+    });
     await expect(service.listCategoryAttributes({ categoryId: "category-1" })).resolves.toEqual({
       data: [{ id: "binding-1" }],
     });
     await expect(service.createCategoryAttribute({ categoryId: "category-1" })).resolves.toEqual({
       data: { id: "binding-1" },
     });
-    await expect(service.updateCategoryAttribute("binding-1", { required: true })).resolves.toEqual({
+    await expect(service.updateCategoryAttribute("binding-1", { required: true }, 3)).resolves.toEqual({
       data: { id: "binding-1", required: true },
     });
-    await expect(service.deleteCategoryAttribute("binding-1")).resolves.toEqual({ data: { deleted: true } });
+    await expect(service.deleteCategoryAttribute("binding-1", 4)).resolves.toEqual({ data: { deleted: true } });
     await expect(service.listPriceLists({ page: "1" })).resolves.toEqual({ data: [{ id: "price-list-1" }] });
     await expect(service.createPriceList({ name: "Default" })).resolves.toEqual({ data: { id: "price-list-1" } });
+    await expect(service.listPriceListItems({ priceListId: "price-list-1" })).resolves.toEqual({
+      data: [{ id: "item-1" }],
+    });
+    await expect(service.createPriceListItem({ priceListId: "price-list-1" })).resolves.toEqual({
+      data: { id: "item-1" },
+    });
+    await expect(service.listMedia({ ownerType: "spu" })).resolves.toEqual({ data: [{ id: "media-1" }] });
+    await expect(service.createMedia({ ownerType: "spu" })).resolves.toEqual({ data: { id: "media-1" } });
 
     expect(calls.categoryCreate).toHaveBeenCalledWith({ name: "Root" });
-    expect(calls.categoryUpdate).toHaveBeenCalledWith("category-1", { name: "Updated" });
-    expect(calls.categoryDelete).toHaveBeenCalledWith("category-1");
-    expect(calls.productPublish).toHaveBeenCalledWith("product-1", undefined);
-    expect(calls.productArchive).toHaveBeenCalledWith("product-1", undefined);
+    expect(calls.categoryUpdate).toHaveBeenCalledWith("category-1", { name: "Updated" }, 3);
+    expect(calls.categoryDelete).toHaveBeenCalledWith("category-1", 4);
+    expect(calls.productPublish).toHaveBeenCalledWith("product-1", 9);
+    expect(calls.productArchive).toHaveBeenCalledWith("product-1", 10);
     expect(calls.productRetrieve).toHaveBeenCalledWith("product-1");
-    expect(calls.productDelete).toHaveBeenCalledWith("product-1");
-    expect(calls.skuDelete).toHaveBeenCalledWith("sku-1");
-    expect(calls.categoryAttributeUpdate).toHaveBeenCalledWith("binding-1", { required: true });
+    expect(calls.productDelete).toHaveBeenCalledWith("product-1", 8);
+    expect(calls.skuDelete).toHaveBeenCalledWith("sku-1", 6);
+    expect(calls.categoryAttributeUpdate).toHaveBeenCalledWith("binding-1", { required: true }, 3);
   });
 
   it("exports a reusable workspace manifest for Cloud Router integration", () => {

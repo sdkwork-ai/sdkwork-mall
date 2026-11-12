@@ -22,6 +22,8 @@ export type CategoryRecord = {
   levelNo: number;
   status: CategoryStatus;
   sortOrder: number;
+  /** Optimistic-concurrency version; rides every guarded write as `If-Match`. */
+  version: number;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -162,8 +164,13 @@ export function CategoryManagementPage() {
     try {
       if (form.id) {
         // Authority `UpdateCategoryRequest` owns the lifecycle `status`; the
-        // create body cannot carry one (closed body defaults to active).
-        await updateCommerceCategory(form.id, { ...mutablePayload, status: form.status });
+        // create body cannot carry one (closed body defaults to active). The
+        // write carries the version the modal loaded.
+        await updateCommerceCategory(
+          form.id,
+          { ...mutablePayload, status: form.status },
+          modal.record?.version ?? 0,
+        );
         setMessage({ tone: 'success', text: '分类已更新。' });
       } else {
         await createCommerceCategory({ categoryNo, ...mutablePayload });
@@ -184,7 +191,7 @@ export function CategoryManagementPage() {
   async function handleDelete(record: CategoryRecord) {
     setMessage(null);
     try {
-      await deleteCommerceCategory(record.id);
+      await deleteCommerceCategory(record.id, record.version);
       setActivePathIds((current) => current.filter((id) => id !== record.id));
       setMessage({ tone: 'success', text: '分类已归档。' });
       await loadCategories();
@@ -1008,8 +1015,16 @@ function compareCategorySiblings(left: CategoryRecord, right: CategoryRecord): n
 
 async function moveCategorySortOrder(record: CategoryRecord, targetRecord: CategoryRecord): Promise<void> {
   await Promise.all([
-    updateCommerceCategory(record.id, createCategorySortPayload(targetRecord.sortOrder)),
-    updateCommerceCategory(targetRecord.id, createCategorySortPayload(record.sortOrder)),
+    updateCommerceCategory(
+      record.id,
+      createCategorySortPayload(targetRecord.sortOrder),
+      record.version,
+    ),
+    updateCommerceCategory(
+      targetRecord.id,
+      createCategorySortPayload(record.sortOrder),
+      targetRecord.version,
+    ),
   ]);
 }
 
@@ -1153,6 +1168,7 @@ export function readCategoryRecords(result: unknown): CategoryRecord[] {
       levelNo: typeof item.levelNo === 'number' ? item.levelNo : Number(item.levelNo ?? 0) || 0,
       status: readCategoryStatus(item.status),
       sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : Number(item.sortOrder ?? 0) || 0,
+      version: typeof item.version === 'number' ? item.version : Number(item.version ?? 0) || 0,
       createdAt: typeof item.createdAt === 'string' ? item.createdAt : undefined,
       updatedAt: typeof item.updatedAt === 'string' ? item.updatedAt : undefined,
     }));

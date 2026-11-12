@@ -84,6 +84,7 @@
     "@sdkwork/payment-service": "workspace:*",
     "@sdkwork/promotion-app-sdk": "workspace:*",
     "@sdkwork/promotion-service": "workspace:*",
+    "@sdkwork/shop-backend-sdk": "workspace:*",
     "@sdkwork/runtime-bootstrap": "workspace:*",
     "@sdkwork/sdk-common": "workspace:*",
     "@sdkwork/ui-pc-react": "workspace:*",

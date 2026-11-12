@@ -40,7 +40,12 @@ export interface MallDefaultDataPort {
     createCategory(body: Record<string, unknown>): Promise<unknown>;
     listProducts(): Promise<unknown>;
     createProduct(body: Record<string, unknown>): Promise<unknown>;
-    publishProduct(productId: string): Promise<unknown>;
+    /**
+     * Publishes one created product. The authority guards the lifecycle
+     * command with the row version the caller read (`If-Match`), so the
+     * version recorded at create time rides along.
+     */
+    publishProduct(productId: string, expectedVersion: number): Promise<unknown>;
     listSkus(): Promise<unknown>;
     createSku(body: Record<string, unknown>): Promise<unknown>;
   };
@@ -129,6 +134,31 @@ export function readDefaultDataId(value: unknown): string {
       return String(id);
     }
   }
+  return readFallbackId(value);
+}
+
+/**
+ * Extracts the created row's optimistic-concurrency version from a create
+ * response.
+ *
+ * The authority guards `products.publish` with the version the caller read, so
+ * the version recorded at create time is the one the publish command carries.
+ * Returns `null` when the response shape does not expose one, which the plan
+ * refuses rather than guessing.
+ */
+export function readDefaultDataVersion(value: unknown): number | null {
+  const item = readDefaultDataItem(value);
+  const version = item?.version;
+  if (typeof version === "number" && Number.isFinite(version)) {
+    return version;
+  }
+  if (typeof version === "string" && version.trim() && Number.isFinite(Number(version))) {
+    return Number(version);
+  }
+  return null;
+}
+
+function readFallbackId(value: unknown): string {
   if (isRecord(value)) {
     const data = value.data;
     if (isRecord(data)) {

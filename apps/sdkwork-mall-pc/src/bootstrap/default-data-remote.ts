@@ -11,34 +11,24 @@ import {
   type MallCmsConfig,
 } from "@sdkwork/mall-pc-cms/cms-config";
 
+import type { SdkworkBackendClient as SdkworkShopBackendClient } from "@sdkwork/shop-backend-sdk";
+
+import { createSdkworkShopCatalogNamespace } from "./admin-commerce-remote";
 import { createSdkCommandPortAdapter } from "./sdk-command-port-adapter";
 import type { SdkworkMallPcSdkClientInventory } from "./sdkClients";
 
 /**
  * Commerce backend operations the default-data plan calls.
  *
- * Declared explicitly instead of reusing the generated transport types so the
+ * The catalog section rides the Shop backend authority client
+ * (`sdkwork-shop-backend-sdk`, owned by `sdkwork-shop` with the merchandise
+ * module mounted), so publishing is the authority's `products.publish` command.
+ * The remaining domains stay on the federated commerce transport; both are
+ * declared explicitly instead of reusing the generated transport types so the
  * port stays a stable, testable seam: the app bootstrap owns the adapter, the
  * default-data package owns the workflow.
  */
 interface MallDefaultDataBackendCommerce {
-  readonly catalog: {
-    readonly categories: {
-      management: { list(params?: Record<string, unknown>): Promise<unknown> };
-      create(body: Record<string, unknown>): Promise<unknown>;
-    };
-    readonly products: {
-      management: { list(params?: Record<string, unknown>): Promise<unknown> };
-      create(body: Record<string, unknown>): Promise<unknown>;
-    };
-    readonly spus: {
-      publish(spuId: string, body?: Record<string, unknown>, params?: Record<string, unknown>): Promise<unknown>;
-    };
-    readonly skus: {
-      list(params?: Record<string, unknown>): Promise<unknown>;
-      create(body: Record<string, unknown>): Promise<unknown>;
-    };
-  };
   readonly shops: {
     management: { list(params?: Record<string, unknown>): Promise<unknown> };
     create(body: Record<string, unknown>): Promise<unknown>;
@@ -66,10 +56,6 @@ interface MallDefaultDataBackendCommerce {
 }
 
 const BACKEND_COMMAND_PATHS = [
-  "catalog.categories.create",
-  "catalog.products.create",
-  "catalog.skus.create",
-  "catalog.spus.publish",
   "shops.create",
   "promotions.offers.create",
   "memberships.plans.create",
@@ -129,35 +115,41 @@ function writeCmsPresetMarker(presetId: string): void {
  */
 export interface SdkworkMallPcDefaultDataClientSource {
   readonly commerceBackendClient?: { readonly commerce: object };
+  readonly shopBackendClient?: {
+    readonly catalog: SdkworkShopBackendClient["catalog"];
+  };
 }
 
-/** Adapts the federated commerce backend client onto the provisioning port. */
+/**
+ * Adapts the backend clients onto the provisioning port.
+ *
+ * The catalog section comes from the Shop backend authority client; the rest of
+ * the domains come from the federated commerce transport.
+ */
 export function createSdkworkMallPcDefaultDataPort(
   sdkClients: SdkworkMallPcDefaultDataClientSource,
 ): MallDefaultDataPort | null {
   const backendClient = sdkClients.commerceBackendClient;
-  if (!backendClient) {
+  const shopCatalog = sdkClients.shopBackendClient?.catalog;
+  if (!backendClient || !shopCatalog) {
     return null;
   }
   const commerce = createSdkCommandPortAdapter<MallDefaultDataBackendCommerce>(
     backendClient.commerce,
     { commandPaths: BACKEND_COMMAND_PATHS },
   );
+  const catalog = createSdkworkShopCatalogNamespace(shopCatalog);
 
   return {
     catalog: {
-      listCategories: () => commerce.catalog.categories.management.list({ ...PROVISIONING_LIST_QUERY }),
-      createCategory: (body) => commerce.catalog.categories.create(body),
-      listProducts: () => commerce.catalog.products.management.list({ ...PROVISIONING_LIST_QUERY }),
-      createProduct: (body) => commerce.catalog.products.create(body),
-      // The merchandise authority operation is `products.publish`
-      // (`sdkwork-routes-merchandise-backend-api.route-manifest.json`); the
-      // federated transport still names it under the legacy `catalog.spus`
-      // aggregate, so the mapping stays here until the transport is
-      // regenerated from `sdkwork-shop-backend-api`.
-      publishProduct: (productId) => commerce.catalog.spus.publish(productId),
-      listSkus: () => commerce.catalog.skus.list({ ...PROVISIONING_LIST_QUERY }),
-      createSku: (body) => commerce.catalog.skus.create(body),
+      listCategories: () => catalog.categories.management.list({ ...PROVISIONING_LIST_QUERY }),
+      createCategory: (body) => catalog.categories.create(body),
+      listProducts: () => catalog.products.management.list({ ...PROVISIONING_LIST_QUERY }),
+      createProduct: (body) => catalog.products.create(body),
+      publishProduct: (productId, expectedVersion) =>
+        catalog.products.publish(productId, expectedVersion),
+      listSkus: () => catalog.skus.list({ ...PROVISIONING_LIST_QUERY }),
+      createSku: (body) => catalog.skus.create(body),
     },
     shops: {
       listShops: () => commerce.shops.management.list({ ...PROVISIONING_LIST_QUERY }),

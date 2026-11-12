@@ -34,8 +34,9 @@ const EMPTY_CMS: MallDefaultDataCmsConfigShape = {
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
-function okItem(id: string): Record<string, unknown> {
-  return { data: { item: { id } }, code: 0 };
+function okItem(item: string | Record<string, unknown>): Record<string, unknown> {
+  const resource = typeof item === "string" ? { id: item } : item;
+  return { data: { item: resource }, code: 0 };
 }
 
 function okList(items: readonly Record<string, unknown>[]): Record<string, unknown> {
@@ -116,13 +117,22 @@ export function createFakeMallDefaultDataPort(
         const productNo = pickKey(body, ["productNo", "product_no", "spuNo", "spu_no"]);
         failIfRequested(productNo);
         const id = nextId("spu");
-        state.products.push({ ...body, id });
+        // A fresh authority row is a draft at version 0; the list rows carry
+        // the same resource shape the guarded commands read back.
+        const record = { ...body, id, status: "draft", version: 0 };
+        state.products.push(record);
         created.push(productNo);
-        return okItem(id);
+        return okItem({ id, version: 0, status: "draft" });
       },
-      async publishProduct(productId) {
+      async publishProduct(productId, expectedVersion) {
         published.push(productId);
-        return okItem(productId);
+        const record = state.products.find((product) => product.id === productId);
+        if (record) {
+          record.status = "active";
+          record.version = (expectedVersion ?? 0) + 1;
+        }
+        // The authority answers a guarded command with the row's post-write version.
+        return okItem({ id: productId, version: (expectedVersion ?? 0) + 1, status: "active" });
       },
       async listSkus() {
         return okList(state.skus);
