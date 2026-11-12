@@ -170,13 +170,13 @@ export function BrandManagementPage() {
         ) : null}
 
         {state.loading ? (
-          <BusinessStatePanel description="品牌清单加载中。" title="加载中" tone="idle" />
+          <BusinessStatePanel description="品牌清单加载中。" kind="loading" title="加载中" />
         ) : state.error ? (
           <BusinessStatePanel
             description={state.error}
+            kind="error"
             onRetry={() => void loadBrands()}
             title="品牌数据不可用"
-            tone="error"
           />
         ) : (
           <BrandTable
@@ -271,8 +271,8 @@ function BrandTable({
     return (
       <BusinessStatePanel
         description="尚未创建品牌；品牌是商品的品牌归属与筛选维度。"
+        kind="empty"
         title="暂无品牌"
-        tone="idle"
       />
     );
   }

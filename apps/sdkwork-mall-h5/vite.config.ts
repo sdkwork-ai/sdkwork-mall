@@ -1,5 +1,6 @@
 import { resolveViteEnvironment, resolveLucideReactEntry } from '../../../sdkwork-specs/tools/vite-runtime-profile.mjs';
 import { resolveBrowserDistOutDir } from '../../../sdkwork-specs/tools/browser-dist-layout.mjs';
+import { WORKSPACE_SOURCE_RESOLVE_EXTENSIONS } from '../../scripts/lib/workspace-source-resolution.mjs';
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -290,6 +291,11 @@ export default defineConfig(({ mode }) => {
     ],
   },
   resolve: {
+    // Authored TypeScript must win over gitignored `tsc` siblings inside the
+    // source-linked workspace packages (see workspace-source-resolution.mjs):
+    // a stale `.js` shadowing a fresh `.ts` produced the deployed runtime
+    // "Cannot read properties of undefined (reading 'demandClaims')" crash.
+    extensions: [...WORKSPACE_SOURCE_RESOLVE_EXTENSIONS],
     alias: [
       {
         find: "react",

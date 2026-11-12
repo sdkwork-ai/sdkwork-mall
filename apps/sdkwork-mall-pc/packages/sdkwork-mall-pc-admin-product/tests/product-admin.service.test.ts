@@ -46,6 +46,13 @@ describe("sdkwork-mall-pc-admin-product service", () => {
     const commerceService = createCommerceServiceMock({
       admin: {
         catalog: {
+          brands: {
+            list: vi.fn().mockResolvedValue({ data: [{ id: "brand-1" }] }),
+            retrieve: vi.fn().mockResolvedValue({ data: { id: "brand-1" } }),
+            create: vi.fn().mockResolvedValue({ data: { id: "brand-1" } }),
+            update: vi.fn().mockResolvedValue({ data: { id: "brand-1" } }),
+            delete: vi.fn().mockResolvedValue({ data: { deleted: true } }),
+          },
           attributes: {
             management: {
               list: vi.fn().mockResolvedValue({ data: [{ id: "attribute-1" }] }),

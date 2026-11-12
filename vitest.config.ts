@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { configDefaults, defineConfig } from "vitest/config";
+import { WORKSPACE_SOURCE_RESOLVE_EXTENSIONS } from "./scripts/lib/workspace-source-resolution.mjs";
 
 const workspaceRoot = path.dirname(fileURLToPath(import.meta.url));
 const workspaceNodeModules = path.join(workspaceRoot, "node_modules");
@@ -120,6 +121,10 @@ export default defineConfig({
   root: workspaceRoot,
   plugins: [react()],
   resolve: {
+    // Unit tests import the same source-linked workspace packages as the web
+    // renderers, so they must also prefer authored `.ts` over stale compiled
+    // `.js` siblings (see scripts/lib/workspace-source-resolution.mjs).
+    extensions: [...WORKSPACE_SOURCE_RESOLVE_EXTENSIONS],
     alias: [
       {
         find: "react",
