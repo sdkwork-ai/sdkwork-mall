@@ -28,6 +28,9 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@sdkwork/mall-pc-commons": "workspace:*"
+  },
   "peerDependencies": {
     "@sdkwork/payment-service": "workspace:*",
     "@sdkwork/mall-pc-cms": "workspace:*",

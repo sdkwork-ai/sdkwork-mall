@@ -217,114 +217,7 @@ a {
   flex-direction: column;
 }
 
-.sdkwork-mall-pc-topbar {
-  background: #ffffff;
-  border-bottom: 1px solid var(--sdk-color-border-default);
-}
-
-.sdkwork-mall-pc-topbar-inner,
-.sdkwork-mall-pc-category-inner,
-.sdkwork-mall-pc-footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.sdkwork-mall-pc-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.sdkwork-mall-pc-search-form {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 2px solid var(--sdk-color-accent);
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  background: #fff;
-}
-
-.sdkwork-mall-pc-search-form input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-}
-
-.sdkwork-mall-pc-search-form button {
-  border: none;
-  background: var(--sdk-color-accent);
-  color: #fff;
-  border-radius: 999px;
-  padding: 0.35rem 1rem;
-  cursor: pointer;
-}
-
-.sdkwork-mall-pc-topnav {
-  display: flex;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-}
-
-.sdkwork-mall-pc-topnav a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.sdkwork-mall-pc-category-bar {
-  background: #fff7ed;
-  border-bottom: 1px solid var(--sdk-color-border-subtle);
-}
-
-.sdkwork-mall-pc-category-inner {
-  flex-wrap: wrap;
-  font-size: 0.85rem;
-}
-
-.sdkwork-mall-pc-all-categories {
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.sdkwork-mall-pc-storefront-main {
-  flex: 1;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-.sdkwork-mall-pc-footer {
-  border-top: 1px solid var(--sdk-color-border-default);
-  background: #fff;
-}
-
-.sdkwork-mall-pc-hero {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.sdkwork-mall-pc-hero-banner,
-.sdkwork-mall-pc-hero-side {
-  background: linear-gradient(135deg, #eff6ff, #fff);
-  border: 1px solid var(--sdk-color-border-subtle);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-}
-
+/* Default-data quick action reuses the old hero CTA pill. */
 .sdkwork-mall-pc-hero-cta {
   display: inline-flex;
   margin-top: 0.75rem;
@@ -332,11 +225,6 @@ a {
   background: var(--sdk-color-accent);
   color: #fff;
   border-radius: 999px;
-}
-
-.sdkwork-mall-pc-hero-side {
-  display: grid;
-  gap: 0.5rem;
 }
 
 .sdkwork-mall-pc-floor {
@@ -2838,6 +2726,2511 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .sdkwork-mall-pc-chip-row button,
   .sdkwork-mall-pc-chip-row a {
+    transition: none;
+  }
+}
+
+/* ==========================================================================
+   Storefront design system v2 (2026-11)
+   --------------------------------------------------------------------------
+   店面（C 端）视觉系统：设计令牌、顶部导航、首页楼层与共享商品卡片。
+   仅作用于 `.sdkwork-mall-pc-storefront`，买家中心 / 商家 / 管理后台沿用
+   原有控制台令牌，互不影响。
+   ========================================================================== */
+
+.sdkwork-mall-pc-storefront {
+  /* 品牌与中性色 */
+  --mall-brand: #e1251b;
+  --mall-brand-deep: #b81710;
+  --mall-brand-soft: #fff2f0;
+  --mall-brand-line: #f4cdc8;
+  --mall-orange: #ff6a00;
+  --mall-gold: #b98a3c;
+  --mall-ink: #16181d;
+  --mall-ink-2: #3d4553;
+  --mall-muted: #5b6472;
+  --mall-subtle: #6b7280;
+  --mall-line: #ebedf0;
+  --mall-line-strong: #dfe3e8;
+  --mall-bg: #f4f5f7;
+  --mall-surface: #ffffff;
+  --mall-surface-2: #fafbfc;
+
+  /* 版式与节奏 */
+  --mall-container: 1200px;
+  --mall-gutter: 24px;
+  --mall-radius-sm: 8px;
+  --mall-radius: 12px;
+  --mall-radius-lg: 16px;
+  --mall-shadow-1: 0 1px 2px rgba(20, 24, 33, 0.05);
+  --mall-shadow-2: 0 10px 28px rgba(20, 24, 33, 0.09);
+  --mall-shadow-3: 0 22px 48px rgba(20, 24, 33, 0.14);
+  --mall-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --mall-num: "Inter", "SF Pro Text", ui-sans-serif, system-ui, sans-serif;
+
+  /* 让 UI 基础组件的主题色在店面内统一为商城品牌红。 */
+  --theme-primary-50: #fff1f0;
+  --theme-primary-100: #ffe1de;
+  --theme-primary-200: #ffc7c2;
+  --theme-primary-300: #ffa39b;
+  --theme-primary-400: #ff7568;
+  --theme-primary-500: #f4483a;
+  --theme-primary-600: #e1251b;
+  --theme-primary-700: #b81710;
+  --theme-primary-800: #93130e;
+  --theme-primary-900: #74130f;
+  --theme-primary-950: #400604;
+  --sdk-color-brand-primary: #e1251b;
+  --sdk-color-brand-primary-hover: #b81710;
+  --sdk-color-brand-primary-soft: rgba(225, 37, 27, 0.12);
+  --sdk-color-accent: #e1251b;
+  --sdk-focus-ring: 0 0 0 3px rgba(225, 37, 27, 0.28);
+
+  background: var(--mall-bg);
+  color: var(--mall-ink);
+  font-family:
+    "HarmonyOS Sans SC",
+    "PingFang SC",
+    "Microsoft YaHei",
+    "Noto Sans SC",
+    system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sdkwork-mall-pc-storefront ::selection {
+  background: rgba(225, 37, 27, 0.16);
+}
+
+.sdkwork-mall-pc-container {
+  width: 100%;
+  max-width: var(--mall-container);
+  margin: 0 auto;
+  padding: 0 var(--mall-gutter);
+}
+
+.sdkwork-mall-pc-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── 顶部导航 ───────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-masthead {
+  position: relative;
+  z-index: 40;
+  background: var(--mall-surface);
+  box-shadow: 0 1px 0 var(--mall-line);
+}
+
+.sdkwork-mall-pc-masthead-util {
+  background: #f7f8fa;
+  border-bottom: 1px solid var(--mall-line);
+  color: var(--mall-muted);
+  font-size: 12px;
+}
+
+.sdkwork-mall-pc-masthead-util-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px;
+  gap: 16px;
+}
+
+.sdkwork-mall-pc-masthead-util-left,
+.sdkwork-mall-pc-masthead-util-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sdkwork-mall-pc-masthead-util-left {
+  gap: 10px;
+}
+
+.sdkwork-mall-pc-masthead-util-left svg {
+  color: var(--mall-subtle);
+}
+
+.sdkwork-mall-pc-masthead-util a {
+  color: var(--mall-muted);
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-masthead-util a:hover {
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-masthead-util-accent {
+  color: var(--mall-brand);
+  font-weight: 600;
+}
+
+.sdkwork-mall-pc-masthead-util-right a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sdkwork-mall-pc-masthead-util-right a + a::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 1px;
+  height: 10px;
+  background: #dfe3e8;
+  transform: translateY(-50%);
+}
+
+.sdkwork-mall-pc-masthead-main-inner {
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(20px, 3vw, 44px);
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.sdkwork-mall-pc-masthead-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sdkwork-mall-pc-masthead-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #ff5a3c, var(--mall-brand) 55%, var(--mall-brand-deep));
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  box-shadow: 0 6px 16px -6px rgba(225, 37, 27, 0.65);
+}
+
+.sdkwork-mall-pc-masthead-brand-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.sdkwork-mall-pc-masthead-brand-copy strong {
+  font-family: var(--mall-num);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  color: var(--mall-ink);
+}
+
+.sdkwork-mall-pc-masthead-brand-copy span {
+  color: var(--mall-subtle);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  line-height: 1;
+}
+
+.sdkwork-mall-pc-masthead-search {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 620px;
+  justify-self: center;
+}
+
+.sdkwork-mall-pc-masthead-search-box {
+  display: flex;
+  align-items: stretch;
+  height: 44px;
+  border: 2px solid var(--mall-brand);
+  border-radius: 10px;
+  background: var(--mall-surface);
+  overflow: hidden;
+  transition: box-shadow 0.18s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-masthead-search-box:focus-within {
+  box-shadow: 0 0 0 3px rgba(225, 37, 27, 0.14);
+}
+
+.sdkwork-mall-pc-masthead-search-box > svg {
+  align-self: center;
+  margin-left: 13px;
+  color: var(--mall-subtle);
+  flex: 0 0 auto;
+}
+
+.sdkwork-mall-pc-masthead-search-box input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0 12px;
+  color: var(--mall-ink);
+  font-size: 14px;
+}
+
+.sdkwork-mall-pc-masthead-search-box input::placeholder {
+  color: var(--mall-subtle);
+}
+
+.sdkwork-mall-pc-masthead-search-box input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.sdkwork-mall-pc-masthead-search-box button {
+  flex: 0 0 auto;
+  width: 96px;
+  border: 0;
+  background: linear-gradient(135deg, #e1251b, #c8201c);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: filter 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-masthead-search-box button:hover {
+  filter: brightness(1.06);
+}
+
+.sdkwork-mall-pc-masthead-search-hints {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 2px;
+  font-size: 12px;
+  color: var(--mall-subtle);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-masthead-search-hints > span {
+  color: var(--mall-subtle);
+}
+
+.sdkwork-mall-pc-masthead-search-hints a {
+  color: var(--mall-muted);
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-masthead-search-hints a:hover {
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-masthead-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: end;
+}
+
+.sdkwork-mall-pc-masthead-cart,
+.sdkwork-mall-pc-masthead-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color 0.18s var(--mall-ease),
+    color 0.18s var(--mall-ease),
+    border-color 0.18s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-masthead-cart {
+  border: 1px solid var(--mall-brand-line);
+  background: var(--mall-brand-soft);
+  color: var(--mall-brand-deep);
+}
+
+.sdkwork-mall-pc-masthead-cart:hover {
+  background: #ffe4e0;
+  border-color: #f0b3ab;
+}
+
+.sdkwork-mall-pc-masthead-cart svg:last-child {
+  color: #e58b81;
+}
+
+.sdkwork-mall-pc-masthead-account {
+  border: 1px solid var(--mall-line-strong);
+  color: var(--mall-ink-2);
+}
+
+.sdkwork-mall-pc-masthead-account:hover {
+  border-color: #c9ced7;
+  color: var(--mall-ink);
+}
+
+.sdkwork-mall-pc-masthead-nav {
+  border-top: 1px solid var(--mall-line);
+  border-bottom: 1px solid var(--mall-line);
+}
+
+.sdkwork-mall-pc-masthead-nav-inner {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 44px;
+}
+
+.sdkwork-mall-pc-masthead-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  background: linear-gradient(100deg, #d92b21, #c8201c);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 10px 10px 0 0;
+}
+
+.sdkwork-mall-pc-masthead-all:hover {
+  filter: brightness(1.04);
+}
+
+.sdkwork-mall-pc-masthead-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.6vw, 34px);
+  padding-left: 24px;
+  overflow: hidden;
+}
+
+.sdkwork-mall-pc-masthead-links a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mall-ink-2);
+  white-space: nowrap;
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-masthead-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -13px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--mall-brand);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.2s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-masthead-links a:hover {
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-masthead-links a:hover::after {
+  transform: scaleX(1);
+}
+
+.sdkwork-mall-pc-masthead-links svg {
+  color: var(--mall-brand);
+}
+
+/* 店面主内容区：宽度由各页面容器自行控制。 */
+.sdkwork-mall-pc-storefront-main {
+  flex: 1;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── 首页骨架 ───────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home {
+  display: block;
+  padding: 16px 0 56px;
+  background:
+    linear-gradient(180deg, #eef0f4 0, rgba(244, 245, 247, 0) 280px),
+    var(--mall-bg);
+}
+
+.sdkwork-mall-pc-home-section {
+  margin-top: 28px;
+}
+
+.sdkwork-mall-pc-home-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.sdkwork-mall-pc-home-section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.sdkwork-mall-pc-home-section-title h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--mall-ink);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+
+.sdkwork-mall-pc-home-section-title h2 svg {
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-home-section-sub {
+  color: var(--mall-subtle);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-section-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--mall-muted);
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-section-more:hover {
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-home-section-more svg {
+  transition: transform 0.18s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-section-more:hover svg {
+  transform: translateX(2px);
+}
+
+/* ── 首屏：类目导航 + 主视觉 + 用户侧栏 ─────────────────────────────────── */
+
+.sdkwork-mall-pc-home-hero {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 300px;
+  gap: 12px;
+  height: 440px;
+}
+
+.sdkwork-mall-pc-home-categories {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 8px 0 0;
+  background: var(--mall-surface);
+  border-radius: 0 0 var(--mall-radius) var(--mall-radius);
+  box-shadow: var(--mall-shadow-1);
+  overflow: hidden;
+}
+
+.sdkwork-mall-pc-home-category-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  padding: 0 14px;
+  color: var(--mall-ink-2);
+  font-size: 13.5px;
+  transition:
+    background-color 0.16s var(--mall-ease),
+    color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-category-item:hover {
+  background: var(--mall-brand-soft);
+  color: var(--mall-brand-deep);
+}
+
+.sdkwork-mall-pc-home-category-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  color: #8b93a1;
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-category-item:hover .sdkwork-mall-pc-home-category-icon {
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-home-category-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-category-chevron {
+  flex: 0 0 auto;
+  color: #c8cdd5;
+  opacity: 0;
+  transform: translateX(-2px);
+  transition:
+    opacity 0.16s var(--mall-ease),
+    transform 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-category-item:hover .sdkwork-mall-pc-home-category-chevron {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sdkwork-mall-pc-home-category-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  border-top: 1px dashed var(--mall-line);
+  color: var(--mall-muted);
+  font-size: 12px;
+  background: var(--mall-surface-2);
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-category-more:hover {
+  color: var(--mall-brand);
+}
+
+/* 主视觉轮播 */
+
+.sdkwork-mall-pc-home-stage {
+  position: relative;
+  border-radius: var(--mall-radius);
+  overflow: hidden;
+  background: #10131a;
+  box-shadow: var(--mall-shadow-1);
+  isolation: isolate;
+}
+
+.sdkwork-mall-pc-home-slide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+  align-items: center;
+  gap: 24px;
+  padding: 40px clamp(28px, 3.4vw, 52px);
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.6s var(--mall-ease),
+    visibility 0.6s;
+}
+
+.sdkwork-mall-pc-home-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.sdkwork-mall-pc-home-slide.theme-crimson {
+  background:
+    radial-gradient(120% 130% at 88% 8%, rgba(255, 173, 122, 0.5), transparent 52%),
+    linear-gradient(118deg, #6d0b14 0%, #c11a22 46%, #f4583a 100%);
+}
+
+.sdkwork-mall-pc-home-slide.theme-midnight {
+  background:
+    radial-gradient(110% 130% at 84% 12%, rgba(96, 165, 250, 0.42), transparent 54%),
+    linear-gradient(118deg, #081326 0%, #16336b 48%, #2f6fd0 100%);
+}
+
+.sdkwork-mall-pc-home-slide.theme-champagne {
+  background:
+    radial-gradient(120% 120% at 86% 10%, rgba(255, 227, 168, 0.55), transparent 52%),
+    linear-gradient(118deg, #2a1d0b 0%, #7a5518 46%, #c9973f 100%);
+}
+
+.sdkwork-mall-pc-home-slide.theme-forest {
+  background:
+    radial-gradient(120% 120% at 86% 10%, rgba(134, 239, 172, 0.38), transparent 54%),
+    linear-gradient(118deg, #08211a 0%, #14503c 48%, #2f8a63 100%);
+}
+
+.sdkwork-mall-pc-home-slide-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  max-width: 440px;
+}
+
+.sdkwork-mall-pc-home-slide-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.sdkwork-mall-pc-home-slide-title {
+  margin: 0;
+  font-size: clamp(30px, 3.1vw, 42px);
+  font-weight: 800;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.18);
+}
+
+.sdkwork-mall-pc-home-slide-subtitle {
+  margin: 0;
+  max-width: 360px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+.sdkwork-mall-pc-home-slide-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.sdkwork-mall-pc-home-slide-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--mall-brand);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.6);
+  transition:
+    transform 0.18s var(--mall-ease),
+    box-shadow 0.18s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-slide-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px -12px rgba(0, 0, 0, 0.65);
+}
+
+.sdkwork-mall-pc-home-slide-cta svg {
+  transition: transform 0.18s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-slide-cta:hover svg {
+  transform: translateX(3px);
+}
+
+.sdkwork-mall-pc-home-slide-ghost {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.34);
+  padding-bottom: 2px;
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-slide-ghost:hover {
+  color: #fff;
+}
+
+.sdkwork-mall-pc-home-slide-art {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.sdkwork-mall-pc-home-slide-halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(310px, 88%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+}
+
+.sdkwork-mall-pc-home-slide-halo::before,
+.sdkwork-mall-pc-home-slide-halo::after {
+  content: "";
+  position: absolute;
+  inset: 11%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.sdkwork-mall-pc-home-slide-halo::after {
+  inset: 24%;
+}
+
+.sdkwork-mall-pc-home-slide-seal {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  width: clamp(150px, 15vw, 188px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    inset 0 0 40px rgba(255, 255, 255, 0.12),
+    0 24px 60px -24px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.sdkwork-mall-pc-home-slide-seal-mark {
+  color: #ffffff;
+  font-size: clamp(58px, 6vw, 76px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.sdkwork-mall-pc-home-slide-seal-caption {
+  color: rgba(255, 255, 255, 0.68);
+  font-family: var(--mall-num);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
+}
+
+.sdkwork-mall-pc-home-slide-spark {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.sdkwork-mall-pc-home-slide-art-note {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(9, 12, 18, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.sdkwork-mall-pc-home-slide-spark.is-large {
+  top: 18%;
+  right: 18%;
+}
+
+.sdkwork-mall-pc-home-slide-spark.is-small {
+  bottom: 16%;
+  left: 10%;
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.sdkwork-mall-pc-home-slide-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sdkwork-mall-pc-home-slide.has-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(9, 12, 18, 0.86) 0%,
+    rgba(9, 12, 18, 0.62) 44%,
+    rgba(9, 12, 18, 0.12) 100%
+  );
+}
+
+.sdkwork-mall-pc-home-slide-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(16, 19, 26, 0.28);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition:
+    opacity 0.2s var(--mall-ease),
+    background-color 0.2s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-stage:hover .sdkwork-mall-pc-home-slide-nav,
+.sdkwork-mall-pc-home-slide-nav:focus-visible {
+  opacity: 1;
+}
+
+.sdkwork-mall-pc-home-slide-nav:hover {
+  background: rgba(16, 19, 26, 0.5);
+}
+
+.sdkwork-mall-pc-home-slide-nav.is-prev {
+  left: 14px;
+}
+
+.sdkwork-mall-pc-home-slide-nav.is-next {
+  right: 14px;
+}
+
+.sdkwork-mall-pc-home-slide-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(9, 12, 18, 0.28);
+  backdrop-filter: blur(8px);
+  transform: translateX(-50%);
+}
+
+.sdkwork-mall-pc-home-slide-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.46);
+  cursor: pointer;
+  transition:
+    width 0.25s var(--mall-ease),
+    background-color 0.25s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-slide-dot.is-active {
+  width: 22px;
+  background: #fff;
+}
+
+/* 右侧栏 */
+
+.sdkwork-mall-pc-home-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.sdkwork-mall-pc-home-user {
+  flex: 0 0 auto;
+  padding: 16px;
+  border-radius: var(--mall-radius);
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(255, 214, 205, 0.9), transparent 62%),
+    linear-gradient(160deg, #fff7f5, #ffffff 66%);
+  border: 1px solid #f6dfdb;
+  box-shadow: var(--mall-shadow-1);
+}
+
+.sdkwork-mall-pc-home-user-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sdkwork-mall-pc-home-user-avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffd8d2, #ffb3a8);
+  color: var(--mall-brand);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+.sdkwork-mall-pc-home-user-greeting {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sdkwork-mall-pc-home-user-greeting strong {
+  color: var(--mall-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sdkwork-mall-pc-home-user-greeting span {
+  color: var(--mall-muted);
+  font-size: 11.5px;
+}
+
+.sdkwork-mall-pc-home-user-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sdkwork-mall-pc-home-user-actions a {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  transition:
+    background-color 0.16s var(--mall-ease),
+    color 0.16s var(--mall-ease),
+    border-color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-user-actions a:first-child {
+  background: var(--mall-brand);
+  color: #fff;
+}
+
+.sdkwork-mall-pc-home-user-actions a:first-child:hover {
+  background: var(--mall-brand-deep);
+}
+
+.sdkwork-mall-pc-home-user-actions a:last-child {
+  border: 1px solid var(--mall-brand-line);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--mall-brand-deep);
+}
+
+.sdkwork-mall-pc-home-user-actions a:last-child:hover {
+  background: #fff;
+}
+
+.sdkwork-mall-pc-home-services {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  min-height: 0;
+  border-radius: var(--mall-radius);
+  background: var(--mall-line);
+  overflow: hidden;
+  box-shadow: var(--mall-shadow-1);
+}
+
+.sdkwork-mall-pc-home-service {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 6px;
+  background: var(--mall-surface);
+  color: var(--mall-ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  transition:
+    background-color 0.16s var(--mall-ease),
+    color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-service svg {
+  margin-bottom: 3px;
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-home-service-label {
+  color: var(--mall-ink-2);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-service-desc {
+  color: var(--mall-subtle);
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.sdkwork-mall-pc-home-service:hover {
+  background: var(--mall-brand-soft);
+  color: var(--mall-brand-deep);
+}
+
+.sdkwork-mall-pc-home-service:hover .sdkwork-mall-pc-home-service-label {
+  color: var(--mall-brand-deep);
+}
+
+.sdkwork-mall-pc-home-notice {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: var(--mall-radius);
+  background: var(--mall-surface);
+  border: 1px solid var(--mall-line);
+  color: var(--mall-muted);
+  font-size: 12px;
+  overflow: hidden;
+  box-shadow: var(--mall-shadow-1);
+}
+
+.sdkwork-mall-pc-home-notice svg {
+  flex: 0 0 auto;
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-home-notice span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 服务承诺条 */
+
+.sdkwork-mall-pc-home-benefits {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 14px;
+  padding: 18px 8px;
+  background: var(--mall-surface);
+  border: 1px solid var(--mall-line);
+  border-radius: var(--mall-radius);
+  box-shadow: var(--mall-shadow-1);
+}
+
+.sdkwork-mall-pc-home-benefit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+}
+
+.sdkwork-mall-pc-home-benefit + .sdkwork-mall-pc-home-benefit::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1px;
+  height: 24px;
+  background: var(--mall-line);
+  transform: translateY(-50%);
+}
+
+.sdkwork-mall-pc-home-benefit-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--mall-brand-soft);
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-home-benefit-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.sdkwork-mall-pc-home-benefit-copy strong {
+  color: var(--mall-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sdkwork-mall-pc-home-benefit-copy span {
+  color: var(--mall-subtle);
+  font-size: 11.5px;
+}
+
+/* ── 秒杀专场 ───────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home-seckill {
+  margin-top: 28px;
+  border-radius: var(--mall-radius-lg);
+  background: var(--mall-surface);
+  border: 1px solid #f3d9d4;
+  box-shadow: var(--mall-shadow-1);
+  overflow: hidden;
+}
+
+.sdkwork-mall-pc-home-seckill-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 22px;
+  background:
+    radial-gradient(120% 160% at 92% 0%, rgba(255, 150, 96, 0.42), transparent 56%),
+    linear-gradient(104deg, #2b1210 0%, #7c1a12 48%, #c62b1b 100%);
+  color: #fff;
+}
+
+.sdkwork-mall-pc-home-seckill-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-seckill-brand svg {
+  color: #ffc06a;
+}
+
+.sdkwork-mall-pc-home-seckill-note {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-seckill-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.sdkwork-mall-pc-home-seckill-clock strong {
+  display: inline-flex;
+  gap: 4px;
+  font-family: var(--mall-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.sdkwork-mall-pc-home-seckill-clock strong span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: rgba(9, 12, 18, 0.4);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sdkwork-mall-pc-home-seckill-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-seckill-more:hover {
+  color: #fff;
+}
+
+.sdkwork-mall-pc-home-seckill-offers {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+.sdkwork-mall-pc-home-offer {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  padding: 16px;
+  border-radius: var(--mall-radius);
+  border: 1px solid #f7e0dc;
+  background: linear-gradient(160deg, #fff7f5, #ffffff 58%);
+  transition:
+    transform 0.2s var(--mall-ease),
+    box-shadow 0.2s var(--mall-ease),
+    border-color 0.2s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-offer:hover {
+  transform: translateY(-3px);
+  border-color: #f0b9b1;
+  box-shadow: var(--mall-shadow-2);
+}
+
+.sdkwork-mall-pc-home-offer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sdkwork-mall-pc-home-offer-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--mall-brand-soft);
+  color: var(--mall-brand);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-offer-title {
+  color: var(--mall-ink);
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sdkwork-mall-pc-home-offer-highlight {
+  margin: 0;
+  color: var(--mall-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-offer-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.sdkwork-mall-pc-home-offer-clock {
+  font-family: var(--mall-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--mall-brand);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sdkwork-mall-pc-home-offer-clock.is-muted {
+  color: var(--mall-subtle);
+  font-weight: 600;
+}
+
+.sdkwork-mall-pc-home-offer-arrow {
+  color: var(--mall-brand);
+  opacity: 0.85;
+}
+
+.sdkwork-mall-pc-home-offer-foot .sdkwork-mall-pc-home-offer-arrow {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 1;
+}
+
+/* ── 商品卡片（共享基类升级） ───────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sdkwork-mall-pc-home-grid.is-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sdkwork-mall-pc-home-grid.is-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sdkwork-mall-pc-home-grid.is-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.sdkwork-mall-pc-home-grid.is-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sdkwork-mall-pc-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+  gap: 12px;
+}
+
+.sdkwork-mall-pc-product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  container-type: inline-size;
+  background: var(--mall-surface, #fff);
+  border: 1px solid var(--mall-line, #ebedf0);
+  border-radius: var(--mall-radius, 12px);
+  overflow: hidden;
+  transition:
+    transform 0.24s var(--mall-ease, ease),
+    box-shadow 0.24s var(--mall-ease, ease),
+    border-color 0.24s var(--mall-ease, ease);
+}
+
+.sdkwork-mall-pc-product-card:hover {
+  transform: translateY(-4px);
+  border-color: #f0c6c1;
+  box-shadow: var(--mall-shadow-2, 0 10px 28px rgba(20, 24, 33, 0.09));
+}
+
+.sdkwork-mall-pc-product-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(225, 37, 27, 0.22);
+}
+
+.sdkwork-mall-pc-product-image {
+  position: relative;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(120% 110% at 18% 0%, #f7f8fa 0%, #eef0f4 58%, #e9ecf1 100%);
+  overflow: hidden;
+}
+
+.sdkwork-mall-pc-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--mall-ease, ease);
+}
+
+.sdkwork-mall-pc-product-card:hover .sdkwork-mall-pc-product-image img {
+  transform: scale(1.045);
+}
+
+.sdkwork-mall-pc-product-body {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px 14px;
+}
+
+.sdkwork-mall-pc-product-body h3 {
+  margin: 0;
+  color: var(--mall-ink-2, #3d4553);
+  font-size: clamp(13.5px, 4cqw, 15px);
+  font-weight: 500;
+  line-height: 1.5;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  transition: color 0.16s var(--mall-ease, ease);
+}
+
+.sdkwork-mall-pc-product-card:hover .sdkwork-mall-pc-product-body h3 {
+  color: var(--mall-brand, #e1251b);
+}
+
+.sdkwork-mall-pc-product-subtitle {
+  margin: 0;
+  color: var(--mall-subtle, #98a1af);
+  font-size: 11.5px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-product-price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 24px;
+}
+
+.sdkwork-mall-pc-product-price {
+  color: var(--mall-brand, #e1251b);
+  font-family: var(--mall-num, ui-sans-serif);
+  font-size: clamp(18px, 5.4cqw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.sdkwork-mall-pc-product-price.is-quote {
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+.sdkwork-mall-pc-product-price .price-symbol {
+  margin-right: 1px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sdkwork-mall-pc-product-price .price-cents {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sdkwork-mall-pc-product-price-was {
+  margin-left: 6px;
+  color: var(--mall-subtle, #98a1af);
+  font-family: var(--mall-num, ui-sans-serif);
+  font-size: 11.5px;
+  font-weight: 400;
+  text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+}
+
+.sdkwork-mall-pc-product-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sdkwork-mall-pc-product-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid var(--mall-brand-line, #f4cdc8);
+  color: var(--mall-brand, #e1251b);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.sdkwork-mall-pc-product-tag.is-neutral {
+  border-color: var(--mall-line-strong, #dfe3e8);
+  color: var(--mall-muted, #6b7280);
+}
+
+.sdkwork-mall-pc-product-tag.is-gold {
+  border-color: #eadcc0;
+  color: var(--mall-gold, #b98a3c);
+}
+
+.sdkwork-mall-pc-product-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--mall-subtle, #98a1af);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.sdkwork-mall-pc-product-foot span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-product-foot .is-num {
+  font-family: var(--mall-num, ui-sans-serif);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+/* 无图商品的设计化占位：渐变底 + 品牌首字 + 类目图标 */
+.sdkwork-mall-pc-product-art {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.sdkwork-mall-pc-product-art.tone-0 {
+  background:
+    radial-gradient(100% 100% at 16% 0%, #ffe7e0 0%, #f6f7f9 62%),
+    #f3f4f7;
+  --art-ink: #c8452f;
+}
+
+.sdkwork-mall-pc-product-art.tone-1 {
+  background:
+    radial-gradient(100% 100% at 84% 0%, #e0eafb 0%, #f6f7f9 62%),
+    #f3f4f7;
+  --art-ink: #3b6bb5;
+}
+
+.sdkwork-mall-pc-product-art.tone-2 {
+  background:
+    radial-gradient(100% 100% at 20% 10%, #f7edd6 0%, #f6f7f9 62%),
+    #f3f4f7;
+  --art-ink: #a9803a;
+}
+
+.sdkwork-mall-pc-product-art.tone-3 {
+  background:
+    radial-gradient(100% 100% at 80% 0%, #e2f0e6 0%, #f6f7f9 62%),
+    #f3f4f7;
+  --art-ink: #3f7f60;
+}
+
+.sdkwork-mall-pc-product-art.tone-4 {
+  background:
+    radial-gradient(100% 100% at 18% 0%, #eae4f7 0%, #f6f7f9 62%),
+    #f3f4f7;
+  --art-ink: #6f5aa8;
+}
+
+.sdkwork-mall-pc-product-art.tone-5 {
+  background:
+    radial-gradient(100% 100% at 82% 0%, #f6e3ec 0%, #f6f7f9 62%),
+    #f3f4f7;
+  --art-ink: #a9527a;
+}
+
+.sdkwork-mall-pc-product-art-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  transition: transform 0.4s var(--mall-ease, ease);
+}
+
+.sdkwork-mall-pc-product-card:hover .sdkwork-mall-pc-product-art-inner {
+  transform: translateY(-3px);
+}
+
+.sdkwork-mall-pc-product-art-icon {
+  display: grid;
+  place-items: center;
+  width: clamp(52px, 20cqw, 88px);
+  height: clamp(52px, 20cqw, 88px);
+  border-radius: clamp(16px, 6cqw, 26px);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--art-ink);
+  box-shadow:
+    0 10px 22px -12px rgba(20, 24, 33, 0.32),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.sdkwork-mall-pc-product-art-icon svg {
+  width: 48%;
+  height: 48%;
+}
+
+.sdkwork-mall-pc-product-art-label {
+  color: var(--art-ink);
+  font-size: clamp(11px, 3cqw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  opacity: 0.72;
+}
+
+.sdkwork-mall-pc-product-art-initial {
+  position: absolute;
+  right: -6px;
+  bottom: -18px;
+  z-index: 0;
+  color: var(--art-ink);
+  font-size: 86px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  opacity: 0.1;
+  user-select: none;
+}
+
+.sdkwork-mall-pc-product-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
+}
+
+.sdkwork-mall-pc-product-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--mall-ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 6px rgba(20, 24, 33, 0.1);
+}
+
+.sdkwork-mall-pc-product-badge.is-brand {
+  background: linear-gradient(135deg, #f2533c, var(--mall-brand));
+  color: #fff;
+}
+
+/* 骨架屏 */
+
+.sdkwork-mall-pc-home-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sdkwork-mall-pc-home-skeleton {
+  overflow: hidden;
+  border-radius: var(--mall-radius);
+  background: var(--mall-surface);
+  border: 1px solid var(--mall-line);
+}
+
+.sdkwork-mall-pc-home-skeleton-media {
+  aspect-ratio: 1;
+  background: linear-gradient(100deg, #f1f3f6 20%, #f8f9fb 40%, #f1f3f6 60%);
+  background-size: 220% 100%;
+  animation: sdkwork-mall-pc-home-shimmer 1.5s infinite linear;
+}
+
+.sdkwork-mall-pc-home-skeleton-line {
+  height: 10px;
+  margin: 12px 14px 0;
+  border-radius: 5px;
+  background: #f1f3f6;
+}
+
+.sdkwork-mall-pc-home-skeleton-line.is-short {
+  width: 46%;
+  margin-bottom: 16px;
+}
+
+@keyframes sdkwork-mall-pc-home-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+/* 空状态 */
+
+.sdkwork-mall-pc-home-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 36px 16px;
+  border: 1px dashed var(--mall-line-strong);
+  border-radius: var(--mall-radius);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--mall-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.sdkwork-mall-pc-home-empty svg {
+  color: #c3c9d2;
+}
+
+.sdkwork-mall-pc-home-empty-action {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--mall-brand-soft);
+  border: 1px solid var(--mall-brand-line);
+  color: var(--mall-brand-deep);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition:
+    background-color 0.16s var(--mall-ease),
+    border-color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-empty-action:hover {
+  background: #ffe4e0;
+  border-color: #f0b3ab;
+}
+
+/* ── 店铺推荐 ───────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home-shops {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sdkwork-mall-pc-shop-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--mall-surface, #fff);
+  border: 1px solid var(--mall-line, #ebedf0);
+  border-radius: var(--mall-radius, 12px);
+  transition:
+    transform 0.22s var(--mall-ease, ease),
+    box-shadow 0.22s var(--mall-ease, ease),
+    border-color 0.22s var(--mall-ease, ease);
+}
+
+.sdkwork-mall-pc-shop-card:hover {
+  transform: translateY(-3px);
+  border-color: #f0c6c1;
+  box-shadow: var(--mall-shadow-2, 0 10px 28px rgba(20, 24, 33, 0.09));
+}
+
+.sdkwork-mall-pc-shop-card strong {
+  color: var(--mall-ink);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.sdkwork-mall-pc-shop-card p {
+  margin: 0;
+  color: var(--mall-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sdkwork-mall-pc-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.sdkwork-mall-pc-home-shop-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sdkwork-mall-pc-home-shop-logo {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 11px;
+  background: linear-gradient(145deg, #fff1ef, #f7d8d2);
+  color: var(--mall-brand);
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.sdkwork-mall-pc-home-shop-meta {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.sdkwork-mall-pc-home-shop-meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-shop-meta span {
+  color: var(--mall-subtle);
+  font-size: 11px;
+}
+
+.sdkwork-mall-pc-home-shop-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+  color: var(--mall-brand);
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-3px);
+  transition:
+    opacity 0.2s var(--mall-ease),
+    transform 0.2s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-shop-card:hover .sdkwork-mall-pc-home-shop-enter {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── 最近浏览 ───────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home-recent {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.sdkwork-mall-pc-home-recent-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--mall-surface);
+  border: 1px solid var(--mall-line);
+  border-radius: var(--mall-radius);
+  transition:
+    border-color 0.2s var(--mall-ease),
+    box-shadow 0.2s var(--mall-ease),
+    transform 0.2s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-home-recent-card:hover {
+  transform: translateY(-2px);
+  border-color: #f0c6c1;
+  box-shadow: var(--mall-shadow-2);
+}
+
+.sdkwork-mall-pc-home-recent-media {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #f3f4f7;
+}
+
+.sdkwork-mall-pc-home-recent-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sdkwork-mall-pc-home-recent-media .sdkwork-mall-pc-product-art-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+
+.sdkwork-mall-pc-home-recent-media .sdkwork-mall-pc-product-art-label,
+.sdkwork-mall-pc-home-recent-media .sdkwork-mall-pc-product-art-initial {
+  display: none;
+}
+
+.sdkwork-mall-pc-home-recent-body {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.sdkwork-mall-pc-home-recent-body strong {
+  color: var(--mall-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sdkwork-mall-pc-home-recent-body span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--mall-subtle);
+  font-size: 11px;
+}
+
+/* ── 猜你喜欢 ───────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home-guess {
+  margin-top: 36px;
+}
+
+.sdkwork-mall-pc-home-guess-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.sdkwork-mall-pc-home-guess-head::before,
+.sdkwork-mall-pc-home-guess-head::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #dfe3e8);
+}
+
+.sdkwork-mall-pc-home-guess-head::after {
+  background: linear-gradient(90deg, #dfe3e8, transparent);
+}
+
+.sdkwork-mall-pc-home-guess-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mall-ink);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.sdkwork-mall-pc-home-guess-title svg {
+  color: var(--mall-brand);
+}
+
+/* ── 首页错误态 ─────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home-fallback {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 40px auto;
+  padding: 48px 24px;
+  max-width: 560px;
+  border: 1px solid var(--mall-line);
+  border-radius: var(--mall-radius-lg);
+  background: var(--mall-surface);
+  text-align: center;
+  box-shadow: var(--mall-shadow-1);
+}
+
+.sdkwork-mall-pc-home-fallback h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sdkwork-mall-pc-home-fallback p {
+  margin: 0;
+  color: var(--mall-muted);
+  font-size: 13px;
+}
+
+/* 类目 / 活动页的横幅卡片：与首页视觉语言保持一致。 */
+.sdkwork-mall-pc-banner-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  min-height: 104px;
+  padding: 22px 24px;
+  border-radius: var(--mall-radius, 12px);
+  background:
+    radial-gradient(120% 150% at 100% 0%, rgba(225, 37, 27, 0.08), transparent 56%),
+    linear-gradient(135deg, #fff7f5, #ffffff 62%);
+  border: 1px solid var(--mall-line, #ebedf0);
+  transition:
+    transform 0.2s var(--mall-ease, ease),
+    box-shadow 0.2s var(--mall-ease, ease),
+    border-color 0.2s var(--mall-ease, ease);
+}
+
+.sdkwork-mall-pc-banner-card:hover {
+  transform: translateY(-2px);
+  border-color: #f0c6c1;
+  box-shadow: var(--mall-shadow-2, 0 10px 28px rgba(20, 24, 33, 0.09));
+}
+
+.sdkwork-mall-pc-banner-card > svg {
+  color: var(--mall-brand, #e1251b);
+}
+
+.sdkwork-mall-pc-banner-card img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.sdkwork-mall-pc-banner-card h2 {
+  margin: 0;
+  color: var(--mall-ink, #16181d);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sdkwork-mall-pc-banner-card p {
+  margin: 4px 0 0;
+  color: var(--mall-muted, #5b6472);
+  font-size: 12.5px;
+}
+
+.sdkwork-mall-pc-banner-grid {
+  gap: 12px;
+}
+
+/* ── 页脚 ───────────────────────────────────────────────────────────────── */
+
+.sdkwork-mall-pc-footer {
+  margin-top: 8px;
+  background: var(--mall-surface);
+  border-top: 1px solid var(--mall-line);
+}
+
+.sdkwork-mall-pc-footer-promise {
+  border-bottom: 1px solid var(--mall-line);
+}
+
+.sdkwork-mall-pc-footer-promise-inner {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+.sdkwork-mall-pc-footer-promise-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.sdkwork-mall-pc-footer-promise-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--mall-brand-soft);
+  color: var(--mall-brand);
+  flex: 0 0 auto;
+}
+
+.sdkwork-mall-pc-footer-promise-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.sdkwork-mall-pc-footer-promise-copy strong {
+  color: var(--mall-ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sdkwork-mall-pc-footer-promise-copy span {
+  color: var(--mall-subtle);
+  font-size: 11.5px;
+}
+
+.sdkwork-mall-pc-footer-main-inner {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.sdkwork-mall-pc-footer-brand {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  max-width: 260px;
+}
+
+.sdkwork-mall-pc-footer-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sdkwork-mall-pc-footer-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #ff5a3c, var(--mall-brand) 60%, var(--mall-brand-deep));
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.sdkwork-mall-pc-footer-brand-name {
+  display: grid;
+  gap: 1px;
+}
+
+.sdkwork-mall-pc-footer-brand-name strong {
+  font-family: var(--mall-num);
+  color: var(--mall-ink);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.sdkwork-mall-pc-footer-brand-name span {
+  color: var(--mall-subtle);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+}
+
+.sdkwork-mall-pc-footer-brand p {
+  margin: 0;
+  color: var(--mall-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.sdkwork-mall-pc-footer-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sdkwork-mall-pc-footer-badges span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--mall-surface-2);
+  border: 1px solid var(--mall-line);
+  color: var(--mall-muted);
+  font-size: 10.5px;
+}
+
+.sdkwork-mall-pc-footer-col {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+}
+
+.sdkwork-mall-pc-footer-col h3 {
+  margin: 0 0 2px;
+  color: var(--mall-ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sdkwork-mall-pc-footer-col a {
+  color: var(--mall-muted);
+  font-size: 12.5px;
+  line-height: 1.4;
+  transition: color 0.16s var(--mall-ease);
+}
+
+.sdkwork-mall-pc-footer-col a:hover {
+  color: var(--mall-brand);
+}
+
+.sdkwork-mall-pc-footer-bottom {
+  border-top: 1px solid var(--mall-line);
+}
+
+.sdkwork-mall-pc-footer-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 18px;
+  padding-bottom: 22px;
+  color: var(--mall-subtle);
+  font-size: 11.5px;
+}
+
+.sdkwork-mall-pc-footer-bottom-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mall-num);
+}
+
+.sdkwork-mall-pc-footer-bottom-meta span + span::before {
+  content: "·";
+  margin-right: 10px;
+  color: #cbd1da;
+}
+
+/* ── 响应式 ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1248px) {
+  .sdkwork-mall-pc-storefront {
+    --mall-gutter: 20px;
+  }
+
+  .sdkwork-mall-pc-masthead-main-inner {
+    grid-template-columns: 172px minmax(0, 1fr) auto;
+    gap: 20px;
+  }
+
+  .sdkwork-mall-pc-home-hero {
+    grid-template-columns: 204px minmax(0, 1fr) 276px;
+    height: 420px;
+  }
+
+  .sdkwork-mall-pc-home-grid,
+  .sdkwork-mall-pc-home-skeleton-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1080px) {
+  .sdkwork-mall-pc-masthead-links {
+    gap: 18px;
+    padding-left: 18px;
+  }
+
+  .sdkwork-mall-pc-masthead-search {
+    max-width: 460px;
+  }
+
+  .sdkwork-mall-pc-home-hero {
+    grid-template-columns: 204px minmax(0, 1fr);
+    height: auto;
+  }
+
+  .sdkwork-mall-pc-home-stage {
+    min-height: 380px;
+  }
+
+  .sdkwork-mall-pc-home-rail {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    margin-top: 4px;
+  }
+
+  .sdkwork-mall-pc-home-user {
+    flex: 0 0 300px;
+  }
+
+  .sdkwork-mall-pc-home-services {
+    flex: 1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sdkwork-mall-pc-home-notice {
+    display: none;
+  }
+
+  .sdkwork-mall-pc-home-grid,
+  .sdkwork-mall-pc-home-grid.is-cols-4,
+  .sdkwork-mall-pc-home-grid.is-cols-5,
+  .sdkwork-mall-pc-home-skeleton-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sdkwork-mall-pc-home-shops,
+  .sdkwork-mall-pc-footer-promise-inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sdkwork-mall-pc-footer-main-inner {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sdkwork-mall-pc-footer-brand {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .sdkwork-mall-pc-masthead-util-inner {
+    justify-content: center;
+  }
+
+  .sdkwork-mall-pc-masthead-util-left {
+    display: none;
+  }
+
+  .sdkwork-mall-pc-masthead-main-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
+  }
+
+  .sdkwork-mall-pc-masthead-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    max-width: none;
+  }
+
+  .sdkwork-mall-pc-masthead-account {
+    display: none;
+  }
+
+  .sdkwork-mall-pc-masthead-nav-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sdkwork-mall-pc-masthead-all {
+    justify-content: center;
+    border-radius: 0;
+  }
+
+  .sdkwork-mall-pc-masthead-links {
+    padding: 0 var(--mall-gutter);
+    min-height: 42px;
+    overflow-x: auto;
+  }
+
+  .sdkwork-mall-pc-masthead-links a::after {
+    bottom: -10px;
+  }
+
+  .sdkwork-mall-pc-home-hero {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  .sdkwork-mall-pc-home-categories {
+    display: none;
+  }
+
+  .sdkwork-mall-pc-home-stage {
+    min-height: 340px;
+  }
+
+  .sdkwork-mall-pc-home-slide {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px 24px 48px;
+  }
+
+  .sdkwork-mall-pc-home-slide-art {
+    display: none;
+  }
+
+  .sdkwork-mall-pc-home-rail {
+    flex-direction: column;
+  }
+
+  .sdkwork-mall-pc-home-user {
+    flex: none;
+  }
+
+  .sdkwork-mall-pc-home-services {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sdkwork-mall-pc-home-benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+
+  .sdkwork-mall-pc-home-benefit:nth-child(3)::before {
+    display: none;
+  }
+
+  .sdkwork-mall-pc-home-seckill-offers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sdkwork-mall-pc-home-grid,
+  .sdkwork-mall-pc-home-grid.is-four,
+  .sdkwork-mall-pc-home-grid.is-cols-3,
+  .sdkwork-mall-pc-home-grid.is-cols-4,
+  .sdkwork-mall-pc-home-grid.is-cols-5,
+  .sdkwork-mall-pc-home-skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sdkwork-mall-pc-home-shops {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sdkwork-mall-pc-footer-main-inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .sdkwork-mall-pc-footer-bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdkwork-mall-pc-home-slide,
+  .sdkwork-mall-pc-product-card,
+  .sdkwork-mall-pc-product-image img,
+  .sdkwork-mall-pc-home-offer,
+  .sdkwork-mall-pc-shop-card,
+  .sdkwork-mall-pc-home-recent-card,
+  .sdkwork-mall-pc-home-skeleton-media {
+    animation: none;
     transition: none;
   }
 }

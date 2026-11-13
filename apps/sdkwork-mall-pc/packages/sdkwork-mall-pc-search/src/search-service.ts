@@ -4,6 +4,7 @@ import { getSdkworkSearchRemotePort } from "./search-remote-port";
 export interface MallSearchProduct {
   id: string;
   imageUrl?: string;
+  listPriceCny?: number | null;
   priceCny: number | null;
   shopId?: string;
   shopName?: string;
@@ -107,6 +108,14 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
           : typeof record.priceCny === "number"
             ? record.priceCny
             : null,
+    listPriceCny:
+      typeof record.listPrice === "number"
+        ? record.listPrice
+        : typeof record.marketPrice === "number"
+          ? record.marketPrice
+          : typeof record.originalPrice === "number"
+            ? record.originalPrice
+            : null,
     shopId:
       typeof record.shopId === "string"
         ? record.shopId
@@ -197,12 +206,13 @@ export async function searchMallProducts(input: {
     return { items, total: payload.total ?? items.length };
   }
 
-  // 自由文本搜索走 catalog.spus.list（支持 q），由服务端分页。
+  // 自由文本搜索走 catalog.spus.list（支持 q 与 sort），由服务端分页。
   const response = await remote.listSpus({
     categoryId: input.categoryId,
     page,
     pageSize,
     q: input.query,
+    sort: input.sort,
   });
   const payload = unwrapSdkworkPaymentResponse(response) as {
     items?: Record<string, unknown>[];

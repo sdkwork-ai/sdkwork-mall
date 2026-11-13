@@ -1,22 +1,28 @@
 import type { ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
+  ChevronRight,
   Crown,
   FileBarChart2,
   Flag,
-  Heart,
-  HelpCircle,
+  Flame,
+  Grid2x2,
+  Headphones,
+  Headset,
   KeyRound,
   LayoutDashboard,
   MapPin,
   Megaphone,
   Package,
+  RotateCcw,
   ScrollText,
   Search,
   ShieldAlert,
+  ShieldCheck,
   ShoppingCart,
   Store,
-  User,
+  Truck,
+  UserRound,
   Users,
   Wallet,
 } from "lucide-react";
@@ -25,7 +31,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   sdkworkMallPcBrand,
 } from "@sdkwork/mall-pc-commons";
-import { sdkworkMallPcCategoryNav } from "@sdkwork/mall-pc-commons/category-nav";
 
 export interface SdkworkMallPcShellRuntime {
   readonly config: {
@@ -42,6 +47,57 @@ export interface SdkworkMallPcShellProps {
   readonly runtime: SdkworkMallPcShellRuntime;
 }
 
+const SDKWORK_MALL_PC_HOT_KEYWORDS = [
+  "手机",
+  "笔记本",
+  "冰箱",
+  "跑步机",
+  "精华液",
+  "坚果",
+] as const;
+
+const SDKWORK_MALL_PC_FOOTER_COLUMNS: ReadonlyArray<{
+  readonly links: ReadonlyArray<{ readonly label: string; readonly to: string }>;
+  readonly title: string;
+}> = [
+  {
+    title: "购物指南",
+    links: [
+      { label: "购物流程", to: "/help" },
+      { label: "会员权益", to: "/buyer/membership" },
+      { label: "领券中心", to: "/buyer/coupons" },
+      { label: "常见问题", to: "/help" },
+    ],
+  },
+  {
+    title: "配送与售后",
+    links: [
+      { label: "配送说明", to: "/help" },
+      { label: "订单查询", to: "/buyer/orders" },
+      { label: "退换货服务", to: "/buyer/after-sales" },
+      { label: "价格保护", to: "/help" },
+    ],
+  },
+  {
+    title: "我的资产",
+    links: [
+      { label: "我的订单", to: "/buyer/orders" },
+      { label: "优惠券", to: "/buyer/coupons" },
+      { label: "积分商城", to: "/buyer/points" },
+      { label: "发票管理", to: "/buyer/invoices" },
+    ],
+  },
+  {
+    title: "商家服务",
+    links: [
+      { label: "商家入驻", to: "/merchant" },
+      { label: "商品管理", to: "/merchant/products" },
+      { label: "商家结算", to: "/merchant/settlement" },
+      { label: "平台招商", to: "/merchant/onboarding" },
+    ],
+  },
+];
+
 export function SdkworkMallPcStorefrontShell({
   children,
   isAuthenticated = false,
@@ -52,81 +108,199 @@ export function SdkworkMallPcStorefrontShell({
 
   return (
     <div className="sdkwork-mall-pc-storefront">
-      <header className="sdkwork-mall-pc-topbar">
-        <div className="sdkwork-mall-pc-topbar-inner">
-          <Link className="sdkwork-mall-pc-logo" to="/">
-            <span className="sdkwork-mall-pc-brand-mark">{sdkworkMallPcBrand.mark}</span>
-            <span>{brandName}</span>
-          </Link>
-
-          <form
-            className="sdkwork-mall-pc-search-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const formData = new FormData(event.currentTarget);
-              const query = String(formData.get("q") ?? "").trim();
-              navigate(query ? `/search?q=${encodeURIComponent(query)}` : "/search");
-            }}
-          >
-            <Search aria-hidden="true" size={18} />
-            <input name="q" placeholder="搜索商品、品牌、店铺" type="search" />
-            <button type="submit">搜索</button>
-          </form>
-
-          <nav aria-label="用户快捷入口" className="sdkwork-mall-pc-topnav">
-            <Link to="/buyer">买家中心</Link>
-            <Link to="/buyer/membership">会员中心</Link>
-            <Link to="/activity">活动会场</Link>
-            <Link to="/buyer/orders">我的订单</Link>
-            <Link to="/cart">
-              <ShoppingCart aria-hidden="true" size={16} />
-              购物车
-            </Link>
-            <Link to="/buyer/favorites">
-              <Heart aria-hidden="true" size={16} />
-              收藏
-            </Link>
-            <Link to="/merchant">商家入驻</Link>
-            <Link to="/help">
-              <HelpCircle aria-hidden="true" size={16} />
-              客服
-            </Link>
-            {isAuthenticated ? (
-              <Link to="/buyer">
-                <User aria-hidden="true" size={16} />
-                我的账户
+      <header className="sdkwork-mall-pc-masthead">
+        <div className="sdkwork-mall-pc-masthead-util">
+          <div className="sdkwork-mall-pc-container sdkwork-mall-pc-masthead-util-inner">
+            <div className="sdkwork-mall-pc-masthead-util-left">
+              <MapPin aria-hidden="true" size={13} />
+              <span>配送至：全国</span>
+              {isAuthenticated ? (
+                <span>Hi，欢迎回来</span>
+              ) : (
+                <>
+                  <span>你好，请登录</span>
+                  <Link className="sdkwork-mall-pc-masthead-util-accent" to="/auth/login">
+                    免费注册
+                  </Link>
+                </>
+              )}
+            </div>
+            <nav aria-label="快捷服务" className="sdkwork-mall-pc-masthead-util-right">
+              <Link to="/buyer/orders">我的订单</Link>
+              <Link to="/buyer">买家中心</Link>
+              <Link to="/buyer/membership">会员中心</Link>
+              <Link to="/merchant">商家入驻</Link>
+              <Link to="/help">帮助中心</Link>
+              <Link to="/help">
+                <Headset aria-hidden="true" size={13} />
+                客户服务
               </Link>
-            ) : (
-              <Link to="/auth/login">
-                <User aria-hidden="true" size={16} />
-                登录
+            </nav>
+          </div>
+        </div>
+
+        <div className="sdkwork-mall-pc-masthead-main">
+          <div className="sdkwork-mall-pc-container sdkwork-mall-pc-masthead-main-inner">
+            <Link aria-label={`${brandName}首页`} className="sdkwork-mall-pc-masthead-brand" to="/">
+              <span aria-hidden="true" className="sdkwork-mall-pc-masthead-brand-mark">
+                商
+              </span>
+              <span className="sdkwork-mall-pc-masthead-brand-copy">
+                <strong>SDKWork</strong>
+                <span>商城</span>
+              </span>
+            </Link>
+
+            <div className="sdkwork-mall-pc-masthead-search">
+              <form
+                className="sdkwork-mall-pc-masthead-search-box"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const formData = new FormData(event.currentTarget);
+                  const query = String(formData.get("q") ?? "").trim();
+                  navigate(query ? `/search?q=${encodeURIComponent(query)}` : "/search");
+                }}
+                role="search"
+              >
+                <Search aria-hidden="true" size={17} />
+                <input
+                  aria-label="搜索商品、品牌、店铺"
+                  autoComplete="off"
+                  name="q"
+                  placeholder="搜索商品 / 品牌 / 店铺"
+                  type="search"
+                />
+                <button type="submit">搜索</button>
+              </form>
+              <div className="sdkwork-mall-pc-masthead-search-hints">
+                <span>热搜</span>
+                {SDKWORK_MALL_PC_HOT_KEYWORDS.map((keyword) => (
+                  <Link key={keyword} to={`/search?q=${encodeURIComponent(keyword)}`}>
+                    {keyword}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="sdkwork-mall-pc-masthead-actions">
+              <Link className="sdkwork-mall-pc-masthead-cart" to="/cart">
+                <ShoppingCart aria-hidden="true" size={16} />
+                <span>购物车</span>
+                <ChevronRight aria-hidden="true" size={13} />
               </Link>
-            )}
-          </nav>
+              <Link
+                className="sdkwork-mall-pc-masthead-account"
+                to={isAuthenticated ? "/buyer" : "/auth/login"}
+              >
+                <UserRound aria-hidden="true" size={16} />
+                <span>{isAuthenticated ? "我的账户" : "登录 / 注册"}</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="sdkwork-mall-pc-masthead-nav">
+          <div className="sdkwork-mall-pc-container sdkwork-mall-pc-masthead-nav-inner">
+            <Link className="sdkwork-mall-pc-masthead-all" to="/categories">
+              <Grid2x2 aria-hidden="true" size={16} />
+              全部商品分类
+            </Link>
+            <nav aria-label="商品频道" className="sdkwork-mall-pc-masthead-links">
+              <Link to="/activity">
+                <Flame aria-hidden="true" size={14} />
+                限时秒杀
+              </Link>
+              <Link to="/search?q=brand">品牌闪购</Link>
+              <Link to="/buyer/membership">
+                <Crown aria-hidden="true" size={14} />
+                会员日
+              </Link>
+              <Link to="/search?q=new">新品首发</Link>
+              <Link to="/search?q=家电">家电馆</Link>
+              <Link to="/search?q=生鲜">生鲜直供</Link>
+              <Link to="/merchant">商家服务</Link>
+            </nav>
+          </div>
         </div>
       </header>
-
-      <div className="sdkwork-mall-pc-category-bar">
-        <div className="sdkwork-mall-pc-category-inner">
-          <Link className="sdkwork-mall-pc-all-categories" to="/categories">
-            <MapPin aria-hidden="true" size={16} />
-            全部类目
-          </Link>
-          {sdkworkMallPcCategoryNav.map((category) => (
-            <Link key={category} to={`/search?q=${encodeURIComponent(category)}`}>
-              {category}
-            </Link>
-          ))}
-        </div>
-      </div>
 
       <main className="sdkwork-mall-pc-storefront-main">{children}</main>
 
       <footer className="sdkwork-mall-pc-footer">
-        <div className="sdkwork-mall-pc-footer-inner">
-          <span>{brandName}</span>
-          <span>{runtime.config.environment}</span>
-          <span>{runtime.config.version}</span>
+        <div className="sdkwork-mall-pc-footer-promise">
+          <div className="sdkwork-mall-pc-container sdkwork-mall-pc-footer-promise-inner">
+            {[
+              { icon: ShieldCheck, title: "正品保障", desc: "官方自营 · 品牌直供" },
+              { icon: Truck, title: "极速配送", desc: "多仓直发 · 次日可达" },
+              { icon: RotateCcw, title: "无忧退换", desc: "7 天无理由退换货" },
+              { icon: Headphones, title: "专属客服", desc: "7×24 小时在线答疑" },
+            ].map((item) => (
+              <div className="sdkwork-mall-pc-footer-promise-item" key={item.title}>
+                <span className="sdkwork-mall-pc-footer-promise-icon">
+                  <item.icon aria-hidden="true" size={20} />
+                </span>
+                <span className="sdkwork-mall-pc-footer-promise-copy">
+                  <strong>{item.title}</strong>
+                  <span>{item.desc}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="sdkwork-mall-pc-container sdkwork-mall-pc-footer-main-inner">
+          <div className="sdkwork-mall-pc-footer-brand">
+            <div className="sdkwork-mall-pc-footer-brand-lockup">
+              <span aria-hidden="true" className="sdkwork-mall-pc-footer-brand-mark">
+                商
+              </span>
+              <span className="sdkwork-mall-pc-footer-brand-name">
+                <strong>SDKWork</strong>
+                <span>商城</span>
+              </span>
+            </div>
+            <p>
+              面向品质生活消费者，聚合平台自营与品牌旗舰商家，提供正品保障、
+              极速配送与 7 天无理由退换服务。
+            </p>
+            <div className="sdkwork-mall-pc-footer-badges">
+              <span>
+                <ShieldCheck aria-hidden="true" size={12} />
+                正品保障
+              </span>
+              <span>
+                <Truck aria-hidden="true" size={12} />
+                极速发货
+              </span>
+            </div>
+          </div>
+
+          {SDKWORK_MALL_PC_FOOTER_COLUMNS.map((column) => (
+            <nav
+              aria-label={column.title}
+              className="sdkwork-mall-pc-footer-col"
+              key={column.title}
+            >
+              <h3>{column.title}</h3>
+              {column.links.map((link) => (
+                <Link key={`${column.title}-${link.label}`} to={link.to}>
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          ))}
+        </div>
+
+        <div className="sdkwork-mall-pc-footer-bottom">
+          <div className="sdkwork-mall-pc-container sdkwork-mall-pc-footer-bottom-inner">
+            <span>
+              © {new Date().getFullYear()} SDKWork 商城 · 品质生活，一站购齐
+            </span>
+            <span className="sdkwork-mall-pc-footer-bottom-meta">
+              <span>{runtime.config.environment}</span>
+              <span>v{runtime.config.version}</span>
+            </span>
+          </div>
         </div>
       </footer>
     </div>

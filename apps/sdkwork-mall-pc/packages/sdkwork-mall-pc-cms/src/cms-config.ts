@@ -58,8 +58,10 @@ export const defaultMallCmsConfig = (): MallCmsConfig => ({
     },
   ],
   floors: [
-    { id: "floor-hot", title: "热卖爆款", productQuery: "", sortOrder: 0, enabled: true },
-    { id: "floor-new", title: "新品首发", productQuery: "new", sortOrder: 1, enabled: true },
+    { id: "floor-digital", title: "手机数码", productQuery: "手机", sortOrder: 0, enabled: true },
+    { id: "floor-appliance", title: "家用电器", productQuery: "家电", sortOrder: 1, enabled: true },
+    { id: "floor-fashion", title: "服饰鞋包", productQuery: "服饰", sortOrder: 2, enabled: true },
+    { id: "floor-beauty", title: "美妆个护", productQuery: "护肤", sortOrder: 3, enabled: true },
   ],
   hotKeywords: [
     { id: "kw-phone", keyword: "手机", sortOrder: 0, enabled: true },

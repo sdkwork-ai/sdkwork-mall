@@ -2,9 +2,16 @@ import { unwrapSdkworkPaymentResponse } from "@sdkwork/payment-service";
 import { getSdkworkHomeRemotePort } from "./home-remote-port";
 
 export interface MallHomeProductCard {
+  brand?: string;
+  freeShipping?: boolean;
   id: string;
   imageUrl?: string;
+  inStock?: boolean;
+  listPriceCny?: number | null;
   priceCny: number | null;
+  rating?: number;
+  salesCount?: number;
+  selfOperated?: boolean;
   shopName?: string;
   subtitle?: string;
   title: string;
@@ -28,25 +35,71 @@ export interface MallHomeShopCard {
   name: string;
 }
 
+function readNumber(record: Record<string, unknown>, keys: readonly string[]): number | undefined {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    // Money columns are decimal strings on some transports; a plain Number()
+    // keeps "4299.00" from degrading a card to the "询价" fallback.
+    if (typeof value === "string" && value.trim() !== "") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+  }
+  return undefined;
+}
+
+function readBoolean(record: Record<string, unknown>, keys: readonly string[]): boolean | undefined {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "boolean") {
+      return value;
+    }
+  }
+  return undefined;
+}
+
 function readProductCard(record: Record<string, unknown>): MallHomeProductCard {
   const media = record.primaryImage ?? record.coverImage ?? record.image;
+  const images = Array.isArray(record.images) ? record.images : [];
+  const firstImage = images.find((item) => typeof item === "string" && item !== "");
   const imageUrl =
     typeof media === "object" && media !== null && "url" in media
       ? String((media as { url?: unknown }).url ?? "")
-      : undefined;
+      : typeof record.imageUrl === "string" && record.imageUrl
+        ? record.imageUrl
+        : typeof firstImage === "string"
+          ? firstImage
+          : undefined;
+
+  const brand =
+    typeof record.brand === "string"
+      ? record.brand
+      : typeof record.brandName === "string"
+        ? record.brandName
+        : undefined;
+
+  const stock = readNumber(record, ["stock", "stockQuantity"]);
 
   return {
     id: String(record.id ?? record.spuId ?? ""),
     title: String(record.title ?? record.name ?? "商品"),
     subtitle: typeof record.subtitle === "string" ? record.subtitle : undefined,
-    priceCny:
-      typeof record.salePrice === "number"
-        ? record.salePrice
-        : typeof record.price === "number"
-          ? record.price
-          : null,
+    priceCny: readNumber(record, ["salePrice", "price", "priceCny"]) ?? null,
+    listPriceCny:
+      readNumber(record, ["listPrice", "marketPrice", "originalPrice", "priceList"]) ?? null,
     shopName: typeof record.shopName === "string" ? record.shopName : undefined,
     imageUrl: imageUrl || undefined,
+    brand,
+    rating: readNumber(record, ["rating", "averageRating"]),
+    salesCount: readNumber(record, ["salesCount", "sales"]),
+    selfOperated: readBoolean(record, ["selfOperated", "self_operated", "isSelfOperated"]),
+    freeShipping: readBoolean(record, ["freeShipping", "free_shipping", "isFreeShipping"]),
+    inStock: stock == null ? undefined : stock > 0,
   };
 }
 

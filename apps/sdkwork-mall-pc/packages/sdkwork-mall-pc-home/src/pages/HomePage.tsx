@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Clock, Flame, History, Sparkles, Store, Tag } from "lucide-react";
-import { Button, EmptyState, LoadingBlock } from "@sdkwork/ui-pc-react";
+import { Button } from "@sdkwork/ui-pc-react";
 import {
   listEnabledMallCmsBanners,
   listEnabledMallCmsFloors,
@@ -9,7 +8,7 @@ import {
   type MallCmsFloor,
 } from "@sdkwork/mall-pc-cms/cms-config";
 import { loadMallCmsConfigRemote } from "@sdkwork/mall-pc-cms/cms-service";
-import { searchMallProducts } from "@sdkwork/mall-pc-search/search-service";
+import { searchMallProducts, type MallSearchProduct } from "@sdkwork/mall-pc-search/search-service";
 import { readMallFootprint, type MallFootprintItem } from "@sdkwork/mall-pc-reviews/footprint-service";
 import {
   formatCountdown,
@@ -17,18 +16,61 @@ import {
   listMallActivities,
   type MallActivityOffer,
 } from "@sdkwork/mall-pc-activity/activity-service";
-import { loadMallHomeSnapshot, type MallHomeProductCard, type MallHomeSnapshot } from "../home-service";
+import { sdkworkMallPcCategoryNav } from "@sdkwork/mall-pc-commons/category-nav";
+import {
+  loadMallHomeSnapshot,
+  type MallHomeProductCard,
+  type MallHomeSnapshot,
+} from "../home-service";
+import { HomeHero, type HomeCategoryItem } from "./home/home-hero";
+import {
+  HomeFloor,
+  HomeGuess,
+  HomeProductSection,
+  HomeRecent,
+  HomeSeckill,
+  HomeShops,
+  type HomeSeckillSession,
+} from "./home/home-sections";
 
-const BANNER_AUTOPLAY_INTERVAL_MS = 5000;
-const SEKILL_AUTOPLAY_INTERVAL_MS = 1000;
-const SEKILL_STRIP_SIZE = 4;
+const SECKILL_AUTOPLAY_INTERVAL_MS = 1000;
+const SECKILL_STRIP_SIZE = 4;
+const FOOTPRINT_SIZE = 6;
+const FLOOR_PRODUCT_SIZE = 10;
+const GUESS_PRODUCT_SIZE = 10;
 
-interface SdkworkMallSeckillCountdownState {
-  phase: "active" | "ended" | "upcoming";
-  label: string;
+/**
+ * Upper bound for the skeleton state when the catalog API is unreachable.
+ *
+ * The SDK retries failed requests for a while; without this watchdog a dead
+ * gateway would leave the shelves shimmering forever.
+ */
+const HOME_LOADING_TIMEOUT_MS = 8000;
+
+interface FloorProductsState {
+  readonly loading: boolean;
+  readonly products: MallHomeProductCard[];
 }
 
-function useMallSeckillActivities() {
+interface SeckillView {
+  readonly header?: { readonly label: string; readonly parts: readonly [string, string, string] };
+  readonly sessions: HomeSeckillSession[];
+}
+
+function padClock(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function toClockParts(target: Date): [string, string, string] {
+  const parts = formatCountdown(target);
+  return [
+    padClock(parts.days * 24 + parts.hours),
+    padClock(parts.minutes),
+    padClock(parts.seconds),
+  ];
+}
+
+function useMallSeckillOffers(): MallActivityOffer[] {
   const [offers, setOffers] = useState<MallActivityOffer[]>([]);
 
   useEffect(() => {
@@ -39,7 +81,7 @@ function useMallSeckillActivities() {
           setOffers(
             rows
               .filter((row) => row.activityType === "flash-sale" || row.activityType === "limited-rush")
-              .slice(0, SEKILL_STRIP_SIZE),
+              .slice(0, SECKILL_STRIP_SIZE),
           );
         }
       })
@@ -54,241 +96,139 @@ function useMallSeckillActivities() {
   return offers;
 }
 
-function useMallSeckillCountdown(offers: MallActivityOffer[]): SdkworkMallSeckillCountdownState[] {
+function useMallSeckillView(offers: MallActivityOffer[]): SeckillView {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (offers.length === 0) {
       return undefined;
     }
-    const timer = window.setInterval(() => setNow(Date.now()), SEKILL_AUTOPLAY_INTERVAL_MS);
+    const timer = window.setInterval(() => setNow(Date.now()), SECKILL_AUTOPLAY_INTERVAL_MS);
     return () => {
       window.clearInterval(timer);
     };
   }, [offers.length]);
 
-  return useMemo(
-    () =>
-      offers.map((offer) => {
-        const countdown = getActivityCountdownTarget(offer);
-        if (!countdown || countdown.phase === "ended") {
-          return { phase: "ended" as const, label: "已结束" };
-        }
-        const parts = formatCountdown(countdown.target);
-        const pad = (value: number) => String(value).padStart(2, "0");
-        const clock = `${pad(parts.days * 24 + parts.hours)}:${pad(parts.minutes)}:${pad(parts.seconds)}`;
+  return useMemo(() => {
+    let header: SeckillView["header"];
+
+    const sessions = offers.map((offer) => {
+      const countdown = getActivityCountdownTarget(offer);
+      if (!countdown || countdown.phase === "ended") {
         return {
-          phase: countdown.phase,
-          label: countdown.phase === "upcoming" ? `距开始 ${clock}` : `距结束 ${clock}`,
+          id: offer.id,
+          title: offer.title,
+          discountText: offer.discountText,
+          highlight: offer.highlight,
+          phase: "ended" as const,
+          clockLabel: "已结束",
         };
-      }),
-    [offers, now],
-  );
-}
-
-function SdkworkMallSeckillStrip({ offers }: { offers: MallActivityOffer[] }) {
-  const countdowns = useMallSeckillCountdown(offers);
-  if (offers.length === 0) {
-    return null;
-  }
-
-  return (
-    <section className="sdkwork-mall-pc-floor sdkwork-mall-pc-seckill">
-      <h2>
-        <Clock aria-hidden="true" size={18} /> 秒杀专场
-      </h2>
-      <div className="sdkwork-mall-pc-seckill-row">
-        {offers.map((offer, index) => {
-          const countdown = countdowns[index];
-          return (
-            <Link
-              className="sdkwork-mall-pc-seckill-card"
-              key={offer.id}
-              to={`/activity/${offer.id}`}
-            >
-              <div className="sdkwork-mall-pc-seckill-head">
-                <strong>{offer.title}</strong>
-                {offer.discountText ? <span>{offer.discountText}</span> : null}
-              </div>
-              {offer.highlight ? <p>{offer.highlight}</p> : null}
-              <span
-                className={
-                  countdown.phase === "active"
-                    ? "sdkwork-mall-pc-seckill-countdown sdkwork-mall-pc-seckill-countdown-active"
-                    : "sdkwork-mall-pc-seckill-countdown"
-                }
-              >
-                {countdown.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function SdkworkMallBannerCarousel({ banners }: { banners: MallCmsBanner[] }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const count = banners.length;
-
-  useEffect(() => {
-    if (count <= 1 || isPaused) {
-      return undefined;
-    }
-    const timer = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % count);
-    }, BANNER_AUTOPLAY_INTERVAL_MS);
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [count, isPaused]);
-
-  const activeBanner = banners[activeIndex];
-
-  if (count === 0) {
-    return null;
-  }
-
-  return (
-    <section
-      className="sdkwork-mall-pc-banner-carousel"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      {count === 1 || !activeBanner ? (
-        <BannerCard banner={activeBanner ?? banners[0]} />
-      ) : (
-        <>
-          {banners.map((banner, index) => (
-            <BannerCard banner={banner} hidden={index !== activeIndex} key={banner.id} />
-          ))}
-          <div className="sdkwork-mall-pc-banner-dots" role="tablist" aria-label="banner 切换">
-            {banners.map((banner, index) => (
-              <button
-                aria-label={`切换到第 ${index + 1} 张 banner`}
-                aria-selected={index === activeIndex}
-                className={
-                  index === activeIndex
-                    ? "sdkwork-mall-pc-banner-dot sdkwork-mall-pc-banner-dot-active"
-                    : "sdkwork-mall-pc-banner-dot"
-                }
-                key={banner.id}
-                onClick={() => setActiveIndex(index)}
-                role="tab"
-                type="button"
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </section>
-  );
-}
-
-function BannerCard({ banner, hidden = false }: { banner: MallCmsBanner; hidden?: boolean }) {
-  return (
-    <Link
-      className={
-        banner.imageUrl
-          ? "sdkwork-mall-pc-banner-card sdkwork-mall-pc-banner-card-immersive"
-          : "sdkwork-mall-pc-banner-card"
       }
-      key={banner.id}
-      style={hidden ? { display: "none" } : undefined}
-      to={banner.linkUrl}
-    >
-      {banner.imageUrl ? (
-        <img alt={banner.title} className="sdkwork-mall-pc-banner-image" src={banner.imageUrl} />
-      ) : (
-        <span aria-hidden="true" className="sdkwork-mall-pc-banner-watermark">
-          <Sparkles size={180} strokeWidth={1.2} />
-        </span>
-      )}
-      <div className="sdkwork-mall-pc-banner-copy">
-        <h2>{banner.title}</h2>
-        {banner.subtitle ? <p>{banner.subtitle}</p> : null}
-      </div>
-    </Link>
-  );
+      const parts = toClockParts(countdown.target);
+      const label = countdown.phase === "upcoming" ? "距开始" : "距结束";
+      if (!header && countdown.phase === "active") {
+        header = { label, parts };
+      }
+      return {
+        id: offer.id,
+        title: offer.title,
+        discountText: offer.discountText,
+        highlight: offer.highlight,
+        phase: countdown.phase,
+        clockLabel: `${label} ${parts.join(":")}`,
+      };
+    });
+
+    return { header, sessions };
+  }, [offers, now]);
 }
 
-function ProductGrid({
-  loading,
-  products,
-  title,
-}: {
-  loading: boolean;
-  products: MallHomeProductCard[];
-  title: string;
-}) {
-  if (loading) {
-    return <LoadingBlock label={`加载${title}...`} />;
-  }
-
-  if (products.length === 0) {
-    return <EmptyState description="暂无商品" title={title} />;
-  }
-
-  return (
-    <section className="sdkwork-mall-pc-floor">
-      <h2>{title}</h2>
-      <div className="sdkwork-mall-pc-product-grid">
-        {products.map((product) => (
-          <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
-            <div className="sdkwork-mall-pc-product-image">
-              {product.imageUrl ? <img alt={product.title} src={product.imageUrl} /> : <Tag aria-hidden="true" />}
-            </div>
-            <div className="sdkwork-mall-pc-product-body">
-              <h3>{product.title}</h3>
-              {product.subtitle ? <p>{product.subtitle}</p> : null}
-              <strong>{product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "询价"}</strong>
-              {product.shopName ? <span>{product.shopName}</span> : null}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
+function mapSearchProduct(product: MallSearchProduct): MallHomeProductCard {
+  return {
+    id: product.id,
+    title: product.title,
+    priceCny: product.priceCny,
+    listPriceCny: product.listPriceCny ?? null,
+    shopName: product.shopName,
+    imageUrl: product.imageUrl,
+    brand: product.brand,
+    rating: product.rating,
+    salesCount: product.salesCount,
+    selfOperated: product.selfOperated,
+    freeShipping: product.freeShipping,
+    inStock: product.inStock,
+  };
 }
 
-function HomeFloorSection({ floor }: { floor: MallCmsFloor }) {
-  const [products, setProducts] = useState<MallHomeProductCard[]>([]);
-  const [loading, setLoading] = useState(true);
+function useFloorProducts(floors: MallCmsFloor[]): Record<string, FloorProductsState> {
+  const [state, setState] = useState<Record<string, FloorProductsState>>({});
 
   useEffect(() => {
     let active = true;
-    const sort = floor.id.includes("new") || floor.productQuery === "new" ? "created_at" : "sales";
-    searchMallProducts({
-      pageSize: 8,
-      query: floor.productQuery || undefined,
-      sort,
-    })
-      .then((result) => {
-        if (active) {
-          setProducts(
-            result.items.map((item) => ({
-              id: item.id,
-              title: item.title,
-              priceCny: item.priceCny,
-              shopName: item.shopName,
-              imageUrl: item.imageUrl,
-            })),
-          );
-        }
+    setState(
+      Object.fromEntries(
+        floors.map((floor) => [floor.id, { loading: true, products: [] }]),
+      ) as Record<string, FloorProductsState>,
+    );
+
+    for (const floor of floors) {
+      const isNew = floor.id.includes("new") || floor.productQuery === "new";
+      const sort = isNew ? "created_at" : "sales";
+      void searchMallProducts({
+        pageSize: FLOOR_PRODUCT_SIZE,
+        query: isNew ? undefined : floor.productQuery || undefined,
+        sort,
       })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
+        .then((result) => {
+          if (!active) {
+            return;
+          }
+          setState((current) => ({
+            ...current,
+            [floor.id]: { loading: false, products: result.items.map(mapSearchProduct) },
+          }));
+        })
+        .catch(() => {
+          if (!active) {
+            return;
+          }
+          setState((current) => ({
+            ...current,
+            [floor.id]: { loading: false, products: [] },
+          }));
+        });
+    }
+
+    const watchdog = window.setTimeout(() => {
+      if (!active) {
+        return;
+      }
+      setState((current) => {
+        const next: Record<string, FloorProductsState> = { ...current };
+        for (const floor of floors) {
+          if (next[floor.id]?.loading) {
+            next[floor.id] = { loading: false, products: next[floor.id].products };
+          }
         }
+        return next;
       });
+    }, HOME_LOADING_TIMEOUT_MS);
+
     return () => {
       active = false;
+      window.clearTimeout(watchdog);
     };
-  }, [floor.id, floor.productQuery]);
+  }, [floors]);
 
-  return <ProductGrid loading={loading} products={products} title={floor.title} />;
+  return state;
+}
+
+function fallbackCategories(): HomeCategoryItem[] {
+  return sdkworkMallPcCategoryNav.map((name, index) => ({
+    id: `local-category-${index}`,
+    name,
+    to: `/search?q=${encodeURIComponent(name)}`,
+  }));
 }
 
 export function SdkworkMallHomePage() {
@@ -300,7 +240,9 @@ export function SdkworkMallHomePage() {
   const [guessYouLike, setGuessYouLike] = useState<MallHomeProductCard[]>([]);
   const [guessLoading, setGuessLoading] = useState(true);
   const [footprint, setFootprint] = useState<MallFootprintItem[]>([]);
-  const seckillOffers = useMallSeckillActivities();
+  const seckillOffers = useMallSeckillOffers();
+  const seckillView = useMallSeckillView(seckillOffers);
+  const floorProducts = useFloorProducts(floors);
 
   useEffect(() => {
     let active = true;
@@ -338,20 +280,15 @@ export function SdkworkMallHomePage() {
   useEffect(() => {
     let active = true;
     // 猜你喜欢：基于热销商品随机打散，提供个性化推荐流。
-    void searchMallProducts({ pageSize: 12, sort: "sales" })
+    void searchMallProducts({ pageSize: 20, sort: "sales" })
       .then((result) => {
         if (active) {
-          const shuffled = [...result.items]
-            .map((item) => ({
-              id: item.id,
-              title: item.title,
-              priceCny: item.priceCny,
-              shopName: item.shopName,
-              imageUrl: item.imageUrl,
-            }))
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 10);
-          setGuessYouLike(shuffled);
+          setGuessYouLike(
+            [...result.items]
+              .map(mapSearchProduct)
+              .sort(() => Math.random() - 0.5)
+              .slice(0, GUESS_PRODUCT_SIZE),
+          );
         }
       })
       .catch(() => {
@@ -363,113 +300,118 @@ export function SdkworkMallHomePage() {
         }
       });
     // 最近浏览：从本地足迹读取。
-    setFootprint(readMallFootprint().slice(0, 6));
+    setFootprint(readMallFootprint().slice(0, FOOTPRINT_SIZE));
+    const watchdog = window.setTimeout(() => {
+      if (active) {
+        setGuessLoading(false);
+      }
+    }, HOME_LOADING_TIMEOUT_MS);
     return () => {
       active = false;
+      window.clearTimeout(watchdog);
     };
   }, []);
 
-  if (loading) {
-    return <LoadingBlock label="加载商城首页..." />;
-  }
+  const categories = useMemo<HomeCategoryItem[]>(() => {
+    if (!snapshot?.categories.length) {
+      return fallbackCategories();
+    }
+    return snapshot.categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+      to: `/categories/${category.id}`,
+    }));
+  }, [snapshot]);
+
+  const hotProducts = snapshot?.hotProducts ?? [];
+  const newProducts = snapshot?.newProducts ?? [];
+
+  // 推荐流优先展示上方楼层尚未出现的商品，再用已出现商品补足 10 个。
+  const guessProducts = useMemo(() => {
+    const shownIds = new Set<string>();
+    for (const state of Object.values(floorProducts)) {
+      for (const product of state.products) {
+        shownIds.add(product.id);
+      }
+    }
+    for (const product of [...hotProducts, ...newProducts]) {
+      shownIds.add(product.id);
+    }
+    const unseen = guessYouLike.filter((product) => !shownIds.has(product.id));
+    const repeated = guessYouLike.filter((product) => shownIds.has(product.id));
+    return [...unseen, ...repeated].slice(0, GUESS_PRODUCT_SIZE);
+  }, [floorProducts, guessYouLike, hotProducts, newProducts]);
 
   if (error) {
     return (
-      <EmptyState
-        actions={<Button onClick={() => void loadHomeSnapshot()} type="button" variant="outline">重试</Button>}
-        description={error}
-        title="首页暂不可用"
-      />
+      <div className="sdkwork-mall-pc-home">
+        <div className="sdkwork-mall-pc-container">
+          <div className="sdkwork-mall-pc-home-fallback">
+            <h2>首页暂不可用</h2>
+            <p>{error}</p>
+            <Button onClick={() => void loadHomeSnapshot()} type="button" variant="outline">
+              重试
+            </Button>
+            <Link className="sdkwork-mall-pc-home-section-more" to="/categories">
+              浏览全部商品分类
+            </Link>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="sdkwork-mall-pc-home">
-      <SdkworkMallBannerCarousel banners={banners} />
-      <SdkworkMallSeckillStrip offers={seckillOffers} />
+      <h1 className="sdkwork-mall-pc-visually-hidden">SDKWork 商城首页</h1>
+      <div className="sdkwork-mall-pc-container">
+        <HomeHero banners={banners} categories={categories} />
+        <HomeSeckill
+          clockParts={seckillView.header?.parts}
+          countdownLabel={seckillView.header?.label}
+          sessions={seckillView.sessions}
+        />
 
-      <section className="sdkwork-mall-pc-hero">
-        <div className="sdkwork-mall-pc-hero-banner">
-          <Sparkles aria-hidden="true" size={28} />
-          <div>
-            <h1>品质生活，一站购齐</h1>
-            <p>平台自营与品牌商家，会员权益全覆盖</p>
-          </div>
-          <Link className="sdkwork-mall-pc-hero-cta" to="/activity">
-            活动会场
-          </Link>
-        </div>
-        <div className="sdkwork-mall-pc-hero-side">
-          <Link to="/search?q=new">
-            <Flame aria-hidden="true" size={18} />
-            新品上市
-          </Link>
-          <Link to="/search?q=brand">品牌馆</Link>
-          <Link to="/buyer/coupons">领券中心</Link>
-          <Link to="/buyer/membership">会员专区</Link>
-        </div>
-      </section>
+        {floors.length > 0
+          ? floors.map((floor) => {
+              const state = floorProducts[floor.id] ?? { loading: true, products: [] };
+              return (
+                <HomeFloor
+                  floor={floor}
+                  key={floor.id}
+                  loading={state.loading}
+                  products={state.products}
+                />
+              );
+            })
+          : (
+            <>
+              {hotProducts.length > 0 || loading ? (
+                <HomeProductSection
+                  loading={loading}
+                  moreTo="/search?sort=sales"
+                  products={hotProducts}
+                  subtitle="大家都在买"
+                  title="热卖推荐"
+                />
+              ) : null}
+              {newProducts.length > 0 || loading ? (
+                <HomeProductSection
+                  columns="four"
+                  loading={loading}
+                  moreTo="/search?q=new"
+                  products={newProducts}
+                  subtitle="新品抢先看"
+                  title="新品首发"
+                />
+              ) : null}
+            </>
+          )}
 
-      {snapshot?.categories.length ? (
-        <section className="sdkwork-mall-pc-floor">
-          <h2>热门类目</h2>
-          <div className="sdkwork-mall-pc-chip-row">
-            {snapshot.categories.map((category) => (
-              <Link key={category.id} to={`/categories/${category.id}`}>
-                {category.name}
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {snapshot?.featuredShops.length ? (
-        <section className="sdkwork-mall-pc-floor">
-          <h2><Store aria-hidden="true" size={18} /> 热门店铺</h2>
-          <div className="sdkwork-mall-pc-shop-grid">
-            {snapshot.featuredShops.map((shop) => (
-              <Link className="sdkwork-mall-pc-shop-card" key={shop.id} to={`/shop/${shop.id}`}>
-                <strong>{shop.name}</strong>
-                {shop.description ? <p>{shop.description}</p> : null}
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {floors.map((floor) => (
-        <HomeFloorSection floor={floor} key={floor.id} />
-      ))}
-
-      {snapshot?.hotProducts.length ? (
-        <ProductGrid loading={false} products={snapshot.hotProducts} title="热卖推荐" />
-      ) : null}
-      {snapshot?.newProducts.length ? (
-        <ProductGrid loading={false} products={snapshot.newProducts} title="新品首发" />
-      ) : null}
-
-      {/* 最近浏览：基于本地足迹 */}
-      {footprint.length > 0 ? (
-        <section className="sdkwork-mall-pc-floor">
-          <h2><History aria-hidden="true" size={18} /> 最近浏览</h2>
-          <div className="sdkwork-mall-pc-product-grid">
-            {footprint.map((item) => (
-              <Link className="sdkwork-mall-pc-product-card" key={item.id} to={`/product/${item.id}`}>
-                <div className="sdkwork-mall-pc-product-body">
-                  <h3>{item.title}</h3>
-                  <small>
-                    <Clock aria-hidden="true" size={12} />
-                    {new Date(item.viewedAt).toLocaleDateString("zh-CN")}
-                  </small>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {/* 猜你喜欢：推荐流 */}
-      <ProductGrid loading={guessLoading} products={guessYouLike} title="猜你喜欢" />
+        <HomeShops shops={snapshot?.featuredShops ?? []} />
+        <HomeRecent items={footprint} />
+        <HomeGuess loading={guessLoading} products={guessProducts} />
+      </div>
     </div>
   );
 }
