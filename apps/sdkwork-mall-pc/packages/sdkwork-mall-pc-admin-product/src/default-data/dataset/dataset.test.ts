@@ -104,6 +104,20 @@ describe("mall default dataset", () => {
         if (!overlay.categories[child.key]) missing.push(`category:${child.key}`);
       }
     }
+    for (const brand of zhCnDefaultDataset.brands) {
+      if (!overlay.brands[brand.key]?.name) missing.push(`brand:${brand.key}.name`);
+      if (!overlay.brands[brand.key]?.description) missing.push(`brand:${brand.key}.description`);
+    }
+    for (const attribute of zhCnDefaultDataset.categoryAttributes) {
+      if (!overlay.categoryAttributes[attribute.key]?.attributeName) {
+        missing.push(`attribute:${attribute.key}.attributeName`);
+      }
+      for (const value of attribute.values) {
+        if (!overlay.categoryAttributes[attribute.key]?.values?.[value]) {
+          missing.push(`attribute:${attribute.key}.value:${value}`);
+        }
+      }
+    }
     for (const shop of zhCnDefaultDataset.shops) {
       if (!overlay.shops[shop.key]?.name) missing.push(`shop:${shop.key}.name`);
       if (!overlay.shops[shop.key]?.description) missing.push(`shop:${shop.key}.description`);

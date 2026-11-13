@@ -491,6 +491,21 @@ export function resolveDefaultDataset(
   return {
     ...base,
     locale,
+    brands: base.brands.map((brand) => ({
+      ...brand,
+      name: pick(brand.name, overlay.brands[brand.key]?.name),
+      description: pick(brand.description, overlay.brands[brand.key]?.description),
+    })),
+    categoryAttributes: base.categoryAttributes.map((attribute) => {
+      const translated = overlay.categoryAttributes[attribute.key];
+      return {
+        ...attribute,
+        attributeName: pick(attribute.attributeName, translated?.attributeName),
+        values: attribute.values.map(
+          (value) => pick(value, translated?.values?.[value]),
+        ),
+      };
+    }),
     categories: base.categories.map((category) => ({
       ...category,
       name: pick(category.name, overlay.categories[category.key]),

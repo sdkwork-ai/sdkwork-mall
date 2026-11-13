@@ -216,6 +216,19 @@ export interface MallDefaultDataDataset {
 export interface MallDefaultDataLocaleOverlay {
   readonly schemaVersion: 1;
   readonly locale: MallDefaultDataLocale;
+  readonly brands: Readonly<
+    Record<string, { readonly name?: string; readonly description?: string }>
+  >;
+  readonly categoryAttributes: Readonly<
+    Record<
+      string,
+      {
+        readonly attributeName?: string;
+        /** zh dictionary value -> its en rendering. */
+        readonly values?: Readonly<Record<string, string>>;
+      }
+    >
+  >;
   readonly categories: Readonly<Record<string, string>>;
   readonly shops: Readonly<Record<string, { readonly name?: string; readonly description?: string }>>;
   readonly products: Readonly<

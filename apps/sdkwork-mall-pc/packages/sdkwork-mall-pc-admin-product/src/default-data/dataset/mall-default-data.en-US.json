@@ -515,5 +515,94 @@
       "name": "Qimu",
       "description": "Qimu Mother & Baby: nutrition and educational toys."
     }
+  },
+  "categoryAttributes": {
+    "phone-storage": {
+      "attributeName": "Storage",
+      "values": {
+        "8GB+256GB": "8GB + 256GB",
+        "12GB+256GB": "12GB + 256GB",
+        "16GB+512GB": "16GB + 512GB"
+      }
+    },
+    "phone-color": {
+      "attributeName": "Color",
+      "values": {
+        "曜石黑": "Obsidian Black",
+        "星河银": "Star Silver",
+        "星霜白": "Frost White"
+      }
+    },
+    "tablet-storage": {
+      "attributeName": "Storage",
+      "values": {
+        "8GB+256GB": "8GB + 256GB",
+        "12GB+512GB": "12GB + 512GB"
+      }
+    },
+    "tablet-color": {
+      "attributeName": "Color",
+      "values": {
+        "星空灰": "Star Grey"
+      }
+    },
+    "audio-color": {
+      "attributeName": "Color",
+      "values": {
+        "云雾白": "Cloud White",
+        "曜石黑": "Obsidian Black"
+      }
+    },
+    "laptop-cpu": {
+      "attributeName": "Configuration",
+      "values": {
+        "i7 / 16GB / 1TB": "i7 / 16GB / 1TB",
+        "i9 / 32GB / 1TB": "i9 / 32GB / 1TB",
+        "32GB / 1TB": "32GB / 1TB",
+        "32GB / 2TB": "32GB / 2TB"
+      }
+    },
+    "peripheral-layout": {
+      "attributeName": "Layout",
+      "values": {
+        "87 键": "87-key",
+        "108 键": "108-key"
+      }
+    },
+    "sneakers-size": {
+      "attributeName": "Size",
+      "values": {
+        "42": "42",
+        "43": "43",
+        "44": "44"
+      }
+    },
+    "menswear-size": {
+      "attributeName": "Size",
+      "values": {
+        "L": "L",
+        "XL": "XL"
+      }
+    },
+    "makeup-shade": {
+      "attributeName": "Shade",
+      "values": {
+        "#01 豆沙玫瑰": "#01 Rose",
+        "#02 正红": "#02 Classic Red"
+      }
+    },
+    "fitness-edition": {
+      "attributeName": "Edition",
+      "values": {
+        "标准版": "Standard",
+        "智享版 含坡度调节": "Smart (incl. incline)"
+      }
+    },
+    "womenswear-size": {
+      "attributeName": "Size",
+      "values": {
+        "M": "M"
+      }
+    }
   }
 }

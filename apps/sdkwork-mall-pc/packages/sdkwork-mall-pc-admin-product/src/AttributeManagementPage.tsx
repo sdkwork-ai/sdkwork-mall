@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Plus, RefreshCw, Tags } from 'lucide-react';
+import { Plus, RefreshCw, Tags, X } from 'lucide-react';
 import { BusinessStatePanel } from './commerce-admin-primitives';
 import { readApiItems } from './commerce-api-result';
 import {
+  createCommerceAttributeValue,
   createCommerceCategoryAttribute,
+  deleteCommerceAttributeValue,
+  listCommerceAttributeValues,
   listCommerceAttributes,
   listCommerceCategories,
   listCommerceCategoryAttributes,
@@ -37,6 +40,15 @@ type CategoryAttributeBinding = {
 };
 
 type BindingStatus = 'active' | 'inactive' | 'archived';
+
+type DictionaryValueRow = {
+  id: string;
+  valueCode: string;
+  displayValue: string;
+  status: 'active' | 'inactive';
+  /** Optimistic-concurrency version; rides the delete as `If-Match`. */
+  version: number;
+};
 
 type BindingFormState = {
   categoryId: string;
@@ -74,6 +86,11 @@ export function AttributeManagementPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // Enum dictionary editor: one attribute's value rows at a time.
+  const [dictionaryAttributeId, setDictionaryAttributeId] = useState<string>('');
+  const [dictionaryValues, setDictionaryValues] = useState<DictionaryValueRow[]>([]);
+  const [dictionaryLoading, setDictionaryLoading] = useState(false);
+  const [valueForm, setValueForm] = useState({ displayValue: '' });
 
   const attributeById = useMemo(() => new Map(attributes.map((attribute) => [attribute.id, attribute])), [attributes]);
   const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
@@ -98,6 +115,67 @@ export function AttributeManagementPage() {
       setError(loadError instanceof Error && loadError.message ? loadError.message : '商品属性数据加载失败');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadDictionary(attributeId: string) {
+    if (!attributeId) {
+      setDictionaryValues([]);
+      return;
+    }
+    setDictionaryLoading(true);
+    try {
+      const result = await listCommerceAttributeValues({ attributeId, page: 1, pageSize: 200 });
+      setDictionaryValues(readDictionaryValues(result));
+    } catch (loadError) {
+      setDictionaryValues([]);
+      setError(loadError instanceof Error && loadError.message ? loadError.message : '属性字典加载失败');
+    } finally {
+      setDictionaryLoading(false);
+    }
+  }
+
+  function selectDictionaryAttribute(attributeId: string) {
+    setDictionaryAttributeId(attributeId);
+    setValueForm({ displayValue: '' });
+    void loadDictionary(attributeId);
+  }
+
+  function slugValueCode(displayValue: string): string {
+    const ascii = displayValue.trim().toLowerCase().replace(/[^a-z0-9]+/gu, '-').replace(/^-+|-+$/gu, '');
+    return ascii || `v-${Date.now().toString(36)}`;
+  }
+
+  async function submitValue(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const displayValue = valueForm.displayValue.trim();
+    if (!dictionaryAttributeId || !displayValue) {
+      setError('请选择属性并填写字典值。');
+      return;
+    }
+    setError(null);
+    try {
+      await createCommerceAttributeValue({
+        attributeId: dictionaryAttributeId,
+        valueCode: slugValueCode(displayValue),
+        displayValue,
+      });
+      setMessage('字典值已创建。');
+      setValueForm({ displayValue: '' });
+      await loadDictionary(dictionaryAttributeId);
+    } catch (saveError) {
+      setError(saveError instanceof Error && saveError.message ? saveError.message : '字典值创建失败。');
+    }
+  }
+
+  async function archiveValue(value: DictionaryValueRow) {
+    setError(null);
+    try {
+      await deleteCommerceAttributeValue(value.id, value.version);
+      setMessage('字典值已删除。');
+      await loadDictionary(dictionaryAttributeId);
+    } catch (deleteError) {
+      setError(deleteError instanceof Error && deleteError.message ? deleteError.message : '字典值删除失败。');
     }
   }
 
@@ -239,6 +317,76 @@ export function AttributeManagementPage() {
           )}
         </div>
       </div>
+
+      <div
+        className="shrink-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171717]"
+        data-admin-attribute-dictionary-editor
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="text-sm font-semibold">属性字典值</div>
+          <select
+            aria-label="选择属性"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-lobster-400 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+            data-admin-attribute-dictionary-select
+            value={dictionaryAttributeId}
+            onChange={(event) => selectDictionaryAttribute(event.target.value)}
+          >
+            <option value="">选择属性…</option>
+            {attributes.map((attribute) => (
+              <option key={attribute.id} value={attribute.id}>
+                {attribute.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {dictionaryAttributeId ? (
+          <div className="mt-3">
+            {dictionaryLoading ? (
+              <BusinessStatePanel kind="loading" title="字典值加载中" />
+            ) : dictionaryValues.length === 0 ? (
+              <BusinessStatePanel kind="empty" title="暂无字典值" description="为该属性添加枚举取值；SKU 规格将引用这些值。" />
+            ) : (
+              <div className="flex flex-wrap gap-2" data-admin-attribute-dictionary-values>
+                {dictionaryValues.map((value) => (
+                  <span
+                    key={value.id}
+                    className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs text-slate-700 dark:bg-white/10 dark:text-slate-200"
+                  >
+                    {value.displayValue || value.valueCode}
+                    <button
+                      type="button"
+                      aria-label={`删除字典值 ${value.displayValue || value.valueCode}`}
+                      onClick={() => void archiveValue(value)}
+                      className="text-slate-400 transition hover:text-rose-600 dark:hover:text-rose-300"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <form className="mt-3 flex flex-wrap items-end gap-3" onSubmit={(event) => void submitValue(event)}>
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                字典值显示名
+                <input
+                  value={valueForm.displayValue}
+                  onChange={(event) => setValueForm({ displayValue: event.target.value })}
+                  className="mt-1 w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-lobster-400 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
+                  data-admin-attribute-value-input
+                />
+              </label>
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-lobster-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-lobster-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-lobster-500 dark:hover:bg-lobster-400"
+                data-admin-attribute-value-submit
+              >
+                添加字典值
+              </button>
+            </form>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
@@ -332,6 +480,22 @@ function readCategoryOptions(result: unknown): CategoryOption[] {
       categoryNo: String(record.categoryNo ?? ''),
     };
   }).filter((item) => item.id && item.name);
+}
+
+function readDictionaryValues(result: unknown): DictionaryValueRow[] {
+  return readApiItems(result)
+    .map((item) => {
+      const record = item as Record<string, unknown>;
+      const status = record.status;
+      return {
+        id: String(record.id ?? ''),
+        valueCode: String(record.valueCode ?? record.value_code ?? ''),
+        displayValue: String(record.displayValue ?? record.display_value ?? ''),
+        status: status === 'inactive' ? 'inactive' as const : 'active' as const,
+        version: typeof record.version === 'number' ? record.version : Number(record.version ?? 0) || 0,
+      };
+    })
+    .filter((row) => row.id);
 }
 
 function readCategoryAttributeBindings(result: unknown): CategoryAttributeBinding[] {

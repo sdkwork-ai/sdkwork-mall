@@ -34,6 +34,7 @@ import {
   createCommerceCategory,
   createCommerceProduct,
   createCommerceSku,
+  listCommerceAttributeValues,
   listCommerceAttributes,
   listCommerceBrands,
   listCommerceCategories,
@@ -572,7 +573,7 @@ export function ProductCreatePage({ mode = 'create', productId }: ProductCreateP
   }
 
   async function handleSyncAttributes() {
-    const attributeIdByName = await ensureSkuAttributeDefinitions(draft.specGroups);
+    const { attributeIdByName } = await ensureSkuAttributeDefinitions(draft.specGroups);
     setAttributeDefinitions((currentDefinitions) => {
       const knownNames = new Set(currentDefinitions.map((definition) => definition.name));
       const createdDefinitions = Array.from(attributeIdByName.entries())
@@ -1978,14 +1979,16 @@ export function buildSkuCreatePayloads(
   draft: ProductDraftState,
   productId: string,
   mode: ProductSubmitMode,
+  attributeResolution?: SkuAttributeResolution,
 ) {
-  return buildSkuMutationPayloads(draft, productId, mode).map((sku) => sku.createBody);
+  return buildSkuMutationPayloads(draft, productId, mode, attributeResolution).map((sku) => sku.createBody);
 }
 
 export function buildSkuMutationPayloads(
   draft: ProductDraftState,
   productId: string,
   mode: ProductSubmitMode,
+  attributeResolution?: SkuAttributeResolution,
 ) {
   return draft.skuDrafts
     .filter((sku) => sku.enabled || mode === 'draft' || Boolean(sku.backendSkuId))
@@ -2003,6 +2006,17 @@ export function buildSkuMutationPayloads(
         fulfillmentType: draft.fulfillmentType,
         inventoryTracking: draft.productType === 'physical' && inventoryManaged ? 'quantity' as const : 'none' as const,
       };
+      // Spec selections resolve against the authority dictionary; a variant
+      // whose axis has no dictionary value yet stays un-referenced rather than
+      // sending an invented id.
+      const attributeValueIds = attributeResolution
+        ? sku.specSelections
+            .map((selection) =>
+              attributeResolution.attributeValueIdByKey.get(
+                `${selection.groupName}::${selection.valueName}`,
+              ))
+            .filter((valueId): valueId is string => Boolean(valueId))
+        : [];
       return {
         backendSkuId: sku.backendSkuId,
         version: sku.version,
@@ -2010,6 +2024,7 @@ export function buildSkuMutationPayloads(
           ...commonBody,
           productId,
           skuNo: sku.skuNo,
+          ...(attributeValueIds.length > 0 ? { attributeValueIds } : {}),
         },
         updateBody: mode === 'draft'
           ? { ...commonBody, status: 'draft' as const }
@@ -2018,8 +2033,45 @@ export function buildSkuMutationPayloads(
     });
 }
 
-export async function ensureSkuAttributeDefinitions(specGroups: ProductSpecGroup[]): Promise<Map<string, string>> {
+export interface SkuAttributeResolution {
+  /** Spec group name -> authority attribute id. */
+  readonly attributeIdByName: Map<string, string>;
+  /** `${attributeName}::${valueDisplay}` -> authority attribute value id. */
+  readonly attributeValueIdByKey: Map<string, string>;
+}
+
+async function collectAttributeValueIds(
+  attributeName: string,
+  attributeId: string,
+  valueIdByKey: Map<string, string>,
+): Promise<void> {
+  const valueResult = await listCommerceAttributeValues({
+    attributeId,
+    page: 1,
+    pageSize: 200,
+  });
+  for (const value of readCatalogRecords(valueResult)) {
+    const valueId = readCatalogString(value, ['id']);
+    const displayValue = readCatalogString(value, ['displayValue', 'display_value']);
+    const valueCode = readCatalogString(value, ['valueCode', 'value_code']);
+    if (valueId && displayValue) {
+      valueIdByKey.set(`${attributeName}::${displayValue}`, valueId);
+    } else if (valueId && valueCode) {
+      valueIdByKey.set(`${attributeName}::${valueCode}`, valueId);
+    }
+  }
+}
+
+/**
+ * Ensures every spec group exists as an authority enum attribute (with its
+ * dictionary seeded inline) and resolves the dictionary value ids the SKUs
+ * reference through `attributeValueIds`.
+ */
+export async function ensureSkuAttributeDefinitions(
+  specGroups: ProductSpecGroup[],
+): Promise<SkuAttributeResolution> {
   const attributeIdByName = new Map<string, string>();
+  const attributeValueIdByKey = new Map<string, string>();
   const listResult = await listCommerceAttributes({ page: '1', pageSize: '200' });
   for (const attribute of readCatalogRecords(listResult)) {
     const attributeName = readCatalogString(attribute, ['name']);
@@ -2056,7 +2108,11 @@ export async function ensureSkuAttributeDefinitions(specGroups: ProductSpecGroup
     }
   }
 
-  return attributeIdByName;
+  for (const [attributeName, attributeId] of attributeIdByName) {
+    await collectAttributeValueIds(attributeName, attributeId, attributeValueIdByKey);
+  }
+
+  return { attributeIdByName, attributeValueIdByKey };
 }
 
 type SubmitProductDraftOptions = {
@@ -2073,7 +2129,7 @@ export async function submitProductDraft(
     throw new Error(errors[0]);
   }
 
-  await ensureSkuAttributeDefinitions(draft.specGroups);
+  const skuAttributeResolution = await ensureSkuAttributeDefinitions(draft.specGroups);
   const productResult = options.productId
     ? await updateCommerceProduct(
         options.productId,
@@ -2094,7 +2150,12 @@ export async function submitProductDraft(
       Number(readCatalogString(readCatalogItem(productResult) ?? {}, ['version'])) || 0,
     );
   }
-  const skuPayloads = buildSkuMutationPayloads(draft, productId, mode);
+  const skuPayloads = buildSkuMutationPayloads(
+    draft,
+    productId,
+    mode,
+    skuAttributeResolution,
+  );
   await Promise.all(
     skuPayloads.map((sku) => (
       sku.backendSkuId
