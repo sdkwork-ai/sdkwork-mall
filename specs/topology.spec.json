@@ -7,7 +7,15 @@
   "archetypeNotes": "No owned HTTP public-ingress; nginx webserver profile remains disabled.",
   "cloudPublicHosts": {
     "platform.api-gateway": {
-      "httpHost": "api.sdkwork.com"
+      "httpHost": "api.sdkwork.com",
+      "environments": {
+        "development": {
+          "httpHosts": [
+            "api-dev.sdkwork.com",
+            "api-dev.birdcoder.com"
+          ]
+        }
+      }
     }
   },
   "vocabulary": {
