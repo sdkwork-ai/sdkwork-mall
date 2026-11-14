@@ -1,0 +1,4 @@
+basicConstraints=CA:FALSE
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=serverAuth
+subjectAltName=DNS:api-dev.sdkwork.com,DNS:api-dev.birdcoder.com,DNS:mall-dev.birdcoder.com,DNS:localhost,IP:127.0.0.1,IP:0:0:0:0:0:0:0:1
