@@ -166,6 +166,8 @@ export function SdkworkMallCategoryPage() {
   const [categoryTree, setCategoryTree] = useState<MallCategoryTreeNode[]>([]);
   const [categoryDetail, setCategoryDetail] = useState<{ description?: string; name: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [banners, setBanners] = useState<MallCmsBanner[]>(() => listEnabledMallCmsBanners());
   const [hotProducts, setHotProducts] = useState<MallSearchProduct[]>([]);
   const [newProducts, setNewProducts] = useState<MallSearchProduct[]>([]);
@@ -197,51 +199,68 @@ export function SdkworkMallCategoryPage() {
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setLoadError(null);
     setCategoryDetail(null);
     async function load() {
-      const categoryList = await listMallCategories().catch(() => [] as Array<{ id: string; name: string }>);
-      let detail: { description?: string; name: string } | null = null;
-      if (categoryId) {
-        try {
-          const categoryRecord = await retrieveMallCategory(categoryId);
-          if (categoryRecord) {
-            detail = {
-              name: categoryRecord.name,
-            };
+      try {
+        const categoryList = await listMallCategories().catch(
+          () => [] as Array<{ id: string; name: string }>,
+        );
+        let detail: { description?: string; name: string } | null = null;
+        if (categoryId) {
+          try {
+            const categoryRecord = await retrieveMallCategory(categoryId);
+            if (categoryRecord) {
+              detail = {
+                name: categoryRecord.name,
+              };
+            }
+          } catch {
+            // Fall back to list lookup when retrieve is unavailable.
           }
-        } catch {
-          // Fall back to list lookup when retrieve is unavailable.
         }
-      }
-      const matchedCategory = categoryId
-        ? categoryList.find((category) => category.id === categoryId)
-        : keyword
-          ? categoryList.find((category) => category.name.includes(keyword))
-          : undefined;
-      if (!detail && matchedCategory) {
-        detail = { name: matchedCategory.name };
-      }
-      const resolvedCategoryId = categoryId ?? matchedCategory?.id;
-      const productResult = await searchMallProducts({
-        categoryId: resolvedCategoryId,
-        pageSize: CATEGORY_PAGE_SIZE,
-        query: !resolvedCategoryId && keyword ? keyword : undefined,
-        sort: sort || undefined,
-        page,
-      });
-      if (active) {
-        setCategoryTree(buildMallCategoryTree(categoryList));
-        setCategoryDetail(detail);
-        setItems(productResult.items);
-        setTotal(productResult.total);
-        setLoading(false);
+        const matchedCategory = categoryId
+          ? categoryList.find((category) => category.id === categoryId)
+          : keyword
+            ? categoryList.find((category) => category.name.includes(keyword))
+            : undefined;
+        if (!detail && matchedCategory) {
+          detail = { name: matchedCategory.name };
+        }
+        const resolvedCategoryId = categoryId ?? matchedCategory?.id;
+        const productResult = await searchMallProducts({
+          categoryId: resolvedCategoryId,
+          pageSize: CATEGORY_PAGE_SIZE,
+          query: !resolvedCategoryId && keyword ? keyword : undefined,
+          sort: sort || undefined,
+          page,
+        });
+        if (active) {
+          setCategoryTree(buildMallCategoryTree(categoryList));
+          setCategoryDetail(detail);
+          setItems(productResult.items);
+          setTotal(productResult.total);
+        }
+      } catch (cause: unknown) {
+        // The category pages must distinguish "nothing was seeded" from "the
+        // listing could not be read"; the previous code left the skeleton up
+        // forever on a transport failure.
+        if (active) {
+          setLoadError(cause instanceof Error && cause.message ? cause.message : "类目商品加载失败");
+          setItems([]);
+          setTotal(0);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
     }
     void load();
     return () => {
       active = false;
     };
-  }, [categoryId, keyword, sort, page]);
+  }, [categoryId, keyword, sort, page, reloadToken]);
 
   // 侧边栏热销榜与新品榜
   useEffect(() => {
@@ -366,6 +385,23 @@ export function SdkworkMallCategoryPage() {
 
   if (loading) {
     return <LoadingBlock label="加载类目..." />;
+  }
+
+  if (loadError) {
+    return (
+      <EmptyState
+        actions={(
+          <>
+            <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
+              重试
+            </Button>
+            <Link to="/admin/default-data">默认数据初始化</Link>
+          </>
+        )}
+        description={`${loadError}${loadError.includes("后台") ? "" : "（若刚完成安装，请确认后台服务已启动）"}`}
+        title="类目商品加载失败"
+      />
+    );
   }
 
   const activeCategory = categoryDetail
@@ -593,7 +629,15 @@ export function SdkworkMallCategoryPage() {
 
           {/* 商品列表 */}
           {filteredItems.length === 0 ? (
-            <EmptyState description="该类目下暂无商品，试试调整筛选条件" title="暂无商品" />
+            total === 0 && !hasActiveFilters ? (
+              <EmptyState
+                actions={<Link to="/admin/default-data">初始化默认数据</Link>}
+                description="该环境还没有商品数据。全新安装后可先在首页或管理后台初始化默认数据集（类目、店铺、商品与 SKU）。"
+                title="暂无商品"
+              />
+            ) : (
+              <EmptyState description="该类目下暂无商品，试试调整筛选条件" title="暂无商品" />
+            )
           ) : (
             <div className="sdkwork-mall-pc-product-grid">
               {filteredItems.map((product) => (

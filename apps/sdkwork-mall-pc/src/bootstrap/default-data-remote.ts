@@ -1,10 +1,19 @@
 import {
   configureMallDefaultDataProvider,
   resolveMallDefaultDataEnvironment,
+  resolveMallDefaultDataProfile,
+  runMallDefaultDataInitialization,
   type MallDefaultDataCmsConfigShape,
+  type MallDefaultDataEnvironment,
   type MallDefaultDataLocale,
   type MallDefaultDataPort,
+  type MallDefaultDataProfile,
 } from "@sdkwork/mall-pc-admin-product/default-data";
+import {
+  configureMallHomeSeedProvider,
+  type MallHomeSeedOutcome,
+} from "@sdkwork/mall-pc-home/home-seed";
+import { readRuntimeEnv } from "@sdkwork/sdk-common";
 import {
   readMallCmsConfig,
   writeMallCmsConfig,
@@ -20,6 +29,7 @@ import type { SdkworkBackendClient as SdkworkShopBackendClient } from "@sdkwork/
 import { createSdkworkShopCatalogNamespace } from "./admin-commerce-remote";
 import { createSdkCommandPortAdapter } from "./sdk-command-port-adapter";
 import type { SdkworkMallPcSdkClientInventory } from "./sdkClients";
+import type { SdkworkMallPcSessionStore } from "./sessionStore";
 
 /**
  * Commerce backend operations the default-data plan calls.
@@ -203,16 +213,119 @@ export function configureSdkworkMallPcDefaultDataProvider(input: {
   readonly environment: string;
   readonly locale: string;
   readonly sdkClients: SdkworkMallPcSdkClientInventory;
+  readonly session?: SdkworkMallPcSessionStore;
 }): void {
   const port = createSdkworkMallPcDefaultDataPort(input.sdkClients);
   if (!port) {
     configureMallDefaultDataProvider(null);
+    configureMallHomeSeedProvider(null);
     return;
   }
   const locale: MallDefaultDataLocale = input.locale === "en-US" ? "en-US" : "zh-CN";
+  const environment = resolveMallDefaultDataEnvironment(input.environment);
   configureMallDefaultDataProvider({
     defaultLocale: locale,
-    environment: resolveMallDefaultDataEnvironment(input.environment),
+    environment,
     port,
   });
+
+  // Storefront first-run recovery: the same provisioning plan, reachable from
+  // the home page instead of only from the admin console. A brand-new install
+  // must never present an unexplained empty mall to the first visitor.
+  const policy = resolveSdkworkMallPcSeedPolicy(environment);
+  configureMallHomeSeedProvider({
+    // Both conditions are evaluated per attempt: the environment policy is
+    // static, but the session is not. An anonymous visitor must never trigger
+    // backend writes, and a visitor who signs in later still gets the automatic
+    // pass on the next empty read.
+    automatic: () => policy.automatic && hasMallSessionCredentials(input.session),
+    isSignedIn: () => hasMallSessionCredentials(input.session),
+    profile: policy.profile,
+    run: (options) => runStorefrontSeedInitialization(environment, options?.profile),
+  });
+}
+
+/** Whether the storefront has credentials to attempt backend provisioning. */
+function hasMallSessionCredentials(session: SdkworkMallPcSessionStore | undefined): boolean {
+  if (!session) {
+    return true;
+  }
+  const snapshot = session.getSnapshot();
+  return Boolean(
+    snapshot.accessToken?.trim() ||
+      snapshot.authToken?.trim() ||
+      snapshot.refreshToken?.trim(),
+  );
+}
+
+/** Runtime flag forcing a provisioning profile (`minimal`/`standard`/`demo`). */
+export const MALL_SEED_PROFILE_ENV_KEY = "SDKWORK_MALL_SEED_PROFILE";
+
+/** Runtime flag allowing automatic first-run provisioning in any profile. */
+export const MALL_SEED_AUTOMATIC_ENV_KEY = "SDKWORK_MALL_AUTO_SEED";
+
+export interface SdkworkMallPcSeedPolicy {
+  /** Whether the storefront may provision without an operator click. */
+  readonly automatic: boolean;
+  readonly environment: MallDefaultDataEnvironment;
+  readonly profile: MallDefaultDataProfile;
+}
+
+function readRuntimeFlag(key: string): boolean | undefined {
+  const raw = readRuntimeEnv(key)?.trim().toLowerCase();
+  if (!raw) {
+    return undefined;
+  }
+  if (raw === "1" || raw === "true" || raw === "yes" || raw === "on") {
+    return true;
+  }
+  if (raw === "0" || raw === "false" || raw === "no" || raw === "off") {
+    return false;
+  }
+  return undefined;
+}
+
+/**
+ * Resolves whether the storefront seeds itself and which slice it writes.
+ *
+ * Non-production environments seed automatically with their environment
+ * profile (`demo` or `standard`). Production defaults to the `minimal` reference
+ * slice and never writes on its own; an operator can opt into a richer slice
+ * with `SDKWORK_MALL_SEED_PROFILE`, which also makes the run eligible for
+ * automatic provisioning because that is an explicit deployment decision.
+ */
+export function resolveSdkworkMallPcSeedPolicy(
+  environment: MallDefaultDataEnvironment,
+): SdkworkMallPcSeedPolicy {
+  const profile = resolveMallDefaultDataProfile(
+    environment,
+    readRuntimeEnv(MALL_SEED_PROFILE_ENV_KEY) ?? null,
+  );
+  const explicitAutomatic = readRuntimeFlag(MALL_SEED_AUTOMATIC_ENV_KEY);
+  return {
+    automatic: explicitAutomatic ?? profile !== "minimal",
+    environment,
+    profile,
+  };
+}
+
+async function runStorefrontSeedInitialization(
+  environment: MallDefaultDataEnvironment,
+  profileOverride?: MallDefaultDataProfile,
+): Promise<MallHomeSeedOutcome> {
+  const policy = resolveSdkworkMallPcSeedPolicy(environment);
+  const report = await runMallDefaultDataInitialization({
+    profile: profileOverride ?? policy.profile,
+  });
+  if (!report.ok) {
+    const failed = report.steps.find((step) => step.status === "failed");
+    return {
+      created: report.summary.created,
+      message: failed
+        ? `${failed.title}：${failed.message ?? "执行失败"}`
+        : "默认数据初始化未完成，请在管理后台查看失败步骤。",
+      state: "failed",
+    };
+  }
+  return { created: report.summary.created, state: "succeeded" };
 }

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Clock, Gift, Share2, Star, Ticket, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Badge, EmptyState, LoadingBlock, Progress, Separator } from "@sdkwork/ui-pc-react";
+import { Badge, Button, EmptyState, LoadingBlock, Progress, Separator } from "@sdkwork/ui-pc-react";
 import { loadMallBuyerDashboardSnapshot } from "../buyer-hub-service";
 import {
   formatCny,
@@ -13,13 +13,25 @@ import {
 export function SdkworkMallBuyerDashboardPage() {
   const [snapshot, setSnapshot] = useState<Awaited<ReturnType<typeof loadMallBuyerDashboardSnapshot>> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setLoadError(null);
     void loadMallBuyerDashboardSnapshot()
       .then((data) => {
         if (active) {
           setSnapshot(data);
+        }
+      })
+      .catch((cause: unknown) => {
+        // Without this the page showed "加载买家中心..." forever, because a
+        // failed load leaves the snapshot null.
+        if (active) {
+          setSnapshot(null);
+          setLoadError(cause instanceof Error && cause.message ? cause.message : "买家中心加载失败");
         }
       })
       .finally(() => {
@@ -30,10 +42,24 @@ export function SdkworkMallBuyerDashboardPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadToken]);
 
-  if (loading || !snapshot) {
+  if (loading) {
     return <LoadingBlock label="加载买家中心..." />;
+  }
+
+  if (loadError || !snapshot) {
+    return (
+      <EmptyState
+        actions={(
+          <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
+            重试
+          </Button>
+        )}
+        description={loadError ?? "买家中心数据暂不可用"}
+        title="买家中心加载失败"
+      />
+    );
   }
 
   const { activities, availableCoupons, membership, orderStats, pendingAfterSales, recentOrders } = snapshot;

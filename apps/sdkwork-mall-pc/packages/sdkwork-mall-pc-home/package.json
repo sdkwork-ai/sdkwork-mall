@@ -15,6 +15,11 @@
       "import": "./src/routes.ts",
       "default": "./src/routes.ts"
     },
+    "./home-seed": {
+      "types": "./src/home-seed.ts",
+      "import": "./src/home-seed.ts",
+      "default": "./src/home-seed.ts"
+    },
     "./storefront-pages": {
       "types": "./src/storefront-pages.ts",
       "import": "./src/storefront-pages.ts",

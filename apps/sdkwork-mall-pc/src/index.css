@@ -4784,6 +4784,134 @@ h1 {
   font-size: 13px;
 }
 
+.sdkwork-mall-pc-home-fallback-hint {
+  max-width: 420px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* ── 首页首次运行 / 降级读取提示 ────────────────────────────────────────── */
+
+.sdkwork-mall-pc-home-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border: 1px solid var(--mall-line);
+  border-radius: var(--mall-radius);
+  background: var(--mall-surface);
+  font-size: 13px;
+}
+
+.sdkwork-mall-pc-home-notice.is-warning {
+  border-color: #f3d19e;
+  background: #fffaf1;
+  color: #8a5a12;
+}
+
+.sdkwork-mall-pc-home-notice-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.sdkwork-mall-pc-home-setup {
+  display: grid;
+  gap: 14px;
+  margin: 20px 0 0;
+  padding: 24px;
+  border: 1px solid var(--mall-line);
+  border-radius: var(--mall-radius-lg);
+  background:
+    radial-gradient(120% 160% at 100% 0%, rgba(225, 37, 27, 0.06), transparent 58%),
+    var(--mall-surface);
+  box-shadow: var(--mall-shadow-1);
+}
+
+.sdkwork-mall-pc-home-setup-head {
+  display: grid;
+  gap: 6px;
+}
+
+.sdkwork-mall-pc-home-setup-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.sdkwork-mall-pc-home-setup-head p {
+  margin: 0;
+  max-width: 720px;
+  color: var(--mall-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.sdkwork-mall-pc-home-setup-error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #f3c2bd;
+  border-radius: var(--mall-radius);
+  background: #fff5f4;
+  color: #b3261e;
+  font-size: 13px;
+}
+
+.sdkwork-mall-pc-home-setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.sdkwork-mall-pc-home-setup-hint {
+  color: var(--mall-muted);
+  font-size: 13px;
+}
+
+.sdkwork-mall-pc-home-setup-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--mall-muted);
+  font-size: 12.5px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sdkwork-mall-pc-home-setup-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--mall-muted);
+  font-size: 12.5px;
+}
+
+.sdkwork-mall-pc-home-setup-steps li {
+  position: relative;
+  padding-left: 14px;
+}
+
+.sdkwork-mall-pc-home-setup-steps li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mall-brand);
+  opacity: 0.6;
+}
+
 /* 类目 / 活动页的横幅卡片：与首页视觉语言保持一致。 */
 .sdkwork-mall-pc-banner-card {
   position: relative;

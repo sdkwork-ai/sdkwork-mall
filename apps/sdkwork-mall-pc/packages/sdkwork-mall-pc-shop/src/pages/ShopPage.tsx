@@ -86,6 +86,8 @@ export function SdkworkMallShopPage() {
   const [products, setProducts] = useState<MallSearchProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [following, setFollowing] = useState(() => isMallShopFavorite(shopId));
 
   useEffect(() => {
@@ -109,6 +111,14 @@ export function SdkworkMallShopPage() {
           setShop(shopDetail);
           setProducts(productResult.items);
           setTotal(productResult.total);
+          setLoadError(null);
+        }
+      } catch (cause: unknown) {
+        // A transport failure is not a closed shop: without this the page
+        // reported "未找到店铺" and hid the real error.
+        if (active) {
+          setLoadError(cause instanceof Error && cause.message ? cause.message : "店铺加载失败");
+          setShop(null);
         }
       } finally {
         if (active) {
@@ -120,7 +130,7 @@ export function SdkworkMallShopPage() {
     return () => {
       active = false;
     };
-  }, [shopId, sort, page]);
+  }, [shopId, sort, page, reloadToken]);
 
   // 从当前页商品中提取店铺分类（基于 brand 的品牌聚合）
   const shopCategories = useMemo(() => extractShopCategories(products), [products]);
@@ -172,6 +182,20 @@ export function SdkworkMallShopPage() {
 
   if (loading) {
     return <LoadingBlock label="加载店铺..." />;
+  }
+
+  if (loadError) {
+    return (
+      <EmptyState
+        actions={(
+          <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
+            重试
+          </Button>
+        )}
+        description={loadError}
+        title="店铺加载失败"
+      />
+    );
   }
 
   if (!shop) {
@@ -334,7 +358,15 @@ export function SdkworkMallShopPage() {
         ) : null}
 
         {filteredProducts.length === 0 ? (
-          <EmptyState description="店铺正在上新" title="暂无商品" />
+          total === 0 ? (
+            <EmptyState
+              actions={<Link to="/admin/default-data">初始化默认数据</Link>}
+              description="该店铺还没有上架商品；若刚完成安装，可先初始化默认数据集。"
+              title="暂无商品"
+            />
+          ) : (
+            <EmptyState description="店铺正在上新" title="暂无商品" />
+          )
         ) : (
           <>
             <div className="sdkwork-mall-pc-product-grid">

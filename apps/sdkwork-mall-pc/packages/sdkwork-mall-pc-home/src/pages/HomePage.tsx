@@ -18,11 +18,20 @@ import {
 } from "@sdkwork/mall-pc-activity/activity-service";
 import { sdkworkMallPcCategoryNav } from "@sdkwork/mall-pc-commons/category-nav";
 import {
+  claimMallHomeAutomaticSeed,
+  getMallHomeSeedProfile,
+  isMallHomeSeedAvailable,
+  isMallHomeSeedSignedIn,
+  runMallHomeSeed,
+  type MallHomeSeedProfile,
+} from "../home-seed";
+import {
   loadMallHomeSnapshot,
   type MallHomeProductCard,
   type MallHomeSnapshot,
 } from "../home-service";
 import { HomeHero, type HomeCategoryItem } from "./home/home-hero";
+import { HomeSetupNotice, type HomeSeedPhase } from "./home/home-setup-notice";
 import {
   HomeFloor,
   HomeGuess,
@@ -179,6 +188,15 @@ function useFloorProducts(floors: MallCmsFloor[]): Record<string, FloorProductsS
         query: isNew ? undefined : floor.productQuery || undefined,
         sort,
       })
+        .then(async (result) => {
+          // A floor keyword that matches nothing (a localized shelf over a
+          // catalog written in another locale, for example) must not render an
+          // empty shelf: fall back to the general list for the same sort.
+          const resolved = result.items.length === 0 && floor.productQuery && !isNew
+            ? await searchMallProducts({ pageSize: FLOOR_PRODUCT_SIZE, sort })
+            : result;
+          return resolved;
+        })
         .then((result) => {
           if (!active) {
             return;
@@ -235,6 +253,8 @@ export function SdkworkMallHomePage() {
   const [snapshot, setSnapshot] = useState<MallHomeSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [seedPhase, setSeedPhase] = useState<HomeSeedPhase>("idle");
+  const [seedMessage, setSeedMessage] = useState<string | undefined>(undefined);
   const [banners, setBanners] = useState<MallCmsBanner[]>(() => listEnabledMallCmsBanners());
   const [floors, setFloors] = useState<MallCmsFloor[]>(() => listEnabledMallCmsFloors());
   const [guessYouLike, setGuessYouLike] = useState<MallHomeProductCard[]>([]);
@@ -244,38 +264,69 @@ export function SdkworkMallHomePage() {
   const seckillView = useMallSeckillView(seckillOffers);
   const floorProducts = useFloorProducts(floors);
 
-  useEffect(() => {
-    let active = true;
-    loadMallCmsConfigRemote()
-      .then((config) => {
-        if (active) {
-          setBanners(listEnabledMallCmsBanners(config));
-          setFloors(listEnabledMallCmsFloors(config));
-        }
-      })
-      .catch(() => {
-        // Keep local defaults when remote CMS is unavailable.
-      });
-    return () => {
-      active = false;
-    };
+  const reloadCms = useCallback(async () => {
+    try {
+      const config = await loadMallCmsConfigRemote();
+      setBanners(listEnabledMallCmsBanners(config));
+      setFloors(listEnabledMallCmsFloors(config));
+    } catch {
+      // Keep local defaults when remote CMS is unavailable.
+    }
   }, []);
 
-  const loadHomeSnapshot = useCallback(async () => {
+  useEffect(() => {
+    void reloadCms();
+  }, [reloadCms]);
+
+  const loadHomeSnapshot = useCallback(async (): Promise<MallHomeSnapshot | null> => {
     setLoading(true);
     setError(null);
     try {
-      setSnapshot(await loadMallHomeSnapshot());
+      const next = await loadMallHomeSnapshot();
+      setSnapshot(next);
+      return next;
     } catch (cause: unknown) {
       setError(cause instanceof Error ? cause.message : "首页加载失败");
+      return null;
     } finally {
       setLoading(false);
     }
   }, []);
 
+  /**
+   * Provisions the default dataset from the storefront.
+   *
+   * This is the recovery path for an install whose backend is reachable but
+   * whose catalog has never been seeded: without it the home page could only
+   * ever show an unexplained empty mall. The plan is idempotent, so a rerun is
+   * safe and a partially seeded environment is completed rather than duplicated.
+   */
+  const startSeed = useCallback(async (profile?: MallHomeSeedProfile) => {
+    setSeedPhase("running");
+    setSeedMessage(undefined);
+    const outcome = await runMallHomeSeed(profile ? { profile } : {});
+    if (outcome.state === "succeeded") {
+      setSeedPhase("succeeded");
+      await Promise.all([loadHomeSnapshot(), reloadCms()]);
+      return;
+    }
+    setSeedPhase("failed");
+    setSeedMessage(outcome.message);
+  }, [loadHomeSnapshot, reloadCms]);
+
   useEffect(() => {
     void loadHomeSnapshot();
   }, [loadHomeSnapshot]);
+
+  // Non-production installs provision themselves on first paint; production
+  // waits for the explicit action so a live storefront never gains demo rows
+  // without an operator decision.
+  useEffect(() => {
+    if (!snapshot?.isEmpty || !claimMallHomeAutomaticSeed()) {
+      return;
+    }
+    void startSeed();
+  }, [snapshot, startSeed]);
 
   useEffect(() => {
     let active = true;
@@ -325,6 +376,9 @@ export function SdkworkMallHomePage() {
 
   const hotProducts = snapshot?.hotProducts ?? [];
   const newProducts = snapshot?.newProducts ?? [];
+  // A storefront with categories but no products is just as much a dead end as
+  // a completely empty catalog, so the setup notice also covers that state.
+  const hasProducts = hotProducts.length > 0 || newProducts.length > 0;
 
   // 推荐流优先展示上方楼层尚未出现的商品，再用已出现商品补足 10 个。
   const guessProducts = useMemo(() => {
@@ -349,11 +403,17 @@ export function SdkworkMallHomePage() {
           <div className="sdkwork-mall-pc-home-fallback">
             <h2>首页暂不可用</h2>
             <p>{error}</p>
+            <p className="sdkwork-mall-pc-home-fallback-hint">
+              刚完成安装时通常是后台服务尚未就绪或接口地址未配置；服务恢复后点“重试”即可。
+            </p>
             <Button onClick={() => void loadHomeSnapshot()} type="button" variant="outline">
               重试
             </Button>
             <Link className="sdkwork-mall-pc-home-section-more" to="/categories">
               浏览全部商品分类
+            </Link>
+            <Link className="sdkwork-mall-pc-home-section-more" to="/admin/default-data">
+              默认数据初始化
             </Link>
           </div>
         </div>
@@ -366,6 +426,27 @@ export function SdkworkMallHomePage() {
       <h1 className="sdkwork-mall-pc-visually-hidden">SDKWork 商城首页</h1>
       <div className="sdkwork-mall-pc-container">
         <HomeHero banners={banners} categories={categories} />
+
+        {snapshot && (snapshot.isEmpty || snapshot.issues.length > 0 || !hasProducts) ? (
+          <HomeSetupNotice
+            issues={snapshot.issues}
+            message={seedMessage}
+            onRetry={() => {
+              void loadHomeSnapshot();
+            }}
+            onSeed={() => {
+              void startSeed();
+            }}
+            onSeedDemo={() => {
+              void startSeed("demo");
+            }}
+            phase={seedPhase}
+            seedAvailable={isMallHomeSeedAvailable()}
+            seedProfile={getMallHomeSeedProfile()}
+            signedIn={isMallHomeSeedSignedIn()}
+          />
+        ) : null}
+
         <HomeSeckill
           clockParts={seckillView.header?.parts}
           countdownLabel={seckillView.header?.label}

@@ -92,6 +92,8 @@ export function SdkworkMallSearchPage() {
   const [shops, setShops] = useState<MallSearchShop[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -119,6 +121,7 @@ export function SdkworkMallSearchPage() {
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setLoadError(null);
     const productPromise = searchMallProducts({
       categoryId: categoryId || undefined,
       query: query || undefined,
@@ -140,6 +143,17 @@ export function SdkworkMallSearchPage() {
           setShops(shopResult.items);
         }
       })
+      .catch((cause: unknown) => {
+        // A failed search must not render the "no results" empty state: that
+        // tells the shopper the catalog has nothing matching when the request
+        // never reached the backend at all.
+        if (active) {
+          setItems([]);
+          setTotal(0);
+          setShops([]);
+          setLoadError(cause instanceof Error && cause.message ? cause.message : "搜索请求失败");
+        }
+      })
       .finally(() => {
         if (active) {
           setLoading(false);
@@ -148,7 +162,7 @@ export function SdkworkMallSearchPage() {
     return () => {
       active = false;
     };
-  }, [query, sort, categoryId, shopId, page]);
+  }, [query, sort, categoryId, shopId, page, reloadToken]);
 
   const [hotKeywords, setHotKeywords] = useState<MallCmsHotKeyword[]>(() => listEnabledMallCmsHotKeywords());
   const [history, setHistory] = useState<string[]>(() => readSearchHistory());
@@ -600,9 +614,32 @@ export function SdkworkMallSearchPage() {
 
           {loading ? <LoadingBlock label="搜索中..." /> : null}
 
-          {!loading && filteredItems.length === 0 ? (
+          {!loading && loadError ? (
+            <EmptyState
+              actions={(
+                <>
+                  <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
+                    重试
+                  </Button>
+                  <Link to="/admin/default-data">默认数据初始化</Link>
+                </>
+              )}
+              description={loadError}
+              title="搜索请求失败"
+            />
+          ) : null}
+
+          {!loading && !loadError && filteredItems.length === 0 ? (
             <>
-              <EmptyState description="试试其他关键词或浏览热卖商品" title="没有找到相关商品" />
+              <EmptyState
+                actions={<Link to="/admin/default-data">初始化默认数据</Link>}
+                description={
+                  query || categoryId || shopId
+                    ? "试试其他关键词或浏览热卖商品"
+                    : "该环境还没有商品数据；全新安装后可先在首页或管理后台初始化默认数据集。"
+                }
+                title={query || categoryId || shopId ? "没有找到相关商品" : "暂无商品"}
+              />
               {fallbackProducts.length > 0 ? (
                 <section className="sdkwork-mall-pc-floor">
                   <h2>热卖推荐</h2>

@@ -65,6 +65,7 @@ export function createSdkworkMallPcRuntime(): SdkworkMallPcRuntime {
     environment: config.environment,
     locale: config.i18n.defaultLocale,
     sdkClients,
+    session,
   });
 
   return {

@@ -116,13 +116,36 @@ function CountdownDisplay({ target, phase }: { target: Date; phase: "upcoming" |
 export function SdkworkMallActivityListPage() {
   const [items, setItems] = useState<MallActivityOffer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [typeFilter, setTypeFilter] = useState<MallActivityType | "all">("all");
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError(null);
     listMallActivities()
-      .then(setItems)
-      .finally(() => setLoading(false));
-  }, []);
+      .then((rows) => {
+        if (active) {
+          setItems(rows);
+        }
+      })
+      .catch((cause: unknown) => {
+        // An unreachable campaign service must not read as "no campaigns".
+        if (active) {
+          setItems([]);
+          setLoadError(cause instanceof Error && cause.message ? cause.message : "活动加载失败");
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [reloadToken]);
 
   const filteredItems = useMemo(() => {
     if (typeFilter === "all") return items;
@@ -131,6 +154,20 @@ export function SdkworkMallActivityListPage() {
 
   if (loading) {
     return <LoadingBlock label="加载活动会场..." />;
+  }
+
+  if (loadError) {
+    return (
+      <EmptyState
+        actions={(
+          <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
+            重试
+          </Button>
+        )}
+        description={loadError}
+        title="活动加载失败"
+      />
+    );
   }
 
   return (
@@ -160,7 +197,15 @@ export function SdkworkMallActivityListPage() {
       </div>
 
       {filteredItems.length === 0 ? (
-        <EmptyState description="新活动上线后将在此展示" title="暂无活动" />
+        typeFilter === "all" ? (
+          <EmptyState
+            actions={<Link to="/admin/default-data">初始化默认数据</Link>}
+            description="新活动上线后将在此展示；若刚完成安装，可先初始化默认数据集。"
+            title="暂无活动"
+          />
+        ) : (
+          <EmptyState description="新活动上线后将在此展示" title="暂无活动" />
+        )
       ) : (
         <div className="sdkwork-mall-pc-activity-grid">
           {filteredItems.map((item) => {
@@ -218,28 +263,58 @@ export function SdkworkMallActivityDetailPage() {
   const [activity, setActivity] = useState<MallActivityOffer | null>(null);
   const [products, setProducts] = useState<MallSearchProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setLoadError(null);
     async function load() {
-      const [detail, productResult] = await Promise.all([
-        retrieveMallActivity(eventId),
-        searchMallProducts({ pageSize: 12, query: eventId ? undefined : "sale" }),
-      ]);
-      if (active) {
-        setActivity(detail);
-        setProducts(productResult.items);
-        setLoading(false);
+      try {
+        const [detail, productResult] = await Promise.all([
+          retrieveMallActivity(eventId),
+          searchMallProducts({ pageSize: 12, query: eventId ? undefined : "sale" }),
+        ]);
+        if (active) {
+          setActivity(detail);
+          setProducts(productResult.items);
+        }
+      } catch (cause: unknown) {
+        // Leave the skeleton and report the failure instead of spinning forever
+        // or claiming the campaign ended.
+        if (active) {
+          setActivity(null);
+          setLoadError(cause instanceof Error && cause.message ? cause.message : "活动详情加载失败");
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
       }
     }
     void load();
     return () => {
       active = false;
     };
-  }, [eventId]);
+  }, [eventId, reloadToken]);
 
   if (loading) {
     return <LoadingBlock label="加载活动详情..." />;
+  }
+
+  if (loadError) {
+    return (
+      <EmptyState
+        actions={(
+          <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
+            重试
+          </Button>
+        )}
+        description={loadError}
+        title="活动详情加载失败"
+      />
+    );
   }
 
   if (!activity) {
