@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ChevronRight,
   Crown,
@@ -105,6 +105,10 @@ export function SdkworkMallPcStorefrontShell({
 }: SdkworkMallPcShellProps) {
   const brandName = runtime.config.appDisplayName || sdkworkMallPcBrand.name;
   const navigate = useNavigate();
+  // The masthead is the single search entry point for the storefront, so it
+  // mirrors the keyword of the results page the shopper is currently on.
+  const [searchParams] = useSearchParams();
+  const activeKeyword = searchParams.get("q") ?? "";
 
   return (
     <div className="sdkwork-mall-pc-storefront">
@@ -166,6 +170,8 @@ export function SdkworkMallPcStorefrontShell({
                 <input
                   aria-label="搜索商品、品牌、店铺"
                   autoComplete="off"
+                  defaultValue={activeKeyword}
+                  key={`masthead-search-${activeKeyword}`}
                   name="q"
                   placeholder="搜索商品 / 品牌 / 店铺"
                   type="search"

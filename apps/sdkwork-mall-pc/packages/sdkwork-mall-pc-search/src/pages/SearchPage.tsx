@@ -1,14 +1,14 @@
 import { formatMoney } from "@sdkwork/utils/money";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { History, Search, Sparkles, TrendingUp, X } from "lucide-react";import {
+import { ChevronRight, History, Sparkles } from "lucide-react";
+import {
   readAccountScopedItem,
   writeAccountScopedItem,
 } from "@sdkwork/mall-pc-core/session";
 import {
   Badge,
   Button,
-  Checkbox,
   EmptyState,
   Input,
   LoadingBlock,
@@ -18,7 +18,6 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  StatusNotice,
 } from "@sdkwork/ui-pc-react";
 import { sdkworkMallPcCategoryNav } from "@sdkwork/mall-pc-commons/category-nav";
 import { listEnabledMallCmsHotKeywords, type MallCmsHotKeyword } from "@sdkwork/mall-pc-cms/cms-config";
@@ -28,8 +27,8 @@ import { listMallCategories, searchMallProducts, searchMallShops, type MallSearc
 const sortOptions = [
   { label: "综合", value: "" },
   { label: "销量", value: "sales" },
-  { label: "价格升序", value: "price-asc" },
-  { label: "价格降序", value: "price-desc" },
+  { label: "价格 ↑", value: "price-asc" },
+  { label: "价格 ↓", value: "price-desc" },
   { label: "好评", value: "rating" },
   { label: "上新", value: "created_at" },
 ] as const;
@@ -80,6 +79,17 @@ function formatRating(rating?: number): string | null {
   return rating.toFixed(1);
 }
 
+/**
+ * 统一的筛选胶囊样式名：选中态由 `is-active` 承担，供类目、品牌、
+ * 发货地、服务标签与排序共用同一套视觉语言。
+ */
+function searchChipClass(active: boolean, extraClassName?: string): string {
+  const base = active
+    ? "sdkwork-mall-pc-search-chip is-active"
+    : "sdkwork-mall-pc-search-chip";
+  return extraClassName ? `${base} ${extraClassName}` : base;
+}
+
 export function SdkworkMallSearchPage() {
   const [params, setParams] = useSearchParams();
   const query = params.get("q") ?? "";
@@ -104,11 +114,6 @@ export function SdkworkMallSearchPage() {
   const [filterFreeShipping, setFilterFreeShipping] = useState(false);
   const [filterSelfOperated, setFilterSelfOperated] = useState(false);
   const [filterInStock, setFilterInStock] = useState(false);
-
-  // 搜索框联想
-  const [searchInput, setSearchInput] = useState(query);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchBoxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     listMallCategories()
@@ -201,22 +206,6 @@ export function SdkworkMallSearchPage() {
     };
   }, []);
 
-  // 同步 URL query 到搜索框
-  useEffect(() => {
-    setSearchInput(query);
-  }, [query]);
-
-  // 点击外部关闭联想下拉
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (searchBoxRef.current && !searchBoxRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   function updateParam(key: string, value: string) {
     const next = new URLSearchParams(params);
     if (value) {
@@ -230,31 +219,6 @@ export function SdkworkMallSearchPage() {
     }
     setParams(next);
   }
-
-  function handleSearchSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    const trimmed = searchInput.trim();
-    updateParam("q", trimmed);
-    setShowSuggestions(false);
-  }
-
-  function handleSuggestionClick(keyword: string) {
-    setSearchInput(keyword);
-    updateParam("q", keyword);
-    setShowSuggestions(false);
-  }
-
-  // 联想词：基于热词 + 输入前缀匹配
-  const suggestions = useMemo(() => {
-    const input = searchInput.trim().toLowerCase();
-    if (!input) return [];
-    const matched = hotKeywords
-      .filter((kw) => kw.keyword.toLowerCase().includes(input) && kw.keyword.toLowerCase() !== input)
-      .slice(0, 8)
-      .map((kw) => kw.keyword);
-    // 去重
-    return Array.from(new Set(matched));
-  }, [searchInput, hotKeywords]);
 
   // 从搜索结果中提取品牌和发货地选项
   const brandOptions = useMemo(() => {
@@ -378,372 +342,339 @@ export function SdkworkMallSearchPage() {
 
   return (
     <div className="sdkwork-mall-pc-search-page">
-      <header className="sdkwork-mall-pc-search-header">
-        <h1>
-          {shopId
-            ? "店内商品"
-            : activeCategoryName
-              ? `类目：${activeCategoryName}`
-              : query
-                ? `搜索「${query}」`
-                : "商品搜索"}
+      <nav aria-label="面包屑" className="sdkwork-mall-pc-search-crumb">
+        <Link to="/">首页</Link>
+        <ChevronRight aria-hidden="true" size={12} />
+        <span>{query ? `搜索「${query}」` : "全部商品"}</span>
+      </nav>
+
+      <header className="sdkwork-mall-pc-search-head">
+        <h1 className="sdkwork-mall-pc-search-title">
+          {shopId ? "店内商品" : (activeCategoryName ?? query) || "全部商品"}
         </h1>
-        <p>
-          共 {filteredItems.length} 件商品
-          {filteredItems.length !== total ? `（筛选自 ${total} 件）` : ""}
-        </p>
-
-        {/* 搜索框 + 联想 */}
-        <div className="sdkwork-mall-pc-search-box-wrapper" ref={searchBoxRef}>
-          <form className="sdkwork-mall-pc-search-box" onSubmit={handleSearchSubmit}>
-            <Search className="sdkwork-mall-pc-search-box-icon" />
-            <Input
-              aria-label="搜索商品"
-              autoComplete="off"
-              onChange={(event) => {
-                setSearchInput(event.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              placeholder="搜索商品品牌、类目、型号..."
-              value={searchInput}
-            />
-            {searchInput ? (
-              <button
-                aria-label="清空"
-                className="sdkwork-mall-pc-search-box-clear"
-                onClick={() => {
-                  setSearchInput("");
-                  setShowSuggestions(false);
-                }}
-                type="button"
-              >
-                <X />
-              </button>
-            ) : null}
-            <Button type="submit" variant="primary" size="default">
-              搜索
-            </Button>
-          </form>
-
-          {showSuggestions && suggestions.length > 0 ? (
-            <ul className="sdkwork-mall-pc-search-suggestions" role="listbox">
-              {suggestions.map((suggestion) => (
-                <li key={suggestion} role="option">
-                  <button
-                    className="sdkwork-mall-pc-suggestion-item"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    type="button"
-                  >
-                    <Search className="sdkwork-mall-pc-suggestion-icon" />
-                    <span>{suggestion}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-
-        {/* 热搜词 */}
-        {hotKeywords.length > 0 ? (
-          <div className="sdkwork-mall-pc-chip-row">
-            <Sparkles className="sdkwork-mall-pc-chip-row-icon" />
-            {hotKeywords.slice(0, 10).map((keyword) => (
-              <Link key={keyword.id} to={`/search?q=${encodeURIComponent(keyword.keyword)}`}>
-                {keyword.keyword}
-              </Link>
-            ))}
-          </div>
-        ) : null}
-
-        {/* 搜索历史 */}
-        {history.length > 0 ? (
-          <div className="sdkwork-mall-pc-chip-row">
-            <History className="sdkwork-mall-pc-chip-row-icon" />
-            {history.map((keyword) => (
-              <Link key={keyword} to={`/search?q=${encodeURIComponent(keyword)}`}>
-                {keyword}
-              </Link>
-            ))}
-            <button onClick={clearSearchHistory} type="button">
-              清空
-            </button>
-          </div>
-        ) : null}
-
-        {/* 类目筛选 */}
-        {categories.length > 0 ? (
-          <div className="sdkwork-mall-pc-chip-row">
-            <button onClick={() => updateParam("categoryId", "")} type="button">
-              全部类目
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => updateParam("categoryId", category.id)}
-                type="button"
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        ) : null}
       </header>
 
-      <div className="sdkwork-mall-pc-search-layout">
-        {/* 左侧筛选区 */}
-        <aside className="sdkwork-mall-pc-search-filters">
-          <div className="sdkwork-mall-pc-filter-section">
-            <h3>价格区间</h3>
-            <div className="sdkwork-mall-pc-price-filter">
+      {/* 搜索历史 / 热搜：轻量文字行，避免与顶部导航的搜索框重复。 */}
+      {hotKeywords.length > 0 || history.length > 0 ? (
+        <div className="sdkwork-mall-pc-search-keywords">
+          {hotKeywords.length > 0 && !query ? (
+            <div className="sdkwork-mall-pc-search-keyword-row">
+              <span className="sdkwork-mall-pc-search-keyword-label">
+                <Sparkles aria-hidden="true" size={13} />
+                热搜
+              </span>
+              {hotKeywords.slice(0, 10).map((keyword) => (
+                <Link key={keyword.id} to={`/search?q=${encodeURIComponent(keyword.keyword)}`}>
+                  {keyword.keyword}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+          {history.length > 0 ? (
+            <div className="sdkwork-mall-pc-search-keyword-row">
+              <span className="sdkwork-mall-pc-search-keyword-label">
+                <History aria-hidden="true" size={13} />
+                搜索历史
+              </span>
+              {history.map((keyword) => (
+                <Link key={keyword} to={`/search?q=${encodeURIComponent(keyword)}`}>
+                  {keyword}
+                </Link>
+              ))}
+              <button onClick={clearSearchHistory} type="button">
+                清空
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      <section aria-label="筛选条件" className="sdkwork-mall-pc-search-facets">
+        {categories.length > 0 ? (
+          <div className="sdkwork-mall-pc-search-facet">
+            <span className="sdkwork-mall-pc-search-facet-label">类目</span>
+            <div className="sdkwork-mall-pc-search-facet-values">
+              <button
+                aria-pressed={!categoryId}
+                className={searchChipClass(!categoryId)}
+                onClick={() => updateParam("categoryId", "")}
+                type="button"
+              >
+                全部
+              </button>
+              {categories.map((category) => (
+                <button
+                  aria-pressed={categoryId === category.id}
+                  className={searchChipClass(categoryId === category.id)}
+                  key={category.id}
+                  onClick={() => updateParam("categoryId", category.id)}
+                  type="button"
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {brandOptions.length > 0 ? (
+          <div className="sdkwork-mall-pc-search-facet">
+            <span className="sdkwork-mall-pc-search-facet-label">品牌</span>
+            <div className="sdkwork-mall-pc-search-facet-values">
+              {brandOptions.map(({ brand, count }) => (
+                <button
+                  aria-pressed={selectedBrands.includes(brand)}
+                  className={searchChipClass(selectedBrands.includes(brand))}
+                  key={brand}
+                  onClick={() => toggleBrand(brand)}
+                  type="button"
+                >
+                  {brand}
+                  <span className="sdkwork-mall-pc-search-chip-count">{count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {originOptions.length > 0 ? (
+          <div className="sdkwork-mall-pc-search-facet">
+            <span className="sdkwork-mall-pc-search-facet-label">发货地</span>
+            <div className="sdkwork-mall-pc-search-facet-values">
+              {originOptions.map(({ origin, count }) => (
+                <button
+                  aria-pressed={selectedOrigins.includes(origin)}
+                  className={searchChipClass(selectedOrigins.includes(origin))}
+                  key={origin}
+                  onClick={() => toggleOrigin(origin)}
+                  type="button"
+                >
+                  {origin}
+                  <span className="sdkwork-mall-pc-search-chip-count">{count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="sdkwork-mall-pc-search-facet">
+          <span className="sdkwork-mall-pc-search-facet-label">价格</span>
+          <div className="sdkwork-mall-pc-search-facet-values">
+            <div className="sdkwork-mall-pc-search-price-range">
               <Input
                 aria-label="最低价"
                 min={0}
                 onChange={(event) => setMinPrice(event.target.value)}
-                placeholder="最低"
+                placeholder="¥ 最低"
                 type="number"
                 value={minPrice}
               />
-              <span className="sdkwork-mall-pc-price-separator">-</span>
+              <span className="sdkwork-mall-pc-search-price-separator">-</span>
               <Input
                 aria-label="最高价"
                 min={0}
                 onChange={(event) => setMaxPrice(event.target.value)}
-                placeholder="最高"
+                placeholder="¥ 最高"
                 type="number"
                 value={maxPrice}
               />
             </div>
+            <span aria-hidden="true" className="sdkwork-mall-pc-search-facet-divider" />
+            <button
+              aria-pressed={filterFreeShipping}
+              className={searchChipClass(filterFreeShipping)}
+              onClick={() => setFilterFreeShipping((current) => !current)}
+              type="button"
+            >
+              包邮
+            </button>
+            <button
+              aria-pressed={filterSelfOperated}
+              className={searchChipClass(filterSelfOperated)}
+              onClick={() => setFilterSelfOperated((current) => !current)}
+              type="button"
+            >
+              自营
+            </button>
+            <button
+              aria-pressed={filterInStock}
+              className={searchChipClass(filterInStock)}
+              onClick={() => setFilterInStock((current) => !current)}
+              type="button"
+            >
+              仅看现货
+            </button>
           </div>
+        </div>
 
-          <div className="sdkwork-mall-pc-filter-section">
-            <h3>服务筛选</h3>
-            <label className="sdkwork-mall-pc-filter-checkbox">
-              <Checkbox
-                checked={filterFreeShipping}
-                onCheckedChange={(checked) => setFilterFreeShipping(checked === true)}
-              />
-              <span>包邮</span>
-            </label>
-            <label className="sdkwork-mall-pc-filter-checkbox">
-              <Checkbox
-                checked={filterSelfOperated}
-                onCheckedChange={(checked) => setFilterSelfOperated(checked === true)}
-              />
-              <span>自营</span>
-            </label>
-            <label className="sdkwork-mall-pc-filter-checkbox">
-              <Checkbox
-                checked={filterInStock}
-                onCheckedChange={(checked) => setFilterInStock(checked === true)}
-              />
-              <span>仅看现货</span>
-            </label>
-          </div>
-
-          {brandOptions.length > 0 ? (
-            <div className="sdkwork-mall-pc-filter-section">
-              <h3>品牌</h3>
-              {brandOptions.map(({ brand, count }) => (
-                <label key={brand} className="sdkwork-mall-pc-filter-checkbox">
-                  <Checkbox
-                    checked={selectedBrands.includes(brand)}
-                    onCheckedChange={() => toggleBrand(brand)}
-                  />
-                  <span>{brand}</span>
-                  <span className="sdkwork-mall-pc-filter-count">{count}</span>
-                </label>
+        {!loading && shops.length > 0 ? (
+          <div className="sdkwork-mall-pc-search-facet">
+            <span className="sdkwork-mall-pc-search-facet-label">相关店铺</span>
+            <div className="sdkwork-mall-pc-search-facet-values">
+              {shops.map((shop) => (
+                <Link
+                  className="sdkwork-mall-pc-search-chip sdkwork-mall-pc-search-shop-chip"
+                  key={shop.id}
+                  to={`/shop/${shop.id}`}
+                >
+                  {shop.name}
+                </Link>
               ))}
             </div>
-          ) : null}
+          </div>
+        ) : null}
+      </section>
 
-          {originOptions.length > 0 ? (
-            <div className="sdkwork-mall-pc-filter-section">
-              <h3>发货地</h3>
-              {originOptions.map(({ origin, count }) => (
-                <label key={origin} className="sdkwork-mall-pc-filter-checkbox">
-                  <Checkbox
-                    checked={selectedOrigins.includes(origin)}
-                    onCheckedChange={() => toggleOrigin(origin)}
-                  />
-                  <span>{origin}</span>
-                  <span className="sdkwork-mall-pc-filter-count">{count}</span>
-                </label>
-              ))}
-            </div>
-          ) : null}
-
+      <div className="sdkwork-mall-pc-search-toolbar">
+        <div aria-label="排序方式" className="sdkwork-mall-pc-search-sort" role="group">
+          {sortOptions.map((option) => (
+            <button
+              aria-pressed={sort === option.value}
+              className={searchChipClass(sort === option.value, "sdkwork-mall-pc-search-sort-option")}
+              key={option.value || "default"}
+              onClick={() => updateParam("sort", option.value)}
+              type="button"
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <div className="sdkwork-mall-pc-search-toolbar-meta">
+          <span className="sdkwork-mall-pc-search-count">
+            共 <strong>{filteredItems.length}</strong> 件
+            {filteredItems.length !== total ? <span>（筛选自 {total} 件）</span> : null}
+          </span>
           {hasActiveFilters ? (
-            <Button variant="ghost" size="sm" onClick={clearAllFilters} type="button">
+            <button className="sdkwork-mall-pc-search-reset" onClick={clearAllFilters} type="button">
               清空筛选
-            </Button>
+            </button>
           ) : null}
-        </aside>
+        </div>
+      </div>
 
-        {/* 右侧主区 */}
-        <div className="sdkwork-mall-pc-search-main">
-          {/* 排序栏 */}
-          <div className="sdkwork-mall-pc-sort-row">
-            <TrendingUp className="sdkwork-mall-pc-sort-icon" />
-            {sortOptions.map((option) => (
-              <button
-                key={option.value || "default"}
-                className={sort === option.value ? "sdkwork-mall-pc-sort-active" : ""}
-                onClick={() => updateParam("sort", option.value)}
-                type="button"
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+      {loading ? <LoadingBlock label="搜索中..." /> : null}
 
-          {/* 相关店铺 */}
-          {!loading && shops.length > 0 ? (
+      {!loading && loadError ? (
+        <EmptyState
+          actions={(
+            <>
+              <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
+                重试
+              </Button>
+              <Link to="/">返回首页</Link>
+            </>
+          )}
+          description={loadError}
+          title="搜索请求失败"
+        />
+      ) : null}
+
+      {!loading && !loadError && filteredItems.length === 0 ? (
+        <>
+          <EmptyState
+            actions={<Link to="/">去首页逛逛</Link>}
+            description={
+              query || categoryId || shopId
+                ? "换个关键词试试，或看看下面的热卖推荐"
+                : "当前还没有可浏览的商品，请稍后再试"
+            }
+            title={query || categoryId || shopId ? "没有找到相关商品" : "暂无商品"}
+          />
+          {fallbackProducts.length > 0 ? (
             <section className="sdkwork-mall-pc-floor">
-              <h2>相关店铺</h2>
-              <div className="sdkwork-mall-pc-shop-grid">
-                {shops.map((shop) => (
-                  <Link className="sdkwork-mall-pc-shop-card" key={shop.id} to={`/shop/${shop.id}`}>
-                    <strong>{shop.name}</strong>
-                    {shop.description ? <p>{shop.description}</p> : null}
+              <h2>热卖推荐</h2>
+              <div className="sdkwork-mall-pc-product-grid sdkwork-mall-pc-search-grid">
+                {fallbackProducts.map((product) => (
+                  <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
+                    <div className="sdkwork-mall-pc-product-image">
+                      {product.imageUrl ? <img alt={product.title} src={product.imageUrl} /> : null}
+                    </div>
+                    <div className="sdkwork-mall-pc-product-body">
+                      <h3>{product.title}</h3>
+                      <strong>{formatCny(product.priceCny)}</strong>
+                    </div>
                   </Link>
                 ))}
               </div>
             </section>
           ) : null}
+        </>
+      ) : null}
 
-          {loading ? <LoadingBlock label="搜索中..." /> : null}
-
-          {!loading && loadError ? (
-            <EmptyState
-              actions={(
-                <>
-                  <Button onClick={() => setReloadToken((token) => token + 1)} type="button" variant="outline">
-                    重试
-                  </Button>
-                  <Link to="/admin/default-data">默认数据初始化</Link>
-                </>
-              )}
-              description={loadError}
-              title="搜索请求失败"
-            />
-          ) : null}
-
-          {!loading && !loadError && filteredItems.length === 0 ? (
-            <>
-              <EmptyState
-                actions={<Link to="/admin/default-data">初始化默认数据</Link>}
-                description={
-                  query || categoryId || shopId
-                    ? "试试其他关键词或浏览热卖商品"
-                    : "该环境还没有商品数据；全新安装后可先在首页或管理后台初始化默认数据集。"
-                }
-                title={query || categoryId || shopId ? "没有找到相关商品" : "暂无商品"}
-              />
-              {fallbackProducts.length > 0 ? (
-                <section className="sdkwork-mall-pc-floor">
-                  <h2>热卖推荐</h2>
-                  <div className="sdkwork-mall-pc-product-grid">
-                    {fallbackProducts.map((product) => (
-                      <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
-                        <div className="sdkwork-mall-pc-product-image">
-                          {product.imageUrl ? <img alt={product.title} src={product.imageUrl} /> : null}
-                        </div>
-                        <div className="sdkwork-mall-pc-product-body">
-                          <h3>{product.title}</h3>
-                          <strong>{formatCny(product.priceCny)}</strong>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-            </>
-          ) : null}
-
-          {/* 商品列表 */}
-          {!loading && filteredItems.length > 0 ? (
-            <div className="sdkwork-mall-pc-product-grid">
-              {filteredItems.map((product) => (
-                <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
-                  <div className="sdkwork-mall-pc-product-image">
-                    {product.imageUrl ? <img alt={product.title} src={product.imageUrl} /> : null}
-                    {product.selfOperated ? (
-                      <Badge variant="danger" className="sdkwork-mall-pc-product-badge-self">自营</Badge>
-                    ) : null}
-                  </div>
-                  <div className="sdkwork-mall-pc-product-body">
-                    <h3 className="sdkwork-mall-pc-product-title">{product.title}</h3>
-                    {product.brand ? (
-                      <span className="sdkwork-mall-pc-product-brand">{product.brand}</span>
-                    ) : null}
-                    <div className="sdkwork-mall-pc-product-price-row">
-                      <strong className="sdkwork-mall-pc-product-price">{formatCny(product.priceCny)}</strong>
-                      {product.freeShipping ? (
-                        <Badge variant="success">包邮</Badge>
-                      ) : null}
-                      {product.inStock === false ? (
-                        <Badge variant="warning">缺货</Badge>
-                      ) : null}
-                    </div>
-                    <div className="sdkwork-mall-pc-product-meta">
-                      {product.shopName ? <span className="sdkwork-mall-pc-product-shop">{product.shopName}</span> : null}
-                      {product.origin ? <span className="sdkwork-mall-pc-product-origin">{product.origin}</span> : null}
-                    </div>
-                    <div className="sdkwork-mall-pc-product-stats">
-                      {product.rating != null ? (
-                        <span className="sdkwork-mall-pc-product-rating">
-                          评分 {formatRating(product.rating)}
-                        </span>
-                      ) : null}
-                      {product.salesCount != null ? (
-                        <span className="sdkwork-mall-pc-product-sales">
-                          已售 {formatSalesCount(product.salesCount)}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : null}
-
-          {/* 分页 */}
-          {!loading && filteredItems.length > 0 && totalPages > 1 ? (
-            <Pagination className="sdkwork-mall-pc-search-pagination">
-              <PaginationContent>
-                {page > 1 ? (
-                  <PaginationItem>
-                    <PaginationPrevious onClick={() => updateParam("page", String(page - 1))} />
-                  </PaginationItem>
+      {/* 商品列表 */}
+      {!loading && filteredItems.length > 0 ? (
+        <div className="sdkwork-mall-pc-product-grid sdkwork-mall-pc-search-grid">
+          {filteredItems.map((product) => (
+            <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
+              <div className="sdkwork-mall-pc-product-image">
+                {product.imageUrl ? <img alt={product.title} src={product.imageUrl} /> : null}
+                {product.selfOperated ? (
+                  <Badge variant="danger" className="sdkwork-mall-pc-product-badge-self">自营</Badge>
                 ) : null}
-                {pageNumbers.map((pageNum) => (
-                  <PaginationItem key={pageNum}>
-                    <PaginationLink
-                      isActive={pageNum === page}
-                      onClick={() => updateParam("page", String(pageNum))}
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                {page < totalPages ? (
-                  <PaginationItem>
-                    <PaginationNext onClick={() => updateParam("page", String(page + 1))} />
-                  </PaginationItem>
+              </div>
+              <div className="sdkwork-mall-pc-product-body">
+                <h3 className="sdkwork-mall-pc-product-title">{product.title}</h3>
+                {product.brand ? (
+                  <span className="sdkwork-mall-pc-product-brand">{product.brand}</span>
                 ) : null}
-              </PaginationContent>
-            </Pagination>
-          ) : null}
-
-          {/* SDK 阻塞提示 */}
-          {!loading && items.length === 0 && !query ? (
-            <StatusNotice tone="default">
-              搜索联想、同义词、品牌价格高级筛选为 SDK 阻塞项，当前基于返回数据做客户端筛选。
-            </StatusNotice>
-          ) : null}
+                <div className="sdkwork-mall-pc-product-price-row">
+                  <strong className="sdkwork-mall-pc-product-price">{formatCny(product.priceCny)}</strong>
+                  {product.freeShipping ? (
+                    <Badge variant="success">包邮</Badge>
+                  ) : null}
+                  {product.inStock === false ? (
+                    <Badge variant="warning">缺货</Badge>
+                  ) : null}
+                </div>
+                <div className="sdkwork-mall-pc-product-meta">
+                  {product.shopName ? <span className="sdkwork-mall-pc-product-shop">{product.shopName}</span> : null}
+                  {product.origin ? <span className="sdkwork-mall-pc-product-origin">{product.origin}</span> : null}
+                </div>
+                <div className="sdkwork-mall-pc-product-stats">
+                  {product.rating != null ? (
+                    <span className="sdkwork-mall-pc-product-rating">
+                      评分 {formatRating(product.rating)}
+                    </span>
+                  ) : null}
+                  {product.salesCount != null ? (
+                    <span className="sdkwork-mall-pc-product-sales">
+                      已售 {formatSalesCount(product.salesCount)}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
-      </div>
+      ) : null}
+
+      {/* 分页 */}
+      {!loading && filteredItems.length > 0 && totalPages > 1 ? (
+        <Pagination className="sdkwork-mall-pc-search-pagination">
+          <PaginationContent>
+            {page > 1 ? (
+              <PaginationItem>
+                <PaginationPrevious onClick={() => updateParam("page", String(page - 1))} />
+              </PaginationItem>
+            ) : null}
+            {pageNumbers.map((pageNum) => (
+              <PaginationItem key={pageNum}>
+                <PaginationLink
+                  isActive={pageNum === page}
+                  onClick={() => updateParam("page", String(pageNum))}
+                >
+                  {pageNum}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            {page < totalPages ? (
+              <PaginationItem>
+                <PaginationNext onClick={() => updateParam("page", String(page + 1))} />
+              </PaginationItem>
+            ) : null}
+          </PaginationContent>
+        </Pagination>
+      ) : null}
     </div>
   );
 }

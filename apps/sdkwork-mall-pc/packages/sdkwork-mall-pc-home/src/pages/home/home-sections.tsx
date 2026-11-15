@@ -142,29 +142,15 @@ function resolveFloorIcon(title: string): LucideIcon {
 }
 
 /**
- * Picks the shelf column count that leaves the fewest empty cells.
+ * 楼层货架统一使用 5 列栅格。
  *
- * A CMS floor can be backed by fewer products than a full 5-column row (for
- * example a niche category with 4 items). Stretching those cards to fill the
- * row keeps the shelf from ending in a ragged gap.
+ * Earlier shelves re-flowed to 3 or 4 columns when a CMS floor was backed by
+ * fewer products, which stretched each card to 280-380px and made neighbouring
+ * sections look misaligned. Every storefront shelf (floors and 猜你喜欢) now
+ * shares one card rhythm; a short shelf simply leaves its trailing cells empty,
+ * exactly like a mainstream mall.
  */
-function resolveShelfColumns(count: number): 3 | 4 | 5 {
-  let best: 3 | 4 | 5 = 5;
-  let bestScore = Number.POSITIVE_INFINITY;
-  for (const columns of [5, 4, 3] as const) {
-    if (columns > count) {
-      continue;
-    }
-    const rows = Math.ceil(count / columns);
-    const emptyCells = rows * columns - count;
-    const score = emptyCells * 10 + rows;
-    if (score < bestScore) {
-      bestScore = score;
-      best = columns;
-    }
-  }
-  return best;
-}
+const SHELF_COLUMNS = 5;
 
 export function HomeFloor({
   floor,
@@ -186,7 +172,9 @@ export function HomeFloor({
   if (!loading && products.length < 3) {
     return null;
   }
-  const columns = resolveShelfColumns(products.length);
+  // 不足一整行的货架用一块“查看全部”跳转卡补齐，保持每层右边缘与 5 列栅格对齐。
+  const remainder = products.length % SHELF_COLUMNS;
+  const fillSpan = remainder === 0 ? 0 : SHELF_COLUMNS - remainder;
   return (
     <section className="sdkwork-mall-pc-home-section">
       <HomeSectionHead
@@ -196,12 +184,37 @@ export function HomeFloor({
         title={floor.title}
       />
       {loading ? (
-        <HomeProductSkeletons />
+        <HomeProductSkeletons count={SHELF_COLUMNS} />
       ) : (
-        <div className={`sdkwork-mall-pc-home-grid is-cols-${columns}`}>
+        <div className="sdkwork-mall-pc-home-grid is-cols-5">
           {products.map((product) => (
             <HomeProductCard key={product.id} product={product} />
           ))}
+          {fillSpan > 0 ? (
+            <Link
+              aria-label={`查看更多${floor.title}商品`}
+              className="sdkwork-mall-pc-home-shelf-fill"
+              style={{ gridColumn: `span ${fillSpan}` }}
+              to={moreTo}
+            >
+              <FloorIcon
+                aria-hidden="true"
+                className="sdkwork-mall-pc-home-shelf-fill-icon"
+                size={88}
+                strokeWidth={1.1}
+              />
+              <span className="sdkwork-mall-pc-home-shelf-fill-title">
+                {floor.title}
+              </span>
+              <span className="sdkwork-mall-pc-home-shelf-fill-copy">
+                精选好物持续上新
+              </span>
+              <span className="sdkwork-mall-pc-home-shelf-fill-cta">
+                查看全部
+                <ArrowRight aria-hidden="true" size={14} />
+              </span>
+            </Link>
+          ) : null}
         </div>
       )}
     </section>
