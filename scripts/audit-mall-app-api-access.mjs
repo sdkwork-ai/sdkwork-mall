@@ -273,10 +273,23 @@ function isAppApiSpec(specFilePath, document) {
   return false;
 }
 
+/** Higher-priority sources first: authored authority, then SDK snapshots, then generated aggregates. */
+function specPriority(relative) {
+  if (relative.includes('/apis/app-api/')) return 0;
+  if (relative.includes('/sdks/') && relative.includes('/openapi/')) return 1;
+  return 2;
+}
+
 /**
  * Collects the app-api OpenAPI authorities that make up the consumed surface.
  *
+ * The mall's own specs come first, so a spec copy shipped by a sibling SDK does
+ * not replace the contract the mall actually consumes. Identical copies (the
+ * same operations with the same declared tiers, e.g. one per generated language)
+ * are collapsed and only counted once.
+ *
  * @param {{ name: string, dir: string }[]} siblingRepos
+ * @returns {{ specs: object[], duplicates: { path: string, duplicateOf: string }[] }}
  */
 function collectConsumedSpecFiles(siblingRepos) {
   const candidates = [];
@@ -314,20 +327,52 @@ function collectConsumedSpecFiles(siblingRepos) {
     }
   }
 
-  const seen = new Set();
+  const ordered = candidates
+    .map((candidate) => ({ ...candidate, relative: workspaceRelative(candidate.filePath) }))
+    .sort((left, right) => {
+      const leftOwnerRank = left.owner === 'mall' ? 0 : 1;
+      const rightOwnerRank = right.owner === 'mall' ? 0 : 1;
+      if (leftOwnerRank !== rightOwnerRank) return leftOwnerRank - rightOwnerRank;
+      const leftPriority = specPriority(left.relative);
+      const rightPriority = specPriority(right.relative);
+      if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+      return left.relative.localeCompare(right.relative);
+    });
+
+  /** @type {object[]} */
   const specs = [];
-  for (const candidate of candidates.sort((left, right) =>
-    workspaceRelative(left.filePath).localeCompare(workspaceRelative(right.filePath)),
-  )) {
-    const relative = workspaceRelative(candidate.filePath);
-    if (seen.has(relative)) continue;
+  /** @type {{ path: string, duplicateOf: string }[]} */
+  const duplicates = [];
+  /** @type {Map<string, string>} */
+  const signatureToSpec = new Map();
+  const seenPaths = new Set();
+
+  for (const candidate of ordered) {
+    if (seenPaths.has(candidate.relative)) continue;
+    seenPaths.add(candidate.relative);
     const document = readJsonFile(candidate.filePath);
     if (!document || typeof document.paths !== 'object') continue;
     if (!isAppApiSpec(candidate.filePath, document)) continue;
-    seen.add(relative);
-    specs.push({ ...candidate, relative, document });
+
+    const spec = {
+      ...candidate,
+      document,
+      isPrimary: /sdkwork-commerce-app-sdk/.test(candidate.relative),
+    };
+    const signature = parseSpecOperations(spec)
+      .map((operation) => `${operation.method} ${operation.path} ${operation.operationId} ${operation.authority?.tier ?? ''}`)
+      .sort()
+      .join('\n');
+    const existing = signatureToSpec.get(signature);
+    if (existing) {
+      duplicates.push({ path: spec.relative, duplicateOf: existing });
+      continue;
+    }
+    signatureToSpec.set(signature, spec.relative);
+    specs.push(spec);
   }
-  return specs;
+
+  return { specs, duplicates };
 }
 
 /**
@@ -384,6 +429,8 @@ function parseSpecOperations(spec) {
         specRelative: spec.relative,
         specRepo: spec.repo,
         specOwner: spec.owner,
+        specPrimary: spec.isPrimary === true,
+        specPriority: specPriority(spec.relative),
       });
     }
   }
@@ -615,7 +662,9 @@ function collectRouteRepoDirs() {
   return repos.sort((left, right) => left.name.localeCompare(right.name));
 }
 
-function isRouteDeclarationFile(_filePath, name) {
+function isRouteDeclarationFile(filePath, name) {
+  if (/[\\/](tests|benches|examples)[\\/]/.test(filePath)) return false;
+  if (/(?:^|_)tests?\.rs$/.test(name)) return false;
   return (
     name === 'http_route_manifest.rs' ||
     /^manifest.*\.rs$/.test(name) ||
@@ -627,22 +676,39 @@ function isRouteDeclarationFile(_filePath, name) {
 /**
  * Builds the published-tier index from checked-in route declarations.
  *
- * @returns {{ index: Map<string, object[]>, files: string[], reposWithGeneratedManifest: Set<string> }}
+ * @returns {{
+ *   index: Map<string, object[]>,
+ *   files: string[],
+ *   reposWithGeneratedManifest: Set<string>,
+ *   generatedManifestSpecs: Map<string, Set<string>>,
+ * }}
  */
 function buildRouteIndex(routeRepoDirs) {
   /** @type {Map<string, object[]>} */
   const index = new Map();
   const files = [];
   const reposWithGeneratedManifest = new Set();
+  /** @type {Map<string, Set<string>>} repo -> absolute OpenAPI authorities it generates its manifest from */
+  const generatedManifestSpecs = new Map();
 
   for (const repo of routeRepoDirs) {
     const cratesDir = path.join(repo.dir, 'crates');
-    const buildScripts = listFiles(cratesDir, (_p, name) => name === 'build.rs', 8);
-    for (const buildScript of buildScripts) {
+    for (const buildScript of listFiles(cratesDir, (_p, name) => name === 'build.rs', 8)) {
       const text = readTextFile(buildScript);
-      if (text && text.includes('generate_http_route_manifest')) {
-        reposWithGeneratedManifest.add(repo.name);
-        break;
+      if (!text || !text.includes('generate_http_route_manifest')) continue;
+      reposWithGeneratedManifest.add(repo.name);
+      let crateDir = path.dirname(buildScript);
+      for (let depth = 0; depth < 8; depth += 1) {
+        if (fs.existsSync(path.join(crateDir, 'Cargo.toml'))) break;
+        const parent = path.dirname(crateDir);
+        if (parent === crateDir) break;
+        crateDir = parent;
+      }
+      if (!generatedManifestSpecs.has(repo.name)) generatedManifestSpecs.set(repo.name, new Set());
+      const specPattern = /"([^"]*\.openapi\.json)"/g;
+      let match;
+      while ((match = specPattern.exec(text)) !== null) {
+        generatedManifestSpecs.get(repo.name).add(path.resolve(crateDir, match[1]));
       }
     }
 
@@ -664,7 +730,7 @@ function buildRouteIndex(routeRepoDirs) {
   }
 
   files.sort();
-  return { index, files, reposWithGeneratedManifest };
+  return { index, files, reposWithGeneratedManifest, generatedManifestSpecs };
 }
 
 // ---------------------------------------------------------------------------
@@ -885,7 +951,7 @@ function uniqueSorted(values) {
 
 function buildAudit() {
   const siblingRepos = readWorkspaceSiblingRepos();
-  const specs = collectConsumedSpecFiles(siblingRepos);
+  const { specs, duplicates: duplicateSpecs } = collectConsumedSpecFiles(siblingRepos);
   const routeRepoDirs = collectRouteRepoDirs();
   const routeIndex = buildRouteIndex(routeRepoDirs);
 
@@ -914,13 +980,14 @@ function buildAudit() {
       if (parsed.operationId) record.operationIds.add(parsed.operationId);
       for (const tag of parsed.tags) record.tags.add(tag);
       record.specRefs.add(parsed.specRelative);
-      if (parsed.specOwner === 'mall' && spec.relative) record.primary = true;
+      if (parsed.specPrimary) record.primary = true;
       if (parsed.authority) {
         record.authorities.push({
           tier: parsed.authority.tier,
           declaredBy: parsed.authority.declaredBy,
           spec: parsed.specRelative,
           repo: parsed.specRepo,
+          priority: parsed.specPriority,
         });
       }
     }
@@ -947,18 +1014,16 @@ function buildAudit() {
       operationId: declaration.operationId,
     }));
 
-    const authorityByRepo = new Map();
-    for (const authority of operation.authorities) {
-      if (!authorityByRepo.has(authority.repo)) authorityByRepo.set(authority.repo, []);
-      authorityByRepo.get(authority.repo).push(authority);
-    }
     const authorityTiers = uniqueSorted(operation.authorities.map((entry) => entry.tier));
     operation.authorityTiers = authorityTiers;
     operation.authorities = operation.authorities
       .slice()
       .sort((left, right) =>
-        (left.repo + left.spec + left.tier).localeCompare(right.repo + right.spec + right.tier),
+        left.priority !== right.priority
+          ? left.priority - right.priority
+          : (left.repo + left.spec + left.tier).localeCompare(right.repo + right.spec + right.tier),
       );
+    operation.authorityPrimary = operation.authorities[0] ?? null;
 
     if (declarations.length > 0) {
       const tiers = uniqueSorted(declarations.map((declaration) => declaration.tier));
