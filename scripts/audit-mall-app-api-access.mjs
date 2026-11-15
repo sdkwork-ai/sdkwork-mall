@@ -1288,6 +1288,14 @@ function describePathPattern(source) {
     .join('/');
 }
 
+/** Keeps spec references readable in tables; the JSON keeps the full path. */
+function shortenSpec(relative) {
+  if (relative.length <= 58) return relative;
+  const parts = relative.split('/');
+  if (parts.length < 3) return relative;
+  return `${parts[0]}/…/${parts[parts.length - 1]}`;
+}
+
 function describeConsumed(operation, { compact = true } = {}) {
   if (operation.consumerFiles.length === 0) return '—';
   if (compact) return `${operation.consumerFiles.length} file${operation.consumerFiles.length === 1 ? '' : 's'}`;
@@ -1491,7 +1499,7 @@ function renderMarkdown(audit) {
     push('| --- | --- | --- | --- | --- |');
     for (const operation of missing) {
       push(
-        `| ${operation.method} | \`${mdCell(operation.path)}\` | ${mdCell(operation.operationIds[0] ?? '')} | ${mdCell(uniqueSorted(operation.specRefs).join('<br>'))} | ${describeConsumed(operation)} |`,
+        `| ${operation.method} | \`${mdCell(operation.path)}\` | ${mdCell(operation.operationIds[0] ?? '')} | ${mdCell(uniqueSorted(operation.specRefs).map(shortenSpec).join('<br>'))} | ${describeConsumed(operation)} |`,
       );
     }
   }
@@ -1525,7 +1533,7 @@ function renderMarkdown(audit) {
     push('| --- | --- | --- | --- | --- |');
     for (const drift of authorityDrift) {
       const specs = drift.disagreeingAuthorities
-        .map((authority) => `${authority.spec} (${authority.tier})`)
+        .map((authority) => `${shortenSpec(authority.spec)} (${authority.tier})`)
         .join('<br>');
       push(
         `| ${drift.method} | \`${mdCell(drift.path)}\` | ${drift.routeManifestTier} | ${mdCell(drift.authorityTiers.join(', '))} | ${mdCell(specs)} |`,
@@ -1546,7 +1554,7 @@ function renderMarkdown(audit) {
     push('| --- | --- | --- | --- | --- |');
     for (const conflict of authorityConflicts) {
       const specs = conflict.declarations
-        .map((declaration) => `${declaration.spec} (${declaration.tier})`)
+        .map((declaration) => `${shortenSpec(declaration.spec)} (${declaration.tier})`)
         .join('<br>');
       push(
         `| ${conflict.method} | \`${mdCell(conflict.path)}\` | ${mdCell(conflict.authorityTiers.join(', '))} | ${mdCell(specs)} | ${conflict.includesConsumerAggregate ? 'yes' : 'no'} |`,

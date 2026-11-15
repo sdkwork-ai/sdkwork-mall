@@ -16,7 +16,7 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 
 ## Snapshot
 
-- Generated at: `2026-11-15T02:05:24.825Z`
+- Generated at: `2026-11-15T02:05:50.630Z`
 - Consumed app-api specs: 12
 - Route-owning repos scanned: 94 (13 contribute a consumed tier or contract)
 - Route declaration files parsed: 157
@@ -30,7 +30,7 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 | sdkwork-drive | b8229cd | clean |
 | sdkwork-inventory | 697816d | clean |
 | sdkwork-invoice | 6886f78 | clean |
-| sdkwork-mall | 4886fc8 | dirty (4 paths) |
+| sdkwork-mall | 5cc8e41 | dirty (1 paths) |
 | sdkwork-membership | 00cf902 | dirty (23 paths) |
 | sdkwork-order | a800e62 | clean |
 | sdkwork-partner | d27ccc7 | clean |
@@ -157,40 +157,40 @@ These operations are declared in a consumed OpenAPI authority, but no checked-in
 
 | Method | Path | operationId | Authority spec | Consumed |
 | --- | --- | --- | --- | --- |
-| GET | `/app/v3/api/addresses` | addresses.list | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| POST | `/app/v3/api/addresses` | addresses.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| DELETE | `/app/v3/api/addresses/{addressId}` | addresses.delete | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| PATCH | `/app/v3/api/addresses/{addressId}` | addresses.update | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| POST | `/app/v3/api/addresses/{addressId}/default_selection` | addresses.defaultSelection.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| GET | `/app/v3/api/cart/current` | cart.current.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 3 files |
-| POST | `/app/v3/api/cart/items` | cart.items.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| DELETE | `/app/v3/api/cart/items/{cartItemId}` | cart.items.delete | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| PATCH | `/app/v3/api/cart/items/{cartItemId}` | cart.items.update | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 5 files |
-| GET | `/app/v3/api/catalog/skus/{skuId}/prices` | catalog.skus.prices.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/catalog/spus` | catalog.spus.list | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 4 files |
-| GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 3 files |
-| POST | `/app/v3/api/orders` | orders.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 4 files |
-| POST | `/app/v3/api/orders/{orderId}/cancel` | orders.cancel | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/payments/reconciliations` | payments.reconcile | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
-| GET | `/app/v3/api/payments/statistics` | payments.statistics.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/recharges/orders/{orderId}/cancellations` | recharges.orders.cancel | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/accounts/{accountId}` | wallet.accounts.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/accounts/overview` | wallet.accounts.overview.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/accounts/tokens` | wallet.accounts.tokens.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/wallet/adjustments` | wallet.adjustments.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/exchange_rules` | wallet.exchangeRules.list | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/wallet/holds` | wallet.holds.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 4 files |
-| POST | `/app/v3/api/wallet/holds/releases` | wallet.holds.releases.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/wallet/holds/settlements` | wallet.holds.settlements.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/wallet/point_exchanges` | wallet.pointExchanges.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/point_exchanges/{exchangeNo}` | wallet.pointExchanges.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/wallet/point_transfers` | wallet.pointTransfers.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/requests/{requestNo}` | wallet.requests.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/tokens` | wallet.tokens.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/wallet/topup_transfers` | wallet.topupTransfers.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/transactions` | wallet.transactions.list | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/wallet/transactions/{transactionId}` | wallet.transactions.retrieve | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/wallet/withdrawal_transfers` | wallet.withdrawalTransfers.create | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
+| GET | `/app/v3/api/addresses` | addresses.list | sdkwork-mall/…/source-openapi.json | 5 files |
+| POST | `/app/v3/api/addresses` | addresses.create | sdkwork-mall/…/source-openapi.json | 5 files |
+| DELETE | `/app/v3/api/addresses/{addressId}` | addresses.delete | sdkwork-mall/…/source-openapi.json | 5 files |
+| PATCH | `/app/v3/api/addresses/{addressId}` | addresses.update | sdkwork-mall/…/source-openapi.json | 5 files |
+| POST | `/app/v3/api/addresses/{addressId}/default_selection` | addresses.defaultSelection.create | sdkwork-mall/…/source-openapi.json | 5 files |
+| GET | `/app/v3/api/cart/current` | cart.current.retrieve | sdkwork-mall/…/source-openapi.json | 3 files |
+| POST | `/app/v3/api/cart/items` | cart.items.create | sdkwork-mall/…/source-openapi.json | 5 files |
+| DELETE | `/app/v3/api/cart/items/{cartItemId}` | cart.items.delete | sdkwork-mall/…/source-openapi.json | 5 files |
+| PATCH | `/app/v3/api/cart/items/{cartItemId}` | cart.items.update | sdkwork-mall/…/source-openapi.json | 5 files |
+| GET | `/app/v3/api/catalog/skus/{skuId}/prices` | catalog.skus.prices.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/catalog/spus` | catalog.spus.list | sdkwork-mall/…/source-openapi.json | 4 files |
+| GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | sdkwork-mall/…/source-openapi.json | 3 files |
+| POST | `/app/v3/api/orders` | orders.create | sdkwork-mall/…/source-openapi.json | 4 files |
+| POST | `/app/v3/api/orders/{orderId}/cancel` | orders.cancel | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/payments/reconciliations` | payments.reconcile | sdkwork-mall/…/source-openapi.json | 1 file |
+| GET | `/app/v3/api/payments/statistics` | payments.statistics.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/recharges/orders/{orderId}/cancellations` | recharges.orders.cancel | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/accounts/{accountId}` | wallet.accounts.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/accounts/overview` | wallet.accounts.overview.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/accounts/tokens` | wallet.accounts.tokens.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/wallet/adjustments` | wallet.adjustments.create | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/exchange_rules` | wallet.exchangeRules.list | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/wallet/holds` | wallet.holds.create | sdkwork-mall/…/source-openapi.json | 4 files |
+| POST | `/app/v3/api/wallet/holds/releases` | wallet.holds.releases.create | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/wallet/holds/settlements` | wallet.holds.settlements.create | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/wallet/point_exchanges` | wallet.pointExchanges.create | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/point_exchanges/{exchangeNo}` | wallet.pointExchanges.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/wallet/point_transfers` | wallet.pointTransfers.create | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/requests/{requestNo}` | wallet.requests.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/tokens` | wallet.tokens.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/wallet/topup_transfers` | wallet.topupTransfers.create | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/transactions` | wallet.transactions.list | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/wallet/transactions/{transactionId}` | wallet.transactions.retrieve | sdkwork-mall/…/source-openapi.json | — |
+| POST | `/app/v3/api/wallet/withdrawal_transfers` | wallet.withdrawalTransfers.create | sdkwork-mall/…/source-openapi.json | — |
 
 ### Unused by mall code (267)
 
@@ -472,20 +472,20 @@ The checked-in route manifest (runtime truth) and an OpenAPI authority disagree.
 
 | Method | Path | Manifest tier | Authority tier(s) | Disagreeing authority spec(s) |
 | --- | --- | --- | --- | --- |
-| GET | `/app/v3/api/ai/pricing/rates` | anonymous | dual-token | sdkwork-cloudrouter/apis/app-api/cloudrouter/cloudrouter-app-api.openapi.json (dual-token) |
-| GET | `/app/v3/api/ai/routing/account_groups` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/apis/app-api/cloudrouter/cloudrouter-app-api.openapi.json (dual-token) |
-| GET | `/app/v3/api/catalog/attributes` | dual-token-or-anonymous | dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/catalog/categories` | dual-token-or-anonymous | dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/catalog/categories/{categoryId}` | dual-token-or-anonymous | dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/catalog/products` | dual-token-or-anonymous | dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/catalog/products/{productId}` | dual-token-or-anonymous | dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/catalog/skus/{skuId}` | dual-token-or-anonymous | dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/promotions/offers` | dual-token-or-anonymous | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/promotions/offers/{offerId}` | dual-token-or-anonymous | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/shops` | dual-token-or-anonymous | dual-token, dual-token-or-anonymous | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/shops/{shopId}` | dual-token-or-anonymous | dual-token, dual-token-or-anonymous | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/wallet/exchange_rate` | anonymous | anonymous, dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
-| GET | `/app/v3/api/wallet/points/exchanges/rules` | anonymous | anonymous, dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/ai/pricing/rates` | anonymous | dual-token | sdkwork-cloudrouter/…/cloudrouter-app-api.openapi.json (dual-token) |
+| GET | `/app/v3/api/ai/routing/account_groups` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/…/cloudrouter-app-api.openapi.json (dual-token) |
+| GET | `/app/v3/api/catalog/attributes` | dual-token-or-anonymous | dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/catalog/categories` | dual-token-or-anonymous | dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/catalog/categories/{categoryId}` | dual-token-or-anonymous | dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/catalog/products` | dual-token-or-anonymous | dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/catalog/products/{productId}` | dual-token-or-anonymous | dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/catalog/skus/{skuId}` | dual-token-or-anonymous | dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/promotions/offers` | dual-token-or-anonymous | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/promotions/offers/{offerId}` | dual-token-or-anonymous | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/shops` | dual-token-or-anonymous | dual-token, dual-token-or-anonymous | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/shops/{shopId}` | dual-token-or-anonymous | dual-token, dual-token-or-anonymous | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/wallet/exchange_rate` | anonymous | anonymous, dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
+| GET | `/app/v3/api/wallet/points/exchanges/rules` | anonymous | anonymous, dual-token | sdkwork-mall/…/source-openapi.json (dual-token) |
 
 ### Contract copies that disagree (13)
 
@@ -493,19 +493,19 @@ The same `method + path` is declared with different tiers by different specs. A 
 
 | Method | Path | Declared tiers | Specs (tier) | Aggregate involved |
 | --- | --- | --- | --- | --- |
-| GET | `/app/v3/api/memberships/benefits` | anonymous, dual-token | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/memberships/package_groups` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/memberships/package_groups/{packageGroupId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/memberships/package_groups/{packageGroupId}/packages` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/memberships/packages` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/memberships/packages/{packageId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/memberships/plans` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/promotions/offers` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/promotions/offers/{offerId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/shops` | dual-token, dual-token-or-anonymous | sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/shops/{shopId}` | dual-token, dual-token-or-anonymous | sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/wallet/exchange_rate` | anonymous, dual-token | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
-| GET | `/app/v3/api/wallet/points/exchanges/rules` | anonymous, dual-token | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/benefits` | anonymous, dual-token | sdkwork-membership/…/membership-app-api.openapi.json (anonymous)<br>sdkwork-membership/…/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/package_groups` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/…/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/…/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/package_groups/{packageGroupId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/…/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/…/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/package_groups/{packageGroupId}/packages` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/…/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/…/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/packages` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/…/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/…/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/packages/{packageId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/…/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/…/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/plans` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/…/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/…/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/promotions/offers` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/promotions/offers/{offerId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/shops` | dual-token, dual-token-or-anonymous | sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/shops/{shopId}` | dual-token, dual-token-or-anonymous | sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/wallet/exchange_rate` | anonymous, dual-token | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/wallet/points/exchanges/rules` | anonymous, dual-token | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
 
 ## Consumer evidence (97 operations)
 

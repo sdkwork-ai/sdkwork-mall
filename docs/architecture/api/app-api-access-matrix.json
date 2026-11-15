@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedBy": "scripts/audit-mall-app-api-access.mjs",
-  "generatedAt": "2026-11-15T02:05:24.825Z",
+  "generatedAt": "2026-11-15T02:05:50.630Z",
   "generatedFromCommand": "node scripts/audit-mall-app-api-access.mjs",
   "appApiPrefix": "/app/v3/api",
   "snapshot": [
@@ -43,9 +43,9 @@
     },
     {
       "name": "sdkwork-mall",
-      "head": "4886fc8",
+      "head": "5cc8e41",
       "dirty": true,
-      "dirtyFiles": 4
+      "dirtyFiles": 1
     },
     {
       "name": "sdkwork-membership",
@@ -85,7 +85,7 @@
     }
   ],
   "summary": {
-    "generatedAt": "2026-11-15T02:05:24.825Z",
+    "generatedAt": "2026-11-15T02:05:50.630Z",
     "totalOperations": 385,
     "primaryContract": {
       "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
