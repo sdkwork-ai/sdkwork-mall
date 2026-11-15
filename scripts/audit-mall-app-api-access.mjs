@@ -817,12 +817,16 @@ function collectConsumerEvidence(sourceFiles, operations) {
       if (normalized.length < 2) continue;
       if (seenTemplates.has(normalized)) continue;
       seenTemplates.add(normalized);
-      const candidates = byTemplate.get(normalized);
-      if (candidates) {
-        for (const operation of candidates) {
-          operation.consumerFiles.add(relative);
-          operation.consumerKinds.add('path');
-        }
+      // Clients often call the transport with a module-local path
+      // (`/catalog/spus`) and let the client prepend `/app/v3/api`, so try both
+      // the bare form and the prefixed form.
+      const candidates = [
+        ...(byTemplate.get(normalized) ?? []),
+        ...(byTemplate.get(`${APP_API_PREFIX}${normalized}`) ?? []),
+      ];
+      for (const operation of candidates) {
+        operation.consumerFiles.add(relative);
+        operation.consumerKinds.add('path');
       }
     }
 
@@ -1135,6 +1139,25 @@ function buildAudit() {
     });
   }
 
+  // --- contract copies that disagree with each other ----------------------
+  const authorityConflicts = [];
+  for (const operation of operationList) {
+    if (operation.authorityTiers.length < 2) continue;
+    authorityConflicts.push({
+      method: operation.method,
+      path: operation.path,
+      operationId: operation.operationIds[0] ?? '',
+      authorityTiers: operation.authorityTiers,
+      declarations: operation.authorities.map((authority) => ({
+        tier: authority.tier,
+        spec: authority.spec,
+        repo: authority.repo,
+        declaredBy: authority.declaredBy,
+      })),
+      includesConsumerAggregate: operation.authorities.some((authority) => authority.repo === MALL_REPO_NAME),
+    });
+  }
+
   // --- summary ------------------------------------------------------------
   const summary = summarize(
     operationList,
@@ -1142,6 +1165,7 @@ function buildAudit() {
     specs,
     routeIndex,
     authorityDrift,
+    authorityConflicts,
     duplicateSpecs,
   );
 
@@ -1154,6 +1178,7 @@ function buildAudit() {
     sourceFiles,
     summary,
     authorityDrift,
+    authorityConflicts,
   };
 }
 
@@ -1169,7 +1194,15 @@ function countBy(items, selector) {
   );
 }
 
-function summarize(operations, sourceFiles, specs, routeIndex, authorityDrift, duplicateSpecs) {
+function summarize(
+  operations,
+  sourceFiles,
+  specs,
+  routeIndex,
+  authorityDrift,
+  authorityConflicts,
+  duplicateSpecs,
+) {
   const publicTierBuckets = { anonymous: 0, 'dual-token-or-anonymous': 0, 'dual-token': 0, other: 0, missing: 0 };
   for (const operation of operations) {
     const tier = operation.published.tier;
@@ -1221,6 +1254,7 @@ function summarize(operations, sourceFiles, specs, routeIndex, authorityDrift, d
     consumed,
     unused,
     authorityDriftCount: authorityDrift.length,
+    authorityConflictCount: authorityConflicts.length,
     consistency: {
       totalEqualsPublishedTiers:
         Object.values(publishedTiers).reduce((sum, value) => sum + value, 0) === operations.length,
@@ -1263,7 +1297,7 @@ function describePublishedSource(operation) {
 }
 
 function renderMarkdown(audit) {
-  const { operations, summary, authorityDrift, specs } = audit;
+  const { operations, summary, authorityDrift, authorityConflicts, specs } = audit;
   const lines = [];
   const push = (line = '') => lines.push(line);
 
@@ -1484,6 +1518,27 @@ function renderMarkdown(audit) {
     }
   }
   push();
+  push(`### Contract copies that disagree (${authorityConflicts.length})`);
+  push();
+  if (authorityConflicts.length === 0) {
+    push('None — every spec that declares an operation declares the same tier.');
+  } else {
+    push(
+      'The same `method + path` is declared with different tiers by different specs. A consumer-facing aggregate contract that keeps `dual-token` after the domain moved to optional credential is the usual cause; a client generated from the aggregate then attaches no credential where the runtime expects an optional one, or vice versa.',
+    );
+    push();
+    push('| Method | Path | Declared tiers | Specs (tier) | Aggregate involved |');
+    push('| --- | --- | --- | --- | --- |');
+    for (const conflict of authorityConflicts) {
+      const specs = conflict.declarations
+        .map((declaration) => `${declaration.spec} (${declaration.tier})`)
+        .join('<br>');
+      push(
+        `| ${conflict.method} | \`${mdCell(conflict.path)}\` | ${mdCell(conflict.authorityTiers.join(', '))} | ${mdCell(specs)} | ${conflict.includesConsumerAggregate ? 'yes' : 'no'} |`,
+      );
+    }
+  }
+  push();
 
   // --- consumer evidence --------------------------------------------------
   const consumedOperations = operations.filter((operation) => operation.consumed);
@@ -1555,7 +1610,8 @@ function renderMarkdown(audit) {
 }
 
 function serializeAudit(audit) {
-  const { operations, summary, authorityDrift, specs, routeIndex, sourceFiles } = audit;
+  const { operations, summary, authorityDrift, authorityConflicts, specs, routeIndex, sourceFiles } =
+    audit;
   return {
     schemaVersion: 1,
     generatedBy: 'scripts/audit-mall-app-api-access.mjs',
@@ -1597,6 +1653,7 @@ function serializeAudit(audit) {
         })),
     },
     authorityDrift,
+    authorityConflicts,
     operations: operations.map((operation) => ({
       key: operation.key,
       method: operation.method,
