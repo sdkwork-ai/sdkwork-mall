@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,6 +17,7 @@ import {
 import {
   addMallH5CartItem,
   claimMallH5ProductOffer,
+  isMallH5LoginRequiredError,
   listMallH5ProductOffers,
   retrieveMallH5ProductDetail,
   searchMallH5Products,
@@ -49,6 +50,7 @@ export function SdkworkMallH5ProductDetailPage() {
   const { t } = useTranslation();
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [detail, setDetail] = useState<MallH5ProductDetail | null>(null);
   const [recommendations, setRecommendations] = useState<MallH5ProductCard[]>([]);
   const [offers, setOffers] = useState<MallH5ProductOffer[]>([]);
@@ -253,6 +255,11 @@ export function SdkworkMallH5ProductDetailPage() {
       showToast(t("productDetail.toast.addedToCart"));
       return cartItemId ?? "";
     } catch (cause: unknown) {
+      if (isMallH5LoginRequiredError(cause)) {
+        // Buying is account-scoped; browsing is not.
+        navigate(`/auth/login?redirect=${encodeURIComponent(`${location.pathname}${location.search}`)}`);
+        return null;
+      }
       showToast(cause instanceof Error ? cause.message : t("productDetail.toast.addFailed"));
       return null;
     } finally {

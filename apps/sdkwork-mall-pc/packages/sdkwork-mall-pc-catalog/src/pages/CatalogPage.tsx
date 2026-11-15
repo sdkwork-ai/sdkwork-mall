@@ -1,6 +1,6 @@
 import { formatMoney } from "@sdkwork/utils/money";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ChevronRight,
   Flame,
@@ -48,6 +48,7 @@ import {
 import { loadMallCmsConfigRemote } from "@sdkwork/mall-pc-cms/cms-service";
 import {
   addMallProductToCart,
+  isMallLoginRequiredError,
   loadMallProductCoupons,
   loadMallProductDetail,
   retrieveMallCategory,
@@ -719,6 +720,7 @@ export function SdkworkMallCategoryPage() {
 export function SdkworkMallProductDetailPage() {
   const { productId = "" } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [detail, setDetail] = useState<MallProductDetail | null>(null);
   const [selectedSkuId, setSelectedSkuId] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -862,6 +864,12 @@ export function SdkworkMallProductDetailPage() {
       setMessage("已加入购物车");
       return cartItemId;
     } catch (cause: unknown) {
+      if (isMallLoginRequiredError(cause)) {
+        // Buying is account-scoped; browsing is not. Send the shopper to the
+        // login screen and come back to this product instead of showing a 401.
+        navigate(`/auth/login?redirect=${encodeURIComponent(`${location.pathname}${location.search}`)}`);
+        return undefined;
+      }
       setMessage(cause instanceof Error ? cause.message : "加入购物车失败");
       return undefined;
     } finally {

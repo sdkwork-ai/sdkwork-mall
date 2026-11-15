@@ -1414,6 +1414,57 @@ function renderMarkdown(audit) {
   push(`- total == Σ target tiers: \`${summary.consistency.totalEqualsTargetTiers}\``);
   push();
 
+  // --- computed key findings ---------------------------------------------
+  const browse = operations.filter((operation) => operation.target.rule === 'R1');
+  const browsePublished = {
+    optional: browse.filter((operation) => operation.published.tier === 'dual-token-or-anonymous'),
+    dualToken: browse.filter((operation) => operation.published.tier === 'dual-token'),
+    missing: browse.filter((operation) => operation.published.tier === MISSING_TIER),
+    other: browse.filter(
+      (operation) =>
+        operation.published.tier !== 'dual-token-or-anonymous' &&
+        operation.published.tier !== 'dual-token' &&
+        operation.published.tier !== MISSING_TIER,
+    ),
+  };
+  const staleAggregate = authorityDrift.filter((drift) =>
+    drift.disagreeingAuthorities.some((authority) => authority.repo === MALL_REPO_NAME),
+  );
+  const overPermissive = operations.filter(
+    (operation) => operation.verdict === VERDICT_TIER_CHANGE && operation.published.tier !== 'dual-token',
+  );
+
+  push('## Key findings (computed from this run)');
+  push();
+  push(
+    `- **Storefront browse reads** (rule R1, ${browse.length} operations): ` +
+      `${browsePublished.optional.length} already publish \`dual-token-or-anonymous\`, ` +
+      `${browsePublished.dualToken.length} still publish \`dual-token\`, ` +
+      `${browsePublished.missing.length} have no published route` +
+      `${browsePublished.other.length > 0 ? `, ${browsePublished.other.length} publish another tier` : ''}.`,
+  );
+  if (browsePublished.dualToken.length > 0) {
+    push(`  - still \`dual-token\`: ${browsePublished.dualToken.map((operation) => `\`${operation.method} ${operation.path}\``).join(', ')}`);
+  }
+  if (browsePublished.missing.length > 0) {
+    push(`  - no route: ${browsePublished.missing.map((operation) => `\`${operation.method} ${operation.path}\``).join(', ')}`);
+  }
+  push(
+    `- **Join gaps**: ${summary.publishedTierBuckets.missing} consumed operations have no route declaration anywhere (checked-in or build-generated), so their callers get \`404 route-not-in-manifest\` — see "Missing published route".`,
+  );
+  push(
+    `- **Stale aggregate contract**: ${staleAggregate.length} operations publish a tier that differs from the mall commerce aggregate spec, which still declares \`dual-token\` for reads the owning domain already opened to optional credential. Regenerate that spec from the domain authorities.`,
+  );
+  push(
+    `- **More permissive than policy**: ${overPermissive.length} operation${overPermissive.length === 1 ? '' : 's'} ` +
+      `publish${overPermissive.length === 1 ? 'es' : ''} optional/anonymous access that rule R4 would gate` +
+      `${overPermissive.length > 0 ? ` (${overPermissive.map((operation) => `\`${operation.method} ${operation.path}\` → ${operation.published.tier}`).join(', ')})` : ''}. Review whether anonymous access there is intentional.`,
+  );
+  push(
+    `- **Anonymous surface preserved**: ${summary.publishedTierBuckets.anonymous} operations are published \`anonymous\` and stay that way under rule R3 (webhooks, cashier capability links, public configuration).`,
+  );
+  push();
+
   push('## Tier policy');
   push();
   push('### Access tiers');

@@ -3,6 +3,53 @@ import {
   unwrapSdkworkCommerceResponse,
 } from "@sdkwork/mall-commerce-service";
 
+/**
+ * Raised when a transactional action (add to cart, buy now) is attempted
+ * without a signed-in buyer.
+ *
+ * Storefront browsing never requires a session, so the H5 surface only meets
+ * this error on account-scoped actions. Callers send the shopper to the login
+ * screen with a return path instead of surfacing a raw `401`.
+ */
+export class MallH5LoginRequiredError extends Error {
+  /**
+   * Diagnostic only: the H5 surface localises its copy through `t()`, so
+   * callers must not render this string. They redirect to the login screen.
+   */
+  constructor(message = "login required before a cart mutation") {
+    super(message);
+    this.name = "MallH5LoginRequiredError";
+  }
+}
+
+export function isMallH5LoginRequiredError(value: unknown): value is MallH5LoginRequiredError {
+  return value instanceof MallH5LoginRequiredError;
+}
+
+/** Detects the framework's authentication/authorization rejections. */
+function isAuthenticationFailure(cause: unknown): boolean {
+  if (!cause || typeof cause !== "object") {
+    return false;
+  }
+  const record = cause as { name?: unknown; status?: unknown; code?: unknown; message?: unknown };
+  if (
+    record.name === "AuthenticationError" ||
+    record.name === "TokenExpiredError" ||
+    record.name === "TokenInvalidError" ||
+    record.name === "ForbiddenError"
+  ) {
+    return true;
+  }
+  if (record.status === 401 || record.status === 403) {
+    return true;
+  }
+  if (record.code === 40101 || record.code === 40301) {
+    return true;
+  }
+  const message = typeof record.message === "string" ? record.message : "";
+  return message.includes("missing-access-token") || message.includes("missing-auth-token");
+}
+
 export interface MallH5CategoryOption {
   id: string;
   name: string;
@@ -171,11 +218,20 @@ export async function addMallH5CartItem(input: {
   quantity: number;
   skuId: string;
 }): Promise<string | undefined> {
-  const response = await getSdkworkCommerceService().cart.items.create({
-    quantity: input.quantity,
-    skuId: input.skuId,
-    spuId: input.productId,
-  });
+  let response: unknown;
+  try {
+    response = await getSdkworkCommerceService().cart.items.create({
+      quantity: input.quantity,
+      skuId: input.skuId,
+      spuId: input.productId,
+    });
+  } catch (cause) {
+    // The cart is buyer-owned: an anonymous add becomes a login check.
+    if (isAuthenticationFailure(cause)) {
+      throw new MallH5LoginRequiredError();
+    }
+    throw cause;
+  }
   // "立即购买" needs the created line id to scope the checkout to that item.
   const payload = unwrapSdkworkCommerceResponse<Record<string, unknown>>(response) ?? {};
   const item = (payload.item ?? payload.cartItem ?? payload) as Record<string, unknown>;

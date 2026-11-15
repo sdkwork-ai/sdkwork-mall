@@ -16,7 +16,7 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 
 ## Snapshot
 
-- Generated at: `2026-11-15T02:05:50.630Z`
+- Generated at: `2026-11-15T02:07:48.875Z`
 - Consumed app-api specs: 12
 - Route-owning repos scanned: 94 (13 contribute a consumed tier or contract)
 - Route declaration files parsed: 157
@@ -30,7 +30,7 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 | sdkwork-drive | b8229cd | clean |
 | sdkwork-inventory | 697816d | clean |
 | sdkwork-invoice | 6886f78 | clean |
-| sdkwork-mall | 5cc8e41 | dirty (1 paths) |
+| sdkwork-mall | 6e4c8b8 | dirty (3 paths) |
 | sdkwork-membership | 00cf902 | dirty (23 paths) |
 | sdkwork-order | a800e62 | clean |
 | sdkwork-partner | d27ccc7 | clean |
@@ -81,6 +81,15 @@ Consistency checks:
 - total == Σ verdicts: `true`
 - total == consumed + unused: `true`
 - total == Σ target tiers: `true`
+
+## Key findings (computed from this run)
+
+- **Storefront browse reads** (rule R1, 18 operations): 16 already publish `dual-token-or-anonymous`, 0 still publish `dual-token`, 2 have no published route.
+  - no route: `GET /app/v3/api/catalog/spus`, `GET /app/v3/api/catalog/spus/{spuId}`
+- **Join gaps**: 34 consumed operations have no route declaration anywhere (checked-in or build-generated), so their callers get `404 route-not-in-manifest` — see "Missing published route".
+- **Stale aggregate contract**: 12 operations publish a tier that differs from the mall commerce aggregate spec, which still declares `dual-token` for reads the owning domain already opened to optional credential. Regenerate that spec from the domain authorities.
+- **More permissive than policy**: 1 operation publishes optional/anonymous access that rule R4 would gate (`GET /app/v3/api/ai/routing/account_groups` → dual-token-or-anonymous). Review whether anonymous access there is intentional.
+- **Anonymous surface preserved**: 17 operations are published `anonymous` and stay that way under rule R3 (webhooks, cashier capability links, public configuration).
 
 ## Tier policy
 

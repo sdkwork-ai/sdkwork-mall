@@ -2,6 +2,54 @@ import { unwrapSdkworkPaymentResponse } from "@sdkwork/payment-service";
 import { getSdkworkCatalogRemotePort } from "./catalog-remote-port";
 
 /**
+ * Raised when a transactional action (add to cart, buy now) is attempted
+ * without a signed-in buyer.
+ *
+ * Browsing the catalog never requires a session, so the storefront only meets
+ * this error on the paths that genuinely belong to a buyer's account. Callers
+ * use it to send the shopper to the login screen with a return path instead of
+ * surfacing a raw `401` to them.
+ */
+export class MallLoginRequiredError extends Error {
+  /**
+   * Diagnostic only: the catalog package has no message catalogue, so callers
+   * must not render this string. They redirect to the login screen instead.
+   */
+  constructor(message = "login required before a cart mutation") {
+    super(message);
+    this.name = "MallLoginRequiredError";
+  }
+}
+
+export function isMallLoginRequiredError(value: unknown): value is MallLoginRequiredError {
+  return value instanceof MallLoginRequiredError;
+}
+
+/** Detects the framework's authentication/authorization rejections. */
+function isAuthenticationFailure(cause: unknown): boolean {
+  if (!cause || typeof cause !== "object") {
+    return false;
+  }
+  const record = cause as { name?: unknown; status?: unknown; code?: unknown; message?: unknown };
+  if (
+    record.name === "AuthenticationError" ||
+    record.name === "TokenExpiredError" ||
+    record.name === "TokenInvalidError" ||
+    record.name === "ForbiddenError"
+  ) {
+    return true;
+  }
+  if (record.status === 401 || record.status === 403) {
+    return true;
+  }
+  if (record.code === 40101 || record.code === 40301) {
+    return true;
+  }
+  const message = typeof record.message === "string" ? record.message : "";
+  return message.includes("missing-access-token") || message.includes("missing-auth-token");
+}
+
+/**
  * 规格参数行：品牌、型号、产地、材质等键值对。
  */
 export interface MallProductSpecRow {
@@ -344,11 +392,21 @@ export async function addMallProductToCart(input: {
   quantity: number;
   skuId: string;
 }): Promise<string | undefined> {
-  const response = await getSdkworkCatalogRemotePort().createCartItem({
-    spuId: input.productId,
-    skuId: input.skuId,
-    quantity: input.quantity,
-  });
+  let response: unknown;
+  try {
+    response = await getSdkworkCatalogRemotePort().createCartItem({
+      spuId: input.productId,
+      skuId: input.skuId,
+      quantity: input.quantity,
+    });
+  } catch (cause) {
+    // The cart is a buyer-owned resource: an anonymous add must become a login
+    // check, never a raw 401 rendered as "add to cart failed".
+    if (isAuthenticationFailure(cause)) {
+      throw new MallLoginRequiredError();
+    }
+    throw cause;
+  }
   // "立即购买" needs the created line id to scope the checkout to that item.
   // The envelope may nest the line or return it at the root; read defensively.
   const payload = unwrapSdkworkPaymentResponse(response) as Record<string, unknown> | null;
