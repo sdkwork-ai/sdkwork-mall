@@ -534,8 +534,14 @@ const ROUTE_DEFINITION_REGEX = /RouteDefinition\s*\{([^{}]*)\}/g;
  * @returns {{ method: string, path: string, operationId: string, tier: string, form: string }[]}
  */
 function parseRouteDeclarations(filePath) {
-  const text = readTextFile(filePath);
-  if (text === null) return [];
+  const raw = readTextFile(filePath);
+  if (raw === null) return [];
+  if (!raw.includes('HttpRoute::') && !raw.includes('RouteDefinition')) return [];
+
+  // Unit tests in the same file declare fixture routes; the production manifest
+  // is the part before the first `#[cfg(test)]` module.
+  const testModuleIndex = raw.indexOf('#[cfg(test)]');
+  const text = testModuleIndex >= 0 ? raw.slice(0, testModuleIndex) : raw;
   if (!text.includes('HttpRoute::') && !text.includes('RouteDefinition')) return [];
 
   const crateDir = (() => {
@@ -1037,19 +1043,30 @@ function buildAudit() {
       };
     } else {
       // No checked-in manifest entry: the tier can only be published when the
-      // owning repo materializes its manifest at build time from the authority.
-      const candidates = operation.authorities
-        .filter((authority) => routeIndex.reposWithGeneratedManifest.has(authority.repo))
+      // owning repo materializes its manifest at build time from an OpenAPI
+      // authority it names in `build.rs`.
+      const generatedCandidates = operation.authorities
         .filter((authority) => authority.repo !== mallRepoName)
-        .sort((left, right) => left.repo.localeCompare(right.repo));
-      if (candidates.length > 0) {
-        const tiers = uniqueSorted(candidates.map((candidate) => candidate.tier));
+        .filter((authority) => routeIndex.reposWithGeneratedManifest.has(authority.repo))
+        .filter((authority) => {
+          const specs = routeIndex.generatedManifestSpecs.get(authority.repo);
+          if (!specs || specs.size === 0) return true;
+          return specs.has(path.resolve(WORKSPACE_ROOT, authority.spec));
+        })
+        .sort((left, right) =>
+          left.priority !== right.priority
+            ? left.priority - right.priority
+            : left.repo.localeCompare(right.repo),
+        );
+      if (generatedCandidates.length > 0) {
+        const tiers = uniqueSorted(generatedCandidates.map((candidate) => candidate.tier));
         operation.published = {
           tier: tiers.length === 1 ? tiers[0] : 'conflict',
           tiers,
-          source: `openapi-authority:${candidates[0].repo} (manifest generated at build time)`,
+          source: `openapi-authority:${generatedCandidates[0].repo} (manifest generated at build time)`,
           sourceKind: 'openapi-authority',
-          repo: candidates[0].repo,
+          repo: generatedCandidates[0].repo,
+          spec: generatedCandidates[0].spec,
         };
       } else {
         operation.published = {
@@ -1098,27 +1115,40 @@ function buildAudit() {
   const authorityDrift = [];
   for (const operation of operationList) {
     if (operation.published.sourceKind !== 'route-manifest') continue;
-    if (operation.authorityTiers.length === 0) continue;
-    if (operation.authorityTiers.length === 1 && operation.authorityTiers[0] === operation.published.tier) {
-      continue;
-    }
-    if (operation.authorityTiers.length > 1) continue;
+    const disagreeing = operation.authorities.filter(
+      (authority) => authority.tier !== operation.published.tier,
+    );
+    if (disagreeing.length === 0) continue;
     authorityDrift.push({
       method: operation.method,
       path: operation.path,
       operationId: operation.operationIds[0] ?? '',
       routeManifestTier: operation.published.tier,
-      authorityTier: operation.authorityTiers[0],
-      authoritySpecs: uniqueSorted(operation.authorities.map((authority) => authority.spec)),
+      routeManifestFiles: uniqueSorted(operation.manifestDeclarations.map((entry) => entry.file)),
+      authorityTiers: operation.authorityTiers,
+      disagreeingAuthorities: disagreeing.map((authority) => ({
+        tier: authority.tier,
+        spec: authority.spec,
+        repo: authority.repo,
+        declaredBy: authority.declaredBy,
+      })),
     });
   }
 
   // --- summary ------------------------------------------------------------
-  const summary = summarize(operationList, sourceFiles, specs, routeIndex, authorityDrift);
+  const summary = summarize(
+    operationList,
+    sourceFiles,
+    specs,
+    routeIndex,
+    authorityDrift,
+    duplicateSpecs,
+  );
 
   return {
     siblingRepos,
     specs,
+    duplicateSpecs,
     routeIndex,
     operations: operationList,
     sourceFiles,
@@ -1139,7 +1169,7 @@ function countBy(items, selector) {
   );
 }
 
-function summarize(operations, sourceFiles, specs, routeIndex, authorityDrift) {
+function summarize(operations, sourceFiles, specs, routeIndex, authorityDrift, duplicateSpecs) {
   const publicTierBuckets = { anonymous: 0, 'dual-token-or-anonymous': 0, 'dual-token': 0, other: 0, missing: 0 };
   for (const operation of operations) {
     const tier = operation.published.tier;
@@ -1181,6 +1211,7 @@ function summarize(operations, sourceFiles, specs, routeIndex, authorityDrift) {
       verdicts: countBy(primaryOperations, (operation) => operation.verdict),
     },
     consumedSpecs: specs.length,
+    duplicateSpecCopies: duplicateSpecs.length,
     routeManifestFiles: routeIndex.files.length,
     sourceFilesScanned: sourceFiles.length,
     publishedTiers,
@@ -1438,14 +1469,17 @@ function renderMarkdown(audit) {
     push('None — every checked-in manifest entry agrees with its OpenAPI authority.');
   } else {
     push(
-      'The checked-in route manifest (runtime truth) and the operation\'s own OpenAPI authority disagree. Either the authority is stale or the manifest was not regenerated; the runtime follows the manifest.',
+      'The checked-in route manifest (runtime truth) and an OpenAPI authority disagree. Either the authority is stale or the manifest was not regenerated; the runtime follows the manifest. Aggregate contracts (the mall commerce spec) are the usual stale side: they keep declaring `dual-token` after a domain authority moved a read to optional credential.',
     );
     push();
-    push('| Method | Path | Manifest tier | Authority tier | Authority spec |');
+    push('| Method | Path | Manifest tier | Authority tier(s) | Disagreeing authority spec(s) |');
     push('| --- | --- | --- | --- | --- |');
     for (const drift of authorityDrift) {
+      const specs = drift.disagreeingAuthorities
+        .map((authority) => `${authority.spec} (${authority.tier})`)
+        .join('<br>');
       push(
-        `| ${drift.method} | \`${mdCell(drift.path)}\` | ${drift.routeManifestTier} | ${drift.authorityTier} | ${mdCell(drift.authoritySpecs.join('<br>'))} |`,
+        `| ${drift.method} | \`${mdCell(drift.path)}\` | ${drift.routeManifestTier} | ${mdCell(drift.authorityTiers.join(', '))} | ${mdCell(specs)} |`,
       );
     }
   }
@@ -1546,6 +1580,7 @@ function serializeAudit(audit) {
     },
     sources: {
       consumedSpecs: specs.map((spec) => ({ path: spec.relative, repo: spec.repo, operations: spec.operationCount })),
+      duplicateSpecCopies: audit.duplicateSpecs,
       routeManifestFiles: routeIndex.files,
       reposWithBuildGeneratedManifest: [...routeIndex.reposWithGeneratedManifest].sort(),
       sourceFilesScanned: sourceFiles.length,
