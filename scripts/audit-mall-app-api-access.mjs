@@ -1173,6 +1173,7 @@ function buildAudit() {
     siblingRepos,
     specs,
     duplicateSpecs,
+    routeRepoDirs,
     routeIndex,
     operations: operationList,
     sourceFiles,
@@ -1276,6 +1277,17 @@ function mdCell(value) {
   return String(value ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 }
 
+/** Renders a rule's regex source as the route template a reader recognises. */
+function describePathPattern(source) {
+  return source
+    .replace(/^\^/, '')
+    .replace(/\$$/, '')
+    .split('\\{[^}]+\\}')
+    .join('{param}')
+    .split('\\/')
+    .join('/');
+}
+
 function describeConsumed(operation, { compact = true } = {}) {
   if (operation.consumerFiles.length === 0) return '—';
   if (compact) return `${operation.consumerFiles.length} file${operation.consumerFiles.length === 1 ? '' : 's'}`;
@@ -1332,6 +1344,9 @@ function renderMarkdown(audit) {
   push();
   push(`- Generated at: \`${summary.generatedAt}\``);
   push(`- Consumed app-api specs: ${summary.consumedSpecs}`);
+  push(
+    `- Route-owning repos scanned: ${audit.routeRepoCount ?? 'n/a'} (${audit.contributingRepoCount ?? 'n/a'} contribute a consumed tier or contract)`,
+  );
   push(`- Route declaration files parsed: ${summary.routeManifestFiles}`);
   push(`- Mall source files scanned for consumer evidence: ${summary.sourceFilesScanned}`);
   push();
@@ -1418,13 +1433,13 @@ function renderMarkdown(audit) {
   push('R1 storefront browse reads (the explicit list evaluated by the script):');
   push();
   for (const entry of STOREFRONT_BROWSE_READS) {
-    push(`- \`GET ${entry.pattern.source.replace(/^\^|\$$/g, '').replace(/\\\//g, '/')}\` — ${entry.note}`);
+    push(`- \`GET ${describePathPattern(entry.pattern.source)}\` — ${entry.note}`);
   }
   push();
   push('R2 recharge catalogue reads:');
   push();
   for (const pattern of RECHARGE_CATALOGUE_READS) {
-    push(`- \`GET ${pattern.source.replace(/^\^|\$$/g, '').replace(/\\\//g, '/')}\``);
+    push(`- \`GET ${describePathPattern(pattern.source)}\``);
   }
   push();
 
@@ -1557,14 +1572,7 @@ function renderMarkdown(audit) {
   }
   push();
 
-  // --- full matrix --------------------------------------------------------
-  push('## Full matrix');
-  push();
-  push(
-    `${operations.length} operations, one row each, ordered by path then method. The first path segment after \`${APP_API_PREFIX}\` forms the family grouping.`,
-  );
-  push();
-
+  // --- coverage by family -------------------------------------------------
   /** @type {Map<string, object[]>} */
   const families = new Map();
   for (const operation of operations) {
@@ -1573,6 +1581,32 @@ function renderMarkdown(audit) {
     if (!families.has(family)) families.set(family, []);
     families.get(family).push(operation);
   }
+
+  push('## Coverage by family');
+  push();
+  push(
+    `The first path segment after \`${APP_API_PREFIX}\` groups the consumed surface. A family with a large \`unused\` column is a whole SDK surface the mall depends on but does not call operation by operation.`,
+  );
+  push();
+  push('| Family | Operations | Consumed | Unused | OK | Needs tier change | Missing route |');
+  push('| --- | --- | --- | --- | --- | --- | --- |');
+  for (const family of [...families.keys()].sort((left, right) => left.localeCompare(right))) {
+    const rows = families.get(family);
+    const count = (predicate) => rows.filter(predicate).length;
+    push(
+      `| \`${family}\` | ${rows.length} | ${count((operation) => operation.consumed)} | ${count((operation) => !operation.consumed)} | ${count((operation) => operation.verdict === VERDICT_OK)} | ${count((operation) => operation.verdict === VERDICT_TIER_CHANGE)} | ${count((operation) => operation.verdict === VERDICT_MISSING)} |`,
+    );
+  }
+  push();
+
+  // --- full matrix --------------------------------------------------------
+  push('## Full matrix');
+  push();
+  push(
+    `${operations.length} operations, one row each, ordered by path then method. The first path segment after \`${APP_API_PREFIX}\` forms the family grouping.`,
+  );
+  push();
+
   for (const family of [...families.keys()].sort((left, right) => left.localeCompare(right))) {
     const rows = families.get(family);
     push(`### \`${family}\` (${rows.length})`);
@@ -1637,6 +1671,8 @@ function serializeAudit(audit) {
     sources: {
       consumedSpecs: specs.map((spec) => ({ path: spec.relative, repo: spec.repo, operations: spec.operationCount })),
       duplicateSpecCopies: audit.duplicateSpecs,
+      routeReposScanned: audit.routeRepoCount ?? null,
+      routeReposContributing: audit.repoSnapshot.map((repo) => repo.name),
       routeManifestFiles: routeIndex.files,
       reposWithBuildGeneratedManifest: [...routeIndex.reposWithGeneratedManifest].sort(),
       sourceFilesScanned: sourceFiles.length,
@@ -1694,17 +1730,26 @@ function main() {
 
   // Record the snapshot of every repo contributing data, so a re-run can be
   // compared to the state this document describes.
-  const snapshotRepos = new Map();
-  snapshotRepos.set(MALL_REPO_NAME, MALL_ROOT);
-  for (const repo of audit.siblingRepos) {
-    const contributes =
-      audit.specs.some((spec) => spec.repo === repo.name) ||
-      audit.routeIndex.files.some((file) => file.startsWith(`${repo.name}/`));
-    if (contributes) snapshotRepos.set(repo.name, repo.dir);
+  const repoDirs = new Map([[MALL_REPO_NAME, MALL_ROOT]]);
+  for (const repo of audit.routeRepoDirs) repoDirs.set(repo.name, repo.dir);
+  for (const repo of audit.siblingRepos) if (!repoDirs.has(repo.name)) repoDirs.set(repo.name, repo.dir);
+
+  const contributingRepos = new Set([MALL_REPO_NAME]);
+  for (const spec of audit.specs) contributingRepos.add(spec.repo);
+  for (const operation of audit.operations) {
+    if (operation.published.repo) {
+      for (const repoName of operation.published.repo.split(',')) contributingRepos.add(repoName.trim());
+    }
+    for (const declaration of operation.manifestDeclarations) contributingRepos.add(declaration.repo);
+    for (const authority of operation.authorities) contributingRepos.add(authority.repo);
   }
-  audit.repoSnapshot = [...snapshotRepos.entries()]
-    .sort((left, right) => left[0].localeCompare(right[0]))
-    .map(([name, dir]) => ({ name, ...readWorkspaceRootGitRef(dir) }));
+
+  audit.repoSnapshot = [...contributingRepos]
+    .filter((name) => repoDirs.has(name))
+    .sort((left, right) => left.localeCompare(right))
+    .map((name) => ({ name, ...readWorkspaceRootGitRef(repoDirs.get(name)) }));
+  audit.routeRepoCount = audit.routeRepoDirs.length;
+  audit.contributingRepoCount = audit.repoSnapshot.length;
 
   // Spec operation counts for the document header.
   for (const spec of audit.specs) {

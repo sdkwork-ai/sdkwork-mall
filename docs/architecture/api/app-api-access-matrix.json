@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedBy": "scripts/audit-mall-app-api-access.mjs",
-  "generatedAt": "2026-11-15T02:00:52.946Z",
+  "generatedAt": "2026-11-15T02:05:24.825Z",
   "generatedFromCommand": "node scripts/audit-mall-app-api-access.mjs",
   "appApiPrefix": "/app/v3/api",
   "snapshot": [
@@ -12,8 +12,8 @@
       "dirtyFiles": 0
     },
     {
-      "name": "sdkwork-appbase",
-      "head": "ab4a8d7",
+      "name": "sdkwork-catalog",
+      "head": "2138b7c",
       "dirty": false,
       "dirtyFiles": 0
     },
@@ -30,34 +30,28 @@
       "dirtyFiles": 0
     },
     {
-      "name": "sdkwork-iam",
-      "head": "b407bb83",
-      "dirty": true,
-      "dirtyFiles": 1
+      "name": "sdkwork-inventory",
+      "head": "697816d",
+      "dirty": false,
+      "dirtyFiles": 0
     },
     {
-      "name": "sdkwork-im",
-      "head": "3675c18b",
+      "name": "sdkwork-invoice",
+      "head": "6886f78",
       "dirty": false,
       "dirtyFiles": 0
     },
     {
       "name": "sdkwork-mall",
-      "head": "c9d5a1a",
+      "head": "4886fc8",
       "dirty": true,
-      "dirtyFiles": 3
+      "dirtyFiles": 4
     },
     {
       "name": "sdkwork-membership",
       "head": "00cf902",
       "dirty": true,
-      "dirtyFiles": 24
-    },
-    {
-      "name": "sdkwork-merchandise",
-      "head": "5dd9689",
-      "dirty": false,
-      "dirtyFiles": 0
+      "dirtyFiles": 23
     },
     {
       "name": "sdkwork-order",
@@ -91,7 +85,7 @@
     }
   ],
   "summary": {
-    "generatedAt": "2026-11-15T02:00:52.946Z",
+    "generatedAt": "2026-11-15T02:05:24.825Z",
     "totalOperations": 385,
     "primaryContract": {
       "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
@@ -139,6 +133,7 @@
     "consumed": 97,
     "unused": 288,
     "authorityDriftCount": 14,
+    "authorityConflictCount": 13,
     "consistency": {
       "totalEqualsPublishedTiers": true,
       "totalEqualsVerdicts": true,
@@ -389,6 +384,22 @@
         "path": "sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript/generated/server-openapi/source-openapi.json",
         "duplicateOf": "sdkwork-drive/apis/app-api/drive/drive-app-api.openapi.json"
       }
+    ],
+    "routeReposScanned": 94,
+    "routeReposContributing": [
+      "sdkwork-account",
+      "sdkwork-catalog",
+      "sdkwork-cloudrouter",
+      "sdkwork-drive",
+      "sdkwork-inventory",
+      "sdkwork-invoice",
+      "sdkwork-mall",
+      "sdkwork-membership",
+      "sdkwork-order",
+      "sdkwork-partner",
+      "sdkwork-payment",
+      "sdkwork-promotion",
+      "sdkwork-shop"
     ],
     "routeManifestFiles": [
       "sdkwork-account/crates/sdkwork-routes-account-app-api/src/http_route_manifest.rs",
@@ -1305,6 +1316,394 @@
           "declaredBy": "security=AuthToken+AccessToken"
         }
       ]
+    }
+  ],
+  "authorityConflicts": [
+    {
+      "method": "GET",
+      "path": "/app/v3/api/memberships/benefits",
+      "operationId": "benefits.list",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token"
+      ],
+      "declarations": [
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/memberships/package_groups",
+      "operationId": "memberships.packageGroups.list",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/memberships/package_groups/{packageGroupId}",
+      "operationId": "memberships.packageGroups.retrieve",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/memberships/package_groups/{packageGroupId}/packages",
+      "operationId": "memberships.packageGroups.packages.list",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/memberships/packages",
+      "operationId": "memberships.packages.list",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/memberships/packages/{packageId}",
+      "operationId": "memberships.packages.retrieve",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/memberships/plans",
+      "operationId": "memberships.plans.list",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json",
+          "repo": "sdkwork-membership",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/promotions/offers",
+      "operationId": "offers.list",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/promotions/offers/{offerId}",
+      "operationId": "offers.retrieve",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/shops",
+      "operationId": "list",
+      "authorityTiers": [
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json",
+          "repo": "sdkwork-shop",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/shops/{shopId}",
+      "operationId": "retrieve",
+      "authorityTiers": [
+        "dual-token",
+        "dual-token-or-anonymous"
+      ],
+      "declarations": [
+        {
+          "tier": "dual-token-or-anonymous",
+          "spec": "sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json",
+          "repo": "sdkwork-shop",
+          "declaredBy": "x-sdkwork-auth-mode=dual-token-or-anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/wallet/exchange_rate",
+      "operationId": "wallet.exchangeRate.retrieve",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token"
+      ],
+      "declarations": [
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/wallet/points/exchanges/rules",
+      "operationId": "points.list",
+      "authorityTiers": [
+        "anonymous",
+        "dual-token"
+      ],
+      "declarations": [
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "anonymous",
+          "spec": "sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json",
+          "repo": "sdkwork-promotion",
+          "declaredBy": "x-sdkwork-auth-mode=anonymous"
+        },
+        {
+          "tier": "dual-token",
+          "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
+          "repo": "sdkwork-mall",
+          "declaredBy": "security=AuthToken+AccessToken"
+        }
+      ],
+      "includesConsumerAggregate": true
     }
   ],
   "operations": [

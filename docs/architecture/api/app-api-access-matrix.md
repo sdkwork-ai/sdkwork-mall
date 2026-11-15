@@ -16,22 +16,22 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 
 ## Snapshot
 
-- Generated at: `2026-11-15T02:00:52.946Z`
+- Generated at: `2026-11-15T02:05:24.825Z`
 - Consumed app-api specs: 12
+- Route-owning repos scanned: 94 (13 contribute a consumed tier or contract)
 - Route declaration files parsed: 157
 - Mall source files scanned for consumer evidence: 816
 
 | Repository | HEAD | Working tree |
 | --- | --- | --- |
 | sdkwork-account | 22e6d89 | clean |
-| sdkwork-appbase | ab4a8d7 | clean |
+| sdkwork-catalog | 2138b7c | clean |
 | sdkwork-cloudrouter | 3d4d9f9f | clean |
 | sdkwork-drive | b8229cd | clean |
-| sdkwork-iam | b407bb83 | dirty (1 paths) |
-| sdkwork-im | 3675c18b | clean |
-| sdkwork-mall | c9d5a1a | dirty (3 paths) |
-| sdkwork-membership | 00cf902 | dirty (24 paths) |
-| sdkwork-merchandise | 5dd9689 | clean |
+| sdkwork-inventory | 697816d | clean |
+| sdkwork-invoice | 6886f78 | clean |
+| sdkwork-mall | 4886fc8 | dirty (4 paths) |
+| sdkwork-membership | 00cf902 | dirty (23 paths) |
 | sdkwork-order | a800e62 | clean |
 | sdkwork-partner | d27ccc7 | clean |
 | sdkwork-payment | a6ae151 | clean |
@@ -110,23 +110,23 @@ R1 storefront browse reads (the explicit list evaluated by the script):
 
 - `GET /app/v3/api/catalog/attributes` — catalog attribute dictionary
 - `GET /app/v3/api/catalog/categories` — category tree
-- `GET /app/v3/api/catalog/categories/\{[^}]+\}` — category detail
+- `GET /app/v3/api/catalog/categories/{param}` — category detail
 - `GET /app/v3/api/catalog/products` — product (spu projection) list
-- `GET /app/v3/api/catalog/products/\{[^}]+\}` — product detail
-- `GET /app/v3/api/catalog/products/\{[^}]+\}/skus` — product sku list
-- `GET /app/v3/api/catalog/skus/\{[^}]+\}` — sku detail
+- `GET /app/v3/api/catalog/products/{param}` — product detail
+- `GET /app/v3/api/catalog/products/{param}/skus` — product sku list
+- `GET /app/v3/api/catalog/skus/{param}` — sku detail
 - `GET /app/v3/api/catalog/spus` — spu list (storefront grid)
-- `GET /app/v3/api/catalog/spus/\{[^}]+\}` — spu detail (product page)
+- `GET /app/v3/api/catalog/spus/{param}` — spu detail (product page)
 - `GET /app/v3/api/shops` — shop list
-- `GET /app/v3/api/shops/\{[^}]+\}` — shop detail
+- `GET /app/v3/api/shops/{param}` — shop detail
 - `GET /app/v3/api/promotions/offers` — promotion offer list
-- `GET /app/v3/api/promotions/offers/\{[^}]+\}` — promotion offer detail
+- `GET /app/v3/api/promotions/offers/{param}` — promotion offer detail
 - `GET /app/v3/api/memberships/plans` — membership plan catalogue
 - `GET /app/v3/api/memberships/package_groups` — membership package group list
-- `GET /app/v3/api/memberships/package_groups/\{[^}]+\}` — membership package group detail
-- `GET /app/v3/api/memberships/package_groups/\{[^}]+\}/packages` — membership packages of a group
+- `GET /app/v3/api/memberships/package_groups/{param}` — membership package group detail
+- `GET /app/v3/api/memberships/package_groups/{param}/packages` — membership packages of a group
 - `GET /app/v3/api/memberships/packages` — membership package list
-- `GET /app/v3/api/memberships/packages/\{[^}]+\}` — membership package detail
+- `GET /app/v3/api/memberships/packages/{param}` — membership package detail
 
 R2 recharge catalogue reads:
 
@@ -487,6 +487,26 @@ The checked-in route manifest (runtime truth) and an OpenAPI authority disagree.
 | GET | `/app/v3/api/wallet/exchange_rate` | anonymous | anonymous, dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
 | GET | `/app/v3/api/wallet/points/exchanges/rules` | anonymous | anonymous, dual-token | sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) |
 
+### Contract copies that disagree (13)
+
+The same `method + path` is declared with different tiers by different specs. A consumer-facing aggregate contract that keeps `dual-token` after the domain moved to optional credential is the usual cause; a client generated from the aggregate then attaches no credential where the runtime expects an optional one, or vice versa.
+
+| Method | Path | Declared tiers | Specs (tier) | Aggregate involved |
+| --- | --- | --- | --- | --- |
+| GET | `/app/v3/api/memberships/benefits` | anonymous, dual-token | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/package_groups` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/package_groups/{packageGroupId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/package_groups/{packageGroupId}/packages` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/packages` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/packages/{packageId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/memberships/plans` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-membership/sdks/sdkwork-membership-app-sdk/openapi/sdkwork-membership-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/promotions/offers` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/promotions/offers/{offerId}` | anonymous, dual-token, dual-token-or-anonymous | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/shops` | dual-token, dual-token-or-anonymous | sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/shops/{shopId}` | dual-token, dual-token-or-anonymous | sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json (dual-token-or-anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/wallet/exchange_rate` | anonymous, dual-token | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+| GET | `/app/v3/api/wallet/points/exchanges/rules` | anonymous, dual-token | sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/sdks/sdkwork-promotion-app-sdk/openapi/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json (dual-token) | yes |
+
 ## Consumer evidence (97 operations)
 
 | Method | Path | Evidence | Files |
@@ -588,6 +608,43 @@ The checked-in route manifest (runtime truth) and an OpenAPI authority disagree.
 | GET | `/app/v3/api/wallet/points/lots` | path | apps/sdkwork-mall-mini-program/src/services/account-service.ts |
 | GET | `/app/v3/api/wallet/points/summary` | path | apps/sdkwork-mall-mini-program/src/services/account-service.ts |
 | POST | `/app/v3/api/withdrawals/requests` | operation-id | apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-wallet/src/wallet-service.ts |
+
+## Coverage by family
+
+The first path segment after `/app/v3/api` groups the consumed surface. A family with a large `unused` column is a whole SDK surface the mall depends on but does not call operation by operation.
+
+| Family | Operations | Consumed | Unused | OK | Needs tier change | Missing route |
+| --- | --- | --- | --- | --- | --- | --- |
+| `accounts` | 1 | 1 | 0 | 1 | 0 | 0 |
+| `addresses` | 5 | 5 | 0 | 0 | 0 | 5 |
+| `after_sales` | 7 | 7 | 0 | 7 | 0 | 0 |
+| `ai` | 9 | 0 | 9 | 0 | 1 | 0 |
+| `app_template_orders` | 2 | 0 | 2 | 0 | 0 | 0 |
+| `billing` | 1 | 1 | 0 | 1 | 0 | 0 |
+| `cart` | 4 | 4 | 0 | 0 | 0 | 4 |
+| `cashier` | 3 | 0 | 3 | 0 | 0 | 0 |
+| `catalog` | 9 | 6 | 3 | 4 | 0 | 3 |
+| `checkout` | 4 | 3 | 1 | 3 | 0 | 0 |
+| `drive` | 101 | 2 | 99 | 2 | 0 | 0 |
+| `fulfillments` | 2 | 0 | 2 | 0 | 0 | 0 |
+| `iam` | 9 | 0 | 9 | 0 | 0 | 0 |
+| `invoices` | 9 | 9 | 0 | 9 | 0 | 0 |
+| `memberships` | 27 | 4 | 23 | 4 | 0 | 0 |
+| `notification` | 3 | 0 | 3 | 0 | 0 | 0 |
+| `orders` | 33 | 10 | 23 | 9 | 0 | 2 |
+| `partner_center` | 5 | 5 | 0 | 5 | 0 | 0 |
+| `partner_join` | 5 | 3 | 2 | 3 | 0 | 0 |
+| `payments` | 17 | 10 | 7 | 9 | 0 | 2 |
+| `promotions` | 17 | 9 | 8 | 9 | 0 | 0 |
+| `recharges` | 8 | 0 | 8 | 0 | 0 | 1 |
+| `refunds` | 3 | 0 | 3 | 0 | 0 | 0 |
+| `runtime` | 9 | 0 | 9 | 0 | 0 | 0 |
+| `shipments` | 3 | 3 | 0 | 3 | 0 | 0 |
+| `shops` | 47 | 5 | 42 | 5 | 0 | 0 |
+| `system` | 1 | 0 | 1 | 0 | 0 | 0 |
+| `token_bank` | 4 | 0 | 4 | 0 | 0 | 0 |
+| `wallet` | 35 | 9 | 26 | 8 | 0 | 17 |
+| `withdrawals` | 2 | 1 | 1 | 1 | 0 | 0 |
 
 ## Full matrix
 

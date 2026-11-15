@@ -26,6 +26,7 @@
     "check:default-data": "node scripts/verify-mall-default-data.mjs --check",
     "audit:default-data": "node scripts/verify-mall-default-data.mjs",
     "audit:i18n": "node scripts/audit-mall-i18n-readiness.mjs",
+    "audit:app-api-access": "node scripts/audit-mall-app-api-access.mjs",
     "i18n:baseline": "node scripts/audit-mall-i18n-readiness.mjs --write-baseline",
     "check:i18n-baseline": "node scripts/audit-mall-i18n-readiness.mjs --check",
     "i18n:catalogues": "node scripts/generate-mall-i18n-catalogues.mjs",
