@@ -16,9 +16,9 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 
 ## Snapshot
 
-- Generated at: `2026-11-15T01:58:24.124Z`
+- Generated at: `2026-11-15T01:58:37.582Z`
 - Consumed app-api specs: 23
-- Route declaration files parsed: 39
+- Route declaration files parsed: 158
 - Mall source files scanned for consumer evidence: 816
 
 | Repository | HEAD | Working tree |
@@ -29,13 +29,13 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 | sdkwork-drive | b8229cd | clean |
 | sdkwork-iam | d32bee89 | clean |
 | sdkwork-im | 3675c18b | clean |
-| sdkwork-mall | 833878b | dirty (2 paths) |
+| sdkwork-mall | cf8562a | dirty (1 paths) |
 | sdkwork-membership | 00cf902 | dirty (24 paths) |
 | sdkwork-merchandise | 5dd9689 | clean |
 | sdkwork-order | a800e62 | clean |
 | sdkwork-partner | d27ccc7 | clean |
 | sdkwork-payment | a6ae151 | clean |
-| sdkwork-promotion | 7cead6d | dirty (4 paths) |
+| sdkwork-promotion | fefc5ad | clean |
 | sdkwork-shop | ad552c3 | clean |
 
 Consumed specs (23):
@@ -70,21 +70,21 @@ Consumed specs (23):
 | --- | --- |
 | Total consumed app-api operations | 385 |
 | Published `anonymous` | 17 |
-| Published `dual-token-or-anonymous` | 5 |
-| Published `dual-token` | 306 |
-| Published other tier (`bootstrap-body`, `api-key`, …) | 6 |
-| Published none (`MISSING-ROUTE`) | 51 |
+| Published `dual-token-or-anonymous` | 10 |
+| Published `dual-token` | 317 |
+| Published other tier (`bootstrap-body`, `api-key`, …) | 7 |
+| Published none (`MISSING-ROUTE`) | 34 |
 | Consumed by mall code (path or operationId evidence) | 77 |
 | Not consumed (unused) | 308 |
 
 | Verdict | Count |
 | --- | --- |
-| OK | 51 |
-| NEEDS-TIER-CHANGE | 7 |
-| MISSING-ROUTE | 51 |
-| UNUSED | 276 |
+| OK | 62 |
+| NEEDS-TIER-CHANGE | 8 |
+| MISSING-ROUTE | 34 |
+| UNUSED | 281 |
 
-Primary consumed contract (`sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json`, 182 operations): 5 anonymous, 4 dual-token-or-anonymous, 116 dual-token, 51 missing, 110 unused, 6 other.
+Primary consumed contract (`sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json`, 182 operations): 5 anonymous, 9 dual-token-or-anonymous, 127 dual-token, 34 missing, 110 unused, 7 other.
 
 Consistency checks:
 
@@ -156,7 +156,7 @@ R2 recharge catalogue reads:
 
 ## Findings
 
-### Needs a tier change (7)
+### Needs a tier change (8)
 
 | Method | Path | Published | Target | Rule | Consumed |
 | --- | --- | --- | --- | --- | --- |
@@ -167,8 +167,9 @@ R2 recharge catalogue reads:
 | GET | `/app/v3/api/memberships/packages` | conflict (anonymous / dual-token-or-anonymous) | `dual-token-or-anonymous` | R1 | — |
 | GET | `/app/v3/api/memberships/packages/{packageId}` | conflict (anonymous / dual-token-or-anonymous) | `dual-token-or-anonymous` | R1 | — |
 | GET | `/app/v3/api/memberships/plans` | conflict (anonymous / dual-token-or-anonymous) | `dual-token-or-anonymous` | R1 | — |
+| GET | `/app/v3/api/promotions/offers` | conflict (anonymous / dual-token-or-anonymous) | `dual-token-or-anonymous` | R1 | 6 files |
 
-### Missing published route — join gaps (51)
+### Missing published route — join gaps (34)
 
 These operations are declared in a consumed OpenAPI authority, but no checked-in (or build-generated) route manifest declares them, so a caller gets `404 route-not-in-manifest`.
 
@@ -183,31 +184,14 @@ These operations are declared in a consumed OpenAPI authority, but no checked-in
 | POST | `/app/v3/api/cart/items` | cart.items.create | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 4 files |
 | DELETE | `/app/v3/api/cart/items/{cartItemId}` | cart.items.delete | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 4 files |
 | PATCH | `/app/v3/api/cart/items/{cartItemId}` | cart.items.update | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 4 files |
-| GET | `/app/v3/api/catalog/attributes` | catalog.attributes.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/catalog/categories` | catalog.categories.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
-| GET | `/app/v3/api/catalog/categories/{categoryId}` | catalog.categories.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
-| GET | `/app/v3/api/catalog/products` | catalog.products.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
-| GET | `/app/v3/api/catalog/products/{productId}` | catalog.products.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/catalog/skus/{skuId}` | catalog.skus.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
 | GET | `/app/v3/api/catalog/skus/{skuId}/prices` | catalog.skus.prices.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 | GET | `/app/v3/api/catalog/spus` | catalog.spus.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
 | GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
-| GET | `/app/v3/api/invoices` | invoices.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/invoices` | invoices.create | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 3 files |
-| GET | `/app/v3/api/invoices/{invoiceId}` | invoices.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
-| PATCH | `/app/v3/api/invoices/{invoiceId}` | invoices.update | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
-| POST | `/app/v3/api/invoices/{invoiceId}/cancellations` | invoices.cancellations.create | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
-| GET | `/app/v3/api/invoices/{invoiceId}/items` | invoices.items.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
-| POST | `/app/v3/api/invoices/{invoiceId}/submissions` | invoices.submissions.create | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
-| GET | `/app/v3/api/invoices/mine` | invoices.mine.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 2 files |
-| GET | `/app/v3/api/invoices/statistics` | invoices.statistics.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
 | POST | `/app/v3/api/orders` | orders.create | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
 | POST | `/app/v3/api/orders/{orderId}/cancel` | orders.cancel | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 | POST | `/app/v3/api/payments/reconciliations` | payments.reconcile | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | 1 file |
 | GET | `/app/v3/api/payments/statistics` | payments.statistics.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 | POST | `/app/v3/api/recharges/orders/{orderId}/cancellations` | recharges.orders.cancel | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| GET | `/app/v3/api/shops/current/inventory/stocks` | shops.current.inventory.stocks.list | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
-| POST | `/app/v3/api/shops/current/inventory/stocks/{stockId}/adjustments` | shops.current.inventory.stocks.adjustments.create | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 | GET | `/app/v3/api/wallet/accounts/{accountId}` | wallet.accounts.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 | GET | `/app/v3/api/wallet/accounts/overview` | wallet.accounts.overview.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 | GET | `/app/v3/api/wallet/accounts/tokens` | wallet.accounts.tokens.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
@@ -226,7 +210,7 @@ These operations are declared in a consumed OpenAPI authority, but no checked-in
 | GET | `/app/v3/api/wallet/transactions/{transactionId}` | wallet.transactions.retrieve | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 | POST | `/app/v3/api/wallet/withdrawal_transfers` | wallet.withdrawalTransfers.create | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json | — |
 
-### Unused by mall code (276)
+### Unused by mall code (281)
 
 Published tier matches the target tier, but no mall source path or operationId references the operation. They are listed for scope review, not as defects.
 
@@ -245,6 +229,8 @@ Published tier matches the target tier, but no mall source path or operationId r
 | GET | `/app/v3/api/cashier/{token}` | anonymous |
 | POST | `/app/v3/api/cashier/{token}/payments` | anonymous |
 | GET | `/app/v3/api/cashier/{token}/status` | anonymous |
+| GET | `/app/v3/api/catalog/attributes` | dual-token-or-anonymous |
+| GET | `/app/v3/api/catalog/products/{productId}` | dual-token-or-anonymous |
 | GET | `/app/v3/api/checkout/sessions/{checkoutSessionId}` | dual-token |
 | GET | `/app/v3/api/drive/changes` | dual-token |
 | GET | `/app/v3/api/drive/changes/start_page_token` | dual-token |
@@ -358,6 +344,7 @@ Published tier matches the target tier, but no mall source path or operationId r
 | POST | `/app/v3/api/iam/invites/validate` | anonymous |
 | GET | `/app/v3/api/iam/users/settings` | dual-token |
 | PUT | `/app/v3/api/iam/users/settings` | dual-token |
+| GET | `/app/v3/api/invoices` | dual-token |
 | POST | `/app/v3/api/memberships/access/checks` | dual-token |
 | GET | `/app/v3/api/memberships/benefits` | anonymous |
 | GET | `/app/v3/api/memberships/current` | dual-token |
@@ -461,6 +448,8 @@ Published tier matches the target tier, but no mall source path or operationId r
 | GET | `/app/v3/api/shops/current/deposit_account` | dual-token |
 | GET | `/app/v3/api/shops/current/fulfillment_profile` | dual-token |
 | PATCH | `/app/v3/api/shops/current/fulfillment_profile` | dual-token |
+| GET | `/app/v3/api/shops/current/inventory/stocks` | dual-token |
+| POST | `/app/v3/api/shops/current/inventory/stocks/{stockId}/adjustments` | dual-token |
 | GET | `/app/v3/api/shops/current/orders` | dual-token |
 | GET | `/app/v3/api/shops/current/orders/{orderId}` | dual-token |
 | POST | `/app/v3/api/shops/current/orders/{orderId}/fulfillments` | dual-token |
@@ -509,7 +498,7 @@ Published tier matches the target tier, but no mall source path or operationId r
 | GET | `/app/v3/api/wallet/portfolio` | dual-token |
 | GET | `/app/v3/api/withdrawals/requests/{withdrawalRequestId}` | dual-token |
 
-### Route-manifest / OpenAPI-authority drift (2)
+### Route-manifest / OpenAPI-authority drift (8)
 
 The checked-in route manifest (runtime truth) and the operation's own OpenAPI authority disagree. Either the authority is stale or the manifest was not regenerated; the runtime follows the manifest.
 
@@ -517,6 +506,12 @@ The checked-in route manifest (runtime truth) and the operation's own OpenAPI au
 | --- | --- | --- | --- | --- |
 | GET | `/app/v3/api/ai/pricing/rates` | anonymous | dual-token | sdkwork-cloudrouter/apis/app-api/cloudrouter/cloudrouter-app-api.openapi.json |
 | GET | `/app/v3/api/ai/routing/account_groups` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/apis/app-api/cloudrouter/cloudrouter-app-api.openapi.json |
+| GET | `/app/v3/api/catalog/attributes` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json |
+| GET | `/app/v3/api/catalog/categories` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json |
+| GET | `/app/v3/api/catalog/categories/{categoryId}` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json |
+| GET | `/app/v3/api/catalog/products` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json |
+| GET | `/app/v3/api/catalog/products/{productId}` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json |
+| GET | `/app/v3/api/catalog/skus/{skuId}` | dual-token-or-anonymous | dual-token | sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript/generated/commerce-server-openapi/source-openapi.json<br>sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json |
 
 ## Consumer evidence (77 operations)
 
@@ -639,7 +634,7 @@ The checked-in route manifest (runtime truth) and the operation's own OpenAPI au
 | GET | `/app/v3/api/ai/dashboard/overview` | dashboard.overview.retrieve | — | dual-token | manifest: sdkwork-cloudrouter | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/ai/gateway/traces` | gateway.traces.list | — | dual-token | manifest: sdkwork-cloudrouter | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/ai/pricing/rates` | pricing.rates.list | — | anonymous | manifest: sdkwork-cloudrouter | `anonymous` | R3 | UNUSED |
-| GET | `/app/v3/api/ai/routing/account_groups` | routing.accountGroups.list | — | dual-token-or-anonymous | manifest: sdkwork-cloudrouter | `dual-token` | R4 | NEEDS-TIER-CHANGE |
+| GET | `/app/v3/api/ai/routing/account_groups` | routing.accountGroups.list | — | dual-token-or-anonymous | manifest: sdkwork-cloudrouter,sdkwork-web-framework | `dual-token` | R4 | NEEDS-TIER-CHANGE |
 | GET | `/app/v3/api/ai/routing/api_keys` | routing.apiKeys.list | — | dual-token | manifest: sdkwork-cloudrouter | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/ai/routing/request_traces` | routing.requestTraces.list | — | dual-token | manifest: sdkwork-cloudrouter | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/ai/routing/usage` | routing.usage.retrieve | — | dual-token | manifest: sdkwork-cloudrouter | `dual-token` | R4 | UNUSED |
@@ -680,12 +675,12 @@ The checked-in route manifest (runtime truth) and the operation's own OpenAPI au
 
 | Method | Path | operationId | Consumed by | Published | Published source | Target | Rule | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/app/v3/api/catalog/attributes` | catalog.attributes.list | — | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
-| GET | `/app/v3/api/catalog/categories` | catalog.categories.list | 2 files | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
-| GET | `/app/v3/api/catalog/categories/{categoryId}` | catalog.categories.retrieve | 1 file | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
-| GET | `/app/v3/api/catalog/products` | catalog.products.list | 2 files | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
-| GET | `/app/v3/api/catalog/products/{productId}` | catalog.products.retrieve | — | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
-| GET | `/app/v3/api/catalog/skus/{skuId}` | catalog.skus.retrieve | 1 file | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
+| GET | `/app/v3/api/catalog/attributes` | catalog.attributes.list | — | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | UNUSED |
+| GET | `/app/v3/api/catalog/categories` | catalog.categories.list | 2 files | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
+| GET | `/app/v3/api/catalog/categories/{categoryId}` | catalog.categories.retrieve | 1 file | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
+| GET | `/app/v3/api/catalog/products` | catalog.products.list | 2 files | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
+| GET | `/app/v3/api/catalog/products/{productId}` | catalog.products.retrieve | — | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | UNUSED |
+| GET | `/app/v3/api/catalog/skus/{skuId}` | catalog.skus.retrieve | 1 file | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
 | GET | `/app/v3/api/catalog/skus/{skuId}/prices` | catalog.skus.prices.retrieve | — | none | — | `dual-token` | R4 | MISSING-ROUTE |
 | GET | `/app/v3/api/catalog/spus` | catalog.spus.list | 2 files | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
 | GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | 2 files | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
@@ -830,15 +825,15 @@ The checked-in route manifest (runtime truth) and the operation's own OpenAPI au
 
 | Method | Path | operationId | Consumed by | Published | Published source | Target | Rule | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| GET | `/app/v3/api/invoices` | invoices.list | — | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| POST | `/app/v3/api/invoices` | invoices.create | 3 files | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| GET | `/app/v3/api/invoices/{invoiceId}` | invoices.retrieve | 1 file | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| PATCH | `/app/v3/api/invoices/{invoiceId}` | invoices.update | 2 files | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| POST | `/app/v3/api/invoices/{invoiceId}/cancellations` | invoices.cancellations.create | 2 files | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| GET | `/app/v3/api/invoices/{invoiceId}/items` | invoices.items.list | 1 file | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| POST | `/app/v3/api/invoices/{invoiceId}/submissions` | invoices.submissions.create | 2 files | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| GET | `/app/v3/api/invoices/mine` | invoices.mine.list | 2 files | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| GET | `/app/v3/api/invoices/statistics` | invoices.statistics.retrieve | 1 file | none | — | `dual-token` | R4 | MISSING-ROUTE |
+| GET | `/app/v3/api/invoices` | invoices.list | — | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | UNUSED |
+| POST | `/app/v3/api/invoices` | invoices.create | 3 files | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
+| GET | `/app/v3/api/invoices/{invoiceId}` | invoices.retrieve | 1 file | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
+| PATCH | `/app/v3/api/invoices/{invoiceId}` | invoices.update | 2 files | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
+| POST | `/app/v3/api/invoices/{invoiceId}/cancellations` | invoices.cancellations.create | 2 files | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
+| GET | `/app/v3/api/invoices/{invoiceId}/items` | invoices.items.list | 1 file | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
+| POST | `/app/v3/api/invoices/{invoiceId}/submissions` | invoices.submissions.create | 2 files | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
+| GET | `/app/v3/api/invoices/mine` | invoices.mine.list | 2 files | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
+| GET | `/app/v3/api/invoices/statistics` | invoices.statistics.retrieve | 1 file | dual-token | manifest: sdkwork-invoice | `dual-token` | R4 | OK |
 
 ### `memberships` (27)
 
@@ -974,12 +969,12 @@ The checked-in route manifest (runtime truth) and the operation's own OpenAPI au
 | GET | `/app/v3/api/promotions/member_cards` | memberCards.list | — | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/promotions/member_cards/{cardId}` | memberCards.retrieve | — | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | UNUSED |
 | POST | `/app/v3/api/promotions/member_cards/{cardId}/consumptions` | memberCards.consumptions.create | — | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | UNUSED |
-| GET | `/app/v3/api/promotions/offers` | offers.list | 6 files | dual-token-or-anonymous | manifest: sdkwork-promotion | `dual-token-or-anonymous` | R1 | OK |
+| GET | `/app/v3/api/promotions/offers` | offers.list | 6 files | conflict (anonymous / dual-token-or-anonymous) | manifest: sdkwork-promotion,sdkwork-web-framework | `dual-token-or-anonymous` | R1 | NEEDS-TIER-CHANGE |
 | GET | `/app/v3/api/promotions/offers/{offerId}` | offers.retrieve | 3 files | dual-token-or-anonymous | manifest: sdkwork-promotion | `dual-token-or-anonymous` | R1 | OK |
 | POST | `/app/v3/api/promotions/user_coupon_claims` | promotions.userCoupons.claims.create | 4 files | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | OK |
 | GET | `/app/v3/api/promotions/user_coupons` | promotions.userCoupons.list | 3 files | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | OK |
-| GET | `/app/v3/api/promotions/user_coupons/{userCouponId}` | promotions.userCoupons.retrieve | — | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | UNUSED |
-| GET | `/app/v3/api/promotions/user_coupons/wallet` | promotions.userCoupons.wallet.list | 2 files | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | OK |
+| GET | `/app/v3/api/promotions/user_coupons/{userCouponId}` | promotions.userCoupons.retrieve | — | dual-token | manifest: sdkwork-promotion,sdkwork-web-framework | `dual-token` | R4 | UNUSED |
+| GET | `/app/v3/api/promotions/user_coupons/wallet` | promotions.userCoupons.wallet.list | 2 files | dual-token | manifest: sdkwork-promotion,sdkwork-web-framework | `dual-token` | R4 | OK |
 | GET | `/app/v3/api/promotions/user_coupons/wallet/{userCouponId}` | promotions.userCoupons.wallet.retrieve | 1 file | dual-token | manifest: sdkwork-promotion | `dual-token` | R4 | OK |
 
 ### `recharges` (8)
@@ -1048,8 +1043,8 @@ The checked-in route manifest (runtime truth) and the operation's own OpenAPI au
 | GET | `/app/v3/api/shops/current/deposit_account` | current.depositAccount.retrieve | — | dual-token | manifest: sdkwork-shop | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/shops/current/fulfillment_profile` | current.fulfillmentProfile.retrieve | — | dual-token | manifest: sdkwork-shop | `dual-token` | R4 | UNUSED |
 | PATCH | `/app/v3/api/shops/current/fulfillment_profile` | current.fulfillmentProfile.update | — | dual-token | manifest: sdkwork-shop | `dual-token` | R4 | UNUSED |
-| GET | `/app/v3/api/shops/current/inventory/stocks` | shops.current.inventory.stocks.list | — | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| POST | `/app/v3/api/shops/current/inventory/stocks/{stockId}/adjustments` | shops.current.inventory.stocks.adjustments.create | — | none | — | `dual-token` | R4 | MISSING-ROUTE |
+| GET | `/app/v3/api/shops/current/inventory/stocks` | shops.current.inventory.stocks.list | — | dual-token | manifest: sdkwork-inventory | `dual-token` | R4 | UNUSED |
+| POST | `/app/v3/api/shops/current/inventory/stocks/{stockId}/adjustments` | shops.current.inventory.stocks.adjustments.create | — | dual-token | manifest: sdkwork-inventory | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/shops/current/orders` | current.orders.list | — | dual-token | manifest: sdkwork-shop | `dual-token` | R4 | UNUSED |
 | GET | `/app/v3/api/shops/current/orders/{orderId}` | current.orders.retrieve | — | dual-token | manifest: sdkwork-shop | `dual-token` | R4 | UNUSED |
 | POST | `/app/v3/api/shops/current/orders/{orderId}/fulfillments` | current.orders.fulfillments.create | — | dual-token | manifest: sdkwork-shop | `dual-token` | R4 | UNUSED |

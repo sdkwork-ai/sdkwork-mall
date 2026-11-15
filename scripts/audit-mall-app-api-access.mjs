@@ -886,7 +886,7 @@ function uniqueSorted(values) {
 function buildAudit() {
   const siblingRepos = readWorkspaceSiblingRepos();
   const specs = collectConsumedSpecFiles(siblingRepos);
-  const routeRepoDirs = collectRouteRepoDirs(siblingRepos);
+  const routeRepoDirs = collectRouteRepoDirs();
   const routeIndex = buildRouteIndex(routeRepoDirs);
 
   // --- consumed operations (deduped by method + path template) -------------
