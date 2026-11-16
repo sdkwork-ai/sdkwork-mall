@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { allPagePaths } from "../scripts/app-pages.mjs";
 
 function read(relativePath) {
   return readFileSync(new URL(relativePath, import.meta.url), "utf8");
@@ -68,7 +69,7 @@ test("mall mini-program tab bar covers the JD core surfaces", () => {
 
 test("mall mini-program registers the full commerce route catalog", () => {
   const appJson = JSON.parse(read("../src/app.json"));
-  const pages = new Set(appJson.pages);
+  const pages = new Set(allPagePaths(appJson));
   const requiredSurfaces = [
     "pages/home/index",
     "pages/category/index",

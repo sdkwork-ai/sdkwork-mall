@@ -17,6 +17,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { allPagePaths } from "../apps/sdkwork-mall-mini-program/scripts/app-pages.mjs";
 
 const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const contractPath = path.join(workspaceRoot, "specs", "mall-capability-parity.json");
@@ -35,7 +36,7 @@ const routeRegistries = {
   h5: new Set(readRouteIds("h5")),
 };
 const miniProgramPages = new Set(
-  JSON.parse(readText(contract.platforms.miniProgram.pageRegistry)).pages,
+  allPagePaths(JSON.parse(readText(contract.platforms.miniProgram.pageRegistry))),
 );
 const flutterRoutes = new Set(readFlutterRoutes());
 

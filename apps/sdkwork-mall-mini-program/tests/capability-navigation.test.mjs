@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
+import { allPagePaths } from "../scripts/app-pages.mjs";
 
 /**
  * Mini-program capability navigation guard.
@@ -59,7 +60,7 @@ test("mini-program page modules navigate by capability id, never by page path", 
 test("capability registry and app.json declare the same pages", () => {
   const appJson = JSON.parse(readFileSync(join(sourceRoot, "app.json"), "utf8"));
   const registeredPages = new Set(registryEntries().map((entry) => entry.page));
-  const declaredPages = new Set(appJson.pages);
+  const declaredPages = new Set(allPagePaths(appJson));
 
   const missingFromRegistry = [...declaredPages].filter((page) => !registeredPages.has(page));
   const missingFromAppJson = [...registeredPages].filter((page) => !declaredPages.has(page));

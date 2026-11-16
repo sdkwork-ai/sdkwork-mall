@@ -40,3 +40,23 @@ local gateway dev double runs on port 3900.
   fails on the first error; `smoke:mp -- --hot-reload` additionally clears the
   runtime/host/services state first, reproducing a dev-tool hot reload that skips
   `app.onLaunch`.
+
+## 微信包体与分包（官方限制）
+
+- 官方限制：**主包 ≤ 2 MB，单个分包 ≤ 2 MB，总计 ≤ 20 MB**。
+- 布局：主包只放 `app.*` + 5 个 tab 页（首页/分类/消息/购物车/我的）+ tab 图标；其余 31 个页面
+  各自作为分包根（`{ "root": "pages/<name>", "pages": ["index"] }`），页面路径保持不变
+  （`pages/<name>/index`），能力路由与跳转无需修改。
+- 首页/分类/我的通过 `preloadRule` 预下载常用分包（搜索、商品、订单、收藏），避免首次跳转白屏。
+- `pnpm --filter sdkwork-mall-mini-program build:mp` 会在构建结束时打印并校验包体：
+  `[mall-mp] package budget: main ... KB, 31 subpackages (largest ... KB), total ... KB`；
+  任一包超限则构建失败。
+- 当前实测：主包 ≈ 1.68 MB，最大分包 ≈ 250 KB，总计 ≈ 8.2 MB。
+
+### 为什么打出来这么大
+
+每个页面 bundle 都由 esbuild 独立打包（小程序只认 CommonJS，无法共享 chunk），页面会
+各自内联 `@sdkwork/mall-mp-core`、`-host`、`-im`、`-auth` 以及 IAM/IM/Commerce/Order/Partner
+App SDK 与 `@sdkwork/sdk-common`/`im-sdk` 的完整调用链，单页约 220 KB；36 页 × ~220 KB ≈ 8 MB。
+分包后每个包都在 2 MB 内；若要把总量再降一个量级，需要抽出一个共享 runtime 包供页面
+`require`（页面 bundle 变薄），这是后续优化项。

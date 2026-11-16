@@ -14,6 +14,7 @@
  * `miniprogramRoot` at `dist/`, so the dev tool never compiles TypeScript.
  */
 import { createRequire } from "node:module";
+import { allPagePaths } from "./app-pages.mjs";
 import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,12 +26,12 @@ const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const srcRoot = path.join(appRoot, "src");
 const outRoot = path.join(appRoot, "dist");
 
-const appJson = JSON.parse(readFileSync(path.join(srcRoot, "app.json"), "utf8"));
+const appJson = JSON.parse(readFileSync(path.join(srcRoot, "app.json"), "utf8").replace(/^\uFEFF/u, ""));
 
 /** Entry modules: the app plus every page declared in app.json. */
 const entryPoints = [
   path.join(srcRoot, "app.ts"),
-  ...appJson.pages.map((page) => path.join(srcRoot, `${page}.ts`)),
+  ...allPagePaths(appJson).map((page) => path.join(srcRoot, `${page}.ts`)),
 ];
 
 for (const entry of entryPoints) {
@@ -239,6 +240,62 @@ const bundleBytes = (directory) => {
   }
   return total;
 };
+
+/**
+ * Reports the WeChat package budget and fails the build when a limit is exceeded.
+ *
+ * Official limits: the main package and every subpackage are capped at 2 MB, and
+ * the whole mini program at 20 MB. `subPackages` in `app.json` splits the 31
+ * non-tab pages so the main package only carries the entry surface (app shell,
+ * five tab pages and shared assets).
+ */
+function checkPackageBudget() {
+  const distJson = JSON.parse(readFileSync(path.join(outRoot, "app.json"), "utf8").replace(/^\uFEFF/u, ""));
+  const pagesBytes = (pages) => {
+    let total = 0;
+    for (const page of pages) {
+      const directory = path.join(outRoot, path.dirname(page));
+      for (const entry of readdirSync(directory, { withFileTypes: true })) {
+        if (entry.isFile()) {
+          total += statSync(path.join(directory, entry.name)).size;
+        }
+      }
+    }
+    return total;
+  };
+  const MB = 1024 * 1024;
+  const mainBytes =
+    statSync(path.join(outRoot, "app.js")).size +
+    statSync(path.join(outRoot, "app.wxss")).size +
+    statSync(path.join(outRoot, "app.json")).size +
+    pagesBytes(distJson.pages ?? []) +
+    bundleBytes(path.join(outRoot, "assets"));
+  const subpackages = (distJson.subPackages ?? []).map((entry) => ({
+    root: entry.root,
+    bytes: bundleBytes(path.join(outRoot, entry.root)),
+  }));
+  const totalBytes = bundleBytes(outRoot);
+  const problems = [];
+  if (mainBytes > 2 * MB) problems.push(`main package ${(mainBytes / MB).toFixed(2)} MB > 2 MB`);
+  for (const subpackage of subpackages) {
+    if (subpackage.bytes > 2 * MB) {
+      problems.push(`${subpackage.root} ${(subpackage.bytes / MB).toFixed(2)} MB > 2 MB`);
+    }
+  }
+  if (totalBytes > 20 * MB) problems.push(`total ${(totalBytes / MB).toFixed(2)} MB > 20 MB`);
+  const largest = subpackages.reduce((max, entry) => Math.max(max, entry.bytes), 0);
+  const kb = (value) => (value / 1024).toFixed(1);
+  console.log(
+    `[mall-mp] package budget: main ${kb(mainBytes)} KB, ${subpackages.length} subpackages ` +
+      `(largest ${kb(largest)} KB), total ${kb(totalBytes)} KB`,
+  );
+  if (problems.length > 0) {
+    console.error(`[mall-mp] package budget exceeded: ${problems.join("; ")}`);
+    process.exitCode = 1;
+  }
+}
+
+checkPackageBudget();
 
 if (!WATCH) {
   console.log(

@@ -725,3 +725,23 @@
   - The home page renders the build stamp (`build <ISO>`) at the bottom, so the dev
     tool's package is visible on screen instead of only in the console.
   - Rebuilt at `2026-11-16T15:56:49.805Z`; guards 35/35, smoke PASS over 36 pages.
+
+- 2026-11-16 (twenty-seventh pass: WeChat package budget). `dist/` was a single
+  package of 8.2 MB, far over the 2 MB main-package limit.
+  - `app.json` now declares `subPackages`: the main package keeps `app.*`, the five
+    tab pages and the tab icons; each of the other 31 pages is its own subpackage
+    root (`pages/<name>` → `index`), so page paths, the capability registry and
+    every `navigateTo` stay unchanged. `preloadRule` preloads search/product/orders/
+    favorites from the entry tabs.
+  - Measured: main ≈ 1.68 MB, largest subpackage ≈ 250 KB, total ≈ 8.2 MB — inside
+    2 MB / 2 MB / 20 MB.
+  - Root cause of the size: esbuild bundles each entry independently (the mini
+    program only loads CommonJS, no shared chunks), so every page inlines the full
+    SDK graph (`mall-mp-core`/`-host`/`-im`/`-auth` + IAM/IM/Commerce/Order/Partner
+    App SDKs + `sdk-common`/`im-sdk`) at ~220 KB per page.
+  - `scripts/app-pages.mjs` is the single reader for main + subpackage pages (build,
+    smoke harness, page guards, capability parity report/contract all use it), and
+    the build now prints and enforces the package budget.
+  - Regression: 35 mini guards, 69 vitest, typecheck, composition, parity snapshot
+    and i18n green; smoke covers all 36 pages; contract suite 187/194 with the
+    seven H5-only failures.

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { allPagePaths } from "../../apps/sdkwork-mall-mini-program/scripts/app-pages.mjs";
 
 /**
  * Cross-client capability parity gate.
@@ -92,7 +93,7 @@ function readRouteContributions(platform) {
 const registries = {
   pc: readRouteContributions("pc"),
   h5: readRouteContributions("h5"),
-  miniProgram: new Set(JSON.parse(readText(contract.platforms.miniProgram.pageRegistry)).pages),
+  miniProgram: new Set(allPagePaths(JSON.parse(readText(contract.platforms.miniProgram.pageRegistry)))),
   flutter: readFlutterRoutes(),
 };
 

@@ -11,12 +11,14 @@
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { allPagePaths } from "./app-pages.mjs";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = path.join(appRoot, "dist");
-const appJson = JSON.parse(readFileSync(path.join(distRoot, "app.json"), "utf8"));
+const appJson = JSON.parse(readFileSync(path.join(distRoot, "app.json"), "utf8").replace(/^\uFEFF/u, ""));
+const pagePaths = allPagePaths(appJson);
 
 const errors = [];
 const log = [];
@@ -150,7 +152,7 @@ if (process.argv.includes("--shared-store-only")) {
   Object.freeze(globalThis.wx);
   console.log("[smoke] shared-store-only: platform stores cleared, wx frozen");
 }
-for (const page of appJson.pages) {
+for (const page of pagePaths) {
   const before = pageConfigs.length;
   try {
     loadModule(`${page}.js`);
@@ -178,7 +180,7 @@ for (const page of appJson.pages) {
 }
 
 console.log("[smoke] ----------------------------------------");
-console.log(`[smoke] pages: ${appJson.pages.length}  requests attempted: ${requests.length}  toasts: ${toasts.length}`);
+console.log(`[smoke] pages: ${pagePaths.length}  requests attempted: ${requests.length}  toasts: ${toasts.length}`);
 if (errors.length === 0) {
   console.log("[smoke] PASS no boot or page-lifecycle errors");
   process.exit(0);

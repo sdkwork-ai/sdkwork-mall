@@ -4,39 +4,218 @@
     "pages/category/index",
     "pages/cart/index",
     "pages/buyer/index",
-    "pages/search/index",
-    "pages/product/index",
-    "pages/checkout/index",
-    "pages/cashier/index",
-    "pages/payment-result/index",
-    "pages/orders/index",
-    "pages/order-detail/index",
-    "pages/logistics/index",
-    "pages/messages/index",
-    "pages/address/index",
-    "pages/coupons/index",
-    "pages/aftersales/index",
-    "pages/favorites/index",
-    "pages/footprint/index",
-    "pages/wallet/index",
-    "pages/points/index",
-    "pages/membership/index",
-    "pages/partner/index",
-    "pages/invoices/index",
-    "pages/settings/index",
-    "pages/shop/index",
-    "pages/activity/index",
-    "pages/activity-detail/index",
-    "pages/chats/index",
-    "pages/chat/index",
-    "pages/notices/index",
-    "pages/login/index",
-    "pages/help/index",
-    "pages/reviews/index",
-    "pages/gift-cards/index",
-    "pages/profile/index",
-    "pages/security/index"
+    "pages/chats/index"
   ],
+  "subPackages": [
+    {
+      "root": "pages/search",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/product",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/checkout",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/cashier",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/payment-result",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/orders",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/order-detail",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/logistics",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/messages",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/address",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/coupons",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/aftersales",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/favorites",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/footprint",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/wallet",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/points",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/membership",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/partner",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/invoices",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/settings",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/shop",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/activity",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/activity-detail",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/chat",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/notices",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/login",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/help",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/reviews",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/gift-cards",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/profile",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/security",
+      "pages": [
+        "index"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/home/index": {
+      "network": "all",
+      "packages": [
+        "pages/search",
+        "pages/product"
+      ]
+    },
+    "pages/category/index": {
+      "network": "all",
+      "packages": [
+        "pages/product"
+      ]
+    },
+    "pages/buyer/index": {
+      "network": "all",
+      "packages": [
+        "pages/orders",
+        "pages/favorites"
+      ]
+    }
+  },
   "window": {
     "navigationBarBackgroundColor": "#e93b3d",
     "navigationBarTextStyle": "white",

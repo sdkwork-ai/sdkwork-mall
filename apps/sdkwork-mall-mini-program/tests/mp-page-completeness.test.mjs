@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { allPagePaths } from "../scripts/app-pages.mjs";
 
 /**
  * Page completeness and platform compatibility.
@@ -25,7 +26,7 @@ function pageDirectories() {
 }
 
 const appJson = JSON.parse(read(path.join(srcRoot, "app.json")));
-const registeredPages = appJson.pages;
+const registeredPages = allPagePaths(appJson);
 
 test("every page folder is fully authored", () => {
   const problems = [];
@@ -109,7 +110,7 @@ test("the dev tool runs the bundled package, not TypeScript sources", () => {
   assert.match(packageJson.scripts["build:cloud"], /build-miniprogram\.mjs/u);
 
   const bundler = read(path.join(appRoot, "scripts/build-miniprogram.mjs"));
-  assert.match(bundler, /appJson\.pages\.map/u, "every page declared in app.json becomes an entry");
+  assert.match(bundler, /allPagePaths\(appJson\)/u, "every page declared in app.json becomes an entry");
   assert.match(bundler, /format: "cjs"/u);
   assert.match(bundler, /nodeBuiltinStub/u, "Node-only SDK transports are stubbed, not required at runtime");
 });

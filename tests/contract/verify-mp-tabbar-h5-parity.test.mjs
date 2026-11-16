@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { allPagePaths } from "../../apps/sdkwork-mall-mini-program/scripts/app-pages.mjs";
 
 /**
  * Mini-program tab bar parity with the H5 shell.
@@ -38,7 +39,7 @@ test("the mini-program tab bar mirrors the H5 shell tabs", () => {
 
 test("every tab declares both icon states and a registered page", () => {
   const appJson = JSON.parse(read(mp, "src/app.json"));
-  const registered = new Set(appJson.pages);
+  const registered = new Set(allPagePaths(appJson));
   for (const entry of appJson.tabBar.list) {
     assert.ok(registered.has(entry.pagePath), `${entry.pagePath} must be registered in app.json pages`);
     for (const key of ["iconPath", "selectedIconPath"]) {
