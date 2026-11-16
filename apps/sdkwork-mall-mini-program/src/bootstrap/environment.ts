@@ -15,6 +15,7 @@
  * a platform call here: this module stays pure and testable, and the app entry
  * passes the value in.
  */
+import { resolveGlobalObject } from "@sdkwork/mall-mp-core";
 import { RUNTIME_ENV } from "./runtime-env.generated";
 
 export interface SdkworkMallMpRuntimeEnvironment {
@@ -44,9 +45,13 @@ export function resolveReleaseChannel(accountEnvVersion: string): "development" 
  * @param accountEnvVersion - Platform release channel from the host profile.
  */
 export function readRuntimeEnv(accountEnvVersion: string): SdkworkMallMpRuntimeEnvironment {
-  const globalRuntime = (globalThis as {
+  // Never dereference `globalThis` unguarded: the WeChat appservice does not
+  // reliably define it (base library 3.18 raised "Cannot read property … of
+  // undefined" here). The host scope resolver tries the real global objects.
+  const injected = resolveGlobalObject() as {
     __SDKWORK_MALL_MP_RUNTIME_ENV__?: Partial<SdkworkMallMpRuntimeEnvironment>;
-  }).__SDKWORK_MALL_MP_RUNTIME_ENV__ ?? {};
+  };
+  const globalRuntime = injected.__SDKWORK_MALL_MP_RUNTIME_ENV__ ?? {};
   const channel = resolveReleaseChannel(accountEnvVersion);
   const environment = globalRuntime.environment ?? RUNTIME_ENV.environment ?? channel;
   // A release channel is a production build no matter what the materialized file

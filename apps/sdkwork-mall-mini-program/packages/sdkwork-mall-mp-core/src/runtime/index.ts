@@ -15,6 +15,7 @@ import type { MpHost } from "@sdkwork/mall-mp-host";
 
 import { validateMallMpComposition } from "../composition";
 import { installMallMpHost } from "../host";
+import { resolveSharedScope } from "@sdkwork/mall-mp-host";
 import { installMpFetch } from "@sdkwork/mall-mp-host/fetch";
 import {
   createMpRequestClient,
@@ -97,14 +98,10 @@ interface RuntimeGlobal {
 }
 
 function runtimeScope(): RuntimeGlobal {
-  if (typeof globalThis !== "undefined" && globalThis) {
-    return globalThis as unknown as RuntimeGlobal;
-  }
-  try {
-    return (Function("return this") as () => RuntimeGlobal)();
-  } catch {
-    return {};
-  }
+  // `getApp().globalData` first (the documented cross-bundle store), then the
+  // shared platform scope. Never dereference `globalThis` unguarded: the WeChat
+  // appservice does not always define it.
+  return resolveSharedScope() as unknown as RuntimeGlobal;
 }
 
 function readInstalledRuntime(): MallMpRuntime | null {

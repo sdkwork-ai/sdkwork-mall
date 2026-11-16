@@ -7,6 +7,7 @@
  * swaps one registration and nothing else.
  */
 import type { MpHost, MpHostCapability } from "@sdkwork/mall-mp-host";
+import { resolveSharedScope } from "@sdkwork/mall-mp-host";
 
 export type {
   MpChosenImage,
@@ -43,14 +44,9 @@ interface HostGlobal {
 }
 
 function hostScope(): HostGlobal {
-  if (typeof globalThis !== "undefined" && globalThis) {
-    return globalThis as unknown as HostGlobal;
-  }
-  try {
-    return (Function("return this") as () => HostGlobal)();
-  } catch {
-    return {};
-  }
+  // Same shared scope as the runtime: `getApp().globalData` when the app exists,
+  // otherwise the platform scope (`wx`), so every per-entry bundle agrees.
+  return resolveSharedScope() as unknown as HostGlobal;
 }
 
 export function installMallMpHost(host: MpHost): void {

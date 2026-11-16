@@ -21,7 +21,7 @@ import {
   type ImMpChatRealtimeService,
   type ImMpNotificationsService,
 } from "@sdkwork/im-mp-chat/services";
-import { type ImAppSdkClient, type ImChatSdkClient } from "@sdkwork/mall-mp-core";
+import { resolveSharedScope, type ImAppSdkClient, type ImChatSdkClient } from "@sdkwork/mall-mp-core";
 
 export interface MpNotice {
   readonly body: string;
@@ -126,14 +126,8 @@ interface ImServicesGlobal {
 }
 
 function imServicesScope(): ImServicesGlobal {
-  if (typeof globalThis !== "undefined" && globalThis) {
-    return globalThis as unknown as ImServicesGlobal;
-  }
-  try {
-    return (Function("return this") as () => ImServicesGlobal)();
-  } catch {
-    return {};
-  }
+  // Same cross-bundle store as the runtime and host singletons.
+  return resolveSharedScope() as unknown as ImServicesGlobal;
 }
 
 /** Installs the composed services; called once from `app.onLaunch`. */

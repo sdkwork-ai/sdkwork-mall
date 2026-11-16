@@ -13,7 +13,7 @@
  * (`ok`/`status`/`statusText`/`headers.get`/`json`/`text`/`arrayBuffer`).
  */
 import type { MpHttpClient, MpHttpResponse } from "./index";
-import { resolvePlatformScope } from "./weixin/scope";
+import { resolveGlobalObject } from "./scope";
 
 /** Minimal `fetch` shape the SDKs rely on. */
 export type MpFetch = (
@@ -234,16 +234,30 @@ function createAbortPolyfill(): { AbortController: unknown; AbortSignal: unknown
  * @param http - Host HTTP client backing the adapter.
  */
 export function installMpFetch(http: MpHttpClient): MpFetch {
-  const globalScope = resolvePlatformScope() as { AbortController?: unknown; AbortSignal?: unknown; fetch?: unknown };
+  const globalScope = resolveGlobalObject() as {
+    AbortController?: unknown;
+    AbortSignal?: unknown;
+    fetch?: unknown;
+    __SDKWORK_MALL_MP_ABORT_CONTROLLER__?: unknown;
+    __SDKWORK_MALL_MP_ABORT_SIGNAL__?: unknown;
+    __SDKWORK_MALL_MP_FETCH__?: unknown;
+  };
+  const polyfill = createAbortPolyfill();
   if (typeof globalScope.AbortController !== "function" || typeof globalScope.AbortSignal !== "function") {
-    const polyfill = createAbortPolyfill();
     globalScope.AbortController = polyfill.AbortController;
     globalScope.AbortSignal = polyfill.AbortSignal;
   }
+  // The bundled entries shadow `fetch`/`AbortController` with variables that read
+  // these keys: the WeChat appservice does not reliably expose `globalThis`, so a
+  // global assignment alone would not define the variables the SDKs call.
+  globalScope.__SDKWORK_MALL_MP_ABORT_CONTROLLER__ = globalScope.AbortController;
+  globalScope.__SDKWORK_MALL_MP_ABORT_SIGNAL__ = globalScope.AbortSignal;
+
+  const adapter = createMpFetch(http);
+  globalScope.__SDKWORK_MALL_MP_FETCH__ = adapter as unknown;
   if (typeof globalScope.fetch === "function") {
     return globalScope.fetch as MpFetch;
   }
-  const adapter = createMpFetch(http);
   globalScope.fetch = adapter as unknown as typeof fetch;
   return adapter;
 }

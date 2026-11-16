@@ -528,3 +528,25 @@
   - Regression: 31 node guards, 69 vitest contracts, typecheck, composition and
     parity green; contract suite 183/190 with the seven failures all inside the
     concurrent H5 brick migration.
+
+- 2026-11-16 (nineteenth pass: no unguarded `globalThis` anywhere). The next
+  launch error was `Cannot read property '__SDKWORK_MALL_MP_RUNTIME_ENV__' of
+  undefined`: `bootstrap/environment.ts` read the injection override through
+  `globalThis`, and the dev-tool appservice (base library 3.18, after its
+  ES6→ES5 pass) does not expose a usable `globalThis` binding.
+  - One guarded resolver (`packages/sdkwork-mall-mp-host/src/scope.ts`):
+    `resolveGlobalObject()` (`wx` first, then a `typeof globalThis` guard, then a
+    module fallback), `resolvePlatformScope()` (the `{ wx }` shape the adapters
+    take) and `resolveSharedScope()` (`getApp().globalData`, the documented
+    cross-bundle store). Every consumer — environment, runtime/host/IM singletons,
+    fetch/AbortController installer — now goes through it.
+  - Global *assignments* do not create global *variables* on WeChat, so the
+    bundler prepends bundle-scoped shims for `fetch`/`AbortController`/`AbortSignal`
+    that resolve the host adapter from `wx.__SDKWORK_MALL_MP_FETCH__` (published by
+    `installMpFetch`). SDK HTTP now works end to end: the smoke harness reports 16
+    real request attempts and every page handles them.
+  - Guard: the completeness suite fails if any `.ts` outside the scope helper
+    mentions `globalThis` (comments stripped).
+  - Regression: 32 node guards, 69 vitest contracts, mini typecheck, composition and
+    parity green; 184/191 contract tests with the seven failures inside the
+    concurrent H5 brick migration.

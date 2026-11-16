@@ -12,4 +12,5 @@ export * from "./platform/index";
 export * from "./request/index";
 export * from "./runtime/index";
 export * from "./sdk/index";
+export { resolveGlobalObject, resolvePlatformScope, resolveSharedScope } from "@sdkwork/mall-mp-host";
 export * from "./session/index";

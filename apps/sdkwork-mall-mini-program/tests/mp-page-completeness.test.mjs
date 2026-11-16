@@ -132,6 +132,43 @@ test("the loader-compatibility env shim mirrors the generated module", () => {
   assert.match(shim, /module\.exports = \{/u, "the shim must be a CommonJS module");
 });
 
+test("no module dereferences globalThis outside the guarded scope helper", () => {
+  // Base library 3.18 in the dev tool does not reliably expose `globalThis`
+  // ("Cannot read property '…' of undefined"), so all scope resolution funnels
+  // through `packages/sdkwork-mall-mp-host/src/scope.ts`, which guards every use.
+  const problems = [];
+  const SCOPE_HELPER = "packages/sdkwork-mall-mp-host/src/scope.ts";
+  const scan = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || entry.name === "node_modules") {
+        continue;
+      }
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        scan(entryPath);
+        continue;
+      }
+      if (!entry.name.endsWith(".ts")) {
+        continue;
+      }
+      const relative = path.relative(appRoot, entryPath).replace(/\\/gu, "/");
+      if (relative === SCOPE_HELPER) {
+        continue;
+      }
+      // Strip comments so prose that mentions the global does not trip the guard.
+      const source = read(entryPath)
+        .replace(/\/\*[\s\S]*?\*\//gu, "")
+        .replace(/^[ \t]*\/\/.*$/gmu, "");
+      if (/\bglobalThis\b/u.test(source)) {
+        problems.push(relative);
+      }
+    }
+  };
+  scan(srcRoot);
+  scan(path.join(appRoot, "packages"));
+  assert.deepEqual(problems, [], "use resolvePlatformScope/resolveGlobalObject/resolveSharedScope instead");
+});
+
 test("the app loads no JSON module and no non-mini-program global", () => {
   const problems = [];
   const scan = (directory) => {

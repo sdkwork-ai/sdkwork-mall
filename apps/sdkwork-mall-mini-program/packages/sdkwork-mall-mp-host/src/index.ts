@@ -217,6 +217,7 @@ export interface MpHttpClient {
  */
 export type MpFetchInstaller = (http: MpHttpClient) => void;
 
+export * from "./scope";
 /** The complete host surface a mall mini-program bootstrap installs. */
 export interface MpHost {
   readonly capabilities: ReadonlySet<MpHostCapability>;
