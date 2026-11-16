@@ -21,6 +21,7 @@ import { readRuntimeEnv } from "./bootstrap/environment";
 import { SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD } from "./bootstrap/uploadDeclaration";
 import { mpCapabilityUrl } from "./routes/capabilities";
 import { uploadDriveImageDetailed } from "./services/drive-upload-service";
+import { createDriveDownloadGrant } from "./services/drive-download-service";
 import runtimeEnvJson from "./runtime-env.json";
 
 interface MallMpGlobalData {
@@ -79,6 +80,7 @@ export function bootstrapMallMpRuntime(): MallMpRuntime {
     { imAppClient: runtime.imAppClient, imChatClient: runtime.imChatClient },
     {
       resolveCurrentUserId: () => runtime.session.read()?.userId ?? "",
+      resolveImageUrl: createDriveDownloadGrant,
       uploadImage: (image) => uploadDriveImageDetailed({
         declaration: SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD,
         appResourceId: SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD.scene,

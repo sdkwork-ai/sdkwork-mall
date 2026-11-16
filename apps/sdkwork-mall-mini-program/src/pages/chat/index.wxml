@@ -12,7 +12,15 @@
       wx:key="id"
       id="msg-{{item.id}}"
     >
-      <view class="chat-bubble {{item.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-agent'}}">
+      <image
+        wx:if="{{item.imageUrl}}"
+        class="chat-image"
+        src="{{item.imageUrl}}"
+        mode="widthFix"
+        data-url="{{item.imageUrl}}"
+        bindtap="previewChatImage"
+      />
+      <view wx:else class="chat-bubble {{item.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-agent'}}">
         {{item.content}}
       </view>
     </view>

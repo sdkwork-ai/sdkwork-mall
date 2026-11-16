@@ -40,6 +40,16 @@ through the injected Drive port and posts the returned
 capability owns no storage flow; the app bootstrap injects the uploader declared
 as `mall.chat-image` in `specs/upload.declaration.json`.
 
+Reading works the same way in reverse:
+
+```ts
+const messages = await listChatMessages(conversationId); // carries mediaNodeId
+const url = await resolveChatImageUrl(nodeId);            // injected grant port
+```
+
+The page caches one signed URL per Drive node, renders an `<image>` bubble when it
+resolves, and falls back to the message summary text when the grant fails.
+
 This package only **projects** the IM domain types onto mall view models
 (`MpNotice`, `MpChatConversation`, `MpChatMessage`) and orders the chat stream
 chronologically. It declares no transport and no endpoint.

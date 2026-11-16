@@ -240,3 +240,19 @@
     140/141 repo contract tests — the single failure is still the external H5
     i18n ratchet (h5 255 -> 271 from a concurrent edit); miniProgram improved to
     152, both typechecks, composition, parity and catalogues green.
+
+- 2026-11-16 (sixth pass, continuation: inbound image bubbles). Image messages
+  are now readable, not just sendable:
+  - `services/drive-download-service.ts` exchanges a stored node for a signed URL
+    (`POST /drive/nodes/{nodeId}/download_grants`), the read counterpart of the
+    uploader and injected the same way.
+  - `listChatMessages` carries `mediaNodeId` from the IM message projection;
+    `resolveChatImageUrl(nodeId)` goes through the injected grant port and fails
+    loudly when the port is missing.
+  - The chat page caches one signed URL per Drive node, renders an `<image>`
+    bubble when it resolves (tap opens the platform preview), and keeps the
+    file-name text bubble when a grant fails.
+  - Regression: 25 node guards, 53 vitest contracts, 141/142 repo contract tests
+    (the single failure remains the external H5 i18n ratchet), both typechecks,
+    composition, parity, catalogues and default data green; miniProgram readiness
+    153/155.

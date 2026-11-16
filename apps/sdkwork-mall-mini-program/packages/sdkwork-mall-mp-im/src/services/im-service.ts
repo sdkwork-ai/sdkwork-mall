@@ -51,6 +51,10 @@ export interface MpChatMessage {
   readonly id: string;
   readonly role: string;
   readonly sentAt: string;
+  /** Drive node of an image message, when the message carries media. */
+  readonly mediaNodeId?: string;
+  /** Short-lived signed URL resolved for that node, when available. */
+  readonly imageUrl?: string;
 }
 
 /** One picked image ready to become a media message. */
@@ -80,6 +84,14 @@ export interface MpImChatImageUpload {
  */
 export type MpImImageUploader = (input: MpImChatImageInput) => Promise<MpImChatImageUpload>;
 
+/**
+ * Drive download-grant resolver injected by the app bootstrap.
+ *
+ * The IM message carries the persisted `drive://` identity, not a readable URL;
+ * rendering exchanges the node id for a short-lived signed URL through this port.
+ */
+export type MpImImageUrlResolver = (nodeId: string) => Promise<string>;
+
 /** Capability services composed by the app bootstrap. */
 export interface MpImServices {
   readonly conversation: ImMpChatConversationService;
@@ -94,6 +106,8 @@ export interface MpImServices {
    * has no hidden dependency on the runtime singleton.
    */
   readonly resolveCurrentUserId: () => string;
+  /** Drive download grants for image bubbles. */
+  readonly resolveImageUrl?: MpImImageUrlResolver;
   /** Drive uploader for image messages; absent when the surface is text-only. */
   readonly uploadImage?: MpImImageUploader;
 }
@@ -123,7 +137,11 @@ export function createMpImServices(
     readonly imAppClient: ImAppSdkClient;
     readonly imChatClient: ImChatSdkClient;
   },
-  options: { resolveCurrentUserId?: () => string; uploadImage?: MpImImageUploader } = {},
+  options: {
+    resolveCurrentUserId?: () => string;
+    resolveImageUrl?: MpImImageUrlResolver;
+    uploadImage?: MpImImageUploader;
+  } = {},
 ): MpImServices {
   // The generated IM runtime client is the structural `ImMpChatSdkPort` the chat
   // services consume; the cast documents that the port type belongs to IM.
@@ -134,6 +152,7 @@ export function createMpImServices(
     conversation: createImMpChatConversationService(resolveChat),
     realtime: createImMpChatRealtimeService(resolveChat),
     resolveCurrentUserId: options.resolveCurrentUserId ?? (() => ""),
+    ...(options.resolveImageUrl ? { resolveImageUrl: options.resolveImageUrl } : {}),
     ...(options.uploadImage ? { uploadImage: options.uploadImage } : {}),
   };
 }
@@ -196,6 +215,7 @@ export async function listChatMessages(conversationId: string): Promise<MpChatMe
       content: item.text,
       role: currentUserId && item.senderId === currentUserId ? "user" : "agent",
       sentAt: item.occurredAt,
+      ...(item.media?.nodeId ? { mediaNodeId: item.media.nodeId } : {}),
       // int64 wire field; used only to order the stream.
       seq: Number(item.messageSeq) || 0,
     }))
@@ -208,6 +228,19 @@ export async function listChatMessages(conversationId: string): Promise<MpChatMe
       return Date.parse(left.sentAt) - Date.parse(right.sentAt);
     })
     .map(({ seq: _seq, ...message }) => message);
+}
+
+/**
+ * Resolves the signed URL for one image message node.
+ *
+ * @param nodeId - Drive node referenced by the message.
+ */
+export async function resolveChatImageUrl(nodeId: string): Promise<string> {
+  const resolve = requireServices().resolveImageUrl;
+  if (!resolve) {
+    throw new Error("IM image URL resolver is not configured; wire it from app bootstrap");
+  }
+  return resolve(nodeId);
 }
 
 export async function sendChatMessage(conversationId: string, content: string): Promise<void> {

@@ -1,10 +1,11 @@
 import { t } from "../../i18n";
-import { errorMessage, type MpInputEvent } from "../../types/common";
+import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   listChatMessages,
   markChatRead,
   recoverRealtime,
+  resolveChatImageUrl,
   sendChatImage,
   sendChatMessage,
   subscribeConversationMessages,
@@ -28,6 +29,14 @@ const MAX_CHAT_IMAGE_BYTES = 5 * 1024 * 1024;
  * keyed by the page instance.
  */
 const realtimeLeases = new WeakMap<object, () => void>();
+
+/**
+ * Signed image URLs keyed by Drive node.
+ *
+ * A re-read of the stream returns the same nodes again; caching keeps one grant
+ * per bubble per visit instead of one per refresh cycle.
+ */
+const chatImageUrls = new Map<string, string>();
 
 interface ChatData {
   messages: MpChatMessage[];
@@ -169,6 +178,7 @@ Page({
         patch._lastMessageId = lastId;
       }
       this.setData(patch);
+      void this.resolveImageUrls();
       // A read receipt per poll wrote ~720 receipts per hour; only a new
       // inbound message needs one.
       if (lastId && lastId !== this.data._acknowledgedId) {
@@ -177,6 +187,63 @@ Page({
       }
     } catch (cause) {
       this.setData({ message: errorMessage(cause, t("chat.loadFailed")) });
+    }
+  },
+
+  /**
+   * Resolves signed URLs for image bubbles.
+   *
+   * The message record only carries the persisted Drive identity; rendering
+   * exchanges it for a short-lived URL through the injected grant port. Fail-soft:
+   * a failed grant leaves the file-name text bubble in place.
+   */
+  async resolveImageUrls() {
+    const pending = this.data.messages.filter(
+      (message) => message.mediaNodeId && !message.imageUrl && !chatImageUrls.has(message.mediaNodeId),
+    );
+    if (pending.length === 0) {
+      const cached = this.data.messages.some(
+        (message) => message.mediaNodeId && !message.imageUrl && chatImageUrls.has(message.mediaNodeId),
+      );
+      if (!cached) {
+        return;
+      }
+    }
+    const conversationId = this.data._conversationId;
+    const resolved = new Map<string, string>(chatImageUrls);
+    await Promise.all(pending.map(async (message) => {
+      const nodeId = message.mediaNodeId as string;
+      try {
+        resolved.set(nodeId, await resolveChatImageUrl(nodeId));
+      } catch {
+        // keep the text fallback for this bubble
+      }
+    }));
+    if (this.data._conversationId !== conversationId) {
+      return;
+    }
+    for (const [nodeId, url] of resolved) {
+      chatImageUrls.set(nodeId, url);
+    }
+    if (resolved.size === 0) {
+      return;
+    }
+    this.setData({
+      messages: this.data.messages.map((message) => {
+        const url = message.mediaNodeId ? resolved.get(message.mediaNodeId) : undefined;
+        return url ? { ...message, imageUrl: url } : message;
+      }),
+    });
+  },
+
+  /** Full-screen preview of the conversation's image bubbles. */
+  previewChatImage(event: MpTapEvent) {
+    const current = String(event.currentTarget.dataset.url ?? "");
+    const urls = this.data.messages
+      .map((message) => message.imageUrl)
+      .filter((url): url is string => Boolean(url));
+    if (current && urls.length > 0) {
+      platform.previewImages({ current, urls });
     }
   },
 

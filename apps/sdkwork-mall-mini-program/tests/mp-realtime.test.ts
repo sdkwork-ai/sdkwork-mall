@@ -14,7 +14,14 @@ import {
   MP_SOCKET_CONNECTING,
   MP_SOCKET_OPEN,
 } from "@sdkwork/mall-mp-host/weixin";
-import { configureMpImServices, recoverRealtime, sendChatImage, subscribeConversationMessages } from "@sdkwork/mall-mp-im/im-service";
+import {
+  configureMpImServices,
+  listChatMessages,
+  recoverRealtime,
+  resolveChatImageUrl,
+  sendChatImage,
+  subscribeConversationMessages,
+} from "@sdkwork/mall-mp-im/im-service";
 import type { MpImServices } from "@sdkwork/mall-mp-im/im-service";
 
 interface FakeTask {
@@ -244,5 +251,51 @@ describe("image messages", () => {
       fileName: "a.jpg",
       sizeBytes: 1,
     })).rejects.toThrow("IM image uploader is not configured");
+  });
+});
+
+describe("image rendering", () => {
+  beforeEach(() => {
+    configureMpImServices(null);
+  });
+
+  it("keeps the media node on the message and resolves it through the grant port", async () => {
+    configureMpImServices({
+      conversation: {
+        listMessages: async () => ({
+          items: [
+            {
+              messageId: "m-1",
+              body: { text: "看这张" },
+              sender: { id: "agent-9" },
+              occurredAt: "2026-11-16T10:00:00Z",
+              messageSeq: "3",
+            },
+            {
+              messageId: "m-2",
+              body: { text: "chat-image.jpg" },
+              sender: { id: "agent-9" },
+              occurredAt: "2026-11-16T10:01:00Z",
+              messageSeq: "4",
+              media: { kind: "image", nodeId: "n-7" },
+            },
+          ],
+          hasMore: false,
+          highWatermark: "4",
+          pageInfo: { mode: "cursor", hasMore: false },
+        }),
+      },
+      resolveCurrentUserId: () => "user-1",
+      resolveImageUrl: async (nodeId: string) => `https://cdn.test/${nodeId}`,
+    } as unknown as MpImServices);
+
+    const messages = await listChatMessages("c-1");
+    expect(messages.map((message) => message.mediaNodeId)).toEqual([undefined, "n-7"]);
+    await expect(resolveChatImageUrl("n-7")).resolves.toBe("https://cdn.test/n-7");
+  });
+
+  it("fails loudly when the image URL resolver was never wired", async () => {
+    configureMpImServices({ conversation: {} } as unknown as MpImServices);
+    await expect(resolveChatImageUrl("n-7")).rejects.toThrow("IM image URL resolver is not configured");
   });
 });

@@ -14,6 +14,7 @@ export {
   listNotices,
   markChatRead,
   recoverRealtime,
+  resolveChatImageUrl,
   retrieveNotice,
   sendChatImage,
   sendChatMessage,
