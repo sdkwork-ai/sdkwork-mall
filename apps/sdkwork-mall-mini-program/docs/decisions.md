@@ -848,3 +848,24 @@
     overrides and rejects a `.page-*` root with horizontal padding.
   - Rebuilt 16:19:56.884Z; main 766.9 KB, largest subpackage 48.4 KB, total
     1418.8 KB; 42 node guards, 69 vitest, smoke PASS over 36 pages.
+
+- 2026-11-16 (thirty-fifth pass: the sign-in surface). The login page was a bare
+  card with two buttons — no brand, no agreement gate, no password visibility, no
+  remembered account, no trust cues. Rebuilt as a product-grade surface that mirrors
+  the H5 IAM auth gate's flow (the IAM brick owns auth, this page only presents it):
+  - Brand poster (red→orange, flat corners) with the store promise and a trust badge.
+  - WeChat identity sign-in as the primary green action (`wx.login` → IAM dual-token
+    session), an "or" divider, then a credential form with labelled fields, a
+    show/hide password toggle (`cursor-spacing`/`adjust-position` for the keyboard)
+    and inline error banner.
+  - Terms gate: both sign-in paths and the dev token path require an explicit
+    opt-in; the links open the help surface. The buyer is blocked with a readable
+    message instead of a silent failure.
+  - The account is remembered in device storage (`sdkwork-mall-mp-last-account`) and
+    pre-filled on the next visit; a signed-in visitor gets a profile card with
+    "进入我的" / "退出当前账号" instead of the form.
+  - The dev token paste is demoted to a collapsed footer block and stays hidden in
+    production; the trust row (微信授权 / 加密传输 / 隐私保护) closes the page.
+  - Smoke now exercises the login behaviour (agreement toggle, password toggle,
+    empty-credential guard, agreement gate on WeChat sign-in) on top of the lifecycle
+    pass; 42 node guards and 69 vitest stay green.

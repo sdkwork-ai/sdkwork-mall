@@ -3,14 +3,19 @@ import { errorMessage, type MpInputEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getMallMpRuntime, platform } from "@sdkwork/mall-mp-core";
 import { loginWithPassword, loginWithWechat } from "../../services/auth-service";
-import { clearSession, getToken, setToken } from "../../services/session";
+import { clearSession, getToken, isLoggedIn, setToken } from "../../services/session";
 
 interface LoginData {
   account: string;
   password: string;
   token: string;
-  /** Account/password fallback panel; WeChat sign-in is the primary path. */
-  showCredentialForm: boolean;
+  /** Remembered account so a returning buyer does not retype it. */
+  lastAccount: string;
+  loggedIn: boolean;
+  displayName: string;
+  /** Terms gate: both sign-in paths require an explicit opt-in. */
+  agreementAccepted: boolean;
+  showPassword: boolean;
   /** Development-only token paste; hidden in production builds. */
   useTokenFallback: boolean;
   devFallbackVisible: boolean;
@@ -21,12 +26,12 @@ interface LoginData {
   hintText: string;
   wechatLoginText: string;
   wechatLoginBusyText: string;
-  credentialToggleText: string;
-  credentialCollapseText: string;
   accountLabel: string;
   accountPlaceholder: string;
   passwordLabel: string;
   passwordPlaceholder: string;
+  showPasswordText: string;
+  hidePasswordText: string;
   submitText: string;
   submittingText: string;
   devToggleText: string;
@@ -35,6 +40,8 @@ interface LoginData {
   tokenPlaceholder: string;
   logoutText: string;
 }
+
+const LAST_ACCOUNT_KEY = "sdkwork-mall-mp-last-account";
 
 function goBackAfterLogin(): void {
   setTimeout(() => {
@@ -47,7 +54,11 @@ Page({
     account: "",
     password: "",
     token: "",
-    showCredentialForm: false,
+    lastAccount: "",
+    loggedIn: false,
+    displayName: "已登录用户",
+    agreementAccepted: false,
+    showPassword: false,
     useTokenFallback: false,
     devFallbackVisible: true,
     wechatAvailable: true,
@@ -57,12 +68,12 @@ Page({
     hintText: t("auth.hint"),
     wechatLoginText: t("auth.wechatLogin"),
     wechatLoginBusyText: t("auth.wechatLoginBusy"),
-    credentialToggleText: t("auth.credentialToggle"),
-    credentialCollapseText: t("auth.credentialCollapse"),
     accountLabel: t("auth.accountLabel"),
     accountPlaceholder: t("auth.accountPlaceholder"),
     passwordLabel: t("auth.passwordLabel"),
     passwordPlaceholder: t("auth.passwordPlaceholder"),
+    showPasswordText: "显示",
+    hidePasswordText: "隐藏",
     submitText: t("auth.submit"),
     submittingText: t("auth.submitting"),
     devToggleText: t("auth.devToggle"),
@@ -72,10 +83,17 @@ Page({
     logoutText: t("auth.logout"),
   } as LoginData,
 
+  onLoad() {
+    const lastAccount = platform.storage.get(LAST_ACCOUNT_KEY) ?? "";
+    this.setData({ lastAccount, account: lastAccount });
+  },
+
   onShow() {
     const runtime = getMallMpRuntime();
+    const token = getToken();
     this.setData({
-      token: getToken(),
+      token,
+      loggedIn: isLoggedIn() && token !== "",
       // `platformLogin` is the WeChat capability; a host profile without it must
       // not show a button that can only fail.
       wechatAvailable: runtime.host.hasCapability("platformLogin"),
@@ -84,23 +102,48 @@ Page({
   },
 
   onAccountInput(event: MpInputEvent) {
-    this.setData({ account: event.detail.value });
+    this.setData({ account: event.detail.value, error: "" });
   },
 
   onPasswordInput(event: MpInputEvent) {
-    this.setData({ password: event.detail.value });
+    this.setData({ password: event.detail.value, error: "" });
   },
 
   onTokenInput(event: MpInputEvent) {
     this.setData({ token: event.detail.value });
   },
 
-  toggleCredentialForm() {
-    this.setData({ showCredentialForm: !this.data.showCredentialForm, error: "" });
+  togglePassword() {
+    this.setData({ showPassword: !this.data.showPassword });
+  },
+
+  toggleAgreement() {
+    this.setData({ agreementAccepted: !this.data.agreementAccepted, error: "" });
   },
 
   toggleFallback() {
     this.setData({ useTokenFallback: !this.data.useTokenFallback, error: "" });
+  },
+
+  goBuyer() {
+    platform.switchTab(mpCapabilityUrl("buyer.mall.dashboard"));
+  },
+
+  openTerms() {
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.help"));
+  },
+
+  openPrivacy() {
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.help"));
+  },
+
+  /** Blocks sign-in until the buyer opts in; returns false when blocked. */
+  requireAgreement(): boolean {
+    if (this.data.agreementAccepted) {
+      return true;
+    }
+    this.setData({ error: "请先阅读并同意《用户协议》与《隐私政策》" });
+    return false;
   },
 
   /** Production path: one tap, no credential typing (mini-program review expects it). */
@@ -112,10 +155,13 @@ Page({
       this.setData({ error: t("auth.wechatUnsupported") });
       return;
     }
+    if (!this.requireAgreement()) {
+      return;
+    }
     this.setData({ busy: true, error: "" });
     try {
       await loginWithWechat();
-      this.setData({ busy: false });
+      this.setData({ busy: false, loggedIn: true });
       platform.toast(t("auth.success"), "success");
       goBackAfterLogin();
     } catch (cause) {
@@ -134,10 +180,19 @@ Page({
     if (this.data.busy) {
       return;
     }
+    if (!this.requireAgreement()) {
+      return;
+    }
     this.setData({ busy: true, error: "" });
     try {
       await loginWithPassword(account, password);
-      this.setData({ busy: false });
+      platform.storage.set(LAST_ACCOUNT_KEY, account);
+      this.setData({
+        busy: false,
+        loggedIn: true,
+        lastAccount: account,
+        password: "",
+      });
       platform.toast(t("auth.success"), "success");
       goBackAfterLogin();
     } catch (cause) {
@@ -151,6 +206,9 @@ Page({
       this.setData({ error: t("auth.missingToken") });
       return;
     }
+    if (!this.requireAgreement()) {
+      return;
+    }
     setToken(token);
     platform.toast(t("auth.success"), "success");
     goBackAfterLogin();
@@ -158,7 +216,7 @@ Page({
 
   logout() {
     clearSession();
-    this.setData({ token: "", account: "", password: "" });
+    this.setData({ token: "", password: "", loggedIn: false, error: "" });
     platform.toast(t("auth.loggedOut"), "success");
   },
 });

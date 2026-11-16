@@ -178,6 +178,28 @@ for (const page of pagePaths) {
     };
     instance.onLoad?.({ id: "stub", conversationId: "stub", categoryId: "", orderId: "stub" });
     instance.onShow?.();
+    if (page === "pages/login/index") {
+      // Product rules on the sign-in surface: the agreement gate and the
+      // missing-credential guard are behaviour, so the harness exercises them.
+      instance.toggleAgreement();
+      if (instance.data.agreementAccepted !== true) {
+        throw new Error("agreement toggle did not engage");
+      }
+      instance.togglePassword();
+      if (instance.data.showPassword !== true) {
+        throw new Error("password visibility toggle did not engage");
+      }
+      instance.setData({ agreementAccepted: false, account: "", password: "" });
+      instance.login();
+      if (!instance.data.error) {
+        throw new Error("empty credentials must surface an error");
+      }
+      instance.setData({ agreementAccepted: false, error: "" });
+      instance.loginWithWechat();
+      if (!/用户协议/u.test(instance.data.error ?? "")) {
+        throw new Error("wechat sign-in must require the agreement");
+      }
+    }
     // Deferred loaders (network) settle with the stub rejections; ignore them.
     await Promise.resolve();
   } catch (error) {

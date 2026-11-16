@@ -1,48 +1,114 @@
 <view class="page-login">
-  <view class="mp-card">
-    <view class="mp-card-title">{{titleText}}</view>
-    <view class="mp-muted login-hint">{{hintText}}</view>
+  <view class="login-hero">
+    <view class="login-logo">SDKWork</view>
+    <view class="login-slogan">品质生活，一站购齐</view>
+    <view class="login-hero-badge">官方自营 · 品牌好物 · 极速发货</view>
+  </view>
 
-    <button
-      class="mp-btn mp-btn-primary login-btn"
-      disabled="{{busy || !wechatAvailable}}"
-      bindtap="loginWithWechat"
-    >{{busy ? wechatLoginBusyText : wechatLoginText}}</button>
-
-    <view class="login-fallback-switch" bindtap="toggleCredentialForm">
-      {{showCredentialForm ? credentialCollapseText : credentialToggleText}}
-    </view>
-
-    <block wx:if="{{showCredentialForm}}">
-      <view class="mp-field">
-        <text class="mp-field-label">{{accountLabel}}</text>
-        <input value="{{account}}" placeholder="{{accountPlaceholder}}" bindinput="onAccountInput" />
+  <view class="login-panel">
+    <block wx:if="{{loggedIn}}">
+      <view class="login-signed">
+        <view class="login-avatar">S</view>
+        <view class="login-signed-body">
+          <view class="login-signed-name">{{displayName}}</view>
+          <view class="login-signed-hint">已登录，购物车与订单已同步到本设备</view>
+        </view>
       </view>
-      <view class="mp-field">
-        <text class="mp-field-label">{{passwordLabel}}</text>
-        <input password value="{{password}}" placeholder="{{passwordPlaceholder}}" bindinput="onPasswordInput" />
+      <button class="mp-btn mp-btn-primary login-primary" bindtap="goBuyer">进入我的</button>
+      <view class="login-link" catchtap="logout">{{logoutText}}</view>
+    </block>
+
+    <block wx:else>
+      <view class="login-heading">{{titleText}}</view>
+      <view class="login-sub">{{hintText}}</view>
+
+      <button
+        class="login-wechat"
+        disabled="{{busy || !wechatAvailable}}"
+        bindtap="loginWithWechat"
+      >{{busy ? wechatLoginBusyText : wechatLoginText}}</button>
+      <view wx:if="{{!wechatAvailable}}" class="login-note">当前环境不支持微信登录，请使用账号密码登录。</view>
+
+      <view class="login-divider">
+        <view class="login-divider-line"></view>
+        <text class="login-divider-text">或</text>
+        <view class="login-divider-line"></view>
       </view>
-      <button class="mp-btn mp-btn-primary login-btn" disabled="{{busy}}" bindtap="login">
+
+      <view class="login-field">
+        <text class="login-label">{{accountLabel}}</text>
+        <input
+          class="login-input"
+          value="{{account}}"
+          placeholder="{{accountPlaceholder}}"
+          placeholder-class="login-placeholder"
+          maxlength="64"
+          adjust-position
+          cursor-spacing="24"
+          bindinput="onAccountInput"
+        />
+      </view>
+
+      <view class="login-field">
+        <text class="login-label">{{passwordLabel}}</text>
+        <view class="login-input-row">
+          <input
+            class="login-input login-input-inline"
+            password="{{!showPassword}}"
+            value="{{password}}"
+            placeholder="{{passwordPlaceholder}}"
+            placeholder-class="login-placeholder"
+            maxlength="64"
+            adjust-position
+            cursor-spacing="24"
+            bindinput="onPasswordInput"
+          />
+          <view class="login-eye" catchtap="togglePassword">{{showPassword ? hidePasswordText : showPasswordText}}</view>
+        </view>
+      </view>
+
+      <button class="mp-btn mp-btn-primary login-primary" disabled="{{busy}}" bindtap="login">
         {{busy ? submittingText : submitText}}
       </button>
-    </block>
 
-    <view wx:if="{{error}}" class="mp-error">
-      <text>{{error}}</text>
-    </view>
+      <view wx:if="{{error}}" class="login-error">{{error}}</view>
 
-    <block wx:if="{{devFallbackVisible}}">
-      <view class="login-fallback-switch" bindtap="toggleFallback">{{devToggleText}}</view>
-      <block wx:if="{{useTokenFallback}}">
-        <view class="mp-muted login-hint">{{devHintText}}</view>
-        <view class="mp-field">
-          <text class="mp-field-label">{{tokenLabel}}</text>
-          <input password value="{{token}}" placeholder="{{tokenPlaceholder}}" bindinput="onTokenInput" />
+      <view class="login-agreement" catchtap="toggleAgreement">
+        <view class="login-checkbox {{agreementAccepted ? 'login-checkbox-on' : ''}}">
+          <text wx:if="{{agreementAccepted}}">✓</text>
         </view>
-        <button class="mp-btn mp-btn-ghost login-btn" bindtap="loginWithToken">{{submitText}}</button>
-      </block>
-    </block>
+        <text class="login-agreement-text">我已阅读并同意</text>
+        <text class="login-agreement-link" catchtap="openTerms">《用户协议》</text>
+        <text class="login-agreement-text">与</text>
+        <text class="login-agreement-link" catchtap="openPrivacy">《隐私政策》</text>
+      </view>
 
-    <button wx:if="{{token}}" class="mp-btn mp-btn-ghost login-btn" bindtap="logout">{{logoutText}}</button>
+      <view wx:if="{{devFallbackVisible}}" class="login-dev">
+        <view class="login-dev-toggle" catchtap="toggleFallback">{{devToggleText}}</view>
+        <block wx:if="{{useTokenFallback}}">
+          <view class="login-dev-hint">{{devHintText}}</view>
+          <view class="login-field">
+            <text class="login-label">{{tokenLabel}}</text>
+            <input
+              class="login-input"
+              password
+              value="{{token}}"
+              placeholder="{{tokenPlaceholder}}"
+              placeholder-class="login-placeholder"
+              bindinput="onTokenInput"
+            />
+          </view>
+          <button class="mp-btn mp-btn-ghost login-primary" bindtap="loginWithToken">{{submitText}}</button>
+        </block>
+      </view>
+    </block>
+  </view>
+
+  <view class="login-foot">
+    <view class="login-foot-item">微信官方授权登录</view>
+    <view class="login-foot-dot"></view>
+    <view class="login-foot-item">数据加密传输</view>
+    <view class="login-foot-dot"></view>
+    <view class="login-foot-item">隐私信息受保护</view>
   </view>
 </view>
