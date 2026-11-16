@@ -203,3 +203,143 @@
   font-size: 24rpx;
   padding: 0 24rpx;
 }
+
+
+/* Distribution dashboard: earnings hero, level tabs and the share rail. */
+.partner-earnings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin: 20rpx 0 24rpx;
+}
+
+.partner-earn {
+  flex: 1 1 44%;
+  padding: 20rpx 18rpx;
+  background: #fdf2f2;
+}
+
+.partner-earn-value {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #c0272d;
+}
+
+.partner-earn-label {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #8b9199;
+}
+
+.partner-team-tabs {
+  display: flex;
+  gap: 12rpx;
+  margin: 8rpx 0 20rpx;
+}
+
+.partner-team-tab {
+  padding: 10rpx 24rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+  background: #f6f7f9;
+}
+
+.partner-team-tab-on {
+  color: #ffffff;
+  background: #e93b3d;
+}
+
+.partner-level-tag {
+  padding: 4rpx 14rpx;
+  font-size: 20rpx;
+  color: #c0272d;
+  background: #fdecec;
+}
+
+.partner-share-sub {
+  margin: 8rpx 0 20rpx;
+  line-height: 1.6;
+}
+
+.partner-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.partner-share-btn {
+  flex: 1 1 30%;
+  min-width: 200rpx;
+  font-size: 24rpx;
+}
+
+.partner-invite-code-line {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #6b7280;
+}
+
+.partner-share-title {
+  margin: 28rpx 0 16rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.partner-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.partner-product {
+  width: calc(50% - 10rpx);
+  background: #ffffff;
+  border: 1rpx solid #f0f1f3;
+  box-sizing: border-box;
+}
+
+.partner-product-image {
+  width: 100%;
+  height: 240rpx;
+  display: block;
+  background: #f4f5f7;
+}
+
+.partner-product-image-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c0c4cc;
+  font-size: 24rpx;
+}
+
+.partner-product-title {
+  padding: 12rpx 16rpx 0;
+  font-size: 24rpx;
+  color: #1f2937;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: 64rpx;
+}
+
+.partner-product-price {
+  padding: 6rpx 16rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #e93b3d;
+}
+
+.partner-product-actions {
+  display: flex;
+  gap: 8rpx;
+  padding: 0 12rpx 14rpx;
+}
+
+.partner-product-btn {
+  flex: 1;
+  font-size: 20rpx;
+  padding: 8rpx 0;
+  min-height: 48rpx;
+}

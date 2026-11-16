@@ -874,3 +874,25 @@
   我的资产, directly under 会员中心, as requested. It gained a dedicated `share` line
   icon (three nodes), so the row keeps the icon rhythm of the other asset entries.
   The icon guard confirms the PNG ships; smoke still passes over all 36 pages.
+
+- 2026-11-16 (thirty-seventh pass: distribution dashboard, phase 1). The partner
+  page only showed raw centre numbers; the two-level distribution product needs
+  earnings, team levels and share tools.
+  - `services/distribution-service.ts` turns the partner capability into the
+    distribution language: earnings summary (累计/可提现/冻结/已提现), level labels
+    (一级/二级), commission level labels (一级佣金/二级佣金), team tab filtering by
+    `depth`, level counts, and share paths that carry the partner invite code
+    (invite page and product page).
+  - Partner page: earnings hero, 全部/一级/二级 team tabs with counts and per-member
+    level badges, commission rows tagged 一级佣金/二级佣金 with status, and a
+    "分享赚佣金" card: forward-invite share card, copy invite link/code, and a hot
+    product rail where each tile copies a product share link or opens the WeChat
+    share card (`onShareAppMessage` carries the invite code so the order attributes
+    to the partner).
+  - Gates: typecheck, 42 node guards, 69 vitest, smoke 36 pages; package 1435.1 KB
+    (build 16:34:53.975Z).
+  - Remaining for the goal: H5 parity of the same dashboard, share QR rendering
+    (client encoder), partner customer-binding endpoint + order commission event
+    wiring in sdkwork-partner / sdkwork-order (the app API currently has no binding
+    or commission-event operation, and checkout has no attribution field although
+    `CheckoutOrder.partnerId` already surfaces the bound partner).

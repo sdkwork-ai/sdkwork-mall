@@ -26,6 +26,19 @@ import {
   type MpPartnerWithdrawal,
 } from "../../services/partner-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { listProducts } from "../../services/catalog-service";
+import {
+  buildProductSharePath,
+  commissionLevelLabel,
+  countTeamLevels,
+  filterTeamByTab,
+  summarizeEarnings,
+  teamDepthLabel,
+  toShareProduct,
+  type DistributionEarnings,
+  type DistributionShareProduct,
+  type DistributionTeamTab,
+} from "../../services/distribution-service";
 
 interface PartnerLevelView {
   levelNo: number;
@@ -52,6 +65,8 @@ interface PartnerLevelOption {
 
 interface PartnerTeamView {
   partnerId: string;
+  depth: number;
+  depthTag: string;
   name: string;
   levelText: string;
   metaText: string;
@@ -62,6 +77,7 @@ interface PartnerTeamView {
 
 interface PartnerCommissionView {
   id: string;
+  levelTag: string;
   amountText: string;
   sourceText: string;
   baseText: string;
@@ -91,6 +107,12 @@ interface PartnerPageData {
   levelsEmptyText: string;
   centerNotice: string;
   center: MpPartnerCenter | null;
+  earnings: DistributionEarnings;
+  teamTab: DistributionTeamTab;
+  teamView: PartnerTeamView[];
+  teamDirectCount: number;
+  teamSecondCount: number;
+  shareProducts: DistributionShareProduct[];
   team: PartnerTeamView[];
   teamPage: number;
   teamPageText: string;
@@ -175,6 +197,8 @@ function toTeamView(member: MpPartnerTeamMember, currency: string): PartnerTeamV
   return {
     balanceText: `${t("partner.team.availableBalance")} ${moneyText(member.availableBalance)}`,
     commissionText: `${t("partner.team.totalCommission")} ${moneyText(member.totalCommission)}`,
+    depth: member.depth,
+    depthTag: teamDepthLabel(member.depth),
     joinedText: `${t("partner.team.joinedAt")} ${formatTime(member.joinedAt)}`,
     levelText: `${member.levelName || member.levelNo} · ${t("partner.team.depth")} ${member.depth}`,
     metaText: `${t("partner.team.customerCount")} ${member.customerCount} · ${t("partner.team.directTeam")} ${member.directTeamSize} · ${currency}`,
@@ -186,6 +210,7 @@ function toTeamView(member: MpPartnerTeamMember, currency: string): PartnerTeamV
 function toCommissionView(record: MpPartnerCommissionRecord): PartnerCommissionView {
   return {
     amountText: moneyText(record.amount),
+    levelTag: commissionLevelLabel(record.levelOffset),
     baseText: `${t("partner.commissions.baseAmount")} ${moneyText(record.baseAmount)}`,
     id: record.id,
     metaText: `${t("partner.commissions.levelOffset")} ${record.levelOffset} · ${formatTime(record.computedAt)}`,
@@ -317,6 +342,12 @@ Page({
     cancellingId: "",
     center: null,
     centerNotice: "",
+    earnings: { availableText: "—", frozenText: "—", totalText: "—", withdrawnText: "—" },
+    teamTab: "all" as DistributionTeamTab,
+    teamView: [],
+    teamDirectCount: 0,
+    teamSecondCount: 0,
+    shareProducts: [],
     commissionLoading: false,
     commissionPage: 1,
     commissionPageText: "",
@@ -428,7 +459,9 @@ Page({
         shareLink: center.inviteCode
           ? mpCapabilityUrl("buyer.mall.distribution", { invite: center.inviteCode })
           : "",
+        earnings: summarizeEarnings(center),
       });
+      void this.loadShareProducts();
       await Promise.all([
         this.loadTeamPage(1),
         this.loadCommissionPage(1),
@@ -450,8 +483,12 @@ Page({
     this.setData({ teamLoading: true });
     try {
       const result = await listPartnerTeam(page);
+      const team = result.items.map((member) => toTeamView(member, this.data.center?.currency ?? "CNY"));
       this.setData({
-        team: result.items.map((member) => toTeamView(member, this.data.center?.currency ?? "CNY")),
+        team,
+        teamView: filterTeamByTab(team, this.data.teamTab),
+        teamDirectCount: countTeamLevels(result.items).direct,
+        teamSecondCount: countTeamLevels(result.items).second,
         teamLoading: false,
         teamPage: result.page,
         teamPageText: `${result.page} / ${Math.max(1, Math.ceil(result.total / result.pageSize))}`,
@@ -662,6 +699,59 @@ Page({
     } finally {
       this.setData({ cancellingId: "" });
     }
+  },
+
+  /** Tab switch: 全部 / 一级（直属） / 二级 distribution. */
+  switchTeamTab(event: MpTapEvent) {
+    const tab = String(event.currentTarget.dataset.tab ?? "all") as DistributionTeamTab;
+    this.setData({ teamTab: tab, teamView: filterTeamByTab(this.data.team, tab) });
+  },
+
+  /** Product cards the partner can forward; each path carries the invite code. */
+  async loadShareProducts() {
+    try {
+      const result = await listProducts({ page: 1, pageSize: 6 });
+      const inviteCode = this.data.center?.inviteCode ?? "";
+      this.setData({ shareProducts: result.items.map((product) => toShareProduct(product, inviteCode)) });
+    } catch {
+      this.setData({ shareProducts: [] });
+    }
+  },
+
+  copyProductLink(event: MpTapEvent) {
+    const productId = String(event.currentTarget.dataset.productId ?? "");
+    const product = this.data.shareProducts.find((entry) => entry.id === productId);
+    if (!product) {
+      return;
+    }
+    void platform.copy(product.path);
+    platform.toast("商品分享链接已复制，好友下单后佣金自动结算", "success");
+  },
+
+  openShareProduct(event: MpTapEvent) {
+    const productId = String(event.currentTarget.dataset.productId ?? "");
+    const product = this.data.shareProducts.find((entry) => entry.id === productId);
+    if (product) {
+      platform.navigateTo(product.path);
+    }
+  },
+
+  /** WeChat share card: invite by default, or the product the button carries. */
+  onShareAppMessage(event?: { target?: { dataset?: Record<string, string> } }) {
+    const inviteCode = this.data.center?.inviteCode ?? "";
+    const productId = String(event?.target?.dataset?.productId ?? "");
+    const product = this.data.shareProducts.find((entry) => entry.id === productId);
+    if (product) {
+      return {
+        imageUrl: product.imageUrl || undefined,
+        path: buildProductSharePath(product.id, inviteCode),
+        title: product.title ? `${product.title} - 好物推荐` : "分享好物，一起赚佣金",
+      };
+    }
+    return {
+      path: this.data.shareLink || mpCapabilityUrl("buyer.mall.distribution"),
+      title: "加入我的分销团队，分享好物赚佣金",
+    };
   },
 
   copyShareLink() {
