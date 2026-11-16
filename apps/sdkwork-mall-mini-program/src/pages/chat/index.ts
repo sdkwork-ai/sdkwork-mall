@@ -3,13 +3,27 @@ import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   listChatMessages,
   markChatRead,
+  recoverRealtime,
   sendChatMessage,
+  subscribeConversationMessages,
   type MpChatMessage,
 } from "../../services/im-service";
 import { isLoggedIn } from "../../services/session";
 import { platform } from "@sdkwork/mall-mp-core";
 
-const POLL_INTERVAL_MS = 5000;
+/** Safety-net polling; live pushes arrive through the IM realtime plane. */
+const POLL_INTERVAL_MS = 15_000;
+/** Collapses a burst of pushes into one re-read. */
+const PUSH_DEBOUNCE_MS = 250;
+
+/**
+ * Live-message lease per page instance.
+ *
+ * The release function is not page data (functions cannot cross `setData`) and a
+ * module-level singleton would leak when two chat pages are stacked, so it is
+ * keyed by the page instance.
+ */
+const realtimeLeases = new WeakMap<object, () => void>();
 
 interface ChatData {
   messages: MpChatMessage[];
@@ -23,6 +37,8 @@ interface ChatData {
   /** Newest message already rendered; drives both scroll and read receipts. */
   _lastMessageId: string;
   _pollTimer: number | null;
+  _pushTimer: number | null;
+  _realtimeConnected: boolean;
 }
 
 Page({
@@ -36,8 +52,11 @@ Page({
     _acknowledgedId: "",
     _lastMessageId: "",
     _pollTimer: null,
+    _pushTimer: null,
+    _realtimeConnected: false,
   } as ChatData,
 
+  /** Release function of the live-message lease acquired in `onShow`. */
   onLoad(options: Record<string, string | undefined>) {
     // The conversation list navigates with `?id=`; `conversationId` stays
     // accepted for links built by the other clients.
@@ -50,20 +69,64 @@ Page({
       return;
     }
     void this.refresh();
+    // The realtime plane reconnects lazily after a background/foreground cycle.
+    recoverRealtime();
+    this.startRealtime();
     this.startPolling();
   },
 
   onHide() {
     this.stopPolling();
+    this.stopRealtime();
   },
 
   onUnload() {
     this.stopPolling();
+    this.stopRealtime();
+  },
+
+  /**
+   * Leases live messages for the open conversation.
+   *
+   * IM owns the socket, subscription set and reconnect backoff; this page only
+   * re-reads the stream when something arrives, so a wire payload is never
+   * mapped twice. Polling stays as the offline fallback.
+   */
+  startRealtime() {
+    this.stopRealtime();
+    const conversationId = this.data._conversationId;
+    if (!conversationId) {
+      return;
+    }
+    const release = subscribeConversationMessages(conversationId, () => {
+      this.setData({ _realtimeConnected: true });
+      if (this.data._pushTimer != null) {
+        clearTimeout(this.data._pushTimer);
+      }
+      this.setData({
+        _pushTimer: setTimeout(() => {
+          this.setData({ _pushTimer: null });
+          void this.refresh();
+        }, PUSH_DEBOUNCE_MS) as unknown as number,
+      });
+    });
+    realtimeLeases.set(this as object, release);
+  },
+
+  stopRealtime() {
+    const release = realtimeLeases.get(this as object);
+    if (release) {
+      release();
+      realtimeLeases.delete(this as object);
+    }
+    if (this.data._pushTimer != null) {
+      clearTimeout(this.data._pushTimer);
+      this.setData({ _pushTimer: null });
+    }
   },
 
   startPolling() {
     this.stopPolling();
-    // 客服回复轮询：realtime CCP 接入前保持会话新鲜（与 H5 一致）。
     this.setData({
       _pollTimer: setInterval(() => {
         void this.refresh();
@@ -86,8 +149,8 @@ Page({
       const messages = await listChatMessages(this.data._conversationId);
       const lastId = messages.length ? messages[messages.length - 1].id : "";
       const patch: Record<string, unknown> = { message: "" };
-      // Repaint only when the stream actually changed: a 5 s poll that always
-      // called setData with a fresh array re-rendered the page every cycle.
+      // Repaint only when the stream actually changed: a poll that always called
+      // setData with a fresh array re-rendered the page every cycle.
       if (lastId !== this.data._lastMessageId || messages.length !== this.data.messages.length) {
         patch.messages = messages;
         patch.scrollInto = lastId ? `msg-${lastId}` : "";

@@ -128,6 +128,30 @@ export interface MpDeviceInfo {
   platform(): string;
 }
 
+/** One live socket, shaped like the platform-neutral `WebSocket` subset. */
+export interface MpSocketConnection {
+  /** `0` connecting, `1` open, `2` closing, `3` closed. */
+  readonly readyState: number;
+  addEventListener(type: "close" | "error" | "message" | "open", handler: (event: unknown) => void): void;
+  close(code?: number, reason?: string): void;
+  send(value: string): void;
+}
+
+/**
+ * Realtime socket factory.
+ *
+ * The IM SDK's realtime plane expects a browser-`WebSocket`-like object; this
+ * contract is what the host profile provides, and `@sdkwork/mall-mp-core`
+ * adapts it to the SDK's factory type.
+ */
+export interface MpSocket {
+  connect(options: {
+    header?: Record<string, string>;
+    protocols?: string[];
+    url: string;
+  }): MpSocketConnection;
+}
+
 export interface MpClipboard {
   setText(text: string): Promise<void>;
 }
@@ -192,6 +216,7 @@ export interface MpHost {
   readonly media: MpMediaPicker;
   readonly navigation: MpNavigation;
   readonly payment: MpPaymentBridge;
+  readonly socket: MpSocket;
   readonly storage: MpStorage;
   hasCapability(capability: MpHostCapability): boolean;
 }

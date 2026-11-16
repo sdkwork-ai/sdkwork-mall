@@ -13,6 +13,7 @@ import {
   type MpHost,
   type MpHostCapability,
   type MpLoginCodeProvider,
+  type MpSocket,
 } from "../index";
 import type { WxFeedbackApi } from "./feedback";
 import { createWeixinClipboard, createWeixinFeedback, readWeixinFeedbackApi } from "./feedback";
@@ -28,6 +29,8 @@ import type { WxNavigationApi } from "./navigation";
 import { createWeixinNavigation, readWeixinNavigationApi } from "./navigation";
 import type { WxPaymentApi } from "./payment";
 import { createWeixinPaymentBridge } from "./payment";
+import type { WxSocketApi } from "./socket";
+import { createWeixinSocket, readWeixinSocketApi } from "./socket";
 import type { WxStorageApi } from "./storage";
 import { createWeixinStorage, readWeixinStorageApi } from "./storage";
 
@@ -41,7 +44,8 @@ export interface WxGlobal
     Partial<WxPaymentApi>,
     Partial<WxRequestApi>,
     Partial<WxLifecycleApi>,
-    Partial<WxDeviceInfoApi> {}
+    Partial<WxDeviceInfoApi>,
+    Partial<WxSocketApi> {}
 
 /** Capabilities the WeChat profile implements today. */
 export const WEIXIN_HOST_CAPABILITIES: readonly MpHostCapability[] = [
@@ -53,6 +57,7 @@ export const WEIXIN_HOST_CAPABILITIES: readonly MpHostCapability[] = [
   "appLifecycle",
   "networkStatus",
   "deviceInfo",
+  "subscriptionsOrPush",
 ];
 
 export interface CreateWeixinHostOptions {
@@ -111,6 +116,14 @@ export function createWeixinHost(options: CreateWeixinHostOptions = {}): MpHost 
     capabilities.delete("paymentBridge");
   }
 
+  const socketApi = scope.wx;
+  const socket = socketApi && typeof socketApi.connectSocket === "function"
+    ? createWeixinSocket(socketApi as WxSocketApi)
+    : { connect: () => { throw createMpHostError("unsupported", "当前运行环境不支持 WebSocket"); } };
+  if (!(socketApi && typeof socketApi.connectSocket === "function")) {
+    capabilities.delete("subscriptionsOrPush");
+  }
+
   return {
     capabilities,
     hasCapability: (capability) => capabilities.has(capability),
@@ -123,9 +136,20 @@ export function createWeixinHost(options: CreateWeixinHostOptions = {}): MpHost 
     deviceInfo: createWeixinDeviceInfo(httpApi as unknown as WxDeviceInfoApi),
     media,
     payment,
+    socket: socket as MpSocket,
     http: createWeixinHttpClient(httpApi as WxRequestApi),
   };
 }
 
 /** Re-exported so a profile switch (`my`, `dd`, `tt`) has one capability vocabulary. */
 export { MP_HOST_CAPABILITIES };
+
+/** Socket adapter pieces, re-exported for tests and for a future profile. */
+export {
+  MP_SOCKET_CLOSED,
+  MP_SOCKET_CLOSING,
+  MP_SOCKET_CONNECTING,
+  MP_SOCKET_OPEN,
+  createWeixinSocket,
+  createWeixinSocketConnection,
+} from "./socket";

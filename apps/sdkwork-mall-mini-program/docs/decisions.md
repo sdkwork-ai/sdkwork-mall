@@ -165,3 +165,26 @@
   - Tests: new `mp-platform-host.test.ts` pins the facade projections (tone,
     boolean confirm, EventChannel pass-through, navigation fallbacks, empty
     gallery, media bytes, cancelled cashier, release channel).
+
+- 2026-11-16 (fourth pass: IM realtime + domain boundary). Two changes:
+  - **Domain boundary locked by a guard.** `tests/contract/verify-client-domain-boundaries.test.mjs`
+    proves the IAM mini-program carries no chat/messaging surface (no `/im/chat`,
+    `conversations.*`, `@sdkwork/im-mp*`, chat models or realtime plane), that the
+    mall account capability owns no messaging, that the mall messaging capability
+    owns no session/login, and that the app entry wires the two separately. The
+    IAM repo itself only contains the authored session module
+    (`@sdkwork/iam-mp-core/session-wechat`) — auth, no chat.
+  - **IM realtime plane landed.** `mp-host` gained `MpSocket` over
+    `wx.connectSocket` (WebSocket-subset: tracked `readyState`, buffered `open`
+    replay, `send`/`close`), with a scripted memory socket for tests.
+    `mp-core` adapts it to the IM SDK's `ImWebSocketFactory`, so
+    `@sdkwork/im-mp-chat`'s `chatRealtimeService` can go live. The messaging
+    capability exposes `subscribeConversationMessages` / `recoverRealtime` /
+    `isRealtimeConnected` / `disposeRealtime`; the chat page leases the open
+    conversation, debounces pushes into one re-read (250 ms), reconnects on
+    foreground and keeps a 15 s safety-net poll for offline.
+  - Tests: `mp-realtime.test.ts` pins the socket adaptation (open/message/close
+    transitions, early-open replay, send while connecting) and the facade
+    (lease + release, recover, unwired failure). 25 node guards, 49 vitest
+    contracts, 135 repo contract tests, both typechecks, composition, parity and
+    the i18n ratchet are green.

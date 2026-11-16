@@ -7,12 +7,16 @@
  * import path while the implementation lives in the package.
  */
 export {
+  disposeRealtime,
+  isRealtimeConnected,
   listChatConversations,
   listChatMessages,
   listNotices,
   markChatRead,
+  recoverRealtime,
   retrieveNotice,
   sendChatMessage,
+  subscribeConversationMessages,
 } from "@sdkwork/mall-mp-im/im-service";
 export type {
   MpChatConversation,

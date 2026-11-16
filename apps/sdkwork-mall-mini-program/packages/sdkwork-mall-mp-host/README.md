@@ -20,6 +20,7 @@ profile and an in-memory fake:
 | `MpHttpClient` | `wx.request` | the only platform network hop in the app |
 | `MpMediaPicker` | `wx.chooseMedia` / `previewImage` / `FileSystemManager` | bytes and preview only; Drive owns uploads |
 | `MpPaymentBridge` | `wx.requestPayment` | a dismissed cashier is `cancelled`, not a failure |
+| `MpSocket` | `wx.connectSocket` | tracks `readyState` itself and replays an early `open`, because the IM realtime SDK subscribes after the task exists |
 
 ## Usage
 

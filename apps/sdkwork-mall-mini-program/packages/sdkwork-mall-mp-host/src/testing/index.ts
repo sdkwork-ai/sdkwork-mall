@@ -13,8 +13,77 @@ import {
   type MpHostCapability,
   type MpHttpRequestOptions,
   type MpHttpResponse,
+  type MpSocket,
+  type MpSocketConnection,
   type MpStorage,
 } from "../index";
+
+/** A scripted socket the test can open, push into, and inspect. */
+export interface MemorySocket extends MpSocket {
+  /** Frames the SDK sent through the most recent connection. */
+  readonly sent: string[];
+  close(): void;
+  open(): void;
+  push(data: string): void;
+}
+
+export function createMemorySocket(): MemorySocket {
+  const sent: string[] = [];
+  let latest: {
+    emit: (type: "close" | "error" | "message" | "open", event: unknown) => void;
+    state: { value: number };
+  } | null = null;
+
+  const socket: MemorySocket = {
+    sent,
+    connect({ url }) {
+      void url;
+      const listeners = new Map<string, Array<(event: unknown) => void>>();
+      const state = { value: 0 };
+      latest = {
+        state,
+        emit(type, event) {
+          for (const handler of listeners.get(type) ?? []) {
+            handler(event);
+          }
+        },
+      };
+      const connection: MpSocketConnection = {
+        get readyState() {
+          return state.value;
+        },
+        addEventListener(type, handler) {
+          const list = listeners.get(type) ?? [];
+          list.push(handler);
+          listeners.set(type, list);
+        },
+        send(value) {
+          sent.push(value);
+        },
+        close() {
+          state.value = 3;
+        },
+      };
+      return connection;
+    },
+    open() {
+      if (latest) {
+        latest.state.value = 1;
+        latest.emit("open", { type: "open" });
+      }
+    },
+    push(data) {
+      latest?.emit("message", { data, type: "message" });
+    },
+    close() {
+      if (latest) {
+        latest.state.value = 3;
+        latest.emit("close", { code: 1000, reason: "", type: "close" });
+      }
+    },
+  };
+  return socket;
+}
 
 export interface MemoryHostRecorder {
   readonly clipboard: string[];
@@ -29,6 +98,8 @@ export interface CreateMemoryHostOptions {
   /** Reported by `deviceInfo.accountEnvVersion`; defaults to `develop`. */
   readonly accountEnvVersion?: string;
   readonly capabilities?: readonly MpHostCapability[];
+  /** Scripted socket; a fresh one is created when omitted. */
+  readonly socket?: MemorySocket;
   /** Key/value seed for `storage`. */
   readonly storage?: Record<string, string>;
   /** Scripted HTTP responses, matched in order. */
@@ -43,6 +114,7 @@ export interface CreateMemoryHostOptions {
 
 export interface MemoryHost extends MpHost {
   readonly recorder: MemoryHostRecorder;
+  readonly socket: MemorySocket;
 }
 
 export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryHost {
@@ -57,6 +129,7 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
   };
   const loginCodes = [...(options.loginCodes ?? ["test-js-code"])];
   const responses = [...(options.httpResponses ?? [])];
+  const socket = options.socket ?? createMemorySocket();
 
   const storage: MpStorage = {
     get: (key) => values.get(key) ?? null,
@@ -71,6 +144,7 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
   return {
     capabilities,
     recorder,
+    socket,
     hasCapability: (capability) => capabilities.has(capability),
     storage,
     // Tests can assert the release channel without a platform runtime.

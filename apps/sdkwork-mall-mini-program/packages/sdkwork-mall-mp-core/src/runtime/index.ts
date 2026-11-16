@@ -103,6 +103,7 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
   });
   const imChatClient = createMpImChatSdkClient({
     baseUrl: input.environment.imChatApiBaseUrl ?? input.environment.imAppApiBaseUrl ?? appApiBaseUrl,
+    socket: input.host.socket,
     tokenManager,
   });
   const authManager = createIamMpWechatSessionManager({

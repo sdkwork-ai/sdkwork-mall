@@ -14,9 +14,11 @@ import type { ImMpChatSdkPort } from "@sdkwork/im-mp-chat";
 import {
   createImMpChatConversationService,
   createImMpChatInboxService,
+  createImMpChatRealtimeService,
   createImMpNotificationsService,
   type ImMpChatConversationService,
   type ImMpChatInboxService,
+  type ImMpChatRealtimeService,
   type ImMpNotificationsService,
 } from "@sdkwork/im-mp-chat/services";
 import { type ImAppSdkClient, type ImChatSdkClient } from "@sdkwork/mall-mp-core";
@@ -56,6 +58,8 @@ export interface MpImServices {
   readonly conversation: ImMpChatConversationService;
   readonly inbox: ImMpChatInboxService;
   readonly notifications: ImMpNotificationsService;
+  /** Live message lease per conversation; falls back to polling when offline. */
+  readonly realtime: ImMpChatRealtimeService;
   /**
    * Signed-in IAM user id, used to tell a buyer's own bubble from the agent's.
    *
@@ -99,6 +103,7 @@ export function createMpImServices(
     notifications: createImMpNotificationsService(() => clients.imAppClient),
     inbox: createImMpChatInboxService(resolveChat),
     conversation: createImMpChatConversationService(resolveChat),
+    realtime: createImMpChatRealtimeService(resolveChat),
     resolveCurrentUserId: options.resolveCurrentUserId ?? (() => ""),
   };
 }
@@ -183,4 +188,39 @@ export async function markChatRead(conversationId: string): Promise<void> {
   // The IM service advances the per-principal read cursor and clears the
   // marked-unread flag; mall has no read state of its own.
   await requireServices().conversation.markConversationRead(conversationId);
+}
+
+/**
+ * Leases live messages for one conversation.
+ *
+ * The IM realtime service owns the socket, the subscription set and the
+ * reconnect backoff; mall only reacts to "something arrived" and re-reads the
+ * page, so a decoded wire payload never has to be mapped twice.
+ *
+ * @param conversationId - Open conversation.
+ * @param onMessage - Called for each delivered message.
+ * @returns The release function; call it from `onHide`/`onUnload`.
+ */
+export function subscribeConversationMessages(
+  conversationId: string,
+  onMessage: () => void,
+): () => void {
+  return requireServices().realtime.subscribeConversation(conversationId, () => {
+    onMessage();
+  });
+}
+
+/** Reconnects after the app returns to the foreground; no-op while connected. */
+export function recoverRealtime(): void {
+  requireServices().realtime.recover();
+}
+
+/** True while the IM realtime plane is connected. */
+export function isRealtimeConnected(): boolean {
+  return requireServices().realtime.isLiveConnected();
+}
+
+/** Tears the realtime plane down (logout / account switch). */
+export function disposeRealtime(): void {
+  requireServices().realtime.dispose();
 }

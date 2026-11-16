@@ -19,6 +19,7 @@
 import { createClient as createIamAppClient, type SdkworkAppClient as IamAppClient } from "@sdkwork/iam-app-sdk";
 import { createClient as createImAppClient, type SdkworkAppClient as ImAppClient } from "@sdkwork/im-app-sdk";
 import { ImSdkClient } from "@sdkwork/im-sdk";
+import type { MpSocket } from "@sdkwork/mall-mp-host";
 
 import type { MpTokenManager } from "../session";
 
@@ -40,6 +41,8 @@ export type ImChatSdkClient = ImSdkClient;
 export interface MpSdkClientOptions {
   /** App-api origin, e.g. `https://api.example.com/app/v3/api`. */
   readonly baseUrl: string;
+  /** Host realtime adapter; required for the chat plane to go live. */
+  readonly socket?: MpSocket;
   readonly tokenManager: MpTokenManager;
   readonly timeoutMs?: number;
 }
@@ -84,15 +87,29 @@ export function createMpImAppSdkClient(options: MpSdkClientOptions): ImAppSdkCli
  *
  * The generated IM runtime SDK is the only surface that exposes
  * `conversations.list/listMessages/postText/updateReadCursor`; the
- * `@sdkwork/im-mp-chat` services take it through a resolver. Realtime
- * (`connect`) needs a `wx.connectSocket` factory, which the mall chat page does
- * not use yet: reads and sends are HTTP on the same client.
+ * `@sdkwork/im-mp-chat` services take it through a resolver. When a host socket
+ * is available it is adapted to the SDK's `ImWebSocketFactory`, which enables the
+ * realtime plane; without one the client stays HTTP-only and the chat page keeps
+ * its polling fallback.
  */
 export function createMpImChatSdkClient(options: MpSdkClientOptions): ImChatSdkClient {
+  const socket = options.socket;
   return new ImSdkClient({
     apiBaseUrl: normalizeBaseUrl(options.baseUrl),
     platform: "mini-program",
     ...(options.timeoutMs !== undefined ? { timeout: options.timeoutMs } : {}),
     tokenManager: options.tokenManager,
+    ...(socket
+      ? {
+          // `MpSocketConnection` is the platform-neutral `WebSocket` subset the
+          // IM SDK's factory expects; the cast is the documented boundary.
+          webSocketFactory: (url: string, factoryOptions: { headers: Record<string, string>; protocols: string[] }) =>
+            socket.connect({
+              url,
+              header: factoryOptions.headers,
+              protocols: factoryOptions.protocols,
+            }),
+        }
+      : {}),
   });
 }

@@ -13,6 +13,18 @@ The domain services come from `@sdkwork/im-mp-chat/services`:
 | notice centre | `createImMpNotificationsService` | `@sdkwork/im-app-sdk` `notifications.*` |
 | conversation inbox | `createImMpChatInboxService` | `@sdkwork/im-sdk` `conversations.*` |
 | messages, send, read cursor | `createImMpChatConversationService` | `@sdkwork/im-sdk` `conversations.*` |
+| live messages | `createImMpChatRealtimeService` | `@sdkwork/im-sdk` `connect()` over the host socket |
+
+Realtime facade for pages:
+
+```ts
+const release = subscribeConversationMessages(conversationId, () => void refresh());
+recoverRealtime();   // app foreground after a background cycle
+release();           // onHide / onUnload
+```
+
+The page only re-reads the stream; it never maps a decoded wire payload, and the
+15 s safety-net poll stays for offline periods.
 
 This package only **projects** the IM domain types onto mall view models
 (`MpNotice`, `MpChatConversation`, `MpChatMessage`) and orders the chat stream
