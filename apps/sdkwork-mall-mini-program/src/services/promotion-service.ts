@@ -1,4 +1,12 @@
-import { request } from "./transport";
+/**
+ * Promotional offers and coupon actions.
+ *
+ * Authority: `TECH-BLOCK-INTEGRATION.md` (promotion row). Offers, claims and code
+ * redemptions belong to the mall commerce block
+ * (`runtime.commerceClient.promotions`); this module projects them and owns no
+ * wire path.
+ */
+import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
 export interface MpOffer {
   claimable: boolean;
@@ -9,13 +17,30 @@ export interface MpOffer {
   title: string;
 }
 
+function promotions() {
+  return getMallMpRuntime().commerceClient.promotions;
+}
+
+async function readCommerceData(call: Promise<{ data: Record<string, unknown> }>): Promise<Record<string, unknown>> {
+  const result = await call;
+  return (result?.data ?? {}) as Record<string, unknown>;
+}
+
+function readRows(record: Record<string, unknown>): Array<Record<string, unknown>> {
+  if (Array.isArray(record.items)) {
+    return record.items as Array<Record<string, unknown>>;
+  }
+  if (Array.isArray(record.content)) {
+    return record.content as Array<Record<string, unknown>>;
+  }
+  return [];
+}
+
 export async function listOffers(): Promise<MpOffer[]> {
-  const payload = await request({
-    path: "/promotions/offers",
-    query: { page: 1, page_size: 10, status: "active" },
-  });
-  const items = Array.isArray(payload.items) ? payload.items : [];
-  return items.map((item) => ({
+  const payload = await readCommerceData(
+    promotions().offers.list({ page: 1, pageSize: 10, status: "active" }),
+  );
+  return readRows(payload).map((item) => ({
     id: String(item.id ?? item.offerId ?? ""),
     title: String(item.title ?? item.name ?? "活动"),
     discountText: typeof item.discountText === "string" ? item.discountText : "",
@@ -26,9 +51,9 @@ export async function listOffers(): Promise<MpOffer[]> {
 }
 
 export async function claimCoupon(offerId: string): Promise<Record<string, unknown>> {
-  return request({ path: "/promotions/user_coupon_claims", method: "POST", body: { offerId } });
+  return readCommerceData(promotions().userCoupons.claims.create({ offerId }));
 }
 
 export async function redeemCouponCode(code: string): Promise<Record<string, unknown>> {
-  return request({ path: "/promotions/codes/redemptions", method: "POST", body: { code } });
+  return readCommerceData(promotions().codes.redemptions.create({ code }));
 }

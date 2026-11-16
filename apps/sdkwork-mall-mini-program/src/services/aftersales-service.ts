@@ -1,12 +1,13 @@
 /**
- * After-sales domain for the mini-program: request list, wire-contract
- * create, and revoke. The create body follows the commerce app-api contract
- * (`CreateAfterSalesRequest`): orderId, afterSalesType, reasonCode,
- * requestedAmount as a decimal string, currencyCode, and at least one order
- * item; amounts and per-item quantities come from the order snapshot, never
- * from user input.
+ * After-sales domain for the mini program.
+ *
+ * Authority: `TECH-BLOCK-INTEGRATION.md` (after-sales row). The request
+ * lifecycle, progress timeline and return shipment belong to the mall commerce
+ * block (`runtime.commerceClient.afterSales`); this module keeps the mall-owned
+ * wire bodies (`CreateAfterSalesRequest` fields are a commerce contract) and the
+ * presentation constants, and owns no endpoint.
  */
-import { request } from "./transport";
+import { createMpIdempotencyParams, getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
 export interface MpAfterSalesItemInput {
   orderItemId: string;
@@ -72,6 +73,32 @@ export const STATUS_LABEL_KEYS: Record<string, string> = {
   CANCELLED: "afterSales.status.cancelled",
 };
 
+function afterSales() {
+  return getMallMpRuntime().commerceClient.afterSales;
+}
+
+/**
+ * Reads the `data` payload of a commerce block response.
+ *
+ * The after-sales group wraps results in its own `{ code, data }` response, while
+ * a few operations return the payload directly; both shapes are accepted.
+ */
+async function readCommerceData(call: Promise<unknown>): Promise<Record<string, unknown>> {
+  const result = (await call) as { data?: unknown } | null | undefined;
+  const data = result && typeof result === "object" ? result.data : undefined;
+  return (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
+}
+
+function readRows(record: Record<string, unknown>): Array<Record<string, unknown>> {
+  if (Array.isArray(record.items)) {
+    return record.items as Array<Record<string, unknown>>;
+  }
+  if (Array.isArray(record.content)) {
+    return record.content as Array<Record<string, unknown>>;
+  }
+  return [];
+}
+
 export function buildCreateAfterSalesBody(input: MpAfterSalesCreateInput): Record<string, unknown> {
   if (!Array.isArray(input.items) || input.items.length === 0) {
     throw new Error("订单没有可售后的商品行");
@@ -108,12 +135,8 @@ export function buildCreateAfterSalesBody(input: MpAfterSalesCreateInput): Recor
 }
 
 export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSalesRow[]> {
-  const payload = await request({
-    path: "/after_sales/requests",
-    query: { page, page_size: pageSize },
-  });
-  const rows = Array.isArray(payload.items) ? payload.items : [];
-  return rows.map((item) => {
+  const payload = await readCommerceData(afterSales().requests.list({ page, pageSize }));
+  return readRows(payload).map((item) => {
     const status = String(item.status ?? "").toUpperCase();
     const type = String(item.afterSalesType ?? item.type ?? "refund").toLowerCase();
     return {
@@ -136,15 +159,13 @@ export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSale
 
 export async function createRequest(input: MpAfterSalesCreateInput): Promise<Record<string, unknown>> {
   const body = buildCreateAfterSalesBody(input);
-  return request({ path: "/after_sales/requests", method: "POST", body });
+  return readCommerceData(
+    afterSales().requests.create(body as never, createMpIdempotencyParams()),
+  );
 }
 
 export async function cancelRequest(requestId: string): Promise<Record<string, unknown>> {
-  return request({
-    path: `/after_sales/requests/${requestId}`,
-    method: "PATCH",
-    body: { status: "CANCELLED" },
-  });
+  return readCommerceData(afterSales().requests.update(requestId, { status: "CANCELLED" }));
 }
 
 /** Carriers offered when the buyer ships the goods back. */
@@ -156,10 +177,6 @@ export const RETURN_CARRIERS = [
   { code: "JD", nameKey: "afterSales.carrier.jd" },
   { code: "OTHER", nameKey: "afterSales.carrier.other" },
 ] as const;
-
-function createIdempotencyKey(): string {
-  return `as-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
 
 export interface MpReturnShipmentInput {
   carrierCode: string;
@@ -176,16 +193,12 @@ export interface MpAfterSalesEvent {
 
 /**
  * Loads the progress timeline of one after-sales request
- * (`GET /after_sales/requests/{id}/events`). PC has shown this since the process
- * screen landed; the mobile roots had no way to see refund progress.
+ * (`afterSales.events`). PC has shown this since the process screen landed; the
+ * mobile roots had no way to see refund progress.
  */
 export async function listAfterSalesEvents(requestId: string): Promise<MpAfterSalesEvent[]> {
-  const payload = await request({
-    path: `/after_sales/requests/${requestId}/events`,
-    query: { page: 1, page_size: 20 },
-  });
-  const rows = Array.isArray(payload.items) ? payload.items : [];
-  return rows.map((item) => ({
+  const payload = await readCommerceData(afterSales().events.list(requestId, { page: 1, pageSize: 20 }));
+  return readRows(payload).map((item) => ({
     action: String(item.eventType ?? item.action ?? item.toStatus ?? "event"),
     at: String(item.createdAt ?? ""),
   }));
@@ -201,28 +214,16 @@ export function buildReturnShipmentBody(input: MpReturnShipmentInput): Record<st
   };
 }
 
-/** Full request descriptor, exported so the idempotency header is testable. */
-export function buildReturnShipmentRequest(
-  input: MpReturnShipmentInput,
-  idempotencyKey: string = createIdempotencyKey(),
-): {
-  body: Record<string, unknown>;
-  headers: Record<string, string>;
-  method: "POST";
-  path: string;
-} {
-  return {
-    body: buildReturnShipmentBody(input),
-    headers: { "Idempotency-Key": idempotencyKey },
-    method: "POST",
-    path: `/after_sales/requests/${input.requestId}/return_shipments`,
-  };
-}
-
 /**
  * Submits the buyer's return tracking number
- * (`POST /after_sales/requests/{id}/return_shipments`), idempotent per submit.
+ * (`afterSales.returnShipments`), idempotent per submit.
  */
 export async function createReturnShipment(input: MpReturnShipmentInput): Promise<Record<string, unknown>> {
-  return request(buildReturnShipmentRequest(input));
+  return readCommerceData(
+    afterSales().returnShipments.create(
+      input.requestId,
+      buildReturnShipmentBody(input) as never,
+      createMpIdempotencyParams(),
+    ),
+  );
 }

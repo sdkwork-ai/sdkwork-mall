@@ -59,9 +59,8 @@ manager) and exposes them as `runtime.commerceClient` and `runtime.orderClient`.
    `order-service` project the blocks; both guards
    (`verify-mp-cart-block-integration`, `verify-mp-order-block-integration`)
    reject a reintroduced wire path, and the money-path body builder stays pure.
-4. **Next — promotion + addresses + after-sales + invoices + wallet +
-   membership + shops + partner.** Each migration deletes one raw-request service
-   and adds one block-ownership guard.
+4. **Next — wallet/membership (account-service) and partner.** Each migration
+   deletes one raw-request service and adds one block-ownership guard.
 5. **Finally — retire `src/services/transport.ts`.** Raw request remains only for
    surfaces with no composed block (Drive upload/download and the app-api
    envelope helper those use).

@@ -346,3 +346,29 @@
   endpoint or a re-imported transport seam.
   Regression: 25 node guards, 64 vitest contracts, 161/161 contract tests,
   composition and parity green.
+
+- 2026-11-16 (eleventh pass: promotion, addresses, invoices, shops, after-sales on
+  their blocks). Five more services stopped owning endpoints:
+  - `promotion-service`: offers list, coupon claim and code redemption →
+    `promotions.offers/userCoupons.claims/codes.redemptions`.
+  - `address-service`: address book CRUD and default selection →
+    `addresses.*` / `addresses.defaultSelection`.
+  - `invoice-service`: buyer invoices → `invoices.mine.list` / `invoices.create`.
+  - `marketing-service`: featured shops, shop detail + shop products and activity
+    offers → `shops.list/retrieve`, `catalog.products.list`, `promotions.offers`.
+  - `aftersales-service`: requests list/create/cancel, progress timeline and the
+    buyer return shipment → `afterSales.requests/events/returnShipments`, with the
+    idempotency key from the core seam helper; the mall keeps the commerce create
+    body and the presentation constants.
+  - Guards: `verify-mp-marketing-block-integration` (six assertions) rejects a
+    reintroduced wire path, a re-imported raw transport and an after-sales command
+    without an idempotency key. The after-sales depth contract now tracks the
+    block call instead of the endpoint literal.
+  - Tests: `mp-marketing-block.test.ts` pins offers/coupons, address book,
+    invoices/shops/activities and the whole after-sales lifecycle against fake
+    blocks with zero HTTP hops.
+  - Regression: 25 node guards, 67 vitest contracts, 167/167 contract tests,
+    composition, parity, catalogues, default data and the i18n ratchet green.
+  - External state: the repo-wide `typecheck` is red only on the H5 order page
+    (`apps/sdkwork-mall-h5/.../OrderPage.tsx`), which a concurrent brick-migration
+    edit is mid-way through; no mini-program file participates.

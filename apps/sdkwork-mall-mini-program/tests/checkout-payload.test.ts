@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { buildCheckoutOrderBody } from "../src/services/cart-service";
 import {
   buildReturnShipmentBody,
-  buildReturnShipmentRequest,
   RETURN_CARRIERS,
 } from "../src/services/aftersales-service";
 
@@ -95,16 +94,6 @@ describe("mini-program return-shipment payload", () => {
     });
   });
 
-  it("posts to the request-scoped path with an idempotency key", () => {
-    const request = buildReturnShipmentRequest(
-      { carrierCode: "ZTO", requestId: "as-42", trackingNo: "ZT1" },
-      "key-1",
-    );
-
-    expect(request.path).toBe("/after_sales/requests/as-42/return_shipments");
-    expect(request.method).toBe("POST");
-    expect(request.headers).toEqual({ "Idempotency-Key": "key-1" });
-  });
 
   it("offers the buyer a carrier catalogue", () => {
     expect(RETURN_CARRIERS.map((carrier) => carrier.code)).toContain("SF");

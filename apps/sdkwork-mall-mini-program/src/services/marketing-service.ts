@@ -1,12 +1,12 @@
 /**
  * Marketing surfaces: shops and promotional activities.
  *
- * Wire contract: `GET /shops/{shopId}` (shop detail), `GET /catalog/products`
- * filtered by `shop_id` (shop products), `GET /promotions/offers` with
- * `status=active` (activity list) and `GET /promotions/offers/{offerId}`
- * (activity detail).
+ * Authority: `TECH-BLOCK-INTEGRATION.md` (shops / promotion rows). Shop listing,
+ * shop detail, shop products and activity offers belong to the mall commerce
+ * block (`runtime.commerceClient.shops`, `.catalog`, `.promotions`); this module
+ * projects them and owns no wire path.
  */
-import { request } from "./transport";
+import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 import { asNumber, asRecordList, asString, type MpRecord } from "../types/common";
 
 export interface MpShopSummary {
@@ -52,6 +52,24 @@ const ACTIVITY_TYPE_LABELS: Record<string, string> = {
   "quantity-tier": "满量会场",
 };
 
+function commerce() {
+  return getMallMpRuntime().commerceClient;
+}
+
+/**
+ * Reads one payload out of the commerce block.
+ *
+ * `CommerceApiResult` wraps every payload in `{ code, message, requestId, data }`;
+ * the commerce `shops` group returns its typed response directly, so both shapes
+ * are accepted here.
+ */
+async function readCommerceData<T extends Record<string, unknown>>(call: Promise<T | { data: T }>): Promise<T> {
+  const result = (await call) as T | { data: T };
+  return (result && typeof result === "object" && "data" in result && result.data && typeof result.data === "object"
+    ? result.data
+    : result) as T;
+}
+
 function readShopSummary(item: MpRecord): MpShopSummary {
   return {
     id: asString(item, ["id", "shopId"]),
@@ -94,22 +112,21 @@ function readActivity(item: MpRecord): MpActivity {
  * four, fail-soft because the floor is an enrichment.
  */
 export async function listShops(limit = 4): Promise<MpShopSummary[]> {
-  const payload = await request({
-    path: "/shops",
-    query: { page: 1, page_size: limit, status: "active" },
-  }).catch(() => ({}) as MpRecord);
+  const payload = await readCommerceData(
+    commerce().shops.list({ page: 1, pageSize: limit, operationStatus: "active" }) as unknown as Promise<Record<string, unknown>>,
+  ).catch(() => ({}) as MpRecord);
   return asRecordList(payload.items)
     .map(readShopSummary)
     .filter((shop) => shop.id)
     .slice(0, limit);
 }
 
-export async function retrieveShop(shopId: string): Promise<MpShopDetail | null> {  const [shop, productsPayload] = await Promise.all([
-    request({ path: `/shops/${shopId}` }).catch(() => ({}) as MpRecord),
-    request({
-      path: "/catalog/products",
-      query: { page: 1, page_size: 20, shop_id: shopId },
-    }).catch(() => ({}) as MpRecord),
+export async function retrieveShop(shopId: string): Promise<MpShopDetail | null> {
+  const [shop, productsPayload] = await Promise.all([
+    readCommerceData(commerce().shops.retrieve(shopId) as unknown as Promise<Record<string, unknown>>).catch(() => ({}) as MpRecord),
+    readCommerceData(
+      commerce().catalog.products.list({ page: 1, pageSize: 20, shopId }) as unknown as Promise<Record<string, unknown>>,
+    ).catch(() => ({}) as MpRecord),
   ]);
   if (!asString(shop, ["id", "shopId"])) {
     return null;
@@ -127,10 +144,9 @@ export async function retrieveShop(shopId: string): Promise<MpShopDetail | null>
 }
 
 export async function listActivities(): Promise<MpActivity[]> {
-  const payload = await request({
-    path: "/promotions/offers",
-    query: { status: "active", page: 1, page_size: 20 },
-  });
+  const payload = await readCommerceData(
+    commerce().promotions.offers.list({ status: "active", page: 1, pageSize: 20 }) as unknown as Promise<Record<string, unknown>>,
+  );
   return asRecordList(payload.items)
     .map(readActivity)
     .filter((activity) => activity.id);
@@ -139,7 +155,9 @@ export async function listActivities(): Promise<MpActivity[]> {
 export async function retrieveActivity(eventId: string): Promise<MpActivity | null> {
   // A failed read must stay distinguishable from "no such activity": the page
   // shows a retry for the first and a terminal empty state for the second.
-  const record = await request({ path: `/promotions/offers/${eventId}` });
+  const record = await readCommerceData(
+    commerce().promotions.offers.retrieve(eventId) as unknown as Promise<Record<string, unknown>>,
+  );
   if (!asString(record, ["id", "offerId", "activityId"])) {
     return null;
   }

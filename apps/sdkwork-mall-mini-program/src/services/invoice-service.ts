@@ -1,11 +1,13 @@
 /**
- * Buyer invoices (`/invoices` app-api surface).
+ * Buyer invoices.
  *
- * `GET /invoices/mine` returns the paged `data.items` envelope; create posts
- * the invoice application command and mirrors the H5/PC field contract
- * (`title`, `titleType`, `taxNumber`, `email`, `orderId`).
+ * Authority: `TECH-BLOCK-INTEGRATION.md` (invoices row). Invoice listing and
+ * application belong to the mall commerce block
+ * (`runtime.commerceClient.invoices`); the mall keeps the view model and the
+ * H5/PC field contract (`title`, `titleType`, `taxNumber`, `email`, `orderId`).
  */
-import { request } from "./transport";
+import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
+
 import { asNumber, asRecordList, asString, type MpRecord } from "../types/common";
 
 export interface MpInvoice {
@@ -24,11 +26,17 @@ export interface MpInvoiceCreateInput {
   orderId?: string;
 }
 
+function invoices() {
+  return getMallMpRuntime().commerceClient.invoices;
+}
+
+async function readCommerceData(call: Promise<{ data: Record<string, unknown> }>): Promise<Record<string, unknown>> {
+  const result = await call;
+  return (result?.data ?? {}) as Record<string, unknown>;
+}
+
 export async function listInvoices(): Promise<MpInvoice[]> {
-  const payload = await request({
-    path: "/invoices/mine",
-    query: { page: 1, page_size: 50 },
-  });
+  const payload = await readCommerceData(invoices().mine.list({ page: 1, pageSize: 50 }));
   return asRecordList(payload.items).map((row: MpRecord) => ({
     id: asString(row, ["id", "invoiceId"]),
     title: asString(row, ["title", "invoiceTitle", "header"], "发票"),
@@ -39,15 +47,11 @@ export async function listInvoices(): Promise<MpInvoice[]> {
 }
 
 export async function createInvoice(input: MpInvoiceCreateInput): Promise<MpRecord> {
-  return request({
-    path: "/invoices",
-    method: "POST",
-    body: {
-      title: input.title,
-      titleType: input.titleType,
-      taxNumber: input.taxNumber,
-      email: input.email,
-      orderId: input.orderId,
-    },
-  });
+  return readCommerceData(invoices().create({
+    title: input.title,
+    titleType: input.titleType,
+    taxNumber: input.taxNumber,
+    email: input.email,
+    orderId: input.orderId,
+  }));
 }

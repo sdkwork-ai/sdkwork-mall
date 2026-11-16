@@ -46,7 +46,9 @@ const ROOTS = [
   {
     name: "miniProgram",
     service: "apps/sdkwork-mall-mini-program/src/services/aftersales-service.ts",
-    servicePatterns: ["/return_shipments", "Idempotency-Key", 'status === "APPROVED"'],
+    // The mini program reaches the return-shipment command through the commerce
+    // block; the idempotency key comes from the core seam helper.
+    servicePatterns: ["afterSales().returnShipments.create(", "createMpIdempotencyParams", 'status === "APPROVED"'],
     page: "apps/sdkwork-mall-mini-program/src/pages/aftersales/index.ts",
     pagePatterns: ["submitReturnShipment", "createReturnShipment"],
   },
@@ -107,7 +109,7 @@ const TIMELINE_ROOTS = [
   {
     name: "miniProgram",
     service: "apps/sdkwork-mall-mini-program/src/services/aftersales-service.ts",
-    servicePatterns: ["listAfterSalesEvents", "/events"],
+    servicePatterns: ["listAfterSalesEvents", "afterSales().events.list("],
     page: "apps/sdkwork-mall-mini-program/src/pages/aftersales/index.ts",
     pagePatterns: ["toggleProgress", "progressEvents"],
   },
