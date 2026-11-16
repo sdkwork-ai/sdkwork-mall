@@ -483,3 +483,26 @@
   - Operator action required once: clear the dev-tool cache and recompile, or fully
     quit and reopen the project, so the stale index is dropped.
   - Regression: 30 node guards, 69 vitest contracts, mini typecheck green.
+
+- 2026-11-16 (seventeenth pass: the dev tool now loads a bundled package). The
+  launch error survived both the source fix and the loader shim, which proved the
+  tool was executing its last successful bundle: the TypeScript plugin cannot
+  compile SDKWork workspace packages whose `exports` point at TS sources outside
+  the project root, so every compile since the integration silently fell back.
+  - Added `scripts/build-miniprogram.mjs` (esbuild): bundles `src/app.ts` plus one
+    entry per `app.json` page into `dist/` as CommonJS (ES2020, minified), copies
+    WXML/WXSS/JSON/images, and stubs Node-only SDK transports (`node:net`,
+    `node:dgram`, ...) to an empty module so dead branches stay loadable.
+  - `project.config.json` points `miniprogramRoot` at `dist/` and disables the
+    TypeScript compiler plugin; `pnpm build` / `build:standalone` / `build:cloud`
+    now materialize the env **and** bundle, with `build:mp:watch` for iteration.
+  - Result: `dist/app.js` contains no `require(...)` at all (fully bundled, no
+    `runtime-env.json`, no Node built-ins): 37 entries, 8.1 MB total, ~1.7 MB main
+    package (app + five tab pages + assets) which is inside the 2 MB main-package
+    limit; the remaining pages fit the 20 MB total including subpackages.
+  - Guard: the completeness suite now asserts the dev tool runs `dist/`, the build
+    scripts bundle, and every `app.json` page becomes an entry.
+  - Regression: 31 node guards, 69 vitest contracts, typecheck, composition and
+    parity green; 183/190 contract tests with the seven failures all inside the
+    concurrent H5 brick migration (checkout brick, H5 route registry, gift-card
+    copy, order paymentUrl, H5 i18n).

@@ -73,7 +73,7 @@
     "sdkClients": [],
     "events": [],
     "configKeys": [
-      "src/runtime-env.json"
+      "src/bootstrap/runtime-env.generated.ts"
     ],
     "routeManifest": null,
     "routeRegistry": "src/app.json",

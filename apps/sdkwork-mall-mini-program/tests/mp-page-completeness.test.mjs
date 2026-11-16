@@ -93,6 +93,27 @@ test("every template event handler exists on its page", () => {
   assert.deepEqual(problems, [], "a template must not call an undeclared handler");
 });
 
+test("the dev tool runs the bundled package, not TypeScript sources", () => {
+  // The WeChat dev tool cannot compile workspace TypeScript packages that live
+  // outside the project root; when it fails it keeps the last successful package
+  // (which is how a stale `app.ts` kept requiring a JSON module). The project
+  // therefore points at `dist/`, produced by `scripts/build-miniprogram.mjs`.
+  const projectConfig = JSON.parse(read(path.join(appRoot, "project.config.json")));
+  assert.equal(projectConfig.miniprogramRoot, "dist/");
+  assert.deepEqual(projectConfig.setting.useCompilerPlugins, [], "no TS plugin runs over the built package");
+
+  const packageJson = JSON.parse(read(path.join(appRoot, "package.json")));
+  assert.ok(packageJson.scripts["build:mp"], "a build:mp script must produce dist/");
+  assert.match(packageJson.scripts.build, /build-miniprogram\.mjs/u, "the default build must bundle");
+  assert.match(packageJson.scripts["build:standalone"], /build-miniprogram\.mjs/u);
+  assert.match(packageJson.scripts["build:cloud"], /build-miniprogram\.mjs/u);
+
+  const bundler = read(path.join(appRoot, "scripts/build-miniprogram.mjs"));
+  assert.match(bundler, /appJson\.pages\.map/u, "every page declared in app.json becomes an entry");
+  assert.match(bundler, /format: "cjs"/u);
+  assert.match(bundler, /nodeBuiltinStub/u, "Node-only SDK transports are stubbed, not required at runtime");
+});
+
 test("the loader-compatibility env shim mirrors the generated module", () => {
   // The WeChat compiler derives the module id `runtime-env.json.js` from a JSON
   // import. An older compiled bundle that still requires it must resolve to the

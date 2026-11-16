@@ -1,13 +1,11 @@
 {
-  "miniprogramRoot": "src/",
+  "miniprogramRoot": "dist/",
   "compileType": "miniprogram",
   "appid": "wxceca927f6ff4957f",
   "projectname": "sdkwork-mall-mini-program",
   "setting": {
     "es6": true,
-    "useCompilerPlugins": [
-      "typescript"
-    ],
+    "useCompilerPlugins": [],
     "minified": true,
     "urlCheck": false,
     "postcss": false,
