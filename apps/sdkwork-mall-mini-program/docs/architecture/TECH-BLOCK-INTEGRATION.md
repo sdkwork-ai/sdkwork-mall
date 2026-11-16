@@ -60,9 +60,11 @@ manager) and exposes them as `runtime.commerceClient` and `runtime.orderClient`.
    (`verify-mp-cart-block-integration`, `verify-mp-order-block-integration`)
    reject a reintroduced wire path, and the money-path body builder stays pure.
 4. **Next — partner.** `@sdkwork/partner-app-sdk` owns the partner join/centre\n   surface; migrate `partner-service.ts` and add its guard.
-5. **Finally — retire `src/services/transport.ts`.** Raw request remains only for
-   surfaces with no composed block (Drive upload/download and the app-api
-   envelope helper those use).
+5. **Done — transport retired to the storage boundary.** `src/services/transport.ts`
+   now backs only `drive-upload-service` and `drive-download-service` (presigned
+   storage hops + the app-api envelope); `page-info` reads its payload
+   structurally instead of importing the seam. No storefront surface owns a wire
+   path any more.
 
 ## Guard rules (cumulative)
 

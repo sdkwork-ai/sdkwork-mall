@@ -33,6 +33,9 @@ catalogs:
     lucide-react:
       specifier: ^1.31.0
       version: 1.42.0
+    motion:
+      specifier: ^12.38.0
+      version: 12.43.0
     qrcode:
       specifier: ^1.5.4
       version: 1.5.4
@@ -1452,6 +1455,9 @@ importers:
       '@sdkwork/order-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-order/sdks/sdkwork-order-app-sdk/sdkwork-order-app-sdk-typescript
+      '@sdkwork/order-mobile-react-orders':
+        specifier: workspace:*
+        version: link:../../../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-mobile-react-orders
       '@sdkwork/order-service':
         specifier: workspace:*
         version: link:../../../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-service
@@ -1476,6 +1482,9 @@ importers:
       '@sdkwork/sdk-common':
         specifier: workspace:*
         version: link:../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript
+      '@sdkwork/ui-mobile-react':
+        specifier: workspace:*
+        version: link:../../../sdkwork-ui/sdkwork-ui-mobile-react
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
@@ -1485,6 +1494,9 @@ importers:
       lucide-react:
         specifier: 'catalog:'
         version: 1.42.0(react@19.2.8)
+      motion:
+        specifier: 'catalog:'
+        version: 12.43.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: 'catalog:'
         version: 19.2.8
@@ -1756,6 +1768,9 @@ importers:
       '@sdkwork/order-app-sdk':
         specifier: workspace:*
         version: link:../../../../../sdkwork-order/sdks/sdkwork-order-app-sdk/sdkwork-order-app-sdk-typescript
+      '@sdkwork/partner-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-partner/sdks/sdkwork-partner-app-sdk/sdkwork-partner-app-sdk-typescript
       '@sdkwork/utils':
         specifier: workspace:*
         version: link:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript

@@ -26,11 +26,13 @@ import {
   createMpImAppSdkClient,
   createMpImChatSdkClient,
   createMpOrderAppSdkClient,
+  createMpPartnerAppSdkClient,
   type IamAppSdkClient,
   type ImAppSdkClient,
   type ImChatSdkClient,
   type MpCommerceAppSdkClient,
   type MpOrderAppSdkClient,
+  type MpPartnerAppSdkClient,
 } from "../sdk";
 import {
   createIamMpWechatSessionManager,
@@ -67,6 +69,8 @@ export interface MallMpRuntime {
   readonly imChatClient: ImChatSdkClient;
   /** Order block (orders, cancellations, receipts, payments, shipments). */
   readonly orderClient: MpOrderAppSdkClient;
+  /** Partner block (join programme, partner centre). */
+  readonly partnerClient: MpPartnerAppSdkClient;
   readonly request: MpRequestClient;
   readonly session: MpSessionStore;
   readonly tokenManager: MpTokenManager;
@@ -112,6 +116,7 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
   const iamClient = createMpIamAppSdkClient({ baseUrl: appApiBaseUrl, tokenManager });
   const commerceClient = createMpCommerceAppSdkClient({ baseUrl: appApiBaseUrl, tokenManager });
   const orderClient = createMpOrderAppSdkClient({ baseUrl: appApiBaseUrl, tokenManager });
+  const partnerClient = createMpPartnerAppSdkClient({ baseUrl: appApiBaseUrl, tokenManager });
   const imAppClient = createMpImAppSdkClient({
     baseUrl: input.environment.imAppApiBaseUrl ?? appApiBaseUrl,
     tokenManager,
@@ -136,6 +141,7 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
     iamClient,
     commerceClient,
     orderClient,
+    partnerClient,
     imAppClient,
     imChatClient,
     authManager,

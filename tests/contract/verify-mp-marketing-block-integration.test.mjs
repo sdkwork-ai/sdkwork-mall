@@ -96,6 +96,23 @@ const CASES = [
     forbidden: [/path:\s*"\/(?:wallet|memberships)/u, /\/wallet\/(?:accounts|ledger_entries|points)/u],
     label: "wallet/membership",
   },
+  {
+    file: "src/services/partner-service.ts",
+    calls: [
+      "partner\\(\\)\\.join\\.partnerJoin\\.retrieve",
+      "partner\\(\\)\\.join\\.partnerJoin\\.application\\.list",
+      "partner\\(\\)\\.join\\.partnerJoin\\.application\\.create",
+      "partner\\(\\)\\.join\\.partnerJoin\\.application\\.cancel",
+      "partner\\(\\)\\.join\\.partnerJoin\\.inviteCode\\.retrieve",
+      "partner\\(\\)\\.center\\.partnerCenter\\.retrieve",
+      "partner\\(\\)\\.center\\.partnerCenter\\.team\\.list",
+      "partner\\(\\)\\.center\\.partnerCenter\\.commissionRecords\\.list",
+      "partner\\(\\)\\.center\\.partnerCenter\\.withdrawals\\.list",
+      "partner\\(\\)\\.center\\.partnerCenter\\.withdrawals\\.create",
+    ],
+    forbidden: [/path:\s*"\/partner/u, /\/partner_join|\/partner_center\//u],
+    label: "partner",
+  },
 ];
 
 for (const entry of CASES) {

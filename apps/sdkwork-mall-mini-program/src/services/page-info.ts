@@ -10,7 +10,11 @@
  * Cursor lists carry `hasMore`/`nextCursor` and no `totalItems`; the reader
  * therefore prefers `hasMore`, then `totalPages`, then the item count.
  */
-import type { MpPayload } from "./transport";
+/** Structural view of a list payload; the block-owned services pass their `data`. */
+export interface MpPagePayload {
+  readonly pageInfo?: unknown;
+  readonly [key: string]: unknown;
+}
 
 export interface MpPageInfo {
   /** True when the service reported more pages, or the count proves it. */
@@ -41,7 +45,7 @@ function readNumber(source: Record<string, unknown>, key: string): number | null
  * @param requestedPage - Page number the caller asked for (offset mode only).
  */
 export function readPageInfo(
-  payload: MpPayload | undefined,
+  payload: MpPagePayload | undefined,
   itemCount: number,
   requestedPage = 1,
 ): MpPageInfo {

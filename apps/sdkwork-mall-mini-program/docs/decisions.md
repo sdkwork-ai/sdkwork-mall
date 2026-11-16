@@ -387,3 +387,23 @@
   - Regression: 25 node guards, 67 vitest contracts, 169/169 contract tests,
     composition, parity, catalogues, default data and the i18n ratchet green.
     (Repo-wide typecheck is still red only on the concurrent H5 OrderPage edit.)
+
+- 2026-11-16 (thirteenth pass: partner, and the transport seam retires to storage).
+  - `partner-service.ts` projects `@sdkwork/partner-app-sdk` through the runtime
+    (`partnerClient`): join programme, applications list/create/cancel, invite-code
+    validation, partner centre, team, commission records and withdrawals. The
+    capability keeps its validators, presentation state machine and view models;
+    ten hand-written `/partner_join` and `/partner_center` paths are gone.
+  - `page-info.ts` now reads list payloads structurally instead of importing the
+    raw transport seam, so `src/services/transport.ts` backs only the Drive
+    upload/download envelope — the building-block migration's stated end state.
+  - Guards: the marketing-block suite gained a partner case; every migrated
+    surface (auth, order, cart, catalog, promotion, addresses, invoices, shops,
+    after-sales, wallet/membership, partner) now fails the build if a wire path
+    returns or the raw transport is re-imported.
+  - Regression: 25 node guards, 67 vitest contracts, both typechecks (49
+    packages, 0 failed), composition, parity, catalogues, default data and the
+    i18n ratchet green; 168/170 contract tests pass. The two failures are H5-only
+    and belong to the concurrent H5 brick migration
+    (`verify-h5-i18n-runtime` on the in-flight `OrderDetailPage`, and the H5 pay
+    action redirect).

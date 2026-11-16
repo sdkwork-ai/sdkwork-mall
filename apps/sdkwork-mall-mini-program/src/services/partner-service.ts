@@ -9,7 +9,11 @@
  * SDK package, so this adapter re-implements the boundary mapping. It must stay
  * field-compatible with `@sdkwork/mall-partner-service`.
  */
-import { request } from "./transport";
+import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
+
+function partner() {
+  return getMallMpRuntime().partnerClient;
+}
 import { asNumber, asRecord, asRecordList, asString, type MpRecord } from "../types/common";
 
 export type MpPartnerApplicantType = "INDIVIDUAL" | "ORGANIZATION";
@@ -110,8 +114,8 @@ function readApplication(item: MpRecord): MpPartnerApplication {
 }
 
 export async function retrievePartnerProgram(): Promise<MpPartnerProgram> {
-  const payload = await request({ path: "/partner_join" });
-  const item = asRecord(payload.item);
+  const payload = await partner().join.partnerJoin.retrieve();
+  const item = asRecord(payload);
   const rules = asRecord(item.rules);
   return {
     levels: asRecordList(item.levels).map(readLevel),
@@ -128,18 +132,14 @@ export async function listMyPartnerApplications(
   page = 1,
   pageSize = 20,
 ): Promise<MpPartnerApplication[]> {
-  const payload = await request({
-    path: "/partner_join/applications/mine",
-    query: { page, page_size: pageSize },
-  });
+  const payload = asRecord(await partner().join.partnerJoin.application.list({ page, pageSize }) as unknown);
   return asRecordList(payload.items).map(readApplication);
 }
 
 export async function submitPartnerApplication(
   draft: MpPartnerApplicationDraft,
 ): Promise<MpPartnerApplication> {
-  const payload = await request({
-    body: {
+  const payload = asRecord(await partner().join.partnerJoin.application.create({
       applicantType: draft.applicantType,
       businessIntro: draft.businessIntro || undefined,
       contactEmail: draft.contactEmail,
@@ -148,30 +148,22 @@ export async function submitPartnerApplication(
       inviteCode: draft.inviteCode || undefined,
       subjectName: draft.subjectName || undefined,
       targetLevelNo: draft.targetLevelNo,
-    },
-    method: "POST",
-    path: "/partner_join/applications",
-  });
-  return readApplication(asRecord(payload.item));
+    }) as unknown);
+  return readApplication(asRecord(payload));
 }
 
 export async function cancelPartnerApplication(
   applicationId: string,
 ): Promise<MpPartnerApplication> {
-  const payload = await request({
-    method: "POST",
-    path: `/partner_join/applications/${encodeURIComponent(applicationId)}/cancel`,
-  });
-  return readApplication(asRecord(payload.item));
+  const payload = asRecord(await partner().join.partnerJoin.application.cancel(applicationId) as unknown);
+  return readApplication(asRecord(payload));
 }
 
 export async function validatePartnerInviteCode(
   code: string,
 ): Promise<MpPartnerInvitePreview> {
-  const payload = await request({
-    path: `/partner_join/invite_codes/${encodeURIComponent(code)}`,
-  });
-  const item = asRecord(payload.item);
+  const payload = asRecord(await partner().join.partnerJoin.inviteCode.retrieve(code) as unknown);
+  const item = asRecord(payload);
   return {
     code: asString(item, ["code"], code),
     levelNo: asNumber(item, ["levelNo"]),
@@ -390,18 +382,15 @@ function readPage<T>(
 
 /** The signed-in user's partner centre; rejects when the user is not a partner. */
 export async function retrievePartnerCenter(): Promise<MpPartnerCenter> {
-  const payload = await request({ path: "/partner_center" });
-  return readCenter(asRecord(payload.item));
+  const payload = asRecord(await partner().center.partnerCenter.retrieve() as unknown);
+  return readCenter(asRecord(payload));
 }
 
 export async function listPartnerTeam(
   page = 1,
   pageSize = 10,
 ): Promise<MpPartnerPage<MpPartnerTeamMember>> {
-  const payload = await request({
-    path: "/partner_center/team",
-    query: { page, page_size: pageSize },
-  });
+  const payload = asRecord(await partner().center.partnerCenter.team.list({ page, pageSize }) as unknown);
   return readPage(payload, readTeamMember, page, pageSize);
 }
 
@@ -409,10 +398,7 @@ export async function listPartnerCommissions(
   page = 1,
   pageSize = 10,
 ): Promise<MpPartnerPage<MpPartnerCommissionRecord>> {
-  const payload = await request({
-    path: "/partner_center/commissions",
-    query: { page, page_size: pageSize },
-  });
+  const payload = asRecord(await partner().center.partnerCenter.commissionRecords.list({ page, pageSize }) as unknown);
   return readPage(payload, readCommissionRecord, page, pageSize);
 }
 
@@ -420,10 +406,7 @@ export async function listPartnerWithdrawals(
   page = 1,
   pageSize = 10,
 ): Promise<MpPartnerPage<MpPartnerWithdrawal>> {
-  const payload = await request({
-    path: "/partner_center/withdrawals",
-    query: { page, page_size: pageSize },
-  });
+  const payload = asRecord(await partner().center.partnerCenter.withdrawals.list({ page, pageSize }) as unknown);
   return readPage(payload, readWithdrawal, page, pageSize);
 }
 
@@ -431,12 +414,8 @@ export async function createPartnerWithdrawal(
   amount: string,
   remark: string,
 ): Promise<MpPartnerWithdrawal> {
-  const payload = await request({
-    body: { amount, remark },
-    method: "POST",
-    path: "/partner_center/withdrawals",
-  });
-  return readWithdrawal(asRecord(payload.item));
+  const payload = asRecord(await partner().center.partnerCenter.withdrawals.create({ amount, remark }) as unknown);
+  return readWithdrawal(asRecord(payload));
 }
 
 

@@ -25,6 +25,7 @@ import {
   type CommerceAppSdkClient,
 } from "@sdkwork/commerce-app-sdk";
 import { createClient as createOrderAppClient, type SdkworkAppClient as OrderAppClient } from "@sdkwork/order-app-sdk";
+import { createClient as createPartnerAppClient, type SdkworkAppClient as PartnerAppClient } from "@sdkwork/partner-app-sdk";
 import { uuid } from "@sdkwork/utils";
 
 import type { MpTokenManager } from "../session";
@@ -36,6 +37,7 @@ export type IamAppSdkClient = IamAppClient;
 export type ImAppSdkClient = ImAppClient;
 export type MpCommerceAppSdkClient = CommerceAppSdkClient;
 export type MpOrderAppSdkClient = OrderAppClient;
+export type MpPartnerAppSdkClient = PartnerAppClient;
 /**
  * Conversation/message client.
  *
@@ -131,6 +133,22 @@ export function createMpCommerceAppSdkClient(options: MpSdkClientOptions): MpCom
  */
 export function createMpOrderAppSdkClient(options: MpSdkClientOptions): MpOrderAppSdkClient {
   return createOrderAppClient({
+    authMode: "dual-token",
+    baseUrl: normalizeBaseUrl(options.baseUrl),
+    platform: "mini-program",
+    ...(options.timeoutMs !== undefined ? { timeout: options.timeoutMs } : {}),
+    tokenManager: options.tokenManager,
+  });
+}
+
+/**
+ * Builds the partner app SDK client.
+ *
+ * The partner block owns the join programme (`join.partnerJoin`) and the partner
+ * centre (`center.partnerCenter`); the distributor capability projects it.
+ */
+export function createMpPartnerAppSdkClient(options: MpSdkClientOptions): MpPartnerAppSdkClient {
+  return createPartnerAppClient({
     authMode: "dual-token",
     baseUrl: normalizeBaseUrl(options.baseUrl),
     platform: "mini-program",

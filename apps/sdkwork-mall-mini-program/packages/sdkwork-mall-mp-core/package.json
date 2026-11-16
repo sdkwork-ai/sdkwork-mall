@@ -26,6 +26,7 @@
     "@sdkwork/im-sdk": "workspace:*",
     "@sdkwork/mall-mp-host": "workspace:*",
     "@sdkwork/order-app-sdk": "workspace:*",
+    "@sdkwork/partner-app-sdk": "workspace:*",
     "@sdkwork/utils": "workspace:*"
   },
   "sdkwork": {
