@@ -436,3 +436,30 @@
     tests, with the five failures all in the concurrent H5 brick migration
     (OrderDetail i18n key, H5 route registry, shared copy, H5 pay redirect, H5
     page heading). i18n baseline refreshed to the improved counts.
+
+- 2026-11-16 (fifteenth pass: boot failure fixed + per-page audit). DevTools
+  reported `module "runtime-env.json.js" is not defined, require args is
+  "./runtime-env.json"` and pages never registered.
+  - **Root cause**: `app.ts` imported `src/runtime-env.json`. The WeChat compiler
+    emits `require("./runtime-env.json")`, and the mini-program module system
+    resolves only JS/TS modules, so the whole app aborted before any page
+    registered (hence "Page pages/home/index has not been registered yet").
+  - **Fix**: the build now materializes `src/bootstrap/runtime-env.generated.ts`
+    (committed with the development defaults) and `readRuntimeEnv` merges it with
+    the release channel and the runtime global override. `tsconfig` no longer
+    sets `resolveJsonModule`, so a JSON import fails typecheck instead of device
+    boot. `scripts/build-runtime.mjs` writes the TS module.
+  - **Runtime hardening found during the audit**: `@sdkwork/sdk-common` creates an
+    `AbortController` per request timeout and the fetch adapter used
+    `TextEncoder` for `arrayBuffer()`. Neither is guaranteed on older WeChat base
+    libraries, so `installMpFetch` now polyfills `AbortController`/`AbortSignal`
+    and the adapter UTF-8 encodes by hand.
+  - **Per-page audit** (new `tests/mp-page-completeness.test.mjs`, 4 checks): every
+    `src/pages/*` folder has index.ts/wxml/wxss/json; `app.json` pages and the
+    folders agree exactly (tab roots included); every template event handler
+    (`bindtap`/`catchtap`/`bindinput`/... ) exists on its page module — 36 pages,
+    no dead buttons; and no `.ts` in `src/` or `packages/` imports JSON, uses
+    `import.meta`, `process.env`, `window`, `document` or `localStorage`.
+  - Regression: 29 node guards, 68 vitest contracts, both typechecks, composition,
+    parity, default data and the i18n ratchet green; 181/185 contract tests with
+    the four failures all in the concurrent H5 brick migration.

@@ -92,4 +92,26 @@ describe("host fetch adapter", () => {
     installMpFetch(host.http);
     expect(globalThis.fetch).toBe(native);
   });
+
+  it("polyfills AbortController because the SDK timeouts require it", () => {
+    const originalController = globalThis.AbortController;
+    const originalSignal = globalThis.AbortSignal;
+    // Simulate an older base library that has neither.
+    delete (globalThis as { AbortController?: unknown }).AbortController;
+    delete (globalThis as { AbortSignal?: unknown }).AbortSignal;
+    const host = hostWith({});
+
+    installMpFetch(host.http);
+
+    expect(typeof globalThis.AbortController).toBe("function");
+    const controller = new AbortController();
+    const aborted: boolean[] = [];
+    controller.signal.addEventListener("abort", () => aborted.push(controller.signal.aborted));
+    controller.abort();
+    expect(controller.signal.aborted).toBe(true);
+    expect(aborted).toEqual([true]);
+
+    globalThis.AbortController = originalController;
+    globalThis.AbortSignal = originalSignal;
+  });
 });

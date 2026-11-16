@@ -23,7 +23,6 @@ import { mpCapabilityUrl } from "./routes/capabilities";
 import { uploadDriveImageDetailed } from "./services/drive-upload-service";
 import { createDriveDownloadGrant } from "./services/drive-download-service";
 import { applyCartTabBadge, syncCartTabBadge } from "./services/tab-bar-service";
-import runtimeEnvJson from "./runtime-env.json";
 
 interface MallMpGlobalData {
   commerceApiBaseUrl: string;
@@ -33,30 +32,22 @@ interface MallMpGlobalData {
   runtimeReady: boolean;
 }
 
-// Build-time materialized bundle (scripts/build-runtime.mjs) with the
-// runtime-injection override taking precedence.
-const fromBundle = runtimeEnvJson as {
-  commerceAppApiBaseUrl?: string;
-  deploymentProfile?: string;
-  environment?: string;
-  profileId?: string;
-  surfaceCode?: string;
-};
-
 const FALLBACK_API_BASE_URL = "https://api-dev.sdkwork.com/app/v3/api";
 
+/**
+ * Resolves the launch environment.
+ *
+ * `readRuntimeEnv` owns the whole merge (build-time module -> channel default);
+ * the entry only derives the profile id. No JSON import: the WeChat compiler
+ * cannot resolve JSON modules and the app would fail to boot.
+ */
 function resolveEnvironment(accountEnvVersion: string) {
-  const injected = readRuntimeEnv(accountEnvVersion);
-  const environment = fromBundle.environment ?? injected.environment;
-  const deploymentProfile = fromBundle.deploymentProfile ?? injected.deploymentProfile;
-  const appApiBaseUrl =
-    injected.commerceAppApiBaseUrl ?? fromBundle.commerceAppApiBaseUrl ?? FALLBACK_API_BASE_URL;
+  const resolved = readRuntimeEnv(accountEnvVersion);
   return {
-    environment,
-    deploymentProfile,
-    profileId: fromBundle.profileId ?? `${deploymentProfile}.${environment}`,
-    appApiBaseUrl,
-    ...(fromBundle.surfaceCode ? { surfaceCode: fromBundle.surfaceCode } : {}),
+    environment: resolved.environment,
+    deploymentProfile: resolved.deploymentProfile,
+    profileId: `${resolved.deploymentProfile}.${resolved.environment}`,
+    appApiBaseUrl: resolved.commerceAppApiBaseUrl || FALLBACK_API_BASE_URL,
   };
 }
 
@@ -135,9 +126,16 @@ App({
    * client, a stale badge). Re-paint from storage first, then reconcile.
    */
   onShow() {
-    applyCartTabBadge();
-    // `syncCartTabBadge` clears the badge itself when the buyer is signed out.
-    void syncCartTabBadge();
+    try {
+      applyCartTabBadge();
+      // `syncCartTabBadge` clears the badge itself when the buyer is signed out.
+      void syncCartTabBadge();
+    } catch (cause) {
+      // A failed bootstrap leaves no host installed; the tab badge must never be
+      // the reason the app reports an uncaught error.
+      const message = cause instanceof Error ? cause.message : String(cause);
+      console.warn("[sdkwork-mall] tab badge skipped", message);
+    }
   },
 
   /**
