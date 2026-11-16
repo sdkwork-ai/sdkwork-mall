@@ -1,25 +1,27 @@
-<view class="page-home">
+﻿<view class="page-home">
   <view class="home-search" bindtap="goQuickEntry" data-capability="storefront.mall.search">
     <view class="home-search-box">{{searchPlaceholder}}</view>
   </view>
 
-  <swiper
-    class="home-banner"
-    indicator-dots
-    indicator-color="rgba(255,255,255,0.45)"
-    indicator-active-color="#ffffff"
-    autoplay
-    circular
-    interval="4200"
-    duration="320"
-  >
-    <swiper-item wx:for="{{banners}}" wx:key="id">
-      <view class="home-banner-item home-banner-{{item.tone}}" bindtap="goBanner" data-id="{{item.id}}">
-        <view class="home-banner-title">{{item.title}}</view>
-        <view class="home-banner-sub">{{item.subtitle}}</view>
+  <view class="home-banner" bindtouchstart="onBannerTouchStart" bindtouchend="onBannerTouchEnd">
+    <view class="home-banner-track" style="transform: translateX(-{{bannerIndex * 100}}%);">
+      <view class="home-banner-slide" wx:for="{{banners}}" wx:key="id">
+        <view class="home-banner-item home-banner-{{item.tone}}" bindtap="goBanner" data-id="{{item.id}}">
+          <view class="home-banner-title">{{item.title}}</view>
+          <view class="home-banner-sub">{{item.subtitle}}</view>
+        </view>
       </view>
-    </swiper-item>
-  </swiper>
+    </view>
+    <view class="home-banner-dots">
+      <view
+        wx:for="{{banners}}"
+        wx:key="id"
+        class="home-banner-dot {{index === bannerIndex ? 'home-banner-dot-active' : ''}}"
+        data-index="{{index}}"
+        catchtap="onBannerDotTap"
+      ></view>
+    </view>
+  </view>
 
   <view class="home-quick">
     <view

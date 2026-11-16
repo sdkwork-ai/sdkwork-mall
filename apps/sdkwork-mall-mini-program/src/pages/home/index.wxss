@@ -16,17 +16,49 @@
 }
 
 .home-banner {
+  position: relative;
   height: 240rpx;
   margin: 0;
+  overflow: hidden;
+  background: #e93b3d;
   /* Square corners are part of the flat storefront; `!important` so a stale or
      platform-injected style cannot round the hero again. */
   border-radius: 0 !important;
-  overflow: hidden;
 }
 
-.home-banner swiper-item,
-.home-banner-item {
+.home-banner-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 320ms ease;
+}
+
+.home-banner-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
   border-radius: 0 !important;
+}
+
+.home-banner-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 16rpx;
+  display: flex;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.home-banner-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.home-banner-dot-active {
+  background: #ffffff;
 }
 
 .home-banner-item {

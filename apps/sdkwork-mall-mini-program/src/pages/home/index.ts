@@ -92,6 +92,10 @@ interface HomeData {
   loading: boolean;
   error: string;
   _seckillTimer: number | null;
+  bannerIndex: number;
+  _bannerTimer: number | null;
+  _bannerTouchX: number | null;
+  _bannerTouchY: number | null;
 }
 
 const BANNERS: HomeBannerSource[] = [
@@ -161,6 +165,10 @@ Page({
     loading: true,
     error: "",
     _seckillTimer: null,
+  bannerIndex: 0,
+  _bannerTimer: null,
+  _bannerTouchX: null,
+  _bannerTouchY: null,
   } as HomeData,
 
   onLoad() {
@@ -176,14 +184,17 @@ Page({
     // Browsing footprint is device-local and changes on every product visit;
     // re-read it on tab return instead of carrying a stale chip row.
     this.setData({ footprint: readFootprint().slice(0, 6) });
+    this.startBannerAutoplay();
   },
 
   onHide() {
     this.stopSeckillCountdown();
+    this.stopBannerAutoplay();
   },
 
   onUnload() {
     this.stopSeckillCountdown();
+    this.stopBannerAutoplay();
   },
 
   onShareAppMessage() {
@@ -199,6 +210,66 @@ Page({
       title: this.data.shareTitle,
     });
   },
+
+  /** Custom hero carousel: no native `swiper`, so no platform style can round it. */
+  startBannerAutoplay() {
+    this.stopBannerAutoplay();
+    if (this.data.banners.length <= 1) {
+      return;
+    }
+    this.data._bannerTimer = setInterval(() => {
+      const count = this.data.banners.length;
+      this.setData({ bannerIndex: (this.data.bannerIndex + 1) % count });
+    }, 4200);
+  },
+
+  stopBannerAutoplay() {
+    if (this.data._bannerTimer != null) {
+      clearInterval(this.data._bannerTimer);
+      this.data._bannerTimer = null;
+    }
+  },
+
+  resetBannerAutoplay() {
+    this.stopBannerAutoplay();
+    this.startBannerAutoplay();
+  },
+
+  onBannerDotTap(event: MpTapEvent) {
+    const index = Number(event.currentTarget.dataset.index ?? 0);
+    if (Number.isFinite(index) && index >= 0 && index < this.data.banners.length) {
+      this.setData({ bannerIndex: index });
+      this.resetBannerAutoplay();
+    }
+  },
+
+  onBannerTouchStart(event: { touches?: Array<{ clientX?: number; clientY?: number }> }) {
+    const touch = event.touches?.[0];
+    this.data._bannerTouchX = touch?.clientX ?? null;
+    this.data._bannerTouchY = touch?.clientY ?? null;
+    this.stopBannerAutoplay();
+  },
+
+  onBannerTouchEnd(event: { changedTouches?: Array<{ clientX?: number; clientY?: number }> }) {
+    const startX = this.data._bannerTouchX;
+    const startY = this.data._bannerTouchY;
+    this.data._bannerTouchX = null;
+    this.data._bannerTouchY = null;
+    const touch = event.changedTouches?.[0];
+    const endX = touch?.clientX ?? null;
+    const endY = touch?.clientY ?? null;
+    if (startX != null && endX != null) {
+      const deltaX = endX - startX;
+      const deltaY = startY != null && endY != null ? Math.abs(endY - startY) : 0;
+      if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > deltaY) {
+        const count = this.data.banners.length;
+        const next = deltaX < 0 ? (this.data.bannerIndex + 1) % count : (this.data.bannerIndex - 1 + count) % count;
+        this.setData({ bannerIndex: next });
+      }
+    }
+    this.startBannerAutoplay();
+  },
+
 
   goBanner(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");

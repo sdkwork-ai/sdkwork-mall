@@ -640,3 +640,21 @@
   - Regression: 33 node guards, 69 vitest contracts, typecheck, composition green;
     smoke PASS over 36 pages (the technical-error masking is also visible in its
     log); contract suite 185/192 with the seven H5-only failures.
+
+- 2026-11-16 (twenty-fourth pass: the hero no longer uses the platform `swiper`).
+  The screenshot was taken at 23:30, one minute before the `!important` build
+  (`build 2026-11-16T15:30:37Z` = 23:30:37 +08:00), which explains why rounded
+  corners were still visible after the source had been flattened twice.
+  - Rather than depend on the dev tool picking up the next package, the hero is now
+    a **custom carousel**: plain `view` track with `translateX`, 320 ms transition,
+    autoplay every 4.2 s, swipe left/right, tappable dots, and autoplay paused in
+    `onHide`/`onUnload` and while the visitor drags. No `swiper` component is
+    involved, so no platform default style can round it.
+  - `.home-banner`, `.home-banner-slide` and every card class pin
+    `border-radius: 0 !important`.
+  - The launch log prints `[sdkwork-mall] build <ISO timestamp>`; the current build
+    is `2026-11-16T15:33:01.076Z`. A stale package is now identifiable from the
+    console instead of inferred from pixels.
+  - Regression: 33 node guards, 69 vitest contracts, typecheck, composition, parity
+    and i18n green; smoke PASS over 36 pages; contract suite 185/192 (seven
+    H5-only failures from the concurrent brick migration).
