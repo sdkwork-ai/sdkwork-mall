@@ -800,3 +800,19 @@
     `@font-face`/`@charset`) and brace counts must balance.
   - Rebuilt: main 711.1 KB, largest subpackage 40.5 KB, total 1118.6 KB, build
     `2026-11-16T16:12:25.673Z`; 39 node guards and smoke green.
+
+- 2026-11-16 (thirty-second pass: the appservice web globals). Uploaded preview
+  crashed with `TextEncoder is not defined` (app-service.js): the WeChat appservice
+  provides neither `TextEncoder`/`TextDecoder` nor `atob`/`btoa`, `queueMicrotask` or
+  `URLSearchParams`, and sdk-common's encoding helpers plus the im-sdk transport call
+  all of them.
+  - The bundle banner now defines bundle-scoped implementations: UTF-8
+    TextEncoder/TextDecoder (surrogate-pair aware, replacement char on invalid input),
+    base64 atob/btoa, a Promise-based queueMicrotask and a full URLSearchParams
+    (append/set/get/getAll/has/delete/forEach/toString), each preferring a native
+    implementation when one exists.
+  - The smoke harness now deletes all six globals before loading the bundles, so the
+    emulated appservice matches the device: PASS over 36 pages, 16 request attempts.
+  - Guard: `bundles polyfill the web globals the appservice lacks` (app.js and
+    shared/runtime.js carry all four shim markers).
+  - Size: main 766.3 KB, largest subpackage 48.4 KB, total 1418.1 KB.

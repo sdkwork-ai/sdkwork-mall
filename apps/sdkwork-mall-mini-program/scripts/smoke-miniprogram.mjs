@@ -117,6 +117,12 @@ function loadModule(relative) {
   return require(absolute);
 }
 
+// Emulate the WeChat appservice globals: TextEncoder/TextDecoder, atob/btoa,
+// queueMicrotask and URLSearchParams are not provided there, so the bundle shims
+// must cover them.
+for (const name of ["TextEncoder", "TextDecoder", "atob", "btoa", "queueMicrotask", "URLSearchParams"]) {
+  delete globalThis[name];
+}
 console.log("[smoke] booting the app bundle");
 try {
   loadModule("app.js");

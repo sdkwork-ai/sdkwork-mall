@@ -128,6 +128,198 @@ var __sdkworkFetchImpl = function (input, init) {
   return impl(input, init);
 };
 var fetch = __sdkworkFetchImpl;
+/**
+ * Web globals the WeChat appservice does not provide and the SDK graph calls.
+ * They are bundle-scoped var shadows (the appservice does not reliably expose a
+ * writable global object): TextEncoder/TextDecoder (sdk-common encoding), atob/btoa
+ * (base64 helpers), queueMicrotask (im-sdk transport) and URLSearchParams (query
+ * building in the HTTP client).
+ */
+var TextEncoder = __sdkworkSharedStore.__SDKWORK_TEXT_ENCODER__ || __sdkworkGlobal.TextEncoder || (function () {
+  function MpTextEncoder() {}
+  MpTextEncoder.prototype.encoding = "utf-8";
+  MpTextEncoder.prototype.encode = function (input) {
+    var source = String(input == null ? "" : input);
+    var bytes = [];
+    for (var i = 0; i < source.length; i += 1) {
+      var code = source.charCodeAt(i);
+      if (code < 0x80) {
+        bytes.push(code);
+      } else if (code < 0x800) {
+        bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+      } else if (code >= 0xd800 && code <= 0xdbff && i + 1 < source.length) {
+        var next = source.charCodeAt(i + 1);
+        if (next >= 0xdc00 && next <= 0xdfff) {
+          var point = 0x10000 + ((code - 0xd800) << 10) + (next - 0xdc00);
+          bytes.push(0xf0 | (point >> 18), 0x80 | ((point >> 12) & 0x3f), 0x80 | ((point >> 6) & 0x3f), 0x80 | (point & 0x3f));
+          i += 1;
+        } else {
+          bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+        }
+      } else {
+        bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+      }
+    }
+    return new Uint8Array(bytes);
+  };
+  return MpTextEncoder;
+})();
+var TextDecoder = __sdkworkSharedStore.__SDKWORK_TEXT_DECODER__ || __sdkworkGlobal.TextDecoder || (function () {
+  function MpTextDecoder() {}
+  MpTextDecoder.prototype.encoding = "utf-8";
+  MpTextDecoder.prototype.decode = function (input) {
+    var bytes = input instanceof Uint8Array ? input : new Uint8Array(input || []);
+    var result = "";
+    for (var i = 0; i < bytes.length; ) {
+      var byte = bytes[i];
+      if (byte < 0x80) {
+        result += String.fromCharCode(byte);
+        i += 1;
+      } else if (byte >= 0xc0 && byte < 0xe0 && i + 1 < bytes.length) {
+        result += String.fromCharCode(((byte & 0x1f) << 6) | (bytes[i + 1] & 0x3f));
+        i += 2;
+      } else if (byte >= 0xe0 && byte < 0xf0 && i + 2 < bytes.length) {
+        result += String.fromCharCode(((byte & 0x0f) << 12) | ((bytes[i + 1] & 0x3f) << 6) | (bytes[i + 2] & 0x3f));
+        i += 3;
+      } else if (byte >= 0xf0 && i + 3 < bytes.length) {
+        var point = ((byte & 0x07) << 18) | ((bytes[i + 1] & 0x3f) << 12) | ((bytes[i + 2] & 0x3f) << 6) | (bytes[i + 3] & 0x3f);
+        point -= 0x10000;
+        result += String.fromCharCode(0xd800 + (point >> 10), 0xdc00 + (point & 0x3ff));
+        i += 4;
+      } else {
+        result += "\ufffd";
+        i += 1;
+      }
+    }
+    return result;
+  };
+  return MpTextDecoder;
+})();
+var __sdkworkBase64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var btoa = __sdkworkSharedStore.__SDKWORK_BTOA__ || __sdkworkGlobal.btoa || function (input) {
+  var source = String(input == null ? "" : input);
+  var output = "";
+  for (var i = 0; i < source.length; i += 3) {
+    var a = source.charCodeAt(i) & 0xff;
+    var b = i + 1 < source.length ? source.charCodeAt(i + 1) & 0xff : NaN;
+    var c = i + 2 < source.length ? source.charCodeAt(i + 2) & 0xff : NaN;
+    var triple = (a << 16) | ((isNaN(b) ? 0 : b) << 8) | (isNaN(c) ? 0 : c);
+    output += __sdkworkBase64Chars.charAt((triple >> 18) & 0x3f);
+    output += __sdkworkBase64Chars.charAt((triple >> 12) & 0x3f);
+    output += isNaN(b) ? "=" : __sdkworkBase64Chars.charAt((triple >> 6) & 0x3f);
+    output += isNaN(c) ? "=" : __sdkworkBase64Chars.charAt(triple & 0x3f);
+  }
+  return output;
+};
+var atob = __sdkworkSharedStore.__SDKWORK_ATOB__ || __sdkworkGlobal.atob || function (input) {
+  var raw = String(input == null ? "" : input);
+  var source = "";
+  for (var s = 0; s < raw.length; s += 1) {
+    var code = raw.charCodeAt(s);
+    if (code !== 32 && code !== 9 && code !== 10 && code !== 13) source += raw.charAt(s);
+  }
+  var output = "";
+  for (var i = 0; i < source.length; i += 4) {
+    var a = __sdkworkBase64Chars.indexOf(source.charAt(i));
+    var b = __sdkworkBase64Chars.indexOf(source.charAt(i + 1));
+    var c = __sdkworkBase64Chars.indexOf(source.charAt(i + 2));
+    var d = __sdkworkBase64Chars.indexOf(source.charAt(i + 3));
+    var triple = (a << 18) | (b << 12) | ((c < 0 ? 0 : c) << 6) | (d < 0 ? 0 : d);
+    output += String.fromCharCode((triple >> 16) & 0xff);
+    if (c >= 0) output += String.fromCharCode((triple >> 8) & 0xff);
+    if (d >= 0) output += String.fromCharCode(triple & 0xff);
+  }
+  return output;
+};
+var queueMicrotask = __sdkworkGlobal.queueMicrotask || function (callback) {
+  Promise.resolve().then(callback);
+};
+var URLSearchParams = __sdkworkGlobal.URLSearchParams || (function () {
+  function MpURLSearchParams(init) {
+    this.__entries = [];
+    if (typeof init === "string") {
+      var text = init.charAt(0) === "?" ? init.slice(1) : init;
+      if (text) {
+        var parts = text.split("&");
+        for (var i = 0; i < parts.length; i += 1) {
+          var piece = parts[i];
+          if (!piece) continue;
+          var eq = piece.indexOf("=");
+          var key = eq < 0 ? piece : piece.slice(0, eq);
+          var value = eq < 0 ? "" : piece.slice(eq + 1);
+          this.append(decodeURIComponent(key.split("+").join(" ")), decodeURIComponent(value.split("+").join(" ")));
+        }
+      }
+    } else if (init && typeof init === "object") {
+      var entries = typeof init.forEach === "function" ? init : null;
+      if (entries && entries.__entries) {
+        for (var j = 0; j < entries.__entries.length; j += 1) {
+          this.append(entries.__entries[j][0], entries.__entries[j][1]);
+        }
+      } else if (typeof init.forEach === "function") {
+        var self = this;
+        init.forEach(function (value, key) { self.append(key, value); });
+      } else {
+        var keys = Object.keys(init);
+        for (var k = 0; k < keys.length; k += 1) {
+          this.append(keys[k], init[keys[k]]);
+        }
+      }
+    }
+  }
+  MpURLSearchParams.prototype.append = function (key, value) {
+    this.__entries.push([String(key), String(value)]);
+  };
+  MpURLSearchParams.prototype.set = function (key, value) {
+    var name = String(key);
+    for (var i = 0; i < this.__entries.length; i += 1) {
+      if (this.__entries[i][0] === name) {
+        this.__entries[i][1] = String(value);
+        this.__entries.splice(i + 1, this.__entries.length);
+        return;
+      }
+    }
+    this.append(name, value);
+  };
+  MpURLSearchParams.prototype.get = function (key) {
+    var name = String(key);
+    for (var i = 0; i < this.__entries.length; i += 1) {
+      if (this.__entries[i][0] === name) return this.__entries[i][1];
+    }
+    return null;
+  };
+  MpURLSearchParams.prototype.getAll = function (key) {
+    var name = String(key);
+    var values = [];
+    for (var i = 0; i < this.__entries.length; i += 1) {
+      if (this.__entries[i][0] === name) values.push(this.__entries[i][1]);
+    }
+    return values;
+  };
+  MpURLSearchParams.prototype.has = function (key) {
+    return this.get(key) !== null;
+  };
+  MpURLSearchParams.prototype.delete = function (key) {
+    var name = String(key);
+    for (var i = this.__entries.length - 1; i >= 0; i -= 1) {
+      if (this.__entries[i][0] === name) this.__entries.splice(i, 1);
+    }
+  };
+  MpURLSearchParams.prototype.forEach = function (callback, thisArg) {
+    for (var i = 0; i < this.__entries.length; i += 1) {
+      callback.call(thisArg, this.__entries[i][1], this.__entries[i][0], this);
+    }
+  };
+  MpURLSearchParams.prototype.toString = function () {
+    var parts = [];
+    for (var i = 0; i < this.__entries.length; i += 1) {
+      parts.push(encodeURIComponent(this.__entries[i][0]) + "=" + encodeURIComponent(this.__entries[i][1]));
+    }
+    return parts.join("&");
+  };
+  return MpURLSearchParams;
+})();
+
 var AbortSignal = __sdkworkSharedStore.__SDKWORK_MALL_MP_ABORT_SIGNAL__ || __sdkworkGlobal.__SDKWORK_MALL_MP_ABORT_SIGNAL__ || (function () {
   function MpAbortSignal() {
     this.aborted = false;

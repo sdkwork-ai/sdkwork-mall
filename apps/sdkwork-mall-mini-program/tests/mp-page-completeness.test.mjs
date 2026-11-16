@@ -339,6 +339,24 @@ test("stylesheets contain no stray at-sign or unbalanced braces", () => {
   assert.deepEqual(problems, [], "stylesheets must be valid");
 });
 
+test("bundles polyfill the web globals the appservice lacks", () => {
+  // WeChat appservice has no TextEncoder/TextDecoder, atob/btoa, queueMicrotask or
+  // URLSearchParams; sdk-common and im-sdk call all of them. After upload the app
+  // crashed with "TextEncoder is not defined", so the shims are part of the bundle.
+  const dist = path.join(appRoot, "dist");
+  if (!existsSync(dist)) {
+    assert.ok(true, "dist is absent; run build:mp first");
+    return;
+  }
+  const bundles = [path.join(dist, "app.js"), path.join(dist, "shared", "runtime.js")];
+  for (const bundle of bundles) {
+    const source = read(bundle);
+    for (const marker of ["MpTextEncoder", "MpTextDecoder", "__sdkworkBase64Chars", "MpURLSearchParams"]) {
+      assert.ok(source.includes(marker), path.relative(dist, bundle) + " must define " + marker);
+    }
+  }
+});
+
 test("no text asset starts with a UTF-8 BOM", () => {
   // The WXSS compiler fails with "unexpected '\uFEFF' at pos 1" and reports the
   // whole package as broken; PowerShell-authored edits used to add one.
