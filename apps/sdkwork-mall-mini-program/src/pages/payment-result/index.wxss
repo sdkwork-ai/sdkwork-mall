@@ -1,6 +1,6 @@
 .result-hero {
   margin: 40rpx 0 30rpx;
-  border-radius: 20rpx;
+  border-radius: 0;
   padding: 60rpx 40rpx;
   text-align: center;
 }

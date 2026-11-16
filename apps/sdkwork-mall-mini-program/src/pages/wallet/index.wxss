@@ -1,7 +1,7 @@
 .wallet-hero {
   display: flex;
   background: linear-gradient(135deg, #e93b3d, #f06b3e);
-  border-radius: 20rpx;
+  border-radius: 0;
   padding: 40rpx 32rpx;
   margin-bottom: 24rpx;
   color: #ffffff;

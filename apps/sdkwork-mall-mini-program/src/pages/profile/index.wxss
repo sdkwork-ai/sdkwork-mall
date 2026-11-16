@@ -27,7 +27,7 @@
 }
 
 .profile-link {
-  border-radius: 16rpx;
+  border-radius: 0;
   justify-content: space-between;
 }
 

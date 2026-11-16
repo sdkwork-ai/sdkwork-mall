@@ -169,6 +169,47 @@ test("no module dereferences globalThis outside the guarded scope helper", () =>
   assert.deepEqual(problems, [], "use resolvePlatformScope/resolveGlobalObject/resolveSharedScope instead");
 });
 
+test("card surfaces stay rectangular (flat storefront)", () => {
+  // Rounded cards exposed the page background at every corner, which is why the
+  // storefront uses rectangular card surfaces; pills, avatars and inputs keep
+  // their radius. This guard keeps a stray `border-radius` from regressing.
+  const CARD_SELECTOR = /(card|hero|panel|section|banner|notice|row|item-image|product-image)/iu;
+  const INTERACTIVE = /(input|textarea|btn|chip|tag|badge|dot|avatar|checkbox|pill|search)/iu;
+  const ROUND = /999rpx|50%/u;
+  const problems = [];
+  const scan = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || entry.name === "node_modules") {
+        continue;
+      }
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        scan(entryPath);
+        continue;
+      }
+      if (!entry.name.endsWith(".wxss")) {
+        continue;
+      }
+      const lines = read(entryPath).split(/\r?\n/u);
+      let selector = "";
+      for (const line of lines) {
+        if (/^\s*[.#][^{]*\{\s*$/u.test(line)) {
+          selector = line.trim().replace(/\s*\{$/u, "");
+        }
+        const radius = line.match(/border-radius\s*:\s*([^;]+);/u);
+        if (!radius || !CARD_SELECTOR.test(selector) || INTERACTIVE.test(selector) || ROUND.test(radius[1])) {
+          continue;
+        }
+        if (radius[1].trim() !== "0") {
+          problems.push(`${path.relative(appRoot, entryPath).replace(/\\/gu, "/")} [${selector}] ${radius[1].trim()}`);
+        }
+      }
+    }
+  };
+  scan(srcRoot);
+  assert.deepEqual(problems, [], "card surfaces must use border-radius: 0");
+});
+
 test("the app loads no JSON module and no non-mini-program global", () => {
   const problems = [];
   const scan = (directory) => {

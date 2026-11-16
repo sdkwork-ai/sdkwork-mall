@@ -1,6 +1,6 @@
 .notice-card {
   background: #ffffff;
-  border-radius: 16rpx;
+  border-radius: 0;
   padding: 28rpx;
   margin-bottom: 16rpx;
 }

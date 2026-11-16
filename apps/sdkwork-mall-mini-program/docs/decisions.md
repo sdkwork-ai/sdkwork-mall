@@ -595,3 +595,29 @@
   - Regression: 32 node guards, 69 vitest contracts, typecheck, composition green;
     184/191 contract tests (seven H5-only failures from the concurrent brick
     migration).
+
+- 2026-11-16 (twenty-second pass: flat storefront + H5 home alignment). Feedback
+  from the dev-tool screenshot: rounded cards exposed the page background at every
+  corner, the hero carousel looked inset, and a raw English SDK error
+  ("A required dependency is temporarily unavailable") was rendered to the buyer.
+  - Hero carousel: full-width, `border-radius: 0`, no side margin, white / 45 %
+    white indicator dots, 320 ms transitions, and the four H5 poster tones
+    (`brand`/`ember`/`teal`/`violet`) assigned per banner, so the mini program hero
+    matches the H5 carousel posters.
+  - Home section order now mirrors H5: search → hero → quick entries → categories →
+    seckill → featured shops → footprint → hot → new arrivals → service grid.
+  - Every card surface in all 36 pages is rectangular: 29 stylesheets flattened
+    (`.mp-card`, `.mp-product-card`, product images, activity/orders/notice/messages
+    rows, cart shop blocks, checkout panels, membership hero, logistics cards,
+    partner panels, ...) and the `--mp-radius-*` tokens are 0. Pills, chips,
+    avatars, checkboxes, dots and inputs keep their radius.
+  - `errorMessage()` no longer forwards a message that contains no CJK characters:
+    an English SDK/transport failure is logged for diagnostics and the page's
+    localized fallback is shown instead.
+  - Guard: `card surfaces stay rectangular (flat storefront)` fails the build if a
+    card-like selector reintroduces a non-zero radius (interactive/round elements
+    are exempt).
+  - Regression: 33 node guards, 69 vitest contracts, typecheck, composition, parity
+    and the i18n ratchet green; smoke (normal / hot reload / shared-store-only) all
+    PASS over 36 pages; contract suite 185/192 with the seven failures inside the
+    concurrent H5 brick migration.

@@ -19,7 +19,11 @@ interface HomeBannerSource {
   query?: Record<string, string>;
   subtitleKey: string;
   titleKey: string;
+  /** Poster gradient, mirroring the H5 hero tones. */
+  tone: HomeBannerTone;
 }
+
+type HomeBannerTone = "brand" | "ember" | "teal" | "violet";
 
 interface HomeBanner {
   capability: string;
@@ -27,6 +31,7 @@ interface HomeBanner {
   query?: Record<string, string>;
   subtitle: string;
   title: string;
+  tone: HomeBannerTone;
 }
 
 interface HomeQuickSource {
@@ -90,11 +95,11 @@ interface HomeData {
 }
 
 const BANNERS: HomeBannerSource[] = [
-  { id: "b-quality", titleKey: "home.banners.quality.title", subtitleKey: "home.banners.quality.subtitle", capability: "storefront.mall.categories" },
-  { id: "b-activity", titleKey: "home.banners.activity.title", subtitleKey: "home.banners.activity.subtitle", capability: "storefront.mall.activity-list" },
-  { id: "b-new", titleKey: "home.banners.newArrival.title", subtitleKey: "home.banners.newArrival.subtitle", capability: "storefront.mall.search", query: { q: "new" } },
-  { id: "b-coupon", titleKey: "home.banners.coupon.title", subtitleKey: "home.banners.coupon.subtitle", capability: "buyer.mall.coupons" },
-  { id: "b-member", titleKey: "home.banners.member.title", subtitleKey: "home.banners.member.subtitle", capability: "buyer.mall.dashboard" },
+  { id: "b-quality", titleKey: "home.banners.quality.title", subtitleKey: "home.banners.quality.subtitle", capability: "storefront.mall.categories", tone: "brand" },
+  { id: "b-activity", titleKey: "home.banners.activity.title", subtitleKey: "home.banners.activity.subtitle", capability: "storefront.mall.activity-list", tone: "ember" },
+  { id: "b-new", titleKey: "home.banners.newArrival.title", subtitleKey: "home.banners.newArrival.subtitle", capability: "storefront.mall.search", query: { q: "new" }, tone: "teal" },
+  { id: "b-coupon", titleKey: "home.banners.coupon.title", subtitleKey: "home.banners.coupon.subtitle", capability: "buyer.mall.coupons", tone: "violet" },
+  { id: "b-member", titleKey: "home.banners.member.title", subtitleKey: "home.banners.member.subtitle", capability: "buyer.mall.dashboard", tone: "brand" },
 ];
 
 const QUICK_ENTRIES: HomeQuickSource[] = [
@@ -113,6 +118,7 @@ function resolveBanners(): HomeBanner[] {
     query: banner.query,
     subtitle: t(banner.subtitleKey),
     title: t(banner.titleKey),
+    tone: banner.tone,
   }));
 }
 

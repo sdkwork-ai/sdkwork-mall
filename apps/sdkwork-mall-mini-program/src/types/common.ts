@@ -70,14 +70,24 @@ export function asRecordList(value: unknown): MpRecord[] {
 
 /** Human-readable message from a thrown value of any shape. */
 export function errorMessage(cause: unknown, fallback = "操作失败"): string {
-  if (cause instanceof Error && cause.message) {
-    return cause.message;
+  const raw = typeof cause === "object" && cause !== null && "message" in cause
+    ? (cause as { message?: unknown }).message
+    : undefined;
+  const message = cause instanceof Error && cause.message
+    ? cause.message
+    : typeof raw === "string"
+      ? raw
+      : "";
+  if (!message) {
+    return fallback;
   }
-  if (typeof cause === "object" && cause !== null && "message" in cause) {
-    const message = (cause as { message?: unknown }).message;
-    if (typeof message === "string" && message !== "") {
-      return message;
-    }
+  // SDK/transport failures arrive in English ("A required dependency is
+  // temporarily unavailable"); pages must not surface untranslated technical copy
+  // to the buyer. A message without any CJK character is treated as a technical
+  // detail and replaced by the page's localized fallback.
+  if (!/[\u3400-\u9fff]/u.test(message)) {
+    console.warn("[sdkwork-mall] technical error masked:", message);
+    return fallback;
   }
-  return fallback;
+  return message;
 }

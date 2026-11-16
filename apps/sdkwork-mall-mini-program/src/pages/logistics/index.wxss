@@ -10,7 +10,7 @@
 
 .logistics-card {
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 0;
   padding: 28rpx 24rpx;
   margin-bottom: 20rpx;
 }

@@ -1,4 +1,4 @@
-.page-chat {
+﻿.page-chat {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -81,6 +81,6 @@
 
 .chat-image {
   width: 360rpx;
-  border-radius: 12rpx;
+  border-radius: 0;
   background: #f3f4f6;
 }

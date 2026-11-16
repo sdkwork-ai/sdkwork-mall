@@ -3,9 +3,18 @@
     <view class="home-search-box">{{searchPlaceholder}}</view>
   </view>
 
-  <swiper class="home-banner" indicator-dots autoplay circular interval="4200">
+  <swiper
+    class="home-banner"
+    indicator-dots
+    indicator-color="rgba(255,255,255,0.45)"
+    indicator-active-color="#ffffff"
+    autoplay
+    circular
+    interval="4200"
+    duration="320"
+  >
     <swiper-item wx:for="{{banners}}" wx:key="id">
-      <view class="home-banner-item" bindtap="goBanner" data-id="{{item.id}}">
+      <view class="home-banner-item home-banner-{{item.tone}}" bindtap="goBanner" data-id="{{item.id}}">
         <view class="home-banner-title">{{item.title}}</view>
         <view class="home-banner-sub">{{item.subtitle}}</view>
       </view>
@@ -50,6 +59,41 @@
       <text class="home-seckill-more">{{seckillOffer.discountText || seckillOngoing}}</text>
     </view>
     <view class="home-seckill-highlight" wx:if="{{seckillOffer.highlight}}">{{seckillOffer.highlight}}</view>
+  </view>
+
+  <view wx:if="{{shops.length}}" class="mp-card">
+    <view class="mp-card-title">{{shopsTitle}}</view>
+    <view class="home-shop-grid">
+      <view
+        class="home-shop-card"
+        wx:for="{{shops}}"
+        wx:key="id"
+        bindtap="goShop"
+        data-id="{{item.id}}"
+      >
+        <view class="home-shop-logo">
+          <image wx:if="{{item.logoUrl}}" src="{{item.logoUrl}}" mode="aspectFill" lazy-load />
+          <text wx:else>{{item.name}}</text>
+        </view>
+        <view class="home-shop-body">
+          <view class="home-shop-name">{{item.name}}</view>
+          <view class="mp-muted" wx:if="{{item.ratingText}}">{{item.ratingText}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{footprint.length}}" class="mp-card">
+    <view class="mp-card-title">{{footprintTitle}}</view>
+    <view class="search-chips">
+      <text
+        class="search-chip"
+        wx:for="{{footprint}}"
+        wx:key="id"
+        bindtap="goProduct"
+        data-id="{{item.id}}"
+      >{{item.title}}</text>
+    </view>
   </view>
 
   <view wx:if="{{hotProducts.length}}" class="home-products">
@@ -99,41 +143,6 @@
           </view>
         </view>
       </view>
-    </view>
-  </view>
-
-  <view wx:if="{{shops.length}}" class="mp-card">
-    <view class="mp-card-title">{{shopsTitle}}</view>
-    <view class="home-shop-grid">
-      <view
-        class="home-shop-card"
-        wx:for="{{shops}}"
-        wx:key="id"
-        bindtap="goShop"
-        data-id="{{item.id}}"
-      >
-        <view class="home-shop-logo">
-          <image wx:if="{{item.logoUrl}}" src="{{item.logoUrl}}" mode="aspectFill" lazy-load />
-          <text wx:else>{{item.name}}</text>
-        </view>
-        <view class="home-shop-body">
-          <view class="home-shop-name">{{item.name}}</view>
-          <view class="mp-muted" wx:if="{{item.ratingText}}">{{item.ratingText}}</view>
-        </view>
-      </view>
-    </view>
-  </view>
-
-  <view wx:if="{{footprint.length}}" class="mp-card">
-    <view class="mp-card-title">{{footprintTitle}}</view>
-    <view class="search-chips">
-      <text
-        class="search-chip"
-        wx:for="{{footprint}}"
-        wx:key="id"
-        bindtap="goProduct"
-        data-id="{{item.id}}"
-      >{{item.title}}</text>
     </view>
   </view>
 

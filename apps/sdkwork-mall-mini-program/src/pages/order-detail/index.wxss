@@ -28,7 +28,7 @@
 .detail-item-image {
   width: 140rpx;
   height: 140rpx;
-  border-radius: 12rpx;
+  border-radius: 0;
   background: #f3f4f6;
   overflow: hidden;
   display: flex;

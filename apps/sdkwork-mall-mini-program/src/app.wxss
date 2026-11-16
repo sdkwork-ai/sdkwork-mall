@@ -6,7 +6,7 @@ page {
 
 .mp-section {
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 0;
   padding: 24rpx;
   margin: 0 0 20rpx 0;
 }
@@ -24,7 +24,7 @@ page {
 /* ── shared building blocks ── */
 .mp-card {
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 0;
   margin: 0 0 20rpx 0;
   padding: 24rpx;
 }
@@ -101,7 +101,7 @@ page {
 .mp-error {
   margin: 0 0 20rpx 0;
   padding: 16rpx 24rpx;
-  border-radius: 12rpx;
+  border-radius: 0;
   background: #fef2f2;
   color: #b91c1c;
   font-size: 24rpx;
@@ -114,7 +114,7 @@ page {
   transform: translateX(-50%);
   background: rgba(17, 24, 39, 0.85);
   color: #fff;
-  border-radius: 12rpx;
+  border-radius: 0;
   padding: 14rpx 36rpx;
   font-size: 26rpx;
   z-index: 99;
@@ -131,7 +131,7 @@ page {
 .mp-product-card {
   width: 48.6%;
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 0;
   overflow: hidden;
   margin-bottom: 20rpx;
 }
@@ -205,7 +205,7 @@ page {
 .mp-field textarea,
 .mp-field select {
   border: 1rpx solid #e5e7eb;
-  border-radius: 12rpx;
+  border-radius: 0;
   padding: 16rpx 20rpx;
   font-size: 28rpx;
   background: #fff;
@@ -235,9 +235,9 @@ page {
    page styles stay untouched.
    ========================================================================== */
 page {
-  --mp-radius-sm: 12rpx;
-  --mp-radius-md: 22rpx;
-  --mp-radius-lg: 30rpx;
+  --mp-radius-sm: 0;
+  --mp-radius-md: 0;
+  --mp-radius-lg: 0;
   --mp-bg: #f5f6f8;
   --mp-panel: #ffffff;
   --mp-border: #eceef2;
@@ -262,7 +262,7 @@ button::after {
 .mp-section {
   background: var(--mp-panel);
   border: 1rpx solid var(--mp-border);
-  border-radius: var(--mp-radius-md);
+  border-radius: 0;
   box-shadow: var(--mp-shadow-1);
   padding: 28rpx;
 }
@@ -279,7 +279,7 @@ button::after {
   content: "";
   width: 6rpx;
   height: 28rpx;
-  border-radius: 999rpx;
+  border-radius: 0;
   background: linear-gradient(180deg, #f43f5e, var(--mp-primary));
 }
 
@@ -318,13 +318,13 @@ button::after {
 }
 
 .mp-product-card {
-  border-radius: var(--mp-radius-md);
+  border-radius: 0;
   box-shadow: var(--mp-shadow-1);
   border: 1rpx solid var(--mp-border);
 }
 
 .mp-product-image {
-  border-radius: var(--mp-radius-md) var(--mp-radius-md) 0 0;
+  border-radius: 0;
 }
 
 .mp-row {
@@ -339,7 +339,7 @@ button::after {
 .mp-field input,
 .mp-field textarea,
 .mp-field select {
-  border-radius: var(--mp-radius-sm);
+  border-radius: 0;
   border-color: var(--mp-border);
   background: #fbfbfd;
 }
@@ -364,7 +364,7 @@ button::after {
 .mp-loading {
   color: transparent;
   min-height: 120rpx;
-  border-radius: var(--mp-radius-md);
+  border-radius: 0;
   background: linear-gradient(90deg, #eef1f5 25%, #f8fafc 37%, #eef1f5 63%);
   background-size: 200% 100%;
   animation: mp-shimmer 1.4s linear infinite;
@@ -372,12 +372,12 @@ button::after {
 
 .mp-error {
   border: 1rpx solid #fecaca;
-  border-radius: var(--mp-radius-sm);
+  border-radius: 0;
   background: #fef2f2;
   color: #b91c1c;
 }
 
 .mp-toast {
-  border-radius: var(--mp-radius-sm);
+  border-radius: 0;
   box-shadow: var(--mp-shadow-2);
 }

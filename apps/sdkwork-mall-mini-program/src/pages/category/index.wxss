@@ -1,4 +1,4 @@
-.page-category {
+﻿.page-category {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -82,7 +82,7 @@
 .category-product-row {
   display: flex;
   background: #fff;
-  border-radius: 16rpx;
+  border-radius: 0;
   padding: 20rpx;
   margin-bottom: 20rpx;
 }
@@ -90,7 +90,7 @@
 .category-product-image {
   width: 180rpx;
   height: 180rpx;
-  border-radius: 12rpx;
+  border-radius: 0;
   background: #f3f4f6;
   overflow: hidden;
   display: flex;
