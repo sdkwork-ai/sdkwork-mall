@@ -1,0 +1,32 @@
+{
+  "name": "@sdkwork/mall-mp-core",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Runtime composition for the SDKWork Mall mini program: runtime config, generated SDK client factories, the IAM mini-program session adapter and the commerce request seam.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./composition": "./src/composition/index.ts",
+    "./host": "./src/host/index.ts",
+    "./modules": "./src/modules/index.ts",
+    "./request": "./src/request/index.ts",
+    "./sdk": "./src/sdk/index.ts",
+    "./session": "./src/session/index.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "dependencies": {
+    "@sdkwork/iam-app-sdk": "workspace:*",
+    "@sdkwork/iam-mp-core": "workspace:*",
+    "@sdkwork/im-app-sdk": "workspace:*",
+    "@sdkwork/im-sdk": "workspace:*",
+    "@sdkwork/mall-mp-host": "workspace:*"
+  },
+  "sdkwork": {
+    "architecture": "mini-program",
+    "packageType": "core",
+    "status": "ready"
+  }
+}

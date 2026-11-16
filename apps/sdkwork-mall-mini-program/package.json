@@ -14,6 +14,13 @@
     "test": "pnpm --dir ../.. run test:vitest",
     "lint": "pnpm run typecheck"
   },
+  "dependencies": {
+    "@sdkwork/mall-mp-auth": "workspace:*",
+    "@sdkwork/mall-mp-commons": "workspace:*",
+    "@sdkwork/mall-mp-core": "workspace:*",
+    "@sdkwork/mall-mp-host": "workspace:*",
+    "@sdkwork/mall-mp-im": "workspace:*"
+  },
   "devDependencies": {
     "miniprogram-api-typings": "^5.2.3",
     "typescript": "catalog:"

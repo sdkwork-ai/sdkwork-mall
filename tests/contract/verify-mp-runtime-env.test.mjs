@@ -54,7 +54,16 @@ test("the release channel decides the fallback API host", () => {
   assert.match(environment, /https:\/\/api\.sdkwork\.com\/app\/v3\/api/u);
   assert.match(environment, /https:\/\/api-dev\.sdkwork\.com\/app\/v3\/api/u);
 
+  // The base URL is resolved once by the app entry and handed to the runtime
+  // (`@sdkwork/mall-mp-core`); the transport seam only delegates, so it must not
+  // re-derive the host from `getApp().globalData`.
+  const appEntry = read("apps/sdkwork-mall-mini-program/src/app.ts");
+  assert.match(appEntry, /readRuntimeEnv\(\)/u);
+  assert.match(appEntry, /commerceAppApiBaseUrl/u);
+  assert.match(appEntry, /appApiBaseUrl/u);
+
   const transport = read("apps/sdkwork-mall-mini-program/src/services/transport.ts");
-  assert.match(transport, /readRuntimeEnv\(\)\.commerceAppApiBaseUrl/u);
-  assert.doesNotMatch(transport, /return app\?\.globalData\?\.commerceApiBaseUrl \|\| "https:/u);
+  assert.match(transport, /getMallMpRuntime\(\)\.request/u);
+  assert.doesNotMatch(transport, /getApp\(/u);
+  assert.doesNotMatch(transport, /wx\.request/u);
 });

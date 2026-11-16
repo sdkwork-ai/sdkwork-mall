@@ -1,37 +1,48 @@
 <view class="page-login">
   <view class="mp-card">
-    <view class="mp-card-title">登录 SDKWork 商城</view>
+    <view class="mp-card-title">{{titleText}}</view>
+    <view class="mp-muted login-hint">{{hintText}}</view>
 
-    <block wx:if="{{!useTokenFallback}}">
+    <button
+      class="mp-btn mp-btn-primary login-btn"
+      disabled="{{busy || !wechatAvailable}}"
+      bindtap="loginWithWechat"
+    >{{busy ? wechatLoginBusyText : wechatLoginText}}</button>
+
+    <view class="login-fallback-switch" bindtap="toggleCredentialForm">
+      {{showCredentialForm ? credentialCollapseText : credentialToggleText}}
+    </view>
+
+    <block wx:if="{{showCredentialForm}}">
       <view class="mp-field">
-        <text class="mp-field-label">用户名 / 手机号 / 邮箱</text>
-        <input value="{{account}}" placeholder="输入登录账号" bindinput="onAccountInput" />
+        <text class="mp-field-label">{{accountLabel}}</text>
+        <input value="{{account}}" placeholder="{{accountPlaceholder}}" bindinput="onAccountInput" />
       </view>
       <view class="mp-field">
-        <text class="mp-field-label">密码</text>
-        <input password value="{{password}}" placeholder="输入密码" bindinput="onPasswordInput" />
+        <text class="mp-field-label">{{passwordLabel}}</text>
+        <input password value="{{password}}" placeholder="{{passwordPlaceholder}}" bindinput="onPasswordInput" />
       </view>
-      <view wx:if="{{error}}" class="mp-error">{{error}}</view>
       <button class="mp-btn mp-btn-primary login-btn" disabled="{{busy}}" bindtap="login">
-        {{busy ? '登录中...' : '登录'}}
+        {{busy ? submittingText : submitText}}
       </button>
     </block>
 
-    <block wx:else>
-      <view class="mp-muted login-hint">
-        开发回退：直接粘贴平台签发的访问令牌。
-      </view>
-      <view class="mp-field">
-        <text class="mp-field-label">访问令牌</text>
-        <input password value="{{token}}" placeholder="粘贴平台访问令牌" bindinput="onTokenInput" />
-      </view>
-      <view wx:if="{{error}}" class="mp-error">{{error}}</view>
-      <button class="mp-btn mp-btn-primary login-btn" bindtap="loginWithToken">登录</button>
+    <view wx:if="{{error}}" class="mp-error">
+      <text>{{error}}</text>
+    </view>
+
+    <block wx:if="{{devFallbackVisible}}">
+      <view class="login-fallback-switch" bindtap="toggleFallback">{{devToggleText}}</view>
+      <block wx:if="{{useTokenFallback}}">
+        <view class="mp-muted login-hint">{{devHintText}}</view>
+        <view class="mp-field">
+          <text class="mp-field-label">{{tokenLabel}}</text>
+          <input password value="{{token}}" placeholder="{{tokenPlaceholder}}" bindinput="onTokenInput" />
+        </view>
+        <button class="mp-btn mp-btn-ghost login-btn" bindtap="loginWithToken">{{submitText}}</button>
+      </block>
     </block>
 
-    <button wx:if="{{token}}" class="mp-btn mp-btn-ghost login-btn" bindtap="logout">退出当前账号</button>
-    <view class="login-fallback-switch" bindtap="toggleFallback">
-      {{useTokenFallback ? '使用账号密码登录' : '使用访问令牌登录（开发）'}}
-    </view>
+    <button wx:if="{{token}}" class="mp-btn mp-btn-ghost login-btn" bindtap="logout">{{logoutText}}</button>
   </view>
 </view>

@@ -1,0 +1,29 @@
+{
+  "name": "@sdkwork/mall-mp-im",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Messaging capability for the SDKWork Mall mini program: the sdkwork-im notice centre and chat services projected onto mall view models.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./im-service": "./src/services/im-service.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "dependencies": {
+    "@sdkwork/im-mp-chat": "workspace:*",
+    "@sdkwork/mall-mp-commons": "workspace:*",
+    "@sdkwork/mall-mp-core": "workspace:*",
+    "@sdkwork/mall-mp-host": "workspace:*"
+  },
+  "sdkwork": {
+    "architecture": "mini-program",
+    "surface": "app",
+    "domain": "im",
+    "capability": "messaging",
+    "packageType": "feature",
+    "status": "ready"
+  }
+}

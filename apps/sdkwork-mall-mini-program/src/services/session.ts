@@ -1,76 +1,85 @@
 /**
- * Session storage for the mini-program.
+ * Session shim for the mini program.
  *
- * Speaks the IAM session contract: the login exchange returns dual tokens
- * (`authToken` for the Authorization header, `accessToken` for Access-Token)
- * plus the user context, persisted through wx storage. wx.login/
- * code2session replaces the password exchange once the MP identity contract
- * lands (see docs/decisions.md); the dev token-paste entry remains on the
- * login page as a fallback.
+ * Authority: `MINI_PROGRAM_APP_ARCHITECTURE_SPEC.md` sections 2-3. The real
+ * session/token context is the IAM-owned store surfaced by
+ * `@sdkwork/mall-mp-core`; this module keeps the historical helper names the
+ * pages already import so a capability package can be adopted without touching
+ * every page at once.
+ *
+ * The development-only token paste still writes `LEGACY_TOKEN_KEY` directly: it
+ * produces a single-credential session that the IAM exchange would refuse, and
+ * keeping it out of the dual-token store prevents a half session from ever
+ * reaching a generated SDK.
  */
+import { getMallMpRuntime, type MpSessionSnapshot as MpCoreSession } from "@sdkwork/mall-mp-core";
 
-interface MpSessionSnapshot {
-  authToken: string;
+export interface MpSessionSnapshot {
   accessToken: string;
+  authToken: string;
   userId: string;
 }
 
-const STORAGE_KEY = "sdkwork-mall-mp-session";
+/** Storage key of the pre-dual-token single credential (dev escape hatch). */
 const LEGACY_TOKEN_KEY = "sdkwork-mall-mp-session-token";
 
-function readSession(): MpSessionSnapshot | null {
-  try {
-    const stored = wx.getStorageSync(STORAGE_KEY);
-    if (stored && typeof stored === "object") {
-      const record = stored as Record<string, unknown>;
-      return {
-        authToken: String(record.authToken ?? ""),
-        accessToken: String(record.accessToken ?? ""),
-        userId: String(record.userId ?? ""),
-      };
-    }
-  } catch (error) {
-    // storage unavailable
-  }
-  return null;
+function storage(): ReturnType<typeof getMallMpRuntime>["host"]["storage"] {
+  return getMallMpRuntime().host.storage;
 }
 
-export function getToken(): string {
-  const stored = readSession();
-  if (stored && stored.authToken !== "") {
-    return stored.authToken;
-  }
-  // Pre-dual-token storage held a bare token string.
+function readLegacyToken(): string {
   try {
-    return String(wx.getStorageSync(LEGACY_TOKEN_KEY) || "");
-  } catch (error) {
+    return storage().get(LEGACY_TOKEN_KEY) ?? "";
+  } catch {
     return "";
   }
 }
 
+function toShim(snapshot: MpCoreSession | null): MpSessionSnapshot | null {
+  if (!snapshot) {
+    return null;
+  }
+  return {
+    accessToken: snapshot.accessToken,
+    authToken: snapshot.authToken,
+    userId: snapshot.userId ?? "",
+  };
+}
+
+/** `Authorization` credential; empty when signed out. */
+export function getToken(): string {
+  const stored = toShim(getMallMpRuntime().session.read());
+  if (stored && stored.authToken !== "") {
+    return stored.authToken;
+  }
+  return readLegacyToken();
+}
+
+/** `access-token` credential; empty when signed out or on the dev fallback. */
 export function getAccessToken(): string {
-  const stored = readSession();
-  return stored ? stored.accessToken : "";
+  return toShim(getMallMpRuntime().session.read())?.accessToken ?? "";
 }
 
 export function setSession(snapshot: MpSessionSnapshot): void {
-  try {
-    wx.setStorageSync(STORAGE_KEY, snapshot);
-  } catch (error) {
-    // storage unavailable: keep the session in memory only
-  }
+  getMallMpRuntime().session.write({
+    accessToken: snapshot.accessToken,
+    authToken: snapshot.authToken,
+    ...(snapshot.userId ? { userId: snapshot.userId } : {}),
+  });
 }
 
+/** Development-only single-credential sign-in (login page escape hatch). */
 export function setToken(token: string): void {
-  setSession({ authToken: token, accessToken: "", userId: "" });
+  storage().set(LEGACY_TOKEN_KEY, token);
 }
 
 export function clearSession(): void {
+  const runtime = getMallMpRuntime();
+  runtime.session.clear();
   try {
-    wx.removeStorageSync(STORAGE_KEY);
-    wx.removeStorageSync(LEGACY_TOKEN_KEY);
-  } catch (error) {
-    // ignore
+    runtime.host.storage.remove(LEGACY_TOKEN_KEY);
+  } catch {
+    // storage unavailable: the in-memory snapshot is already cleared
   }
 }
 
@@ -80,6 +89,5 @@ export function isLoggedIn(): boolean {
 
 /** IAM user id captured by the login exchange (empty when signed out). */
 export function getUserId(): string {
-  const stored = readSession();
-  return stored ? stored.userId : "";
+  return toShim(getMallMpRuntime().session.read())?.userId ?? "";
 }

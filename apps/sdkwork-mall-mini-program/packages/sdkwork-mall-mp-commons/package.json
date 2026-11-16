@@ -1,0 +1,19 @@
+{
+  "name": "@sdkwork/mall-mp-commons",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Domain-neutral primitives for the SDKWork Mall mini program: wire-record coercion, error message mapping and display formatters shared by every capability package.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "sdkwork": {
+    "architecture": "mini-program",
+    "packageType": "commons",
+    "status": "ready"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "@sdkwork/mall-mp-auth",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Account capability for the SDKWork Mall mini program: WeChat one-tap sign-in through the IAM mini-program session exchange, plus the development-only credential fallbacks.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./auth-service": "./src/services/auth-service.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "dependencies": {
+    "@sdkwork/mall-mp-core": "workspace:*",
+    "@sdkwork/mall-mp-host": "workspace:*"
+  },
+  "sdkwork": {
+    "architecture": "mini-program",
+    "surface": "app",
+    "domain": "account",
+    "capability": "auth",
+    "packageType": "feature",
+    "status": "ready"
+  }
+}

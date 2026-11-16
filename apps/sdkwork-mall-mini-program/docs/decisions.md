@@ -109,3 +109,34 @@
     The new suite cross-checks every top-level template binding against the
     page module, every `t("…")` key against the catalogue, the `PageInfo`
     contract, `rpx`-only styles, share hooks, and pull-to-refresh pairing.
+
+- 2026-11-16 (user-directed, second pass: "IM lives in sdkwork-im, auth in
+  sdkwork-iam - keep the difference"). The first pass put the WeChat session in
+  IAM (correct side) but re-implemented the IM chat/notice transport inside the
+  mall app (wrong side). Corrected to domain ownership:
+  - **Authentication -> `sdkwork-iam`.** `@sdkwork/iam-mp-core/session-wechat` is
+    now the single WeChat mini-program session module: persisted dual-token store,
+    `AuthTokenManager` twin, `oauth.miniProgramSessions.create` exchange (with the
+    per-install `deviceId` established *before* the exchange), cold-launch
+    revalidation and logout. It exports through its own package subpath and is
+    authored (not generated), so the IAM app and any product mini program share
+    one implementation. `@sdkwork/mall-mp-core` only adapts the host storage and
+    re-exports it.
+  - **Messaging -> `sdkwork-im`.** The mall deleted its chat/notice transport and
+    consumes `@sdkwork/im-mp-chat/services`: `createImMpNotificationsService`
+    (newly landed in IM, previously missing - IM had no notice-centre module at
+    all), `createImMpChatInboxService` and `createImMpChatConversationService`.
+    The mall capability only projects IM domain types onto view models and orders
+    the chat stream chronologically; it declares no endpoint.
+  - **Client construction stays in `@sdkwork/mall-mp-core`** (spec section 7):
+    `@sdkwork/iam-app-sdk` for auth, `@sdkwork/im-app-sdk` for notices,
+    `@sdkwork/im-sdk` for conversations, all reading the IAM token manager so a
+    login/logout is visible to every client without a rebuild.
+  - **Workspace governance.** Consuming sibling mini-program packages required
+    registering them in `sdkwork-specs/workspace/consumers/sdkwork-mall.json`
+    (`im-mp-{commons,core,shell,chat}`, `iam-mp-core`, `im-sdk`); `verify-repo`
+    now passes with the registry-rendered `pnpm-workspace.yaml`.
+  - Tests: `mp-runtime-core.test.ts` exercises the IAM module through the mall
+    re-export (store/token manager/exchange/restore/expiry), and
+    `mp-auth-im.test.ts` pins the IM projections (notice page + cursor, inbox,
+    chronological stream, send/read delegated to IM services).

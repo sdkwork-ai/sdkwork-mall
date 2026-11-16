@@ -9,6 +9,7 @@
  * resolves only JavaScript at runtime.
  */
 import buyerHub from "./zh-CN/account/buyer-hub/messages";
+import auth from "./zh-CN/account/auth/messages";
 import messagesFragment from "./zh-CN/account/messages/messages";
 import invoices from "./zh-CN/account/invoices/messages";
 import membership from "./zh-CN/account/membership/messages";
@@ -39,6 +40,7 @@ function collect(node: Record<string, unknown>, prefix: string): void {
 }
 
 collect(buyerHub as Record<string, unknown>, "");
+collect(auth as Record<string, unknown>, "");
 collect(messagesFragment as Record<string, unknown>, "");
 collect(invoices as Record<string, unknown>, "");
 collect(membership as Record<string, unknown>, "");

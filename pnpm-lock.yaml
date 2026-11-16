@@ -637,6 +637,25 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  ../sdkwork-iam/apps/sdkwork-iam-mini-program/packages/sdkwork-iam-mp-core:
+    dependencies:
+      '@sdkwork/iam-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
+      '@sdkwork/iam-contracts':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-contracts
+      '@sdkwork/iam-runtime':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-runtime
+      '@sdkwork/iam-service':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-service
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+
   ../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-pc-react:
     dependencies:
       '@sdkwork/i18n-pc-react':
@@ -791,6 +810,47 @@ importers:
         specifier: workspace:*
         version: link:../../../../sdkwork-utils/packages/sdkwork-utils-typescript
 
+  ../sdkwork-im/apps/sdkwork-im-mini-program/packages/sdkwork-im-mp-chat:
+    dependencies:
+      '@sdkwork/drive-upload-image-core':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-drive/apps/sdkwork-drive-common/packages/sdkwork-drive-upload-image-core
+      '@sdkwork/im-mp-commons':
+        specifier: workspace:*
+        version: link:../sdkwork-im-mp-commons
+      '@sdkwork/im-mp-core':
+        specifier: workspace:*
+        version: link:../sdkwork-im-mp-core
+      '@sdkwork/im-mp-shell':
+        specifier: workspace:*
+        version: link:../sdkwork-im-mp-shell
+
+  ../sdkwork-im/apps/sdkwork-im-mini-program/packages/sdkwork-im-mp-commons: {}
+
+  ../sdkwork-im/apps/sdkwork-im-mini-program/packages/sdkwork-im-mp-core:
+    dependencies:
+      '@sdkwork/drive-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript
+      '@sdkwork/iam-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
+      '@sdkwork/im-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../sdks/sdkwork-im-app-sdk/sdkwork-im-app-sdk-typescript
+      '@sdkwork/im-sdk':
+        specifier: workspace:*
+        version: link:../../../../sdks/sdkwork-im-sdk/sdkwork-im-sdk-typescript
+      '@sdkwork/sdk-common':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript
+
+  ../sdkwork-im/apps/sdkwork-im-mini-program/packages/sdkwork-im-mp-shell:
+    dependencies:
+      '@sdkwork/im-mp-commons':
+        specifier: workspace:*
+        version: link:../sdkwork-im-mp-commons
+
   ../sdkwork-im/sdks/sdkwork-im-app-sdk/sdkwork-im-app-sdk-typescript:
     dependencies:
       '@sdkwork/sdk-common':
@@ -799,6 +859,15 @@ importers:
       '@sdkwork/utils':
         specifier: workspace:*
         version: link:../../../../sdkwork-utils/packages/sdkwork-utils-typescript
+
+  ../sdkwork-im/sdks/sdkwork-im-sdk/sdkwork-im-sdk-typescript:
+    dependencies:
+      '@sdkwork/sdk-common':
+        specifier: workspace:*
+        version: link:../../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript
+      ws:
+        specifier: ^8.18.1
+        version: 8.23.0
 
   ../sdkwork-membership/apps/sdkwork-membership-common/packages/sdkwork-membership-contracts: {}
 
@@ -1482,7 +1551,11 @@ importers:
         specifier: workspace:*
         version: link:../sdkwork-mall-h5-core
 
-  apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-commons: {}
+  apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-commons:
+    dependencies:
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.42.0(react@19.2.8)
 
   apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-core: {}
 
@@ -1584,6 +1657,22 @@ importers:
         version: link:../sdkwork-mall-h5-core
 
   apps/sdkwork-mall-mini-program:
+    dependencies:
+      '@sdkwork/mall-mp-auth':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-mp-auth
+      '@sdkwork/mall-mp-commons':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-mp-commons
+      '@sdkwork/mall-mp-core':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-mp-core
+      '@sdkwork/mall-mp-host':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-mp-host
+      '@sdkwork/mall-mp-im':
+        specifier: workspace:*
+        version: link:packages/sdkwork-mall-mp-im
     devDependencies:
       miniprogram-api-typings:
         specifier: ^5.2.3
@@ -1591,6 +1680,52 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+
+  apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-auth:
+    dependencies:
+      '@sdkwork/mall-mp-core':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-mp-core
+      '@sdkwork/mall-mp-host':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-mp-host
+
+  apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-commons: {}
+
+  apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-core:
+    dependencies:
+      '@sdkwork/iam-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
+      '@sdkwork/iam-mp-core':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-iam/apps/sdkwork-iam-mini-program/packages/sdkwork-iam-mp-core
+      '@sdkwork/im-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-im/sdks/sdkwork-im-app-sdk/sdkwork-im-app-sdk-typescript
+      '@sdkwork/im-sdk':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-im/sdks/sdkwork-im-sdk/sdkwork-im-sdk-typescript
+      '@sdkwork/mall-mp-host':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-mp-host
+
+  apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-host: {}
+
+  apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-im:
+    dependencies:
+      '@sdkwork/im-mp-chat':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-im/apps/sdkwork-im-mini-program/packages/sdkwork-im-mp-chat
+      '@sdkwork/mall-mp-commons':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-mp-commons
+      '@sdkwork/mall-mp-core':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-mp-core
+      '@sdkwork/mall-mp-host':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-mp-host
 
   apps/sdkwork-mall-pc:
     dependencies:
@@ -6839,6 +6974,18 @@ packages:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
     engines: {node: '>=8'}
 
+  ws@8.23.0:
+    resolution: {integrity: sha512-wCkmX8QMOrKjgO8HW2WyDbTSGeqkocxgDzS9iR79rEAexty6/2qzilx3Ag8Tqf9ykop3irLKle0MtVn5qjVnoQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
@@ -11502,6 +11649,8 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+
+  ws@8.23.0: {}
 
   xml-name-validator@5.0.0: {}
 

@@ -1,0 +1,142 @@
+/**
+ * In-memory host for node tests and for the devtools-without-platform harness.
+ *
+ * Authority: `MINI_PROGRAM_APP_ARCHITECTURE_SPEC.md` section 8 ("`mp-host`
+ * provides platform implementations and fakes for tests"). Every fake records
+ * its calls so a test can assert the contract without a platform runtime.
+ */
+import {
+  MP_HOST_CAPABILITIES,
+  createMpHostError,
+  type MpChosenImage,
+  type MpHost,
+  type MpHostCapability,
+  type MpHttpRequestOptions,
+  type MpHttpResponse,
+  type MpStorage,
+} from "../index";
+
+export interface MemoryHostRecorder {
+  readonly clipboard: string[];
+  readonly http: MpHttpRequestOptions[];
+  readonly navigations: string[];
+  readonly toasts: string[];
+}
+
+export interface CreateMemoryHostOptions {
+  readonly capabilities?: readonly MpHostCapability[];
+  /** Key/value seed for `storage`. */
+  readonly storage?: Record<string, string>;
+  /** Scripted HTTP responses, matched in order. */
+  readonly httpResponses?: MpHttpResponse[];
+  /** Scripted login codes, consumed in order (default `["test-js-code"]`). */
+  readonly loginCodes?: string[];
+  /** Scripted image picks. */
+  readonly images?: MpChosenImage[];
+  /** Confirmation answer for `feedback.confirm`. */
+  readonly confirmAnswer?: boolean;
+}
+
+export interface MemoryHost extends MpHost {
+  readonly recorder: MemoryHostRecorder;
+}
+
+export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryHost {
+  const capabilities = new Set<MpHostCapability>(options.capabilities ?? MP_HOST_CAPABILITIES);
+  const values = new Map<string, string>(Object.entries(options.storage ?? {}));
+  const recorder: MemoryHostRecorder = {
+    clipboard: [],
+    http: [],
+    navigations: [],
+    toasts: [],
+  };
+  const loginCodes = [...(options.loginCodes ?? ["test-js-code"])];
+  const responses = [...(options.httpResponses ?? [])];
+
+  const storage: MpStorage = {
+    get: (key) => values.get(key) ?? null,
+    set: (key, value) => {
+      values.set(key, value);
+    },
+    remove: (key) => {
+      values.delete(key);
+    },
+  };
+
+  return {
+    capabilities,
+    recorder,
+    hasCapability: (capability) => capabilities.has(capability),
+    storage,
+    loginCode: {
+      async requestLoginCode() {
+        const next = loginCodes.shift();
+        if (!next) {
+          throw createMpHostError("invalid-state", "no login code scripted");
+        }
+        return next;
+      },
+    },
+    navigation: {
+      async navigateTo(url) {
+        recorder.navigations.push(`navigateTo:${url}`);
+      },
+      async redirectTo(url) {
+        recorder.navigations.push(`redirectTo:${url}`);
+      },
+      async switchTab(url) {
+        recorder.navigations.push(`switchTab:${url}`);
+      },
+      async back(delta = 1) {
+        recorder.navigations.push(`back:${delta}`);
+      },
+    },
+    feedback: {
+      toast(message) {
+        recorder.toasts.push(message);
+      },
+      async confirm() {
+        return options.confirmAnswer ?? true;
+      },
+      async alert() {
+        // recorded as a toast so a test can assert the message text
+      },
+    },
+    clipboard: {
+      async setText(text) {
+        recorder.clipboard.push(text);
+      },
+    },
+    media: {
+      async chooseImages() {
+        return options.images ?? [];
+      },
+      async readBytes() {
+        return new ArrayBuffer(0);
+      },
+    },
+    payment: {
+      async requestPayment() {
+        // A memory host always "completes" the platform cashier.
+      },
+    },
+    http: {
+      async request(requestOptions) {
+        recorder.http.push(requestOptions);
+        const next = responses.shift();
+        if (!next) {
+          throw createMpHostError("unavailable", `no HTTP response scripted for ${requestOptions.url}`);
+        }
+        return next;
+      },
+      async requestBytes(requestOptions) {
+        recorder.http.push(requestOptions);
+        const next = responses.shift();
+        if (!next) {
+          throw createMpHostError("unavailable", `no HTTP response scripted for ${requestOptions.url}`);
+        }
+        return next;
+      },
+    },
+  };
+}
