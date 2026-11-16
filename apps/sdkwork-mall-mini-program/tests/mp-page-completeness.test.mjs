@@ -388,6 +388,17 @@ test("no text asset starts with a UTF-8 BOM", () => {
   assert.deepEqual(problems, [], "text assets must not start with a BOM");
 });
 
+test("buyer page carries every icon it renders", () => {
+  // The first version dropped the icon field in resolveLinks, so the template built
+  // "/assets/icons/undefined.png": order rows showed icons, service tiles did not.
+  const source = read(path.join(srcRoot, "pages", "buyer", "index.ts"));
+  assert.match(source, /icon: link\.icon/u, "resolveLinks must carry the icon");
+  const names = [...source.matchAll(/icon: "([a-z-]+)"/gu)].map((match) => match[1]);
+  assert.ok(names.length >= 14, "expected an icon per entry");
+  const missing = names.filter((name) => !existsSync(path.join(srcRoot, "assets", "icons", name + ".png")));
+  assert.deepEqual(missing, [], "every referenced icon must ship as a PNG");
+});
+
 test("templates only reference assets that exist and avoid grid layout", () => {
   // Two failures observed in the dev tool: a `/assets/...png` icon that was never
   // shipped (empty glyph) and `display: grid` collapsing tiles so labels wrapped one

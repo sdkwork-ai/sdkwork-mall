@@ -47,8 +47,8 @@ const ACCOUNT_LINKS: Array<{ labelKey: string; capability: string }> = [
   { labelKey: "buyerHub.account.help", capability: "storefront.mall.help" },
 ];
 
-const OTHER_LINKS: Array<{ labelKey: string; capability: string }> = [
-  { labelKey: "buyerHub.others.activity", capability: "storefront.mall.activity-list" },
+const OTHER_LINKS: Array<{ labelKey: string; capability: string; icon: string }> = [
+  { labelKey: "buyerHub.others.activity", capability: "storefront.mall.activity-list", icon: "ticket" },
 ];
 
 interface BuyerData {
@@ -75,9 +75,13 @@ function resolveOrderEntries(
 }
 
 function resolveLinks(
-  links: Array<{ labelKey: string; capability: string }>,
-): Array<{ label: string; capability: string }> {
-  return links.map((link) => ({ label: t(link.labelKey), capability: link.capability }));
+  links: Array<{ labelKey: string; capability: string; icon?: string }>,
+): Array<{ label: string; capability: string; icon: string }> {
+  return links.map((link) => ({
+    label: t(link.labelKey),
+    capability: link.capability,
+    icon: link.icon ?? "",
+  }));
 }
 
 Page({

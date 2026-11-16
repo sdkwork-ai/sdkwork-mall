@@ -816,3 +816,20 @@
   - Guard: `bundles polyfill the web globals the appservice lacks` (app.js and
     shared/runtime.js carry all four shim markers).
   - Size: main 766.3 KB, largest subpackage 48.4 KB, total 1418.1 KB.
+
+- 2026-11-16 (thirty-third pass: buyer icons verified per entry). The screenshot
+  showed solid red blocks in "我的订单" and **no icons at all** in "我的资产" and
+  "常用服务". Two separate defects:
+  - `resolveLinks` returned `{ label, capability }` and silently dropped `icon`, so
+    the template resolved `/assets/icons/undefined.png` for every service/asset tile
+    (the order entries were fine because they map their own `icon` field). The helper
+    now carries the icon, and `resolveLinks` accepts links without one (account rows
+    stay text-only).
+  - The first artwork pass filled whole rectangles for wallet/package/truck/file/
+    receipt/ticket, which rendered as red blocks at 24 px. The generator now draws
+    line glyphs (outline rectangles, rings, hands) and all 15 PNGs were regenerated.
+  - Guards: `buyer page carries every icon it renders` (resolveLinks must carry the
+    icon, every `icon: "name"` must ship as a PNG) on top of the template asset check;
+    41 node guards total.
+  - Rebuilt: main 766.5 KB, largest subpackage 48.4 KB, total 1418.4 KB (build
+    16:18:11.695Z); smoke PASS over 36 pages.

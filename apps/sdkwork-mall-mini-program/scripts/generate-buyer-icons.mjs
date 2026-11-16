@@ -75,7 +75,8 @@ function canvas() {
     buffer[offset + 2] = COLOR.b;
     buffer[offset + 3] = 0xff;
   };
-  return { buffer, set };
+  const alphaZero = (offset) => { buffer[offset + 3] = 0; };
+  return { buffer, set, alphaZero };
 }
 
 function rect(set, x, y, w, h) {
@@ -117,12 +118,19 @@ function line(set, x1, y1, x2, y2, thickness = 4) {
   }
 }
 
+function strokeRect(set, x, y, w, h, t = 4) {
+  line(set, x, y, x + w, y, t);
+  line(set, x + w, y, x + w, y + h, t);
+  line(set, x + w, y + h, x, y + h, t);
+  line(set, x, y + h, x, y, t);
+}
+
 const ICONS = {
   wallet: (set) => {
-    rect(set, 8, 18, 48, 32);
-    rect(set, 8, 18, 48, 5);
-    rect(set, 34, 30, 22, 8);
-    disc(set, 46, 34, 3);
+    strokeRect(set, 10, 18, 44, 30);
+    line(set, 10, 26, 54, 26, 3);
+    strokeRect(set, 34, 32, 20, 10, 3);
+    disc(set, 40, 37, 2.5);
   },
   star: (set) => {
     const points = [];
@@ -146,13 +154,13 @@ const ICONS = {
     }
   },
   crown: (set) => {
-    for (let x = 0; x < SIZE; x += 1) {
-      for (let y = 0; y < SIZE; y += 1) {
-        const top = 16 + Math.abs(((x - 8) % 16) - 8) * 1.6;
-        if (y >= top && y <= 46 && x >= 8 && x <= 56) set(x, y);
+    for (let x = 10; x <= 54; x += 1) {
+      for (let y = 20; y <= 46; y += 1) {
+        const top = 18 + Math.abs(((x - 10) % 15) - 7) * 1.8;
+        if (y >= top) set(x, y);
       }
     }
-    rect(set, 8, 48, 48, 5);
+    line(set, 10, 50, 54, 50, 4);
   },
   heart: (set) => {
     disc(set, 23, 26, 11);
@@ -168,69 +176,60 @@ const ICONS = {
     line(set, 32, 32, 42, 36, 4);
   },
   pin: (set) => {
-    disc(set, 32, 26, 14);
-    for (let y = 26; y < 52; y += 1) {
-      const half = Math.max(0, 14 - (y - 26) * 0.55);
-      for (let x = Math.round(32 - half); x <= Math.round(32 + half); x += 1) set(x, y);
-    }
-    disc(set, 32, 26, 6);
+    ring(set, 32, 25, 15, 4);
+    line(set, 24, 36, 32, 54, 4);
+    line(set, 40, 36, 32, 54, 4);
+    disc(set, 32, 25, 4);
   },
   ticket: (set) => {
-    rect(set, 8, 18, 48, 28);
-    disc(set, 8, 32, 5);
-    disc(set, 56, 32, 5);
-    line(set, 30, 24, 30, 40, 3);
+    strokeRect(set, 8, 16, 48, 32);
+    line(set, 30, 22, 30, 42, 3);
   },
   file: (set) => {
-    rect(set, 16, 10, 32, 44);
-    rect(set, 24, 22, 16, 4);
-    rect(set, 24, 30, 16, 4);
-    rect(set, 24, 38, 10, 4);
-  },
-  receipt: (set) => {
-    rect(set, 16, 10, 32, 40);
+    strokeRect(set, 16, 10, 32, 44);
     line(set, 24, 22, 40, 22, 3);
     line(set, 24, 30, 40, 30, 3);
+    line(set, 24, 38, 34, 38, 3);
+  },
+  receipt: (set) => {
+    strokeRect(set, 16, 8, 32, 40);
+    line(set, 24, 20, 40, 20, 3);
+    line(set, 24, 28, 40, 28, 3);
+    line(set, 24, 36, 34, 36, 3);
     for (let x = 16; x < 48; x += 8) {
-      line(set, x, 50, x + 4, 56, 3);
-      line(set, x + 4, 56, x + 8, 50, 3);
+      line(set, x, 48, x + 4, 56, 3);
+      line(set, x + 4, 56, x + 8, 48, 3);
     }
   },
   chat: (set) => {
-    rect(set, 10, 14, 44, 28);
-    for (let y = 42; y < 54; y += 1) {
-      const half = Math.max(0, 12 - (y - 42));
-      for (let x = Math.round(20 - half); x <= Math.round(20 + half); x += 1) set(x, y);
-    }
+    strokeRect(set, 10, 12, 44, 30, 4);
+    line(set, 22, 42, 22, 54, 4);
+    line(set, 22, 54, 38, 42, 4);
   },
   headset: (set) => {
-    ring(set, 32, 32, 22, 5);
-    for (let y = 0; y < 32; y += 1) {
+    for (let y = 8; y < 32; y += 1) {
       for (let x = 0; x < SIZE; x += 1) {
         const distance = Math.hypot(x - 32, y - 32);
-        if (distance <= 22 && distance >= 17 && y > 32) {
-          set(x, y);
-        }
+        if (distance <= 22 && distance >= 18) set(x, y);
       }
     }
-    rect(set, 8, 32, 9, 18);
-    rect(set, 47, 32, 9, 18);
+    strokeRect(set, 8, 30, 9, 18, 3);
+    strokeRect(set, 47, 30, 9, 18, 3);
   },
   box: (set) => {
-    line(set, 32, 12, 52, 24, 4);
-    line(set, 32, 12, 12, 24, 4);
-    line(set, 12, 24, 12, 44, 4);
-    line(set, 52, 24, 52, 44, 4);
-    line(set, 12, 44, 32, 54, 4);
-    line(set, 52, 44, 32, 54, 4);
-    line(set, 32, 32, 32, 54, 3);
-    rect(set, 14, 20, 8, 3);
+    line(set, 32, 10, 54, 24, 4);
+    line(set, 32, 10, 10, 24, 4);
+    line(set, 10, 24, 10, 44, 4);
+    line(set, 54, 24, 54, 44, 4);
+    line(set, 10, 44, 32, 56, 4);
+    line(set, 54, 44, 32, 56, 4);
+    line(set, 32, 32, 32, 56, 3);
   },
   truck: (set) => {
-    rect(set, 8, 24, 26, 18);
-    rect(set, 34, 30, 16, 12);
-    disc(set, 20, 46, 6);
-    disc(set, 44, 46, 6);
+    strokeRect(set, 8, 24, 26, 18);
+    strokeRect(set, 34, 30, 16, 12);
+    ring(set, 20, 46, 6, 3);
+    ring(set, 44, 46, 6, 3);
     line(set, 34, 24, 34, 30, 3);
   },
   check: (set) => {
@@ -238,16 +237,17 @@ const ICONS = {
     line(set, 28, 46, 50, 18, 7);
   },
   package: (set) => {
-    rect(set, 12, 18, 40, 32);
+    strokeRect(set, 12, 16, 40, 34);
     line(set, 12, 26, 52, 26, 3);
-    line(set, 32, 18, 32, 50, 3);
+    line(set, 32, 16, 32, 50, 3);
     disc(set, 32, 26, 3);
   },
 };
 
 mkdirSync(OUT, { recursive: true });
 for (const [name, draw] of Object.entries(ICONS)) {
-  const { buffer, set } = canvas();
+  const { buffer, set, alphaZero } = canvas();
+  void alphaZero;
   draw(set);
   writeFileSync(path.join(OUT, `${name}.png`), encodePng(buffer));
 }
