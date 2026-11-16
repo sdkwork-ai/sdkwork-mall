@@ -198,7 +198,12 @@ function toTeamView(member: MpPartnerTeamMember, currency: string): PartnerTeamV
     balanceText: `${t("partner.team.availableBalance")} ${moneyText(member.availableBalance)}`,
     commissionText: `${t("partner.team.totalCommission")} ${moneyText(member.totalCommission)}`,
     depth: member.depth,
-    depthTag: teamDepthLabel(member.depth),
+    depthTag:
+      member.depth <= 1
+        ? t("partner.dashboard.levelFirst")
+        : member.depth === 2
+          ? t("partner.dashboard.levelSecond")
+          : `${t("partner.team.depth")} ${member.depth}`,
     joinedText: `${t("partner.team.joinedAt")} ${formatTime(member.joinedAt)}`,
     levelText: `${member.levelName || member.levelNo} · ${t("partner.team.depth")} ${member.depth}`,
     metaText: `${t("partner.team.customerCount")} ${member.customerCount} · ${t("partner.team.directTeam")} ${member.directTeamSize} · ${currency}`,
@@ -210,7 +215,12 @@ function toTeamView(member: MpPartnerTeamMember, currency: string): PartnerTeamV
 function toCommissionView(record: MpPartnerCommissionRecord): PartnerCommissionView {
   return {
     amountText: moneyText(record.amount),
-    levelTag: commissionLevelLabel(record.levelOffset),
+    levelTag:
+      record.levelOffset <= 0
+        ? t("partner.dashboard.levelFirstCommission")
+        : record.levelOffset === 1
+          ? t("partner.dashboard.levelSecondCommission")
+          : `${t("partner.commissions.levelOffset")} ${record.levelOffset}`,
     baseText: `${t("partner.commissions.baseAmount")} ${moneyText(record.baseAmount)}`,
     id: record.id,
     metaText: `${t("partner.commissions.levelOffset")} ${record.levelOffset} · ${formatTime(record.computedAt)}`,
@@ -262,6 +272,24 @@ function summaryTexts(program: MpPartnerProgram): string[] {
 function buildLabels(): Record<string, string> {
   return {
     actionsApply: t("partner.actions.apply"),
+    dashAvailable: t("partner.dashboard.earningsAvailable"),
+    dashFrozen: t("partner.dashboard.earningsFrozen"),
+    dashInviteCodeLine: t("partner.dashboard.inviteCodeLine"),
+    dashProductsLoading: t("partner.dashboard.productsLoading"),
+    dashShareCopied: t("partner.dashboard.shareCopied"),
+    dashShareCopyCode: t("partner.dashboard.shareCopyCode"),
+    dashCopyProduct: t("partner.dashboard.copyProduct"),
+    dashShareAction: t("partner.dashboard.shareAction"),
+    dashShareCopyLink: t("partner.dashboard.shareCopyLink"),
+    dashTabAll: t("partner.dashboard.tabAll"),
+    dashTabFirst: t("partner.dashboard.levelFirst"),
+    dashTabSecond: t("partner.dashboard.levelSecond"),
+    dashShareDescription: t("partner.dashboard.shareDescription"),
+    dashShareInvite: t("partner.dashboard.shareInvite"),
+    dashShareProductsTitle: t("partner.dashboard.shareProductsTitle"),
+    dashShareTitle: t("partner.dashboard.shareTitle"),
+    dashTotal: t("partner.dashboard.earningsTotal"),
+    dashWithdrawn: t("partner.dashboard.earningsWithdrawn"),
     actionsCancel: t("partner.actions.cancelApplication"),
     actionsClose: t("partner.actions.close"),
     actionsCopy: t("partner.actions.copy"),
@@ -725,7 +753,7 @@ Page({
       return;
     }
     void platform.copy(product.path);
-    platform.toast("商品分享链接已复制，好友下单后佣金自动结算", "success");
+    platform.toast(t("partner.dashboard.shareCopied"), "success");
   },
 
   openShareProduct(event: MpTapEvent) {
@@ -745,12 +773,14 @@ Page({
       return {
         imageUrl: product.imageUrl || undefined,
         path: buildProductSharePath(product.id, inviteCode),
-        title: product.title ? `${product.title} - 好物推荐` : "分享好物，一起赚佣金",
+        title: product.title
+          ? `${product.title} - ${t("partner.dashboard.cardProductSuffix")}`
+          : t("partner.dashboard.cardProductFallback"),
       };
     }
     return {
       path: this.data.shareLink || mpCapabilityUrl("buyer.mall.distribution"),
-      title: "加入我的分销团队，分享好物赚佣金",
+      title: t("partner.dashboard.cardInviteTitle"),
     };
   },
 

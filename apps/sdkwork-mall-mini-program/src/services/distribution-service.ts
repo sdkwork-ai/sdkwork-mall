@@ -45,24 +45,12 @@ export function summarizeEarnings(center: MpPartnerCenter): DistributionEarnings
 
 /** One level per depth: 0 is the partner's own customer chain entry (一级). */
 export function teamDepthLabel(depth: number): string {
-  if (depth <= 1) {
-    return "一级";
-  }
-  if (depth === 2) {
-    return "二级";
-  }
-  return `${depth} 级`;
+  return String(Math.max(1, depth));
 }
 
 /** Commission record level offset → buyer-facing label. */
 export function commissionLevelLabel(levelOffset: number): string {
-  if (levelOffset <= 0) {
-    return "一级佣金";
-  }
-  if (levelOffset === 1) {
-    return "二级佣金";
-  }
-  return `${levelOffset + 1} 级佣金`;
+  return String(levelOffset + 1);
 }
 
 /** Tab filter over the loaded team page (server pages the whole chain). */

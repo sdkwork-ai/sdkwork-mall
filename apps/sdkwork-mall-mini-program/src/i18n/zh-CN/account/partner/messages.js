@@ -3,6 +3,31 @@
 // TypeScript the shape and `src/i18n/index.ts` resolves keys at runtime.
 module.exports = {
   partner: {
+    dashboard: {
+      earningsTotal: "累计收益",
+      earningsAvailable: "可提现",
+      earningsFrozen: "冻结中",
+      earningsWithdrawn: "已提现",
+      inviteCodeLine: "我的邀请码",
+      productsLoading: "商品加载中…",
+      shareCopied: "商品分享链接已复制，好友下单后佣金自动结算",
+      shareCopyCode: "复制邀请码",
+      shareCopyLink: "复制邀请链接",
+      shareDescription: "分享商品给好友，好友下单后佣金按一级/二级自动结算到你的账户。",
+      shareInvite: "转发邀请好友",
+      shareProductsTitle: "分享热卖商品",
+      shareTitle: "分享赚佣金",
+      cardProductFallback: "分享好物，一起赚佣金",
+      cardProductSuffix: "好物推荐",
+      cardInviteTitle: "加入我的分销团队，分享好物赚佣金",
+      copyProduct: "复制链接",
+      shareAction: "分享",
+      tabAll: "全部",
+      levelFirst: "一级",
+      levelSecond: "二级",
+      levelFirstCommission: "一级佣金",
+      levelSecondCommission: "二级佣金",
+    },
     page: {
       eyebrow: "合作伙伴计划",
       title: "分销中心",

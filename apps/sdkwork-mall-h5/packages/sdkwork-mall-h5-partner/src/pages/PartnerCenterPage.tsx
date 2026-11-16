@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Copy, Share2, ShieldCheck, ShieldX, Users } from "lucide-react";
+import { Copy, Share2, ShieldCheck, ShieldX, Users, Wallet } from "lucide-react";
 
 import {
   buildSdkworkPartnerInviteLink,
@@ -21,6 +21,8 @@ import {
   type SdkworkPartnerTeamMember,
   type SdkworkPartnerWithdrawal,
 } from "@sdkwork/mall-partner-service";
+
+import { searchMallH5Products, type MallH5ProductCard } from "@sdkwork/mall-h5-catalog";
 
 import type { SdkworkPartnerController } from "../partner-controller.ts";
 import {
@@ -90,6 +92,11 @@ export function SdkworkMallH5PartnerCenterPage({
         preview={state.invitePreview}
         t={t}
       />
+
+        <ShareSection
+          inviteCode={state.center?.available ? state.center.snapshot.profile.inviteCode : undefined}
+          t={t}
+        />
 
       {state.isApplyFormOpen && state.program ? (
         <ApplyModal onClose={controller.closeApplyForm} t={t}>
@@ -230,10 +237,15 @@ function CenterSection({
     );
   }
   const { snapshot } = center;
+  const balance = snapshot.balance;
+  const money = (value: string) => formatSdkworkPartnerMoney(value, balance.currency, locale);
   const metrics = [
     { icon: Users, label: t("partner.center.team"), value: String(snapshot.counts.teamSize) },
     { icon: Users, label: t("partner.center.directTeam"), value: String(snapshot.counts.directTeamSize) },
     { icon: Users, label: t("partner.center.customers"), value: String(snapshot.counts.customerCount) },
+    { icon: Wallet, label: t("partner.center.settled"), value: money(balance.settledTotal) },
+    { icon: Wallet, label: t("partner.center.withdrawable"), value: money(balance.withdrawable) },
+    { icon: Wallet, label: t("partner.center.pending"), value: money(balance.pending) },
   ];
   return (
     <section className="sdk-h5-section">
@@ -348,6 +360,69 @@ function InviteSection({
           </div>
         </div>
       ) : null}
+    </section>
+  );
+}
+
+function ShareSection({ inviteCode, t }: { readonly inviteCode?: string; readonly t: Translate }) {
+  const [products, setProducts] = useState<readonly MallH5ProductCard[]>([]);
+  const [copiedId, setCopiedId] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    void searchMallH5Products({ page: 1, pageSize: 6 })
+      .then((result) => {
+        if (!cancelled) {
+          setProducts(result.items);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProducts([]);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const productLink = (id: string): string =>
+    `${origin}/product/${encodeURIComponent(id)}${inviteCode ? `?invite=${encodeURIComponent(inviteCode)}` : ""}`;
+  return (
+    <section className="sdk-h5-section">
+      <h2>{t("partner.share.title")}</h2>
+      <p className="sdk-h5-muted">{t("partner.share.description")}</p>
+      <h3>{t("partner.share.productTitle")}</h3>
+      {products.length === 0 ? (
+        <div className="sdk-h5-empty">{t("partner.share.noProducts")}</div>
+      ) : (
+        <ul className="sdk-h5-benefit-grid">
+          {products.map((product) => (
+            <li className="sdk-h5-benefit-item" key={product.id}>
+              <h3>{product.title}</h3>
+              <p className="sdk-h5-muted">
+                {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "—"}
+              </p>
+              <div className="sdk-h5-action-row">
+                <button
+                  className="sdk-h5-button sdk-h5-button-secondary"
+                  onClick={() => {
+                    if (typeof navigator !== "undefined" && navigator.clipboard) {
+                      void navigator.clipboard.writeText(productLink(product.id)).then(() => setCopiedId(product.id));
+                    }
+                  }}
+                  type="button"
+                >
+                  <Copy aria-hidden="true" size={14} />
+                  {copiedId === product.id ? t("partner.actions.copied") : t("partner.share.copyProduct")}
+                </button>
+                <a className="sdk-h5-button sdk-h5-button-secondary" href={`/product/${product.id}`}>
+                  {t("partner.share.openProduct")}
+                </a>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -659,21 +734,46 @@ function TeamSection({
   readonly total: number;
 }) {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const [tab, setTab] = useState<"all" | "direct" | "second">("all");
+  const visible = members.filter((member) =>
+    tab === "all" ? true : tab === "direct" ? member.depth <= 1 : member.depth === 2,
+  );
+  const tabs = [
+    { id: "all" as const, label: t("partner.team.all"), count: members.length },
+    { id: "direct" as const, label: t("partner.team.level1"), count: members.filter((member) => member.depth <= 1).length },
+    { id: "second" as const, label: t("partner.team.level2"), count: members.filter((member) => member.depth === 2).length },
+  ];
+  const depthLabel = (depth: number): string =>
+    depth <= 1 ? t("partner.team.level1") : depth === 2 ? t("partner.team.level2") : `${t("partner.team.depth")} ${depth}`;
   return (
     <section className="sdk-h5-section">
       <h2>{t("partner.team.title")}</h2>
       <p className="sdk-h5-muted">{t("partner.team.description")}</p>
-      {members.length === 0 ? (
+      <div className="sdk-h5-chip-row sdk-h5-chip-row-sub" role="tablist">
+        {tabs.map((entry) => (
+          <button
+            aria-pressed={tab === entry.id}
+            className={`sdk-h5-chip ${tab === entry.id ? "sdk-h5-chip-active" : ""}`}
+            key={entry.id}
+            onClick={() => setTab(entry.id)}
+            role="tab"
+            type="button"
+          >
+            {entry.label} {entry.count}
+          </button>
+        ))}
+      </div>
+      {visible.length === 0 ? (
         <div className="sdk-h5-empty">{t("partner.team.empty")}</div>
       ) : (
         <ul className="sdk-h5-benefit-grid">
-          {members.map((member) => (
+          {visible.map((member) => (
             <li className="sdk-h5-benefit-item" key={member.partnerId}>
               <h3>
                 {member.name || member.partnerId}
                 <span className="sdk-h5-muted">
                   {" "}
-                  · {member.levelName || member.levelNo} · {t("partner.team.depth")} {member.depth}
+                  · {member.levelName || member.levelNo} · {depthLabel(member.depth)}
                 </span>
               </h3>
               <p className="sdk-h5-muted">
@@ -743,7 +843,11 @@ function CommissionSection({
                 {t("partner.commissions.baseAmount")}{" "}
                 {formatSdkworkPartnerMoney(record.baseAmount, currency, locale)} ·{" "}
                 {t("partner.commissions.ratio")} {formatSdkworkPartnerPercent(record.ratio, locale)} ·{" "}
-                {t("partner.commissions.levelOffset")} {record.levelOffset}
+                {record.levelOffset <= 0
+                  ? t("partner.commissions.level1")
+                  : record.levelOffset === 1
+                    ? t("partner.commissions.level2")
+                    : `${t("partner.commissions.levelOffset")} ${record.levelOffset}`}
               </p>
               <p className="sdk-h5-muted">
                 {formatSdkworkPartnerDateTime(record.computedAt, locale)} · {record.status}

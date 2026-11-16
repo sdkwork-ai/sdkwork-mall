@@ -79,7 +79,8 @@
       "inviteCode": "我的邀请码",
       "notConfigured": "团队、佣金与提现需要合作伙伴自助端读模型接入后展示；当前已开放加盟申请与邀请码校验。",
       "notEnrolled": "成为分销伙伴后，这里会展示你的团队、收益记录与提现能力。",
-      "notSupported": "当前部署尚未提供团队与佣金接口。"
+      "notSupported": "当前部署尚未提供团队与佣金接口。",
+      "earnings": "收益概览"
     },
     "invite": {
       "title": "邀请码校验",
@@ -135,7 +136,10 @@
       "joinedAt": "加入时间",
       "previousPage": "上一页",
       "nextPage": "下一页",
-      "page": "第 {{page}} / {{total}} 页"
+      "page": "第 {{page}} / {{total}} 页",
+      "all": "全部",
+      "level1": "一级",
+      "level2": "二级"
     },
     "commissions": {
       "title": "收益记录",
@@ -150,7 +154,9 @@
       "status": "状态",
       "previousPage": "上一页",
       "nextPage": "下一页",
-      "page": "第 {{page}} / {{total}} 页"
+      "page": "第 {{page}} / {{total}} 页",
+      "level1": "一级佣金",
+      "level2": "二级佣金"
     },
     "withdrawals": {
       "title": "提现",
@@ -187,6 +193,14 @@
       "dashboard": {
         "title": "分销中心"
       }
+    },
+    "share": {
+      "title": "分享赚佣金",
+      "description": "分享商品给好友，好友下单后佣金按一级/二级自动结算到你的账户。",
+      "productTitle": "分享热卖商品",
+      "copyProduct": "复制商品链接",
+      "openProduct": "打开商品",
+      "noProducts": "暂无可分享商品"
     }
   }
 }

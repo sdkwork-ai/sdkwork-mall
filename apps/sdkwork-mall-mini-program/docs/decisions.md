@@ -896,3 +896,22 @@
     wiring in sdkwork-partner / sdkwork-order (the app API currently has no binding
     or commission-event operation, and checkout has no attribution field although
     `CheckoutOrder.partnerId` already surfaces the bound partner).
+
+- 2026-11-16 (thirty-eighth pass: H5 distribution dashboard parity + localization).
+  - H5 partner centre now matches the mini program's distribution language:
+    commission-ledger chips (累计结算 / 可提现 / 待结算) in the centre section, team
+    tabs 全部/一级/二级 with per-level counts and depth badges, commission records
+    labelled 一级佣金/二级佣金, and a 分享赚佣金 section listing hot products whose
+    copied links carry the partner invite code (`/product/<id>?invite=<code>`).
+  - New copy lives in the H5 partner catalogue (`partner.dashboard` on the mini
+    program, `partner.team.*`/`partner.commissions.level*`/`partner.share.*` on H5),
+    and the mini program dashboard literals were moved out of templates into the
+    catalogue; the i18n readiness baseline was refreshed
+    (`pc 1865, h5 229, miniProgram 153, flutter 163`, total 2410) with the growth
+    justified by the new distribution copy.
+  - H5 CSS gains the selected tab chip style; H5 typecheck and its 27 contract tests
+    pass; mini typecheck, 42 node guards and smoke stay green
+    (package 1437.6 KB, build 16:38:10.446Z).
+  - Remaining for the goal: share QR rendering, partner customer-binding endpoint and
+    order commission-event wiring in sdkwork-partner / sdkwork-order (checkout has no
+    attribution field yet; `CheckoutOrder.partnerId` exists).

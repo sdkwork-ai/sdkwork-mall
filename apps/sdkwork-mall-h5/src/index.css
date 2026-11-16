@@ -10,6 +10,8 @@
 @source "../../../../sdkwork-order/apps/sdkwork-order-common/packages/sdkwork-order-mobile-react-orders/src";
 @source "../../../../sdkwork-shop/apps/sdkwork-shop-common/packages/sdkwork-shop-mobile-react-shopping/src";
 @source "../../../../sdkwork-ui/sdkwork-ui-mobile-react/src";
+@source "../../../../sdkwork-account/apps/sdkwork-account-common/packages/sdkwork-account-mobile-react-wallet/src";
+@source "../../../../sdkwork-membership/apps/sdkwork-membership-common/packages/sdkwork-membership-mobile-react-subscription/src";
 
 @theme {
   /* Mall brand palette: the IAM auth surface renders `primary-*` utilities
@@ -380,7 +382,7 @@ body {
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
-  background: var(--sdk-h5-surface);
+  background: var(--sdk-h5-fill);
   color: var(--sdk-h5-text-muted);
   overflow: hidden;
 }
@@ -598,7 +600,9 @@ body {
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
+  background: var(--sdk-h5-fill);
   color: var(--sdk-h5-text-muted);
+  font-size: 0.8rem;
 }
 
 .sdk-h5-pdp-summary {
@@ -1017,6 +1021,21 @@ body {
   font-size: 0.78rem;
 }
 
+/* Full-width CTA pair for sparse info pages (gift cards, empty hubs). */
+.sdk-h5-action-row-full {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin: 0.85rem;
+}
+
+.sdk-h5-action-row-full .sdk-h5-button {
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.85rem;
+}
+
 .sdk-h5-tracking {
   list-style: none;
   margin: 0;
@@ -1236,8 +1255,9 @@ body {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  margin-top: 0.9rem;
+  margin-top: 1rem;
   padding-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .sdk-h5-wallet-hero-points-label {
@@ -1248,6 +1268,13 @@ body {
 .sdk-h5-wallet-hero-points-value {
   font-size: 1.05rem;
   font-weight: 700;
+}
+
+.sdk-h5-wallet-hero-unit {
+  margin-left: 0.15rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.85;
 }
 
 .sdk-h5-ledger-list {
@@ -1317,6 +1344,11 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem 0.4rem;
+}
+
+/* Nine-tile service dock: 3x3 keeps every row full and the tiles readable. */
+.sdk-h5-quick-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 /* 我的资产：list rows with chevrons (钱包 / 积分 / 会员). */
@@ -1835,8 +1867,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #c2410c;
-  color: #fff;
+  background: #fff4e5;
+  color: #9a3412;
   border-radius: 0.7rem;
   padding: 0.7rem 0.9rem;
   font-size: 0.85rem;
@@ -3889,4 +3921,118 @@ html .sdkwork-iam-h5-auth-surface {
  * surface keeps zero elevation on auth controls too. */
 html .sdkwork-iam-h5-auth-surface button {
   box-shadow: none;
+}
+
+/* ── Touch targets ──
+ * Mobile guidance: primary controls expose at least a 44px tap target (32px
+ * minimum for secondary chips). Visual size stays compact; the box grows. */
+.sdkwork-mobile-navbar__back {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.sdk-h5-topbar-brand {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.sdk-h5-sort {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.sdk-h5-hero-dot {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.sdk-h5-hero-toggle {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.sdk-h5-chip {
+  min-height: 2.25rem;
+  padding-block: 0.3rem;
+}
+
+.sdk-h5-button {
+  min-height: 2.5rem;
+}
+
+.sdk-h5-link-button {
+  min-width: 44px;
+  min-height: 2.25rem;
+  padding-block: 0.2rem;
+  padding-inline: 0.6rem;
+}
+
+.sdk-h5-app input[type="radio"],
+.sdk-h5-app input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.sdk-h5-buyer-logout {
+  min-height: 2.25rem;
+  padding-block: 0.25rem;
+}
+
+.sdk-h5-pending-order-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+}
+
+/* ── Desktop H5 canvas ──
+ * The H5 app is a mobile canvas. On wide screens it stays a centered phone
+ * column with a neutral surround, and every fixed chrome layer (tab bar,
+ * action bars, sheets) is clipped to that same column instead of stretching
+ * across the desktop viewport. */
+:root {
+  --sdk-h5-canvas-width: 34rem;
+}
+
+@media (min-width: 40rem) {
+  body {
+    background: #e7e9ee;
+  }
+
+  .sdk-h5-app {
+    max-width: var(--sdk-h5-canvas-width);
+    margin-inline: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--sdk-h5-bg);
+    border-inline: 1px solid rgba(17, 24, 39, 0.06);
+  }
+
+  .sdk-h5-tabbar,
+  .sdk-h5-pdp-actions,
+  .sdk-h5-pdp-compact,
+  .sdk-h5-pdp-searchbar,
+  .sdk-h5-cart-footer,
+  .sdk-h5-pdp-sheet-mask,
+  .sdk-h5-pdp-preview,
+  .sdk-h5-actionsheet-mask,
+  .partner-apply-modal {
+    left: 50%;
+    right: auto;
+    width: var(--sdk-h5-canvas-width);
+    max-width: 100%;
+    transform: translateX(-50%);
+  }
+
+  /* Fixed bars owned by bricks (cart settlement bar and friends). */
+  .sdk-h5-app .fixed.inset-x-0 {
+    left: 50%;
+    right: auto;
+    width: var(--sdk-h5-canvas-width);
+    max-width: 100%;
+    transform: translateX(-50%);
+  }
+
+  .sdk-h5-toast {
+    max-width: calc(var(--sdk-h5-canvas-width) - 2rem);
+  }
 }
