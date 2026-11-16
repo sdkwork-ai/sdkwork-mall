@@ -23,6 +23,8 @@ const ASSET_LINKS: Array<{ labelKey: string; capability: string; icon: string }>
   { labelKey: "buyerHub.assets.wallet", capability: "buyer.mall.wallet", icon: "wallet" },
   { labelKey: "buyerHub.assets.points", capability: "buyer.mall.points", icon: "star" },
   { labelKey: "buyerHub.assets.membership", capability: "buyer.mall.membership", icon: "crown" },
+  // 分销中心 sits directly under 会员中心 in the assets list.
+  { labelKey: "buyerHub.account.partner", capability: "buyer.mall.distribution", icon: "share" },
 ];
 
 const QUICK_LINKS: Array<{ labelKey: string; capability: string; icon: string }> = [
@@ -39,7 +41,6 @@ const QUICK_LINKS: Array<{ labelKey: string; capability: string; icon: string }>
 /** 账户区入口（含设置）同样走能力路由。 */
 const ACCOUNT_LINKS: Array<{ labelKey: string; capability: string }> = [
   { labelKey: "buyerHub.account.profile", capability: "buyer.mall.profile" },
-  { labelKey: "buyerHub.account.partner", capability: "buyer.mall.distribution" },
   { labelKey: "buyerHub.account.reviews", capability: "buyer.mall.reviews" },
   { labelKey: "buyerHub.account.giftCards", capability: "buyer.mall.gift-cards" },
   { labelKey: "buyerHub.account.security", capability: "buyer.mall.security" },

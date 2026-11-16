@@ -869,3 +869,8 @@
   - Smoke now exercises the login behaviour (agreement toggle, password toggle,
     empty-credential guard, agreement gate on WeChat sign-in) on top of the lifecycle
     pass; 42 node guards and 69 vitest stay green.
+
+- 2026-11-16 (thirty-sixth pass: assets order). 分销中心 moved from the 账户 list to
+  我的资产, directly under 会员中心, as requested. It gained a dedicated `share` line
+  icon (three nodes), so the row keeps the icon rhythm of the other asset entries.
+  The icon guard confirms the PNG ships; smoke still passes over all 36 pages.

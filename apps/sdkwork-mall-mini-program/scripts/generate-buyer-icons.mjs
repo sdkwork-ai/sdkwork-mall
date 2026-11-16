@@ -232,6 +232,13 @@ const ICONS = {
     ring(set, 44, 46, 6, 3);
     line(set, 34, 24, 34, 30, 3);
   },
+  share: (set) => {
+    ring(set, 18, 20, 7, 3);
+    ring(set, 18, 44, 7, 3);
+    ring(set, 46, 32, 7, 3);
+    line(set, 24, 24, 40, 29, 3);
+    line(set, 24, 40, 40, 35, 3);
+  },
   check: (set) => {
     line(set, 16, 34, 28, 46, 7);
     line(set, 28, 46, 50, 18, 7);
