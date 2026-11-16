@@ -35,3 +35,8 @@ local gateway dev double runs on port 3900.
 - `pnpm exec vitest run apps/sdkwork-mall-mini-program/tests`
 - `pnpm --filter sdkwork-mall-mini-program build` must succeed before opening the
   dev tool.
+- `pnpm --filter sdkwork-mall-mini-program smoke:mp` boots the built package headlessly
+  (stub `wx`/`App`/`Page`), runs `app.onLaunch`/`onShow` plus every page lifecycle and
+  fails on the first error; `smoke:mp -- --hot-reload` additionally clears the
+  runtime/host/services state first, reproducing a dev-tool hot reload that skips
+  `app.onLaunch`.

@@ -127,6 +127,17 @@ try {
   record("app.onLaunch", error);
 }
 
+// `--hot-reload` emulates the dev tool: the page bundles evaluate without
+// `app.onLaunch` having run in this context (only the app module's registration
+// survives), so the runtime must be rebuilt lazily from the published factory.
+if (process.argv.includes("--hot-reload")) {
+  const shared = appInstance?.globalData ?? {};
+  for (const key of ["__SDKWORK_MALL_MP_RUNTIME__", "__SDKWORK_MALL_MP_HOST__", "__SDKWORK_MALL_MP_IM_SERVICES__"]) {
+    delete shared[key];
+    delete globalThis.wx[key];
+  }
+  console.log("[smoke] hot-reload: runtime/host/services state cleared, bootstrap factory kept");
+}
 for (const page of appJson.pages) {
   const before = pageConfigs.length;
   try {

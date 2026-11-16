@@ -550,3 +550,25 @@
   - Regression: 32 node guards, 69 vitest contracts, mini typecheck, composition and
     parity green; 184/191 contract tests with the seven failures inside the
     concurrent H5 brick migration.
+
+- 2026-11-16 (twentieth pass: resumable runtime after a dev-tool hot reload). The
+  next launch log was `runtime is not initialized` on page `onShow` while the app
+  itself had booted: the dev tool's auto hot reload re-evaluates page bundles
+  without `app.onLaunch`, and the "compileHotReLoad" path can run in a context
+  where the runtime/host/services singletons are gone.
+  - The runtime, host profile and IM services are now cross-bundle shared state
+    (`readSharedState`/`writeSharedState`) written to **every** reachable store
+    (`getApp().globalData`, the platform global) so a value written before the app
+    instance existed is still found afterwards; the stale module-local fallback no
+    longer shadows the real stores.
+  - `registerMallMpBootstrap(bootstrapMallMpRuntime)` runs at the app module scope,
+    so any later bundle can rebuild the graph; `getMallMpRuntime()` and
+    `getMallMpHost()` both self-heal through it, and
+    `initializeMallMpRuntime` only short-circuits when the runtime **and** host are
+    installed (a half-cleared store rebuilds instead of returning a broken graph).
+  - `smoke:mp --hot-reload` reproduces the scenario (clears runtime/host/services
+    state, keeps the bootstrap factory) and now passes for all 36 pages, with 16
+    request attempts handled by the pages.
+  - Regression: 32 node guards, 69 vitest contracts, typecheck, composition green;
+    184/191 contract tests with the seven failures inside the concurrent H5 brick
+    migration.

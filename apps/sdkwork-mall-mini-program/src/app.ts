@@ -9,6 +9,7 @@
 // session module), messaging is SDKWork IM (`@sdkwork/im-mp-chat` services).
 import {
   getMallMpRuntime,
+  registerMallMpBootstrap,
   initializeMallMpRuntime,
   platform,
   type MallMpRuntime,
@@ -58,6 +59,8 @@ function resolveEnvironment(accountEnvVersion: string) {
  * profile switch; `app.onLaunch` is the only production caller.
  */
 export function bootstrapMallMpRuntime(): MallMpRuntime {
+  // Published at module scope below: a hot-reloaded page bundle may run before
+  // `app.onLaunch` in the new appservice context and rebuild the runtime itself.
   // The host is created first: the release channel it reports decides the
   // fallback API host (spec section 10).
   const host = createWeixinHost();
@@ -84,6 +87,11 @@ export function bootstrapMallMpRuntime(): MallMpRuntime {
       }),
     },
   ));
+
+// Publish the launch bootstrap before App() runs: a hot-reloaded page bundle may
+// evaluate in a fresh appservice context where `app.onLaunch` never ran, and its
+// capability calls then resolve the runtime through this factory.
+registerMallMpBootstrap(bootstrapMallMpRuntime);
   return runtime;
 }
 

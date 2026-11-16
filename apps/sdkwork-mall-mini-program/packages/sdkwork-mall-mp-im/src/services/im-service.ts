@@ -21,7 +21,7 @@ import {
   type ImMpChatRealtimeService,
   type ImMpNotificationsService,
 } from "@sdkwork/im-mp-chat/services";
-import { resolveSharedScope, type ImAppSdkClient, type ImChatSdkClient } from "@sdkwork/mall-mp-core";
+import { readSharedState, writeSharedState, type ImAppSdkClient, type ImChatSdkClient } from "@sdkwork/mall-mp-core";
 
 export interface MpNotice {
   readonly body: string;
@@ -113,30 +113,25 @@ export interface MpImServices {
 }
 
 /**
- * Composed services, stored on the global scope.
+ * Composed services key.
  *
  * The published package is bundled per entry (app + every page); a module-local
  * registry would be initialized in the app bundle and read as `null` in every
- * page bundle. The host and runtime singletons are global for the same reason.
+ * page bundle. The shared cross-bundle store keeps one registry.
  */
 const IM_SERVICES_GLOBAL_KEY = "__SDKWORK_MALL_MP_IM_SERVICES__";
 
-interface ImServicesGlobal {
-  __SDKWORK_MALL_MP_IM_SERVICES__?: MpImServices | null;
-}
-
-function imServicesScope(): ImServicesGlobal {
-  // Same cross-bundle store as the runtime and host singletons.
-  return resolveSharedScope() as unknown as ImServicesGlobal;
+function readImServices(): MpImServices | null {
+  return readSharedState<MpImServices | null>(IM_SERVICES_GLOBAL_KEY) ?? null;
 }
 
 /** Installs the composed services; called once from `app.onLaunch`. */
 export function configureMpImServices(next: MpImServices | null): void {
-  imServicesScope()[IM_SERVICES_GLOBAL_KEY] = next;
+  writeSharedState(IM_SERVICES_GLOBAL_KEY, next);
 }
 
 function requireServices(): MpImServices {
-  const services = imServicesScope()[IM_SERVICES_GLOBAL_KEY];
+  const services = readImServices();
   if (!services) {
     throw new Error("IM services are not configured; wire them from app bootstrap");
   }

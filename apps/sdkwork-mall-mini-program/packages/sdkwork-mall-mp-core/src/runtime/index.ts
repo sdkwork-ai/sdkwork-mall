@@ -14,8 +14,9 @@
 import type { MpHost } from "@sdkwork/mall-mp-host";
 
 import { validateMallMpComposition } from "../composition";
-import { installMallMpHost } from "../host";
-import { resolveSharedScope } from "@sdkwork/mall-mp-host";
+import { installMallMpHost, isMallMpHostInstalled } from "../host";
+import { readSharedState, writeSharedState } from "@sdkwork/mall-mp-host";
+import { MP_RUNTIME_BOOTSTRAP_SHARED_KEY, MP_RUNTIME_SHARED_KEY } from "../shared-keys";
 import { installMpFetch } from "@sdkwork/mall-mp-host/fetch";
 import {
   createMpRequestClient,
@@ -83,33 +84,34 @@ export interface InitializeMallMpRuntimeInput {
 }
 
 /**
- * Runtime singleton key.
+ * Runtime singleton keys.
  *
  * The published package is bundled per entry (app + every page), so each bundle
  * would otherwise get its own module instance and therefore its own null runtime:
- * `app.onLaunch` initialized one copy while pages read another. Keeping the
- * instance on the global scope gives every bundle the single launch-time runtime,
- * exactly like the host profile (which is already installed globally).
+ * `app.onLaunch` initialized one copy while pages read another. The instance lives
+ * in the shared cross-bundle store (`getApp().globalData` and the platform global),
+ * and the bootstrap factory is published the same way so a page bundle can rebuild
+ * the runtime after a hot reload that skipped `app.onLaunch`.
  */
 const RUNTIME_GLOBAL_KEY = "__SDKWORK_MALL_MP_RUNTIME__";
-
-interface RuntimeGlobal {
-  __SDKWORK_MALL_MP_RUNTIME__?: MallMpRuntime | null;
-}
-
-function runtimeScope(): RuntimeGlobal {
-  // `getApp().globalData` first (the documented cross-bundle store), then the
-  // shared platform scope. Never dereference `globalThis` unguarded: the WeChat
-  // appservice does not always define it.
-  return resolveSharedScope() as unknown as RuntimeGlobal;
-}
+const RUNTIME_BOOTSTRAP_KEY = "__SDKWORK_MALL_MP_RUNTIME_BOOTSTRAP__";
 
 function readInstalledRuntime(): MallMpRuntime | null {
-  return runtimeScope()[RUNTIME_GLOBAL_KEY] ?? null;
+  return readSharedState<MallMpRuntime | null>(RUNTIME_GLOBAL_KEY) ?? null;
 }
 
 function writeInstalledRuntime(next: MallMpRuntime | null): void {
-  runtimeScope()[RUNTIME_GLOBAL_KEY] = next;
+  writeSharedState(RUNTIME_GLOBAL_KEY, next);
+}
+
+/**
+ * Publishes the launch bootstrap so any bundle can rebuild the runtime.
+ *
+ * Called at module scope of the app entry: with dev-tool hot reload a page bundle
+ * may evaluate without `app.onLaunch` ever running in the new appservice context.
+ */
+export function registerMallMpBootstrap(factory: () => MallMpRuntime): void {
+  writeSharedState(RUNTIME_BOOTSTRAP_KEY, factory);
 }
 
 /**
@@ -120,6 +122,14 @@ function writeInstalledRuntime(next: MallMpRuntime | null): void {
  * readable reason instead of at the first network call.
  */
 export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): MallMpRuntime {
+  // Idempotent: hot reload and the lazy page-side bootstrap may both call this in
+  // one appservice lifetime; a second host/client graph would split session state.
+  // A runtime without its host means the shared store was partially cleared, so the
+  // graph is rebuilt rather than returned half-installed.
+  const existing = readInstalledRuntime();
+  if (existing && isMallMpHostInstalled()) {
+    return existing;
+  }
   const issues = validateMallMpComposition(input.environment, input.host.capabilities);
   if (issues.length > 0) {
     // Fail closed at launch: a graph missing its login/storage capability or a
@@ -179,13 +189,27 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
   return installed;
 }
 
-/** Reads the installed runtime; a cold call before bootstrap is a programming error. */
+/**
+ * Reads the installed runtime.
+ *
+ * Self-healing: when a page bundle evaluates before `app.onLaunch` (dev-tool hot
+ * reload re-runs page modules in a fresh appservice context), the published
+ * bootstrap factory rebuilds the runtime instead of throwing at the first
+ * `onShow`. A failed bootstrap surfaces its own error.
+ */
 export function getMallMpRuntime(): MallMpRuntime {
   const runtime = readInstalledRuntime();
-  if (!runtime) {
-    throw new Error("mall mini program: runtime is not initialized; call initializeMallMpRuntime from app.onLaunch");
+  if (runtime) {
+    return runtime;
   }
-  return runtime;
+  const bootstrap = readSharedState<(() => MallMpRuntime) | null>(RUNTIME_BOOTSTRAP_KEY) ?? null;
+  if (bootstrap) {
+    const built = bootstrap();
+    if (built) {
+      return built;
+    }
+  }
+  throw new Error("mall mini program: runtime is not initialized; call initializeMallMpRuntime from app.onLaunch");
 }
 
 export function isMallMpRuntimeInitialized(): boolean {

@@ -7,7 +7,8 @@
  * swaps one registration and nothing else.
  */
 import type { MpHost, MpHostCapability } from "@sdkwork/mall-mp-host";
-import { resolveSharedScope } from "@sdkwork/mall-mp-host";
+import { readSharedState, writeSharedState } from "@sdkwork/mall-mp-host";
+import { MP_HOST_SHARED_KEY, MP_RUNTIME_BOOTSTRAP_SHARED_KEY } from "../shared-keys";
 
 export type {
   MpChosenImage,
@@ -31,42 +32,46 @@ export type {
 export { MP_HOST_CAPABILITIES } from "@sdkwork/mall-mp-host";
 
 /**
- * Installed host profile, stored on the global scope.
+ * Installed host profile key.
  *
  * The published package is bundled per entry (app + every page), so a
  * module-local variable would be installed by `app.onLaunch` and still read as
- * `null` from a page bundle. The global key keeps one profile for the launch.
+ * `null` from a page bundle. The shared cross-bundle store keeps one profile.
  */
-const HOST_GLOBAL_KEY = "__SDKWORK_MALL_MP_HOST__";
+const HOST_GLOBAL_KEY = MP_HOST_SHARED_KEY;
 
-interface HostGlobal {
-  __SDKWORK_MALL_MP_HOST__?: MpHost | null;
-}
-
-function hostScope(): HostGlobal {
-  // Same shared scope as the runtime: `getApp().globalData` when the app exists,
-  // otherwise the platform scope (`wx`), so every per-entry bundle agrees.
-  return resolveSharedScope() as unknown as HostGlobal;
+function readInstalledHost(): MpHost | null {
+  return readSharedState<MpHost | null>(HOST_GLOBAL_KEY) ?? null;
 }
 
 export function installMallMpHost(host: MpHost): void {
-  hostScope()[HOST_GLOBAL_KEY] = host;
+  writeSharedState(HOST_GLOBAL_KEY, host);
 }
 
 export function getMallMpHost(): MpHost {
-  const installedHost = hostScope()[HOST_GLOBAL_KEY];
-  if (!installedHost) {
-    throw new Error("mall mini program: host profile is not installed; call initializeMallMpRuntime first");
+  const installedHost = readInstalledHost();
+  if (installedHost) {
+    return installedHost;
   }
-  return installedHost;
+  // Self-healing after a hot reload: rebuild through the published launch factory
+  // instead of failing the first capability call of the page.
+  const bootstrap = readSharedState<(() => unknown) | null>(MP_RUNTIME_BOOTSTRAP_SHARED_KEY) ?? null;
+  if (bootstrap) {
+    bootstrap();
+    const rebuilt = readInstalledHost();
+    if (rebuilt) {
+      return rebuilt;
+    }
+  }
+  throw new Error("mall mini program: host profile is not installed; call initializeMallMpRuntime first");
 }
 
 export function isMallMpHostInstalled(): boolean {
-  return (hostScope()[HOST_GLOBAL_KEY] ?? null) !== null;
+  return readInstalledHost() !== null;
 }
 
 /** Capabilities the installed profile actually implements. */
 export function listInstalledHostCapabilities(): readonly MpHostCapability[] {
-  const installedHost = hostScope()[HOST_GLOBAL_KEY];
+  const installedHost = readInstalledHost();
   return installedHost ? [...installedHost.capabilities] : [];
 }

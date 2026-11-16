@@ -53,6 +53,11 @@ export function resolvePlatformScope(): MpPlatformScope & Record<string, unknown
  * are **not** shared between them. `getApp().globalData` is the documented object
  * every bundle can reach, so cross-bundle state (runtime, host, services) lives
  * there; outside the platform (tests) the global object keeps it shared.
+ *
+ * `getApp()` is not available during the very first module evaluation, so writes
+ * go to **every** reachable store and reads check them in the same order — a
+ * value written before the app instance existed is still found afterwards (and
+ * vice versa after a hot reload).
  */
 export function resolveSharedScope(): Record<string, unknown> {
   if (typeof getApp === "function") {
@@ -67,4 +72,44 @@ export function resolveSharedScope(): Record<string, unknown> {
     }
   }
   return resolveGlobalObject();
+}
+
+/** Stores reachable for cross-bundle state, most specific first. */
+function sharedStores(): Array<Record<string, unknown>> {
+  const stores: Array<Record<string, unknown>> = [];
+  if (typeof getApp === "function") {
+    try {
+      const app = getApp();
+      const globalData = (app as { globalData?: unknown } | undefined)?.globalData;
+      if (globalData && typeof globalData === "object") {
+        stores.push(globalData as Record<string, unknown>);
+      }
+    } catch {
+      // not constructed yet
+    }
+  }
+  // `resolveGlobalObject` already falls back to the module object when neither
+  // `wx` nor `globalThis` exists, so no extra (stale) store is appended here.
+  const globalObject = resolveGlobalObject();
+  if (!stores.includes(globalObject)) {
+    stores.push(globalObject);
+  }
+  return stores;
+}
+
+/** Reads a cross-bundle value from the first store that owns it. */
+export function readSharedState<T>(key: string): T | undefined {
+  for (const store of sharedStores()) {
+    if (key in store) {
+      return store[key] as T;
+    }
+  }
+  return undefined;
+}
+
+/** Writes a cross-bundle value to every reachable store. */
+export function writeSharedState(key: string, value: unknown): void {
+  for (const store of sharedStores()) {
+    store[key] = value;
+  }
 }
