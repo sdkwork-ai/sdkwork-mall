@@ -4,6 +4,7 @@ import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getMallMpRuntime, platform } from "@sdkwork/mall-mp-core";
 import { loginWithPassword, loginWithWechat } from "../../services/auth-service";
 import { clearSession, getToken, isLoggedIn, setToken } from "../../services/session";
+import { bindPendingInvite } from "../../services/invite-service";
 
 interface LoginData {
   account: string;
@@ -161,6 +162,7 @@ Page({
     this.setData({ busy: true, error: "" });
     try {
       await loginWithWechat();
+      await bindPendingInvite();
       this.setData({ busy: false, loggedIn: true });
       platform.toast(t("auth.success"), "success");
       goBackAfterLogin();
@@ -186,6 +188,7 @@ Page({
     this.setData({ busy: true, error: "" });
     try {
       await loginWithPassword(account, password);
+      await bindPendingInvite();
       platform.storage.set(LAST_ACCOUNT_KEY, account);
       this.setData({
         busy: false,

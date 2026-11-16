@@ -16,6 +16,7 @@ import { syncCartTabBadge } from "../../services/tab-bar-service";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import { platform } from "@sdkwork/mall-mp-core";
+import { captureInviteCode } from "../../services/invite-service";
 
 type ProductSku = MpSku & { priceText: string };
 
@@ -124,6 +125,7 @@ Page({
 
   onLoad(options: Record<string, string | undefined>) {
     this.setData({ _productId: options.id || "" });
+    void captureInviteCode(options.invite);
     void this.loadDetail();
   },
 

@@ -935,3 +935,21 @@
   - Gates: mini typecheck, 45 tests, 69 vitest, smoke PASS (package 1462.4 KB, build
     16:40:57.778Z); H5 typecheck + 27 contract tests; i18n catalogues and baseline
     hold.
+
+- 2026-11-16 (fortieth pass: invite-code binding on both roots). A shared product
+  link/QR now attributes the order to its distributor.
+  - mini program: `partner-service.ts` calls the new
+    `center.partnerCenter.customerBindings.create` operation; `invite-service.ts`
+    remembers `?invite=` in device storage, binds immediately when signed in, and
+    flushes the pending code after sign-in. Product pages and the distributor page
+    capture the code; the login page binds after a successful WeChat/password
+    sign-in (idempotent server-side).
+  - H5: the shared partner service/port gained
+    `bindCustomerByInviteCode` (delegating to the generated
+    `customerBindings.create`), and the distribution page binds the code read from
+    `?invite=` on mount.
+  - Guard: `mp-distribution-binding.test.mjs` asserts both roots keep the binding
+    wiring (service call, pending-code capture, sign-in flush, H5 page effect).
+  - Gates: mini typecheck, 47 node tests, smoke PASS (package 1464.9 KB, build
+    16:46:58.135Z); H5 typecheck + 27 contract tests; PC typecheck (shared partner
+    service extended).

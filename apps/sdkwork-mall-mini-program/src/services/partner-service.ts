@@ -419,3 +419,30 @@ export async function createPartnerWithdrawal(
 }
 
 
+
+
+/** Customer binding produced by an invite-code scan (two-level attribution). */
+export interface MpPartnerCustomerBinding {
+  partnerId: string;
+  status: string;
+  boundAt: string;
+}
+
+/**
+ * Binds the signed-in buyer to the distributor that owns `inviteCode`.
+ *
+ * Idempotent on the server (one active binding per customer+partner), so product
+ * pages may call it on every visit that carries an invite code.
+ */
+export async function bindPartnerCustomerByInviteCode(
+  inviteCode: string,
+): Promise<MpPartnerCustomerBinding> {
+  const payload = asRecord(
+    (await partner().center.partnerCenter.customerBindings.create({ inviteCode })) as unknown,
+  );
+  return {
+    boundAt: asString(payload, ["boundAt"]),
+    partnerId: asString(payload, ["partnerId"]),
+    status: asString(payload, ["status"]),
+  };
+}

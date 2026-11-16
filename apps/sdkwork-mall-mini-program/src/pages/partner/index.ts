@@ -26,6 +26,7 @@ import {
   type MpPartnerWithdrawal,
 } from "../../services/partner-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { captureInviteCode } from "../../services/invite-service";
 import { buildQrDataUri } from "../../utils/qr-code";
 import { listProducts } from "../../services/catalog-service";
 import {
@@ -436,6 +437,7 @@ Page({
 
   onLoad(options: Record<string, string | undefined>) {
     const invite = (options.invite ?? "").trim();
+    void captureInviteCode(invite);
     if (invite) {
       this.setData({ "form.inviteCode": invite, inviteInput: invite });
     }

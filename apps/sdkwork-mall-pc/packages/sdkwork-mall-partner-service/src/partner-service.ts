@@ -28,6 +28,8 @@ export interface CreateSdkworkPartnerServiceInput {
 }
 
 export interface SdkworkPartnerService {
+  /** Binds the signed-in buyer to the distributor that owns the invite code. */
+  bindCustomerByInviteCode(inviteCode: string): Promise<void>;
   retrieveProgram(): Promise<SdkworkPartnerProgram>;
   submitApplication(
     draft: SdkworkPartnerApplicationDraft,
@@ -65,6 +67,12 @@ export function createSdkworkPartnerService(
 ): SdkworkPartnerService {
   const center = input.center ?? null;
   return {
+    async bindCustomerByInviteCode(inviteCode) {
+      if (!center) {
+        return;
+      }
+      await center.bindCustomerByInviteCode(inviteCode);
+    },
     cancelApplication: (applicationId) => input.join.cancelApplication(applicationId),
     async createWithdrawal(draft) {
       if (!center) {

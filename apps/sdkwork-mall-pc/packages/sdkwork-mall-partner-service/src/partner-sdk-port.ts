@@ -40,6 +40,8 @@ export interface SdkworkPartnerJoinPort {
  * never depends on the centre contract.
  */
 export interface SdkworkPartnerCenterPort {
+  /** Binds the signed-in buyer to the distributor that owns the invite code. */
+  bindCustomerByInviteCode(inviteCode: string): Promise<void>;
   retrieveCenter(): Promise<SdkworkPartnerCenterSnapshot>;
   listTeam(
     query?: SdkworkPartnerListQuery,
@@ -91,8 +93,15 @@ export interface SdkworkPartnerCenterWireClient {
         list(params?: SdkworkPartnerPageWireQuery): Promise<unknown>;
         create(body: SdkworkPartnerWithdrawalWireRequest): Promise<unknown>;
       };
+      readonly customerBindings: {
+        create(body: SdkworkPartnerCustomerBindingWireRequest): Promise<unknown>;
+      };
     };
   };
+}
+
+export interface SdkworkPartnerCustomerBindingWireRequest {
+  readonly inviteCode: string;
 }
 
 export interface SdkworkPartnerWithdrawalWireRequest {
@@ -173,8 +182,13 @@ export function createSdkworkPartnerJoinPort(
 export function createSdkworkPartnerCenterPort(
   client: SdkworkPartnerCenterWireClient,
 ): SdkworkPartnerCenterPort {
+  // Exposed so the page can attribute a shared product link to its distributor.
+  const bindCustomerByInviteCode = async (inviteCode: string): Promise<void> => {
+    await client.center.partnerCenter.customerBindings.create({ inviteCode });
+  };
   const center = client.center.partnerCenter;
   return {
+    bindCustomerByInviteCode,
     async createWithdrawal(draft) {
       return mapWithdrawal(
         asRecord(

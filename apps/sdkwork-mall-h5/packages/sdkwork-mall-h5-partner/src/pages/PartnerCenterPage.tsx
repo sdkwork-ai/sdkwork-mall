@@ -26,6 +26,8 @@ import QRCode from "qrcode";
 
 import { searchMallH5Products, type MallH5ProductCard } from "@sdkwork/mall-h5-catalog";
 
+import { getSdkworkH5PartnerService } from "../partner-service.ts";
+
 import type { SdkworkPartnerController } from "../partner-controller.ts";
 import {
   useSdkworkPartnerController,
@@ -43,6 +45,23 @@ export function SdkworkMallH5PartnerCenterPage({
   const locale = i18n.language || "zh-CN";
   const controller = useSdkworkPartnerController(controllerProp);
   const state = useSdkworkPartnerControllerState(controller);
+
+  // A shared link/QR carries `invite=<code>`; bind the signed-in buyer so orders
+  // attribute to the distributor (idempotent server-side).
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const invite = new URLSearchParams(window.location.search).get("invite")?.trim() ?? "";
+    if (!invite) {
+      return;
+    }
+    void getSdkworkH5PartnerService()
+      .bindCustomerByInviteCode(invite)
+      .catch(() => {
+        // Non-fatal: the share link still opens the product/distribution pages.
+      });
+  }, []);
 
   if (state.status === "loading" && !state.program) {
     return (
