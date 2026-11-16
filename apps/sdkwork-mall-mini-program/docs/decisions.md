@@ -1070,3 +1070,13 @@
   Verified: order cargo check + fmt (adapter) + 8 static contract tests; mall
   test:node 207/207; mini typecheck + 48 node tests + 69 vitest + smoke; H5
   typecheck + 27 contract tests; PC typecheck; i18n baseline.
+
+- 2026-11-17 (forty-ninth pass: share-attribution regression coverage). Added
+  contract coverage for the distributor share path: the H5 commons seam must resolve
+  defensively, the H5 root must register the partner-backed resolver, the product
+  detail share must append `invite`, and the mini program share card must resolve the
+  cached/lazily fetched own invite code. Root contract is now 211/211; H5 contract
+  30/30; mini program node tests 49/49; vitest 69; i18n baseline holds.
+  H5 `build:test` still stops in the cross-sibling tsc step on a lucide-react version
+  skew (mall 1.42.0 vs sdkwork-cloudrouter 1.7.0, whose working tree is mid-change);
+  H5 app typecheck and every H5 runtime gate pass.

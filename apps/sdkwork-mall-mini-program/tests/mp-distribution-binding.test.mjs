@@ -49,3 +49,12 @@ test("the order detail shows the distributor that earned the commission", () => 
   const detail = read(path.join(repoRoot, "apps/sdkwork-mall-mini-program/src/pages/order-detail/index.wxml"));
   assert.match(detail, /\{\{detail\.partnerName\}\}/u, "order detail must render the distributor");
 });
+
+test("product shares carry the distributor invite code", () => {
+  const product = read(path.join(repoRoot, "apps/sdkwork-mall-mini-program/src/pages/product/index.ts"));
+  assert.match(product, /invite: readOwnInviteCode\(\) \|\| undefined/u);
+  assert.match(product, /void resolveOwnInviteCode\(\)/u);
+  const service = read(path.join(repoRoot, "apps/sdkwork-mall-mini-program/src/services/distribution-service.ts"));
+  assert.match(service, /export async function resolveOwnInviteCode/u);
+  assert.match(service, /rememberOwnInviteCode\(center\.inviteCode\)/u);
+});
