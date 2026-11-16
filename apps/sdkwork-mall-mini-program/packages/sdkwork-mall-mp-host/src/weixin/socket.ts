@@ -11,6 +11,7 @@
  * branches on it (`CONNECTING` vs `OPEN`) before sending.
  */
 import { createMpHostError, normalizeMpHostError, type MpSocket, type MpSocketConnection } from "../index";
+import { resolvePlatformScope } from "./scope";
 
 /** `WebSocket`-compatible ready states. */
 export const MP_SOCKET_CONNECTING = 0;
@@ -127,7 +128,7 @@ export function createWeixinSocket(api: WxSocketApi): MpSocket {
 }
 
 export function readWeixinSocketApi(
-  scope: { wx?: Partial<WxSocketApi> } = globalThis as { wx?: Partial<WxSocketApi> },
+  scope: { wx?: Partial<WxSocketApi> } = resolvePlatformScope() as { wx?: Partial<WxSocketApi> },
 ): WxSocketApi {
   const candidate = scope.wx;
   if (!candidate || typeof candidate.connectSocket !== "function") {

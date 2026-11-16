@@ -31,6 +31,7 @@ import type { WxPaymentApi } from "./payment";
 import { createWeixinPaymentBridge } from "./payment";
 import type { WxSocketApi } from "./socket";
 import { createWeixinSocket, readWeixinSocketApi } from "./socket";
+import { resolvePlatformScope as resolveGlobalScope } from "./scope";
 import type { WxStorageApi } from "./storage";
 import { createWeixinStorage, readWeixinStorageApi } from "./storage";
 
@@ -74,7 +75,7 @@ export interface CreateWeixinHostOptions {
  * development fallbacks instead of white-screening at launch.
  */
 export function createWeixinHost(options: CreateWeixinHostOptions = {}): MpHost {
-  const scope = options.scope ?? (globalThis as { wx?: WxGlobal });
+  const scope = options.scope ?? (resolveGlobalScope() as { wx?: WxGlobal });
   const capabilities = new Set<MpHostCapability>(WEIXIN_HOST_CAPABILITIES);
 
   const unavailable = (capability: MpHostCapability): MpLoginCodeProvider => ({

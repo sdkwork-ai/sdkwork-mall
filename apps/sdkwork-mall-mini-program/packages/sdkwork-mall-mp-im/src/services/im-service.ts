@@ -112,14 +112,37 @@ export interface MpImServices {
   readonly uploadImage?: MpImImageUploader;
 }
 
-let services: MpImServices | null = null;
+/**
+ * Composed services, stored on the global scope.
+ *
+ * The published package is bundled per entry (app + every page); a module-local
+ * registry would be initialized in the app bundle and read as `null` in every
+ * page bundle. The host and runtime singletons are global for the same reason.
+ */
+const IM_SERVICES_GLOBAL_KEY = "__SDKWORK_MALL_MP_IM_SERVICES__";
+
+interface ImServicesGlobal {
+  __SDKWORK_MALL_MP_IM_SERVICES__?: MpImServices | null;
+}
+
+function imServicesScope(): ImServicesGlobal {
+  if (typeof globalThis !== "undefined" && globalThis) {
+    return globalThis as unknown as ImServicesGlobal;
+  }
+  try {
+    return (Function("return this") as () => ImServicesGlobal)();
+  } catch {
+    return {};
+  }
+}
 
 /** Installs the composed services; called once from `app.onLaunch`. */
 export function configureMpImServices(next: MpImServices | null): void {
-  services = next;
+  imServicesScope()[IM_SERVICES_GLOBAL_KEY] = next;
 }
 
 function requireServices(): MpImServices {
+  const services = imServicesScope()[IM_SERVICES_GLOBAL_KEY];
   if (!services) {
     throw new Error("IM services are not configured; wire them from app bootstrap");
   }

@@ -29,13 +29,36 @@ export type {
 } from "@sdkwork/mall-mp-host";
 export { MP_HOST_CAPABILITIES } from "@sdkwork/mall-mp-host";
 
-let installedHost: MpHost | null = null;
+/**
+ * Installed host profile, stored on the global scope.
+ *
+ * The published package is bundled per entry (app + every page), so a
+ * module-local variable would be installed by `app.onLaunch` and still read as
+ * `null` from a page bundle. The global key keeps one profile for the launch.
+ */
+const HOST_GLOBAL_KEY = "__SDKWORK_MALL_MP_HOST__";
+
+interface HostGlobal {
+  __SDKWORK_MALL_MP_HOST__?: MpHost | null;
+}
+
+function hostScope(): HostGlobal {
+  if (typeof globalThis !== "undefined" && globalThis) {
+    return globalThis as unknown as HostGlobal;
+  }
+  try {
+    return (Function("return this") as () => HostGlobal)();
+  } catch {
+    return {};
+  }
+}
 
 export function installMallMpHost(host: MpHost): void {
-  installedHost = host;
+  hostScope()[HOST_GLOBAL_KEY] = host;
 }
 
 export function getMallMpHost(): MpHost {
+  const installedHost = hostScope()[HOST_GLOBAL_KEY];
   if (!installedHost) {
     throw new Error("mall mini program: host profile is not installed; call initializeMallMpRuntime first");
   }
@@ -43,10 +66,11 @@ export function getMallMpHost(): MpHost {
 }
 
 export function isMallMpHostInstalled(): boolean {
-  return installedHost !== null;
+  return (hostScope()[HOST_GLOBAL_KEY] ?? null) !== null;
 }
 
 /** Capabilities the installed profile actually implements. */
 export function listInstalledHostCapabilities(): readonly MpHostCapability[] {
+  const installedHost = hostScope()[HOST_GLOBAL_KEY];
   return installedHost ? [...installedHost.capabilities] : [];
 }

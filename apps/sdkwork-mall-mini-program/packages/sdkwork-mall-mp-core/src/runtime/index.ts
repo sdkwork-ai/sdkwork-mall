@@ -81,7 +81,39 @@ export interface InitializeMallMpRuntimeInput {
   readonly host: MpHost;
 }
 
-let runtime: MallMpRuntime | null = null;
+/**
+ * Runtime singleton key.
+ *
+ * The published package is bundled per entry (app + every page), so each bundle
+ * would otherwise get its own module instance and therefore its own null runtime:
+ * `app.onLaunch` initialized one copy while pages read another. Keeping the
+ * instance on the global scope gives every bundle the single launch-time runtime,
+ * exactly like the host profile (which is already installed globally).
+ */
+const RUNTIME_GLOBAL_KEY = "__SDKWORK_MALL_MP_RUNTIME__";
+
+interface RuntimeGlobal {
+  __SDKWORK_MALL_MP_RUNTIME__?: MallMpRuntime | null;
+}
+
+function runtimeScope(): RuntimeGlobal {
+  if (typeof globalThis !== "undefined" && globalThis) {
+    return globalThis as unknown as RuntimeGlobal;
+  }
+  try {
+    return (Function("return this") as () => RuntimeGlobal)();
+  } catch {
+    return {};
+  }
+}
+
+function readInstalledRuntime(): MallMpRuntime | null {
+  return runtimeScope()[RUNTIME_GLOBAL_KEY] ?? null;
+}
+
+function writeInstalledRuntime(next: MallMpRuntime | null): void {
+  runtimeScope()[RUNTIME_GLOBAL_KEY] = next;
+}
 
 /**
  * Builds the runtime and installs it as the process-wide singleton.
@@ -132,7 +164,7 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
     ...(input.environment.surfaceCode ? { surfaceCode: input.environment.surfaceCode } : {}),
   });
 
-  runtime = {
+  const installed: MallMpRuntime = {
     environment: input.environment,
     host: input.host,
     session,
@@ -146,11 +178,13 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
     imChatClient,
     authManager,
   };
-  return runtime;
+  writeInstalledRuntime(installed);
+  return installed;
 }
 
 /** Reads the installed runtime; a cold call before bootstrap is a programming error. */
 export function getMallMpRuntime(): MallMpRuntime {
+  const runtime = readInstalledRuntime();
   if (!runtime) {
     throw new Error("mall mini program: runtime is not initialized; call initializeMallMpRuntime from app.onLaunch");
   }
@@ -158,10 +192,10 @@ export function getMallMpRuntime(): MallMpRuntime {
 }
 
 export function isMallMpRuntimeInitialized(): boolean {
-  return runtime !== null;
+  return readInstalledRuntime() !== null;
 }
 
 /** Test/devtools hook: drops the singleton so a scenario can rebuild it. */
 export function resetMallMpRuntime(): void {
-  runtime = null;
+  writeInstalledRuntime(null);
 }

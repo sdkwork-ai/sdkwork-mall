@@ -13,6 +13,7 @@
  * (`ok`/`status`/`statusText`/`headers.get`/`json`/`text`/`arrayBuffer`).
  */
 import type { MpHttpClient, MpHttpResponse } from "./index";
+import { resolvePlatformScope } from "./weixin/scope";
 
 /** Minimal `fetch` shape the SDKs rely on. */
 export type MpFetch = (
@@ -233,7 +234,7 @@ function createAbortPolyfill(): { AbortController: unknown; AbortSignal: unknown
  * @param http - Host HTTP client backing the adapter.
  */
 export function installMpFetch(http: MpHttpClient): MpFetch {
-  const globalScope = globalThis as { AbortController?: unknown; AbortSignal?: unknown; fetch?: unknown };
+  const globalScope = resolvePlatformScope() as { AbortController?: unknown; AbortSignal?: unknown; fetch?: unknown };
   if (typeof globalScope.AbortController !== "function" || typeof globalScope.AbortSignal !== "function") {
     const polyfill = createAbortPolyfill();
     globalScope.AbortController = polyfill.AbortController;

@@ -506,3 +506,25 @@
     parity green; 183/190 contract tests with the seven failures all inside the
     concurrent H5 brick migration (checkout brick, H5 route registry, gift-card
     copy, order paymentUrl, H5 i18n).
+
+- 2026-11-16 (eighteenth pass: the bundled app boots cleanly). The first real
+  launch after the build change surfaced two bundling-specific defects, both fixed:
+  - **`Cannot read property 'wx' of undefined`**: the WeChat adapters read their
+    platform scope from a `globalThis` default parameter, and that binding is not
+    reliably present in every base library/bundle transform. A `resolvePlatformScope()`
+    helper (`typeof globalThis` guard + indirect `Function("return this")()` fallback)
+    now backs every adapter and the fetch/AbortController installer.
+  - **`runtime is not initialized` / `host profile is not installed`**: bundling per
+    entry (app + 36 pages) gave each bundle its own copy of the module-local
+    singletons, so `app.onLaunch` initialized one and every page read another. The
+    runtime, host profile and IM services registries now live on global keys
+    (`__SDKWORK_MALL_MP_RUNTIME__`, `__SDKWORK_MALL_MP_HOST__`,
+    `__SDKWORK_MALL_MP_IM_SERVICES__`), matching how the platform scope already works.
+  - Added `scripts/smoke-miniprogram.mjs` (`pnpm smoke:mp`): loads the real `dist/`
+    bundles with a stub `wx`/`App`/`Page`, runs `app.onLaunch`/`onShow` and every
+    page's `onLoad`/`onShow`, and fails on the first error — this is the automated
+    "console log until clean" loop, and it now reports
+    `PASS no boot or page-lifecycle errors` for all 36 pages.
+  - Regression: 31 node guards, 69 vitest contracts, typecheck, composition and
+    parity green; contract suite 183/190 with the seven failures all inside the
+    concurrent H5 brick migration.

@@ -7,6 +7,7 @@
  * crash a login attempt with a raw platform exception.
  */
 import { createMpHostError, normalizeMpHostError, type MpStorage } from "../index";
+import { resolvePlatformScope } from "./scope";
 
 export interface WxStorageApi {
   getStorageSync(key: string): unknown;
@@ -42,7 +43,7 @@ export function createWeixinStorage(api: WxStorageApi): MpStorage {
 }
 
 export function readWeixinStorageApi(
-  scope: { wx?: Partial<WxStorageApi> } = globalThis as { wx?: Partial<WxStorageApi> },
+  scope: { wx?: Partial<WxStorageApi> } = resolvePlatformScope() as { wx?: Partial<WxStorageApi> },
 ): WxStorageApi {
   const candidate = scope.wx;
   if (

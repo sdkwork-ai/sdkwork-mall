@@ -6,6 +6,7 @@
  * platform; it is exchanged for an IAM session by `@sdkwork/mall-mp-core`
  * (`oauth.miniProgramSessions.create`). The code is never logged or persisted.
  */
+import { resolvePlatformScope } from "./scope";
 import {
   createMpHostError,
   normalizeMpHostError,
@@ -55,7 +56,7 @@ export function createWeixinLoginCodeProvider(
   };
 }
 
-export function readWeixinLoginApi(scope: { wx?: Partial<WxLoginApi> } = globalThis as { wx?: Partial<WxLoginApi> }): WxLoginApi {
+export function readWeixinLoginApi(scope: { wx?: Partial<WxLoginApi> } = resolvePlatformScope() as { wx?: Partial<WxLoginApi> }): WxLoginApi {
   const candidate = scope.wx;
   if (!candidate || typeof candidate.login !== "function") {
     throw createMpHostError("unsupported", "当前运行环境不支持 wx.login");

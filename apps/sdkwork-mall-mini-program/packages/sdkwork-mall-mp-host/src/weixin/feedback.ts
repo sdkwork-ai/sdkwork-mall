@@ -5,6 +5,7 @@
  * toast or a confirmation; they never assemble platform options themselves.
  */
 import { createMpHostError, normalizeMpHostError, type MpClipboard, type MpFeedback } from "../index";
+import { resolvePlatformScope } from "./scope";
 
 export interface WxFeedbackApi {
   setClipboardData(options: { data: string; fail?(result: { errMsg?: string }): void; success?(): void }): void;
@@ -71,7 +72,7 @@ export function createWeixinClipboard(api: WxFeedbackApi): MpClipboard {
 }
 
 export function readWeixinFeedbackApi(
-  scope: { wx?: Partial<WxFeedbackApi> } = globalThis as { wx?: Partial<WxFeedbackApi> },
+  scope: { wx?: Partial<WxFeedbackApi> } = resolvePlatformScope() as { wx?: Partial<WxFeedbackApi> },
 ): WxFeedbackApi {
   const candidate = scope.wx;
   if (!candidate || typeof candidate.showToast !== "function" || typeof candidate.showModal !== "function") {

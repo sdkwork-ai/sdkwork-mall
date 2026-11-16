@@ -6,6 +6,7 @@
  * this adapter stays a thin, promise-shaped wrapper around the platform API.
  */
 import { createMpHostError, normalizeMpHostError, type MpNavigation } from "../index";
+import { resolvePlatformScope } from "./scope";
 
 export interface WxNavigationApi {
   navigateBack(options?: { delta?: number; fail?(result: { errMsg?: string }): void; success?(): void }): void;
@@ -103,7 +104,7 @@ export function createWeixinNavigation(api: WxNavigationApi): MpNavigation {
 }
 
 export function readWeixinNavigationApi(
-  scope: { wx?: Partial<WxNavigationApi> } = globalThis as { wx?: Partial<WxNavigationApi> },
+  scope: { wx?: Partial<WxNavigationApi> } = resolvePlatformScope() as { wx?: Partial<WxNavigationApi> },
 ): WxNavigationApi {
   const candidate = scope.wx;
   if (!candidate || typeof candidate.navigateTo !== "function" || typeof candidate.switchTab !== "function") {
