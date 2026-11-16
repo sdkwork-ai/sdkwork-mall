@@ -509,6 +509,7 @@ Page({
           ? mpCapabilityUrl("buyer.mall.distribution", { invite: center.inviteCode })
           : "",
         earnings: summarizeEarnings(center),
+        shareProductsLoading: true,
       });
       rememberOwnInviteCode(center.inviteCode);
       void this.loadShareProducts();
