@@ -426,6 +426,9 @@ const commonBuildOptions = {
   bundle: true,
   format: "cjs",
   platform: "neutral",
+  // `qrcode` depends on `dijkstrajs`, which ships only a CommonJS `main`; the
+  // neutral platform ignores main fields unless they are listed explicitly.
+  mainFields: ["main", "module", "browser"],
   target: ["es2020"],
   logLevel: "warning",
   sourcemap: false,

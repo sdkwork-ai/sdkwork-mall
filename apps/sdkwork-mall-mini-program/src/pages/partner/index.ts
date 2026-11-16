@@ -26,6 +26,7 @@ import {
   type MpPartnerWithdrawal,
 } from "../../services/partner-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { buildQrDataUri } from "../../utils/qr-code";
 import { listProducts } from "../../services/catalog-service";
 import {
   buildProductSharePath,
@@ -113,6 +114,10 @@ interface PartnerPageData {
   teamDirectCount: number;
   teamSecondCount: number;
   shareProducts: DistributionShareProduct[];
+  qrVisible: boolean;
+  qrTitle: string;
+  qrUri: string;
+  qrLink: string;
   team: PartnerTeamView[];
   teamPage: number;
   teamPageText: string;
@@ -288,6 +293,11 @@ function buildLabels(): Record<string, string> {
     dashShareInvite: t("partner.dashboard.shareInvite"),
     dashShareProductsTitle: t("partner.dashboard.shareProductsTitle"),
     dashShareTitle: t("partner.dashboard.shareTitle"),
+    dashQrClose: t("partner.dashboard.qrClose"),
+    dashQrCopy: t("partner.dashboard.qrCopy"),
+    dashQrHint: t("partner.dashboard.qrHint"),
+    dashQrOpenInvite: t("partner.dashboard.qrOpenInvite"),
+    dashQrOpenProduct: t("partner.dashboard.qrOpenProduct"),
     dashTotal: t("partner.dashboard.earningsTotal"),
     dashWithdrawn: t("partner.dashboard.earningsWithdrawn"),
     actionsCancel: t("partner.actions.cancelApplication"),
@@ -376,6 +386,10 @@ Page({
     teamDirectCount: 0,
     teamSecondCount: 0,
     shareProducts: [],
+    qrVisible: false,
+    qrTitle: "",
+    qrUri: "",
+    qrLink: "",
     commissionLoading: false,
     commissionPage: 1,
     commissionPageText: "",
@@ -762,6 +776,42 @@ Page({
     if (product) {
       platform.navigateTo(product.path);
     }
+  },
+
+  openInviteQr() {
+    const link = this.data.shareLink || mpCapabilityUrl("buyer.mall.distribution");
+    this.setData({
+      qrLink: link,
+      qrTitle: t("partner.dashboard.qrTitleInvite"),
+      qrUri: buildQrDataUri(link, { scale: 6 }),
+      qrVisible: true,
+    });
+  },
+
+  openProductQr(event: MpTapEvent) {
+    const productId = String(event.currentTarget.dataset.productId ?? "");
+    const product = this.data.shareProducts.find((entry) => entry.id === productId);
+    if (!product) {
+      return;
+    }
+    this.setData({
+      qrLink: product.path,
+      qrTitle: product.title ? `${product.title} · ${t("partner.dashboard.qrTitleProduct")}` : t("partner.dashboard.qrTitleProduct"),
+      qrUri: buildQrDataUri(product.path, { scale: 6 }),
+      qrVisible: true,
+    });
+  },
+
+  closeQr() {
+    this.setData({ qrVisible: false, qrUri: "", qrTitle: "", qrLink: "" });
+  },
+
+  copyQrLink() {
+    if (!this.data.qrLink) {
+      return;
+    }
+    void platform.copy(this.data.qrLink);
+    platform.toast(t("partner.actions.copied"), "success");
   },
 
   /** WeChat share card: invite by default, or the product the button carries. */

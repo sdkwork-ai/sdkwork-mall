@@ -915,3 +915,23 @@
   - Remaining for the goal: share QR rendering, partner customer-binding endpoint and
     order commission-event wiring in sdkwork-partner / sdkwork-order (checkout has no
     attribution field yet; `CheckoutOrder.partnerId` exists).
+
+- 2026-11-16 (thirty-ninth pass: share QR on both roots). Distributors can now show a
+  scannable code instead of only copying a link.
+  - `src/utils/qr-code.ts` builds the QR matrix with the `qrcode` core encoder and
+    rasterises it with a self-contained 1-bit palette PNG writer (deflate "stored"
+    blocks + CRC/adler), producing a ~7 KB data URI — no canvas, no Node built-ins,
+    so the mini program can render it through `image` and H5 can use the browser
+    encoder.
+  - Partner page: 邀请二维码 button on the share card and 二维码 per product tile open a
+    flat overlay with the code, its link and 复制链接/关闭 actions; labels live in the
+    catalogue (`partner.dashboard.qr*`).
+  - H5: the share section renders the invite QR plus a QR per product via
+    `QRCode.toDataURL`, with the same invite-coded links.
+  - Build: `mainFields: ["main","module","browser"]` lets the neutral platform
+    resolve `dijkstrajs` (CommonJS-only dependency of `qrcode`).
+  - Guard: `tests/mp-qr.test.mjs` verifies finder patterns, timing row, palette PNG
+    dimensions and payload growth (45 mini tests total).
+  - Gates: mini typecheck, 45 tests, 69 vitest, smoke PASS (package 1462.4 KB, build
+    16:40:57.778Z); H5 typecheck + 27 contract tests; i18n catalogues and baseline
+    hold.

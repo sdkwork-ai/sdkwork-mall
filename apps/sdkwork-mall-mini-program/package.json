@@ -23,7 +23,8 @@
     "@sdkwork/mall-mp-commons": "workspace:*",
     "@sdkwork/mall-mp-core": "workspace:*",
     "@sdkwork/mall-mp-host": "workspace:*",
-    "@sdkwork/mall-mp-im": "workspace:*"
+    "@sdkwork/mall-mp-im": "workspace:*",
+    "qrcode": "catalog:"
   },
   "devDependencies": {
     "esbuild": "0.28.1",

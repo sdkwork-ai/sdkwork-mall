@@ -4036,3 +4036,14 @@ html .sdkwork-iam-h5-auth-surface button {
     max-width: calc(var(--sdk-h5-canvas-width) - 2rem);
   }
 }
+
+
+/* Distribution share QR: 1-bit palette PNG rendered at 220px. */
+.sdk-h5-qr {
+  width: 7.5rem;
+  height: 7.5rem;
+  image-rendering: pixelated;
+  background: #fff;
+  display: block;
+  margin: 0.4rem 0;
+}

@@ -343,3 +343,51 @@
   padding: 8rpx 0;
   min-height: 48rpx;
 }
+
+
+/* Share QR overlay: flat card, scannable code rendered as a data-URI PNG. */
+.partner-qr-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.55);
+}
+
+.partner-qr-card {
+  width: 620rpx;
+  padding: 40rpx 36rpx 32rpx;
+  background: #ffffff;
+  text-align: center;
+}
+
+.partner-qr-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.partner-qr-image {
+  width: 440rpx;
+  margin: 24rpx auto 8rpx;
+  display: block;
+}
+
+.partner-qr-hint {
+  font-size: 22rpx;
+  color: #8b9199;
+  line-height: 1.6;
+}
+
+.partner-qr-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 28rpx;
+}
+
+.partner-qr-btn {
+  flex: 1;
+  font-size: 24rpx;
+}

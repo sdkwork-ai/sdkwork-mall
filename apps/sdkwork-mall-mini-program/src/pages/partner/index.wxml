@@ -67,6 +67,7 @@
         <button class="mp-btn mp-btn-primary partner-share-btn" open-type="share">{{labels.dashShareInvite}}</button>
         <button class="mp-btn mp-btn-ghost partner-share-btn" bindtap="copyShareLink">{{labels.dashShareCopyLink}}</button>
         <button class="mp-btn mp-btn-plain partner-share-btn" bindtap="copyInviteCode">{{labels.dashShareCopyCode}}</button>
+        <button class="mp-btn mp-btn-ghost partner-share-btn" bindtap="openInviteQr">{{labels.dashQrOpenInvite}}</button>
       </view>
       <view class="partner-invite-code-line">{{labels.dashInviteCodeLine}}：{{center.inviteCode || '—'}}</view>
       <view class="partner-share-title">{{labels.dashShareProductsTitle}}</view>
@@ -79,6 +80,7 @@
           <view class="partner-product-actions">
             <button class="mp-btn mp-btn-ghost partner-product-btn" data-product-id="{{item.id}}" bindtap="copyProductLink">{{labels.dashCopyProduct}}</button>
             <button class="mp-btn mp-btn-plain partner-product-btn" data-product-id="{{item.id}}" open-type="share">{{labels.dashShareAction}}</button>
+            <button class="mp-btn mp-btn-ghost partner-product-btn" data-product-id="{{item.id}}" bindtap="openProductQr">{{labels.dashQrOpenProduct}}</button>
           </view>
         </view>
       </view>
@@ -310,4 +312,15 @@
       </view>
     </view>
   </block>
+  <view wx:if="{{qrVisible}}" class="partner-qr-mask" catchtap="closeQr">
+    <view class="partner-qr-card" catchtap="noop">
+      <view class="partner-qr-title">{{qrTitle}}</view>
+      <image class="partner-qr-image" src="{{qrUri}}" mode="widthFix" />
+      <view class="partner-qr-hint">{{labels.dashQrHint}}</view>
+      <view class="partner-qr-actions">
+        <button class="mp-btn mp-btn-ghost partner-qr-btn" bindtap="copyQrLink">{{labels.dashQrCopy}}</button>
+        <button class="mp-btn mp-btn-primary partner-qr-btn" bindtap="closeQr">{{labels.dashQrClose}}</button>
+      </view>
+    </view>
+  </view>
 </view>

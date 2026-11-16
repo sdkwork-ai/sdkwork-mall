@@ -22,6 +22,8 @@ import {
   type SdkworkPartnerWithdrawal,
 } from "@sdkwork/mall-partner-service";
 
+import QRCode from "qrcode";
+
 import { searchMallH5Products, type MallH5ProductCard } from "@sdkwork/mall-h5-catalog";
 
 import type { SdkworkPartnerController } from "../partner-controller.ts";
@@ -367,6 +369,11 @@ function InviteSection({
 function ShareSection({ inviteCode, t }: { readonly inviteCode?: string; readonly t: Translate }) {
   const [products, setProducts] = useState<readonly MallH5ProductCard[]>([]);
   const [copiedId, setCopiedId] = useState("");
+  const [qrByLink, setQrByLink] = useState<Record<string, string>>({});
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const productLink = (id: string): string =>
+    `${origin}/product/${encodeURIComponent(id)}${inviteCode ? `?invite=${encodeURIComponent(inviteCode)}` : ""}`;
+  const inviteLink = inviteCode ? `${origin}/partner?invite=${encodeURIComponent(inviteCode)}` : "";
   useEffect(() => {
     let cancelled = false;
     void searchMallH5Products({ page: 1, pageSize: 6 })
@@ -384,13 +391,46 @@ function ShareSection({ inviteCode, t }: { readonly inviteCode?: string; readonl
       cancelled = true;
     };
   }, []);
-  const origin = typeof window === "undefined" ? "" : window.location.origin;
-  const productLink = (id: string): string =>
-    `${origin}/product/${encodeURIComponent(id)}${inviteCode ? `?invite=${encodeURIComponent(inviteCode)}` : ""}`;
+  useEffect(() => {
+    const links = new Set<string>();
+    if (inviteLink) {
+      links.add(inviteLink);
+    }
+    for (const product of products) {
+      links.add(productLink(product.id));
+    }
+    if (links.size === 0) {
+      return undefined;
+    }
+    let cancelled = false;
+    void Promise.all(
+      [...links].map(async (link) => ({
+        link,
+        uri: await QRCode.toDataURL(link, { errorCorrectionLevel: "M", margin: 1, width: 220 }),
+      })),
+    )
+      .then((entries) => {
+        if (!cancelled) {
+          setQrByLink(Object.fromEntries(entries.map((entry) => [entry.link, entry.uri])));
+        }
+      })
+      .catch(() => {
+        // Text links stay usable when the encoder fails.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [inviteLink, products]);
   return (
     <section className="sdk-h5-section">
       <h2>{t("partner.share.title")}</h2>
       <p className="sdk-h5-muted">{t("partner.share.description")}</p>
+      {inviteCode && qrByLink[inviteLink] ? (
+        <div className="sdk-h5-empty">
+          <img alt={t("partner.dashboard.inviteQrAlt")} className="sdk-h5-qr" src={qrByLink[inviteLink]} />
+          <p className="sdk-h5-muted">{t("partner.dashboard.inviteQrHint")}</p>
+        </div>
+      ) : null}
       <h3>{t("partner.share.productTitle")}</h3>
       {products.length === 0 ? (
         <div className="sdk-h5-empty">{t("partner.share.noProducts")}</div>
@@ -402,6 +442,13 @@ function ShareSection({ inviteCode, t }: { readonly inviteCode?: string; readonl
               <p className="sdk-h5-muted">
                 {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "—"}
               </p>
+              {qrByLink[productLink(product.id)] ? (
+                <img
+                  alt={t("partner.dashboard.productQrAlt")}
+                  className="sdk-h5-qr"
+                  src={qrByLink[productLink(product.id)]}
+                />
+              ) : null}
               <div className="sdk-h5-action-row">
                 <button
                   className="sdk-h5-button sdk-h5-button-secondary"

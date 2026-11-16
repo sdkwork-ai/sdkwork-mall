@@ -201,6 +201,12 @@
       "copyProduct": "复制商品链接",
       "openProduct": "打开商品",
       "noProducts": "暂无可分享商品"
+    },
+    "dashboard": {
+      "inviteQrAlt": "邀请二维码",
+      "inviteQrHint": "好友扫码进入分销页，邀请码自动带入。",
+      "productQrAlt": "商品二维码",
+      "productQrHint": "好友扫码打开商品，下单后佣金自动归属。"
     }
   }
 }
