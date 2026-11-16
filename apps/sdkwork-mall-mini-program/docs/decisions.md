@@ -953,3 +953,31 @@
   - Gates: mini typecheck, 47 node tests, smoke PASS (package 1464.9 KB, build
     16:46:58.135Z); H5 typecheck + 27 contract tests; PC typecheck (shared partner
     service extended).
+
+- 2026-11-17 (forty-first pass: distribution capability end-to-end). The two-level
+  distribution chain is implemented across the mall roots and the partner/order
+  backends:
+  - share: product links and QR codes carry `invite=<code>`; the distributor sees
+    the invite QR and per-product QR (mini program renders a palette PNG data URI,
+    H5 uses the browser encoder).
+  - binding: `POST /app/v3/api/partner_center/customer_bindings` (partner app API)
+    binds the buyer to the distributor; both roots capture and flush the code
+    (mini program also after sign-in).
+  - attribution: order checkout already resolves `partner_customer_binding` and
+    surfaces `CheckoutOrder.partnerId`.
+  - commission: on a genuine first payment the order repository records the order
+    revenue as an idempotent partner commission event and immediately settles it
+    with the differential (level) engine (profit margin → level-1 full / level-2
+    difference → wallet ledger + commission records), best-effort on the payment
+    path.
+  - partner centre: earnings hero, 全部/一级/二级 team tabs, commission records with
+    level tags, invite/product share rail, withdrawal flow.
+  - verification: partner intake unit tests 4/4, `cargo check` for partner
+    repository/service/routes and order integration/repository, generator
+    `--check` for the partner app SDK (11 operations), mall mini typecheck +
+    47 node tests + smoke, H5 typecheck + 27 contract tests, PC typecheck.
+  - honest gaps: no PostgreSQL in this environment, so the settlement path is
+    compile-verified and unit-tested rather than executed; order list/detail does
+    not yet display the counterparty distributor (the app order schema exposes
+    `partnerId` only on checkout); the shared contract suite still reports the
+    in-flight H5 brick-migration failures.
