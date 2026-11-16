@@ -22,6 +22,9 @@ export interface MpOrderSummary {
   createdAt: string;
   id: string;
   paidAmountCny: number | null;
+  /** Distributor bound to the buyer at order creation (empty when none). */
+  partnerName: string;
+  partnerLevelNo: string;
   status: string;
   subject: string;
   totalAmountCny: number | null;
@@ -33,6 +36,9 @@ export interface MpOrderDetail {
   items: Array<{ id: string; imageUrl: string; priceCny: number | null; quantity: number; skuName: string; spuId: string; title: string }>;
   paidAmountCny: number | null;
   paymentMethod: string;
+  /** Distributor bound to the buyer at order creation (empty when none). */
+  partnerName: string;
+  partnerLevelNo: string;
   shipmentIds: string[];
   status: string;
   subject: string;
@@ -68,6 +74,8 @@ function mapSummary(order: Record<string, unknown>): MpOrderSummary {
     totalAmountCny: Number(order.totalAmount ?? order.totalAmountCny) || null,
     paidAmountCny: Number(order.paidAmount ?? order.paidAmountCny) || null,
     createdAt: String(order.createdAt ?? ""),
+    partnerName: String(order.partnerName ?? ""),
+    partnerLevelNo: String(order.partnerLevelNo ?? ""),
   };
 }
 
@@ -118,6 +126,8 @@ export async function getOrderDetail(orderId: string): Promise<MpOrderDetail> {
     totalAmountCny: Number(record.totalAmount ?? record.totalAmountCny) || null,
     paidAmountCny: Number(record.paidAmount ?? record.paidAmountCny) || null,
     paymentMethod: String(record.paymentMethod ?? ""),
+    partnerName: String(record.partnerName ?? ""),
+    partnerLevelNo: String(record.partnerLevelNo ?? ""),
     createdAt: String(record.createdAt ?? ""),
     shipmentIds: Array.isArray(record.shipmentIds)
       ? record.shipmentIds.map((entry) => String(entry)).filter(Boolean)

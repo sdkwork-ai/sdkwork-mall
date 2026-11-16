@@ -1051,3 +1051,12 @@
   partner centre on load, so every share from the catalog carries `invite=` and the
   friend's order attributes. Verified with mini typecheck, build, smoke and 47
   node tests.
+
+- 2026-11-17 (forty-seventh pass: order-side distributor attribution). The order
+  response now exposes the snapshotted distributor (`partnerId`, `partnerName`,
+  `partnerLevelNo`) on list and detail payloads, and the mini-program order detail
+  renders 分销伙伴 · L<level> when present, so the buyer can see which distributor
+  earned the commission. H5 order list/detail are the order mobile brick's UI, so
+  the same field is available to the brick but is not rendered by the mall host yet.
+  Verified: order `cargo check` + 8 static contract tests, mini typecheck + 47 node
+  tests + build + smoke, mall `test:node` 206/206, i18n baseline.

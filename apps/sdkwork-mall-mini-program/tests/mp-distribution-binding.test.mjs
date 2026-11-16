@@ -41,3 +41,11 @@ test("the H5 root binds the invite code through the shared partner service", () 
   assert.match(shell, /sdkwork-mall-h5-pending-invite/u, "the shell must persist the invite code");
   assert.match(shell, /bindCustomerByInviteCode\(invite\)/u, "the shell must bind once authenticated");
 });
+
+test("the order detail shows the distributor that earned the commission", () => {
+  const service = read(path.join(repoRoot, "apps/sdkwork-mall-mini-program/src/services/order-service.ts"));
+  assert.match(service, /partnerName: String\(order\.partnerName/u);
+  assert.match(service, /partnerName: String\(record\.partnerName/u);
+  const detail = read(path.join(repoRoot, "apps/sdkwork-mall-mini-program/src/pages/order-detail/index.wxml"));
+  assert.match(detail, /\{\{detail\.partnerName\}\}/u, "order detail must render the distributor");
+});

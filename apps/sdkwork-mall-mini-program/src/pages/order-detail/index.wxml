@@ -44,6 +44,10 @@
       <view class="detail-meta"><text>订单总额</text><text>{{detail.totalText}}</text></view>
       <view class="detail-meta"><text>实付金额</text><text>{{detail.paidText}}</text></view>
       <view class="detail-meta" wx:if="{{detail.paymentMethod}}"><text>支付方式</text><text>{{detail.paymentMethod}}</text></view>
+      <view class="detail-meta" wx:if="{{detail.partnerName}}">
+        <text>分销伙伴</text>
+        <text>{{detail.partnerName}}<text wx:if="{{detail.partnerLevelNo}}" class="mp-muted"> · L{{detail.partnerLevelNo}}</text></text>
+      </view>
     </view>
 
     <view class="detail-actions">
