@@ -56,6 +56,7 @@
     "build:pc:demo:cloud": "node ../sdkwork-specs/tools/build-browser-client.mjs --root . --architecture pc --environment demo --deployment-profile cloud",
     "build:pc:prod:cloud": "node ../sdkwork-specs/tools/build-browser-client.mjs --root . --architecture pc --environment prod --deployment-profile cloud",
     "topology:validate": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs validate --root . --spec specs/topology.spec.json",
+    "admin:bootstrap:app": "node ../sdkwork-appbase/scripts/bootstrap/bootstrap-app.mjs",
     "_sdkwork:build": "pnpm --dir apps/sdkwork-mall-pc run build:prod",
     "_sdkwork:test": "pnpm test:node && pnpm test:vitest",
     "_sdkwork:check": "pnpm run check:app-composition && pnpm run typecheck:packages && pnpm typecheck && pnpm test:node",
@@ -68,6 +69,7 @@
   },
   "devDependencies": {
     "@sdkwork/iam-app-sdk": "workspace:*",
+    "@sdkwork/iam-application-bootstrap": "workspace:*",
     "@sdkwork/appbase-pc-react": "workspace:*",
     "@sdkwork/runtime-bootstrap": "workspace:*",
     "@sdkwork/sdk-common": "workspace:*",

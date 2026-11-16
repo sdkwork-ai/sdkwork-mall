@@ -138,6 +138,9 @@ importers:
       '@sdkwork/iam-app-sdk':
         specifier: workspace:*
         version: link:../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
+      '@sdkwork/iam-application-bootstrap':
+        specifier: workspace:*
+        version: link:../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-application-bootstrap
       '@sdkwork/runtime-bootstrap':
         specifier: workspace:*
         version: link:../sdkwork-appbase/packages/common/foundation/sdkwork-runtime-bootstrap
@@ -2012,7 +2015,11 @@ importers:
         specifier: workspace:*
         version: link:../sdkwork-mall-pc-core
 
-  apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-home: {}
+  apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-home:
+    dependencies:
+      '@sdkwork/mall-pc-commons':
+        specifier: workspace:*
+        version: link:../sdkwork-mall-pc-commons
 
   apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-invoice:
     dependencies:

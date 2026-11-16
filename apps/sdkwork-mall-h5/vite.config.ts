@@ -8,7 +8,11 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from 'vite';
-import { createSdkworkCredentialEntryBootstrapVitePlugin } from '@sdkwork/iam-credential-entry/vite';
+import type { PluginOption } from 'vite';
+import {
+  createSdkworkCredentialEntryBootstrapVitePlugin,
+  createSdkworkPublicApplicationAccessTokenVitePlugin,
+} from '@sdkwork/iam-credential-entry/vite';
 
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(appRoot, "../..");
@@ -215,9 +219,96 @@ const STABLE_VENDOR_CHUNK_GROUPS = [
   },
 ];
 
-export default defineConfig(({ mode }) => {
+/**
+ * Read the committed public application access token of one deployment profile.
+ *
+ * `.env.<mode>` is the selected profile document whenever Vite runs with the
+ * profile id as its mode (`standalone.development`, `cloud.production`, …),
+ * which is what every canonical dev/build path does. The file is read directly
+ * instead of through `loadEnv` because a launching process can export a private
+ * fixture under the same `SDKWORK_ACCESS_TOKEN` key, and a private credential
+ * must never be embedded in a renderer (`IAM_CREDENTIAL_ENTRY_SPEC.md` §4).
+ */
+function readProfilePublicApplicationAccessToken(mode: string): string | undefined {
+  const profilePath = path.join(appRoot, `.env.${mode}`);
+  if (existsSync(profilePath)) {
+    for (const line of readFileSync(profilePath, "utf8").split(/\r?\n/u)) {
+      const separator = line.indexOf("=");
+      if (separator <= 0 || line.startsWith("#")) {
+        continue;
+      }
+      if (line.slice(0, separator).trim() !== "SDKWORK_ACCESS_TOKEN") {
+        continue;
+      }
+      const value = line.slice(separator + 1).trim();
+      if (value) {
+        return value;
+      }
+    }
+  }
+  return process.env.SDKWORK_ACCESS_TOKEN?.trim() || undefined;
+}
+
+/** Manifest `backend.appId`: the application identity the access token must carry. */
+function readManifestApplicationId(): string | undefined {
+  try {
+    const manifest = JSON.parse(
+      readFileSync(path.join(appRoot, "agent.app.config.json"), "utf8"),
+    ) as { backend?: { appId?: string } };
+    return manifest.backend?.appId?.trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Credential-entry handoff for one Vite mode.
+ *
+ * The Vite dev server (`serve`) keeps the private development bootstrap token
+ * handoff: it is a local, CSP-free surface. Every other combination —
+ * non-development serve and every build (development … production,
+ * standalone/cloud) — receives the committed public application access token as
+ * a same-origin external script, because `IAM_CREDENTIAL_ENTRY_SPEC.md` §4
+ * requires test/demo/staging/production renderers to carry it and the
+ * production CSP (`script-src 'self'`) refuses an inline script. The canonical
+ * plugin validates the token and fails closed when the selected profile has no
+ * public application token, so a renderer can never reach the runtime error
+ * `access-token-only request requires Access-Token before request dispatch`
+ * (APP_ACCESS_TOKEN_SPEC.md §4).
+ */
+function resolveCredentialEntryPlugins({
+  command,
+  environment,
+  mode,
+  privateBootstrapAccessToken,
+}: {
+  command: "build" | "serve";
+  environment: string;
+  mode: string;
+  privateBootstrapAccessToken?: string;
+}): PluginOption[] {
+  if (command === "serve" && environment === "development") {
+    const developmentPlugin = createSdkworkCredentialEntryBootstrapVitePlugin({
+      accessToken: privateBootstrapAccessToken,
+      environment,
+    });
+    return developmentPlugin ? [developmentPlugin] : [];
+  }
+
+  return [
+    createSdkworkPublicApplicationAccessTokenVitePlugin({
+      accessToken: readProfilePublicApplicationAccessToken(mode),
+      applicationId: readManifestApplicationId(),
+      environment,
+      profileId: mode,
+    }),
+  ];
+}
+
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, appRoot, "");
   const bootstrapAccessToken = env.SDKWORK_ACCESS_TOKEN ?? process.env.SDKWORK_ACCESS_TOKEN;
+  const environment = resolveViteEnvironment(mode, process.env);
   const appApiProxyTarget = resolveMallH5DevProxyTarget({
     configuredApiBaseUrl: env.VITE_SDKWORK_COMMERCE_H5_APP_API_BASE_URL,
     configuredSdkBaseUrl: env.VITE_SDKWORK_COMMERCE_H5_SDK_BASE_URL,
@@ -235,13 +326,15 @@ export default defineConfig(({ mode }) => {
   root: appRoot,
   plugins: [
     // The bootstrap credential reaches the renderer only through the shared IAM
-    // plugin (dev-server HTML injection as
+    // plugins (the injected global
     // `globalThis.__SDKWORK_CREDENTIAL_ENTRY_BOOTSTRAP_ACCESS_TOKEN__`).
     // `define['process.env.SDKWORK_ACCESS_TOKEN']` is NOT a valid handoff
     // (IAM_CREDENTIAL_ENTRY_SPEC.md section 4/5).
-    createSdkworkCredentialEntryBootstrapVitePlugin({
-      accessToken: bootstrapAccessToken,
-      environment: resolveViteEnvironment(mode, process.env),
+    ...resolveCredentialEntryPlugins({
+      command,
+      environment,
+      mode,
+      privateBootstrapAccessToken: bootstrapAccessToken,
     }),
     react(), tailwindcss(),
   ],

@@ -158,6 +158,11 @@
       "deployUrl": "https://api-test.sdkwork.com/apps/sdkwork-mall-h5",
       "deployEnv": "test"
     },
+    "demo": {
+      "accessUrl": "https://api-demo.sdkwork.com/apps/sdkwork-mall-h5",
+      "deployUrl": "https://api-demo.sdkwork.com/apps/sdkwork-mall-h5",
+      "deployEnv": "demo"
+    },
     "staging": {
       "accessUrl": "https://api-staging.sdkwork.com/apps/sdkwork-mall-h5",
       "deployUrl": "https://api-staging.sdkwork.com/apps/sdkwork-mall-h5",
@@ -240,10 +245,11 @@
     "build": {
       "targets": []
     },
-    "sourceRoot": "apps/sdkwork-mall-pc"
+    "sourceRoot": "apps/sdkwork-mall-h5"
   },
   "metadata": {
     "standardOwner": "sdkwork-mall",
-    "initializedAt": "2026-09-30T00:00:00Z"
+    "initializedAt": "2026-09-30T00:00:00Z",
+    "deploymentConfig": "etc/sdkwork.deployment.config.json"
   }
 }
