@@ -200,7 +200,9 @@ test("card surfaces stay rectangular (flat storefront)", () => {
         if (!radius || !CARD_SELECTOR.test(selector) || INTERACTIVE.test(selector) || ROUND.test(radius[1])) {
           continue;
         }
-        if (radius[1].trim() !== "0") {
+        // `!important` is allowed: the flat surfaces are pinned that way.
+        const value = radius[1].replace(/\s*!important$/iu, "").trim();
+        if (value !== "0") {
           problems.push(`${path.relative(appRoot, entryPath).replace(/\\/gu, "/")} [${selector}] ${radius[1].trim()}`);
         }
       }

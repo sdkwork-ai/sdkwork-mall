@@ -381,3 +381,56 @@ button::after {
   border-radius: 0;
   box-shadow: var(--mp-shadow-2);
 }
+/* Flat storefront: card surfaces never round. `!important` keeps a platform
+   style or a stale stylesheet from cutting the corners again. */
+.mp-card,
+.mp-section,
+.mp-product-card,
+.mp-product-image,
+.mp-error,
+.mp-loading,
+.mp-toast {
+  border-radius: 0 !important;
+}
+/* Flat storefront: the page-level card classes across all 36 pages. A page
+   stylesheet that predates the flattening (or a stale dev-tool build) can no
+   longer cut these corners. */
+.orders-item,
+.notice-card,
+.messages-row,
+.messages-detail,
+.messages-icon,
+.activity-card,
+.activity-hero,
+.logistics-card,
+.cart-shop,
+.cart-select-all,
+.cashier-method,
+.checkout-address,
+.checkout-coupon,
+.checkout-remark,
+.coupon-row,
+.home-shop-card,
+.home-services,
+.home-quick,
+.home-category-item,
+.membership-hero,
+.membership-benefit,
+.partner-picker,
+.partner-invite-result,
+.address-picker,
+.aftersales-evidence-item,
+.aftersales-evidence-add,
+.buyer-quick-item,
+.category-product-row,
+.category-product-image,
+.chat-image,
+.fav-image,
+.fp-image,
+.detail-item-image,
+.inv-input,
+.inv-picker,
+.checkout-giftcard-input,
+.coupon-redeem-input {
+  border-radius: 0 !important;
+}

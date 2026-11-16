@@ -621,3 +621,22 @@
     and the i18n ratchet green; smoke (normal / hot reload / shared-store-only) all
     PASS over 36 pages; contract suite 185/192 with the seven failures inside the
     concurrent H5 brick migration.
+
+- 2026-11-16 (twenty-third pass: rounded hero could not be reproduced in the
+  source, so the build now proves which package runs). `src/` and `dist/` both
+  carry `border-radius: 0` on `.home-banner`, yet the dev tool still painted
+  rounded corners — the tell-tale of a stale compiled package (the tool's project
+  cache was already found to predate the integration).
+  - The hero and every card class now pin `border-radius: 0 !important`
+    (`.home-banner`, `.home-banner swiper-item`, `.home-banner-item`, plus the
+    global `.mp-card`/`.mp-product-card`/... set and the 36 page-level card
+    classes), so a platform style or an older stylesheet cannot round them again.
+  - The bundler injects `__SDKWORK_MALL_MP_BUILD_ID__` (ISO timestamp) into the
+    app entry and prints it at launch: `[sdkwork-mall] build <timestamp>`. Comparing
+    that line with the build log output proves whether the dev tool is really
+    running the new package.
+  - Guard: the flatness check accepts `0 !important`, and the built `dist` bundle
+    was rebuilt (8.2 MB) with the marker.
+  - Regression: 33 node guards, 69 vitest contracts, typecheck, composition green;
+    smoke PASS over 36 pages (the technical-error masking is also visible in its
+    log); contract suite 185/192 with the seven H5-only failures.

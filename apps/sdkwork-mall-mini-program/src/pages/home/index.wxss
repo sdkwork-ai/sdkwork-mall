@@ -18,8 +18,15 @@
 .home-banner {
   height: 240rpx;
   margin: 0;
-  border-radius: 0;
+  /* Square corners are part of the flat storefront; `!important` so a stale or
+     platform-injected style cannot round the hero again. */
+  border-radius: 0 !important;
   overflow: hidden;
+}
+
+.home-banner swiper-item,
+.home-banner-item {
+  border-radius: 0 !important;
 }
 
 .home-banner-item {

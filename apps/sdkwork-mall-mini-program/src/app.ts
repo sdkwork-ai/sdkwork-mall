@@ -25,6 +25,10 @@ import { uploadDriveImageDetailed } from "./services/drive-upload-service";
 import { createDriveDownloadGrant } from "./services/drive-download-service";
 import { applyCartTabBadge, syncCartTabBadge } from "./services/tab-bar-service";
 
+// Injected by scripts/build-miniprogram.mjs so the dev-tool console proves which
+// package is actually running.
+declare const __SDKWORK_MALL_MP_BUILD_ID__: string;
+
 interface MallMpGlobalData {
   commerceApiBaseUrl: string;
   deploymentProfile: string;
@@ -105,6 +109,8 @@ App({
   } as MallMpGlobalData,
 
   onLaunch() {
+    // Which bundle is running: compare this stamp with the build log output.
+    console.info("[sdkwork-mall] build", __SDKWORK_MALL_MP_BUILD_ID__);
     const globalData = (this as { globalData?: MallMpGlobalData }).globalData;
     try {
       const runtime = bootstrapMallMpRuntime();
