@@ -139,8 +139,8 @@ test("PC/H5 vite configs hand the public token to every build and non-dev serve"
     );
     assert.match(
       config,
-      /resolveViteEnvironment\(mode, process\.env\)/u,
-      `${root}: the plugin environment must be the normalized lifecycle, never raw Vite mode`,
+      /resolveViteEnvironment\(mode, command === "serve" \? \{\} : process\.env\)/u,
+      `${root}: a serve lifecycle must follow its mode, never an ambient SDKWORK_ENVIRONMENT`,
     );
     assert.doesNotMatch(
       config,

@@ -244,12 +244,34 @@ function normalizeLinkTemplate(target) {
   return target.replace(/\$\{[^}]+\}/gu, ":param");
 }
 
+/**
+ * Build output and caches are never source.
+ *
+ * A concurrent `pnpm build` rewrites these trees while the suite runs (and locks
+ * files on Windows: `EBUSY ... dist\<profile>\<env>\README.md`), so scanning them
+ * makes the architecture contract racy and lets a build copy of a source document
+ * stand in for the source itself.
+ */
+const IGNORED_SCAN_DIRECTORIES = new Set([
+  ".git",
+  ".turbo",
+  ".vite",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+  "target",
+]);
+
 function collectFiles(root, predicate) {
   if (!existsSync(root)) {
     return [];
   }
   const files = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (IGNORED_SCAN_DIRECTORIES.has(entry.name)) {
+      continue;
+    }
     const fullPath = path.join(root, entry.name);
     // Never follow symlinked directories: workspace node_modules links point
     // into sibling repositories and pnpm store chains that are not source

@@ -325,7 +325,12 @@ function resolveCredentialEntryPlugins({
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, appRoot, "");
   const bootstrapAccessToken = env.SDKWORK_ACCESS_TOKEN ?? process.env.SDKWORK_ACCESS_TOKEN;
-  const environment = resolveViteEnvironment(mode, process.env);
+  // A serve process must honour its explicit mode: an ambient
+  // `SDKWORK_ENVIRONMENT=production` (exported by some build shells and agent
+  // presets) would otherwise promote `pnpm dev` to production, skip the private
+  // development handoff and refuse to boot. Builds keep the process-env fallback
+  // because the canonical build runner injects the deployment identity there.
+  const environment = resolveViteEnvironment(mode, command === "serve" ? {} : process.env);
   const appApiProxyTarget = resolveMallPcDevProxyTarget({
     configuredApiBaseUrl: env.VITE_SDKWORK_COMMERCE_PC_APP_API_BASE_URL,
     configuredSdkBaseUrl: env.VITE_SDKWORK_COMMERCE_PC_SDK_BASE_URL,
