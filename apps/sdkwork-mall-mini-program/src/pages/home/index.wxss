@@ -298,7 +298,7 @@
 .home-banner-violet {
   background: #5b21b6;
 }
-@
+
 /* Visible build stamp: confirms which package the dev tool is running. */
 .home-build {
   text-align: center;

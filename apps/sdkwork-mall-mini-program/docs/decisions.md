@@ -790,3 +790,13 @@
   - Guard: `no text asset starts with a UTF-8 BOM` scans `src/` and `dist/`.
   - Package unchanged in size: main 711.1 KB, largest subpackage 40.5 KB, total
     1118.6 KB.
+
+- 2026-11-16 (thirty-first pass: no stray tokens in WXSS). The dev tool rejected
+  `./pages/home/index.wxss(301:1): unexpected token '@'`: a PowerShell here-string
+  escape left a lone `@` line in the file (the same edit that added the build-stamp
+  style). Line removed.
+  - Guard: `stylesheets contain no stray at-sign or unbalanced braces` — every `@`
+    line must be a real at-rule (`@import`/`@media`/`@supports`/`@keyframes`/
+    `@font-face`/`@charset`) and brace counts must balance.
+  - Rebuilt: main 711.1 KB, largest subpackage 40.5 KB, total 1118.6 KB, build
+    `2026-11-16T16:12:25.673Z`; 39 node guards and smoke green.

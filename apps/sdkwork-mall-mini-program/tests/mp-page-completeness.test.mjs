@@ -303,6 +303,42 @@ test("the dist folder is a self-contained dev-tool project", () => {
   assert.ok((distAppJson.subPackages ?? []).length >= 20, "subpackages must be declared in dist/app.json");
 });
 
+test("stylesheets contain no stray at-sign or unbalanced braces", () => {
+  // A leftover "@" line (PowerShell here-string escape) made the dev tool fail with
+  // "./pages/home/index.wxss(301:1): unexpected token '@'" and blocked the compile.
+  const problems = [];
+  const scan = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || entry.name === "node_modules") {
+        continue;
+      }
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        scan(entryPath);
+        continue;
+      }
+      if (!entry.name.endsWith(".wxss")) {
+        continue;
+      }
+      const source = read(entryPath);
+      const relative = path.relative(appRoot, entryPath).replace(/\\/gu, "/");
+      for (const [index, line] of source.split(/\r?\n/u).entries()) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith("@") && !/^@(import|media|supports|keyframes|-webkit-keyframes|font-face|charset)\b/u.test(trimmed)) {
+          problems.push(relative + ":" + (index + 1) + " stray " + JSON.stringify(trimmed));
+        }
+      }
+      const opens = (source.match(/\{/gu) ?? []).length;
+      const closes = (source.match(/\}/gu) ?? []).length;
+      if (opens !== closes) {
+        problems.push(relative + ": unbalanced braces " + opens + "/" + closes);
+      }
+    }
+  };
+  scan(srcRoot);
+  assert.deepEqual(problems, [], "stylesheets must be valid");
+});
+
 test("no text asset starts with a UTF-8 BOM", () => {
   // The WXSS compiler fails with "unexpected '\uFEFF' at pos 1" and reports the
   // whole package as broken; PowerShell-authored edits used to add one.
