@@ -53,10 +53,22 @@ local gateway dev double runs on port 3900.
   任一包超限则构建失败。
 - 当前实测：主包 ≈ 1.68 MB，最大分包 ≈ 250 KB，总计 ≈ 8.2 MB。
 
-### 为什么打出来这么大
+### 共享 runtime（同一份 SDK 只打一次）
 
-每个页面 bundle 都由 esbuild 独立打包（小程序只认 CommonJS，无法共享 chunk），页面会
-各自内联 `@sdkwork/mall-mp-core`、`-host`、`-im`、`-auth` 以及 IAM/IM/Commerce/Order/Partner
-App SDK 与 `@sdkwork/sdk-common`/`im-sdk` 的完整调用链，单页约 220 KB；36 页 × ~220 KB ≈ 8 MB。
-分包后每个包都在 2 MB 内；若要把总量再降一个量级，需要抽出一个共享 runtime 包供页面
-`require`（页面 bundle 变薄），这是后续优化项。
+小程序只认 CommonJS、不能共享 chunk，早期每个页面 bundle 都会内联整套 SDK
+（`mall-mp-core`/`-host`/`-im`/`-auth` + IAM/IM/Commerce/Order/Partner App SDK +
+`sdk-common`/`im-sdk`），单页约 220 KB，36 页 ≈ 8 MB。
+
+现在构建分两步：
+
+1. `dist/shared/runtime.js`：把 `src/` 直接引用的 `@sdkwork/*` 运行时模块（5 个入口）
+   和 `src/i18n` 目录**各打一次**，以 `{ "spec": module }` 注册表形式导出；
+2. 每个页面 bundle 只保留页面代码，`@sdkwork/*` 与 `../../i18n` 的 import 被改写为
+   `require("../../shared/runtime.js")["spec"]`（构建后按目录深度重写相对路径）。
+
+runtime 位于主包 `dist/shared/`，所有分包都能 require。守卫
+`page bundles load the one shared runtime` 会检查每个页面 bundle 都 require 共享 runtime、
+且不再内联 SDK 传输层代码。
+
+实测（当前）：主包 711 KB，最大分包 40.5 KB，总计 **1118 KB**（约 1.09 MB），
+相比改造前的 8.2 MB 降低约 7.5 倍。

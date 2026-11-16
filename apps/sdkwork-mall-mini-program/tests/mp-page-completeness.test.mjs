@@ -250,6 +250,43 @@ test("the app loads no JSON module and no non-mini-program global", () => {
   scan(path.join(appRoot, "packages"));
   assert.deepEqual(problems, [], "platform-incompatible module or global");
 });
+test("page bundles load the one shared runtime instead of inlining the SDK", () => {
+  // The SDK graph is bundled once into dist/shared/runtime.js; a page bundle that
+  // inlines it again would grow the package past the 2 MB limit (it did: 8.2 MB).
+  const dist = path.join(appRoot, "dist");
+  if (!existsSync(dist)) {
+    assert.ok(true, "dist is absent; run build:mp before the package guard");
+    return;
+  }
+  assert.ok(existsSync(path.join(dist, "shared", "runtime.js")), "dist/shared/runtime.js must exist");
+  const problems = [];
+  const pagesRoot = path.join(dist, "pages");
+  const bundles = [];
+  const walk = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const full = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else if (entry.name === "index.js") {
+        bundles.push(full);
+      }
+    }
+  };
+  walk(pagesRoot);
+  for (const bundle of bundles) {
+    const source = read(bundle);
+    const relative = path.relative(dist, bundle).replace(/\\/gu, "/");
+    if (!source.includes("shared/runtime.js")) {
+      problems.push(relative + ": does not require the shared runtime");
+    }
+    if (source.includes("Access-Token")) {
+      problems.push(relative + ": inlines SDK transport code");
+    }
+  }
+  assert.ok(bundles.length >= 30, "expected every page bundle");
+  assert.deepEqual(problems, []);
+});
+
 test("templates only reference assets that exist and avoid grid layout", () => {
   // Two failures observed in the dev tool: a `/assets/...png` icon that was never
   // shipped (empty glyph) and `display: grid` collapsing tiles so labels wrapped one

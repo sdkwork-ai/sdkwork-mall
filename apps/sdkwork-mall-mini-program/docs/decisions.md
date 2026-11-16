@@ -745,3 +745,23 @@
   - Regression: 35 mini guards, 69 vitest, typecheck, composition, parity snapshot
     and i18n green; smoke covers all 36 pages; contract suite 187/194 with the
     seven H5-only failures.
+
+- 2026-11-16 (twenty-eighth pass: one SDK copy instead of 36). The duplicate-SDK
+  problem that produced the 8.2 MB package is gone:
+  - `dist/shared/runtime.js` bundles every `@sdkwork/*` runtime module the entries
+    import (five top-level specifiers, transitively the whole IAM/IM/Commerce/Order/
+    Partner graph) **and** `src/i18n`, exported as a `{ specifier: module }` registry.
+  - Entry builds rewrite those imports to
+    `require(<rel>/shared/runtime.js)["specifier"]`, so a page bundle carries only its
+    own code; the runtime sits in the main package, so every subpackage can require it.
+  - The relative i18n import is recognized by its resolved path, keeping one catalogue
+    instance for the whole app.
+  - Measured: main 711 KB, largest subpackage 40.5 KB, total **1118 KB** (8.2 MB
+    before, ~7.5× smaller), one SDK copy, one i18n copy.
+  - Guard: `page bundles load the one shared runtime instead of inlining the SDK`
+    asserts every `pages/*/index.js` requires the shared runtime and contains no
+    `Access-Token` transport code.
+  - Regression: 36 node guards, 69 vitest, typecheck, composition and capability
+    parity green; smoke PASS over all 36 pages. The nine remaining contract failures
+    are H5-only (concurrent brick migration); the i18n ratchet reports the H5 baseline
+    needs the H5 owner's refresh (`236 -> 229`), untouched here.
