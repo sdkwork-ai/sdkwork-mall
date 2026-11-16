@@ -1060,3 +1060,13 @@
   the same field is available to the brick but is not rendered by the mall host yet.
   Verified: order `cargo check` + 8 static contract tests, mini typecheck + 47 node
   tests + build + smoke, mall `test:node` 206/206, i18n baseline.
+
+- 2026-11-17 (forty-eighth pass: order attribution end-to-end). Order list/detail
+  responses now include the snapshotted distributor (`partnerId`/`partnerName`/
+  `partnerLevelNo`), and the mini-program order detail renders 分销伙伴 · L<level>.
+  The H5 order brick (`@sdkwork/order-mobile-react-orders`) has no partner model or
+  card slot yet, so H5 attribution display is an upstream brick gap — the data is
+  already on the wire for it to consume.
+  Verified: order cargo check + fmt (adapter) + 8 static contract tests; mall
+  test:node 207/207; mini typecheck + 48 node tests + 69 vitest + smoke; H5
+  typecheck + 27 contract tests; PC typecheck; i18n baseline.
