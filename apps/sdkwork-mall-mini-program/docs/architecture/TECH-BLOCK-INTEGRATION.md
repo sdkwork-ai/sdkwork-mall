@@ -13,6 +13,7 @@ mini program still hand-rolls; those are the remaining migration work.
 
 | Surface | Owning block | Mall projection |
 | --- | --- | --- |
+| SDK transport (all generated SDKs) | host `fetch` adapter over `wx.request` | installed once by `@sdkwork/mall-mp-core` runtime |
 | WeChat one-tap sign-in, session restore, logout | `@sdkwork/iam-mp-core` (`session-wechat`) | `@sdkwork/mall-mp-auth` |
 | Credential sign-in / password change / identity | `@sdkwork/iam-app-sdk` (`auth.sessions`, `iam.users.current`) | `@sdkwork/mall-mp-auth` |
 | Notices, conversations, live messages, image parts | `@sdkwork/im-app-sdk`, `@sdkwork/im-sdk`, `@sdkwork/im-mp-chat` | `@sdkwork/mall-mp-im` |

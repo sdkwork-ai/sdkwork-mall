@@ -15,6 +15,7 @@ import type { MpHost } from "@sdkwork/mall-mp-host";
 
 import { validateMallMpComposition } from "../composition";
 import { installMallMpHost } from "../host";
+import { installMpFetch } from "@sdkwork/mall-mp-host/fetch";
 import {
   createMpRequestClient,
   type MpRequestClient,
@@ -89,6 +90,10 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
     throw new Error("mall mini program: app-api base URL is missing from the runtime environment");
   }
   installMallMpHost(input.host);
+  // Generated SDKWork SDKs issue every request through the global `fetch`.
+  // WeChat has none, so the host adapter is installed once, before any client is
+  // built (`@sdkwork/sdk-common` `BaseHttpClient` reads it per request).
+  installMpFetch(input.host.http);
   const session = createMpSessionStore(input.host.storage);
   const tokenManager = createMpSessionTokenManager(session);
   const request = createMpRequestClient({

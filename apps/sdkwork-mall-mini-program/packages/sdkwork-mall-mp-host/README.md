@@ -21,6 +21,7 @@ profile and an in-memory fake:
 | `MpMediaPicker` | `wx.chooseMedia` / `previewImage` / `FileSystemManager` | bytes and preview only; Drive owns uploads |
 | `MpPaymentBridge` | `wx.requestPayment` | a dismissed cashier is `cancelled`, not a failure |
 | `MpSocket` | `wx.connectSocket` | tracks `readyState` itself and replays an early `open`, because the IM realtime SDK subscribes after the task exists |
+| `fetch` adapter (`./fetch`) | `wx.request` | installed once as the global `fetch` before any SDK client is built; the generated SDKWork SDKs request through it |
 
 ## Usage
 

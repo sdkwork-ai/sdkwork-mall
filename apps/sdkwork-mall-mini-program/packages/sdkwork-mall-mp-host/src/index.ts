@@ -204,6 +204,15 @@ export interface MpHttpClient {
   requestBytes(options: MpHttpRequestOptions & { contentType?: string }): Promise<MpHttpResponse>;
 }
 
+/**
+ * Installs the SDK-facing `fetch` over the host HTTP client.
+ *
+ * Generated SDKWork SDKs (`@sdkwork/sdk-common` `BaseHttpClient`) issue every
+ * request through the global `fetch`; the mini program has none, so the bootstrap
+ * installs this adapter once before it builds any SDK client.
+ */
+export type MpFetchInstaller = (http: MpHttpClient) => void;
+
 /** The complete host surface a mall mini-program bootstrap installs. */
 export interface MpHost {
   readonly capabilities: ReadonlySet<MpHostCapability>;

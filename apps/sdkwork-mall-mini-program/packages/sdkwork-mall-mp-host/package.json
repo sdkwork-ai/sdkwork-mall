@@ -6,6 +6,7 @@
   "description": "WeChat mini-program host adapters for the SDKWork Mall mini program: platform login, secure storage, navigation, feedback, request and media bridges behind typed contracts.",
   "exports": {
     ".": "./src/index.ts",
+    "./fetch": "./src/fetch.ts",
     "./weixin": "./src/weixin/index.ts",
     "./testing": "./src/testing/index.ts"
   },

@@ -282,3 +282,25 @@
   - Regression: 25 node guards, 55 vitest contracts, 147/147 repo contract tests,
     both typechecks (49 packages), composition, parity, catalogues, default data
     and the i18n ratchet all green; miniProgram readiness 155 -> 149.
+
+- 2026-11-16 (eighth pass: SDK transport seam). Generated SDKWork SDKs request
+  through the global `fetch`; WeChat has none, so the blocks could not run on a
+  device even though they typechecked. Fixed with one host adapter:
+  - `packages/sdkwork-mall-mp-host/src/fetch.ts` (exported as `./fetch`) maps the
+    `fetch` subset `@sdkwork/sdk-common` uses (`method`/`headers`/`body`/`signal`
+    → `ok`/`status`/`headers.get`/`json`/`text`/`arrayBuffer`) onto
+    `MpHttpClient` (`wx.request`). Non-2xx responses resolve so the SDK envelope
+    and `ProblemDetail` handling sees the status; only a transport failure rejects.
+  - `initializeMallMpRuntime` installs it **before** building any SDK client, and a
+    native `fetch` (newer base libraries) always wins.
+  - Guard `tests/contract/verify-mp-sdk-transport-seam.test.mjs`: exactly one
+    module may write `globalThis.fetch`, the installation must precede the first
+    client, capability packages may not construct a domain SDK client, and no
+    service may fall back to `wx.request`.
+  - Also cleared workspace drift: two IAM H5 packages rendered into
+    `pnpm-workspace.yaml` without a consumer-registry entry
+    (`sdkwork-specs` commit `a1fab18`), so `verify-repo` is green again.
+  - i18n baseline refreshed to the improved counts (miniProgram 155 -> 149).
+  - Regression: 25 node guards, 60 vitest contracts, 152/152 repo contract tests,
+    both typechecks (49 packages), composition, parity, catalogues and default
+    data green.
