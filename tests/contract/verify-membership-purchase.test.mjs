@@ -36,7 +36,10 @@ test("the H5 membership service purchases packages through the membership API", 
 test("the mini-program member centre purchases packages", () => {
   const service = read("apps/sdkwork-mall-mini-program/src/services/account-service.ts");
   assert.match(service, /export async function purchaseMembership/u);
-  assert.match(service, /path: "\/memberships\/purchases"/u);
+  // The purchase is an operation of the commerce memberships block, not a
+  // hand-written endpoint.
+  assert.match(service, /memberships\.purchases\.create/u);
+  assert.match(service, /memberships\.packages\.list/u);
   assert.match(service, /export async function listMembershipPackages/u);
 
   const page = read("apps/sdkwork-mall-mini-program/src/pages/membership/index.ts");

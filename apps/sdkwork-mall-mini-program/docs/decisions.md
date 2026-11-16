@@ -372,3 +372,18 @@
   - External state: the repo-wide `typecheck` is red only on the H5 order page
     (`apps/sdkwork-mall-h5/.../OrderPage.tsx`), which a concurrent brick-migration
     edit is mid-way through; no mini-program file participates.
+
+- 2026-11-16 (twelfth pass: wallet, points and membership on their blocks).
+  `account-service.ts` now projects `runtime.commerceClient.wallet` and
+  `.memberships`: cash/points accounts, cash and points ledgers, membership
+  status/plans/packages and the package purchase. The eleven hand-written
+  `/wallet/*` and `/memberships/*` paths are gone.
+  - The commerce block exposes no per-lot points reader, so `lots` stays empty
+    instead of being re-derived from a hand-written endpoint; the view model is
+    unchanged and the points page degrades to balance + ledger.
+  - The marketing guard covers account-service as a sixth case; the membership
+    purchase contract now tracks `memberships.purchases.create` instead of the
+    endpoint literal.
+  - Regression: 25 node guards, 67 vitest contracts, 169/169 contract tests,
+    composition, parity, catalogues, default data and the i18n ratchet green.
+    (Repo-wide typecheck is still red only on the concurrent H5 OrderPage edit.)

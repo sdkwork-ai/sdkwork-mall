@@ -81,6 +81,21 @@ const CASES = [
     forbidden: [/path:\s*"\/after_sales/u, /\/after_sales\//u],
     label: "after-sales",
   },
+  {
+    file: "src/services/account-service.ts",
+    calls: [
+      'commerce\\(\\)\\.wallet\\.accounts\\.retrieve\\("cash"\\)',
+      "commerce\\(\\)\\.wallet\\.accounts\\.points\\.retrieve",
+      "commerce\\(\\)\\.wallet\\.ledgerEntries\\.list",
+      "commerce\\(\\)\\.wallet\\.ledgerEntries\\.points\\.list",
+      "commerce\\(\\)\\.memberships\\.current\\.status\\.retrieve",
+      "commerce\\(\\)\\.memberships\\.plans\\.list",
+      "commerce\\(\\)\\.memberships\\.packages\\.list",
+      "commerce\\(\\)\\.memberships\\.purchases\\.create",
+    ],
+    forbidden: [/path:\s*"\/(?:wallet|memberships)/u, /\/wallet\/(?:accounts|ledger_entries|points)/u],
+    label: "wallet/membership",
+  },
 ];
 
 for (const entry of CASES) {
