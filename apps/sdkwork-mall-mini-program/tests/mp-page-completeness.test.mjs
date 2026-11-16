@@ -287,6 +287,22 @@ test("page bundles load the one shared runtime instead of inlining the SDK", () 
   assert.deepEqual(problems, []);
 });
 
+test("the dist folder is a self-contained dev-tool project", () => {
+  // Opening the dev tool on a parent directory makes it count sources and
+  // node_modules as package code (the repository alone is ~2 GB). dist ships its
+  // own project.config.json so it can be opened directly.
+  const dist = path.join(appRoot, "dist");
+  if (!existsSync(dist)) {
+    assert.ok(true, "dist is absent; run build:mp first");
+    return;
+  }
+  const config = JSON.parse(read(path.join(dist, "project.config.json")));
+  assert.equal(config.miniprogramRoot, "./", "dist must be its own project root");
+  assert.equal(config.compileType, "miniprogram");
+  const distAppJson = JSON.parse(read(path.join(dist, "app.json")));
+  assert.ok((distAppJson.subPackages ?? []).length >= 20, "subpackages must be declared in dist/app.json");
+});
+
 test("templates only reference assets that exist and avoid grid layout", () => {
   // Two failures observed in the dev tool: a `/assets/...png` icon that was never
   // shipped (empty glyph) and `display: grid` collapsing tiles so labels wrapped one

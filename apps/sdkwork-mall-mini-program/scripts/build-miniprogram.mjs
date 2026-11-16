@@ -39,6 +39,7 @@ const sharedRoot = path.join(outRoot, "shared");
 const sharedRuntimeFile = path.join(sharedRoot, "runtime.js");
 
 const appJson = JSON.parse(readFileSync(path.join(srcRoot, "app.json"), "utf8").replace(/^\uFEFF/u, ""));
+const appJsonProjectConfig = JSON.parse(readFileSync(path.join(appRoot, "project.config.json"), "utf8").replace(/^\uFEFF/u, ""));
 
 /** Entry modules: the app plus every page declared in app.json (main + subpackages). */
 const entryPoints = [
@@ -363,6 +364,40 @@ const appJsonTarget = path.join(outRoot, "app.json");
 if (!statSync(appJsonTarget, { throwIfNoEntry: false })?.isFile()) {
   writeFileSync(appJsonTarget, `${JSON.stringify(appJson, null, 2)}\n`);
 }
+
+/**
+ * Emits a self-contained dev-tool project inside `dist/`.
+ *
+ * The app-root `project.config.json` points `miniprogramRoot` at `dist/`, but a
+ * project opened one level too high (the app folder, or the repository root) makes
+ * the tool count sources and `node_modules` as package code and report a size far
+ * over the limit. With this file the tool can be opened directly on `dist/`, so the
+ * package it measures is exactly what ships.
+ */
+const distProjectConfig = {
+  miniprogramRoot: "./",
+  compileType: "miniprogram",
+  appid: appJsonProjectConfig.appid,
+  projectname: appJsonProjectConfig.projectname,
+  setting: {
+    es6: true,
+    useCompilerPlugins: [],
+    minified: true,
+    urlCheck: false,
+    postcss: false,
+    minifyWXSS: true,
+    minifyWXML: true,
+    compileWorklet: false,
+    uglifyFileName: false,
+    uploadWithSourceMap: false,
+    enhance: false,
+    packNpmManually: false,
+    packNpmRelationList: [],
+  },
+  packOptions: { ignore: [{ type: "file", value: ".DS_Store" }] },
+  condition: {},
+};
+writeFileSync(path.join(outRoot, "project.config.json"), `${JSON.stringify(distProjectConfig, null, 2)}\n`);
 
 const bundleBytes = (directory) => {
   let total = 0;

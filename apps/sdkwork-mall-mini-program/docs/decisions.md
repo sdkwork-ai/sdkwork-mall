@@ -765,3 +765,18 @@
     parity green; smoke PASS over all 36 pages. The nine remaining contract failures
     are H5-only (concurrent brick migration); the i18n ratchet reports the H5 baseline
     needs the H5 owner's refresh (`236 -> 229`), untouched here.
+
+- 2026-11-16 (twenty-ninth pass: the measured package is now the shipped package).
+  The reported over-limit size could not come from `dist` (1118.6 KB across 176
+  files): the repository root is ~2057 MB and the app folder is 1.97 MB, so a
+  dev-tool project opened on either of them either counts sources/node_modules or
+  keeps an earlier 8 MB package from before the split.
+  - `dist/` now ships its own `project.config.json` (`miniprogramRoot: "./"`,
+    appid/compile settings, `uploadWithSourceMap: false`), so the dev tool can be
+    opened **directly on `dist/`** and the package it measures is exactly what
+    ships: main 711.1 KB, largest subpackage 40.5 KB, total 1118.6 KB.
+  - Guard: `the dist folder is a self-contained dev-tool project` asserts that
+    `dist/project.config.json` exists with `miniprogramRoot: "./"` and that
+    `dist/app.json` still declares the subpackages.
+  - Build keeps printing and enforcing the budget on every run.
+  - Regression: 37 node guards, 69 vitest, typecheck, smoke PASS over 36 pages.
