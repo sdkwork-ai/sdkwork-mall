@@ -17,7 +17,7 @@ import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import { platform } from "@sdkwork/mall-mp-core";
 import { captureInviteCode } from "../../services/invite-service";
-import { readOwnInviteCode } from "../../services/distribution-service";
+import { readOwnInviteCode, resolveOwnInviteCode } from "../../services/distribution-service";
 
 type ProductSku = MpSku & { priceText: string };
 
@@ -127,6 +127,8 @@ Page({
   onLoad(options: Record<string, string | undefined>) {
     this.setData({ _productId: options.id || "" });
     void captureInviteCode(options.invite);
+    // Warm the distributor's own invite code so a share from this page attributes.
+    void resolveOwnInviteCode();
     void this.loadDetail();
   },
 

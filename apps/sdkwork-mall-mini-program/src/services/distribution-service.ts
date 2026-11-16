@@ -11,7 +11,7 @@ import { platform } from "@sdkwork/mall-mp-core";
 import { mpCapabilityUrl } from "../routes/capabilities";
 import { formatCny } from "../utils/format";
 import type { MpProductCard } from "./catalog-service";
-import type { MpPartnerCenter, MpPartnerTeamMember } from "./partner-service";
+import { retrievePartnerCenter, type MpPartnerCenter, type MpPartnerTeamMember } from "./partner-service";
 
 export interface DistributionEarnings {
   totalText: string;
@@ -118,6 +118,28 @@ export function readOwnInviteCode(): string {
   try {
     return platform.storage.get(OWN_INVITE_KEY) ?? "";
   } catch {
+    return "";
+  }
+}
+
+/**
+ * Own invite code with a lazy fetch.
+ *
+ * A distributor who never opened the distribution centre on this device still
+ * shares products; warm the cached code from the partner centre once so the share
+ * card can carry it synchronously.
+ */
+export async function resolveOwnInviteCode(): Promise<string> {
+  const cached = readOwnInviteCode();
+  if (cached) {
+    return cached;
+  }
+  try {
+    const center = await retrievePartnerCenter();
+    rememberOwnInviteCode(center.inviteCode);
+    return center.inviteCode;
+  } catch {
+    // Not enrolled / offline: share without attribution.
     return "";
   }
 }

@@ -1044,3 +1044,10 @@
   - verification: `pnpm test:node` **206/206**, composition/parity/snapshot/i18n
     green, H5 typecheck + 27 root contract tests + standalone build, PC typecheck,
     mini typecheck + 47 node tests + smoke.
+
+- 2026-11-17 (forty-sixth pass: distributor share attribution robustness). A
+  distributor who never opened the distribution centre on a device shared products
+  without an invite code. The product page now warms the cached code from the
+  partner centre on load, so every share from the catalog carries `invite=` and the
+  friend's order attributes. Verified with mini typecheck, build, smoke and 47
+  node tests.
