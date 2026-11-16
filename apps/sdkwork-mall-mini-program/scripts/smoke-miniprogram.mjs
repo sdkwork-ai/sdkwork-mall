@@ -176,8 +176,34 @@ for (const page of pagePaths) {
       },
       route: page,
     };
-    instance.onLoad?.({ id: "stub", conversationId: "stub", categoryId: "", orderId: "stub" });
+    instance.onLoad?.({ id: "stub", conversationId: "stub", categoryId: "", orderId: "stub", invite: "SMOKE-INVITE" });
     instance.onShow?.();
+    if (page === "pages/product/index") {
+      const pending = globalThis.wx.getStorageSync("sdkwork-mall-mp-pending-invite");
+      if (pending !== "SMOKE-INVITE") {
+        throw new Error("product page did not capture the invite code");
+      }
+    }
+
+    if (page === "pages/partner/index") {
+      // Distribution dashboard behaviour: level tabs, invite QR rendering (the
+      // qrcode core + palette-PNG writer must work inside the bundle) and the
+      // overlay lifecycle.
+      instance.switchTeamTab({ currentTarget: { dataset: { tab: "direct" } } });
+      if (instance.data.teamTab !== "direct") {
+        throw new Error("distribution team tab did not switch");
+      }
+      instance.openInviteQr();
+      const qr = instance.data.qrUri;
+      if (!qr.startsWith("data:image/png;base64,")) {
+        throw new Error("invite QR was not rendered");
+      }
+      instance.closeQr();
+      if (instance.data.qrVisible === true || instance.data.qrUri !== "") {
+        throw new Error("QR overlay did not close");
+      }
+    }
+
     if (page === "pages/login/index") {
       // Product rules on the sign-in surface: the agreement gate and the
       // missing-credential guard are behaviour, so the harness exercises them.

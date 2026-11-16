@@ -84,16 +84,18 @@
           </view>
         </view>
       </view>
-      <view wx:if="{{!shareProducts.length}}" class="mp-muted partner-empty">{{labels.dashProductsLoading}}</view>
+      <view wx:if="{{shareProductsLoading}}" class="mp-muted partner-empty">{{labels.dashProductsLoading}}</view>
+      <view wx:elif="{{!shareProducts.length}}" class="mp-muted partner-empty">{{labels.dashShareProductsEmpty}}</view>
     </view>
 
     <view wx:if="{{center}}" class="mp-card">
       <view class="mp-card-title">{{labels.teamTitle}}</view>
       <view class="partner-team-tabs">
-        <view class="partner-team-tab {{teamTab === 'all' ? 'partner-team-tab-on' : ''}}" data-tab="all" bindtap="switchTeamTab">{{labels.dashTabAll}} {{teamTotal}}</view>
-        <view class="partner-team-tab {{teamTab === 'direct' ? 'partner-team-tab-on' : ''}}" data-tab="direct" bindtap="switchTeamTab">{{labels.dashTabFirst}} {{teamDirectCount}}</view>
-        <view class="partner-team-tab {{teamTab === 'second' ? 'partner-team-tab-on' : ''}}" data-tab="second" bindtap="switchTeamTab">{{labels.dashTabSecond}} {{teamSecondCount}}</view>
+        <view class="partner-team-tab {{teamTab === 'all' ? 'partner-team-tab-on' : ''}}" data-tab="all" bindtap="switchTeamTab">{{labels.dashTabAll}}</view>
+        <view class="partner-team-tab {{teamTab === 'direct' ? 'partner-team-tab-on' : ''}}" data-tab="direct" bindtap="switchTeamTab">{{labels.dashTabFirst}}</view>
+        <view class="partner-team-tab {{teamTab === 'second' ? 'partner-team-tab-on' : ''}}" data-tab="second" bindtap="switchTeamTab">{{labels.dashTabSecond}}</view>
       </view>
+      <view class="partner-team-counts mp-muted">{{labels.dashTeamPageCounts}}：{{labels.dashTabFirst}} {{teamDirectCount}} · {{labels.dashTabSecond}} {{teamSecondCount}} · {{labels.dashTabAll}} {{teamTotal}}</view>
       <view wx:if="{{!teamView.length}}" class="mp-muted partner-empty">{{labels.teamEmpty}}</view>
       <view class="partner-level" wx:for="{{teamView}}" wx:key="partnerId">
         <view class="partner-level-head">

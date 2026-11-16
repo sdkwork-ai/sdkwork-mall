@@ -56,11 +56,15 @@ export function SdkworkMallH5PartnerCenterPage({
     if (!invite) {
       return;
     }
-    void getSdkworkH5PartnerService()
-      .bindCustomerByInviteCode(invite)
-      .catch(() => {
-        // Non-fatal: the share link still opens the product/distribution pages.
-      });
+    try {
+      void getSdkworkH5PartnerService()
+        .bindCustomerByInviteCode(invite)
+        .catch(() => {
+          // Non-fatal: the share link still opens the product/distribution pages.
+        });
+    } catch {
+      // Provider not configured yet (bootstrap order) — the next visit binds.
+    }
   }, []);
 
   if (state.status === "loading" && !state.program) {
@@ -829,6 +833,12 @@ function TeamSection({
           </button>
         ))}
       </div>
+      <p className="sdk-h5-muted">
+        {t("partner.team.countsLine", {
+          first: members.filter((member) => member.depth <= 1).length,
+          second: members.filter((member) => member.depth === 2).length,
+        })}
+      </p>
       {visible.length === 0 ? (
         <div className="sdk-h5-empty">{t("partner.team.empty")}</div>
       ) : (

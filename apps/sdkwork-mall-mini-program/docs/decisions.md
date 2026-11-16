@@ -981,3 +981,25 @@
     not yet display the counterparty distributor (the app order schema exposes
     `partnerId` only on checkout); the shared contract suite still reports the
     in-flight H5 brick-migration failures.
+
+- 2026-11-17 (forty-second pass: regression sweep and fixes). Repeated gates surfaced
+  five real defects around the distribution surfaces; all fixed:
+  - mini program partner page reported "loading products" forever when the product
+    request failed (the empty state reused the loading copy) — now separate
+    `shareProductsLoading` + 暂无可分享商品.
+  - team tab counters were page-scoped but presented as totals — the tabs now only
+    filter, with an explicit 本页 counts line (mini program and H5).
+  - mini program login awaited the invite-binding round-trip inside the success
+    branch, delaying post-login navigation — binding is now fire-and-forget.
+  - H5 shared the binding only on the distribution page; a shared product link
+    (`/product/<id>?invite=`) never bound. The shell now persists the code before
+    the auth gate can redirect and binds once an authenticated tree renders.
+  - H5 called the partner provider synchronously inside an effect; an unconfigured
+    provider would throw past the promise catch — wrapped in try/catch.
+  - order integration now skips commission events entirely when the customer has no
+    ACTIVE partner binding (previously every paid order queued an event that
+    settlement would mark SKIPPED).
+  - verification: mini typecheck + 47 node tests + smoke (now also exercising level
+    tabs, invite QR rendering and product invite capture) + 69 vitest; H5 typecheck
+    + 27 contract tests + standalone build PASS; PC typecheck; i18n catalogue and
+    baseline hold; partner/order cargo check pass.

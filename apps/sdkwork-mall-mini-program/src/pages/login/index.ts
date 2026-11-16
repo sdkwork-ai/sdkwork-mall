@@ -162,7 +162,7 @@ Page({
     this.setData({ busy: true, error: "" });
     try {
       await loginWithWechat();
-      await bindPendingInvite();
+      void bindPendingInvite();
       this.setData({ busy: false, loggedIn: true });
       platform.toast(t("auth.success"), "success");
       goBackAfterLogin();
@@ -188,7 +188,7 @@ Page({
     this.setData({ busy: true, error: "" });
     try {
       await loginWithPassword(account, password);
-      await bindPendingInvite();
+      void bindPendingInvite();
       platform.storage.set(LAST_ACCOUNT_KEY, account);
       this.setData({
         busy: false,

@@ -115,6 +115,7 @@ interface PartnerPageData {
   teamDirectCount: number;
   teamSecondCount: number;
   shareProducts: DistributionShareProduct[];
+  shareProductsLoading: boolean;
   qrVisible: boolean;
   qrTitle: string;
   qrUri: string;
@@ -294,6 +295,8 @@ function buildLabels(): Record<string, string> {
     dashShareInvite: t("partner.dashboard.shareInvite"),
     dashShareProductsTitle: t("partner.dashboard.shareProductsTitle"),
     dashShareTitle: t("partner.dashboard.shareTitle"),
+    dashShareProductsEmpty: t("partner.dashboard.shareProductsEmpty"),
+    dashTeamPageCounts: t("partner.dashboard.teamPageCounts"),
     dashQrClose: t("partner.dashboard.qrClose"),
     dashQrCopy: t("partner.dashboard.qrCopy"),
     dashQrHint: t("partner.dashboard.qrHint"),
@@ -387,6 +390,7 @@ Page({
     teamDirectCount: 0,
     teamSecondCount: 0,
     shareProducts: [],
+    shareProductsLoading: false,
     qrVisible: false,
     qrTitle: "",
     qrUri: "",
@@ -753,12 +757,15 @@ Page({
 
   /** Product cards the partner can forward; each path carries the invite code. */
   async loadShareProducts() {
+    this.setData({ shareProductsLoading: true });
     try {
       const result = await listProducts({ page: 1, pageSize: 6 });
       const inviteCode = this.data.center?.inviteCode ?? "";
       this.setData({ shareProducts: result.items.map((product) => toShareProduct(product, inviteCode)) });
     } catch {
       this.setData({ shareProducts: [] });
+    } finally {
+      this.setData({ shareProductsLoading: false });
     }
   },
 

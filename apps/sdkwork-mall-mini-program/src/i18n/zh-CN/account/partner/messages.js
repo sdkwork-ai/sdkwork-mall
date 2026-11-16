@@ -16,6 +16,8 @@ module.exports = {
       shareDescription: "分享商品给好友，好友下单后佣金按一级/二级自动结算到你的账户。",
       shareInvite: "转发邀请好友",
       shareProductsTitle: "分享热卖商品",
+      shareProductsEmpty: "暂无可分享商品，稍后重试",
+      teamPageCounts: "本页",
       shareTitle: "分享赚佣金",
       cardProductFallback: "分享好物，一起赚佣金",
       cardProductSuffix: "好物推荐",

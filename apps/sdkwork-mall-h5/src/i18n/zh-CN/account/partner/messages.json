@@ -139,7 +139,9 @@
       "page": "第 {{page}} / {{total}} 页",
       "all": "全部",
       "level1": "一级",
-      "level2": "二级"
+      "level2": "二级",
+      "pageCounts": "本页",
+      "countsLine": "本页：一级 {{first}} · 二级 {{second}}"
     },
     "commissions": {
       "title": "收益记录",
