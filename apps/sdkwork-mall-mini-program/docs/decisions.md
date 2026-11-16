@@ -1003,3 +1003,15 @@
     tabs, invite QR rendering and product invite capture) + 69 vitest; H5 typecheck
     + 27 contract tests + standalone build PASS; PC typecheck; i18n catalogue and
     baseline hold; partner/order cargo check pass.
+
+- 2026-11-17 (forty-third pass: share attribution fixes). Two more defects closed:
+  - a distributor's **product page share** carried no invite code, so friends who
+    bought from a forwarded product earned nothing; the page now remembers the
+    distributor's own code (saved when the partner centre loads) and appends it to
+    the share card / timeline query.
+  - the H5 distribution page bound the invite code a second time (the shell does it
+    now); the duplicate effect is removed so a visit performs one bind.
+  - the binding guard now targets the H5 shell, and smoke asserts the product share
+    path contains the distributor's invite code.
+  - verification: mini typecheck + 47 node tests + 69 vitest + smoke; H5 typecheck +
+    27 contract tests + standalone build; PC typecheck; i18n baseline holds.

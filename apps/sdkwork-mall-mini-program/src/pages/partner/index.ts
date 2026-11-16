@@ -31,6 +31,7 @@ import { buildQrDataUri } from "../../utils/qr-code";
 import { listProducts } from "../../services/catalog-service";
 import {
   buildProductSharePath,
+  rememberOwnInviteCode,
   commissionLevelLabel,
   countTeamLevels,
   filterTeamByTab,
@@ -509,6 +510,7 @@ Page({
           : "",
         earnings: summarizeEarnings(center),
       });
+      rememberOwnInviteCode(center.inviteCode);
       void this.loadShareProducts();
       await Promise.all([
         this.loadTeamPage(1),

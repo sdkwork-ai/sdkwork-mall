@@ -37,8 +37,7 @@ test("the H5 root binds the invite code through the shared partner service", () 
     path.join(repoRoot, "apps/sdkwork-mall-pc/packages/sdkwork-mall-partner-service/src/partner-service.ts"),
   );
   assert.match(service, /bindCustomerByInviteCode/u);
-  const page = read(
-    path.join(repoRoot, "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-partner/src/pages/PartnerCenterPage.tsx"),
-  );
-  assert.match(page, /bindCustomerByInviteCode\(invite\)/u);
+  const shell = read(path.join(repoRoot, "apps/sdkwork-mall-h5/src/App.tsx"));
+  assert.match(shell, /sdkwork-mall-h5-pending-invite/u, "the shell must persist the invite code");
+  assert.match(shell, /bindCustomerByInviteCode\(invite\)/u, "the shell must bind once authenticated");
 });

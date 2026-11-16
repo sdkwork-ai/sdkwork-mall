@@ -6,6 +6,8 @@
  * language the storefront shows: earnings summary, level labels, team tabs and
  * share paths that carry the partner's invite code.
  */
+import { platform } from "@sdkwork/mall-mp-core";
+
 import { mpCapabilityUrl } from "../routes/capabilities";
 import { formatCny } from "../utils/format";
 import type { MpProductCard } from "./catalog-service";
@@ -95,4 +97,27 @@ export function toShareProduct(product: MpProductCard, inviteCode: string): Dist
     priceText: product.priceCny == null ? "—" : formatCny(product.priceCny),
     title: product.title ?? "",
   };
+}
+
+/** Device-local copy of the distributor's own invite code (for product shares). */
+const OWN_INVITE_KEY = "sdkwork-mall-mp-my-invite";
+
+export function rememberOwnInviteCode(inviteCode: string): void {
+  if (!inviteCode) {
+    return;
+  }
+  try {
+    platform.storage.set(OWN_INVITE_KEY, inviteCode);
+  } catch {
+    // Sharing still works without attribution; the partner page retries next load.
+  }
+}
+
+/** The signed-in distributor's invite code, or "" when not enrolled. */
+export function readOwnInviteCode(): string {
+  try {
+    return platform.storage.get(OWN_INVITE_KEY) ?? "";
+  } catch {
+    return "";
+  }
 }

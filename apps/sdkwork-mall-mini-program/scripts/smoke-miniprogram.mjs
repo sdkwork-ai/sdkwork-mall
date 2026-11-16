@@ -179,6 +179,16 @@ for (const page of pagePaths) {
     instance.onLoad?.({ id: "stub", conversationId: "stub", categoryId: "", orderId: "stub", invite: "SMOKE-INVITE" });
     instance.onShow?.();
     if (page === "pages/product/index") {
+      // A distributor's own product share must attribute the order.
+      globalThis.wx.setStorageSync("sdkwork-mall-mp-my-invite", "SMOKE-OWN");
+      const card = instance.onShareAppMessage?.();
+      if (!card || !String(card.path).includes("invite=SMOKE-OWN")) {
+        throw new Error("product share card does not carry the distributor invite code");
+      }
+      globalThis.wx.removeStorageSync("sdkwork-mall-mp-my-invite");
+    }
+
+    if (page === "pages/product/index") {
       const pending = globalThis.wx.getStorageSync("sdkwork-mall-mp-pending-invite");
       if (pending !== "SMOKE-INVITE") {
         throw new Error("product page did not capture the invite code");

@@ -17,6 +17,7 @@ import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import { platform } from "@sdkwork/mall-mp-core";
 import { captureInviteCode } from "../../services/invite-service";
+import { readOwnInviteCode } from "../../services/distribution-service";
 
 type ProductSku = MpSku & { priceText: string };
 
@@ -134,7 +135,7 @@ Page({
     const detail = this.data.detail;
     return buildMpShareCard({
       imageUrl: this.data.images[0],
-      query: { id: this.data._productId },
+      query: { id: this.data._productId, invite: readOwnInviteCode() || undefined },
       routeId: "storefront.mall.product-detail",
       title: detail ? detail.title : undefined,
     });
