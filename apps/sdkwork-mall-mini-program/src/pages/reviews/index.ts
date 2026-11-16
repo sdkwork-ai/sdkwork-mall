@@ -5,6 +5,7 @@ import {
   listPendingReviewOrders,
   type MpPendingReviewOrder,
 } from "../../services/reviews-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface ReviewRow extends MpPendingReviewOrder {
   amountText: string;
@@ -29,7 +30,7 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 
   async load() {
@@ -51,18 +52,16 @@ Page({
   goOrder(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.detail", { id }) });
+      platform.navigateTo(mpCapabilityUrl("buyer.mall.orders.detail", { id }));
     }
   },
 
   goAfterSales(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
-    wx.navigateTo({
-      url: id ? mpCapabilityUrl("buyer.mall.after-sales", { orderId: id }) : mpCapabilityUrl("buyer.mall.after-sales"),
-    });
+    platform.navigateTo(id ? mpCapabilityUrl("buyer.mall.after-sales", { orderId: id }) : mpCapabilityUrl("buyer.mall.after-sales"));
   },
 
   goOrders() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders") });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.orders"));
   },
 });

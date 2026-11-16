@@ -5,6 +5,7 @@ import {
   getOrderLogistics,
   type MpShipmentLogistics,
 } from "../../services/order-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface MpTrackingEventView {
   description: string;
@@ -52,7 +53,7 @@ Page({
 
   onPullDownRefresh() {
     void this.loadLogistics(this.data._orderId, this.data._shipmentId)
-      .finally(() => wx.stopPullDownRefresh());
+      .finally(() => platform.stopPullDownRefresh());
   },
 
   async loadLogistics(orderId: string, shipmentId: string) {
@@ -91,10 +92,6 @@ Page({
   },
 
   goOrders() {
-    wx.navigateBack({
-      fail() {
-        wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders") });
-      },
-    });
+    platform.back({ url: mpCapabilityUrl("buyer.mall.orders") });
   },
 });

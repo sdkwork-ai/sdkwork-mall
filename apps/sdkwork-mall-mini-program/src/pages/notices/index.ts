@@ -4,6 +4,7 @@ import {
   retrieveNotice,
   type MpNotice,
 } from "../../services/im-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface NoticeRow extends MpNotice {
   timeText: string;
@@ -72,6 +73,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 });

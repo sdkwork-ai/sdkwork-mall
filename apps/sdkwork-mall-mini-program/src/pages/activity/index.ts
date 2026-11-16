@@ -3,6 +3,7 @@ import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { listActivities, type MpActivity } from "../../services/marketing-service";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface ActivityRow {
   id: string;
@@ -74,7 +75,7 @@ Page({
   goDetail(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.activity-detail", { id: id }) });
+      platform.navigateTo(mpCapabilityUrl("storefront.mall.activity-detail", { id: id }));
     }
   },
 
@@ -97,6 +98,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 });

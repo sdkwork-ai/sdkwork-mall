@@ -2,6 +2,7 @@ import { t } from "../../i18n";
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { listPaymentMethods, payOrder, type MpWechatPayParams } from "../../services/cart-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface CashierData {
   orderId: string;
@@ -98,21 +99,18 @@ Page({
       } else if (payment.paymentUrl) {
         // Outside channels (e.g. H5/QR) cannot be opened inside the mini
         // program: copy the link so the buyer can finish in a browser.
-        wx.setClipboardData({ data: payment.paymentUrl });
-        wx.showModal({
+        void platform.copy(payment.paymentUrl);
+        await platform.alert({
           title: t("cashier.browserHintTitle"),
           content: t("cashier.browserHint"),
-          showCancel: false,
         });
       }
-      wx.redirectTo({
-        url: mpCapabilityUrl("storefront.mall.payment-result", {
-          orderId,
-          paymentId: payment.paymentId,
-          paymentMethod: selectedCode,
-          status,
-        }),
-      });
+      platform.redirectTo(mpCapabilityUrl("storefront.mall.payment-result", {
+        orderId,
+        paymentId: payment.paymentId,
+        paymentMethod: selectedCode,
+        status,
+      }));
     } catch (cause) {
       this.setData({
         paying: false,
@@ -121,29 +119,29 @@ Page({
     }
   },
 
-  requestWechatPayment(params: MpWechatPayParams): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      wx.requestPayment({
+  /**
+   * Hands the prepay parameters to the platform cashier through the host bridge.
+   *
+   * A dismissed cashier surfaces as `cancelled` on the host error, which is a
+   * different message than a failed charge.
+   */
+  async requestWechatPayment(params: MpWechatPayParams): Promise<void> {
+    try {
+      await platform.requestPayment({
         nonceStr: params.nonceStr,
         package: params.package,
         paySign: params.paySign,
         signType: params.signType,
         timeStamp: params.timeStamp,
-        success: () => resolve(),
-        fail: (result) => {
-          const cancelled = String(result.errMsg ?? "").includes("cancel");
-          reject(
-            new Error(
-              cancelled ? t("cashier.errors.cancelled") : t("cashier.errors.payFailed"),
-            ),
-          );
-        },
       });
-    });
+    } catch (cause) {
+      const cancelled = (cause as { code?: string } | null)?.code === "cancelled";
+      throw new Error(cancelled ? t("cashier.errors.cancelled") : t("cashier.errors.payFailed"));
+    }
   },
 
   cancel() {
-    wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders", { status: "PENDING_PAYMENT" }) });
+    platform.redirectTo(mpCapabilityUrl("buyer.mall.orders", { status: "PENDING_PAYMENT" }));
   },
 
   retry() {

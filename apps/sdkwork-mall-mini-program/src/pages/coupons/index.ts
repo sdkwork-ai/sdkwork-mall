@@ -8,6 +8,7 @@ import {
 } from "../../services/promotion-service";
 import { listUserCoupons } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
+import { platform } from "@sdkwork/mall-mp-core";
 
 type MpUserCoupon = Awaited<ReturnType<typeof listUserCoupons>>[number];
 
@@ -36,7 +37,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
       return;
     }
     this.refresh();
@@ -111,6 +112,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.refresh().finally(() => wx.stopPullDownRefresh());
+    void this.refresh().finally(() => platform.stopPullDownRefresh());
   },
 });

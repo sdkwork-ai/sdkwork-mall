@@ -237,8 +237,43 @@ test("pull-to-refresh is declared and always stops the spinner", () => {
 });
 
 test("destructive cart and address actions ask for confirmation", () => {
+  // Authority: pages must ask through the host feedback adapter, not by
+  // assembling a platform `showModal` literal.
   const cart = readPage("cart", "ts");
   const address = readPage("address", "ts");
-  assert.match(cart, /wx\.showModal/u, "cart deletion must confirm before removing lines");
-  assert.match(address, /wx\.showModal/u, "address deletion must confirm before removing the row");
+  assert.match(cart, /platform\.confirm/u, "cart deletion must confirm before removing lines");
+  assert.match(address, /platform\.confirm/u, "address deletion must confirm before removing the row");
 });
+
+test("the app root never calls platform globals directly", () => {
+  // Authority: MINI_PROGRAM_APP_ARCHITECTURE_SPEC.md section 8. Every WeChat API
+  // lives in `@sdkwork/mall-mp-host`; the root goes through the `platform`
+  // facade or the injected host adapters.
+  const stripProse = (source) => source
+    .replace(/\/\*[\s\S]*?\*\//gu, "")
+    .replace(/^[ \t]*\/\/.*$/gmu, "")
+    .replace(/`(?:[^`\\]|\\.)*`/gu, "``")
+    .replace(/'(?:[^'\\\n]|\\.)*'/gu, "''")
+    .replace(/"(?:[^"\\\n]|\\.)*"/gu, '""');
+  const violations = [];
+  for (const file of collectTypeScriptFiles(sourceRoot)) {
+    if (/\bwx\.[a-zA-Z]/u.test(stripProse(readFileSync(file, "utf8")))) {
+      violations.push(file.replace(sourceRoot, "").replace(/\\/gu, "/"));
+    }
+  }
+  assert.deepEqual(violations, [], `Move these platform calls behind the host facade:\n${violations.join("\n")}`);
+});
+
+/** Every `.ts` file under a directory tree. */
+function collectTypeScriptFiles(directory) {
+  const files = [];
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const entryPath = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectTypeScriptFiles(entryPath));
+    } else if (entry.name.endsWith(".ts")) {
+      files.push(entryPath);
+    }
+  }
+  return files;
+}

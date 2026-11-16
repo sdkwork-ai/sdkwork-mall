@@ -6,6 +6,7 @@
  * each surface independently.
  */
 import { type MpRecord } from "../types/common";
+import { platform } from "@sdkwork/mall-mp-core";
 
 const FAVORITES_STORAGE_KEY = "sdkwork-mall-favorites";
 const FOOTPRINT_STORAGE_KEY = "sdkwork-mall-footprint";
@@ -27,7 +28,7 @@ export interface MpFootprintItem {
 
 function readList<T>(storageKey: string): T[] {
   try {
-    const raw = wx.getStorageSync(storageKey);
+    const raw = platform.storage.get(storageKey);
     if (typeof raw !== "string" || raw === "") {
       return [];
     }
@@ -39,7 +40,7 @@ function readList<T>(storageKey: string): T[] {
 }
 
 function writeList<T>(storageKey: string, items: T[]): void {
-  wx.setStorageSync(storageKey, JSON.stringify(items));
+  platform.storage.set(storageKey, JSON.stringify(items));
 }
 
 export function readFavorites(): MpFavoriteItem[] {

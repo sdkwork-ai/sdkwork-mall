@@ -12,6 +12,7 @@ import {
   setDefaultAddress,
   type MpAddress,
 } from "../../services/address-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 const PROVINCE_CITIES: Array<{ province: string; cities: string[] }> = [
   { province: "北京市", cities: ["北京市"] },
@@ -138,9 +139,8 @@ Page({
     if (eventChannel && eventChannel.emit) {
       eventChannel.emit("addressPicked", address);
     }
-    wx.navigateBack();
+    platform.back();
   },
-
   openCreate() {
     this.setData({
       editing: true,
@@ -249,21 +249,19 @@ Page({
 
   async remove(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
-    wx.showModal({
+    const confirmed = await platform.confirm({
       title: "删除地址",
       content: "确定删除该收货地址？",
-      success: async (result) => {
-        if (!result.confirm) {
-          return;
-        }
-        try {
-          await deleteAddress(id);
-          await this.refresh();
-        } catch (cause) {
-          this.showToast(errorMessage(cause, "删除失败"));
-        }
-      },
     });
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await deleteAddress(id);
+      await this.refresh();
+    } catch (cause) {
+      this.showToast(errorMessage(cause, "删除失败"));
+    }
   },
 
   showToast(message: string) {
@@ -279,6 +277,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.refresh().finally(() => wx.stopPullDownRefresh());
+    void this.refresh().finally(() => platform.stopPullDownRefresh());
   },
 });

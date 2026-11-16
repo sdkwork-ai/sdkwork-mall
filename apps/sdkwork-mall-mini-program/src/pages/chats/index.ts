@@ -4,6 +4,7 @@ import {
   listChatConversations,
   type MpChatConversation,
 } from "../../services/im-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface ConversationRow {
   id: string;
@@ -62,12 +63,12 @@ Page({
   goChat(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.chat", { id: id }) });
+      platform.navigateTo(mpCapabilityUrl("buyer.mall.im.chat", { id: id }));
     }
   },
 
   goNotices() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.notices") });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.im.notices"));
   },
 
   retry() {
@@ -75,6 +76,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 });

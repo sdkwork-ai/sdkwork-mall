@@ -1,7 +1,7 @@
 import { t } from "../../i18n";
 import { errorMessage, type MpInputEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
-import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
+import { getMallMpRuntime, platform } from "@sdkwork/mall-mp-core";
 import { loginWithPassword, loginWithWechat } from "../../services/auth-service";
 import { clearSession, getToken, setToken } from "../../services/session";
 
@@ -38,11 +38,7 @@ interface LoginData {
 
 function goBackAfterLogin(): void {
   setTimeout(() => {
-    wx.navigateBack({
-      fail() {
-        wx.switchTab({ url: mpCapabilityUrl("buyer.mall.dashboard") });
-      },
-    });
+    platform.back({ tab: true, url: mpCapabilityUrl("buyer.mall.dashboard") });
   }, 600);
 }
 
@@ -120,7 +116,7 @@ Page({
     try {
       await loginWithWechat();
       this.setData({ busy: false });
-      wx.showToast({ title: t("auth.success"), icon: "success" });
+      platform.toast(t("auth.success"), "success");
       goBackAfterLogin();
     } catch (cause) {
       this.setData({ busy: false, error: errorMessage(cause, t("auth.failed")) });
@@ -142,7 +138,7 @@ Page({
     try {
       await loginWithPassword(account, password);
       this.setData({ busy: false });
-      wx.showToast({ title: t("auth.success"), icon: "success" });
+      platform.toast(t("auth.success"), "success");
       goBackAfterLogin();
     } catch (cause) {
       this.setData({ busy: false, error: errorMessage(cause, t("auth.failed")) });
@@ -156,13 +152,13 @@ Page({
       return;
     }
     setToken(token);
-    wx.showToast({ title: t("auth.success"), icon: "success" });
+    platform.toast(t("auth.success"), "success");
     goBackAfterLogin();
   },
 
   logout() {
     clearSession();
     this.setData({ token: "", account: "", password: "" });
-    wx.showToast({ title: t("auth.loggedOut"), icon: "success" });
+    platform.toast(t("auth.loggedOut"), "success");
   },
 });

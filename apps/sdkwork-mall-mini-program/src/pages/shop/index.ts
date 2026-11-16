@@ -3,6 +3,7 @@ import { mpCapabilityUrl } from "../../routes/capabilities";
 import { retrieveShop, type MpShopDetail } from "../../services/marketing-service";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface ShopProductRow {
   id: string;
@@ -97,7 +98,7 @@ Page({
   goProduct(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id }) });
+      platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id }));
     }
   },
 
@@ -106,6 +107,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 });

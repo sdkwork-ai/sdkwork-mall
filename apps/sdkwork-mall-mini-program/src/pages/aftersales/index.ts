@@ -16,6 +16,7 @@ import {
 import { uploadDriveImage } from "../../services/drive-upload-service";
 import { getOrderDetail } from "../../services/order-service";
 import { SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD } from "../../bootstrap/uploadDeclaration";
+import { platform } from "@sdkwork/mall-mp-core";
 
 const MAX_EVIDENCE_FILES = 6;
 const MAX_EVIDENCE_BYTES = 5 * 1024 * 1024;
@@ -209,24 +210,30 @@ Page({
     this.setData({ reasonIndex: Number(event.detail.value) || 0 });
   },
 
-  chooseEvidence() {
+  async chooseEvidence() {
     const remaining = MAX_EVIDENCE_FILES - this.data.evidence.length;
     if (remaining <= 0) {
       return;
     }
-    wx.chooseMedia({
-      count: remaining,
-      mediaType: ["image"],
-      sizeType: ["compressed"],
-      success: (result) => {
-        for (const item of result.tempFiles ?? []) {
-          void this.uploadOneEvidence(String(item.tempFilePath), Number(item.size ?? 0));
-        }
-      },
-    });
+    try {
+      // The host picker applies the size guard and reports the content type; the
+      // page still runs its own per-file check because the buyer can add several.
+      const chosen = await platform.chooseImages({
+        maxCount: remaining,
+        maxSizeBytes: MAX_EVIDENCE_BYTES,
+      });
+      for (const item of chosen) {
+        await this.uploadOneEvidence(item.path, item.sizeBytes, item.contentType);
+      }
+    } catch (cause) {
+      const code = (cause as { code?: string } | null)?.code;
+      if (code !== "cancelled") {
+        this.setData({ error: errorMessage(cause, t("afterSales.errors.readImageFailed")) });
+      }
+    }
   },
 
-  async uploadOneEvidence(tempPath: string, sizeBytes: number) {
+  async uploadOneEvidence(tempPath: string, sizeBytes: number, contentType = "image/jpeg") {
     if (sizeBytes > MAX_EVIDENCE_BYTES) {
       this.setData({ error: t("afterSales.errors.evidenceTooLarge") });
       return;
@@ -236,19 +243,13 @@ Page({
       tempPath,
       fileName: tempPath.split("/").pop() || "evidence.jpg",
       fileSize: sizeBytes,
-      fileType: "image/jpeg",
+      fileType: contentType,
       state: "uploading",
       reference: "",
     };
     this.setData({ evidence: [...this.data.evidence, entry].slice(0, MAX_EVIDENCE_FILES) });
     try {
-      const bytes = await new Promise<ArrayBuffer>((resolve, reject) => {
-        wx.getFileSystemManager().readFile({
-          filePath: tempPath,
-          success: (read) => resolve(read.data as ArrayBuffer),
-          fail: (cause) => reject(new Error(cause?.errMsg ?? t("afterSales.errors.readImageFailed"))),
-        });
-      });
+      const bytes = await platform.readBytes(tempPath);
       const reference = await uploadDriveImage({
         declaration: SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD,
         appResourceId: SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD.scene,
@@ -389,7 +390,7 @@ Page({
         orderId: "",
         presetOrderId: "",
       });
-      wx.showToast({ title: t("afterSales.apply.submitted"), icon: "success" });
+      platform.toast(t("afterSales.apply.submitted"), "success");
       await this.reloadRequests();
     } catch (cause) {
       this.setData({ error: errorMessage(cause, t("afterSales.errors.submitFailed")) });
@@ -406,7 +407,7 @@ Page({
     this.setData({ busy: true, error: "" });
     try {
       await cancelRequest(requestId);
-      wx.showToast({ title: t("afterSales.list.cancelled"), icon: "success" });
+      platform.toast(t("afterSales.list.cancelled"), "success");
       await this.reloadRequests();
     } catch (cause) {
       this.setData({ error: errorMessage(cause, t("afterSales.errors.cancelFailed")) });
@@ -455,7 +456,7 @@ Page({
         trackingNo,
       });
       this.setData({ returnBusy: false, returnFormRequestId: "", returnTrackingNo: "" });
-      wx.showToast({ title: t("afterSales.return.submitted"), icon: "success" });
+      platform.toast(t("afterSales.return.submitted"), "success");
       await this.reloadRequests();
     } catch (cause) {
       this.setData({
@@ -493,6 +494,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.reloadRequests().finally(() => wx.stopPullDownRefresh());
+    void this.reloadRequests().finally(() => platform.stopPullDownRefresh());
   },
 });

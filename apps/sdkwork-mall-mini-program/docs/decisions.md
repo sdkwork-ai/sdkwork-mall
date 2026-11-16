@@ -140,3 +140,28 @@
     re-export (store/token manager/exchange/restore/expiry), and
     `mp-auth-im.test.ts` pins the IM projections (notice page + cursor, inbox,
     chronological stream, send/read delegated to IM services).
+
+- 2026-11-16 (third pass: "continue, regress repeatedly and align"). Host
+  boundary completed — the app root no longer touches a single platform API:
+  - `MpHost` gained `MpLifecycle` (start/stop pull-down refresh), `MpDeviceInfo`
+    (release channel, platform) and `MpMediaPicker.previewImages`; navigation now
+    accepts the platform EventChannel (`events`) so the address picker round trip
+    is a host call rather than a page-level `wx.navigateTo`.
+  - `@sdkwork/mall-mp-core` exposes the page-facing `platform` facade (toast with
+    tone, confirm as a boolean, copy, navigate with fallback, back with
+    tab/redirect fallback, preview, choose/read media, payment, storage, stop
+    refresh). Every method resolves the installed host per call, so importing it
+    before `app.onLaunch` is safe and a profile swap needs no stale closure.
+  - All ~140 platform call sites across 34 pages moved behind the facade:
+    navigation (45+9+7+4), pull-down refresh (25), toast (18), modal (10),
+    clipboard (3), native payment (3), media (2), storage (5). The release
+    channel moved into `MpDeviceInfo`, so `bootstrap/environment.ts` is pure and
+    the app entry resolves the host first and then the environment.
+  - Guards: `mp-page-contract.test.mjs` now scans the whole app root for platform
+    globals (comments/strings stripped) and requires destructive actions to
+    confirm through the facade; `verify-mp-runtime-env` and
+    `verify-payment-channel-wiring` were realigned to the host seam (release
+    channel in `mp-host`, cashier through `platform.requestPayment`).
+  - Tests: new `mp-platform-host.test.ts` pins the facade projections (tone,
+    boolean confirm, EventChannel pass-through, navigation fallbacks, empty
+    gallery, media bytes, cancelled cashier, release channel).

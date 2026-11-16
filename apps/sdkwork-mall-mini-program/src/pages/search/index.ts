@@ -4,6 +4,7 @@ import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface SearchSort {
   code: string;
@@ -71,7 +72,7 @@ Page({
 
   readHistory(): string[] {
     try {
-      const raw = wx.getStorageSync(HISTORY_KEY);
+      const raw = platform.storage.get(HISTORY_KEY);
       const list: unknown = raw ? JSON.parse(raw) : [];
       return Array.isArray(list) ? list.slice(0, 10) : [];
     } catch {
@@ -87,7 +88,7 @@ Page({
       .concat(this.readHistory().filter((entry: string) => entry !== keyword))
       .slice(0, 10);
     try {
-      wx.setStorageSync(HISTORY_KEY, JSON.stringify(history));
+      platform.storage.set(HISTORY_KEY, JSON.stringify(history));
     } catch {
       // storage unavailable
     }
@@ -96,7 +97,7 @@ Page({
 
   clearHistory() {
     try {
-      wx.removeStorageSync(HISTORY_KEY);
+      platform.storage.remove(HISTORY_KEY);
     } catch {
       // ignore
     }
@@ -178,7 +179,7 @@ Page({
   },
 
   goProduct(event: MpTapEvent) {
-    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }));
   },
 
   onShareAppMessage() {
@@ -210,6 +211,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadProducts(1).finally(() => wx.stopPullDownRefresh());
+    this.loadProducts(1).finally(() => platform.stopPullDownRefresh());
   },
 });

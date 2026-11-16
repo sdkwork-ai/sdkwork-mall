@@ -8,6 +8,7 @@ import {
   getOrderDetail,
   type MpOrderDetail,
 } from "../../services/order-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 type MpOrderDetailItemView = MpOrderDetail["items"][number] & { priceText: string };
 
@@ -68,7 +69,7 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.loadDetail().finally(() => wx.stopPullDownRefresh());
+    void this.loadDetail().finally(() => platform.stopPullDownRefresh());
   },
 
   async loadDetail() {
@@ -100,7 +101,7 @@ Page({
   goProduct(event: MpTapEvent) {
     const spuId = String(event.currentTarget.dataset.spu ?? "");
     if (spuId) {
-      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: spuId }) });
+      platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id: spuId }));
     }
   },
 
@@ -108,47 +109,41 @@ Page({
     // The cashier owns the real channel handoff (wx.requestPayment / link
     // copy), so every pay entry funnels through the same page.
     const paymentMethod = this.data.detail?.paymentMethod || "";
-    wx.navigateTo({
-      url: mpCapabilityUrl("storefront.mall.payment-cashier", {
-        orderId: this.data._orderId,
-        ...(paymentMethod ? { paymentMethod } : {}),
-      }),
-    });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.payment-cashier", {
+      orderId: this.data._orderId,
+      ...(paymentMethod ? { paymentMethod } : {}),
+    }));
   },
 
   async cancel() {
     try {
       await cancelOrder(this.data._orderId);
-      wx.showToast({ title: "已取消", icon: "success" });
+      platform.toast("已取消", "success");
       this.loadDetail();
     } catch (cause) {
-      wx.showToast({ title: errorMessage(cause, "取消失败"), icon: "none" });
+      platform.toast(errorMessage(cause, "取消失败"));
     }
   },
 
   goAfterSales() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.after-sales", { orderId: this.data._orderId }) });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.after-sales", { orderId: this.data._orderId }));
   },
 
   goLogistics() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: this.data._orderId }) });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: this.data._orderId }));
   },
 
   async confirmReceipt() {
     try {
       await confirmReceipt(this.data._orderId);
-      wx.showToast({ title: "已确认收货", icon: "success" });
+      platform.toast("已确认收货", "success");
       this.loadDetail();
     } catch (cause) {
-      wx.showToast({ title: errorMessage(cause, "确认收货失败"), icon: "none" });
+      platform.toast(errorMessage(cause, "确认收货失败"));
     }
   },
 
   goOrders() {
-    wx.navigateBack({
-      fail() {
-        wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders") });
-      },
-    });
+    platform.back({ url: mpCapabilityUrl("buyer.mall.orders") });
   },
 });

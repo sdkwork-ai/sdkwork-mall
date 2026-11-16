@@ -9,18 +9,30 @@ import { createMpHostError, normalizeMpHostError, type MpNavigation } from "../i
 
 export interface WxNavigationApi {
   navigateBack(options?: { delta?: number; fail?(result: { errMsg?: string }): void; success?(): void }): void;
-  navigateTo(options: { fail?(result: { errMsg?: string }): void; success?(): void; url: string }): void;
+  navigateTo(options: {
+    events?: Record<string, (...args: unknown[]) => void>;
+    fail?(result: { errMsg?: string }): void;
+    success?(): void;
+    url: string;
+  }): void;
   redirectTo(options: { fail?(result: { errMsg?: string }): void; success?(): void; url: string }): void;
   switchTab(options: { fail?(result: { errMsg?: string }): void; success?(): void; url: string }): void;
 }
 
 function navigate(
-  open: (options: { fail?(result: { errMsg?: string }): void; success?(): void; url: string }) => void,
+  open: (options: {
+    events?: Record<string, (...args: unknown[]) => void>;
+    fail?(result: { errMsg?: string }): void;
+    success?(): void;
+    url: string;
+  }) => void,
   url: string,
+  events?: Record<string, (...args: never[]) => void>,
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     open({
       url,
+      ...(events ? { events: events as Record<string, (...args: unknown[]) => void> } : {}),
       success: () => resolve(),
       fail: (result) => reject(normalizeMpHostError(result)),
     });
@@ -29,7 +41,7 @@ function navigate(
 
 export function createWeixinNavigation(api: WxNavigationApi): MpNavigation {
   return {
-    navigateTo: (url) => navigate(api.navigateTo.bind(api), url),
+    navigateTo: (url, options) => navigate(api.navigateTo.bind(api), url, options?.events),
     redirectTo: (url) => navigate(api.redirectTo.bind(api), url),
     switchTab: (url) => navigate(api.switchTab.bind(api), url),
     back(delta = 1) {

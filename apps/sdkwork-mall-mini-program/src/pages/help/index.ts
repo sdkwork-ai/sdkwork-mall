@@ -1,6 +1,7 @@
 import { t } from "../../i18n";
 import { type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface HelpSection {
   titleKey: string;
@@ -78,11 +79,11 @@ Page({
   goQuickLink(event: MpTapEvent) {
     const capability = String(event.currentTarget.dataset.capability ?? "");
     if (capability) {
-      wx.navigateTo({ url: mpCapabilityUrl(capability) });
+      platform.navigateTo(mpCapabilityUrl(capability));
     }
   },
 
   goChats() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.chats") });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.im.chats"));
   },
 });

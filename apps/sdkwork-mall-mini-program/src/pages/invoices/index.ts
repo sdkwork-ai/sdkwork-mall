@@ -12,6 +12,7 @@ import {
 } from "../../services/invoice-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
+import { platform } from "@sdkwork/mall-mp-core";
 
 const TITLE_TYPE_OPTIONS = ["个人", "企业"];
 const TITLE_TYPE_VALUES = ["personal", "company"];
@@ -156,6 +157,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.reload().finally(() => wx.stopPullDownRefresh());
+    void this.reload().finally(() => platform.stopPullDownRefresh());
   },
 });

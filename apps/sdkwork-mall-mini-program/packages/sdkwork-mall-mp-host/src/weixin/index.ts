@@ -20,6 +20,8 @@ import type { WxRequestApi } from "./http";
 import { createWeixinHttpClient } from "./http";
 import type { WxLoginApi } from "./login";
 import { createWeixinLoginCodeProvider, readWeixinLoginApi } from "./login";
+import type { WxDeviceInfoApi, WxLifecycleApi } from "./lifecycle";
+import { createWeixinDeviceInfo, createWeixinLifecycle } from "./lifecycle";
 import type { WxMediaApi } from "./media";
 import { createWeixinMediaPicker } from "./media";
 import type { WxNavigationApi } from "./navigation";
@@ -37,7 +39,9 @@ export interface WxGlobal
     Partial<WxFeedbackApi>,
     Partial<WxMediaApi>,
     Partial<WxPaymentApi>,
-    Partial<WxRequestApi> {}
+    Partial<WxRequestApi>,
+    Partial<WxLifecycleApi>,
+    Partial<WxDeviceInfoApi> {}
 
 /** Capabilities the WeChat profile implements today. */
 export const WEIXIN_HOST_CAPABILITIES: readonly MpHostCapability[] = [
@@ -48,6 +52,7 @@ export const WEIXIN_HOST_CAPABILITIES: readonly MpHostCapability[] = [
   "paymentBridge",
   "appLifecycle",
   "networkStatus",
+  "deviceInfo",
 ];
 
 export interface CreateWeixinHostOptions {
@@ -91,6 +96,7 @@ export function createWeixinHost(options: CreateWeixinHostOptions = {}): MpHost 
     ? createWeixinMediaPicker(mediaApi as WxMediaApi)
     : {
         chooseImages: () => Promise.reject(createMpHostError("unsupported", "当前运行环境不支持选择图片")),
+        previewImages: () => Promise.reject(createMpHostError("unsupported", "当前运行环境不支持图片预览")),
         readBytes: () => Promise.reject(createMpHostError("unsupported", "当前运行环境不支持读取文件")),
       };
   if (!(mediaApi && typeof mediaApi.chooseMedia === "function")) {
@@ -113,6 +119,8 @@ export function createWeixinHost(options: CreateWeixinHostOptions = {}): MpHost 
     navigation: createWeixinNavigation(navigationApi),
     feedback: createWeixinFeedback(feedbackApi),
     clipboard: createWeixinClipboard(feedbackApi),
+    lifecycle: createWeixinLifecycle(httpApi as unknown as WxLifecycleApi),
+    deviceInfo: createWeixinDeviceInfo(httpApi as unknown as WxDeviceInfoApi),
     media,
     payment,
     http: createWeixinHttpClient(httpApi as WxRequestApi),

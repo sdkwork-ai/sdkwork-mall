@@ -6,6 +6,7 @@ import {
   type MpFavoriteItem,
 } from "../../services/favorites-service";
 import { formatCny } from "../../utils/format";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface FavoriteRow extends MpFavoriteItem {
   priceText: string;
@@ -43,7 +44,7 @@ Page({
   goProduct(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: id }) });
+      platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id: id }));
     }
   },
 

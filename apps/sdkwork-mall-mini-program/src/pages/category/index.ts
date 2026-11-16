@@ -4,6 +4,7 @@ import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
+import { platform } from "@sdkwork/mall-mp-core";
 
 type CategoryProduct = MpProductCard & { priceText: string };
 
@@ -40,7 +41,7 @@ Page({
   },
 
   goProduct(event: MpTapEvent) {
-    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }));
   },
 
   onShareAppMessage() {
@@ -62,7 +63,7 @@ Page({
   },
 
   goSearch() {
-    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.search") });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.search"));
   },
 
   async loadCategories() {
@@ -127,7 +128,7 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadProducts(1).then(() => wx.stopPullDownRefresh());
+    this.loadProducts(1).then(() => platform.stopPullDownRefresh());
   },
 
   onReachBottom() {

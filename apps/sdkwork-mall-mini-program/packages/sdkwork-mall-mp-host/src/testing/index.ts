@@ -18,12 +18,16 @@ import {
 
 export interface MemoryHostRecorder {
   readonly clipboard: string[];
+  /** EventChannel handlers registered by a `navigateTo` call, per target URL. */
+  readonly eventChannels: Array<{ handlers: Record<string, (...args: never[]) => void>; url: string }>;
   readonly http: MpHttpRequestOptions[];
   readonly navigations: string[];
   readonly toasts: string[];
 }
 
 export interface CreateMemoryHostOptions {
+  /** Reported by `deviceInfo.accountEnvVersion`; defaults to `develop`. */
+  readonly accountEnvVersion?: string;
   readonly capabilities?: readonly MpHostCapability[];
   /** Key/value seed for `storage`. */
   readonly storage?: Record<string, string>;
@@ -46,6 +50,7 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
   const values = new Map<string, string>(Object.entries(options.storage ?? {}));
   const recorder: MemoryHostRecorder = {
     clipboard: [],
+    eventChannels: [],
     http: [],
     navigations: [],
     toasts: [],
@@ -68,6 +73,19 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
     recorder,
     hasCapability: (capability) => capabilities.has(capability),
     storage,
+    // Tests can assert the release channel without a platform runtime.
+    deviceInfo: {
+      accountEnvVersion: () => options.accountEnvVersion ?? "develop",
+      platform: () => "weixin",
+    },
+    lifecycle: {
+      stopPullDownRefresh() {
+        recorder.navigations.push("stopPullDownRefresh");
+      },
+      async startPullDownRefresh() {
+        recorder.navigations.push("startPullDownRefresh");
+      },
+    },
     loginCode: {
       async requestLoginCode() {
         const next = loginCodes.shift();
@@ -78,8 +96,12 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
       },
     },
     navigation: {
-      async navigateTo(url) {
+      async navigateTo(url, options) {
         recorder.navigations.push(`navigateTo:${url}`);
+        // An EventChannel handler is available to the test as a scripted emit.
+        if (options?.events) {
+          recorder.eventChannels.push({ url, handlers: options.events });
+        }
       },
       async redirectTo(url) {
         recorder.navigations.push(`redirectTo:${url}`);
@@ -92,8 +114,8 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
       },
     },
     feedback: {
-      toast(message) {
-        recorder.toasts.push(message);
+      toast(message, tone = "none") {
+        recorder.toasts.push(tone === "none" ? message : `${tone}:${message}`);
       },
       async confirm() {
         return options.confirmAnswer ?? true;
@@ -110,6 +132,9 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
     media: {
       async chooseImages() {
         return options.images ?? [];
+      },
+      async previewImages() {
+        recorder.navigations.push("previewImages");
       },
       async readBytes() {
         return new ArrayBuffer(0);

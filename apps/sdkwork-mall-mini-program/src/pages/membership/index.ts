@@ -10,6 +10,7 @@ import {
 import { listPaymentMethods } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface MpMembershipPackageView extends MpMembershipPackage {
   durationText: string;
@@ -131,6 +132,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 });

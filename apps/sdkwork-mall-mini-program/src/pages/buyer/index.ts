@@ -3,6 +3,7 @@ import { type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getOrderStatistics } from "../../services/order-service";
 import { isLoggedIn, clearSession } from "../../services/session";
+import { platform } from "@sdkwork/mall-mp-core";
 
 const ORDER_ENTRIES: Array<{ status: string; labelKey: string; count: string | number }> = [
   { status: "all", labelKey: "buyerHub.orders.all", count: "" },
@@ -94,10 +95,10 @@ Page({
 
   onPullDownRefresh() {
     if (!isLoggedIn()) {
-      wx.stopPullDownRefresh();
+      platform.stopPullDownRefresh();
       return;
     }
-    void this.loadStatistics().finally(() => wx.stopPullDownRefresh());
+    void this.loadStatistics().finally(() => platform.stopPullDownRefresh());
   },
 
   async loadStatistics() {
@@ -134,12 +135,10 @@ Page({
 
   goOrderEntry(event: MpTapEvent) {
     const status = String(event.currentTarget.dataset.status ?? "");
-    wx.navigateTo({
-      url: mpCapabilityUrl(
+    platform.navigateTo(mpCapabilityUrl(
         "buyer.mall.orders",
         status && status !== "all" ? { status } : undefined,
-      ),
-    });
+      ));
   },
 
   goCapability(event: MpTapEvent) {
@@ -147,23 +146,22 @@ Page({
     if (!capability) {
       return;
     }
-    wx.navigateTo({ url: mpCapabilityUrl(capability) });
+    platform.navigateTo(mpCapabilityUrl(capability));
   },
 
   goLogin() {
-    wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 
-  logout() {
-    wx.showModal({
+  async logout() {
+    const confirmed = await platform.confirm({
       title: t("buyerHub.logout.title"),
       content: t("buyerHub.logout.confirm"),
-      success: (result) => {
-        if (result.confirm) {
-          clearSession();
-          this.setData({ loggedIn: false, orderEntries: resolveOrderEntries() });
-        }
-      },
     });
+    if (!confirmed) {
+      return;
+    }
+    clearSession();
+    this.setData({ loggedIn: false, orderEntries: resolveOrderEntries() });
   },
 });

@@ -5,6 +5,7 @@ import { type MpCategory, type MpProductCard, listCategories, listProducts } fro
 import { type MpOffer, listOffers } from "../../services/promotion-service";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
+import { platform } from "@sdkwork/mall-mp-core";
 
 /**
  * 首页入口按能力路由声明，路径由 routes/capabilities.ts 解析；
@@ -205,10 +206,10 @@ Page({
   openCapability(capability: string, query?: Record<string, string>) {
     const url = mpCapabilityUrl(capability, query);
     if (isMpTabCapability(capability)) {
-      wx.switchTab({ url });
+      platform.switchTab(url);
       return;
     }
-    wx.navigateTo({ url });
+    platform.navigateTo(url);
   },
 
   async loadHome() {
@@ -290,6 +291,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadHome().then(() => wx.stopPullDownRefresh());
+    this.loadHome().then(() => platform.stopPullDownRefresh());
   },
 });

@@ -29,6 +29,12 @@ export interface WxMediaApi {
       success?(result: { data: unknown }): void;
     }): void;
   };
+  previewImage?(options: {
+    current?: string;
+    fail?(result: { errMsg?: string }): void;
+    success?(): void;
+    urls: string[];
+  }): void;
 }
 
 function contentTypeFromPath(path: string): string {
@@ -86,6 +92,21 @@ export function createWeixinMediaPicker(api: WxMediaApi): MpMediaPicker {
             }
             reject(createMpHostError("invalid-state", "读取图片失败"));
           },
+          fail: (failure) => reject(normalizeMpHostError(failure)),
+        });
+      });
+    },
+
+    previewImages({ current, urls }) {
+      return new Promise<void>((resolve, reject) => {
+        if (typeof api.previewImage !== "function") {
+          reject(createMpHostError("unsupported", "当前运行环境不支持图片预览"));
+          return;
+        }
+        api.previewImage({
+          urls,
+          ...(current ? { current } : {}),
+          success: () => resolve(),
           fail: (failure) => reject(normalizeMpHostError(failure)),
         });
       });

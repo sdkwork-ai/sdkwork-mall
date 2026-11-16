@@ -5,6 +5,7 @@ import { type MpAddress, listAddresses } from "../../services/address-service";
 import { type MpCheckoutQuote, createCheckoutQuote, listUserCoupons, submitOrder } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface MpCouponOption {
   discountAmountCny: number | null;
@@ -191,7 +192,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
       return;
     }
     void this.bootstrap();
@@ -334,8 +335,7 @@ Page({
     // The address page emits the picked row over the opener EventChannel
     // (`pages/address/index.ts`), so checkout receives the choice instead of
     // silently keeping the default address.
-    wx.navigateTo({
-      url: mpCapabilityUrl("buyer.mall.addresses", { picker: "1" }),
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.addresses", { picker: "1" }), {
       events: {
         addressPicked: (payload: unknown) => {
           const picked = payload as { id?: unknown } | null;
@@ -407,19 +407,16 @@ Page({
         buyerRemark: this.data.buyerRemark.trim() || undefined,
       });
       const next = () =>
-        wx.redirectTo({ url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: result.orderId }) });
+        platform.redirectTo(mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: result.orderId }));
       if (result.warnings.length > 0) {
         // The order exists and will be paid: tell the buyer which deduction did
         // not apply before sending them to the cashier.
-        wx.showModal({
+        await platform.alert({
           title: t("checkout.errors.warningsTitle"),
           content: result.warnings.join("\n"),
-          showCancel: false,
-          complete: next,
         });
-      } else {
-        next();
       }
+      next();
     } catch (cause) {
       this.showToast(errorMessage(cause, t("checkout.errors.submitFailed")));
       this.setData({ busy: false });

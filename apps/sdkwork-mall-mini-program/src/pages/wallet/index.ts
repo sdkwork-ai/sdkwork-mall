@@ -6,6 +6,7 @@ import {
 } from "../../services/account-service";
 import { formatCny } from "../../utils/format";
 import { isLoggedIn } from "../../services/session";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface LedgerRow {
   id: string;
@@ -76,6 +77,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 });

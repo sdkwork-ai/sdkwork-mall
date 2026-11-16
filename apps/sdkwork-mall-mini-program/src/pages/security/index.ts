@@ -5,6 +5,7 @@ import {
   type MpSecuritySnapshot,
 } from "../../services/profile-service";
 import { isLoggedIn } from "../../services/session";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface SecurityRow {
   label: string;
@@ -40,7 +41,7 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 
   async load() {
@@ -73,6 +74,6 @@ Page({
   },
 
   goLogin() {
-    wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 });

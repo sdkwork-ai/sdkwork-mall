@@ -24,11 +24,11 @@ const TOAST_DURATION_MS = 2200;
 
 export function createWeixinFeedback(api: WxFeedbackApi): MpFeedback {
   return {
-    toast(message) {
+    toast(message, tone = "none") {
       if (!message) {
         return;
       }
-      api.showToast({ icon: "none", title: message, duration: TOAST_DURATION_MS });
+      api.showToast({ icon: tone, title: message, duration: TOAST_DURATION_MS });
     },
     confirm({ content, confirmText, title }) {
       return new Promise<boolean>((resolve) => {

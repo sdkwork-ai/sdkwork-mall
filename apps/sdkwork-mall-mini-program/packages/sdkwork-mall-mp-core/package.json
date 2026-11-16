@@ -9,6 +9,7 @@
     "./composition": "./src/composition/index.ts",
     "./host": "./src/host/index.ts",
     "./modules": "./src/modules/index.ts",
+    "./platform": "./src/platform/index.ts",
     "./request": "./src/request/index.ts",
     "./sdk": "./src/sdk/index.ts",
     "./session": "./src/session/index.ts"

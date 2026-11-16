@@ -9,6 +9,7 @@ import {
   type MpOrderSummary,
 } from "../../services/order-service";
 import { isLoggedIn } from "../../services/session";
+import { platform } from "@sdkwork/mall-mp-core";
 
 type OrderTab = { code: string; labelKey: string };
 
@@ -78,7 +79,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
       return;
     }
     void this.loadOrders(1);
@@ -121,7 +122,7 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.loadOrders(1).finally(() => wx.stopPullDownRefresh());
+    void this.loadOrders(1).finally(() => platform.stopPullDownRefresh());
   },
 
   selectTab(event: MpTapEvent) {
@@ -134,33 +135,28 @@ Page({
   },
 
   goDetail(event: MpTapEvent) {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.orders.detail", { id: String(event.currentTarget.dataset.id ?? "") }));
   },
 
   goLogistics(event: MpTapEvent) {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: String(event.currentTarget.dataset.id ?? "") }) });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: String(event.currentTarget.dataset.id ?? "") }));
   },
 
   payOrder(event: MpTapEvent) {
     // The cashier owns the real channel handoff, so every pay entry funnels
     // through the same page.
     const orderId = String(event.currentTarget.dataset.id ?? "");
-    wx.navigateTo({
-      url: mpCapabilityUrl("storefront.mall.payment-cashier", { orderId }),
-    });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.payment-cashier", { orderId }));
   },
 
   async cancelOrder(event: MpTapEvent) {
     const orderId = String(event.currentTarget.dataset.id ?? "");
     try {
       await cancelOrder(orderId);
-      wx.showToast({ title: t("orderList.toasts.cancelled"), icon: "success" });
+      platform.toast(t("orderList.toasts.cancelled"), "success");
       void this.loadOrders(1);
     } catch (cause) {
-      wx.showToast({
-        title: errorMessage(cause, t("orderList.errors.cancelFailed")),
-        icon: "none",
-      });
+      platform.toast(errorMessage(cause, t("orderList.errors.cancelFailed")));
     }
   },
 
@@ -168,13 +164,10 @@ Page({
     const orderId = String(event.currentTarget.dataset.id ?? "");
     try {
       await confirmReceipt(orderId);
-      wx.showToast({ title: t("orderList.toasts.receiptConfirmed"), icon: "success" });
+      platform.toast(t("orderList.toasts.receiptConfirmed"), "success");
       void this.loadOrders(1);
     } catch (cause) {
-      wx.showToast({
-        title: errorMessage(cause, t("orderList.errors.receiptFailed")),
-        icon: "none",
-      });
+      platform.toast(errorMessage(cause, t("orderList.errors.receiptFailed")));
     }
   },
 

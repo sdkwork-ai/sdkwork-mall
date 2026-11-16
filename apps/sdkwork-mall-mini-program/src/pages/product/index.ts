@@ -13,6 +13,7 @@ import { claimCoupon, type MpOffer, listOffers } from "../../services/promotion-
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
+import { platform } from "@sdkwork/mall-mp-core";
 
 type ProductSku = MpSku & { priceText: string };
 
@@ -225,7 +226,7 @@ Page({
     if (!current || this.data.images.length === 0) {
       return;
     }
-    wx.previewImage({ current, urls: this.data.images });
+    platform.previewImages({ current, urls: this.data.images });
   },
 
   toggleFavorite() {
@@ -246,7 +247,7 @@ Page({
   goShop(event: MpTapEvent) {
     const shopId = String(event.currentTarget.dataset.id ?? "");
     if (shopId) {
-      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.shop", { id: shopId }) });
+      platform.navigateTo(mpCapabilityUrl("storefront.mall.shop", { id: shopId }));
     }
   },
 
@@ -255,7 +256,7 @@ Page({
     if (!id) {
       return;
     }
-    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id }) });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id }));
   },
 
   async claimOffer(event: MpTapEvent) {
@@ -264,7 +265,7 @@ Page({
       return;
     }
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
       return;
     }
     this.setData({ claimingOfferId: offerId });
@@ -350,7 +351,7 @@ Page({
       return;
     }
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
       return;
     }
     if (this.data.maxQuantity != null && this.data.quantity > this.data.maxQuantity) {
@@ -372,12 +373,7 @@ Page({
         const target = cartItemId
           ? mpCapabilityUrl("storefront.mall.checkout", { items: cartItemId })
           : mpCapabilityUrl("storefront.mall.cart");
-        wx.navigateTo({
-          url: target,
-          fail() {
-            wx.switchTab({ url: mpCapabilityUrl("storefront.mall.cart") });
-          },
-        });
+        platform.navigateTo(target, { fallbackUrl: mpCapabilityUrl("storefront.mall.cart") });
       } else {
         this.showToast("已加入购物车");
       }
@@ -389,11 +385,11 @@ Page({
   },
 
   goCart() {
-    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.cart") });
+    platform.switchTab(mpCapabilityUrl("storefront.mall.cart"));
   },
 
   goChat() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.chats") });
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.im.chats"));
   },
 
   retry() {
@@ -401,11 +397,11 @@ Page({
   },
 
   goHome() {
-    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
+    platform.switchTab(mpCapabilityUrl("storefront.mall.home"));
   },
 
   onPullDownRefresh() {
-    void this.loadDetail().finally(() => wx.stopPullDownRefresh());
+    void this.loadDetail().finally(() => platform.stopPullDownRefresh());
   },
 
   showToast(message: string) {

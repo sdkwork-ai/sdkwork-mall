@@ -48,17 +48,24 @@ test("build-runtime derives /app/v3/api from the manifest access URL", () => {
 });
 
 test("the release channel decides the fallback API host", () => {
+  // The channel is a host fact now: the weixin profile reads the account info,
+  // `bootstrap/environment.ts` maps it, and the app entry passes it in.
+  const host = read("apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-host/src/weixin/lifecycle.ts");
+  assert.match(host, /getAccountInfoSync\(\)/u);
+  assert.match(host, /envVersion/u);
+
   const environment = read("apps/sdkwork-mall-mini-program/src/bootstrap/environment.ts");
-  assert.match(environment, /getAccountInfoSync\(\)/u);
-  assert.match(environment, /envVersion === "release"/u);
+  assert.match(environment, /EnvVersion === "release"/u);
   assert.match(environment, /https:\/\/api\.sdkwork\.com\/app\/v3\/api/u);
   assert.match(environment, /https:\/\/api-dev\.sdkwork\.com\/app\/v3\/api/u);
+  assert.match(environment, /resolveReleaseChannel/u);
 
   // The base URL is resolved once by the app entry and handed to the runtime
   // (`@sdkwork/mall-mp-core`); the transport seam only delegates, so it must not
   // re-derive the host from `getApp().globalData`.
   const appEntry = read("apps/sdkwork-mall-mini-program/src/app.ts");
-  assert.match(appEntry, /readRuntimeEnv\(\)/u);
+  assert.match(appEntry, /readRuntimeEnv\(/u);
+  assert.match(appEntry, /accountEnvVersion\(\)/u);
   assert.match(appEntry, /commerceAppApiBaseUrl/u);
   assert.match(appEntry, /appApiBaseUrl/u);
 

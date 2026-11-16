@@ -3,6 +3,7 @@ import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCartItem, getCart, removeCartItem, updateCartItem } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface CartGroup {
   shopId: string;
@@ -202,17 +203,15 @@ Page({
       return;
     }
     const item = this.findItem(id);
-    wx.showModal({
+    const confirmed = await platform.confirm({
       title: t("cart.deleteTitle"),
       content: item
         ? t("cart.deleteConfirm", { title: item.title })
         : t("cart.deleteConfirmPlain"),
-      success: (result) => {
-        if (result.confirm) {
-          void this.deleteItems([id]);
-        }
-      },
     });
+    if (confirmed) {
+      await this.deleteItems([id]);
+    }
   },
 
   findItem(itemId: string): MpCartItem | null {
@@ -244,19 +243,17 @@ Page({
     }
   },
 
-  removeSelected() {
+  async removeSelected() {
     if (this.data.selectedIds.length === 0) {
       return;
     }
-    wx.showModal({
+    const confirmed = await platform.confirm({
       title: t("cart.deleteSelected"),
       content: t("cart.deleteSelectedConfirm", { count: this.data.selectedIds.length }),
-      success: (result) => {
-        if (result.confirm) {
-          void this.deleteItems(this.data.selectedIds.slice());
-        }
-      },
     });
+    if (confirmed) {
+      await this.deleteItems(this.data.selectedIds.slice());
+    }
   },
 
   toggleManage() {
@@ -264,19 +261,19 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.refresh().finally(() => wx.stopPullDownRefresh());
+    void this.refresh().finally(() => platform.stopPullDownRefresh());
   },
 
   goProduct(event: MpTapEvent) {
-    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }));
   },
 
   goHome() {
-    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
+    platform.switchTab(mpCapabilityUrl("storefront.mall.home"));
   },
 
   goLogin() {
-    wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 
   goCheckout() {
@@ -284,7 +281,7 @@ Page({
       this.showToast(t("cart.errors.selectionRequired"));
       return;
     }
-    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.checkout", { items: this.data.selectedIds.join(",") }) });
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.checkout", { items: this.data.selectedIds.join(",") }));
   },
 
   showToast(message: string) {

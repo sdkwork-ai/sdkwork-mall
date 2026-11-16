@@ -10,6 +10,7 @@
 import {
   getMallMpRuntime,
   initializeMallMpRuntime,
+  platform,
   type MallMpRuntime,
 } from "@sdkwork/mall-mp-core";
 import { createMpAuthService } from "@sdkwork/mall-mp-auth";
@@ -30,7 +31,6 @@ interface MallMpGlobalData {
 
 // Build-time materialized bundle (scripts/build-runtime.mjs) with the
 // runtime-injection override taking precedence.
-const injected = readRuntimeEnv();
 const fromBundle = runtimeEnvJson as {
   commerceAppApiBaseUrl?: string;
   deploymentProfile?: string;
@@ -41,7 +41,8 @@ const fromBundle = runtimeEnvJson as {
 
 const FALLBACK_API_BASE_URL = "https://api-dev.sdkwork.com/app/v3/api";
 
-function resolveEnvironment() {
+function resolveEnvironment(accountEnvVersion: string) {
+  const injected = readRuntimeEnv(accountEnvVersion);
   const environment = fromBundle.environment ?? injected.environment;
   const deploymentProfile = fromBundle.deploymentProfile ?? injected.deploymentProfile;
   const appApiBaseUrl =
@@ -62,9 +63,12 @@ function resolveEnvironment() {
  * profile switch; `app.onLaunch` is the only production caller.
  */
 export function bootstrapMallMpRuntime(): MallMpRuntime {
+  // The host is created first: the release channel it reports decides the
+  // fallback API host (spec section 10).
+  const host = createWeixinHost();
   const runtime = initializeMallMpRuntime({
-    environment: resolveEnvironment(),
-    host: createWeixinHost(),
+    environment: resolveEnvironment(host.deviceInfo.accountEnvVersion()),
+    host,
   });
   // Composition: the capability never learns which SDK satisfies each plane
   // (MINI_PROGRAM_APP_ARCHITECTURE_SPEC section 6).
@@ -126,7 +130,7 @@ App({
    */
   onPageNotFound() {
     console.warn("[sdkwork-mall] page not found, redirecting to home");
-    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
+    platform.switchTab(mpCapabilityUrl("storefront.mall.home"));
   },
 });
 

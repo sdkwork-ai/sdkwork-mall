@@ -6,6 +6,7 @@ import {
 } from "../../services/account-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny, formatPoints } from "../../utils/format";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface LotRow {
   id: string;
@@ -90,6 +91,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.load().finally(() => wx.stopPullDownRefresh());
+    void this.load().finally(() => platform.stopPullDownRefresh());
   },
 });

@@ -1,6 +1,7 @@
 import { t } from "../../i18n";
 import { getPaymentSuccess } from "../../services/order-service";
 import { mpCapabilityUrl } from "../../routes/capabilities";
+import { platform } from "@sdkwork/mall-mp-core";
 
 /** Payment providers settle asynchronously; poll, but never forever. */
 const PAYMENT_POLL_INTERVAL_MS = 3000;
@@ -147,22 +148,20 @@ Page({
   },
 
   goOrders() {
-    wx.redirectTo({ url: mpCapabilityUrl("buyer.mall.orders") });
+    platform.redirectTo(mpCapabilityUrl("buyer.mall.orders"));
   },
 
   goHome() {
-    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
+    platform.switchTab(mpCapabilityUrl("storefront.mall.home"));
   },
 
   retryPay() {
     if (!this.data.orderId) {
       return;
     }
-    wx.redirectTo({
-      url: mpCapabilityUrl("storefront.mall.payment-cashier", {
-        orderId: this.data.orderId,
-        paymentMethod: this.data.paymentMethod || "",
-      }),
-    });
+    platform.redirectTo(mpCapabilityUrl("storefront.mall.payment-cashier", {
+      orderId: this.data.orderId,
+      paymentMethod: this.data.paymentMethod || "",
+    }));
   },
 });

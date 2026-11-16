@@ -8,6 +8,7 @@
 export * from "./composition/index";
 export * from "./host/index";
 export * from "./modules/index";
+export * from "./platform/index";
 export * from "./request/index";
 export * from "./runtime/index";
 export * from "./sdk/index";

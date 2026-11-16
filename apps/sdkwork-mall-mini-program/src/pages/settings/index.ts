@@ -1,6 +1,7 @@
 import { clearSession, isLoggedIn } from "../../services/session";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { clearFootprint, readFavorites, removeFavorite } from "../../services/favorites-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface SettingsData {
   loggedIn: boolean;
@@ -35,48 +36,45 @@ Page({
     });
   },
 
-  clearFootprint() {
-    wx.showModal({
+  async clearFootprint() {
+    const confirmed = await platform.confirm({
       title: "清空浏览足迹",
       content: "确定清空全部浏览记录？",
-      success: (result) => {
-        if (result.confirm) {
-          clearFootprint();
-          wx.showToast({ title: "已清空", icon: "success" });
-        }
-      },
     });
+    if (!confirmed) {
+      return;
+    }
+    clearFootprint();
+    platform.toast("已清空", "success");
   },
 
-  clearFavorites() {
-    wx.showModal({
+  async clearFavorites() {
+    const confirmed = await platform.confirm({
       title: "清空收藏",
       content: `确定移除全部 ${readFavorites().length} 件收藏？`,
-      success: (result) => {
-        if (result.confirm) {
-          for (const item of readFavorites()) {
-            removeFavorite(item.id);
-          }
-          wx.showToast({ title: "已清空", icon: "success" });
-        }
-      },
     });
+    if (!confirmed) {
+      return;
+    }
+    for (const item of readFavorites()) {
+      removeFavorite(item.id);
+    }
+    platform.toast("已清空", "success");
   },
 
-  logout() {
-    wx.showModal({
+  async logout() {
+    const confirmed = await platform.confirm({
       title: "退出登录",
       content: "确定退出当前账号？",
-      success: (result) => {
-        if (result.confirm) {
-          clearSession();
-          this.setData({ loggedIn: false });
-        }
-      },
     });
+    if (!confirmed) {
+      return;
+    }
+    clearSession();
+    this.setData({ loggedIn: false });
   },
 
   goLogin() {
-    wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 });

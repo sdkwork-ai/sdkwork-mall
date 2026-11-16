@@ -58,9 +58,12 @@ test("the mini-program cashier invokes the native WeChat cashier", () => {
   assert.match(service, /paymentUrl: readPaymentUrl\(payment\)/u);
 
   const cashier = read("apps/sdkwork-mall-mini-program/src/pages/cashier/index.ts");
-  assert.match(cashier, /wx\.requestPayment\(\{/u);
+  // The native cashier handoff goes through the host payment bridge now.
+  assert.match(cashier, /platform\.requestPayment\(\{/u);
   assert.match(cashier, /await this\.requestWechatPayment\(payment\.wechatPay\)/u);
-  assert.match(cashier, /wx\.setClipboardData\(\{ data: payment\.paymentUrl \}\)/u);
+  assert.match(cashier, /platform\.copy\(payment\.paymentUrl\)/u);
+  assert.doesNotMatch(cashier, /wx\.requestPayment/u);
+  assert.doesNotMatch(cashier, /wx\.setClipboardData/u);
 
   const orderDetail = read("apps/sdkwork-mall-mini-program/src/pages/order-detail/index.ts");
   assert.match(orderDetail, /storefront\.mall\.payment-cashier/u);

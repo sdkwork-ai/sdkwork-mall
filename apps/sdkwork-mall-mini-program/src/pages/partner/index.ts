@@ -25,6 +25,7 @@ import {
   type MpPartnerTeamMember,
   type MpPartnerWithdrawal,
 } from "../../services/partner-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface PartnerLevelView {
   levelNo: number;
@@ -667,10 +668,10 @@ Page({
     if (!this.data.shareLink) {
       // The invite link only exists once the partner centre resolved an invite
       // code, so say so instead of copying an empty clipboard.
-      wx.showToast({ title: t("partner.center.notEnrolled"), icon: "none" });
+      platform.toast(t("partner.center.notEnrolled"));
       return;
     }
-    wx.setClipboardData({ data: this.data.shareLink });
+    void platform.copy(this.data.shareLink);
   },
 
   copyInviteCode() {
@@ -678,6 +679,6 @@ Page({
     if (!code) {
       return;
     }
-    wx.setClipboardData({ data: code });
+    void platform.copy(code);
   },
 });

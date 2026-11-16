@@ -7,6 +7,7 @@ import {
   type MpChatMessage,
 } from "../../services/im-service";
 import { isLoggedIn } from "../../services/session";
+import { platform } from "@sdkwork/mall-mp-core";
 
 const POLL_INTERVAL_MS = 5000;
 
@@ -45,7 +46,7 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
       return;
     }
     void this.refresh();

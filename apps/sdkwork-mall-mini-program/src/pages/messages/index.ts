@@ -2,6 +2,7 @@ import { t } from "../../i18n";
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { formatTime } from "../../utils/format";
 import { listNotices, retrieveNotice } from "../../services/im-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface MpMessageRowView {
   id: string;
@@ -179,6 +180,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    void this.loadRows().finally(() => wx.stopPullDownRefresh());
+    void this.loadRows().finally(() => platform.stopPullDownRefresh());
   },
 });

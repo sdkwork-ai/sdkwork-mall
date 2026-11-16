@@ -20,6 +20,10 @@ Authority: `MINI_PROGRAM_APP_ARCHITECTURE_SPEC.md` sections 1, 3, 6 and 7.
 - **composition**: the module/SDK/host inventory plus
   `validateMallMpComposition()`, which fails a launch that misses a required key
   or host capability.
+- **platform**: the page-facing facade (`platform.toast/navigateTo/confirm/
+  copy/chooseImages/previewImages/requestPayment/stopPullDownRefresh/storage`).
+  Pages call this instead of assembling platform option literals; every method
+  resolves the installed host per call.
 - **host**: the installed host accessor for capability packages.
 
 ## Domain ownership

@@ -5,6 +5,7 @@ import {
   readFootprint,
   type MpFootprintItem,
 } from "../../services/favorites-service";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface FootprintRow extends MpFootprintItem {
   viewedText: string;
@@ -40,20 +41,19 @@ Page({
   goProduct(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: id }) });
+      platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id: id }));
     }
   },
 
-  clearAll() {
-    wx.showModal({
+  async clearAll() {
+    const confirmed = await platform.confirm({
       title: "清空足迹",
       content: "确定清空全部浏览记录？",
-      success: (result) => {
-        if (result.confirm) {
-          clearFootprint();
-          this.setData({ records: [] });
-        }
-      },
     });
+    if (!confirmed) {
+      return;
+    }
+    clearFootprint();
+    this.setData({ records: [] });
   },
 });

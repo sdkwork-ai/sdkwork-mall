@@ -93,17 +93,39 @@ export interface MpStorage {
 }
 
 export interface MpNavigation {
-  navigateTo(url: string): Promise<void>;
+  /**
+   * Opens a page.
+   *
+   * `events` is the platform EventChannel: the opened page emits a named event
+   * back to this handler (the address picker uses it to return the selection).
+   */
+  navigateTo(url: string, options?: { events?: Record<string, (...args: never[]) => void> }): Promise<void>;
   redirectTo(url: string): Promise<void>;
   switchTab(url: string): Promise<void>;
   back(delta?: number): Promise<void>;
 }
 
 export interface MpFeedback {
-  toast(message: string): void;
+  toast(message: string, tone?: "error" | "none" | "success"): void;
   /** Resolves `true` when the buyer confirms. */
-  confirm(options: { content: string; confirmText?: string; title: string }): Promise<boolean>;
+  confirm(options: { confirmText?: string; content: string; title: string }): Promise<boolean>;
   alert(options: { content: string; showCancel?: boolean; title: string }): Promise<void>;
+}
+
+/** Page lifecycle controls the platform exposes (pull-to-refresh). */
+export interface MpLifecycle {
+  /** Ends the pull-to-refresh spinner; safe to call when it was never started. */
+  stopPullDownRefresh(): void;
+  /** Programmatic refresh trigger for a page that wants one. */
+  startPullDownRefresh(): Promise<void>;
+}
+
+/** Read-only device/account facts the app may display or branch on. */
+export interface MpDeviceInfo {
+  /** `release` in production; devtools/trial report their own channel. */
+  accountEnvVersion(): string;
+  /** Platform the profile runs on (`weixin`). */
+  platform(): string;
 }
 
 export interface MpClipboard {
@@ -119,6 +141,8 @@ export interface MpChosenImage {
 
 export interface MpMediaPicker {
   chooseImages(options: { maxCount: number; maxSizeBytes: number }): Promise<MpChosenImage[]>;
+  /** Full-screen platform viewer with swipe and save. */
+  previewImages(options: { current?: string; urls: string[] }): Promise<void>;
   readBytes(path: string): Promise<ArrayBuffer>;
 }
 
@@ -160,8 +184,10 @@ export interface MpHttpClient {
 export interface MpHost {
   readonly capabilities: ReadonlySet<MpHostCapability>;
   readonly clipboard: MpClipboard;
+  readonly deviceInfo: MpDeviceInfo;
   readonly feedback: MpFeedback;
   readonly http: MpHttpClient;
+  readonly lifecycle: MpLifecycle;
   readonly loginCode: MpLoginCodeProvider;
   readonly media: MpMediaPicker;
   readonly navigation: MpNavigation;
