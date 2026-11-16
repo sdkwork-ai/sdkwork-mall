@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { Link, useParams } from "react-router-dom";
 import { Star, Store } from "lucide-react";
 
@@ -81,7 +82,7 @@ export function SdkworkMallH5ShopPage() {
       <section className="sdk-h5-section">
         <h2>店内商品</h2>
         {shop.products.length === 0 ? (
-          <div className="sdk-h5-empty">店内暂无在售商品</div>
+          <SdkworkMallH5EmptyState>店内暂无在售商品</SdkworkMallH5EmptyState>
         ) : (
           <div className="sdk-h5-product-grid">
             {shop.products.map((product) => (

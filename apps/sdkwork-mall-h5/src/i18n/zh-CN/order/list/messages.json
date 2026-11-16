@@ -5,6 +5,8 @@
     "loadingMore": "加载中...",
     "loadMore": "加载更多订单",
     "empty": "暂无订单",
+    "emptyHint": "去首页挑选心仪商品，下单后可在这里查看进度",
+    "emptyAction": "去逛逛",
     "statusFallback": "订单",
     "merchantPreparing": "商家备货中",
     "detail": "订单详情",

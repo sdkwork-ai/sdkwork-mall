@@ -66,7 +66,7 @@ export function SdkworkMallH5SecurityPage() {
       <section className="sdk-h5-section">
         <h2>安全设置</h2>
         <div className="sdk-h5-cell-group">
-          <Link className="sdk-h5-cell" to="/auth/login">
+          <Link className="sdk-h5-cell" to="/buyer/password">
             <span className="sdk-h5-cell-label">修改密码</span>
             <span className="sdk-h5-cell-value sdk-h5-muted">前往 IAM 认证路由</span>
             <ChevronRight aria-hidden="true" className="sdk-h5-cell-chevron" size={16} />

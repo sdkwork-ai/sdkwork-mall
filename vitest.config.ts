@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
@@ -12,6 +13,25 @@ const appbaseRoot = path.resolve(workspaceRoot, "../sdkwork-appbase");
 const commerceRoot = path.resolve(workspaceRoot, "../sdkwork-cloudrouter");
 const uiRoot = path.resolve(workspaceRoot, "../sdkwork-ui");
 const sdkRoot = path.resolve(workspaceRoot, "..");
+
+/**
+ * Resolves the `react-router` instance that `react-router-dom` actually uses.
+ *
+ * pnpm may install a different patch of react-router at the workspace root than
+ * the one react-router-dom links (7.18.2 vs 7.18.3 here). Aliasing to the wrong
+ * copy splits the Router context and `useNavigate()` throws "must be used
+ * within a Router", so resolve from react-router-dom's own package instead.
+ */
+function resolveReactRouterPackage(): string {
+  try {
+    const requireFromRouterDom = createRequire(
+      path.join(workspaceNodeModules, "react-router-dom", "package.json"),
+    );
+    return path.dirname(requireFromRouterDom.resolve("react-router/package.json"));
+  } catch {
+    return path.join(workspaceNodeModules, "react-router");
+  }
+}
 
 const sharedUiRuntimePackages = [
   "@radix-ui/react-avatar",
@@ -136,12 +156,7 @@ export default defineConfig({
       },
       {
         find: "react-router",
-        replacement: path.join(
-          workspaceNodeModules,
-          "react-router-dom",
-          "node_modules",
-          "react-router",
-        ),
+        replacement: path.join(workspaceNodeModules, "react-router-dom"),
       },
       {
         find: "react-router-dom",

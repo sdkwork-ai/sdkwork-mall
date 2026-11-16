@@ -1,15 +1,10 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  SdkworkIamAuthRoutes,
-  type SdkworkIamAuthRoutesProps,
-} from "@sdkwork/auth-pc-react";
+  SdkworkIamH5AuthRoutes,
+  createSdkworkIamH5AuthController,
+} from "@sdkwork/iam-h5-auth";
 
-import {
-  resolveSdkworkMallH5AuthLocale,
-  resolveSdkworkMallH5AuthRuntimeConfig,
-} from "./bootstrap/authConfig";
-import { createSdkworkMallH5AuthAppearance } from "./bootstrap/authAppearance";
 import type { SdkworkMallH5Runtime } from "./bootstrap/runtime";
 import {
   hasSdkworkMallH5AuthenticatedSession,
@@ -22,12 +17,14 @@ export interface AuthGateProps {
 }
 
 /**
- * Routes unauthenticated visitors through the IAM login/register/recovery
- * surface.
+ * Routes unauthenticated visitors through the IAM H5 auth brick.
  *
- * The auth screens replace the storefront shell (no tab bar), so this gate owns
- * the whole viewport on `/auth/*` and hands control back to the app as soon as
- * the session store reports an authenticated session.
+ * The login/register/recovery screens, the verification-code and OAuth flows
+ * and the session controller are owned by `@sdkwork/iam-h5-auth`; this gate only
+ * decides *when* to mount them and hands control back to the app as soon as the
+ * shared session store reports an authenticated session. No mall package
+ * implements an auth screen or appearance config
+ * (`APP_H5_ARCHITECTURE_SPEC` §7, `APP_MOBILE_REACT_UI_SPEC` §4).
  */
 export function AuthGate({ children, runtime }: AuthGateProps) {
   const location = useLocation();
@@ -53,17 +50,11 @@ export function AuthGate({ children, runtime }: AuthGateProps) {
     navigate(decision.to, { replace: true });
   }, [decision, navigate]);
 
-  const authProps = useMemo<SdkworkIamAuthRoutesProps>(
-    () => ({
-      appearance: createSdkworkMallH5AuthAppearance(),
-      basePath: "/auth",
-      getRuntime: () => runtime.iamRuntime,
-      homePath: "/",
-      locale: resolveSdkworkMallH5AuthLocale(runtime.config.i18n.defaultLocale),
-      runtimeConfig: resolveSdkworkMallH5AuthRuntimeConfig(),
-      viewportMode: "flow",
-    }),
-    [runtime.config.i18n.defaultLocale, runtime.iamRuntime],
+  // One controller per runtime: it holds the auth state machine and talks to the
+  // injected IAM service, so rebuilding it per render would drop in-flight flows.
+  const controller = useMemo(
+    () => createSdkworkIamH5AuthController({ service: runtime.iamRuntime.iamService }),
+    [runtime.iamRuntime],
   );
 
   if (decision.kind === "redirect") {
@@ -71,7 +62,13 @@ export function AuthGate({ children, runtime }: AuthGateProps) {
   }
 
   if (decision.kind === "auth-route") {
-    return <SdkworkIamAuthRoutes {...authProps} />;
+    return (
+      <SdkworkIamH5AuthRoutes
+        controller={controller}
+        locale={runtime.config.i18n.defaultLocale}
+        onBack={() => navigate("/", { replace: true })}
+      />
+    );
   }
 
   return <>{children}</>;

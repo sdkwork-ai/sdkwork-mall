@@ -206,7 +206,7 @@ export async function searchMallProducts(input: {
     return { items, total: payload.total ?? items.length };
   }
 
-  // 自由文本搜索走 catalog.spus.list（支持 q 与 sort），由服务端分页。
+  // 自由文本搜索走 catalog.products.list（支持 q 与 sort），由服务端分页。
   const response = await remote.listSpus({
     categoryId: input.categoryId,
     page,

@@ -94,9 +94,15 @@ inject. Tokens come from the committed `SDKWORK_ACCESS_TOKEN` values in
 
 ## Known backend gaps (dev gateway 0.1.60)
 
-`catalog/spus` returns `404 route-not-in-manifest` and `shops` returns `503`
-until the development `sdkwork-api-cloud-gateway` binary is rebuilt with the
-current catalog route manifest and redeployed; see the gateway runbook
-(`docs/runbooks/model-catalog.md` in `sdkwork-api-cloud-gateway`). The
-frontends are wired correctly; categories, promotions, and login are served by
-the same gateway.
+The storefront no longer calls the retired `catalog/spus` collection. The catalog authority never
+published it (it is a second name for `catalog/products`), so no gateway binary could have served
+it; the earlier `404 route-not-in-manifest` here was a consumer/contract mismatch, not a stale
+gateway build. PC, H5, mini program, and Flutter now read the published
+`/app/v3/api/catalog/products` collection, which the catalog app-api route manifest carries and the
+gateway composes. Categories, promotions, and login are served by the same gateway.
+
+`shops` answered `503` because the shop capability shipped a UUID-keyed database stub while its
+HTTP repository queries the text-keyed `commerce_shop` model: every query failed and the route
+envelope reported `50301`. `sdkwork-shop` now ships the matching baseline and a forward migration
+(`0002_shop_http_schema_repair`); redeploy the development gateway once so its database-module pass
+applies it (or delete/rebuild the development database). No frontend change is involved.

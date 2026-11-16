@@ -1,7 +1,12 @@
 import type { SdkworkCommerceService } from "@sdkwork/mall-commerce-service";
+import { configureOrderMobileRuntime } from "@sdkwork/order-mobile-react-orders";
 import { configureMallH5AfterSalesMediaRuntimePort } from "@sdkwork/mall-h5-buyer";
 
 import { configureSdkworkMallH5Providers } from "./commerceProviders";
+import { configureSdkworkMallH5CartBrick } from "@sdkwork/mall-h5-cart/cart-brick";
+import { configureSdkworkMallH5CheckoutBrick } from "@sdkwork/mall-h5-cart";
+import { configureSdkworkMallH5UserCenter } from "@sdkwork/mall-h5-buyer";
+import { configureSdkworkMallH5OrderLogisticsBrick } from "@sdkwork/mall-h5-order";
 import { configureSdkworkMallH5PartnerProviders } from "./partnerProviders";
 import {
   resolveSdkworkMallH5RuntimeConfig,
@@ -45,7 +50,6 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
   const sdkClients = createSdkworkMallH5SdkClientsWithTokenManager(config, tokenManager);
   const iamRuntime = createSdkworkMallH5IamRuntime({
     config,
-    sdkClients,
     session,
   });
   const { commerceService } = configureSdkworkMallH5Providers({
@@ -53,8 +57,18 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
     iamRuntime,
     sdkClients,
   });
+  configureSdkworkMallH5UserCenter(iamRuntime.iamService);
   configureSdkworkMallH5ImProviders({ config, tokenManager });
   configureSdkworkMallH5PartnerProviders(sdkClients);
+  // The order mobile brick owns the order read/write flows; the mall root only
+  // injects its SDK client (brick contract: `OrderRuntime`), never a second
+  // order service (APP_MOBILE_REACT_UI_SPEC §4).
+  configureOrderMobileRuntime({ client: sdkClients.orderAppClient });
+  // Cart UI is the shop mobile shopping brick; the mall commerce cart facade is
+  // injected through the brick runtime port (no second cart implementation).
+  configureSdkworkMallH5CartBrick();
+  configureSdkworkMallH5CheckoutBrick();
+  configureSdkworkMallH5OrderLogisticsBrick();
   configureSdkworkMallH5AfterSalesMediaPort(config, tokenManager);
 
   return {

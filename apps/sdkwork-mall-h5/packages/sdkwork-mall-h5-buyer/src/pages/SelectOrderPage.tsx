@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { useNavigate } from "react-router-dom";
 
 import { completeOrderPick } from "../order-pick-channel";
@@ -78,7 +79,7 @@ export function SdkworkMallH5SelectOrderPage() {
         {loading ? <div className="sdk-h5-loading">加载订单...</div> : null}
         {error ? <SdkworkMallH5ErrorState message={error} /> : null}
         {!loading && orders.length === 0 ? (
-          <div className="sdk-h5-empty">暂无可选订单</div>
+          <SdkworkMallH5EmptyState>暂无可选订单</SdkworkMallH5EmptyState>
         ) : null}
         {orders.map((order) => (
           <button

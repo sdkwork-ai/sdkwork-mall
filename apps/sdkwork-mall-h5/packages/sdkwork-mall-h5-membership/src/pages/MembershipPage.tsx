@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { useTranslation } from "react-i18next";
 import { Crown, Headphones, Percent, ShieldCheck, Star } from "lucide-react";
 
@@ -142,7 +143,7 @@ export function SdkworkMallH5MembershipPage() {
       <section className="sdk-h5-section">
         <h2>{t("membership.plans.title")}</h2>
         {packages.length === 0 ? (
-          <div className="sdk-h5-empty">{t("membership.plans.empty")}</div>
+          <SdkworkMallH5EmptyState title={t("membership.plans.empty")} />
         ) : (
           packages.map((plan) => (
             <div className="sdk-h5-coupon-row" key={plan.id}>

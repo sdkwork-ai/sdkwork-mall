@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
@@ -355,7 +356,7 @@ export function SdkworkMallH5ProductDetailPage() {
   if (!detail) {
     return (
       <div className="sdk-h5-page">
-        <div className="sdk-h5-empty">{t("productDetail.notFound")}</div>
+        <SdkworkMallH5EmptyState title={t("productDetail.notFound")} />
         <div className="sdk-h5-center">
           <Link className="sdk-h5-button" to="/">{t("productDetail.backHome")}</Link>
         </div>

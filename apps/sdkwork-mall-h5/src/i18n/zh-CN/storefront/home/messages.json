@@ -1,9 +1,27 @@
 {
   "home": {
+    "title": "商城首页",
+    "actions": {
+      "more": "更多"
+    },
+    "empty": {
+      "title": "暂时没有可展示的内容",
+      "hint": "检查网络后重试，或稍后再来看看",
+      "retry": "重新加载"
+    },
+    "shops": {
+      "ratingAria": "店铺评分 {{rating}} 分"
+    },
     "banners": {
       "recommendAria": "推荐",
       "carouselAria": "轮播导航",
-      "bannerAria": "第 {{index}} 张横幅",
+      "carouselRole": "轮播图",
+      "slideRole": "幻灯片",
+      "bannerAria": "第 {{index}} / {{total}} 张横幅",
+      "dotAria": "查看第 {{index}} / {{total}} 张横幅",
+      "cta": "立即查看",
+      "pause": "暂停自动轮播",
+      "play": "开始自动轮播",
       "quality": {
         "title": "品质生活，一站购齐",
         "subtitle": "平台自营与品牌商家"

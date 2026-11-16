@@ -3,7 +3,7 @@ import '../utils/json.dart';
 
 /// 营销面：店铺与促销活动。
 ///
-/// 线上契约：`GET /shops/{shopId}`（店铺详情）、`GET /catalog/spus` 按
+/// 线上契约：`GET /shops/{shopId}`（店铺详情）、`GET /catalog/products` 按
 /// `shop_id` 过滤（店铺商品）、`GET /promotions/offers?status=active`
 /// （活动列表）、`GET /promotions/offers/{offerId}`（活动详情）。
 class MarketingService {
@@ -15,7 +15,7 @@ class MarketingService {
     final results = await Future.wait(<Future<Map<String, dynamic>>>[
       _safe('/shops/$shopId'),
       _safe(
-        '/catalog/spus',
+        '/catalog/products',
         query: <String, String>{'page': '1', 'page_size': '20', 'shop_id': shopId},
       ),
     ]);

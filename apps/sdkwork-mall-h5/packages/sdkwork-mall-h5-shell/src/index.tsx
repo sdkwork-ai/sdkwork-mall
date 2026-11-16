@@ -108,6 +108,23 @@ export function isSdkworkMallH5TabBarSurface(pathname: string): boolean {
 }
 
 /**
+ * Surfaces whose mounted brick renders the shared `PageLayout` header itself
+ * (title + back). The shell must not paint a second navigation bar above them;
+ * the order detail brick is the first such surface.
+ */
+export function isSdkworkMallH5PageOwnedChrome(pathname: string): boolean {
+  return (
+    (pathname.startsWith("/buyer/orders/") && pathname !== "/buyer/orders")
+    || pathname === "/buyer/vouchers"
+    || pathname === "/buyer/refunds"
+    || pathname === "/buyer/profile"
+    || pathname === "/buyer/password"
+    || pathname === "/buyer/logistics"
+    || pathname === "/checkout"
+  );
+}
+
+/**
  * Shared secondary-screen navigation bar: back affordance + route title.
  * Titles resolve from the route registry at shell-layout time; pages never
  * assemble their own headers.
@@ -148,6 +165,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
   //   accessibility-hidden h1 and never paint a second title).
   const isProductDetail = location.pathname.startsWith("/product/");
   const isTabRoot = isSdkworkMallH5TabBarSurface(location.pathname);
+  const isPageOwnedChrome = isSdkworkMallH5PageOwnedChrome(location.pathname);
   const matchedRoute = runtime.routes.find((route) =>
     matchPath(route.path, location.pathname),
   );
@@ -179,7 +197,7 @@ export function SdkworkMallH5MobileShell({ children, runtime }: SdkworkMallH5Mob
 
   return (
     <div className="sdk-h5-app">
-      {isProductDetail ? null : !isTabRoot ? (
+      {isProductDetail || isPageOwnedChrome ? null : !isTabRoot ? (
         <SdkworkMallH5NavBar title={navbarTitle} />
       ) : tabHeaderMode === "search" ? (
         <header className="sdk-h5-topbar">

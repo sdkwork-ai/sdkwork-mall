@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -145,7 +146,7 @@ export function SdkworkMallH5InvoicesPage() {
       <section className="sdk-h5-section">
         <h2>我的发票</h2>
         {invoices.length === 0 ? (
-          <div className="sdk-h5-empty">暂无发票</div>
+          <SdkworkMallH5EmptyState>暂无发票</SdkworkMallH5EmptyState>
         ) : (
           invoices.map((invoice) => (
             <div className="sdk-h5-coupon-row" key={invoice.id}>

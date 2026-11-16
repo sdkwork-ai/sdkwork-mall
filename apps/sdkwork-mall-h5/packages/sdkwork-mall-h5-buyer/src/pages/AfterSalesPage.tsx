@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ChangeEvent } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -463,7 +464,7 @@ export function SdkworkMallH5AfterSalesPage() {
       <section className="sdk-h5-section">
         <h2>{t("afterSales.list.title")}</h2>
         {requests.length === 0 ? (
-          <div className="sdk-h5-empty">{t("afterSales.list.empty")}</div>
+          <SdkworkMallH5EmptyState title={t("afterSales.list.empty")} />
         ) : (
           requests.map((request) => (
             <div className="sdk-h5-coupon-row" key={request.id}>

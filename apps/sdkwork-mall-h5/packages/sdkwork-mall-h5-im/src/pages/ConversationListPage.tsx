@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
@@ -72,7 +73,7 @@ export function SdkworkMallH5ConversationListPage() {
       {loading ? <div className="sdk-h5-loading">加载会话...</div> : null}
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
       {!loading && !error && conversations.length === 0 ? (
-        <div className="sdk-h5-empty">暂无会话</div>
+        <SdkworkMallH5EmptyState>暂无会话</SdkworkMallH5EmptyState>
       ) : null}
 
       <div className="sdk-h5-conv-list" role="list">

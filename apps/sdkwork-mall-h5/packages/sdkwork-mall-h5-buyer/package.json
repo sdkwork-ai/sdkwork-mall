@@ -80,6 +80,11 @@
       "import": "./src/pages/ProfilePage.tsx",
       "default": "./src/pages/ProfilePage.tsx"
     },
+    "./password-page": {
+      "types": "./src/pages/PasswordPage.tsx",
+      "import": "./src/pages/PasswordPage.tsx",
+      "default": "./src/pages/PasswordPage.tsx"
+    },
     "./security-page": {
       "types": "./src/pages/SecurityPage.tsx",
       "import": "./src/pages/SecurityPage.tsx",
@@ -108,6 +113,9 @@
     "@sdkwork/mall-h5-commons": "workspace:*",
     "@sdkwork/mall-commerce-service": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*",
+    "@sdkwork/iam-h5-commons": "workspace:*",
+    "@sdkwork/iam-h5-user-center": "workspace:*",
+    "@sdkwork/iam-service": "workspace:*",
     "@sdkwork/mall-h5-order": "workspace:*",
     "@sdkwork/order-service": "workspace:*",
     "lucide-react": "catalog:"

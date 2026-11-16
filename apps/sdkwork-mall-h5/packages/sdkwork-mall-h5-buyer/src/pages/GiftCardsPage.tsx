@@ -1,25 +1,34 @@
+import { Gift, Ticket } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Gift } from "lucide-react";
 
+/**
+ * Gift cards / red packets entry.
+ *
+ * The commerce gift-card purchase and red-packet APIs are not published yet, so
+ * this surface explains the status and exposes the capability that *is* live:
+ * voucher (coupon code) redemption through the order brick.
+ */
 export function SdkworkMallH5GiftCardsPage() {
+  const { t } = useTranslation();
   return (
     <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">礼品卡与红包</h1>
+      <h1 className="sdk-h5-visually-hidden">{t("giftCards.title")}</h1>
 
       <section className="sdk-h5-section">
         <h2>
-          <Gift aria-hidden="true" size={18} /> 功能说明
+          <Gift aria-hidden="true" size={18} /> {t("giftCards.section")}
         </h2>
-        <div className="sdk-h5-empty">礼品卡购买、赠送、兑换与红包领取需 commerce gift-cards API。</div>
-        <p className="sdk-h5-muted">
-          当前版本仅预留入口。待 commerce gift-cards / red-packet API 合约落地后，
-          将在此接入余额、领取记录与兑换流程。
-        </p>
+        <div className="sdk-h5-empty">{t("giftCards.empty")}</div>
+        <p className="sdk-h5-muted">{t("giftCards.hint")}</p>
       </section>
 
       <div className="sdk-h5-action-row">
+        <Link className="sdk-h5-button sdk-h5-button-primary" to="/buyer/vouchers">
+          <Ticket aria-hidden="true" size={16} /> {t("giftCards.redeem")}
+        </Link>
         <Link className="sdk-h5-button sdk-h5-button-secondary" to="/buyer/wallet">
-          查看我的钱包
+          {t("giftCards.wallet")}
         </Link>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { SdkworkAppErrorBoundary } from "@sdkwork/appbase-pc-react";
-import { SdkworkSessionAuthBrowserRoot } from "@sdkwork/auth-pc-react";
 import { SdkworkMallH5MobileShell } from "@sdkwork/mall-h5-shell";
 
 import { AppRoutes } from "./routes/AppRoutes";
@@ -40,11 +39,9 @@ function MallErrorBoundary() {
 export function App() {
   return (
     <BrowserRouter>
-      <SdkworkSessionAuthBrowserRoot>
-        <AuthGate runtime={runtime}>
-          <MallErrorBoundary />
-        </AuthGate>
-      </SdkworkSessionAuthBrowserRoot>
+      <AuthGate runtime={runtime}>
+        <MallErrorBoundary />
+      </AuthGate>
     </BrowserRouter>
   );
 }

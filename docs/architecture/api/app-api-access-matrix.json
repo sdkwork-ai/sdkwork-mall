@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedBy": "scripts/audit-mall-app-api-access.mjs",
-  "generatedAt": "2026-11-15T02:07:48.875Z",
+  "generatedAt": "2026-11-16T10:26:04.931Z",
   "generatedFromCommand": "node scripts/audit-mall-app-api-access.mjs",
   "appApiPrefix": "/app/v3/api",
   "snapshot": [
@@ -14,18 +14,18 @@
     {
       "name": "sdkwork-catalog",
       "head": "2138b7c",
-      "dirty": false,
-      "dirtyFiles": 0
+      "dirty": true,
+      "dirtyFiles": 9
     },
     {
       "name": "sdkwork-cloudrouter",
-      "head": "3d4d9f9f",
-      "dirty": false,
-      "dirtyFiles": 0
+      "head": "83c91745",
+      "dirty": true,
+      "dirtyFiles": 25
     },
     {
       "name": "sdkwork-drive",
-      "head": "b8229cd",
+      "head": "a21bd6d",
       "dirty": false,
       "dirtyFiles": 0
     },
@@ -43,21 +43,21 @@
     },
     {
       "name": "sdkwork-mall",
-      "head": "6e4c8b8",
+      "head": "881476d",
       "dirty": true,
-      "dirtyFiles": 3
+      "dirtyFiles": 20
     },
     {
       "name": "sdkwork-membership",
-      "head": "00cf902",
-      "dirty": true,
-      "dirtyFiles": 23
+      "head": "b32ea13",
+      "dirty": false,
+      "dirtyFiles": 0
     },
     {
       "name": "sdkwork-order",
-      "head": "a800e62",
-      "dirty": false,
-      "dirtyFiles": 0
+      "head": "1e6d96d",
+      "dirty": true,
+      "dirtyFiles": 2
     },
     {
       "name": "sdkwork-partner",
@@ -67,9 +67,9 @@
     },
     {
       "name": "sdkwork-payment",
-      "head": "a6ae151",
-      "dirty": false,
-      "dirtyFiles": 0
+      "head": "6b140d4",
+      "dirty": true,
+      "dirtyFiles": 22
     },
     {
       "name": "sdkwork-promotion",
@@ -85,8 +85,8 @@
     }
   ],
   "summary": {
-    "generatedAt": "2026-11-15T02:07:48.875Z",
-    "totalOperations": 385,
+    "generatedAt": "2026-11-16T10:26:04.931Z",
+    "totalOperations": 386,
     "primaryContract": {
       "spec": "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json",
       "operations": 182,
@@ -95,11 +95,11 @@
       "dualToken": 127,
       "otherPublished": 0,
       "missing": 34,
-      "unused": 104,
+      "unused": 105,
       "verdicts": {
         "MISSING-ROUTE": 34,
-        "OK": 64,
-        "UNUSED": 84
+        "OK": 65,
+        "UNUSED": 83
       }
     },
     "consumedSpecs": 12,
@@ -107,31 +107,31 @@
     "routeManifestFiles": 157,
     "sourceFilesScanned": 816,
     "publishedTiers": {
-      "anonymous": 17,
+      "anonymous": 18,
       "dual-token": 317,
       "dual-token-or-anonymous": 17,
       "MISSING": 34
     },
     "publishedTierBuckets": {
-      "anonymous": 17,
+      "anonymous": 18,
       "dual-token-or-anonymous": 17,
       "dual-token": 317,
       "other": 0,
       "missing": 34
     },
     "targetTiers": {
-      "anonymous": 17,
+      "anonymous": 18,
       "dual-token-or-anonymous": 18,
       "dual-token": 350
     },
     "verdicts": {
       "MISSING-ROUTE": 34,
       "NEEDS-TIER-CHANGE": 1,
-      "OK": 83,
+      "OK": 84,
       "UNUSED": 267
     },
-    "consumed": 97,
-    "unused": 288,
+    "consumed": 96,
+    "unused": 290,
     "authorityDriftCount": 14,
     "authorityConflictCount": 13,
     "consistency": {
@@ -306,7 +306,7 @@
       {
         "path": "sdkwork-order/apis/app-api/order/order-app-api.openapi.json",
         "repo": "sdkwork-order",
-        "operations": 62
+        "operations": 63
       },
       {
         "path": "sdkwork-partner/apis/app-api/partner/sdkwork-partner-app-api.openapi.json",
@@ -738,12 +738,7 @@
         "authoritySpecs": [
           "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json"
         ],
-        "consumedBy": [
-          "apps/sdkwork-mall-mini-program/src/services/catalog-service.ts",
-          "apps/sdkwork-mall-mini-program/src/services/marketing-service.ts",
-          "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-search/src/search-service.ts",
-          "apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts"
-        ]
+        "consumedBy": []
       },
       {
         "method": "GET",
@@ -754,11 +749,7 @@
         "authoritySpecs": [
           "sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json"
         ],
-        "consumedBy": [
-          "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/catalog-service.ts",
-          "apps/sdkwork-mall-mini-program/src/services/catalog-service.ts",
-          "apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts"
-        ]
+        "consumedBy": []
       },
       {
         "method": "POST",
@@ -3623,6 +3614,62 @@
       "verdict": "UNUSED"
     },
     {
+      "key": "POST /app/v3/api/cashier/links",
+      "method": "POST",
+      "path": "/app/v3/api/cashier/links",
+      "operationIds": [
+        "cashier.links.create"
+      ],
+      "tags": [
+        "orderCashier"
+      ],
+      "primaryContract": false,
+      "consumed": {
+        "isConsumed": false,
+        "evidenceKinds": [],
+        "fileCount": 0,
+        "files": []
+      },
+      "published": {
+        "tier": "anonymous",
+        "tiers": [
+          "anonymous"
+        ],
+        "sourceKind": "route-manifest",
+        "source": "route-manifest:sdkwork-order",
+        "repo": "sdkwork-order",
+        "declarations": [
+          {
+            "tier": "anonymous",
+            "repo": "sdkwork-order",
+            "file": "sdkwork-order/crates/sdkwork-routes-order-app-api/src/http_route_manifest.rs",
+            "form": "HttpRoute::<tier>",
+            "operationId": "cashier.links.create"
+          }
+        ]
+      },
+      "authority": {
+        "tiers": [
+          "anonymous"
+        ],
+        "declarations": [
+          {
+            "tier": "anonymous",
+            "declaredBy": "x-sdkwork-auth-mode=anonymous",
+            "spec": "sdkwork-order/apis/app-api/order/order-app-api.openapi.json",
+            "repo": "sdkwork-order",
+            "priority": 0
+          }
+        ]
+      },
+      "target": {
+        "tier": "anonymous",
+        "rule": "R3",
+        "note": "already published anonymous"
+      },
+      "verdict": "UNUSED"
+    },
+    {
       "key": "GET /app/v3/api/catalog/attributes",
       "method": "GET",
       "path": "/app/v3/api/catalog/attributes",
@@ -3815,10 +3862,13 @@
       "consumed": {
         "isConsumed": true,
         "evidenceKinds": [
-          "operation-id"
+          "operation-id",
+          "path"
         ],
-        "fileCount": 2,
+        "fileCount": 4,
         "files": [
+          "apps/sdkwork-mall-mini-program/src/services/catalog-service.ts",
+          "apps/sdkwork-mall-mini-program/src/services/marketing-service.ts",
           "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-search/src/search-service.ts",
           "apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts"
         ]
@@ -3874,10 +3924,17 @@
       ],
       "primaryContract": true,
       "consumed": {
-        "isConsumed": false,
-        "evidenceKinds": [],
-        "fileCount": 0,
-        "files": []
+        "isConsumed": true,
+        "evidenceKinds": [
+          "operation-id",
+          "path"
+        ],
+        "fileCount": 3,
+        "files": [
+          "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/catalog-service.ts",
+          "apps/sdkwork-mall-mini-program/src/services/catalog-service.ts",
+          "apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts"
+        ]
       },
       "published": {
         "tier": "dual-token-or-anonymous",
@@ -3916,7 +3973,7 @@
         "rule": "R1",
         "note": "product detail"
       },
-      "verdict": "UNUSED"
+      "verdict": "OK"
     },
     {
       "key": "GET /app/v3/api/catalog/skus/{}",
@@ -4036,18 +4093,10 @@
       ],
       "primaryContract": true,
       "consumed": {
-        "isConsumed": true,
-        "evidenceKinds": [
-          "operation-id",
-          "path"
-        ],
-        "fileCount": 4,
-        "files": [
-          "apps/sdkwork-mall-mini-program/src/services/catalog-service.ts",
-          "apps/sdkwork-mall-mini-program/src/services/marketing-service.ts",
-          "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-search/src/search-service.ts",
-          "apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts"
-        ]
+        "isConsumed": false,
+        "evidenceKinds": [],
+        "fileCount": 0,
+        "files": []
       },
       "published": {
         "tier": "MISSING",
@@ -4090,17 +4139,10 @@
       ],
       "primaryContract": true,
       "consumed": {
-        "isConsumed": true,
-        "evidenceKinds": [
-          "operation-id",
-          "path"
-        ],
-        "fileCount": 3,
-        "files": [
-          "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/catalog-service.ts",
-          "apps/sdkwork-mall-mini-program/src/services/catalog-service.ts",
-          "apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts"
-        ]
+        "isConsumed": false,
+        "evidenceKinds": [],
+        "fileCount": 0,
+        "files": []
       },
       "published": {
         "tier": "MISSING",

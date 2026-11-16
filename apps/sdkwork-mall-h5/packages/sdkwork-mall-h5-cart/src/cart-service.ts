@@ -278,7 +278,7 @@ export async function submitMallH5CheckoutOrder(
     // The discount application is keyed by order, so it can only run after the
     // order exists. A rejected coupon must not surface as a failed checkout
     // (the order is already created and will be paid): record it as a warning
-    // so the payment-result page tells the buyer the coupon did not apply.
+    // so the cashier/order surface tells the buyer the coupon did not apply.
     try {
       await remote.promotions.discountApplications.create({
         orderId,
@@ -311,20 +311,16 @@ export async function submitMallH5CheckoutOrder(
     }
   }
 
-  let paymentId: string | undefined;
-  let nextUrl = `/payment/result?status=success&orderId=${encodeURIComponent(orderId)}`;
-
+  // Payment is owned by the order brick cashier: checkout only hands the buyer
+  // over to it with the created order id. The cashier picks the method, creates
+  // the payment session, renders the QR/countdown and polls the result — the
+  // checkout flow must not create a payment or land on the legacy result page.
   if (input.paymentMethodCode) {
     rememberMallH5PaymentMethod(input.paymentMethodCode);
-    const paymentResponse = await remote.orders.pay(orderId, { paymentMethod: input.paymentMethodCode });
-    const payment = unwrapSdkworkCommerceResponse<Record<string, unknown>>(paymentResponse) ?? {};
-    paymentId = readId(payment.paymentId ?? payment.id) || undefined;
-    if (paymentId) {
-      nextUrl = `/payment/result?status=pending&orderId=${encodeURIComponent(orderId)}&paymentId=${encodeURIComponent(paymentId)}&paymentMethod=${encodeURIComponent(input.paymentMethodCode)}`;
-    }
   }
+  const nextUrl = `/buyer/orders/${encodeURIComponent(orderId)}/cashier`;
 
-  return { nextUrl, orderId, paymentId, warnings };
+  return { nextUrl, orderId, paymentId: undefined as string | undefined, warnings };
 }
 
 export async function retrieveMallH5OrderPaymentSuccess(

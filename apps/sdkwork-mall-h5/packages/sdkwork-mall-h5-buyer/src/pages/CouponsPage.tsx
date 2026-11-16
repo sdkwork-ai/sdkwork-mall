@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 
 import {
   claimMallH5Coupon,
@@ -125,7 +126,7 @@ export function SdkworkMallH5CouponsPage() {
       <section className="sdk-h5-section">
         <h2>我的优惠券</h2>
         {coupons.length === 0 ? (
-          <div className="sdk-h5-empty">暂无优惠券</div>
+          <SdkworkMallH5EmptyState>暂无优惠券</SdkworkMallH5EmptyState>
         ) : (
           coupons.map((coupon) => (
             <div className="sdk-h5-coupon-row" key={coupon.id}>

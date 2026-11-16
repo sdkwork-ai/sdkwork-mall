@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { Link } from "react-router-dom";
 import { Clock } from "lucide-react";
 
@@ -49,7 +50,7 @@ export function SdkworkMallH5ActivityListPage() {
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {activities.length === 0 ? (
-        <div className="sdk-h5-empty">暂无进行中的活动</div>
+        <SdkworkMallH5EmptyState>暂无进行中的活动</SdkworkMallH5EmptyState>
       ) : (
         <div className="sdk-h5-activity-list">
           {activities.map((activity) => {

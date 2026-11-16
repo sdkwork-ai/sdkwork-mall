@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 
 import {
   listMallH5ChatConversations,
@@ -88,7 +89,7 @@ export function SdkworkMallH5ChatPage() {
       <div className="sdk-h5-chat-stream" ref={streamRef}>
         {loading ? <div className="sdk-h5-loading">加载会话...</div> : null}
         {!loading && messages.length === 0 ? (
-          <div className="sdk-h5-empty">开始和客服聊聊吧</div>
+          <SdkworkMallH5EmptyState>开始和客服聊聊吧</SdkworkMallH5EmptyState>
         ) : null}
         {messages.map((message) => (
           <div

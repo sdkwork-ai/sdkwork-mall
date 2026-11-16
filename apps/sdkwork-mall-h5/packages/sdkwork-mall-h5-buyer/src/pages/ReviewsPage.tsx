@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { Link } from "react-router-dom";
 
 import {
@@ -47,7 +48,7 @@ export function SdkworkMallH5ReviewsPage() {
       <section className="sdk-h5-section">
         <h2>待评价</h2>
         {orders.length === 0 ? (
-          error ? null : <div className="sdk-h5-empty">已完成订单可在这里提交评价</div>
+          error ? null : <SdkworkMallH5EmptyState>已完成订单可在这里提交评价</SdkworkMallH5EmptyState>
         ) : (
           <div className="sdk-h5-cart-list">
             {orders.map((order) => (

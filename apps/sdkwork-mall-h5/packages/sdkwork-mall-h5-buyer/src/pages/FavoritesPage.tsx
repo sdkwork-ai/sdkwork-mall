@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
 
@@ -25,7 +26,7 @@ export function SdkworkMallH5FavoritesPage() {
       <h1 className="sdk-h5-visually-hidden">我的收藏</h1>
 
       {favorites.length === 0 ? (
-        <div className="sdk-h5-empty">还没有收藏的商品</div>
+        <SdkworkMallH5EmptyState>还没有收藏的商品</SdkworkMallH5EmptyState>
       ) : (
         <div className="sdk-h5-cart-list">
           {favorites.map((item) => (

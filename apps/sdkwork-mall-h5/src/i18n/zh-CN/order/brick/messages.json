@@ -1,0 +1,6 @@
+{
+  "orders": {
+    "total_items": "共 {{count}} 件",
+    "payable": "实付款"
+  }
+}

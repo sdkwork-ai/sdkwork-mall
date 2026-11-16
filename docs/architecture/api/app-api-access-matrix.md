@@ -16,7 +16,7 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 
 ## Snapshot
 
-- Generated at: `2026-11-15T02:07:48.875Z`
+- Generated at: `2026-11-16T10:26:04.931Z`
 - Consumed app-api specs: 12
 - Route-owning repos scanned: 94 (13 contribute a consumed tier or contract)
 - Route declaration files parsed: 157
@@ -25,16 +25,16 @@ Path templates are compared with parameter names erased (`{spuId}` ≈ `{product
 | Repository | HEAD | Working tree |
 | --- | --- | --- |
 | sdkwork-account | 22e6d89 | clean |
-| sdkwork-catalog | 2138b7c | clean |
-| sdkwork-cloudrouter | 3d4d9f9f | clean |
-| sdkwork-drive | b8229cd | clean |
+| sdkwork-catalog | 2138b7c | dirty (9 paths) |
+| sdkwork-cloudrouter | 83c91745 | dirty (25 paths) |
+| sdkwork-drive | a21bd6d | clean |
 | sdkwork-inventory | 697816d | clean |
 | sdkwork-invoice | 6886f78 | clean |
-| sdkwork-mall | 6e4c8b8 | dirty (3 paths) |
-| sdkwork-membership | 00cf902 | dirty (23 paths) |
-| sdkwork-order | a800e62 | clean |
+| sdkwork-mall | 881476d | dirty (20 paths) |
+| sdkwork-membership | b32ea13 | clean |
+| sdkwork-order | 1e6d96d | dirty (2 paths) |
 | sdkwork-partner | d27ccc7 | clean |
-| sdkwork-payment | a6ae151 | clean |
+| sdkwork-payment | 6b140d4 | dirty (22 paths) |
 | sdkwork-promotion | fefc5ad | clean |
 | sdkwork-shop | ad552c3 | clean |
 
@@ -45,7 +45,7 @@ Consumed specs (12):
 - `sdkwork-cloudrouter/apis/app-api/cloudrouter/cloudrouter-app-api.openapi.json` — 31 operations
 - `sdkwork-drive/apis/app-api/drive/drive-app-api.openapi.json` — 101 operations
 - `sdkwork-membership/apis/app-api/membership/membership-app-api.openapi.json` — 26 operations
-- `sdkwork-order/apis/app-api/order/order-app-api.openapi.json` — 62 operations
+- `sdkwork-order/apis/app-api/order/order-app-api.openapi.json` — 63 operations
 - `sdkwork-partner/apis/app-api/partner/sdkwork-partner-app-api.openapi.json` — 10 operations
 - `sdkwork-promotion/apis/app-api/promotion/sdkwork-promotion-app-api.openapi.json` — 21 operations
 - `sdkwork-shop/apis/app-api/shop/shop-app-api.openapi.json` — 45 operations
@@ -57,23 +57,23 @@ Consumed specs (12):
 
 | Metric | Count |
 | --- | --- |
-| Total consumed app-api operations | 385 |
-| Published `anonymous` | 17 |
+| Total consumed app-api operations | 386 |
+| Published `anonymous` | 18 |
 | Published `dual-token-or-anonymous` | 17 |
 | Published `dual-token` | 317 |
 | Published other tier (`bootstrap-body`, `api-key`, …) | 0 |
 | Published none (`MISSING-ROUTE`) | 34 |
-| Consumed by mall code (path or operationId evidence) | 97 |
-| Not consumed (unused) | 288 |
+| Consumed by mall code (path or operationId evidence) | 96 |
+| Not consumed (unused) | 290 |
 
 | Verdict | Count |
 | --- | --- |
-| OK | 83 |
+| OK | 84 |
 | NEEDS-TIER-CHANGE | 1 |
 | MISSING-ROUTE | 34 |
 | UNUSED | 267 |
 
-Primary consumed contract (`sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json`, 182 operations): 5 anonymous, 16 dual-token-or-anonymous, 127 dual-token, 34 missing, 104 unused, 0 other.
+Primary consumed contract (`sdkwork-mall/sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript/generated/server-openapi/source-openapi.json`, 182 operations): 5 anonymous, 16 dual-token-or-anonymous, 127 dual-token, 34 missing, 105 unused, 0 other.
 
 Consistency checks:
 
@@ -89,7 +89,7 @@ Consistency checks:
 - **Join gaps**: 34 consumed operations have no route declaration anywhere (checked-in or build-generated), so their callers get `404 route-not-in-manifest` — see "Missing published route".
 - **Stale aggregate contract**: 12 operations publish a tier that differs from the mall commerce aggregate spec, which still declares `dual-token` for reads the owning domain already opened to optional credential. Regenerate that spec from the domain authorities.
 - **More permissive than policy**: 1 operation publishes optional/anonymous access that rule R4 would gate (`GET /app/v3/api/ai/routing/account_groups` → dual-token-or-anonymous). Review whether anonymous access there is intentional.
-- **Anonymous surface preserved**: 17 operations are published `anonymous` and stay that way under rule R3 (webhooks, cashier capability links, public configuration).
+- **Anonymous surface preserved**: 18 operations are published `anonymous` and stay that way under rule R3 (webhooks, cashier capability links, public configuration).
 
 ## Tier policy
 
@@ -176,8 +176,8 @@ These operations are declared in a consumed OpenAPI authority, but no checked-in
 | DELETE | `/app/v3/api/cart/items/{cartItemId}` | cart.items.delete | sdkwork-mall/…/source-openapi.json | 5 files |
 | PATCH | `/app/v3/api/cart/items/{cartItemId}` | cart.items.update | sdkwork-mall/…/source-openapi.json | 5 files |
 | GET | `/app/v3/api/catalog/skus/{skuId}/prices` | catalog.skus.prices.retrieve | sdkwork-mall/…/source-openapi.json | — |
-| GET | `/app/v3/api/catalog/spus` | catalog.spus.list | sdkwork-mall/…/source-openapi.json | 4 files |
-| GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | sdkwork-mall/…/source-openapi.json | 3 files |
+| GET | `/app/v3/api/catalog/spus` | catalog.spus.list | sdkwork-mall/…/source-openapi.json | — |
+| GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | sdkwork-mall/…/source-openapi.json | — |
 | POST | `/app/v3/api/orders` | orders.create | sdkwork-mall/…/source-openapi.json | 4 files |
 | POST | `/app/v3/api/orders/{orderId}/cancel` | orders.cancel | sdkwork-mall/…/source-openapi.json | — |
 | POST | `/app/v3/api/payments/reconciliations` | payments.reconcile | sdkwork-mall/…/source-openapi.json | 1 file |
@@ -220,8 +220,8 @@ Published tier matches the target tier, but no mall source path or operationId r
 | GET | `/app/v3/api/cashier/{token}` | anonymous |
 | POST | `/app/v3/api/cashier/{token}/payments` | anonymous |
 | GET | `/app/v3/api/cashier/{token}/status` | anonymous |
+| POST | `/app/v3/api/cashier/links` | anonymous |
 | GET | `/app/v3/api/catalog/attributes` | dual-token-or-anonymous |
-| GET | `/app/v3/api/catalog/products/{productId}` | dual-token-or-anonymous |
 | GET | `/app/v3/api/checkout/sessions/{checkoutSessionId}` | dual-token |
 | GET | `/app/v3/api/drive/changes` | dual-token |
 | GET | `/app/v3/api/drive/changes/start_page_token` | dual-token |
@@ -516,7 +516,7 @@ The same `method + path` is declared with different tiers by different specs. A 
 | GET | `/app/v3/api/wallet/exchange_rate` | anonymous, dual-token | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
 | GET | `/app/v3/api/wallet/points/exchanges/rules` | anonymous, dual-token | sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-promotion/…/sdkwork-promotion-app-api.openapi.json (anonymous)<br>sdkwork-mall/…/source-openapi.json (dual-token) | yes |
 
-## Consumer evidence (97 operations)
+## Consumer evidence (96 operations)
 
 | Method | Path | Evidence | Files |
 | --- | --- | --- | --- |
@@ -540,10 +540,9 @@ The same `method + path` is declared with different tiers by different specs. A 
 | PATCH | `/app/v3/api/cart/items/{cartItemId}` | operation-id, path | apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/cart-service.ts<br>apps/sdkwork-mall-h5/src/bootstrap/commerceProviders.ts<br>apps/sdkwork-mall-mini-program/src/services/cart-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/cart-commerce-remote.ts<br>apps/sdkwork-mall-pc/src/bootstrap/commerceProviders.ts |
 | GET | `/app/v3/api/catalog/categories` | operation-id, path | apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/catalog-service.ts<br>apps/sdkwork-mall-mini-program/src/services/catalog-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts |
 | GET | `/app/v3/api/catalog/categories/{categoryId}` | operation-id | apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts |
-| GET | `/app/v3/api/catalog/products` | operation-id | apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-search/src/search-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts |
+| GET | `/app/v3/api/catalog/products` | operation-id, path | apps/sdkwork-mall-mini-program/src/services/catalog-service.ts<br>apps/sdkwork-mall-mini-program/src/services/marketing-service.ts<br>apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-search/src/search-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts |
+| GET | `/app/v3/api/catalog/products/{productId}` | operation-id, path | apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/catalog-service.ts<br>apps/sdkwork-mall-mini-program/src/services/catalog-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts |
 | GET | `/app/v3/api/catalog/skus/{skuId}` | operation-id | apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-admin-product/src/catalogService.ts |
-| GET | `/app/v3/api/catalog/spus` | operation-id, path | apps/sdkwork-mall-mini-program/src/services/catalog-service.ts<br>apps/sdkwork-mall-mini-program/src/services/marketing-service.ts<br>apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-search/src/search-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts |
-| GET | `/app/v3/api/catalog/spus/{spuId}` | operation-id, path | apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/catalog-service.ts<br>apps/sdkwork-mall-mini-program/src/services/catalog-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/storefront-commerce-remote.ts |
 | POST | `/app/v3/api/checkout/sessions` | operation-id, path | apps/sdkwork-mall-h5/src/bootstrap/commerceProviders.ts<br>apps/sdkwork-mall-mini-program/src/services/cart-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/cart-commerce-remote.ts<br>apps/sdkwork-mall-pc/src/bootstrap/commerceProviders.ts |
 | POST | `/app/v3/api/checkout/sessions/{checkoutSessionId}/orders` | operation-id, path | apps/sdkwork-mall-h5/src/bootstrap/commerceProviders.ts<br>apps/sdkwork-mall-mini-program/src/services/cart-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/cart-commerce-remote.ts<br>apps/sdkwork-mall-pc/src/bootstrap/commerceProviders.ts |
 | POST | `/app/v3/api/checkout/sessions/{checkoutSessionId}/quotes` | operation-id, path | apps/sdkwork-mall-h5/src/bootstrap/commerceProviders.ts<br>apps/sdkwork-mall-mini-program/src/services/cart-service.ts<br>apps/sdkwork-mall-pc/src/bootstrap/cart-commerce-remote.ts<br>apps/sdkwork-mall-pc/src/bootstrap/commerceProviders.ts |
@@ -631,8 +630,8 @@ The first path segment after `/app/v3/api` groups the consumed surface. A family
 | `app_template_orders` | 2 | 0 | 2 | 0 | 0 | 0 |
 | `billing` | 1 | 1 | 0 | 1 | 0 | 0 |
 | `cart` | 4 | 4 | 0 | 0 | 0 | 4 |
-| `cashier` | 3 | 0 | 3 | 0 | 0 | 0 |
-| `catalog` | 9 | 6 | 3 | 4 | 0 | 3 |
+| `cashier` | 4 | 0 | 4 | 0 | 0 | 0 |
+| `catalog` | 9 | 5 | 4 | 5 | 0 | 3 |
 | `checkout` | 4 | 3 | 1 | 3 | 0 | 0 |
 | `drive` | 101 | 2 | 99 | 2 | 0 | 0 |
 | `fulfillments` | 2 | 0 | 2 | 0 | 0 | 0 |
@@ -657,7 +656,7 @@ The first path segment after `/app/v3/api` groups the consumed surface. A family
 
 ## Full matrix
 
-385 operations, one row each, ordered by path then method. The first path segment after `/app/v3/api` forms the family grouping.
+386 operations, one row each, ordered by path then method. The first path segment after `/app/v3/api` forms the family grouping.
 
 ### `accounts` (1)
 
@@ -723,13 +722,14 @@ The first path segment after `/app/v3/api` groups the consumed surface. A family
 | DELETE | `/app/v3/api/cart/items/{cartItemId}` | cart.items.delete | 5 files | none | — | `dual-token` | R4 | MISSING-ROUTE |
 | PATCH | `/app/v3/api/cart/items/{cartItemId}` | cart.items.update | 5 files | none | — | `dual-token` | R4 | MISSING-ROUTE |
 
-### `cashier` (3)
+### `cashier` (4)
 
 | Method | Path | operationId | Consumed by | Published | Published source | Target | Rule | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | GET | `/app/v3/api/cashier/{token}` | cashier.retrieve | — | anonymous | manifest: sdkwork-order | `anonymous` | R3 | UNUSED |
 | POST | `/app/v3/api/cashier/{token}/payments` | cashier.payments.create | — | anonymous | manifest: sdkwork-order | `anonymous` | R3 | UNUSED |
 | GET | `/app/v3/api/cashier/{token}/status` | cashier.status.retrieve | — | anonymous | manifest: sdkwork-order | `anonymous` | R3 | UNUSED |
+| POST | `/app/v3/api/cashier/links` | cashier.links.create | — | anonymous | manifest: sdkwork-order | `anonymous` | R3 | UNUSED |
 
 ### `catalog` (9)
 
@@ -738,12 +738,12 @@ The first path segment after `/app/v3/api` groups the consumed surface. A family
 | GET | `/app/v3/api/catalog/attributes` | catalog.attributes.list | — | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | UNUSED |
 | GET | `/app/v3/api/catalog/categories` | catalog.categories.list | 3 files | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
 | GET | `/app/v3/api/catalog/categories/{categoryId}` | catalog.categories.retrieve | 1 file | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
-| GET | `/app/v3/api/catalog/products` | catalog.products.list | 2 files | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
-| GET | `/app/v3/api/catalog/products/{productId}` | catalog.products.retrieve | — | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | UNUSED |
+| GET | `/app/v3/api/catalog/products` | catalog.products.list | 4 files | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
+| GET | `/app/v3/api/catalog/products/{productId}` | catalog.products.retrieve | 3 files | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
 | GET | `/app/v3/api/catalog/skus/{skuId}` | catalog.skus.retrieve | 1 file | dual-token-or-anonymous | manifest: sdkwork-catalog | `dual-token-or-anonymous` | R1 | OK |
 | GET | `/app/v3/api/catalog/skus/{skuId}/prices` | catalog.skus.prices.retrieve | — | none | — | `dual-token` | R4 | MISSING-ROUTE |
-| GET | `/app/v3/api/catalog/spus` | catalog.spus.list | 4 files | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
-| GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | 3 files | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
+| GET | `/app/v3/api/catalog/spus` | catalog.spus.list | — | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
+| GET | `/app/v3/api/catalog/spus/{spuId}` | catalog.spus.retrieve | — | none | — | `dual-token-or-anonymous` | R1 | MISSING-ROUTE |
 
 ### `checkout` (4)
 

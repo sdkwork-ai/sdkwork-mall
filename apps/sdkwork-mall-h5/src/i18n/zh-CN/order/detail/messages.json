@@ -1,5 +1,6 @@
 {
   "orderDetail": {
+    "title": "订单详情",
     "loading": "加载订单详情...",
     "notFound": "订单不存在",
     "orderNo": "订单号：{{id}}",

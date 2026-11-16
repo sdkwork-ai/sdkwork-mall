@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -190,7 +191,7 @@ export function SdkworkMallH5AddressesPage() {
       {message ? <div className="sdk-h5-notice sdk-h5-notice-danger" role="alert">{message}</div> : null}
 
       {addresses.length === 0 ? (
-        <div className="sdk-h5-empty">{t("addresses.empty")}</div>
+        <SdkworkMallH5EmptyState title={t("addresses.empty")} />
       ) : (
         addresses.map((address) => (
           <div className="sdk-h5-section" key={address.id}>

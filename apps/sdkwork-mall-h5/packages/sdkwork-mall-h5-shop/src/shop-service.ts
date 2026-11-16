@@ -59,7 +59,7 @@ export async function retrieveMallH5Shop(shopId: string): Promise<MallH5ShopDeta
   const remote = getSdkworkCommerceService();
   const [shopResponse, productsResponse] = await Promise.all([
     remote.shops.retrieve(shopId),
-    remote.catalog.spus
+    remote.catalog.products
       .list({ page: 1, page_size: 20, shop_id: shopId })
       .catch(() => null),
   ]);

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 
 import {
   listMallH5Notices,
@@ -87,7 +88,7 @@ export function SdkworkMallH5NoticesPage() {
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {notices.length === 0 ? (
-        <div className="sdk-h5-empty">暂无消息，订单动态与优惠提醒都会出现在这里</div>
+        <SdkworkMallH5EmptyState>暂无消息，订单动态与优惠提醒都会出现在这里</SdkworkMallH5EmptyState>
       ) : (
         notices.map((notice) => (
           <button

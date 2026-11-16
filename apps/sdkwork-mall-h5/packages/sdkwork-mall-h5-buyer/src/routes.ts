@@ -159,6 +159,18 @@ export const sdkworkMallH5BuyerRoutes = [
   },
   {
     auth: "required",
+    capability: "account-security",
+    domain: "commerce",
+    id: "buyer.mall.password",
+    packageName: "@sdkwork/mall-h5-buyer",
+    path: "/buyer/password",
+    screen: "password",
+    surface: "buyer",
+    title: "修改密码",
+    titleKey: "buyer.routes.password.title",
+  },
+  {
+    auth: "required",
     capability: "settings",
     domain: "commerce",
     id: "buyer.mall.settings",

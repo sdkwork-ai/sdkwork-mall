@@ -31,6 +31,17 @@ const SdkworkMallH5OrderPage = lazy(() =>
 const SdkworkMallH5OrderDetailPage = lazy(() =>
   import("@sdkwork/mall-h5-order/order-detail-page").then((module) => ({ default: module.SdkworkMallH5OrderDetailPage })),
 );
+// Payment is the order brick's own cashier screen (method matrix, QR, polling,
+// provider redirects). The mall root only supplies the host route templates.
+const SdkworkOrderBrickCashierPage = lazy(() =>
+  import("@sdkwork/order-mobile-react-orders").then((module) => ({ default: module.CashierPage })),
+);
+const SdkworkOrderBrickVoucherPage = lazy(() =>
+  import("@sdkwork/order-mobile-react-orders").then((module) => ({ default: module.VoucherCodePage })),
+);
+const SdkworkOrderBrickRefundPage = lazy(() =>
+  import("@sdkwork/order-mobile-react-orders").then((module) => ({ default: module.RefundRequestsPage })),
+);
 const SdkworkMallH5LogisticsPage = lazy(() =>
   import("@sdkwork/mall-h5-order/logistics-page").then((module) => ({ default: module.SdkworkMallH5LogisticsPage })),
 );
@@ -106,6 +117,9 @@ const SdkworkMallH5ProfilePage = lazy(() =>
 const SdkworkMallH5SecurityPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/security-page").then((module) => ({ default: module.SdkworkMallH5SecurityPage })),
 );
+const SdkworkMallH5PasswordPage = lazy(() =>
+  import("@sdkwork/mall-h5-buyer/password-page").then((module) => ({ default: module.SdkworkMallH5PasswordPage })),
+);
 const SdkworkMallH5SettingsPage = lazy(() =>
   import("@sdkwork/mall-h5-buyer/settings-page").then((module) => ({ default: module.SdkworkMallH5SettingsPage })),
 );
@@ -180,6 +194,33 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/orders/:orderId"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkOrderBrickCashierPage
+                orderCenterPath="/buyer/orders"
+                orderDetailPath="/buyer/orders/:orderId"
+              />
+            </RequireSession>
+          )}
+          path="/buyer/orders/:orderId/cashier"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkOrderBrickVoucherPage />
+            </RequireSession>
+          )}
+          path="/buyer/vouchers"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkOrderBrickRefundPage />
+            </RequireSession>
+          )}
+          path="/buyer/refunds"
         />
         <Route
           element={(
@@ -324,6 +365,14 @@ export function AppRoutes({ runtime }: { runtime: SdkworkMallH5Runtime }) {
             </RequireSession>
           )}
           path="/buyer/settings"
+        />
+        <Route
+          element={(
+            <RequireSession runtime={runtime}>
+              <SdkworkMallH5PasswordPage />
+            </RequireSession>
+          )}
+          path="/buyer/password"
         />
         <Route
           element={(

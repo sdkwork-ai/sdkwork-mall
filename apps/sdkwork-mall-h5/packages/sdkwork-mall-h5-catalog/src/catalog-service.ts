@@ -51,6 +51,8 @@ function isAuthenticationFailure(cause: unknown): boolean {
 }
 
 export interface MallH5CategoryOption {
+  /** Stable category code (`MALL-CAT-DIGITAL`) when the API exposes it. */
+  code?: string;
   id: string;
   name: string;
   parentId?: string;
@@ -117,7 +119,9 @@ export async function listMallH5Categories(): Promise<MallH5CategoryOption[]> {
   const payload = unwrapSdkworkCommerceResponse<{ items?: Record<string, unknown>[] }>(response) ?? {};
   return (payload.items ?? []).map((item) => {
     const parentId = String(item.parentId ?? item.parent_id ?? "").trim();
+    const code = String(item.categoryNo ?? item.category_no ?? "").trim();
     return {
+      ...(code ? { code } : {}),
       id: String(item.id ?? ""),
       name: String(item.name ?? item.title ?? "类目"),
       ...(parentId ? { parentId } : {}),
@@ -152,7 +156,7 @@ export async function searchMallH5Products(input: {
 }): Promise<{ items: MallH5ProductCard[]; total: number }> {
   const remote = getSdkworkCommerceService();
   const page = input.page ?? 1;
-  const response = await remote.catalog.spus.list({
+  const response = await remote.catalog.products.list({
     category_id: input.categoryId,
     page,
     page_size: input.pageSize ?? 20,
@@ -177,7 +181,7 @@ export async function searchMallH5Products(input: {
 }
 
 export async function retrieveMallH5ProductDetail(productId: string): Promise<MallH5ProductDetail | null> {
-  const response = await getSdkworkCommerceService().catalog.spus.retrieve(productId);
+  const response = await getSdkworkCommerceService().catalog.products.retrieve(productId);
   const record = unwrapSdkworkCommerceResponse<Record<string, unknown>>(response);
   if (!record?.id) {
     return null;

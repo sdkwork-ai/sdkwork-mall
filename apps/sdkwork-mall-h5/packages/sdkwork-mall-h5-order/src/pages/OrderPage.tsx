@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { useTranslation } from "react-i18next";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  OrderCard,
+  OrderTabsNav,
+  type Order as OrderBrickOrder,
+} from "@sdkwork/order-mobile-react-orders";
 
 import {
   cancelMallH5Order,
   confirmMallH5OrderReceipt,
   loadMallH5OrderDashboard,
   MALL_H5_ORDER_STATUS_LABEL_KEYS,
-  payMallH5Order,
   toRemoteOrderStatusFilter,
   type MallH5OrderDashboard,
   type MallH5OrderStatus,
   type MallH5OrderSummary,
 } from "../order-service";
-import { recallMallH5PaymentMethod } from "@sdkwork/mall-h5-cart/cart-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
 
 const STATUS_FILTERS: Array<{ code: "all" | MallH5OrderStatus; labelKey: string }> = [
@@ -26,6 +30,20 @@ const STATUS_FILTERS: Array<{ code: "all" | MallH5OrderStatus; labelKey: string 
 
 const STATUS_FILTER_CODES = STATUS_FILTERS.map((filter) => filter.code);
 
+/** Mall order states projected onto the order brick's wire status vocabulary. */
+const BRICK_ORDER_STATUS: Record<MallH5OrderStatus, string> = {
+  "pending-payment": "pending_payment",
+  "pending-shipment": "paid",
+  "pending-receipt": "fulfilled",
+  completed: "completed",
+  paid: "paid",
+  cancelled: "cancelled",
+  expired: "cancelled",
+  refunding: "refunded",
+  refunded: "refunded",
+  unknown: "unknown",
+};
+
 function parseStatusFilter(value: string | null): "all" | MallH5OrderStatus {
   if (value && (STATUS_FILTER_CODES as string[]).includes(value)) {
     return value as "all" | MallH5OrderStatus;
@@ -35,6 +53,7 @@ function parseStatusFilter(value: string | null): "all" | MallH5OrderStatus {
 
 export function SdkworkMallH5OrderPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeFilter = parseStatusFilter(searchParams.get("status"));
   const [dashboard, setDashboard] = useState<MallH5OrderDashboard | null>(null);
@@ -48,6 +67,31 @@ export function SdkworkMallH5OrderPage() {
 
   function statusLabel(status: MallH5OrderStatus): string {
     return t(MALL_H5_ORDER_STATUS_LABEL_KEYS[status] ?? "orderList.statusFallback");
+  }
+
+  /**
+   * Projects a mall order summary onto the order brick's read model.
+   *
+   * The list endpoint returns summaries (no line items), so the card renders
+   * the header/total/actions of the brick and the count is the minimum the
+   * summary can prove; the detail page owns the item lines.
+   */
+  function toBrickOrder(order: MallH5OrderSummary): OrderBrickOrder {
+    return {
+      id: order.id,
+      orderSn: order.id,
+      status: BRICK_ORDER_STATUS[order.status] ?? order.status,
+      statusText: statusLabel(order.status),
+      subject: order.subject,
+      totalAmount: String(Math.round((order.totalAmountCny ?? 0) * 100)),
+      ...(order.paidAmountCny != null
+        ? { paidAmount: String(Math.round(order.paidAmountCny * 100)) }
+        : {}),
+      currencyCode: "CNY",
+      quantity: 1,
+      createdAt: order.createdAt,
+      items: [],
+    };
   }
 
   const reload = useCallback(async (statusFilter: "all" | MallH5OrderStatus) => {
@@ -112,28 +156,13 @@ export function SdkworkMallH5OrderPage() {
     }
   }
 
-  async function handlePay(orderId: string) {
-    setBusyOrderId(orderId);
-    setError(null);
-    try {
-      const paymentMethod = recallMallH5PaymentMethod() || "WECHAT";
-      const { paymentId, paymentUrl } = await payMallH5Order({ orderId, paymentMethod });
-      // Real channel cashier URL wins: the buyer completes payment on the
-      // channel page, which then returns to the payment-result route.
-      if (paymentUrl) {
-        window.location.assign(paymentUrl);
-        return;
-      }
-      const query = new URLSearchParams({ orderId, status: paymentId ? "pending" : "pending" });
-      if (paymentId) {
-        query.set("paymentId", paymentId);
-      }
-      query.set("paymentMethod", paymentMethod);
-      window.location.assign(`/payment/result?${query.toString()}`);
-    } catch (cause: unknown) {
-      setError(cause instanceof Error ? cause.message : t("orderDetail.errors.pay"));
-      setBusyOrderId(null);
-    }
+  /**
+   * Payment is owned by the order brick's cashier page: the list only routes
+   * into it. The cashier creates the payment session, renders the method
+   * matrix/QR and polls the result, so the list must not create payments itself.
+   */
+  function handlePay(orderId: string) {
+    navigate(`/buyer/orders/${encodeURIComponent(orderId)}/cashier`);
   }
 
   const serverSideFilter = toRemoteOrderStatusFilter(activeFilter) !== undefined;
@@ -202,48 +231,39 @@ export function SdkworkMallH5OrderPage() {
   return (
     <div className="sdk-h5-page">
       <h1 className="sdk-h5-visually-hidden">{t("orderList.title")}</h1>
-      <div className="sdk-h5-sort-row">
-        {STATUS_FILTERS.map((filter) => (
-          <button
-            className={activeFilter === filter.code ? "sdk-h5-sort sdk-h5-sort-active" : "sdk-h5-sort"}
-            key={filter.code}
-            onClick={() => setSearchParams(filter.code === "all" ? {} : { status: filter.code })}
-            type="button"
-          >
-            {t(filter.labelKey)}
-          </button>
-        ))}
-      </div>
+      <OrderTabsNav
+        activeTab={activeFilter}
+        onTabChange={(tabId) =>
+          setSearchParams(tabId === "all" ? {} : { status: tabId })}
+        tabs={STATUS_FILTERS.map((filter) => ({
+          id: filter.code,
+          label: t(filter.labelKey),
+        }))}
+      />
 
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
 
       {orders.length === 0 ? (
-        <div className="sdk-h5-empty">{t("orderList.empty")}</div>
+        <SdkworkMallH5EmptyState
+          action={(
+            <Link className="sdk-h5-button sdk-h5-button-primary" to="/">
+              {t("orderList.emptyAction")}
+            </Link>
+          )}
+          hint={t("orderList.emptyHint")}
+          title={t("orderList.empty")}
+        />
       ) : (
         <>
         <div className="sdk-h5-order-list">
           {orders.map((order) => (
-            <article className="sdk-h5-order-row" key={order.id}>
-              <header>
-                <Link to={`/buyer/orders/${encodeURIComponent(order.id)}`}>
-                  <strong>{order.subject}</strong>
-                </Link>
-                <span className="sdk-h5-order-status">{statusLabel(order.status)}</span>
-              </header>
-              <div className="sdk-h5-order-meta">
-                <span>{new Date(order.createdAt).toLocaleString("zh-CN")}</span>
-                <strong>{order.totalAmountCny != null ? `¥${order.totalAmountCny.toFixed(2)}` : "--"}</strong>
-              </div>
-              <footer className="sdk-h5-action-row">
-                <Link
-                  className="sdk-h5-button sdk-h5-button-ghost"
-                  to={`/buyer/orders/${encodeURIComponent(order.id)}`}
-                >
-                  {t("orderList.detail")}
-                </Link>
-                {renderAction(order)}
-              </footer>
-            </article>
+            <OrderCard
+              key={order.id}
+              onClick={() =>
+                navigate(`/buyer/orders/${encodeURIComponent(order.id)}`)}
+              order={toBrickOrder(order)}
+              renderActionButtons={() => renderAction(order)}
+            />
           ))}
         </div>
         {ordersHasMore ? (

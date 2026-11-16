@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
+import { useTranslation } from "react-i18next";
+import { Link, useLocation, useParams, useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
 
 import {
   buildMallH5CategoryTree,
@@ -14,6 +17,7 @@ import {
   recordMallH5SearchHistory,
 } from "../search-history-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
+import { resolveSdkworkMallH5CategoryVisual } from "@sdkwork/mall-h5-commons/category-visual";
 
 const SORT_OPTIONS = [
   { code: "", label: "综合" },
@@ -42,7 +46,9 @@ function ProductRow({ product }: { product: MallH5ProductCard }) {
 }
 
 export function SdkworkMallH5CatalogPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   // 分类 id 既可能是路径参数（/categories/:categoryId 深链）也可能是查询参数（页内切换）。
   const routeParams = useParams<{ categoryId?: string }>();
   const categoryId = searchParams.get("categoryId") ?? routeParams.categoryId ?? undefined;
@@ -50,6 +56,13 @@ export function SdkworkMallH5CatalogPage() {
   const sort = searchParams.get("sort") ?? "";
   // 搜索态（带关键词）保持纵向列表；分类态使用京东式左轨布局。
   const searchMode = Boolean(keyword) && !categoryId;
+  // The results screen keeps an editable query field: arriving from the shell
+  // search header used to leave no way to refine the query without going back.
+  const [draftKeyword, setDraftKeyword] = useState(keyword);
+
+  useEffect(() => {
+    setDraftKeyword(keyword);
+  }, [keyword]);
 
   const [categoryTree, setCategoryTree] = useState<MallH5CategoryTreeNode[]>([]);
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
@@ -182,6 +195,18 @@ export function SdkworkMallH5CatalogPage() {
     setSearchParams(next);
   }
 
+  function submitKeyword() {
+    const trimmed = draftKeyword.trim();
+    const next = new URLSearchParams();
+    if (trimmed) {
+      next.set("q", trimmed);
+    }
+    if (sort) {
+      next.set("sort", sort);
+    }
+    setSearchParams(next);
+  }
+
   function goCategory(nextCategoryId: string | undefined) {
     const next = new URLSearchParams();
     if (nextCategoryId) {
@@ -192,6 +217,27 @@ export function SdkworkMallH5CatalogPage() {
     }
     setSearchParams(next);
   }
+
+  const searchField = location.pathname === "/search" ? (
+    <form
+      className="sdk-h5-search-field"
+      onSubmit={(event) => {
+        event.preventDefault();
+        submitKeyword();
+      }}
+      role="search"
+    >
+      <Search aria-hidden="true" size={16} />
+      <input
+        aria-label={t("productDetail.search.placeholder")}
+        enterKeyHint="search"
+        onChange={(event) => setDraftKeyword(event.target.value)}
+        placeholder={t("productDetail.search.placeholder")}
+        type="search"
+        value={draftKeyword}
+      />
+    </form>
+  ) : null;
 
   const productCount = items.length;
   const hasMoreProducts = productCount > 0 && productCount < total;
@@ -216,7 +262,7 @@ export function SdkworkMallH5CatalogPage() {
       {loading ? <div className="sdk-h5-loading">加载中...</div> : null}
       {error ? <SdkworkMallH5ErrorState message={error} /> : null}
       {!loading && !error && items.length === 0 ? (
-        <div className="sdk-h5-empty">暂无匹配商品</div>
+        <SdkworkMallH5EmptyState>暂无匹配商品</SdkworkMallH5EmptyState>
       ) : null}
       <div className="sdk-h5-product-list">
         {items.map((product) => (
@@ -241,6 +287,7 @@ export function SdkworkMallH5CatalogPage() {
   if (searchMode) {
     return (
       <div className="sdk-h5-page">
+        {searchField}
         <section className="sdk-h5-section">
           <h2>热搜</h2>
           <div className="sdk-h5-chip-row">
@@ -322,18 +369,20 @@ export function SdkworkMallH5CatalogPage() {
 
   // 分类态：京东式左侧一级分类轨道 + 右侧内容（二级宫格 / 商品列表）。
   return (
-    <div className="sdk-h5-catalog">
-      <nav aria-label="分类导航" className="sdk-h5-catalog-rail">
-        {categoryTree.map((node) => (
-          <button
-            className={railActiveRoot?.id === node.id ? "sdk-h5-catalog-rail-item sdk-h5-catalog-rail-item-active" : "sdk-h5-catalog-rail-item"}
-            key={node.id}
-            onClick={() => goCategory(node.id)}
-            type="button"
-          >
-            {node.name}
-          </button>
-        ))}
+    <div className="sdk-h5-catalog-page">
+      {searchField}
+      <div className="sdk-h5-catalog">
+        <nav aria-label="分类导航" className="sdk-h5-catalog-rail">
+          {categoryTree.map((node) => (
+            <button
+              className={railActiveRoot?.id === node.id ? "sdk-h5-catalog-rail-item sdk-h5-catalog-rail-item-active" : "sdk-h5-catalog-rail-item"}
+              key={node.id}
+              onClick={() => goCategory(node.id)}
+              type="button"
+            >
+              {node.name}
+            </button>
+          ))}
         {categoryTree.length === 0 ? <div className="sdk-h5-catalog-rail-empty">分类加载中</div> : null}
       </nav>
 
@@ -349,16 +398,30 @@ export function SdkworkMallH5CatalogPage() {
         {/* 未指定二级分类时展示该一级分类下的二级宫格 */}
         {!categoryId && railActiveRoot && railActiveRoot.children.length > 0 ? (
           <div className="sdk-h5-catalog-child-grid">
-            {railActiveRoot.children.map((child) => (
-              <button
-                className="sdk-h5-catalog-child-card"
-                key={child.id}
-                onClick={() => goCategory(child.id)}
-                type="button"
-              >
-                {child.name}
-              </button>
-            ))}
+            {railActiveRoot.children.map((child) => {
+              // Each tile carries the glyph of its own category (or its
+              // family's), so a grid of sibling names is scannable by shape.
+              const { icon: ChildIcon, tone } = resolveSdkworkMallH5CategoryVisual({
+                code: child.code,
+                name: child.name,
+              });
+              return (
+                <button
+                  className="sdk-h5-catalog-child-card"
+                  key={child.id}
+                  onClick={() => goCategory(child.id)}
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`sdk-h5-category-icon sdk-h5-tile--${tone}`}
+                  >
+                    <ChildIcon size={18} />
+                  </span>
+                  <span className="sdk-h5-category-name">{child.name}</span>
+                </button>
+              );
+            })}
           </div>
         ) : null}
 
@@ -387,6 +450,7 @@ export function SdkworkMallH5CatalogPage() {
 
         {sortRow}
         {productArea}
+        </div>
       </div>
     </div>
   );

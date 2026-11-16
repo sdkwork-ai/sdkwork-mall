@@ -12,6 +12,8 @@ export interface MallH5HomeProductCard {
 }
 
 export interface MallH5HomeCategory {
+  /** Stable category code (`MALL-CAT-DIGITAL`) when the API exposes it. */
+  code?: string;
   id: string;
   name: string;
 }
@@ -64,9 +66,9 @@ function readProductCard(item: Record<string, unknown>): MallH5HomeProductCard {
 export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
   const commerce = getSdkworkCommerceService();
   const [categoriesResult, hotResult, newResult, shopsResult, offersResult] = await Promise.allSettled([
-    commerce.catalog.categories.list({ page: 1, page_size: 10, status: "active" }),
-    commerce.catalog.spus.list({ page: 1, page_size: 10, sort: "sales" }),
-    commerce.catalog.spus.list({ page: 1, page_size: 10, sort: "newest" }),
+    commerce.catalog.categories.list({ page: 1, page_size: 50, status: "active" }),
+    commerce.catalog.products.list({ page: 1, page_size: 10, sort: "sales" }),
+    commerce.catalog.products.list({ page: 1, page_size: 10, sort: "newest" }),
     commerce.shops.list({ page: 1, page_size: 4, status: "active" }),
     commerce.promotions.offers.list({ page: 1, page_size: 6, status: "active" }),
   ]);
@@ -105,10 +107,22 @@ export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
   };
 
   return {
-    categories: (categoriesPayload.items ?? []).map((item) => ({
-      id: String(item.id ?? ""),
-      name: String(item.name ?? item.title ?? "类目"),
-    })),
+    // The home grid is a first-level taxonomy: a flat category page also
+    // returns the second level, and rendering those as peers turned the grid
+    // into a mix of roots and leaves. One generous page keeps every root.
+    categories: (categoriesPayload.items ?? [])
+      .map((item) => ({
+        code: String(item.categoryNo ?? item.category_no ?? "").trim(),
+        id: String(item.id ?? ""),
+        name: String(item.name ?? item.title ?? "类目"),
+        parentId: String(item.parentId ?? item.parent_id ?? "").trim(),
+      }))
+      .filter((category) => category.id && !category.parentId)
+      .map((category) =>
+        category.code
+          ? { code: category.code, id: category.id, name: category.name }
+          : { id: category.id, name: category.name },
+      ),
     featuredShops: (shopsPayload.items ?? [])
       .map((item) => ({
         id: String(item.id ?? item.shopId ?? ""),

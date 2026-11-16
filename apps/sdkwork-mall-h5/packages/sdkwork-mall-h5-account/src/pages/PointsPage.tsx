@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 
 import { loadMallH5Points, type MallH5PointsSummary } from "../account-service";
 import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
@@ -52,7 +53,7 @@ export function SdkworkMallH5PointsPage() {
       <section className="sdk-h5-section">
         <h2>积分批次</h2>
         {!summary || summary.lots.length === 0 ? (
-          <div className="sdk-h5-empty">暂无积分批次</div>
+          <SdkworkMallH5EmptyState>暂无积分批次</SdkworkMallH5EmptyState>
         ) : (
           <div className="sdk-h5-ledger-list">
             {summary.lots.map((lot) => (

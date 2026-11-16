@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
 import { Link } from "react-router-dom";
 
 import {
@@ -27,7 +28,7 @@ export function SdkworkMallH5FootprintPage() {
       </div>
 
       {footprint.length === 0 ? (
-        <div className="sdk-h5-empty">暂无浏览足迹</div>
+        <SdkworkMallH5EmptyState>暂无浏览足迹</SdkworkMallH5EmptyState>
       ) : (
         <div className="sdk-h5-cart-list">
           {footprint.map((item) => (

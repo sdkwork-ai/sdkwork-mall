@@ -13,9 +13,11 @@ import { submitMallH5CheckoutOrder } from "../src/cart-service";
  * silently drops the buyer's invoice.
  */
 const calls: Array<{ body: Record<string, unknown>; sessionId: string }> = [];
+let payCalls = 0;
 
 function installFakeCommerce() {
   calls.length = 0;
+  payCalls = 0;
   configureSdkworkCommerceServiceProvider(
     () =>
       ({
@@ -35,7 +37,10 @@ function installFakeCommerce() {
           },
         },
         orders: {
-          pay: async () => ({ code: 0, data: { paymentId: "payment-1" } }),
+          pay: async () => {
+            payCalls += 1;
+            return { code: 0, data: { paymentId: "payment-1" } };
+          },
         },
         promotions: {
           discountApplications: { create: async () => ({ code: 0, data: { accepted: true } }) },
@@ -93,7 +98,11 @@ describe("H5 checkout order payload", () => {
       },
     });
     expect(result.orderId).toBe("order-1");
-    expect(result.nextUrl).toContain("paymentId=payment-1");
+    // Checkout hands the buyer to the order brick cashier; it must not create a
+    // payment session or build the legacy payment-result URL itself.
+    expect(result.nextUrl).toBe("/buyer/orders/order-1/cashier");
+    expect(result.paymentId).toBeUndefined();
+    expect(payCalls).toBe(0);
   });
 
   it("drops the invoice form when the buyer does not ask for an invoice", async () => {

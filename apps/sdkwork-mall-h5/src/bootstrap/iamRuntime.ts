@@ -1,11 +1,6 @@
-import { createClient as createAppbaseAppClient, type SdkworkAppClient } from "@sdkwork/iam-app-sdk";
-import {
-  createSdkworkAppbasePcAuthRuntime,
-  type SdkworkAppbasePcAuthRuntimeComposition,
-  type SdkworkAppbasePcAuthRuntimeSdkClient,
-} from "@sdkwork/auth-runtime-pc-react";
-import type { IamAppContext, IamDeploymentMode, IamEnvironment } from "@sdkwork/iam-contracts";
-import type { IamRuntime } from "@sdkwork/iam-runtime";
+import { readBootstrapAccessTokenFromProcessEnv } from "@sdkwork/iam-credential-entry";
+import { createIamH5RuntimeService } from "@sdkwork/iam-h5-core";
+import type { IamSession } from "@sdkwork/iam-service";
 import { normalizeSdkworkApiBaseUrl } from "@sdkwork/runtime-bootstrap";
 import { createClient as createAccountAppClient } from "@sdkwork/account-app-sdk";
 import { createClient as createCommerceAppSdkClient } from "@sdkwork/cloudrouter-app-sdk/domains";
@@ -27,7 +22,6 @@ import {
 import { createSdkworkMallH5SessionTokenManager } from "./sessionTokenManager";
 import type { SdkworkMallH5SdkClientInventory } from "./sdkClients";
 
-const APPBASE_APP_SDK_FAMILY_ID = "sdkwork-iam-app-sdk";
 const DOMAIN_APP_SDK_FAMILY_IDS = {
   account: "sdkwork-account-app-sdk",
   im: "sdkwork-im-app-sdk",
@@ -37,75 +31,70 @@ const DOMAIN_APP_SDK_FAMILY_IDS = {
   payment: "sdkwork-payment-app-sdk",
   promotion: "sdkwork-promotion-app-sdk",
 } as const;
+const APPBASE_APP_SDK_FAMILY_ID = "sdkwork-iam-app-sdk";
 const APP_API_PREFIX = "/app/v3/api";
 const BACKEND_API_PREFIX = "/backend/v3/api";
 
-export type SdkworkMallH5IamRuntime = IamRuntime & {
-  composition: SdkworkAppbasePcAuthRuntimeComposition;
+/**
+ * IAM runtime of the mall H5 root.
+ *
+ * The login/session plane is the IAM H5 brick (`@sdkwork/iam-h5-core` +
+ * `@sdkwork/iam-h5-auth`): the service composes the generated IAM app client
+ * over the profile-resolved app-api origin and commits every established
+ * session into the host session store, which the rest of the app reads through
+ * its token manager. The mall root owns no auth flow of its own
+ * (`APP_H5_ARCHITECTURE_SPEC` §7, `APP_MOBILE_REACT_UI_SPEC` §4).
+ */
+export interface SdkworkMallH5IamRuntime {
+  /** IAM service facade every H5 capability package consumes. */
+  iamService: ReturnType<typeof createIamH5RuntimeService>["service"];
+  /** Host session store that unlocks protected mall routes. */
   session: SdkworkMallH5SessionStore;
-};
+}
 
 export interface CreateSdkworkMallH5IamRuntimeOptions {
   config: SdkworkMallH5RuntimeConfig;
-  sdkClients: SdkworkMallH5SdkClientInventory;
   session?: SdkworkMallH5SessionStore;
-}
-
-interface CommerceIamSessionLike {
-  accessToken?: string;
-  authToken?: string;
-  refreshToken?: string;
-  sessionId?: string;
-  context?: IamAppContext;
 }
 
 export function createSdkworkMallH5IamRuntime(
   options: CreateSdkworkMallH5IamRuntimeOptions,
 ): SdkworkMallH5IamRuntime {
   const session = options.session ?? createSdkworkMallH5SessionStore(resolveSessionStorage());
-  const tokenManager = createSdkworkMallH5SessionTokenManager(session);
-  const appbaseAppClient = createAppbaseGeneratedAppClient(options.config, tokenManager);
-  const composition = createSdkworkAppbasePcAuthRuntime({
-    app: {
-      appId: options.config.appKey,
-      deploymentMode: toIamDeploymentMode(options.config.deploymentMode),
-      environment: toIamEnvironment(options.config.environment),
-      platform: "pc",
+  // Access-token-only auth calls (login, registration, reset) need the
+  // committed public application token before any interactive session exists.
+  // It stays the fallback after sign-out, exactly as the IAM H5 root does.
+  const bootstrapAccessToken = readBootstrapAccessTokenFromProcessEnv();
+  const resolveAccessToken = (): string | undefined =>
+    session.getSnapshot().accessToken || bootstrapAccessToken;
+
+  const runtime = createIamH5RuntimeService({
+    baseUrl: resolveIamAppApiOrigin(options.config),
+    ...(bootstrapAccessToken ? { accessToken: bootstrapAccessToken } : {}),
+    clearSession: () => {
+      session.clearSession();
     },
-    baseUrls: {
-      appbaseAppApiBaseUrl: resolveAppbaseAppApiBaseUrl(options.config),
+    commitSession: (iamSession: IamSession) => {
+      commitMallH5IamSession(session, iamSession);
     },
-    createAppbaseAppClient: () => appbaseAppClient,
-    localeProvider: () => options.config.i18n.defaultLocale,
-    sdkClients: [
-      options.sdkClients.accountAppClient,
-      options.sdkClients.commerceAppClient,
-      ...(options.sdkClients.commerceBackendClient
-        ? [options.sdkClients.commerceBackendClient]
-        : []),
-      options.sdkClients.membershipAppClient,
-      options.sdkClients.orderAppClient,
-      options.sdkClients.partnerAppClient,
-      options.sdkClients.paymentAppClient,
-      options.sdkClients.promotionAppClient,
-    ] as SdkworkAppbasePcAuthRuntimeSdkClient[],
-    sessionBridge: {
-      clearSession: () => {
-        session.clearSession();
-      },
-      commitSession: (nextSession) => commitCommerceIamRuntimeSession(session, nextSession as CommerceIamSessionLike),
-      readSession: () => toCommerceIamBridgeSession(session.getSnapshot()),
-    },
-    tokenManager,
+  });
+
+  // The generated IAM client keeps its own copy of the token: re-apply it after
+  // every session change so the brick never sends a stale credential.
+  session.subscribe(() => {
+    runtime.setAccessToken(resolveAccessToken());
   });
 
   return {
-    ...composition.runtime,
-    composition,
+    iamService: runtime.service,
     session,
   };
 }
 
+/**
+ * Builds the domain app-SDK clients the mall services consume from the one
+ * session token manager, so every generated client reads the same identity.
+ */
 export function createSdkworkMallH5SdkClientsWithTokenManager(
   config: SdkworkMallH5RuntimeConfig,
   tokenManager: ReturnType<typeof createSdkworkMallH5SessionTokenManager>,
@@ -116,7 +105,7 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
       resolveDependencyAppApiBaseUrl(config, sdkFamily),
       APP_API_PREFIX,
     ),
-    platform: "pc",
+    platform: "h5" as const,
     tokenManager,
   });
   const accountAppClient = createAccountAppClient(
@@ -125,18 +114,18 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
   const commerceAppClient = createCommerceAppSdkClient({
     authMode: "dual-token",
     baseUrl: normalizeGeneratedSdkBaseUrl(config.appApiBaseUrl, APP_API_PREFIX),
-    platform: "pc",
+    platform: "h5",
     tokenManager,
   });
   const commerceBackendClient = config.backendApiBaseUrl
     ? createCommerceBackendClient({
         authMode: "dual-token",
         baseUrl: normalizeGeneratedSdkBaseUrl(config.backendApiBaseUrl, BACKEND_API_PREFIX),
-        platform: "pc",
+        platform: "h5",
         tokenManager,
       })
     : undefined;
-  // IM 的生成客户端不暴露 setTokenManager；会话凭据通过 config 传入。
+  // 会员生成客户端不暴露 setTokenManager；会话凭据通过 config 传入。
   const membershipAppClient = createMembershipAppClient(
     createAppClientConfig(DOMAIN_APP_SDK_FAMILY_IDS.membership),
   );
@@ -189,7 +178,7 @@ export function createSdkworkMallH5SdkClientsWithTokenManager(
       ],
       backendAdmin: ["sdkwork-commerce-backend-sdk", "sdkwork-iam-backend-sdk"],
     },
-  };
+  } as SdkworkMallH5SdkClientInventory;
 }
 
 /**
@@ -210,19 +199,7 @@ export async function loadSdkworkMallH5ImAppClient(
       resolveDependencyAppApiBaseUrl(config, DOMAIN_APP_SDK_FAMILY_IDS.im),
       APP_API_PREFIX,
     ),
-    platform: "pc",
-    tokenManager,
-  });
-}
-
-function createAppbaseGeneratedAppClient(
-  config: SdkworkMallH5RuntimeConfig,
-  tokenManager: ReturnType<typeof createSdkworkMallH5SessionTokenManager>,
-): SdkworkAppClient {
-  return createAppbaseAppClient({
-    authMode: "dual-token",
-    baseUrl: normalizeGeneratedSdkBaseUrl(resolveAppbaseAppApiBaseUrl(config), APP_API_PREFIX),
-    platform: "pc",
+    platform: "h5",
     tokenManager,
   });
 }
@@ -230,6 +207,24 @@ function createAppbaseGeneratedAppClient(
 function resolveAppbaseAppApiBaseUrl(config: SdkworkMallH5RuntimeConfig): string {
   return config.sdkBaseUrls?.dependencySdkBaseUrls?.[APPBASE_APP_SDK_FAMILY_ID]?.appApiBaseUrl
     ?? config.appApiBaseUrl;
+}
+
+/**
+ * Resolves the app-api origin the IAM H5 brick builds its client from.
+ *
+ * Same-origin profiles configure the app-api base as `/app/v3/api`; the brick
+ * requires a concrete origin (it appends the prefix itself), so a stripped and
+ * empty base falls back to the page origin instead of throwing at boot.
+ */
+function resolveIamAppApiOrigin(config: SdkworkMallH5RuntimeConfig): string {
+  const configured = normalizeGeneratedSdkBaseUrl(
+    resolveAppbaseAppApiBaseUrl(config),
+    APP_API_PREFIX,
+  );
+  if (configured) {
+    return configured;
+  }
+  return typeof window === "undefined" ? "" : window.location.origin;
 }
 
 function normalizeGeneratedSdkBaseUrl(baseUrl: string, apiPrefix: string): string {
@@ -241,63 +236,42 @@ function normalizeGeneratedSdkBaseUrl(baseUrl: string, apiPrefix: string): strin
   return normalizedBaseUrl;
 }
 
-function commitCommerceIamRuntimeSession(
+/**
+ * Projects an IAM session onto the mall session store.
+ *
+ * The mall gate (`hasSdkworkMallH5IamSession`) needs both tokens and a tenant
+ * context; the IAM brick only guarantees the tokens, so the tenant/user fields
+ * are read from the session context (and the IAM session identity) and the
+ * previous snapshot is used only to keep an already-resolved context during a
+ * refresh.
+ */
+function commitMallH5IamSession(
   session: SdkworkMallH5SessionStore,
-  iamSession: CommerceIamSessionLike,
-): CommerceIamSessionLike | undefined {
-  const nextSession: SdkworkMallH5SessionSnapshot = {
-    ...session.getSnapshot(),
+  iamSession: IamSession,
+): void {
+  const previous = session.getSnapshot();
+  const context = iamSession.context;
+  const tenantId = context?.tenantId ?? previous.context?.tenantId;
+  const userId = context?.userId ?? iamSession.user?.id ?? previous.context?.userId;
+  const nextContext: NonNullable<SdkworkMallH5SessionSnapshot["context"]> = {
+    ...(tenantId ? { tenantId } : {}),
+    ...(userId ? { userId } : {}),
+    ...(context?.organizationId ? { organizationId: context.organizationId } : {}),
+    ...(context?.sessionId || iamSession.sessionId
+      ? { sessionId: context?.sessionId ?? iamSession.sessionId }
+      : {}),
+    ...(context?.appId ? { appId: context.appId } : {}),
+    ...(context?.environment ? { environment: context.environment } : {}),
+    ...(context?.deploymentMode ? { deploymentMode: context.deploymentMode } : {}),
+  };
+
+  session.setSession({
     accessToken: iamSession.accessToken,
     authToken: iamSession.authToken,
-    refreshToken: iamSession.refreshToken,
-    sessionId: iamSession.sessionId ?? iamSession.context?.sessionId,
-    context: iamSession.context
-      ? {
-          tenantId: iamSession.context.tenantId,
-          userId: iamSession.context.userId,
-          organizationId: iamSession.context.organizationId,
-          sessionId: iamSession.context.sessionId,
-          appId: iamSession.context.appId,
-          environment: iamSession.context.environment,
-          deploymentMode: iamSession.context.deploymentMode,
-        }
-      : undefined,
-  };
-
-  if (!nextSession.context) {
-    delete nextSession.context;
-  }
-
-  session.setSession(nextSession);
-  return toCommerceIamBridgeSession(session.getSnapshot()) ?? undefined;
-}
-
-function toCommerceIamBridgeSession(
-  snapshot: SdkworkMallH5SessionSnapshot,
-): CommerceIamSessionLike | null {
-  if (!snapshot.authToken && !snapshot.accessToken && !snapshot.refreshToken) {
-    return null;
-  }
-
-  return {
-    ...(snapshot.accessToken ? { accessToken: snapshot.accessToken } : {}),
-    ...(snapshot.authToken ? { authToken: snapshot.authToken } : {}),
-    ...(snapshot.refreshToken ? { refreshToken: snapshot.refreshToken } : {}),
-    ...(snapshot.sessionId ? { sessionId: snapshot.sessionId } : {}),
-    ...(snapshot.context?.tenantId && snapshot.context.userId
-      ? {
-          context: {
-            tenantId: snapshot.context.tenantId,
-            userId: snapshot.context.userId,
-            organizationId: snapshot.context.organizationId,
-            sessionId: snapshot.context.sessionId,
-            appId: snapshot.context.appId,
-            environment: snapshot.context.environment,
-            deploymentMode: snapshot.context.deploymentMode,
-          } as IamAppContext,
-        }
-      : {}),
-  };
+    ...(iamSession.refreshToken ? { refreshToken: iamSession.refreshToken } : {}),
+    ...(iamSession.sessionId ? { sessionId: iamSession.sessionId } : {}),
+    ...(Object.keys(nextContext).length > 0 ? { context: nextContext } : {}),
+  });
 }
 
 function resolveSessionStorage(): Storage | undefined {
@@ -324,21 +298,4 @@ function migrateLegacySessionStorage(storageKey: string): void {
   if (legacySession) {
     window.sessionStorage.removeItem(storageKey);
   }
-}
-
-function toIamDeploymentMode(value: SdkworkMallH5RuntimeConfig["deploymentMode"]): IamDeploymentMode {
-  return value === "web" ? "saas" : value;
-}
-
-function toIamEnvironment(value: SdkworkMallH5RuntimeConfig["environment"]): IamEnvironment {
-  if (value === "development") {
-    return "dev";
-  }
-  if (value === "production") {
-    return "prod";
-  }
-  if (value === "staging") {
-    return "test";
-  }
-  return "test";
 }

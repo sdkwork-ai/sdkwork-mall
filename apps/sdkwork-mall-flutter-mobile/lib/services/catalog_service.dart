@@ -32,7 +32,7 @@ class CatalogService {
     int pageSize = 20,
   }) async {
     final payload = await _client.request(
-      '/catalog/spus',
+      '/catalog/products',
       query: {
         'category_id': categoryId ?? '',
         'q': keyword ?? '',
@@ -52,7 +52,7 @@ class CatalogService {
   }
 
   Future<Map<String, dynamic>?> getProductDetail(String productId) async {
-    final record = await _client.request('/catalog/spus/$productId');
+    final record = await _client.request('/catalog/products/$productId');
     if (record.isEmpty || asString(record, ['id']).isEmpty) {
       return null;
     }

@@ -24,7 +24,10 @@ export function configureSdkworkMallPcStorefrontCommerceRemotePorts(): void {
       return commerce().catalog.categories.list(query);
     },
     listSpus(query) {
-      return commerce().catalog.spus.list(query);
+      // The catalog authority publishes the storefront collection as `products`
+      // (`/app/v3/api/catalog/products`); the retired `spus` collection is not a
+      // route the gateway route manifest carries, so calling it answers 40401.
+      return commerce().catalog.products.list(query);
     },
     listShops(query) {
       return commerce().shops.list(query);
@@ -39,7 +42,7 @@ export function configureSdkworkMallPcStorefrontCommerceRemotePorts(): void {
       return commerce().catalog.products.list(query);
     },
     listSpus(query) {
-      return commerce().catalog.spus.list(query);
+      return commerce().catalog.products.list(query);
     },
     listShops(query) {
       return commerce().shops.list(query);
@@ -57,7 +60,9 @@ export function configureSdkworkMallPcStorefrontCommerceRemotePorts(): void {
       return commerce().catalog.categories.retrieve(query.categoryId);
     },
     retrieveSpu(query) {
-      return commerce().catalog.spus.retrieve(query.spuId);
+      // `retrieveSpu` is the storefront's name for a product record; the
+      // published collection path is `/catalog/products/{productId}`.
+      return commerce().catalog.products.retrieve(query.spuId);
     },
   });
 

@@ -14,9 +14,22 @@
       "types": "./src/ErrorState.tsx",
       "import": "./src/ErrorState.tsx",
       "default": "./src/ErrorState.tsx"
+    },
+    "./category-visual": {
+      "types": "./src/category-visual.ts",
+      "import": "./src/category-visual.ts",
+      "default": "./src/category-visual.ts"
+    },
+    "./empty-state": {
+      "types": "./src/EmptyState.tsx",
+      "import": "./src/EmptyState.tsx",
+      "default": "./src/EmptyState.tsx"
     }
   },
   "files": ["src"],
+  "dependencies": {
+    "lucide-react": "catalog:"
+  },
   "peerDependencies": {
     "react": ">=18.2.0 <20.0.0"
   },

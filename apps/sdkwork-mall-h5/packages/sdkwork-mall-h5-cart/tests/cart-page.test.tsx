@@ -1,18 +1,24 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   configureSdkworkCommerceServiceProvider,
   type SdkworkCommerceService,
 } from "@sdkwork/mall-commerce-service";
+import { getShopMobileCartRuntime } from "@sdkwork/shop-mobile-react-shopping";
 
 import {
   configureCommerceServiceMockSession,
   createCommerceServiceMock,
   resetCommerceServiceMockSession,
 } from "../../../../sdkwork-mall-pc/tests/test-utils/commerce-service-mock";
-import { SdkworkMallH5CartPage } from "../src/pages/CartPage";
+import { configureSdkworkMallH5CartBrick } from "../src/cart-brick";
 
+/**
+ * Host adapter contract for the shop cart brick.
+ *
+ * The brick owns the cart surface; the mall cart package supplies the data
+ * plane. These tests pin the mapping (price units, shop grouping, selection)
+ * and the mutation wiring so the brick and the commerce facade cannot drift.
+ */
 const CART_LINES = [
   {
     id: "cart-1",
@@ -22,6 +28,7 @@ const CART_LINES = [
     quantity: 1,
     shopId: "shop-1",
     shopName: "SDKWork 精选",
+    sku: { title: "远峰蓝", priceCny: 1999 },
     skuName: "远峰蓝",
     spuId: "spu-1",
     title: "SDKWork Phone Lite 轻薄手机",
@@ -34,23 +41,51 @@ const CART_LINES = [
     quantity: 2,
     shopId: "shop-1",
     shopName: "SDKWork 精选",
+    sku: { title: "10kg 装", priceCny: 89 },
     skuName: "10kg 装",
     spuId: "spu-2",
     title: "东北五常大米 10kg",
   },
 ];
 
-function renderCartPage() {
-  return render(
-    <MemoryRouter>
-      <SdkworkMallH5CartPage />
-    </MemoryRouter>,
+let updateSpy: ReturnType<typeof vi.fn>;
+let deleteSpy: ReturnType<typeof vi.fn>;
+
+function installCartServiceMock() {
+  updateSpy = vi.fn().mockResolvedValue({ code: 0 });
+  deleteSpy = vi.fn().mockResolvedValue({ code: 0 });
+  const mock = createCommerceServiceMock({
+    cart: {
+      current: {
+        retrieve: vi.fn().mockResolvedValue({
+          code: 0,
+          data: { id: "cart-current", items: CART_LINES },
+        }),
+      },
+      items: {
+        update: updateSpy,
+        delete: deleteSpy,
+      },
+    },
+  } as never);
+  configureSdkworkCommerceServiceProvider(
+    (): SdkworkCommerceService => mock as SdkworkCommerceService,
   );
 }
 
-describe("sdkwork-mall-h5 cart page", () => {
+function requireCartRuntime() {
+  const runtime = getShopMobileCartRuntime();
+  if (!runtime) {
+    throw new Error("cart runtime was not composed");
+  }
+  return runtime;
+}
+
+describe("sdkwork-mall-h5 cart brick adapter", () => {
   beforeEach(() => {
     configureCommerceServiceMockSession({ authToken: "h5-cart-auth-token" });
+    installCartServiceMock();
+    configureSdkworkMallH5CartBrick();
   });
 
   afterEach(() => {
@@ -58,81 +93,46 @@ describe("sdkwork-mall-h5 cart page", () => {
     configureSdkworkCommerceServiceProvider(null);
   });
 
-  function useCartMock(initialLines = CART_LINES) {
-    let lines = [...initialLines];
-    const deleteSpy = vi.fn().mockImplementation(async (cartItemId: string) => {
-      lines = lines.filter((line) => line.id !== cartItemId);
-      return { code: 0 };
+  it("maps commerce cart lines into the brick model with yuan price strings", async () => {
+    const items = await requireCartRuntime().getCart();
+
+    expect(items).toHaveLength(2);
+    expect(items[0]).toMatchObject({
+      id: "cart-1",
+      productId: "spu-1",
+      shopName: "SDKWork 精选",
+      checked: true,
+      quantity: 1,
     });
-    const updateSpy = vi.fn().mockResolvedValue({ code: 0 });
-    const mock = createCommerceServiceMock({
-      cart: {
-        current: {
-          retrieve: vi.fn().mockImplementation(async () => ({
-            code: 0,
-            data: { id: "cart-current", items: [...lines] },
-          })),
-        },
-        items: {
-          update: updateSpy,
-          delete: deleteSpy,
-        },
-      },
-    } as never);
-    configureSdkworkCommerceServiceProvider(
-      (): SdkworkCommerceService => mock as SdkworkCommerceService,
-    );
-    return { updateSpy, deleteSpy };
-  }
-
-  it("renders the toolbar, shop group, and the footer settlement bar", async () => {
-    useCartMock();
-    renderCartPage();
-
-    expect(await screen.findByText("共 2 件")).toBeTruthy();
-    expect(screen.getByText("SDKWork 精选")).toBeTruthy();
-    expect(screen.getByText("去结算(2)")).toBeTruthy();
-    expect(screen.getByText("合计：")).toBeTruthy();
-    expect(screen.getByText("¥2088.00")).toBeTruthy();
-    expect(screen.getByText("已选 3 件")).toBeTruthy();
+    expect(items[0].product).toMatchObject({
+      title: "SDKWork Phone Lite 轻薄手机",
+      price: "1999.00",
+      shopId: "shop-1",
+    });
+    expect(items[0].sku?.price).toBe("1999.00");
   });
 
-  it("switches to manage mode and batch-deletes the selected rows", async () => {
-    const { deleteSpy } = useCartMock();
-    renderCartPage();
+  it("persists selection through the session-scoped runtime", async () => {
+    const runtime = requireCartRuntime();
+    await runtime.getCart();
+    await runtime.toggleCheck("cart-1", false);
 
-    fireEvent.click(await screen.findByRole("button", { name: "管理" }));
-    const removeSelected = await screen.findByRole("button", { name: "删除所选(2)" });
-    expect(screen.queryByRole("button", { name: "去结算(2)" })).toBeNull();
+    const afterToggle = await runtime.getCart();
+    expect(afterToggle.find((item) => item.id === "cart-1")?.checked).toBe(false);
 
-    fireEvent.click(removeSelected);
-    // Stateful mock empties the cart, so the page falls back to the empty hero.
-    expect(await screen.findByText("购物车还是空的")).toBeTruthy();
-    expect(deleteSpy).toHaveBeenCalledTimes(2);
+    await runtime.toggleAllCheck(false);
+    const afterAll = await runtime.getCart();
+    expect(afterAll.every((item) => item.checked === false)).toBe(true);
   });
 
-  it("recomputes the footer when a row is deselected and blocks checkout at zero", async () => {
-    useCartMock();
-    renderCartPage();
+  it("forwards quantity updates and removals to the commerce cart commands", async () => {
+    const runtime = requireCartRuntime();
+    await runtime.getCart();
 
-    fireEvent.click((await screen.findAllByRole("checkbox"))[2]);
-    expect(await screen.findByText("去结算(1)")).toBeTruthy();
-    // ¥1999.00 matches both the remaining row price and the footer total.
-    expect(screen.getAllByText("¥1999.00").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("已选 1 件")).toBeTruthy();
+    await runtime.updateQuantity("cart-2", 3);
+    expect(updateSpy).toHaveBeenCalledWith("cart-2", { quantity: 3 });
 
-    fireEvent.click((await screen.findAllByRole("checkbox"))[1]);
-    expect(await screen.findByText("去结算(0)")).toBeTruthy();
-  });
-
-  it("steps a row quantity through the cart update command", async () => {
-    const { updateSpy } = useCartMock();
-    renderCartPage();
-
-    const stepperPlus = await screen.findByRole("button", { name: /增加 东北五常大米/ });
-    fireEvent.click(stepperPlus);
-    await waitFor(() =>
-      expect(updateSpy).toHaveBeenCalledWith("cart-2", { quantity: 3 }),
-    );
+    await runtime.removeFromCart(["cart-1"]);
+    expect(deleteSpy).toHaveBeenCalledWith("cart-1");
   });
 });
