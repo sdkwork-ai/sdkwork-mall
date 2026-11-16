@@ -9,8 +9,13 @@ import { platform } from "@sdkwork/mall-mp-core";
 type CategoryProduct = MpProductCard & { priceText: string };
 
 interface CategoryData {
-  categories: MpCategory[];
-  activeCategoryId: string;
+  /** First-level taxonomy rendered in the left rail. */
+  roots: MpCategory[];
+  /** Second-level taxonomy of the selected root. */
+  children: MpCategory[];
+  activeRootId: string;
+  /** Leaf selection inside the active root; empty means "all of the root". */
+  activeChildId: string;
   products: CategoryProduct[];
   page: number;
   total: number;
@@ -18,13 +23,17 @@ interface CategoryData {
   loading: boolean;
   loadingMore: boolean;
   error: string;
+  allLabel: string;
   _initialCategoryId: string;
+  _allCategories: MpCategory[];
 }
 
 Page({
   data: {
-    categories: [],
-    activeCategoryId: "",
+    roots: [],
+    children: [],
+    activeRootId: "",
+    activeChildId: "",
     products: [],
     page: 1,
     total: 0,
@@ -32,7 +41,9 @@ Page({
     loading: true,
     loadingMore: false,
     error: "",
+    allLabel: t("category.all"),
     _initialCategoryId: "",
+    _allCategories: [],
   } as CategoryData,
 
   onLoad(options: Record<string, string | undefined>) {
@@ -45,18 +56,18 @@ Page({
   },
 
   onShareAppMessage() {
-    const active = this.data.categories.find((category) => category.id === this.data.activeCategoryId);
+    const active = this.data.roots.find((category) => category.id === this.data.activeRootId);
     return buildMpShareCard({
-      query: { categoryId: this.data.activeCategoryId },
+      query: { categoryId: this.data.activeChildId || this.data.activeRootId },
       routeId: "storefront.mall.categories",
       title: active ? t("share.titledWithMall", { title: active.name }) : undefined,
     });
   },
 
   onShareTimeline() {
-    const active = this.data.categories.find((category) => category.id === this.data.activeCategoryId);
+    const active = this.data.roots.find((category) => category.id === this.data.activeRootId);
     return buildMpTimelineCard({
-      query: { categoryId: this.data.activeCategoryId },
+      query: { categoryId: this.data.activeChildId || this.data.activeRootId },
       routeId: "storefront.mall.categories",
       title: active ? t("share.titledWithMall", { title: active.name }) : undefined,
     });
@@ -70,8 +81,22 @@ Page({
     try {
       const categories = await listCategories();
       const roots = categories.filter((category) => !category.parentId);
-      const activeCategoryId = this.data._initialCategoryId || (roots[0] ? roots[0].id : "");
-      this.setData({ categories: roots, activeCategoryId, loading: true });
+      // A deep link may target a second-level category: resolve it to its root so
+      // the rail, the child chips and the product list agree on one selection.
+      const initial = this.data._initialCategoryId;
+      const initialEntry = categories.find((category) => category.id === initial);
+      const initialRoot = initialEntry
+        ? (initialEntry.parentId ? initialEntry.parentId : initialEntry.id)
+        : (roots[0] ? roots[0].id : "");
+      const initialChild = initialEntry && initialEntry.parentId === initialRoot ? initial : "";
+      this.setData({
+        roots,
+        activeRootId: initialRoot,
+        activeChildId: initialChild,
+        children: categories.filter((category) => category.parentId === initialRoot),
+        _allCategories: categories,
+        loading: true,
+      });
       await this.loadProducts(1);
     } catch (cause) {
       this.setData({
@@ -82,10 +107,10 @@ Page({
   },
 
   async loadProducts(nextPage: number) {
-    const { activeCategoryId } = this.data;
+    const { activeChildId, activeRootId } = this.data;
     try {
       const result = await listProducts({
-        categoryId: activeCategoryId || undefined,
+        categoryId: activeChildId || activeRootId || undefined,
         page: nextPage,
         pageSize: 20,
       });
@@ -110,12 +135,29 @@ Page({
     }
   },
 
-  async selectCategory(event: MpTapEvent) {
-    const categoryId = String(event.currentTarget.dataset.id ?? "");
-    if (categoryId === this.data.activeCategoryId) {
+  async selectRoot(event: MpTapEvent) {
+    const rootId = String(event.currentTarget.dataset.id ?? "");
+    if (rootId === this.data.activeRootId) {
       return;
     }
-    this.setData({ activeCategoryId: categoryId, products: [], loading: true, error: "" });
+    const children = this.data._allCategories.filter((category) => category.parentId === rootId);
+    this.setData({
+      activeRootId: rootId,
+      activeChildId: "",
+      children,
+      products: [],
+      loading: true,
+      error: "",
+    });
+    await this.loadProducts(1);
+  },
+
+  async selectChild(event: MpTapEvent) {
+    const childId = String(event.currentTarget.dataset.id ?? "");
+    if (childId === this.data.activeChildId) {
+      return;
+    }
+    this.setData({ activeChildId: childId, products: [], loading: true, error: "" });
     await this.loadProducts(1);
   },
 
@@ -137,7 +179,7 @@ Page({
 
   retry() {
     this.setData({ error: "" });
-    if (this.data.categories.length === 0) {
+    if (this.data.roots.length === 0) {
       void this.loadCategories();
       return;
     }

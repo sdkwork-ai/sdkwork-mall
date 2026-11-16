@@ -47,6 +47,7 @@ interface OrdersData {
   cancelText: string;
   confirmReceiptText: string;
   logisticsText: string;
+  afterSalesText: string;
 }
 
 Page({
@@ -70,6 +71,7 @@ Page({
     cancelText: t("orderList.actions.cancel"),
     confirmReceiptText: t("orderList.actions.confirmReceipt"),
     logisticsText: t("orderList.actions.logistics"),
+    afterSalesText: t("orderList.actions.afterSales"),
   } as OrdersData,
 
   onLoad(options: Record<string, string | undefined>) {
@@ -140,6 +142,17 @@ Page({
 
   goLogistics(event: MpTapEvent) {
     platform.navigateTo(mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: String(event.currentTarget.dataset.id ?? "") }));
+  },
+
+  /**
+   * After-sales entry per order.
+   *
+   * Mirrors the H5 order list, which exposes it once an order is paid or closed:
+   * a refund request belongs to an order that actually shipped or completed.
+   */
+  goAfterSales(event: MpTapEvent) {
+    const orderId = String(event.currentTarget.dataset.id ?? "");
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.after-sales", orderId ? { orderId } : undefined));
   },
 
   payOrder(event: MpTapEvent) {

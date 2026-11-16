@@ -3,6 +3,7 @@
 // `src/i18n/index.ts` resolves keys at runtime.
 module.exports = {
   buyerHub: {
+    userFallback: "SDKWork 用户",
     orders: {
       all: "全部订单",
       pendingPayment: "待付款",

@@ -2,6 +2,8 @@ import { t } from "../../i18n";
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { isMpTabCapability, mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
+import { type MpFootprintItem, readFootprint } from "../../services/favorites-service";
+import { type MpShopSummary, listShops } from "../../services/marketing-service";
 import { type MpOffer, listOffers } from "../../services/promotion-service";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
@@ -43,11 +45,32 @@ interface HomeQuickEntry {
 
 type HotProduct = MpProductCard & { priceText: string; salesLabel: string };
 
+/** Featured-shop card; the rating line is catalogue copy, not template text. */
+type HomeShop = MpShopSummary & { ratingText: string };
+
+/** Footer shortcuts; the H5 home exposes the same service grid. */
+interface HomeServiceEntry {
+  capability: string;
+  id: string;
+  label: string;
+}
+
+const SERVICE_ENTRIES: Array<{ capability: string; id: string; labelKey: string }> = [
+  { id: "help", labelKey: "home.services.help", capability: "storefront.mall.help" },
+  { id: "orders", labelKey: "home.services.orders", capability: "buyer.mall.orders" },
+  { id: "coupons", labelKey: "home.services.coupons", capability: "buyer.mall.coupons" },
+  { id: "settings", labelKey: "home.services.settings", capability: "buyer.mall.settings" },
+];
+
 interface HomeData {
   banners: HomeBanner[];
   quickEntries: HomeQuickEntry[];
   categories: MpCategory[];
   hotProducts: HotProduct[];
+  newProducts: HotProduct[];
+  shops: HomeShop[];
+  footprint: MpFootprintItem[];
+  services: HomeServiceEntry[];
   seckillOffer: MpOffer | null;
   seckillCountdown: string;
   searchPlaceholder: string;
@@ -56,6 +79,9 @@ interface HomeData {
   seckillTitle: string;
   seckillOngoing: string;
   hotTitle: string;
+  newTitle: string;
+  shopsTitle: string;
+  footprintTitle: string;
   retryText: string;
   shareTitle: string;
   loading: boolean;
@@ -105,6 +131,14 @@ Page({
     quickEntries: resolveQuickEntries(),
     categories: [],
     hotProducts: [],
+    newProducts: [],
+    shops: [],
+    footprint: [],
+    services: SERVICE_ENTRIES.map((entry) => ({
+      capability: entry.capability,
+      id: entry.id,
+      label: t(entry.labelKey),
+    })),
     seckillOffer: null,
     seckillCountdown: "",
     searchPlaceholder: t("home.searchPlaceholder"),
@@ -113,6 +147,9 @@ Page({
     seckillTitle: t("home.seckill.title"),
     seckillOngoing: t("home.seckill.ongoing"),
     hotTitle: t("home.hot"),
+    newTitle: t("home.newArrivals"),
+    shopsTitle: t("home.sections.shops"),
+    footprintTitle: t("home.sections.footprint"),
     retryText: t("home.retry"),
     shareTitle: t("home.shareTitle"),
     loading: true,
@@ -130,6 +167,9 @@ Page({
     if (this.data.seckillOffer && this.data._seckillTimer == null) {
       this.startSeckillCountdown();
     }
+    // Browsing footprint is device-local and changes on every product visit;
+    // re-read it on tab return instead of carrying a stale chip row.
+    this.setData({ footprint: readFootprint().slice(0, 6) });
   },
 
   onHide() {
@@ -189,6 +229,20 @@ Page({
     });
   },
 
+  goShop(event: MpTapEvent) {
+    const id = String(event.currentTarget.dataset.id ?? "");
+    if (id) {
+      this.openCapability("storefront.mall.shop", { id });
+    }
+  },
+
+  goService(event: MpTapEvent) {
+    const capability = String(event.currentTarget.dataset.capability ?? "");
+    if (capability) {
+      this.openCapability(capability);
+    }
+  },
+
   /** Banner / 快捷入口自带的查询参数（新品、热卖等入口携带）。 */
   queryFor(capability: string) {
     const banner = this.data.banners.find(
@@ -216,13 +270,24 @@ Page({
     this.setData({ loading: true, error: "" });
     try {
       // Categories and the hot list are the storefront itself: a failure has to
-      // surface as an error with a retry path, not as a blank page. Offers are
-      // an enrichment and degrade to "no seckill floor".
-      const [categoryResult, hotResult, offersResult] = await Promise.all([
+      // surface as an error with a retry path, not as a blank page. Everything
+      // else (new arrivals, featured shops, offers) is an enrichment floor and
+      // degrades to "section hidden" like the H5 home snapshot.
+      const [categoryResult, hotResult, newResult, shopsResult, offersResult] = await Promise.all([
         listCategories(),
         listProducts({ page: 1, pageSize: 10, sort: "sales" }),
+        listProducts({ page: 1, pageSize: 10, sort: "newest" }).catch(() => null),
+        listShops(4).catch(() => [] as MpShopSummary[]),
         listOffers().catch(() => [] as MpOffer[]),
       ]);
+      const toHotProduct = (product: MpProductCard): HotProduct => ({
+        ...product,
+        priceText: formatCny(product.priceCny),
+        salesLabel:
+          product.sales != null
+            ? t("home.sold", { count: product.sales })
+            : "",
+      });
       const titleTokens = t("home.seckill.titleMatch")
         .split(",")
         .map((token) => token.trim())
@@ -234,15 +299,15 @@ Page({
         offersResult[0] ||
         null;
       this.setData({
-        categories: categoryResult.slice(0, 9),
-        hotProducts: hotResult.items.slice(0, 6).map((product) => ({
-          ...product,
-          priceText: formatCny(product.priceCny),
-          salesLabel:
-            product.sales != null
-              ? t("home.sold", { count: product.sales })
-              : "",
+        categories: categoryResult.slice(0, 8),
+        hotProducts: hotResult.items.slice(0, 6).map(toHotProduct),
+        newProducts: newResult ? newResult.items.slice(0, 6).map(toHotProduct) : [],
+        shops: shopsResult.map((shop) => ({
+          ...shop,
+          ratingText:
+            shop.rating != null ? t("home.shopRating", { rating: shop.rating }) : "",
         })),
+        footprint: readFootprint().slice(0, 6),
         seckillOffer: flashOffer,
         loading: false,
       });

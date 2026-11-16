@@ -19,7 +19,8 @@ module.exports = {
       pay: "去支付",
       cancel: "取消订单",
       confirmReceipt: "确认收货",
-      logistics: "查看物流"
+      logistics: "查看物流",
+      afterSales: "申请售后"
     },
     toasts: {
       cancelled: "已取消",

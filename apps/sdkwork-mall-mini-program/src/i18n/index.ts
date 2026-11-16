@@ -22,6 +22,7 @@ import afterSales from "./zh-CN/support/after-sales/messages";
 import share from "./zh-CN/common/share/messages";
 import activity from "./zh-CN/storefront/product-detail/messages";
 import cart from "./zh-CN/storefront/cart/messages";
+import category from "./zh-CN/storefront/category/messages";
 import home from "./zh-CN/storefront/home/messages";
 import orderList from "./zh-CN/order/list/messages";
 
@@ -53,6 +54,7 @@ collect(afterSales as Record<string, unknown>, "");
 collect(share as Record<string, unknown>, "");
 collect(activity as Record<string, unknown>, "");
 collect(cart as Record<string, unknown>, "");
+collect(category as Record<string, unknown>, "");
 collect(home as Record<string, unknown>, "");
 collect(orderList as Record<string, unknown>, "");
 

@@ -16,6 +16,8 @@ module.exports = {
     buyNow: "立即购买",
     defaultSku: "默认规格",
     retry: "重试",
+    deliveryLabel: "配送至",
+    deliveryAdd: "添加收货地址",
     toasts: {
       couponClaimed: "优惠券已领取",
       couponClaimFailed: "领取失败",

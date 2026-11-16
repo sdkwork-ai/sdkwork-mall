@@ -11,15 +11,30 @@
   <view class="category-layout">
     <scroll-view class="category-rail" scroll-y>
       <view
-        class="category-rail-item {{activeCategoryId === item.id ? 'category-rail-item-active' : ''}}"
-        wx:for="{{categories}}"
+        class="category-rail-item {{activeRootId === item.id ? 'category-rail-item-active' : ''}}"
+        wx:for="{{roots}}"
         wx:key="id"
-        bindtap="selectCategory"
+        bindtap="selectRoot"
         data-id="{{item.id}}"
       >{{item.name}}</view>
     </scroll-view>
 
     <scroll-view class="category-content" scroll-y bindscrolltolower="loadMore">
+      <scroll-view wx:if="{{children.length > 0}}" class="category-children" scroll-x>
+        <text
+          class="category-child {{activeChildId === '' ? 'category-child-active' : ''}}"
+          bindtap="selectChild"
+          data-id=""
+        >{{allLabel}}</text>
+        <text
+          class="category-child {{activeChildId === item.id ? 'category-child-active' : ''}}"
+          wx:for="{{children}}"
+          wx:key="id"
+          bindtap="selectChild"
+          data-id="{{item.id}}"
+        >{{item.name}}</text>
+      </scroll-view>
+
       <view wx:if="{{loading}}" class="mp-loading">加载中...</view>
       <view wx:elif="{{products.length === 0}}" class="mp-empty">该分类暂无商品</view>
       <view wx:else class="category-product-list">
@@ -31,7 +46,7 @@
           data-id="{{item.id}}"
         >
           <view class="category-product-image">
-            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
             <text wx:else>SDKWork</text>
           </view>
           <view class="category-product-body">

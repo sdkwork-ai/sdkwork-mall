@@ -63,7 +63,7 @@
         data-id="{{item.id}}"
       >
         <view class="mp-product-image">
-          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
           <text wx:else>SDKWork</text>
         </view>
         <view class="mp-product-body">
@@ -75,5 +75,75 @@
         </view>
       </view>
     </view>
+  </view>
+
+  <view wx:if="{{newProducts.length}}" class="home-products">
+    <view class="mp-card-title home-products-title">{{newTitle}}</view>
+    <view class="mp-product-grid">
+      <view
+        class="mp-product-card"
+        wx:for="{{newProducts}}"
+        wx:key="id"
+        bindtap="goProduct"
+        data-id="{{item.id}}"
+      >
+        <view class="mp-product-image">
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
+          <text wx:else>SDKWork</text>
+        </view>
+        <view class="mp-product-body">
+          <view class="mp-product-title">{{item.title}}</view>
+          <view class="mp-product-meta">
+            <text class="mp-price">{{item.priceText}}</text>
+            <text class="mp-product-sales" wx:if="{{item.salesLabel}}">{{item.salesLabel}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{shops.length}}" class="mp-card">
+    <view class="mp-card-title">{{shopsTitle}}</view>
+    <view class="home-shop-grid">
+      <view
+        class="home-shop-card"
+        wx:for="{{shops}}"
+        wx:key="id"
+        bindtap="goShop"
+        data-id="{{item.id}}"
+      >
+        <view class="home-shop-logo">
+          <image wx:if="{{item.logoUrl}}" src="{{item.logoUrl}}" mode="aspectFill" lazy-load />
+          <text wx:else>{{item.name}}</text>
+        </view>
+        <view class="home-shop-body">
+          <view class="home-shop-name">{{item.name}}</view>
+          <view class="mp-muted" wx:if="{{item.ratingText}}">{{item.ratingText}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{footprint.length}}" class="mp-card">
+    <view class="mp-card-title">{{footprintTitle}}</view>
+    <view class="search-chips">
+      <text
+        class="search-chip"
+        wx:for="{{footprint}}"
+        wx:key="id"
+        bindtap="goProduct"
+        data-id="{{item.id}}"
+      >{{item.title}}</text>
+    </view>
+  </view>
+
+  <view class="home-services">
+    <view
+      class="home-service-item"
+      wx:for="{{services}}"
+      wx:key="id"
+      bindtap="goService"
+      data-capability="{{item.capability}}"
+    >{{item.label}}</view>
   </view>
 </view>

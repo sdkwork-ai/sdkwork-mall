@@ -40,6 +40,12 @@
         <text class="product-service-item">七天无理由</text>
         <text class="product-service-item">极速退款</text>
       </view>
+
+      <view class="product-delivery" bindtap="goAddress">
+        <text class="mp-muted">{{deliveryLabel}}</text>
+        <text class="product-delivery-value">{{deliveryText}}</text>
+        <text class="product-delivery-chevron">›</text>
+      </view>
     </view>
 
     <view class="mp-card" wx:if="{{offers.length}}">

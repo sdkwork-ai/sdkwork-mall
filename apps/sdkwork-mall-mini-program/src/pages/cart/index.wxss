@@ -150,3 +150,14 @@
 .cart-checkout-btn {
   min-width: 240rpx;
 }
+
+.cart-shop-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.cart-shop-entry {
+  color: #e93b3d;
+  font-size: 24rpx;
+  padding: 4rpx 8rpx;
+}

@@ -1,6 +1,7 @@
 import { errorMessage, type MpSwiperChangeEvent, type MpTapEvent } from "../../types/common";
 import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
+import { listAddresses } from "../../services/address-service";
 import {
   type MpProductDetail,
   type MpSku,
@@ -63,6 +64,8 @@ interface ProductData {
   addToCartText: string;
   defaultSkuText: string;
   retryText: string;
+  deliveryText: string;
+  deliveryLabel: string;
   _productId: string;
   _toastTimer: number | null;
 }
@@ -112,6 +115,8 @@ Page({
     addToCartText: t("productDetail.addToCart"),
     defaultSkuText: t("productDetail.defaultSku"),
     retryText: t("productDetail.retry"),
+    deliveryText: t("productDetail.deliveryAdd"),
+    deliveryLabel: t("productDetail.deliveryLabel"),
     _productId: "",
     _toastTimer: null,
   } as ProductData,
@@ -195,9 +200,10 @@ Page({
    * error (same rule as the H5 product detail).
    */
   async loadEnrichments(detail: MpProductDetail) {
-    const [offersResult, recommendedResult] = await Promise.all([
+    const [offersResult, recommendedResult, deliveryText] = await Promise.all([
       listOffers().catch(() => [] as MpOffer[]),
       listProducts({ page: 1, pageSize: 8, sort: "sales" }).catch(() => null),
+      this.resolveDeliveryText(),
     ]);
     const recommendations = recommendedResult
       ? recommendedResult.items
@@ -213,7 +219,36 @@ Page({
     this.setData({
       offers: toOfferRows(offersResult.filter((offer) => offer.claimable)),
       recommendations,
+      deliveryText,
     });
+  },
+
+  /**
+   * Delivery row, mirroring the H5 product detail.
+   *
+   * The default address is shown truncated; signed-out buyers see the "add
+   * address" hint that leads to the address book. Fail-soft: a lookup failure
+   * leaves the hint instead of failing the page.
+   */
+  async resolveDeliveryText(): Promise<string> {
+    if (!isLoggedIn()) {
+      return t("productDetail.deliveryAdd");
+    }
+    try {
+      const addresses = await listAddresses();
+      const address = addresses.find((entry) => entry.isDefault) ?? addresses[0];
+      if (!address) {
+        return t("productDetail.deliveryAdd");
+      }
+      const line = address.addressLine;
+      return line.length > 24 ? `${line.slice(0, 24)}…` : line;
+    } catch {
+      return t("productDetail.deliveryAdd");
+    }
+  },
+
+  goAddress() {
+    platform.navigateTo(mpCapabilityUrl("buyer.mall.addresses"));
   },
 
   onImageChange(event: MpSwiperChangeEvent) {

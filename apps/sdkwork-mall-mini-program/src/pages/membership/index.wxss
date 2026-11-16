@@ -32,3 +32,19 @@
 .plan-row:last-child {
   border-bottom: none;
 }
+
+.membership-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.membership-benefit {
+  width: 48%;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 24rpx;
+  box-sizing: border-box;
+}

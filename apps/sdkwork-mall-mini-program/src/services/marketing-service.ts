@@ -87,8 +87,24 @@ function readActivity(item: MpRecord): MpActivity {
   };
 }
 
-export async function retrieveShop(shopId: string): Promise<MpShopDetail | null> {
-  const [shop, productsPayload] = await Promise.all([
+/**
+ * Featured shops for the home floor.
+ *
+ * Mirrors the H5 home snapshot (`commerce.shops.list`): an active-shop page of
+ * four, fail-soft because the floor is an enrichment.
+ */
+export async function listShops(limit = 4): Promise<MpShopSummary[]> {
+  const payload = await request({
+    path: "/shops",
+    query: { page: 1, page_size: limit, status: "active" },
+  }).catch(() => ({}) as MpRecord);
+  return asRecordList(payload.items)
+    .map(readShopSummary)
+    .filter((shop) => shop.id)
+    .slice(0, limit);
+}
+
+export async function retrieveShop(shopId: string): Promise<MpShopDetail | null> {  const [shop, productsPayload] = await Promise.all([
     request({ path: `/shops/${shopId}` }).catch(() => ({}) as MpRecord),
     request({
       path: "/catalog/products",

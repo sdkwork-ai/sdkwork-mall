@@ -188,3 +188,30 @@
     (lease + release, recover, unwired failure). 25 node guards, 49 vitest
     contracts, 135 repo contract tests, both typechecks, composition, parity and
     the i18n ratchet are green.
+
+- 2026-11-16 (fifth pass: H5 feature parity). Route parity only proves a page
+  exists, so this pass closed the *feature* gaps against the H5 client:
+  - **Category browser** grew the two-level drill-down H5 has: a root rail plus a
+    child chip row (`全部` + children derived from `parentId`), a deep link that
+    resolves a leaf to its root, and product queries that follow the leaf when one
+    is selected.
+  - **Home storefront** now carries the H5 floors: featured shops
+    (`GET /shops`, fail-soft), new arrivals (`sort=newest`), a device-local
+    footprint chip row refreshed on tab return, and a service grid
+    (help/orders/coupons/settings). Ratings render from the catalogue instead of
+    inline template copy.
+  - **Buyer hub** greets the signed-in account: `GET /accounts/current/summary`
+    provides the display name and the avatar initial, fail-soft to the catalogue
+    fallback.
+  - **Order list** exposes the per-order after-sales entry H5 has (paid, shipping,
+    received, completed, refunding, refunded).
+  - **Product detail** gained the delivery row: the default address (truncated) or
+    the "add address" hint, leading to the address book — same as H5.
+  - **Cart** group headers link into the shop page; **membership** renders the four
+    static benefit tiles; **chat** caps the composer at 500 characters like H5.
+  - **Guard:** `tests/contract/verify-mp-h5-feature-parity.test.mjs` pairs each of
+    these surfaces against its H5 counterpart, so a storefront feature cannot
+    silently regress below the H5 implementation.
+  - Known external state: the repo-wide `test:node` i18n ratchet is red on the H5
+    root (255 -> 271) because of a concurrent, in-flight H5 edit in this working
+    tree; the mini-program root holds at 155/155.

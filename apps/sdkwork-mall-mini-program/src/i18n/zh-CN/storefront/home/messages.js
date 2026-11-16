@@ -45,5 +45,17 @@ module.exports = {
       coupon: "领券",
       orders: "订单",
     },
+    newArrivals: "新品首发",
+    shopRating: "评分 {{rating}}",
+    sections: {
+      shops: "精选店铺",
+      footprint: "最近浏览",
+    },
+    services: {
+      help: "帮助中心",
+      orders: "我的订单",
+      coupons: "领券中心",
+      settings: "设置",
+    },
   },
 };

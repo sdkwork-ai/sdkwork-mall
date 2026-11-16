@@ -2,6 +2,7 @@ import { t } from "../../i18n";
 import { type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getOrderStatistics } from "../../services/order-service";
+import { getProfile } from "../../services/profile-service";
 import { isLoggedIn, clearSession } from "../../services/session";
 import { platform } from "@sdkwork/mall-mp-core";
 
@@ -52,6 +53,9 @@ const OTHER_LINKS: Array<{ labelKey: string; capability: string }> = [
 
 interface BuyerData {
   loggedIn: boolean;
+  displayName: string;
+  /** First character of the display name, rendered in the avatar circle. */
+  avatarText: string;
   orderEntries: Array<{ status: string; label: string; count: string | number }>;
   assetLinks: Array<{ label: string; capability: string }>;
   quickLinks: Array<{ label: string; capability: string }>;
@@ -78,6 +82,8 @@ function resolveLinks(
 Page({
   data: {
     loggedIn: false,
+    displayName: t("buyerHub.userFallback"),
+    avatarText: t("buyerHub.userFallback").slice(0, 1),
     orderEntries: resolveOrderEntries(),
     assetLinks: resolveLinks(ASSET_LINKS),
     quickLinks: resolveLinks(QUICK_LINKS),
@@ -90,6 +96,23 @@ Page({
     this.setData({ loggedIn });
     if (loggedIn) {
       void this.loadStatistics();
+      void this.loadProfile();
+    }
+  },
+
+  /**
+   * Identity hero: the H5 buyer hub greets the signed-in account by name.
+   *
+   * Fail-soft: a profile lookup failure keeps the fallback label instead of
+   * turning the hub into an error page.
+   */
+  async loadProfile() {
+    try {
+      const profile = await getProfile();
+      const displayName = profile.displayName || t("buyerHub.userFallback");
+      this.setData({ displayName, avatarText: displayName.slice(0, 1) });
+    } catch {
+      // keep the fallback identity
     }
   },
 

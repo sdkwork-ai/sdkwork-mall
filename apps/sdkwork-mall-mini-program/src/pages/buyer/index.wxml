@@ -1,9 +1,9 @@
 <view class="page-buyer">
   <view class="buyer-hero">
-    <view class="buyer-avatar">客</view>
+    <view class="buyer-avatar">{{avatarText}}</view>
     <view class="buyer-hero-body">
       <block wx:if="{{loggedIn}}">
-        <view class="buyer-name">SDKWork 用户</view>
+        <view class="buyer-name">{{displayName}}</view>
         <view class="buyer-sub">欢迎回来</view>
       </block>
       <block wx:else>

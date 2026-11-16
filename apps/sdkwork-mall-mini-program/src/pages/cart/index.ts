@@ -268,6 +268,14 @@ Page({
     platform.navigateTo(mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }));
   },
 
+  /** Shop entry on the cart group header (the H5 cart links the shop too). */
+  goShop(event: MpTapEvent) {
+    const shopId = String(event.currentTarget.dataset.id ?? "");
+    if (shopId) {
+      platform.navigateTo(mpCapabilityUrl("storefront.mall.shop", { id: shopId }));
+    }
+  },
+
   goHome() {
     platform.switchTab(mpCapabilityUrl("storefront.mall.home"));
   },

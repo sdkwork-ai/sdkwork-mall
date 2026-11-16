@@ -110,3 +110,66 @@
 .home-products-title {
   padding: 0 20rpx 20rpx;
 }
+
+/* ── Home floors that mirror the H5 home snapshot ── */
+.home-shop-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.home-shop-card {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  width: 48%;
+  padding: 14rpx;
+  border-radius: 12rpx;
+  background: #f9fafb;
+}
+
+.home-shop-logo {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fee2e2;
+  color: #e93b3d;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.home-shop-logo image {
+  width: 100%;
+  height: 100%;
+}
+
+.home-shop-body {
+  min-width: 0;
+}
+
+.home-shop-name {
+  font-size: 26rpx;
+  color: #1f2937;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-services {
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 20rpx;
+}
+
+.home-service-item {
+  flex: 1;
+  text-align: center;
+  font-size: 24rpx;
+  color: #4b5563;
+}

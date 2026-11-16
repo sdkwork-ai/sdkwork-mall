@@ -20,6 +20,8 @@ interface MpMembershipPackageView extends MpMembershipPackage {
 interface MembershipData {
   busyPackageId: number | null;
   isMember: boolean;
+  /** Static benefit tiles shown above the packages (parity with the H5 page). */
+  benefits: Array<{ id: string; label: string }>;
   loading: boolean;
   message: string;
   packages: MpMembershipPackageView[];
@@ -51,6 +53,12 @@ Page({
   data: {
     busyPackageId: null,
     isMember: false,
+    benefits: [
+      { id: "price", label: t("membership.benefits.price") },
+      { id: "points", label: t("membership.benefits.points") },
+      { id: "support", label: t("membership.benefits.support") },
+      { id: "afterSales", label: t("membership.benefits.afterSales") },
+    ],
     loading: true,
     message: "",
     packages: [],

@@ -31,6 +31,7 @@
         <view class="mp-row cart-shop-header" bindtap="toggleGroup" data-shop="{{group.shopId}}">
           <view class="cart-checkbox {{group.allSelected ? 'cart-checkbox-on' : ''}}" />
           <text class="cart-shop-name">{{group.shopName}}</text>
+          <text class="cart-shop-entry" catchtap="goShop" data-id="{{group.shopId}}">进店 ›</text>
         </view>
 
         <view class="mp-row cart-item" wx:for="{{group.items}}" wx:key="id">

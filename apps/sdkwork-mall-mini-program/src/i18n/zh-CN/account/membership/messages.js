@@ -9,6 +9,12 @@ module.exports = {
     levelLabel: "当前等级",
     defaultLevel: "普通会员",
     statusLabel: "状态：{{status}}",
+    benefits: {
+      price: "专属会员价",
+      points: "积分加倍",
+      support: "专属客服",
+      afterSales: "售后优先处理",
+    },
     plans: {
       title: "会员方案",
       empty: "暂无可选方案",

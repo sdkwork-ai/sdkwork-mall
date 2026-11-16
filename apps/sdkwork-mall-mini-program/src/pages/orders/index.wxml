@@ -51,6 +51,12 @@
           catchtap="goLogistics"
           data-id="{{item.id}}"
         >{{logisticsText}}</button>
+        <button
+          wx:if="{{item.status === 'PAID' || item.status === 'PENDING_SHIPMENT' || item.status === 'PENDING_RECEIPT' || item.status === 'COMPLETED' || item.status === 'REFUNDING' || item.status === 'REFUNDED'}}"
+          class="mp-btn mp-btn-plain orders-action"
+          catchtap="goAfterSales"
+          data-id="{{item.id}}"
+        >{{afterSalesText}}</button>
         <button class="mp-btn mp-btn-plain orders-action" catchtap="goDetail" data-id="{{item.id}}">{{viewDetailText}}</button>
       </view>
     </view>

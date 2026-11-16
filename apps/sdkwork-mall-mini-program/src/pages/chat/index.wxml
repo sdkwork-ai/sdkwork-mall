@@ -22,6 +22,7 @@
     <input
       class="chat-composer-input"
       placeholder="输入消息..."
+      maxlength="500"
       value="{{draft}}"
       confirm-type="send"
       bindinput="onDraftInput"

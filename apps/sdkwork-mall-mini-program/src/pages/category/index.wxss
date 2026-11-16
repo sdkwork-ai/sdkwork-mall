@@ -23,6 +23,30 @@
   overflow: hidden;
 }
 
+/* Second-level taxonomy of the active root (H5 renders the same drill-down). */
+.category-children {
+  white-space: nowrap;
+  background: #fff;
+  padding: 18rpx 20rpx 12rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.category-child {
+  display: inline-block;
+  margin: 0 14rpx 10rpx 0;
+  padding: 8rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 24rpx;
+}
+
+.category-child-active {
+  background: #fef2f2;
+  color: #e93b3d;
+  border: 1rpx solid #fca5a5;
+}
+
 .category-rail {
   width: 180rpx;
   background: #fff;

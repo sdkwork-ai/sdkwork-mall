@@ -13,6 +13,12 @@
     </view>
 
     <view class="mp-card">
+      <view class="membership-benefits">
+        <view class="membership-benefit" wx:for="{{benefits}}" wx:key="id">{{item.label}}</view>
+      </view>
+    </view>
+
+    <view class="mp-card">
       <view class="mp-card-title">{{plansTitle}}</view>
       <view wx:if="{{packages.length === 0}}" class="mp-empty">{{plansEmpty}}</view>
       <view class="plan-row" wx:for="{{packages}}" wx:key="id">
