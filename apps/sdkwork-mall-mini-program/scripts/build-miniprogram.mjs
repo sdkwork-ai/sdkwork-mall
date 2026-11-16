@@ -318,7 +318,13 @@ function copyAssets(directory) {
     }
     const target = path.join(outRoot, relative);
     mkdirSync(path.dirname(target), { recursive: true });
-    cpSync(source, target);
+    // Strip a UTF-8 BOM: the WXSS compiler rejects it ("unexpected '\uFEFF' at pos 1").
+    const bytes = readFileSync(source);
+    if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+      writeFileSync(target, bytes.subarray(3));
+    } else {
+      cpSync(source, target);
+    }
   }
 }
 

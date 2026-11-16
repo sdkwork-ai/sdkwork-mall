@@ -303,6 +303,37 @@ test("the dist folder is a self-contained dev-tool project", () => {
   assert.ok((distAppJson.subPackages ?? []).length >= 20, "subpackages must be declared in dist/app.json");
 });
 
+test("no text asset starts with a UTF-8 BOM", () => {
+  // The WXSS compiler fails with "unexpected '\uFEFF' at pos 1" and reports the
+  // whole package as broken; PowerShell-authored edits used to add one.
+  const problems = [];
+  const scan = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || entry.name === "node_modules") {
+        continue;
+      }
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        scan(entryPath);
+        continue;
+      }
+      if (!/\.(wxss|wxml|json|js|wxs)$/u.test(entry.name)) {
+        continue;
+      }
+      const bytes = readFileSync(entryPath);
+      if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+        problems.push(path.relative(appRoot, entryPath).replace(/\\/gu, "/"));
+      }
+    }
+  };
+  scan(srcRoot);
+  const dist = path.join(appRoot, "dist");
+  if (existsSync(dist)) {
+    scan(dist);
+  }
+  assert.deepEqual(problems, [], "text assets must not start with a BOM");
+});
+
 test("templates only reference assets that exist and avoid grid layout", () => {
   // Two failures observed in the dev tool: a `/assets/...png` icon that was never
   // shipped (empty glyph) and `display: grid` collapsing tiles so labels wrapped one

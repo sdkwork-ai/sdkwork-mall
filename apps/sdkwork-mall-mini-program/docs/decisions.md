@@ -780,3 +780,13 @@
     `dist/app.json` still declares the subpackages.
   - Build keeps printing and enforcing the budget on every run.
   - Regression: 37 node guards, 69 vitest, typecheck, smoke PASS over 36 pages.
+
+- 2026-11-16 (thirtieth pass: BOM-free package). The dev tool reported
+  `./pages/category/index.wxss(1:1): unexpected '<BOM>' at pos 1`: four stylesheets
+  (`category`, `chat`, `checkout`, `messages`) carried a UTF-8 BOM from an earlier
+  PowerShell edit, and the WXSS compiler rejects a BOM.
+  - BOM removed from those sources; `copyAssets` now strips a BOM from every copied
+    text asset, so a future editor cannot reintroduce the failure.
+  - Guard: `no text asset starts with a UTF-8 BOM` scans `src/` and `dist/`.
+  - Package unchanged in size: main 711.1 KB, largest subpackage 40.5 KB, total
+    1118.6 KB.
