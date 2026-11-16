@@ -1,14 +1,15 @@
-﻿<view class="page-home">
+<view class="page-home">
   <view class="home-search" bindtap="goQuickEntry" data-capability="storefront.mall.search">
     <view class="home-search-box">{{searchPlaceholder}}</view>
   </view>
 
-  <view class="home-banner" bindtouchstart="onBannerTouchStart" bindtouchend="onBannerTouchEnd">
-    <view class="home-banner-track" style="transform: translateX(-{{bannerIndex * 100}}%);">
-      <view class="home-banner-slide" wx:for="{{banners}}" wx:key="id">
-        <view class="home-banner-item home-banner-{{item.tone}}" bindtap="goBanner" data-id="{{item.id}}">
+  <view class="home-banner" style="border-radius:0!important;" bindtouchstart="onBannerTouchStart" bindtouchend="onBannerTouchEnd">
+    <view class="home-banner-track" style="transform: translateX(-{{bannerIndex * 100}}%); border-radius:0!important;">
+      <view class="home-banner-slide" style="border-radius:0!important;" wx:for="{{banners}}" wx:key="id">
+        <view class="home-banner-item home-banner-{{item.tone}}" style="border-radius:0!important;" bindtap="goBanner" data-id="{{item.id}}">
           <view class="home-banner-title">{{item.title}}</view>
           <view class="home-banner-sub">{{item.subtitle}}</view>
+          <view class="home-banner-cta">{{ctaText}}</view>
         </view>
       </view>
     </view>
@@ -147,6 +148,8 @@
       </view>
     </view>
   </view>
+
+  <view wx:if="{{buildTag}}" class="home-build">{{buildTag}}</view>
 
   <view class="home-services">
     <view

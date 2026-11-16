@@ -678,3 +678,50 @@
     stylesheets must not use CSS grid (flex-wrap instead): 35 node guards now.
   - Regression: 69 vitest contracts, typecheck, composition green; smoke PASS over
     36 pages; contract suite 187/194 with the seven H5-only failures.
+
+- 2026-11-16 (twenty-sixth pass: the home hero still rendered with rounded
+  corners on the device despite the flattened source). Diagnosis from the
+  user's screenshot: the captured hero shows `border-radius: 16rpx` corners and
+  the pre-flat `margin-bottom: 20rpx` seam — pixel-matched to the `bfd2da9`
+  stylesheet, i.e. the dev tool was serving a stale compiled WXSS while
+  `dist/` on disk already carried the flat rules (dist built 23:32, screenshot
+  23:35). The refresh procedure is: WeChat DevTools → 清缓存 → 清除全部缓存,
+  then 编译; the console build stamp must read `2026-11-16T15:50:05.308Z` or
+  newer.
+  - Hero alignment with the H5 home (`sdk-h5-hero-*` rules): poster height
+    435rpx (H5's `clamp(12rem, 58vw, 16rem)` at the 750rpx viewport), flat
+    solid posters replacing the red gradients (brand keeps the storefront red;
+    teal `#0f766e`, ember `#c2410c`, violet `#5b21b6` match H5 exactly),
+    translucent poster discs via `::before`/`::after`, title 50rpx/800 with
+    the H5 text shadow, and the "立即查看" CTA chip (`home.banners.cta`, H5
+    copy).
+  - Dots became the H5 bar indicator: slim pill bars inside 24rpx hit areas,
+    active bar widens to 28rpx.
+  - Banner list aligned to the H5 carousel: the same four slides in the same
+    order and tones (quality → categories, new → search `q=new`, coupon →
+    coupons, member → member center). The activity slide is gone from the
+    hero; the activity list stays reachable through the quick row. Autoplay
+    (4200ms), swipe and dot taps unchanged.
+  - Remaining rounded surfaces flattened: `.checkout-giftcard-input`,
+    `.coupon-redeem-input`, `.inv-input`, `.security-input`, `.cart-quantity`
+    (page rules plus the app-level `!important` guard list);
+    `.shop-logo` became a circle to match the H5 shop avatar and the home
+    shop logo. Chat bubbles keep their H5-aligned 16rpx rounding; pills for
+    buttons/chips/search and circles for dots/avatars/discs are controls, not
+    cards, and stay.
+  - Regression: typecheck green; 69 vitest contracts green; 35 node page
+    guards green (one new catch during the pass: `text-shadow` shipped px
+    units and the rpx-only guard failed — fixed to rpx); smoke PASS over 36
+    pages; repo contract suite 187/194 with the same seven pre-existing
+    H5-only failures from the concurrent brick migration (all H5-scoped, none
+    touch mini-program files).
+
+- 2026-11-16 (twenty-sixth pass: square hero without relying on a stylesheet
+  reload). The reported hero corners survive only in a package built before the
+  custom carousel, so the hero now carries the guarantee in the markup itself:
+  - `.home-banner`, its track, each slide and each poster pin
+    `border-radius:0!important` **inline**, which a stale or cached WXSS cannot
+    override.
+  - The home page renders the build stamp (`build <ISO>`) at the bottom, so the dev
+    tool's package is visible on screen instead of only in the console.
+  - Rebuilt at `2026-11-16T15:56:49.805Z`; guards 35/35, smoke PASS over 36 pages.

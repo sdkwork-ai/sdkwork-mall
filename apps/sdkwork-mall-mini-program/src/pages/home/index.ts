@@ -9,6 +9,9 @@ import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import { platform } from "@sdkwork/mall-mp-core";
 
+// Injected by scripts/build-miniprogram.mjs: proves which package is running.
+declare const __SDKWORK_MALL_MP_BUILD_ID__: string;
+
 /**
  * 首页入口按能力路由声明，路径由 routes/capabilities.ts 解析；
  * `query` 为可选的跳转参数，与 PC/H5 的查询参数同名。
@@ -79,6 +82,7 @@ interface HomeData {
   seckillOffer: MpOffer | null;
   seckillCountdown: string;
   searchPlaceholder: string;
+  ctaText: string;
   loadingText: string;
   categoriesTitle: string;
   seckillTitle: string;
@@ -93,17 +97,21 @@ interface HomeData {
   error: string;
   _seckillTimer: number | null;
   bannerIndex: number;
+  /** Build stamp rendered at the bottom of the page (visible proof of the package). */
+  buildTag: string;
   _bannerTimer: number | null;
   _bannerTouchX: number | null;
   _bannerTouchY: number | null;
 }
 
 const BANNERS: HomeBannerSource[] = [
+  // Same four slides in the same order and tones as the H5 hero carousel
+  // (HomePage.tsx `HOME_BANNERS`); the destinations map to mini-program
+  // capability routes instead of H5 paths.
   { id: "b-quality", titleKey: "home.banners.quality.title", subtitleKey: "home.banners.quality.subtitle", capability: "storefront.mall.categories", tone: "brand" },
-  { id: "b-activity", titleKey: "home.banners.activity.title", subtitleKey: "home.banners.activity.subtitle", capability: "storefront.mall.activity-list", tone: "ember" },
   { id: "b-new", titleKey: "home.banners.newArrival.title", subtitleKey: "home.banners.newArrival.subtitle", capability: "storefront.mall.search", query: { q: "new" }, tone: "teal" },
-  { id: "b-coupon", titleKey: "home.banners.coupon.title", subtitleKey: "home.banners.coupon.subtitle", capability: "buyer.mall.coupons", tone: "violet" },
-  { id: "b-member", titleKey: "home.banners.member.title", subtitleKey: "home.banners.member.subtitle", capability: "buyer.mall.dashboard", tone: "brand" },
+  { id: "b-coupon", titleKey: "home.banners.coupon.title", subtitleKey: "home.banners.coupon.subtitle", capability: "buyer.mall.coupons", tone: "ember" },
+  { id: "b-member", titleKey: "home.banners.member.title", subtitleKey: "home.banners.member.subtitle", capability: "buyer.mall.dashboard", tone: "violet" },
 ];
 
 const QUICK_ENTRIES: HomeQuickSource[] = [
@@ -152,6 +160,7 @@ Page({
     seckillOffer: null,
     seckillCountdown: "",
     searchPlaceholder: t("home.searchPlaceholder"),
+    ctaText: t("home.banners.cta"),
     loadingText: t("home.loading"),
     categoriesTitle: t("home.categories"),
     seckillTitle: t("home.seckill.title"),
@@ -166,6 +175,7 @@ Page({
     error: "",
     _seckillTimer: null,
   bannerIndex: 0,
+  buildTag: `build ${__SDKWORK_MALL_MP_BUILD_ID__}`,
   _bannerTimer: null,
   _bannerTouchX: null,
   _bannerTouchY: null,
