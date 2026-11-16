@@ -399,6 +399,39 @@ test("buyer page carries every icon it renders", () => {
   assert.deepEqual(missing, [], "every referenced icon must ship as a PNG");
 });
 
+test("cards are edge-to-edge without an outline or elevation", () => {
+  // A 1rpx card border renders as a light strip along every card edge (the "white
+  // edge" seen left of all pages), and a page root with horizontal padding adds a
+  // gutter on top of it.
+  const app = read(path.join(srcRoot, "app.wxss"));
+  assert.match(app, /\.mp-card,\s*\n\s*\.mp-section\s*\{[^}]*border:\s*0 !important;/u, "card outline removed");
+  assert.match(app, /\.mp-card,\s*\n\s*\.mp-section\s*\{[^}]*box-shadow:\s*none !important;/u, "card elevation removed");
+  assert.match(app, /\.mp-product-card\s*\{[^}]*border:\s*0 !important;/u, "product tiles are flat");
+  const problems = [];
+  for (const directory of readdirSync(path.join(srcRoot, "pages"))) {
+    const filePath = path.join(srcRoot, "pages", directory, "index.wxss");
+    if (!existsSync(filePath)) {
+      continue;
+    }
+    const lines = read(filePath).split(/\r?\n/u);
+    let selector = "";
+    for (const line of lines) {
+      if (/^\s*[.#][^{]*\{\s*$/u.test(line)) {
+        selector = line.trim().replace(/\s*\{$/u, "");
+      }
+      const match = line.match(/^\s*(padding|margin)\s*:\s*([^;]+);/u);
+      if (!match || !/^\.page-/u.test(selector)) {
+        continue;
+      }
+      const values = match[2].trim().split(/\s+/u);
+      if (values.length >= 2 && (values[1] === "24rpx" || values[1] === "20rpx" || values[1] === "30rpx")) {
+        problems.push(directory + " " + selector + " " + line.trim());
+      }
+    }
+  }
+  assert.deepEqual(problems, [], "page roots must not inset content horizontally");
+});
+
 test("templates only reference assets that exist and avoid grid layout", () => {
   // Two failures observed in the dev tool: a `/assets/...png` icon that was never
   // shipped (empty glyph) and `display: grid` collapsing tiles so labels wrapped one

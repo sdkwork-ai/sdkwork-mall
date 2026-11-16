@@ -833,3 +833,18 @@
     41 node guards total.
   - Rebuilt: main 766.5 KB, largest subpackage 48.4 KB, total 1418.4 KB (build
     16:18:11.695Z); smoke PASS over 36 pages.
+
+- 2026-11-16 (thirty-fourth pass: no side strip on any page). Pixel analysis of the
+  screenshot showed the "white edge" at x≈2 as `#eceef2`: it was the `1rpx solid`
+  border that every `.mp-card` / `.mp-section` carried (plus `--mp-shadow-1`), which
+  renders as a light strip along all four card edges on a 2x screen.
+  - `.mp-card`, `.mp-section` and `.mp-product-card` now set
+    `border: 0 !important; box-shadow: none !important` — the cards are pure white
+    and run edge to edge.
+  - The three page roots that still inset their content horizontally
+    (`logistics`, `messages`, `partner`, 20–24rpx each side) now use vertical padding
+    only, so no page shows a left/right gutter.
+  - Guard: `cards are edge-to-edge without an outline or elevation` checks the global
+    overrides and rejects a `.page-*` root with horizontal padding.
+  - Rebuilt 16:19:56.884Z; main 766.9 KB, largest subpackage 48.4 KB, total
+    1418.8 KB; 42 node guards, 69 vitest, smoke PASS over 36 pages.

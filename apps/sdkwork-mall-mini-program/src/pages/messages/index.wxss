@@ -1,5 +1,5 @@
 .page-messages {
-  padding: 20rpx 24rpx 40rpx;
+  padding: 20rpx 0 40rpx;
 }
 
 .messages-list {

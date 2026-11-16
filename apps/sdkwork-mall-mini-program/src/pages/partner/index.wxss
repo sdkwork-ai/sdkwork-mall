@@ -1,5 +1,5 @@
 .page-partner {
-  padding: 24rpx 24rpx 64rpx;
+  padding: 24rpx 0 64rpx;
 }
 
 .partner-eyebrow {

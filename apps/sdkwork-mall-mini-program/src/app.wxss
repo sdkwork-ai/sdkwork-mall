@@ -431,6 +431,20 @@ button::after {
 .inv-input,
 .inv-picker,
 .checkout-giftcard-input,
-.coupon-redeem-input {
+.coupon-redeem-input,
+.security-input,
+.cart-quantity {
   border-radius: 0 !important;
+}
+/* Edge-to-edge flat cards: the 1rpx outline and the elevation shadow read as a
+   light strip along the card edges (most visible at the left of every page). */
+.mp-card,
+.mp-section {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+/* Product tiles follow the same edge-to-edge rule (no outline or elevation). */
+.mp-product-card {
+  border: 0 !important;
+  box-shadow: none !important;
 }
