@@ -5,7 +5,7 @@
   </view>
 
   <scroll-view class="chat-stream" scroll-y scroll-into-view="{{scrollInto}}">
-    <view wx:if="{{messages.length === 0}}" class="mp-empty chat-empty">发送消息，客服将尽快回复</view>
+    <view wx:if="{{messages.length === 0}}" class="mp-empty chat-empty">{{emptyText}}</view>
     <view
       class="chat-bubble-row chat-bubble-{{item.role === 'user' ? 'right' : 'left'}}"
       wx:for="{{messages}}"
@@ -19,15 +19,16 @@
   </scroll-view>
 
   <view class="chat-composer">
+    <text class="chat-image-btn" bindtap="sendImage" aria-label="{{imageText}}">{{imageText}}</text>
     <input
       class="chat-composer-input"
-      placeholder="输入消息..."
+      placeholder="{{placeholder}}"
       maxlength="500"
       value="{{draft}}"
       confirm-type="send"
       bindinput="onDraftInput"
       bindconfirm="send"
     />
-    <button class="mp-btn mp-btn-primary chat-composer-send" disabled="{{busy || !draft}}" bindtap="send">发送</button>
+    <button class="mp-btn mp-btn-primary chat-composer-send" disabled="{{busy || !draft}}" bindtap="send">{{sendText}}</button>
   </view>
 </view>

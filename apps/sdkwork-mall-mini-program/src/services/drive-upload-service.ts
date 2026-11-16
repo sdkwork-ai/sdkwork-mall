@@ -90,15 +90,27 @@ function readHeader(header: Record<string, string>, name: string): string {
   throw new Error("存储上传响应缺少 ETag");
 }
 
+/** Structured result of one Drive image upload. */
+export interface MpDriveImageUpload {
+  readonly driveUri: string;
+  readonly fileName: string;
+  readonly mimeType: string;
+  readonly nodeId: string;
+  /** int64 wire field; crosses the wire as a decimal string (API_SPEC 13.6). */
+  readonly sizeBytes: string;
+  readonly spaceId: string;
+}
+
 /**
  * Uploads one image through the drive uploader flow and returns the
- * backend-addressable `drive://` reference.
+ * backend-addressable `drive://` reference plus the identity parts a media
+ * message needs.
  */
-export async function uploadDriveImage(input: {
+export async function uploadDriveImageDetailed(input: {
   declaration: MpUploadDeclaration;
   appResourceId: string;
   file: MpUploadSourceFile;
-}): Promise<string> {
+}): Promise<MpDriveImageUpload> {
   const prepareBody = buildUploaderPrepareBody(input);
   const prepared = await request({
     path: "/drive/uploader/uploads",
@@ -154,5 +166,24 @@ export async function uploadDriveImage(input: {
     },
   });
 
-  return formatDriveImageUri(spaceId, nodeId);
+  return {
+    driveUri: formatDriveImageUri(spaceId, nodeId),
+    fileName: input.file.fileName,
+    mimeType: input.file.contentType,
+    nodeId,
+    sizeBytes: String(input.file.bytes.byteLength),
+    spaceId,
+  };
+}
+
+/**
+ * Uploads one image through the drive uploader flow and returns the
+ * backend-addressable `drive://` reference.
+ */
+export async function uploadDriveImage(input: {
+  declaration: MpUploadDeclaration;
+  appResourceId: string;
+  file: MpUploadSourceFile;
+}): Promise<string> {
+  return (await uploadDriveImageDetailed(input)).driveUri;
 }

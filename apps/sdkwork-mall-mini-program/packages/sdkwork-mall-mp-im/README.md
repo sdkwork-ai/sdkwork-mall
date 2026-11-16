@@ -26,6 +26,20 @@ release();           // onHide / onUnload
 The page only re-reads the stream; it never maps a decoded wire payload, and the
 15 s safety-net poll stays for offline periods.
 
+## Image messages
+
+Bytes and the message record stay separate (`DRIVE_SPEC.md` section 10):
+
+```
+host picker -> Drive uploader (injected MpImImageUploader) -> IM conversation.sendImage
+```
+
+`sendChatImage(conversationId, { bytes, contentType, fileName, sizeBytes })` uploads
+through the injected Drive port and posts the returned
+`{ driveUri, spaceId, nodeId, mimeType, sizeBytes }` as a media part. The
+capability owns no storage flow; the app bootstrap injects the uploader declared
+as `mall.chat-image` in `specs/upload.declaration.json`.
+
 This package only **projects** the IM domain types onto mall view models
 (`MpNotice`, `MpChatConversation`, `MpChatMessage`) and orders the chat stream
 chronologically. It declares no transport and no endpoint.

@@ -15,12 +15,14 @@ export {
   markChatRead,
   recoverRealtime,
   retrieveNotice,
+  sendChatImage,
   sendChatMessage,
   subscribeConversationMessages,
 } from "@sdkwork/mall-mp-im/im-service";
 export type {
   MpChatConversation,
   MpChatMessage,
+  MpImChatImageInput,
   MpNotice,
   MpNoticePage,
 } from "@sdkwork/mall-mp-im/im-service";

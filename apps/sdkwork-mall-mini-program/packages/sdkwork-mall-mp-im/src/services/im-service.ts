@@ -53,6 +53,33 @@ export interface MpChatMessage {
   readonly sentAt: string;
 }
 
+/** One picked image ready to become a media message. */
+export interface MpImChatImageInput {
+  readonly bytes: ArrayBuffer;
+  readonly contentType: string;
+  readonly fileName: string;
+  readonly sizeBytes: number;
+}
+
+/** Stored Drive identity of an uploaded image (what a media part persists). */
+export interface MpImChatImageUpload {
+  readonly driveUri: string;
+  readonly fileName: string;
+  readonly mimeType: string;
+  readonly nodeId: string;
+  readonly sizeBytes: string;
+  readonly spaceId: string;
+}
+
+/**
+ * Drive uploader injected by the app bootstrap.
+ *
+ * Image bytes belong to the Drive plane (`DRIVE_SPEC.md` section 9), not to the
+ * messaging capability, so the capability never uploads by itself: it hands the
+ * bytes to this port and posts the returned identity.
+ */
+export type MpImImageUploader = (input: MpImChatImageInput) => Promise<MpImChatImageUpload>;
+
 /** Capability services composed by the app bootstrap. */
 export interface MpImServices {
   readonly conversation: ImMpChatConversationService;
@@ -67,6 +94,8 @@ export interface MpImServices {
    * has no hidden dependency on the runtime singleton.
    */
   readonly resolveCurrentUserId: () => string;
+  /** Drive uploader for image messages; absent when the surface is text-only. */
+  readonly uploadImage?: MpImImageUploader;
 }
 
 let services: MpImServices | null = null;
@@ -94,7 +123,7 @@ export function createMpImServices(
     readonly imAppClient: ImAppSdkClient;
     readonly imChatClient: ImChatSdkClient;
   },
-  options: { resolveCurrentUserId?: () => string } = {},
+  options: { resolveCurrentUserId?: () => string; uploadImage?: MpImImageUploader } = {},
 ): MpImServices {
   // The generated IM runtime client is the structural `ImMpChatSdkPort` the chat
   // services consume; the cast documents that the port type belongs to IM.
@@ -105,6 +134,7 @@ export function createMpImServices(
     conversation: createImMpChatConversationService(resolveChat),
     realtime: createImMpChatRealtimeService(resolveChat),
     resolveCurrentUserId: options.resolveCurrentUserId ?? (() => ""),
+    ...(options.uploadImage ? { uploadImage: options.uploadImage } : {}),
   };
 }
 
@@ -223,4 +253,33 @@ export function isRealtimeConnected(): boolean {
 /** Tears the realtime plane down (logout / account switch). */
 export function disposeRealtime(): void {
   requireServices().realtime.dispose();
+}
+
+/**
+ * Sends one image message.
+ *
+ * Two planes, one call: the bytes go through the injected Drive uploader, and the
+ * resulting identity is posted through the IM conversation service as a media
+ * part. Nothing is base64'd into the message record (`DRIVE_SPEC.md` section 10).
+ *
+ * @param conversationId - Open conversation.
+ * @param image - Picked image bytes plus its declared metadata.
+ */
+export async function sendChatImage(
+  conversationId: string,
+  image: MpImChatImageInput,
+): Promise<void> {
+  const services = requireServices();
+  if (!services.uploadImage) {
+    throw new Error("IM image uploader is not configured; wire it from app bootstrap");
+  }
+  const stored = await services.uploadImage(image);
+  await services.conversation.sendImage(conversationId, {
+    driveUri: stored.driveUri,
+    fileName: stored.fileName,
+    mimeType: stored.mimeType,
+    nodeId: stored.nodeId,
+    sizeBytes: stored.sizeBytes,
+    spaceId: stored.spaceId,
+  });
 }

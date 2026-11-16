@@ -18,7 +18,9 @@ import { configureMpImServices, createMpImServices } from "@sdkwork/mall-mp-im/i
 import { createWeixinHost } from "@sdkwork/mall-mp-host/weixin";
 
 import { readRuntimeEnv } from "./bootstrap/environment";
+import { SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD } from "./bootstrap/uploadDeclaration";
 import { mpCapabilityUrl } from "./routes/capabilities";
+import { uploadDriveImageDetailed } from "./services/drive-upload-service";
 import runtimeEnvJson from "./runtime-env.json";
 
 interface MallMpGlobalData {
@@ -71,10 +73,22 @@ export function bootstrapMallMpRuntime(): MallMpRuntime {
     host,
   });
   // Composition: the capability never learns which SDK satisfies each plane
-  // (MINI_PROGRAM_APP_ARCHITECTURE_SPEC section 6).
+  // (MINI_PROGRAM_APP_ARCHITECTURE_SPEC section 6). The Drive uploader is injected
+  // too, so messaging owns no storage flow of its own.
   configureMpImServices(createMpImServices(
     { imAppClient: runtime.imAppClient, imChatClient: runtime.imChatClient },
-    { resolveCurrentUserId: () => runtime.session.read()?.userId ?? "" },
+    {
+      resolveCurrentUserId: () => runtime.session.read()?.userId ?? "",
+      uploadImage: (image) => uploadDriveImageDetailed({
+        declaration: SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD,
+        appResourceId: SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD.scene,
+        file: {
+          fileName: image.fileName,
+          contentType: image.contentType,
+          bytes: image.bytes,
+        },
+      }),
+    },
   ));
   return runtime;
 }

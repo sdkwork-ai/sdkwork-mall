@@ -215,3 +215,28 @@
   - Known external state: the repo-wide `test:node` i18n ratchet is red on the H5
     root (255 -> 271) because of a concurrent, in-flight H5 edit in this working
     tree; the mini-program root holds at 155/155.
+
+- 2026-11-16 (sixth pass: chat image messages). The messaging capability can now
+  send images, keeping bytes out of the message record:
+  - `specs/upload.declaration.json` + `bootstrap/uploadDeclaration.ts` declare a
+    second purpose, `mall.chat-image` (scene `chat-image`, image profile), so the
+    upload is a declared Drive origin rather than an ad-hoc one.
+  - `services/drive-upload-service.ts` gained `uploadDriveImageDetailed()`
+    (driveUri + spaceId + nodeId + mimeType + sizeBytes); `uploadDriveImage()`
+    stays as the string-only facade the after-sales form uses.
+  - `@sdkwork/mall-mp-im` gained `sendChatImage()` + an injected
+    `MpImImageUploader`: the capability never uploads itself, it hands bytes to
+    the Drive port and posts the returned identity through the IM
+    `conversation.sendImage` media part. Unwired uploader fails loudly.
+  - Chat page: an image button picks one image (5 MB cap) through the host picker,
+    reads bytes through the host, sends, and re-reads the stream. Composer copy
+    moved into `i18n/zh-CN/communication/chat` (miniProgram readiness 155 -> 152).
+  - `app.ts` wires the uploader with the chat declaration, so the messaging
+    capability still holds no session and no storage flow.
+  - Known limitation this round: inbound image bubbles render the message summary
+    text; rendering the stored image needs a Drive download-grant port
+    (`resolveChatMediaUrl`), which is the next step.
+  - Regression: 25 node guards, 51 vitest contracts (2 new for image sending),
+    140/141 repo contract tests — the single failure is still the external H5
+    i18n ratchet (h5 255 -> 271 from a concurrent edit); miniProgram improved to
+    152, both typechecks, composition, parity and catalogues green.

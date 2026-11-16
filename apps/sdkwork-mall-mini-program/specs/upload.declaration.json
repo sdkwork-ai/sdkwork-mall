@@ -10,6 +10,15 @@
       "uploadProfileCode": "image",
       "retention": "long_term",
       "purpose": "After-sales evidence images uploaded to Drive and referenced by the after-sales request snapshot."
+    },
+    {
+      "appResourceType": "mall.chat-image",
+      "appResourceIdKind": "application",
+      "scene": "chat-image",
+      "source": "sdkwork-mall-mini-program",
+      "uploadProfileCode": "image",
+      "retention": "long_term",
+      "purpose": "Customer-service chat images uploaded to Drive and posted to the IM conversation as media messages."
     }
   ]
 }

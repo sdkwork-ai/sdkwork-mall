@@ -1,9 +1,11 @@
+import { t } from "../../i18n";
 import { errorMessage, type MpInputEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import {
   listChatMessages,
   markChatRead,
   recoverRealtime,
+  sendChatImage,
   sendChatMessage,
   subscribeConversationMessages,
   type MpChatMessage,
@@ -15,6 +17,8 @@ import { platform } from "@sdkwork/mall-mp-core";
 const POLL_INTERVAL_MS = 15_000;
 /** Collapses a burst of pushes into one re-read. */
 const PUSH_DEBOUNCE_MS = 250;
+/** Chat images share the after-sales evidence limit (5 MB). */
+const MAX_CHAT_IMAGE_BYTES = 5 * 1024 * 1024;
 
 /**
  * Live-message lease per page instance.
@@ -31,6 +35,10 @@ interface ChatData {
   busy: boolean;
   message: string;
   scrollInto: string;
+  imageText: string;
+  sendText: string;
+  emptyText: string;
+  placeholder: string;
   _conversationId: string;
   /** Newest message already acknowledged with a read receipt. */
   _acknowledgedId: string;
@@ -48,6 +56,10 @@ Page({
     busy: false,
     message: "",
     scrollInto: "",
+    imageText: t("chat.image"),
+    sendText: t("chat.send"),
+    emptyText: t("chat.empty"),
+    placeholder: t("chat.placeholder"),
     _conversationId: "",
     _acknowledgedId: "",
     _lastMessageId: "",
@@ -164,7 +176,7 @@ Page({
         void markChatRead(this.data._conversationId).catch(() => undefined);
       }
     } catch (cause) {
-      this.setData({ message: errorMessage(cause, "消息加载失败") });
+      this.setData({ message: errorMessage(cause, t("chat.loadFailed")) });
     }
   },
 
@@ -183,7 +195,50 @@ Page({
       this.setData({ draft: "" });
       await this.refresh();
     } catch (cause) {
-      this.setData({ message: errorMessage(cause, "发送失败") });
+      this.setData({ message: errorMessage(cause, t("chat.sendFailed")) });
+    } finally {
+      this.setData({ busy: false });
+    }
+  },
+
+  /**
+   * Picks one image and posts it as a media message.
+   *
+   * Bytes go host picker -> Drive uploader (injected into the messaging
+   * capability) -> IM conversation media part; nothing is inlined into the
+   * message record.
+   */
+  async sendImage() {
+    if (this.data.busy || !this.data._conversationId) {
+      return;
+    }
+    let chosen;
+    try {
+      chosen = await platform.chooseImages({ maxCount: 1, maxSizeBytes: MAX_CHAT_IMAGE_BYTES });
+    } catch (cause) {
+      // A dismissed picker is not an error worth a banner.
+      if ((cause as { code?: string } | null)?.code !== "cancelled") {
+        this.setData({ message: errorMessage(cause, t("chat.pickImageFailed")) });
+      }
+      return;
+    }
+    const image = chosen[0];
+    if (!image) {
+      return;
+    }
+    this.setData({ busy: true, message: "" });
+    try {
+      const bytes = await platform.readBytes(image.path);
+      const fileName = image.path.split("/").pop() || "chat-image.jpg";
+      await sendChatImage(this.data._conversationId, {
+        bytes,
+        contentType: image.contentType,
+        fileName,
+        sizeBytes: image.sizeBytes,
+      });
+      await this.refresh();
+    } catch (cause) {
+      this.setData({ message: errorMessage(cause, t("chat.sendImageFailed")) });
     } finally {
       this.setData({ busy: false });
     }

@@ -14,7 +14,7 @@ import {
   MP_SOCKET_CONNECTING,
   MP_SOCKET_OPEN,
 } from "@sdkwork/mall-mp-host/weixin";
-import { configureMpImServices, recoverRealtime, subscribeConversationMessages } from "@sdkwork/mall-mp-im/im-service";
+import { configureMpImServices, recoverRealtime, sendChatImage, subscribeConversationMessages } from "@sdkwork/mall-mp-im/im-service";
 import type { MpImServices } from "@sdkwork/mall-mp-im/im-service";
 
 interface FakeTask {
@@ -183,5 +183,66 @@ describe("mall realtime facade", () => {
 
   it("fails loudly when the realtime service was never wired", () => {
     expect(() => subscribeConversationMessages("c-1", () => undefined)).toThrow("IM services are not configured");
+  });
+});
+
+describe("image messages", () => {
+  beforeEach(() => {
+    configureMpImServices(null);
+  });
+
+  it("uploads through the injected Drive port and posts the media identity", async () => {
+    const sent: unknown[] = [];
+    const uploaded: unknown[] = [];
+    configureMpImServices({
+      conversation: {
+        sendImage: async (conversationId: string, input: unknown) => {
+          sent.push({ conversationId, input });
+          return { messageId: "m-9", messageSeq: "11", deliveryStatus: "applied" };
+        },
+      },
+      uploadImage: async (image: unknown) => {
+        uploaded.push(image);
+        return {
+          driveUri: "drive://spaces/s-1/nodes/n-1",
+          fileName: "chat-image.jpg",
+          mimeType: "image/jpeg",
+          nodeId: "n-1",
+          sizeBytes: "2048",
+          spaceId: "s-1",
+        };
+      },
+    } as unknown as MpImServices);
+
+    const bytes = new ArrayBuffer(2048);
+    await sendChatImage("c-1", {
+      bytes,
+      contentType: "image/jpeg",
+      fileName: "chat-image.jpg",
+      sizeBytes: 2048,
+    });
+
+    expect(uploaded).toHaveLength(1);
+    expect(sent).toEqual([{
+      conversationId: "c-1",
+      input: {
+        driveUri: "drive://spaces/s-1/nodes/n-1",
+        fileName: "chat-image.jpg",
+        mimeType: "image/jpeg",
+        nodeId: "n-1",
+        sizeBytes: "2048",
+        spaceId: "s-1",
+      },
+    }]);
+  });
+
+  it("refuses to send an image when no Drive uploader was wired", async () => {
+    configureMpImServices({ conversation: {} } as unknown as MpImServices);
+    await expect(sendChatImage("c-1", {
+      bytes: new ArrayBuffer(1),
+      contentType: "image/jpeg",
+      fileName: "a.jpg",
+      sizeBytes: 1,
+    })).rejects.toThrow("IM image uploader is not configured");
   });
 });

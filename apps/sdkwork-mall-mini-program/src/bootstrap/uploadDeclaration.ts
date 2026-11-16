@@ -38,7 +38,25 @@ export const SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD = {
   uploadProfileCode: "image",
 } as const satisfies SdkworkMallMpUploadDeclarationEntry;
 
+/**
+ * Customer-service chat images posted to an IM conversation.
+ *
+ * `application`-kind scope label: the message does not exist at upload time, so
+ * the id is the stable surface label rather than a message id. The IM
+ * conversation service posts the returned Drive identity as a media part.
+ */
+export const SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD = {
+  appResourceIdKind: "application",
+  appResourceType: "mall.chat-image",
+  purpose: "Customer-service chat images uploaded to Drive and posted to the IM conversation as media messages.",
+  retention: "long_term",
+  scene: "chat-image",
+  source: SDKWORK_MALL_MP_UPLOAD_SOURCE,
+  uploadProfileCode: "image",
+} as const satisfies SdkworkMallMpUploadDeclarationEntry;
+
 /** Every declared upload purpose for this application. */
 export const SDKWORK_MALL_MP_UPLOAD_DECLARATIONS: readonly SdkworkMallMpUploadDeclarationEntry[] = [
   SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD,
+  SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD,
 ];
