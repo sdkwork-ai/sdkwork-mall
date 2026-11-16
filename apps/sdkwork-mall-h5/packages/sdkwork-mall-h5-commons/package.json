@@ -24,9 +24,16 @@
       "types": "./src/EmptyState.tsx",
       "import": "./src/EmptyState.tsx",
       "default": "./src/EmptyState.tsx"
+    },
+    "./share-attribution": {
+      "types": "./src/share-attribution.ts",
+      "import": "./src/share-attribution.ts",
+      "default": "./src/share-attribution.ts"
     }
   },
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "lucide-react": "catalog:"
   },

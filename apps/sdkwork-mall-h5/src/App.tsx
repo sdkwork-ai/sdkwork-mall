@@ -6,10 +6,20 @@ import { SdkworkMallH5MobileShell } from "@sdkwork/mall-h5-shell";
 import { AppRoutes } from "./routes/AppRoutes";
 import { AuthGate } from "./AuthGate";
 import { getSdkworkH5PartnerService } from "@sdkwork/mall-h5-partner";
+import { registerShareAttributionResolver } from "@sdkwork/mall-h5-commons/share-attribution";
 
 import { createSdkworkMallH5Runtime } from "./bootstrap/runtime";
 
 const runtime = createSdkworkMallH5Runtime();
+
+// Product/promo shares from the storefront carry the distributor's invite code.
+registerShareAttributionResolver(async () => {
+  try {
+    return await getSdkworkH5PartnerService().resolveOwnInviteCode();
+  } catch {
+    return "";
+  }
+});
 
 /** Persisted invite code so a signed-out visitor keeps the attribution. */
 const PENDING_INVITE_KEY = "sdkwork-mall-h5-pending-invite";

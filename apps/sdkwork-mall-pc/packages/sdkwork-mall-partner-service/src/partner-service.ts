@@ -30,6 +30,8 @@ export interface CreateSdkworkPartnerServiceInput {
 export interface SdkworkPartnerService {
   /** Binds the signed-in buyer to the distributor that owns the invite code. */
   bindCustomerByInviteCode(inviteCode: string): Promise<void>;
+  /** The signed-in distributor's own invite code; "" when not enrolled. */
+  resolveOwnInviteCode(): Promise<string>;
   retrieveProgram(): Promise<SdkworkPartnerProgram>;
   submitApplication(
     draft: SdkworkPartnerApplicationDraft,
@@ -72,6 +74,17 @@ export function createSdkworkPartnerService(
         return;
       }
       await center.bindCustomerByInviteCode(inviteCode);
+    },
+    async resolveOwnInviteCode() {
+      if (!center) {
+        return "";
+      }
+      try {
+        return (await center.retrieveCenter()).profile.inviteCode ?? "";
+      } catch {
+        // Not enrolled / centre unavailable: share without attribution.
+        return "";
+      }
     },
     cancelApplication: (applicationId) => input.join.cancelApplication(applicationId),
     async createWithdrawal(draft) {

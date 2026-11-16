@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
+import { resolveShareAttribution } from "@sdkwork/mall-h5-commons/share-attribution";
 import { useTranslation } from "react-i18next";
+import { getSdkworkH5PartnerService } from "@sdkwork/mall-h5-partner";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ChevronLeft,
@@ -287,22 +289,36 @@ export function SdkworkMallH5ProductDetailPage() {
     if (!detail) {
       return;
     }
-    const shareUrl = window.location.href;
-    const navigatorWithShare = navigator as Navigator & {
-      share?: (data: { title: string; url: string }) => Promise<void>;
-    };
-    if (typeof navigatorWithShare.share === "function") {
-      navigatorWithShare
-        .share({ title: detail.title, url: shareUrl })
-        .catch(() => {
-          // 用户取消分享不算失败。
-        });
-      return;
-    }
-    navigator.clipboard
-      .writeText(shareUrl)
-      .then(() => showToast(t("productDetail.toast.linkCopied")))
-      .catch(() => showToast(t("productDetail.toast.shareFailed")));
+    void (async () => {
+      // A distributor's share must attribute the order: append their own invite
+      // code before handing the link to the share sheet or clipboard.
+      let shareUrl = window.location.href;
+      try {
+        const invite = await resolveShareAttribution();
+        if (invite) {
+          const attributed = new URL(shareUrl);
+          attributed.searchParams.set("invite", invite);
+          shareUrl = attributed.toString();
+        }
+      } catch {
+        // Sharing still works without attribution.
+      }
+      const navigatorWithShare = navigator as Navigator & {
+        share?: (data: { title: string; url: string }) => Promise<void>;
+      };
+      if (typeof navigatorWithShare.share === "function") {
+        navigatorWithShare
+          .share({ title: detail.title, url: shareUrl })
+          .catch(() => {
+            // 用户取消分享不算失败。
+          });
+        return;
+      }
+      navigator.clipboard
+        .writeText(shareUrl)
+        .then(() => showToast(t("productDetail.toast.linkCopied")))
+        .catch(() => showToast(t("productDetail.toast.shareFailed")));
+    })();
   }
 
   function handleGalleryScroll() {
