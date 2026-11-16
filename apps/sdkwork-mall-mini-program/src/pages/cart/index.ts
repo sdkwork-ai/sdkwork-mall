@@ -4,6 +4,7 @@ import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCartItem, getCart, removeCartItem, updateCartItem } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
 import { platform } from "@sdkwork/mall-mp-core";
+import { setCartTabBadge } from "../../services/tab-bar-service";
 
 interface CartGroup {
   shopId: string;
@@ -98,6 +99,9 @@ Page({
         loading: false,
       });
       this.syncSelection(groups);
+      // Keep the tab bar's cart badge in step with the cart plane (H5 parity:
+      // the shell reads the same total quantity).
+      setCartTabBadge(cart.items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0));
     } catch (cause) {
       this.setData({
         loading: false,

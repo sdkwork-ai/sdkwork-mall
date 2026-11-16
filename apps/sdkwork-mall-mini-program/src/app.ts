@@ -22,6 +22,7 @@ import { SDKWORK_MALL_MP_CHAT_IMAGE_UPLOAD } from "./bootstrap/uploadDeclaration
 import { mpCapabilityUrl } from "./routes/capabilities";
 import { uploadDriveImageDetailed } from "./services/drive-upload-service";
 import { createDriveDownloadGrant } from "./services/drive-download-service";
+import { applyCartTabBadge, syncCartTabBadge } from "./services/tab-bar-service";
 import runtimeEnvJson from "./runtime-env.json";
 
 interface MallMpGlobalData {
@@ -117,6 +118,9 @@ App({
       // Cold-launch session recovery runs off the critical path: the storefront
       // is browsable without a session, and pages re-read the store on show.
       void restoreSession();
+      // The cart tab badge is part of the tab bar contract (H5 renders
+      // `readMallH5CartCount`); paint the last known count immediately.
+      applyCartTabBadge();
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : String(cause);
       console.error("[sdkwork-mall] runtime bootstrap failed", message);
@@ -124,6 +128,16 @@ App({
         globalData.runtimeError = message;
       }
     }
+  },
+
+  /**
+   * Returning from the background can mean the cart changed elsewhere (another
+   * client, a stale badge). Re-paint from storage first, then reconcile.
+   */
+  onShow() {
+    applyCartTabBadge();
+    // `syncCartTabBadge` clears the badge itself when the buyer is signed out.
+    void syncCartTabBadge();
   },
 
   /**

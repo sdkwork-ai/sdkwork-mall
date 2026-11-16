@@ -55,6 +55,13 @@ export interface MallMpPlatform {
   /** Platform key/value storage for device-local state (history, dev token). */
   readonly storage: MpStorage;
   switchTab(url: string): void;
+  /**
+   * Sets or clears the badge of one tab (`index` into the `app.json` list).
+   *
+   * A badge is decoration: platform failures are swallowed so a badge can never
+   * break navigation or a cart mutation.
+   */
+  tabBarBadge(index: number, text?: string): void;
   toast(message: string, tone?: MpToastTone): void;
 }
 
@@ -71,6 +78,13 @@ export const platform: MallMpPlatform = {
   copy: (text) => getMallMpHost().clipboard.setText(text),
   toast: (message, tone) => getMallMpHost().feedback.toast(message, tone ?? "none"),
   stopPullDownRefresh: () => getMallMpHost().lifecycle.stopPullDownRefresh(),
+  tabBarBadge(index, text) {
+    const navigation = getMallMpHost().navigation;
+    void (text
+      ? navigation.setTabBarBadge(index, text)
+      : navigation.removeTabBarBadge(index)
+    ).catch(() => undefined);
+  },
   get storage() {
     return getMallMpHost().storage;
   },

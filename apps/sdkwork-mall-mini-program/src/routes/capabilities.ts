@@ -88,6 +88,7 @@ export function mpCapabilityUrl(
 export const MP_TAB_CAPABILITY_ROUTES: readonly string[] = [
   "storefront.mall.home",
   "storefront.mall.categories",
+  "buyer.mall.im.chats",
   "storefront.mall.cart",
   "buyer.mall.dashboard",
 ];

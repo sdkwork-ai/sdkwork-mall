@@ -71,6 +71,18 @@ describe("platform facade", () => {
     expect(host.recorder.navigations).toContain("stopPullDownRefresh");
   });
 
+  it("sets and clears the tab bar badge through the host", () => {
+    const host = createMemoryHost();
+    boot(host);
+    const api = getMallMpPlatform();
+
+    api.tabBarBadge(3, "2");
+    api.tabBarBadge(3);
+
+    expect(host.recorder.navigations).toContain("tabBarBadge:3:2");
+    expect(host.recorder.navigations).toContain("tabBarBadgeRemoved:3");
+  });
+
   it("returns the confirm answer as a boolean instead of a callback", async () => {
     expect(await (boot(createMemoryHost({ confirmAnswer: true })), platform.confirm({ title: "删除", content: "确定？" })))
       .toBe(true);

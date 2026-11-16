@@ -6,6 +6,7 @@ import { type MpCheckoutQuote, createCheckoutQuote, listUserCoupons, submitOrder
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
+import { syncCartTabBadge } from "../../services/tab-bar-service";
 
 interface MpCouponOption {
   discountAmountCny: number | null;
@@ -406,6 +407,9 @@ Page({
         usePoints: this.data.usePoints,
         buyerRemark: this.data.buyerRemark.trim() || undefined,
       });
+      // The cart lines are consumed by the order: clear the tab badge before the
+      // cashier takes over (H5 parity: the shell reads the same total quantity).
+      void syncCartTabBadge();
       const next = () =>
         platform.redirectTo(mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: result.orderId }));
       if (result.warnings.length > 0) {

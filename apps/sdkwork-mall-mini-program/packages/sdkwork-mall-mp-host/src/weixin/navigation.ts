@@ -17,6 +17,9 @@ export interface WxNavigationApi {
   }): void;
   redirectTo(options: { fail?(result: { errMsg?: string }): void; success?(): void; url: string }): void;
   switchTab(options: { fail?(result: { errMsg?: string }): void; success?(): void; url: string }): void;
+  /** Tab-bar badge APIs are optional: an older base library may not expose them. */
+  removeTabBarBadge?(options: { fail?(result: { errMsg?: string }): void; index: number; success?(): void }): void;
+  setTabBarBadge?(options: { fail?(result: { errMsg?: string }): void; index: number; success?(): void; text: string }): void;
 }
 
 function navigate(
@@ -54,6 +57,41 @@ export function createWeixinNavigation(api: WxNavigationApi): MpNavigation {
             // redirecting to the capability root, not a platform failure.
             if (/fail can not navigateBack|at first page/iu.test(result.errMsg ?? "")) {
               reject(createMpHostError("invalid-state", "已经是首个页面", result));
+              return;
+            }
+            reject(normalizeMpHostError(result));
+          },
+        });
+      });
+    },
+    setTabBarBadge(index, text) {
+      return new Promise<void>((resolve, reject) => {
+        if (typeof api.setTabBarBadge !== "function") {
+          // A badge is decoration: an older base library simply skips it.
+          resolve();
+          return;
+        }
+        api.setTabBarBadge({
+          index,
+          text,
+          success: () => resolve(),
+          fail: (result) => reject(normalizeMpHostError(result)),
+        });
+      });
+    },
+    removeTabBarBadge(index) {
+      return new Promise<void>((resolve, reject) => {
+        if (typeof api.removeTabBarBadge !== "function") {
+          resolve();
+          return;
+        }
+        api.removeTabBarBadge({
+          index,
+          success: () => resolve(),
+          fail: (result) => {
+            // "no badge on this tab" is the desired end state.
+            if (/no tabBar badge|not found/iu.test(result.errMsg ?? "")) {
+              resolve();
               return;
             }
             reject(normalizeMpHostError(result));

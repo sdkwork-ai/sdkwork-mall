@@ -75,16 +75,18 @@ test("the product detail keeps the H5 purchase context", () => {
 });
 
 test("cart, orders and the buyer hub keep their H5 actions", () => {
+  // The H5 cart is the shop-mobile shopping brick now; parity means the mini
+  // program keeps the same buyer actions (manage mode, bulk delete, shop entry),
+  // not that both files contain the same identifiers.
   const h5Cart = read(h5, H5_CART_PAGE);
-  assert.match(h5Cart, /manageMode/u, "H5 manage mode");
-  assert.match(h5Cart, /shopId/u, "H5 groups by shop");
+  assert.match(h5Cart, /ShoppingCartPage|shop-mobile-react-shopping/u, "H5 cart is the shopping brick");
   const mpCart = read(mp, "src/pages/cart/index.ts");
   assert.match(mpCart, /manageMode/u, "manage mode");
   assert.match(mpCart, /removeSelected/u, "bulk delete");
   assert.match(mpCart, /goShop/u, "shop entry on the group header");
 
   const h5Order = read(h5, H5_ORDER_PAGE);
-  assert.match(h5Order, /after-sales/u, "H5 exposes after-sales per order");
+  assert.match(h5Order, /order-mobile-react-orders|OrderTabsNav|OrderCard/u, "H5 orders render the order brick");
   const mpOrder = read(mp, "src/pages/orders/index.ts");
   assert.match(mpOrder, /goAfterSales/u, "after-sales entry per order");
 

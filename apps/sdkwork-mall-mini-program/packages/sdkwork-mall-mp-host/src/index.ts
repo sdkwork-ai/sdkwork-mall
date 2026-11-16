@@ -103,6 +103,10 @@ export interface MpNavigation {
   redirectTo(url: string): Promise<void>;
   switchTab(url: string): Promise<void>;
   back(delta?: number): Promise<void>;
+  /** Sets the badge text on one tab (index into the `app.json` tabBar list). */
+  setTabBarBadge(index: number, text: string): Promise<void>;
+  /** Clears a tab badge; safe when no badge is set. */
+  removeTabBarBadge(index: number): Promise<void>;
 }
 
 export interface MpFeedback {

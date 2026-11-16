@@ -186,6 +186,12 @@ export function createMemoryHost(options: CreateMemoryHostOptions = {}): MemoryH
       async back(delta = 1) {
         recorder.navigations.push(`back:${delta}`);
       },
+      async setTabBarBadge(index, text) {
+        recorder.navigations.push(`tabBarBadge:${index}:${text}`);
+      },
+      async removeTabBarBadge(index) {
+        recorder.navigations.push(`tabBarBadgeRemoved:${index}`);
+      },
     },
     feedback: {
       toast(message, tone = "none") {

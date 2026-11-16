@@ -407,3 +407,32 @@
     and belong to the concurrent H5 brick migration
     (`verify-h5-i18n-runtime` on the in-flight `OrderDetailPage`, and the H5 pay
     action redirect).
+
+- 2026-11-16 (fourteenth pass: tab bar aligned with the H5 shell). The mini
+  program tab bar had four tabs and no badge; the H5 shell has five tabs and a
+  cart badge.
+  - `app.json` now declares the same five tabs, in the same order, as the H5
+    shell `SHELL_TABS`: 首页 / 分类 / **消息** / 购物车 / 我的. The 消息 tab roots at
+    `pages/chats/index`; the authored icon pair (`message-outline.png` /
+    `message-filled.png`, 81x81, rounded speech bubble, brand-red selected state)
+    completes the eight-icon set.
+  - `buyer.mall.im.chats` joined `MP_TAB_CAPABILITY_ROUTES`, so every capability
+    jump to the conversation list uses `switchTab` instead of an illegal
+    `navigateTo` push onto a tab page.
+  - Cart badge (H5 parity with `readMallH5CartCount` / `writeMallH5CartCount`):
+    the host gained `MpNavigation.setTabBarBadge/removeTabBarBadge` (tolerant of
+    old base libraries and of "no badge set"), the platform facade projects it as
+    `platform.tabBarBadge(index, text?)`, and `src/services/tab-bar-service.ts`
+    owns the tab model, the `sdkwork-mall-mp-cart-count` storage contract and the
+    99+ cap. The entry paints the stored count on launch/show and reconciles off
+    the cart block; the cart, product and checkout flows update it.
+  - Guards: `tests/contract/verify-mp-tabbar-h5-parity.test.mjs` pins the tab
+    labels against the H5 shell source, requires both icon assets and a registered
+    page per tab, checks the tab capability list and the badge wiring; the
+    standard-architecture suite now expects five tabs; `mp-platform-host` covers
+    set/clear through the host fake.
+  - Regression: 25 node guards, 68 vitest contracts, both typechecks (49 packages,
+    deferred typecheck), composition, parity, default data green; 175/180 contract
+    tests, with the five failures all in the concurrent H5 brick migration
+    (OrderDetail i18n key, H5 route registry, shared copy, H5 pay redirect, H5
+    page heading). i18n baseline refreshed to the improved counts.

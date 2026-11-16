@@ -60,6 +60,12 @@
         "selectedIconPath": "assets/tabbar/category-filled.png"
       },
       {
+        "pagePath": "pages/chats/index",
+        "text": "消息",
+        "iconPath": "assets/tabbar/message-outline.png",
+        "selectedIconPath": "assets/tabbar/message-filled.png"
+      },
+      {
         "pagePath": "pages/cart/index",
         "text": "购物车",
         "iconPath": "assets/tabbar/cart-outline.png",

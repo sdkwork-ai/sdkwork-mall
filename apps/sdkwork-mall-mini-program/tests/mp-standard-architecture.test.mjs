@@ -51,12 +51,19 @@ test("mall mini-program root is manifest-driven", () => {
 test("mall mini-program tab bar covers the JD core surfaces", () => {
   const appJson = JSON.parse(read("../src/app.json"));
   const pages = appJson.tabBar.list.map((entry) => entry.pagePath);
+  // Five tabs, matching the H5 shell (`SHELL_TABS`): 首页 / 分类 / 消息 / 购物车 / 我的.
   assert.deepEqual(pages, [
     "pages/home/index",
     "pages/category/index",
+    "pages/chats/index",
     "pages/cart/index",
     "pages/buyer/index",
   ]);
+  // The cart tab is the one that carries a badge; every tab needs both states.
+  for (const entry of appJson.tabBar.list) {
+    assert.ok(entry.text, `${entry.pagePath} needs a label`);
+    assert.ok(entry.iconPath && entry.selectedIconPath, `${entry.pagePath} needs both icon states`);
+  }
 });
 
 test("mall mini-program registers the full commerce route catalog", () => {

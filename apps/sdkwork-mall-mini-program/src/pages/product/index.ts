@@ -12,6 +12,7 @@ import { addToCart } from "../../services/cart-service";
 import { isFavorite, recordFootprint, toggleFavorite } from "../../services/favorites-service";
 import { claimCoupon, type MpOffer, listOffers } from "../../services/promotion-service";
 import { isLoggedIn } from "../../services/session";
+import { syncCartTabBadge } from "../../services/tab-bar-service";
 import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import { platform } from "@sdkwork/mall-mp-core";
@@ -400,6 +401,9 @@ Page({
         skuId: sku.id,
         quantity: this.data.quantity,
       });
+      // The cart tab badge is part of the tab bar contract (H5 parity); reconcile
+      // it off the critical path so the purchase flow never waits on it.
+      void syncCartTabBadge();
       if (goCheckout) {
         // 立即购买 settles only the line just created. Without the line id the
         // buyer is sent to the cart to choose, never to a whole-cart checkout.
