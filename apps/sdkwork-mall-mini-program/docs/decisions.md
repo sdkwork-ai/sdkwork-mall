@@ -256,3 +256,29 @@
     (the single failure remains the external H5 i18n ratchet), both typechecks,
     composition, parity, catalogues and default data green; miniProgram readiness
     153/155.
+
+- 2026-11-16 (seventh pass: IAM as a building block). The login surface stopped
+  hand-rolling IAM wire calls:
+  - `@sdkwork/mall-mp-auth` now runs the credential grant through the generated
+    `@sdkwork/iam-app-sdk` (`auth.sessions.create` with an explicit
+    `grantType: "password"`), reads identity from `iam.users.current.retrieve`
+    and changes credentials through `iam.users.current.password.update`. The raw
+    `POST /auth/sessions` call and its hand-assembled token parsing are gone.
+  - `profile-service` projects identity from the capability instead of the mall's
+    `/accounts/current/summary`; the membership level stays a commerce fact
+    (`memberships/current/status`, fail-soft).
+  - The security screen's "修改密码 → 前往登录页重新认证" placeholder became a real
+    inline credential form (old/new/confirm, client-side pre-checks, IAM policy
+    authority, success toast). Phone/email rows now report the IAM verified state
+    instead of static copy.
+  - Guard: `tests/contract/verify-mp-auth-block-integration.test.mjs` fails the
+    build if a mall service hand-rolls `/auth/*` or `/iam/*`, if the capability
+    opens its own request seam, or if the security form regresses to a
+    placeholder.
+  - Added `docs/architecture/TECH-BLOCK-INTEGRATION.md`: the block-ownership map
+    (IAM, IM, Drive, host, commerce groups) and the remaining migration phases
+    (commerce client seam → cart/order → catalog/promotion/after-sales/... →
+    retire the raw transport).
+  - Regression: 25 node guards, 55 vitest contracts, 147/147 repo contract tests,
+    both typechecks (49 packages), composition, parity, catalogues, default data
+    and the i18n ratchet all green; miniProgram readiness 155 -> 149.

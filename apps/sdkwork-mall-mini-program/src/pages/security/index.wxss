@@ -35,3 +35,22 @@
   display: flex;
   justify-content: center;
 }
+
+.security-password-form {
+  border-top: 1rpx solid #f3f4f6;
+  padding-top: 16rpx;
+}
+
+.security-input {
+  background: #f9fafb;
+  border-radius: 10rpx;
+  padding: 16rpx 20rpx;
+  font-size: 26rpx;
+  margin-bottom: 14rpx;
+}
+
+.security-form-error {
+  color: #dc2626;
+  font-size: 24rpx;
+  margin-bottom: 12rpx;
+}

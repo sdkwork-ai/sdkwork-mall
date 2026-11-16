@@ -52,14 +52,25 @@ function createRuntime(httpResponses: Parameters<typeof createMemoryHost>[0]["ht
 
 /**
  * Replaces the IAM client (and therefore the session manager built from it) so
- * the WeChat exchange can be asserted without a network call.
+ * the WeChat exchange and the credential sign-in can be asserted without a
+ * network call.
  */
 function withFakeIam(
   runtime: MallMpRuntime,
   loginResponse: unknown,
-  overrides: { retrieve?: () => Promise<unknown>; remove?: () => Promise<unknown> } = {},
-): { runtime: MallMpRuntime; lastExchangeBody: () => Record<string, unknown> | null } {
+  overrides: {
+    passwordResponse?: unknown;
+    retrieve?: () => Promise<unknown>;
+    remove?: () => Promise<unknown>;
+    updatePassword?: (body: Record<string, unknown>) => Promise<unknown>;
+  } = {},
+): {
+  runtime: MallMpRuntime;
+  lastExchangeBody: () => Record<string, unknown> | null;
+  lastPasswordBody: () => Record<string, unknown> | null;
+} {
   let exchangeBody: Record<string, unknown> | null = null;
+  let passwordBody: Record<string, unknown> | null = null;
   const fakeClient = {
     oauth: {
       miniProgramSessions: {
@@ -71,9 +82,21 @@ function withFakeIam(
     },
     auth: {
       sessions: {
+        create: async (body: Record<string, unknown>) => {
+          passwordBody = body;
+          return overrides.passwordResponse ?? { accessToken: "access-pw", authToken: "auth-pw", context: { userId: "user-pw" } };
+        },
         current: {
           retrieve: overrides.retrieve ?? (async () => ({})),
           delete: overrides.remove ?? (async () => undefined),
+        },
+      },
+    },
+    iam: {
+      users: {
+        current: {
+          retrieve: overrides.retrieve ?? (async () => ({})),
+          password: { update: overrides.updatePassword ?? (async () => ({})) },
         },
       },
     },
@@ -87,6 +110,7 @@ function withFakeIam(
   return {
     runtime: Object.assign({}, runtime, { iamClient, authManager }) as MallMpRuntime,
     lastExchangeBody: () => exchangeBody,
+    lastPasswordBody: () => passwordBody,
   };
 }
 
@@ -117,26 +141,71 @@ describe("account capability (sdkwork-iam integration)", () => {
   });
 
   it("keeps the account/password fallback on the IAM session contract", async () => {
-    const runtime = createRuntime([{
-      statusCode: 200,
-      header: {},
-      data: envelope({ accessToken: "access-pw", authToken: "auth-pw", context: { userId: "user-pw" } }),
-    }]);
+    const { runtime, lastPasswordBody } = withFakeIam(createRuntime(), {});
     const service = createMpAuthService(runtime);
 
     const snapshot = await service.loginWithPassword({ account: "buyer@example.com", password: "secret" });
 
     expect(snapshot).toMatchObject({ accessToken: "access-pw", authToken: "auth-pw", userId: "user-pw" });
-    expect(runtime.host.recorder.http[0].url).toBe("https://api.test/app/v3/api/auth/sessions");
-    expect(runtime.host.recorder.http[0].data).toEqual({ password: "secret", email: "buyer@example.com" });
+    // The credential grant is an IAM SDK operation, never a mall-owned endpoint.
+    expect(lastPasswordBody()).toEqual({ grantType: "password", email: "buyer@example.com", password: "secret" });
+    expect(runtime.host.recorder.http).toHaveLength(0);
   });
 
   it("rejects a session-create response without a token", async () => {
-    const runtime = createRuntime([{ statusCode: 200, header: {}, data: envelope({ accessToken: "a" }) }]);
+    const { runtime } = withFakeIam(createRuntime(), {}, { passwordResponse: { accessToken: "a" } });
     const service = createMpAuthService(runtime);
 
     await expect(service.loginWithPassword({ account: "13800000000", password: "secret" }))
       .rejects.toThrow("登录响应缺少令牌");
+  });
+
+  it("normalizes the IAM current-user identity", async () => {
+    const { runtime } = withFakeIam(createRuntime(), {}, {
+      retrieve: async () => ({
+        displayName: "李 明",
+        email: "buyer@example.com",
+        emailVerified: true,
+        id: "user-9",
+        nickname: "李 明",
+        phone: "13800000000",
+        phoneVerified: false,
+        userId: "user-9",
+        username: "buyer",
+      }),
+    });
+
+    await expect(createMpAuthService(runtime).loadCurrentUser()).resolves.toEqual({
+      displayName: "李 明",
+      email: "buyer@example.com",
+      emailVerified: true,
+      phone: "13800000000",
+      phoneVerified: false,
+      userId: "user-9",
+      username: "buyer",
+    });
+  });
+
+  it("changes the password through the IAM credential operation", async () => {
+    const updates: unknown[] = [];
+    const { runtime } = withFakeIam(createRuntime(), {}, {
+      updatePassword: async (body: Record<string, unknown>) => {
+        updates.push(body);
+        return {};
+      },
+    });
+
+    await createMpAuthService(runtime).changePassword({
+      confirmPassword: "new-secret",
+      newPassword: "new-secret",
+      oldPassword: "old-secret",
+    });
+
+    expect(updates).toEqual([{
+      confirmPassword: "new-secret",
+      newPassword: "new-secret",
+      oldPassword: "old-secret",
+    }]);
   });
 
   it("clears the session on logout even when the server revoke fails", async () => {
