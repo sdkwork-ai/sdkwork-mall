@@ -249,3 +249,58 @@ test("the app loads no JSON module and no non-mini-program global", () => {
   scan(path.join(appRoot, "packages"));
   assert.deepEqual(problems, [], "platform-incompatible module or global");
 });
+test("templates only reference assets that exist and avoid grid layout", () => {
+  // Two failures observed in the dev tool: a `/assets/...png` icon that was never
+  // shipped (empty glyph) and `display: grid` collapsing tiles so labels wrapped one
+  // character per line. Both are cheap to guard here.
+  const problems = [];
+  const scan = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || entry.name === "node_modules") {
+        continue;
+      }
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        scan(entryPath);
+        continue;
+      }
+      if (!entry.name.endsWith(".wxml")) {
+        continue;
+      }
+      const source = read(entryPath);
+      for (const match of source.matchAll(/src="(\/assets\/[^"{}]+\.png)"/gu)) {
+        const asset = path.join(srcRoot, match[1].replace(/^\//u, ""));
+        if (!existsSync(asset)) {
+          problems.push(`${path.relative(appRoot, entryPath).replace(/\\/gu, "/")}: missing ${match[1]}`);
+        }
+      }
+    }
+  };
+  scan(srcRoot);
+  assert.deepEqual(problems, [], "templates must reference shipped assets");
+});
+
+test("stylesheets avoid CSS grid (unsupported on older base libraries)", () => {
+  const problems = [];
+  const scan = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isSymbolicLink() || entry.name === "node_modules") {
+        continue;
+      }
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        scan(entryPath);
+        continue;
+      }
+      if (!entry.name.endsWith(".wxss")) {
+        continue;
+      }
+      const source = read(entryPath).replace(/\/\*[\s\S]*?\*\//gu, "");
+      if (/display\s*:\s*grid|grid-template/iu.test(source)) {
+        problems.push(path.relative(appRoot, entryPath).replace(/\\/gu, "/"));
+      }
+    }
+  };
+  scan(srcRoot);
+  assert.deepEqual(problems, [], "use flex-wrap instead of grid");
+});

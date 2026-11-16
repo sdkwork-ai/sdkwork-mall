@@ -6,12 +6,12 @@ import { getProfile } from "../../services/profile-service";
 import { isLoggedIn, clearSession } from "../../services/session";
 import { platform } from "@sdkwork/mall-mp-core";
 
-const ORDER_ENTRIES: Array<{ status: string; labelKey: string; count: string | number }> = [
-  { status: "all", labelKey: "buyerHub.orders.all", count: "" },
-  { status: "PENDING_PAYMENT", labelKey: "buyerHub.orders.pendingPayment", count: "" },
-  { status: "PENDING_SHIPMENT", labelKey: "buyerHub.orders.pendingShipment", count: "" },
-  { status: "PENDING_RECEIPT", labelKey: "buyerHub.orders.pendingReceipt", count: "" },
-  { status: "COMPLETED", labelKey: "buyerHub.orders.completed", count: "" },
+const ORDER_ENTRIES: Array<{ status: string; labelKey: string; icon: string; count: string | number }> = [
+  { status: "all", labelKey: "buyerHub.orders.all", icon: "box", count: "" },
+  { status: "PENDING_PAYMENT", labelKey: "buyerHub.orders.pendingPayment", icon: "wallet", count: "" },
+  { status: "PENDING_SHIPMENT", labelKey: "buyerHub.orders.pendingShipment", icon: "package", count: "" },
+  { status: "PENDING_RECEIPT", labelKey: "buyerHub.orders.pendingReceipt", icon: "truck", count: "" },
+  { status: "COMPLETED", labelKey: "buyerHub.orders.completed", icon: "check", count: "" },
 ];
 
 /**
@@ -19,21 +19,21 @@ const ORDER_ENTRIES: Array<{ status: string; labelKey: string; count: string | n
  * `routes/capabilities.ts` 统一解析：改页面路径只需改注册表，
  * 且与 PC / H5 / Flutter 共用同一套 route id。
  */
-const ASSET_LINKS: Array<{ labelKey: string; capability: string }> = [
-  { labelKey: "buyerHub.assets.wallet", capability: "buyer.mall.wallet" },
-  { labelKey: "buyerHub.assets.points", capability: "buyer.mall.points" },
-  { labelKey: "buyerHub.assets.membership", capability: "buyer.mall.membership" },
+const ASSET_LINKS: Array<{ labelKey: string; capability: string; icon: string }> = [
+  { labelKey: "buyerHub.assets.wallet", capability: "buyer.mall.wallet", icon: "wallet" },
+  { labelKey: "buyerHub.assets.points", capability: "buyer.mall.points", icon: "star" },
+  { labelKey: "buyerHub.assets.membership", capability: "buyer.mall.membership", icon: "crown" },
 ];
 
-const QUICK_LINKS: Array<{ labelKey: string; capability: string }> = [
-  { labelKey: "buyerHub.services.favorites", capability: "buyer.mall.favorites" },
-  { labelKey: "buyerHub.services.footprint", capability: "buyer.mall.footprint" },
-  { labelKey: "buyerHub.services.addresses", capability: "buyer.mall.addresses" },
-  { labelKey: "buyerHub.services.coupons", capability: "buyer.mall.coupons" },
-  { labelKey: "buyerHub.services.afterSales", capability: "buyer.mall.after-sales" },
-  { labelKey: "buyerHub.services.invoices", capability: "buyer.mall.invoices" },
-  { labelKey: "buyerHub.services.messages", capability: "buyer.mall.messages" },
-  { labelKey: "buyerHub.services.chats", capability: "buyer.mall.im.chats" },
+const QUICK_LINKS: Array<{ labelKey: string; capability: string; icon: string }> = [
+  { labelKey: "buyerHub.services.favorites", capability: "buyer.mall.favorites", icon: "heart" },
+  { labelKey: "buyerHub.services.footprint", capability: "buyer.mall.footprint", icon: "clock" },
+  { labelKey: "buyerHub.services.addresses", capability: "buyer.mall.addresses", icon: "pin" },
+  { labelKey: "buyerHub.services.coupons", capability: "buyer.mall.coupons", icon: "ticket" },
+  { labelKey: "buyerHub.services.afterSales", capability: "buyer.mall.after-sales", icon: "file" },
+  { labelKey: "buyerHub.services.invoices", capability: "buyer.mall.invoices", icon: "receipt" },
+  { labelKey: "buyerHub.services.messages", capability: "buyer.mall.messages", icon: "chat" },
+  { labelKey: "buyerHub.services.chats", capability: "buyer.mall.im.chats", icon: "headset" },
 ];
 
 /** 账户区入口（含设置）同样走能力路由。 */
@@ -56,11 +56,11 @@ interface BuyerData {
   displayName: string;
   /** First character of the display name, rendered in the avatar circle. */
   avatarText: string;
-  orderEntries: Array<{ status: string; label: string; count: string | number }>;
-  assetLinks: Array<{ label: string; capability: string }>;
-  quickLinks: Array<{ label: string; capability: string }>;
+  orderEntries: Array<{ status: string; label: string; icon: string; count: string | number }>;
+  assetLinks: Array<{ label: string; capability: string; icon: string }>;
+  quickLinks: Array<{ label: string; capability: string; icon: string }>;
   accountLinks: Array<{ label: string; capability: string }>;
-  otherLinks: Array<{ label: string; capability: string }>;
+  otherLinks: Array<{ label: string; capability: string; icon: string }>;
 }
 
 function resolveOrderEntries(
@@ -69,6 +69,7 @@ function resolveOrderEntries(
   return ORDER_ENTRIES.map((entry) => ({
     status: entry.status,
     label: t(entry.labelKey),
+    icon: entry.icon,
     count: counts ? counts(entry.status) : entry.count,
   }));
 }

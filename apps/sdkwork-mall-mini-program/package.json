@@ -11,6 +11,7 @@
     "build:mp": "node scripts/build-miniprogram.mjs",
     "build:mp:watch": "node scripts/build-miniprogram.mjs --watch",
     "smoke:mp": "node scripts/smoke-miniprogram.mjs",
+    "icons:mp": "node scripts/generate-buyer-icons.mjs",
     "build:standalone": "node scripts/build-runtime.mjs && node scripts/build-miniprogram.mjs",
     "build:cloud": "node scripts/build-runtime.mjs --deployment-profile cloud && node scripts/build-miniprogram.mjs",
     "typecheck": "tsc --noEmit",

@@ -37,12 +37,17 @@
   margin-top: 8rpx;
 }
 
+/* Solid white pill on the gradient: the ghost variant made white-on-white text. */
 .buyer-login-btn {
-  margin-top: 12rpx;
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.7);
+  margin-top: 14rpx;
+  margin-left: 0;
+  background: #ffffff;
+  color: #e93b3d;
+  border: 1rpx solid #ffffff;
+  border-radius: 999rpx;
   font-size: 24rpx;
-  padding: 6rpx 26rpx;
+  line-height: 1;
+  padding: 12rpx 30rpx;
 }
 
 .buyer-logout {
@@ -61,37 +66,63 @@
 }
 
 .buyer-order-entry {
-  text-align: center;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.buyer-order-entry-icon {
+  width: 44rpx;
+  height: 44rpx;
+  margin-bottom: 8rpx;
 }
 
 .buyer-order-entry-count {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 700;
   color: #1f2937;
-  min-height: 44rpx;
+  min-height: 40rpx;
 }
 
 .buyer-order-entry-label {
   font-size: 24rpx;
   color: #6b7280;
-  margin-top: 6rpx;
+  margin-top: 4rpx;
+  white-space: nowrap;
 }
 
+/*
+ * Four equal columns with plain flex wrapping. `display: grid` is not reliable on
+ * every base library and it collapsed the tiles to one character wide, which
+ * rendered the labels vertically.
+ */
 .buyer-quick-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20rpx 16rpx;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .buyer-quick-item {
-  width: calc(25% - 15rpx);
-  text-align: center;
-  background: #f9fafb;
-  border-radius: 0;
-  padding: 26rpx 0;
-  font-size: 24rpx;
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 4rpx;
   box-sizing: border-box;
+}
+
+.buyer-quick-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 10rpx;
+}
+
+.buyer-quick-label {
+  font-size: 24rpx;
+  color: #374151;
+  line-height: 1.3;
+  white-space: nowrap;
 }
 
 .buyer-asset-list {
@@ -112,8 +143,16 @@
 }
 
 .buyer-asset-label {
+  display: flex;
+  align-items: center;
   font-size: 28rpx;
   color: #111827;
+}
+
+.buyer-asset-icon {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 16rpx;
 }
 
 .buyer-asset-chevron {

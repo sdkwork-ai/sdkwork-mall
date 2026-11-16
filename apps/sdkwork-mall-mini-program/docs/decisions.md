@@ -658,3 +658,23 @@
   - Regression: 33 node guards, 69 vitest contracts, typecheck, composition, parity
     and i18n green; smoke PASS over 36 pages; contract suite 185/192 (seven
     H5-only failures from the concurrent brick migration).
+
+- 2026-11-16 (twenty-fifth pass: buyer page labels stacked vertically and had no
+  icons). Two independent defects:
+  - **Vertical labels**: `.buyer-quick-grid` used `display: grid;
+    grid-template-columns: repeat(4, 1fr)`. CSS grid is not reliable on every base
+    library and the tiles collapsed to one character wide, so every label wrapped
+    per character. Replaced with `display: flex; flex-wrap: wrap` and `width: 25%`
+    (the same failure existed in `aftersales` evidence grid, also converted).
+  - **Missing icons**: the mini program has no icon component library (H5 uses
+    lucide), so the buyer entries were text-only. `scripts/generate-buyer-icons.mjs`
+    now renders 15 flat PNG glyphs (wallet, star, crown, heart, clock, pin, ticket,
+    file, receipt, chat, headset, box, package, truck, check) with a minimal Node
+    PNG encoder — deterministic, no dependency — into `src/assets/icons/`, and the
+    order/asset/service tiles render them through `image`.
+  - Also fixed the hero login button: the ghost variant produced white text on the
+    white pill (invisible); it is now a solid white pill with brand-red text.
+  - Guards: templates must only reference shipped `/assets/*.png` files, and
+    stylesheets must not use CSS grid (flex-wrap instead): 35 node guards now.
+  - Regression: 69 vitest contracts, typecheck, composition green; smoke PASS over
+    36 pages; contract suite 187/194 with the seven H5-only failures.
