@@ -42,5 +42,8 @@
       "afterSales": "申请售后",
       "back": "返回列表"
     }
+  },
+  "orders": {
+    "partner": "分销伙伴"
   }
 }
