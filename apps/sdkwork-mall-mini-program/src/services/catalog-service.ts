@@ -1,5 +1,14 @@
+/**
+ * Catalogue surfaces (categories, product cards, product detail).
+ *
+ * Authority: `TECH-BLOCK-INTEGRATION.md` (catalog row) and
+ * `MINI_PROGRAM_APP_ARCHITECTURE_SPEC.md` section 6. The catalogue belongs to the
+ * mall commerce block (`runtime.commerceClient.catalog`); this module projects it
+ * onto mall view models and owns no wire path of its own.
+ */
+import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
+
 import { readPageInfo } from "./page-info";
-import { request } from "./transport";
 
 export interface MpCategory {
   id: string;
@@ -46,6 +55,15 @@ export interface MpProductDetail {
   title: string;
 }
 
+function catalog() {
+  return getMallMpRuntime().commerceClient.catalog;
+}
+
+async function readCommerceData(call: Promise<{ data: Record<string, unknown> }>): Promise<Record<string, unknown>> {
+  const result = await call;
+  return (result?.data ?? {}) as Record<string, unknown>;
+}
+
 function mapProductCard(item: Record<string, unknown>): MpProductCard {
   const image = item.imageUrl ?? item.mainImage ?? item.image;
   return {
@@ -57,10 +75,21 @@ function mapProductCard(item: Record<string, unknown>): MpProductCard {
   };
 }
 
+function readRows(record: Record<string, unknown>): Array<Record<string, unknown>> {
+  if (Array.isArray(record.items)) {
+    return record.items as Array<Record<string, unknown>>;
+  }
+  if (Array.isArray(record.content)) {
+    return record.content as Array<Record<string, unknown>>;
+  }
+  return [];
+}
+
 export async function listCategories(): Promise<MpCategory[]> {
-  const payload = await request({ path: "/catalog/categories", query: { page: 1, page_size: 50, status: "active" } });
-  const items = Array.isArray(payload.items) ? payload.items : [];
-  return items.map((item) => ({
+  const payload = await readCommerceData(
+    catalog().categories.list({ page: 1, pageSize: 50, status: "active" }),
+  );
+  return readRows(payload).map((item) => ({
     id: String(item.id ?? ""),
     name: String(item.name ?? item.title ?? "类目"),
     parentId: String(item.parentId ?? item.parent_id ?? ""),
@@ -73,18 +102,15 @@ export async function listProducts(options: MpProductListOptions = {}): Promise<
   total: number;
 }> {
   const page = options.page ?? 1;
-  const payload = await request({
-    path: "/catalog/products",
-    query: {
-      category_id: options.categoryId,
-      page,
-      page_size: options.pageSize ?? 20,
-      q: options.keyword,
-      shop_id: options.shopId,
-      sort: options.sort,
-    },
-  });
-  const items = Array.isArray(payload.items) ? payload.items : [];
+  const payload = await readCommerceData(catalog().products.list({
+    page,
+    pageSize: options.pageSize ?? 20,
+    ...(options.categoryId ? { categoryId: options.categoryId } : {}),
+    ...(options.keyword ? { q: options.keyword } : {}),
+    ...(options.shopId ? { shopId: options.shopId } : {}),
+    ...(options.sort ? { sort: options.sort } : {}),
+  }));
+  const items = readRows(payload);
   const pageInfo = readPageInfo(payload, items.length, page);
   return {
     hasMore: pageInfo.hasMore,
@@ -94,7 +120,7 @@ export async function listProducts(options: MpProductListOptions = {}): Promise<
 }
 
 export async function getProductDetail(productId: string): Promise<MpProductDetail | null> {
-  const record = await request({ path: `/catalog/products/${productId}` });
+  const record = await readCommerceData(catalog().products.retrieve(productId));
   if (!record || !record.id) {
     return null;
   }

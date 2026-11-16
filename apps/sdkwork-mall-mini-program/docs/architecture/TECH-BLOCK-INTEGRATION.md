@@ -28,7 +28,7 @@ and the T1 domain SDKs declared in `pnpm-workspace.yaml`. `@sdkwork/mall-mp-core
 now builds both clients once (over the host `fetch` adapter and the shared token
 manager) and exposes them as `runtime.commerceClient` and `runtime.orderClient`.
 
-**Migrated** (no raw wire path left): `orders`, `cart`, `checkout`, `payments`
+**Migrated** (no raw wire path left): `catalog`, `orders`, `cart`, `checkout`, `payments`
 (payment intent + method list), `promotions` (coupon list/apply), `addresses`
 (default selection), `wallet` (holds), `shipments` (logistics trace).
 
@@ -39,7 +39,6 @@ manager) and exposes them as `runtime.commerceClient` and `runtime.orderClient`.
 | `checkout` | `src/services/cart-service.ts` (checkout half) |
 | `promotions` | `src/services/cart-service.ts` + `src/services/promotion-service.ts` |
 | `addresses` | `src/services/address-service.ts` |
-| `catalog` | `src/services/catalog-service.ts` |
 | `after-sales` | `src/services/aftersales-service.ts` |
 | `invoices` | `src/services/invoice-service.ts` |
 | `memberships` | `src/services/account-service.ts` (membership half) |
@@ -60,7 +59,7 @@ manager) and exposes them as `runtime.commerceClient` and `runtime.orderClient`.
    `order-service` project the blocks; both guards
    (`verify-mp-cart-block-integration`, `verify-mp-order-block-integration`)
    reject a reintroduced wire path, and the money-path body builder stays pure.
-4. **Next — catalog + promotion + addresses + after-sales + invoices + wallet +
+4. **Next — promotion + addresses + after-sales + invoices + wallet +
    membership + shops + partner.** Each migration deletes one raw-request service
    and adds one block-ownership guard.
 5. **Finally — retire `src/services/transport.ts`.** Raw request remains only for

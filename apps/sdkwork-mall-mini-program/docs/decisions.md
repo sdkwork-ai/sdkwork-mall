@@ -336,3 +336,13 @@
   - Regression: 25 node guards, 64 vitest contracts, 159/159 contract tests, both
     typechecks (49 packages), composition, parity, catalogues, default data and
     the i18n ratchet green.
+
+- 2026-11-16 (tenth pass: catalogue on its block). `catalog-service.ts` now
+  projects `runtime.commerceClient.catalog` (`categories.list`, `products.list`,
+  `products.retrieve`); the three hand-written `/catalog/*` paths and the raw
+  transport import are gone, while the category tree, product-card and product
+  detail view models are unchanged. Guard
+  `verify-mp-catalog-block-integration.test.mjs` rejects a reintroduced catalogue
+  endpoint or a re-imported transport seam.
+  Regression: 25 node guards, 64 vitest contracts, 161/161 contract tests,
+  composition and parity green.
