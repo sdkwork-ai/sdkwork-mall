@@ -62,3 +62,7 @@
   font-size: 24rpx;
   padding: 8rpx 26rpx;
 }
+
+.orders-partner {
+  color: #b06a00;
+}

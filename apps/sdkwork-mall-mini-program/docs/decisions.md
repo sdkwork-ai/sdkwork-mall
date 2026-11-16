@@ -1080,3 +1080,9 @@
   H5 `build:test` still stops in the cross-sibling tsc step on a lucide-react version
   skew (mall 1.42.0 vs sdkwork-cloudrouter 1.7.0, whose working tree is mid-change);
   H5 app typecheck and every H5 runtime gate pass.
+
+- 2026-11-17 (fiftieth pass: order-list attribution). Both order lists now show the
+  distributor: the H5 order brick card renders a 分销伙伴 badge + name when the order
+  carries the snapshot, and the mini program order list appends the distributor to
+  the meta line. Verified: mini typecheck + 49 node tests + build + smoke; H5
+  typecheck + 30 contract tests; root 211/211; i18n baseline.

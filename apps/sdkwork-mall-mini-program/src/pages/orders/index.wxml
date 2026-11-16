@@ -23,7 +23,9 @@
         <text class="orders-status">{{item.statusText}}</text>
       </view>
       <view class="mp-flex-between orders-meta">
-        <text class="mp-muted">{{item.timeText}}</text>
+        <text class="mp-muted">
+          {{item.timeText}}<text wx:if="{{item.partnerName}}" class="orders-partner"> · {{item.partnerName}}</text>
+        </text>
         <text class="mp-price">{{item.totalText}}</text>
       </view>
       <view class="orders-actions">

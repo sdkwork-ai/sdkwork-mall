@@ -19,5 +19,8 @@
       "pendingReceipt": "待收货",
       "completed": "已完成"
     }
+  },
+  "orders": {
+    "partner_badge": "分销伙伴"
   }
 }
