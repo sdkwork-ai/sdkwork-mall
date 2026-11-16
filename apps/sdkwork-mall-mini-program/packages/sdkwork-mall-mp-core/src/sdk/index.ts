@@ -20,6 +20,12 @@ import { createClient as createIamAppClient, type SdkworkAppClient as IamAppClie
 import { createClient as createImAppClient, type SdkworkAppClient as ImAppClient } from "@sdkwork/im-app-sdk";
 import { ImSdkClient } from "@sdkwork/im-sdk";
 import type { MpSocket } from "@sdkwork/mall-mp-host";
+import {
+  createCommerceAppSdkClient,
+  type CommerceAppSdkClient,
+} from "@sdkwork/commerce-app-sdk";
+import { createClient as createOrderAppClient, type SdkworkAppClient as OrderAppClient } from "@sdkwork/order-app-sdk";
+import { uuid } from "@sdkwork/utils";
 
 import type { MpTokenManager } from "../session";
 
@@ -28,6 +34,8 @@ export const MP_WECHAT_PROVIDER_CODE = "wechat_mini_program" as const;
 
 export type IamAppSdkClient = IamAppClient;
 export type ImAppSdkClient = ImAppClient;
+export type MpCommerceAppSdkClient = CommerceAppSdkClient;
+export type MpOrderAppSdkClient = OrderAppClient;
 /**
  * Conversation/message client.
  *
@@ -56,6 +64,18 @@ function normalizeBaseUrl(baseUrl: string): string {
 }
 
 /**
+ * Idempotency parameters for order commands.
+ *
+ * The order block requires an `Idempotency-Key` header on cancellations and
+ * receipt confirmations; the key comes from the shared SDKWork uuid helper so the
+ * mini program does not grow a bespoke identifier generator (it falls back when
+ * `crypto` is unavailable, which is the WeChat case).
+ */
+export function createMpIdempotencyParams(idempotencyKey?: string): { idempotencyKey: string } {
+  return { idempotencyKey: idempotencyKey ?? uuid() };
+}
+
+/**
  * Builds the IAM app SDK client.
  *
  * `platform: "mini-program"` is reported to IAM so a session created here is
@@ -74,6 +94,43 @@ export function createMpIamAppSdkClient(options: MpSdkClientOptions): IamAppSdkC
 /** Builds the IM app SDK client used by the notification plane. */
 export function createMpImAppSdkClient(options: MpSdkClientOptions): ImAppSdkClient {
   return createImAppClient({
+    authMode: "dual-token",
+    baseUrl: normalizeBaseUrl(options.baseUrl),
+    platform: "mini-program",
+    ...(options.timeoutMs !== undefined ? { timeout: options.timeoutMs } : {}),
+    tokenManager: options.tokenManager,
+  });
+}
+
+/**
+ * Builds the mall commerce app SDK client.
+ *
+ * The generated commerce SDK owns the storefront domain groups (catalog, cart,
+ * checkout, payments, promotions, addresses, wallet, memberships, shops,
+ * after-sales, invoices). Capability packages receive this client through the
+ * runtime; they never construct it or reach the wire themselves.
+ */
+export function createMpCommerceAppSdkClient(options: MpSdkClientOptions): MpCommerceAppSdkClient {
+  return createCommerceAppSdkClient({
+    authMode: "dual-token",
+    baseUrl: normalizeBaseUrl(options.baseUrl),
+    platform: "mini-program",
+    ...(options.timeoutMs !== undefined ? { timeout: options.timeoutMs } : {}),
+    tokenManager: options.tokenManager,
+  });
+}
+
+/**
+ * Builds the order app SDK client.
+ *
+ * The generated order block exposes `orders` (list/retrieve/statistics, payments,
+ * cancellations, receipts, payment-success, discount), `checkout`, `shipments`
+ * and `afterSales` — the same operations the H5 client reaches through the
+ * composed `@sdkwork/order-service` facade, minus that facade's Node-style `.ts`
+ * import specifiers, which the mini-program compiler does not resolve.
+ */
+export function createMpOrderAppSdkClient(options: MpSdkClientOptions): MpOrderAppSdkClient {
+  return createOrderAppClient({
     authMode: "dual-token",
     baseUrl: normalizeBaseUrl(options.baseUrl),
     platform: "mini-program",

@@ -637,6 +637,53 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
+  ../sdkwork-iam/apps/sdkwork-iam-h5/packages/sdkwork-iam-h5-auth:
+    dependencies:
+      '@sdkwork/i18n-pc-react':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-appbase/packages/pc-react/foundation/sdkwork-i18n-pc-react
+      '@sdkwork/iam-contracts':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-contracts
+      '@sdkwork/iam-h5-core':
+        specifier: workspace:*
+        version: link:../sdkwork-iam-h5-core
+      '@sdkwork/iam-service':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-service
+      '@sdkwork/utils':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.42.0(react@19.2.8)
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
+  ../sdkwork-iam/apps/sdkwork-iam-h5/packages/sdkwork-iam-h5-core:
+    dependencies:
+      '@sdkwork/iam-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
+      '@sdkwork/iam-contracts':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-contracts
+      '@sdkwork/iam-runtime':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-runtime
+      '@sdkwork/iam-service':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam-common/packages/sdkwork-iam-service
+      '@sdkwork/sdk-common':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
   ../sdkwork-iam/apps/sdkwork-iam-mini-program/packages/sdkwork-iam-mp-core:
     dependencies:
       '@sdkwork/iam-app-sdk':
@@ -1318,12 +1365,6 @@ importers:
       '@sdkwork/appbase-pc-react':
         specifier: workspace:*
         version: link:../../../sdkwork-appbase/packages/pc-react/foundation/sdkwork-appbase-pc-react
-      '@sdkwork/auth-pc-react':
-        specifier: workspace:*
-        version: link:../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-pc-react
-      '@sdkwork/auth-runtime-pc-react':
-        specifier: workspace:*
-        version: link:../../../sdkwork-iam/apps/sdkwork-iam-pc/packages/sdkwork-auth-runtime-pc-react
       '@sdkwork/cloudrouter-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript
@@ -1336,18 +1377,18 @@ importers:
       '@sdkwork/drive-upload-image-core':
         specifier: workspace:*
         version: link:../../../sdkwork-drive/apps/sdkwork-drive-common/packages/sdkwork-drive-upload-image-core
-      '@sdkwork/iam-app-sdk':
-        specifier: workspace:*
-        version: link:../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
-      '@sdkwork/iam-contracts':
-        specifier: workspace:*
-        version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-contracts
       '@sdkwork/iam-credential-entry':
         specifier: workspace:*
         version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-credential-entry
-      '@sdkwork/iam-runtime':
+      '@sdkwork/iam-h5-auth':
         specifier: workspace:*
-        version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-runtime
+        version: link:../../../sdkwork-iam/apps/sdkwork-iam-h5/packages/sdkwork-iam-h5-auth
+      '@sdkwork/iam-h5-core':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam/apps/sdkwork-iam-h5/packages/sdkwork-iam-h5-core
+      '@sdkwork/iam-service':
+        specifier: workspace:*
+        version: link:../../../sdkwork-iam/apps/sdkwork-iam-common/packages/sdkwork-iam-service
       '@sdkwork/im-app-sdk':
         specifier: workspace:*
         version: link:../../../sdkwork-im/sdks/sdkwork-im-app-sdk/sdkwork-im-app-sdk-typescript
@@ -1435,9 +1476,6 @@ importers:
       '@sdkwork/sdk-common':
         specifier: workspace:*
         version: link:../../../sdkwork-sdk-commons/sdkwork-sdk-common-typescript
-      '@sdkwork/ui-pc-react':
-        specifier: workspace:*
-        version: link:../../../sdkwork-ui/sdkwork-ui-pc-react
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
@@ -1550,6 +1588,9 @@ importers:
       '@sdkwork/mall-h5-core':
         specifier: workspace:*
         version: link:../sdkwork-mall-h5-core
+      lucide-react:
+        specifier: 'catalog:'
+        version: 1.42.0(react@19.2.8)
 
   apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-commons:
     dependencies:
@@ -1694,6 +1735,9 @@ importers:
 
   apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-core:
     dependencies:
+      '@sdkwork/commerce-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript
       '@sdkwork/iam-app-sdk':
         specifier: workspace:*
         version: link:../../../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
@@ -1709,6 +1753,12 @@ importers:
       '@sdkwork/mall-mp-host':
         specifier: workspace:*
         version: link:../sdkwork-mall-mp-host
+      '@sdkwork/order-app-sdk':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-order/sdks/sdkwork-order-app-sdk/sdkwork-order-app-sdk-typescript
+      '@sdkwork/utils':
+        specifier: workspace:*
+        version: link:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript
 
   apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-host: {}
 

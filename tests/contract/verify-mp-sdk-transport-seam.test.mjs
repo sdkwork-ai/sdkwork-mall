@@ -81,6 +81,10 @@ test("the host exposes the adapter as its own subpath", () => {
 test("capability packages never construct a domain SDK client themselves", () => {
   const offenders = [];
   for (const packageRoot of readdirSync(path.join(miniProgram, "packages"))) {
+    // `@sdkwork/mall-mp-core` is the single seam allowed to build clients.
+    if (packageRoot === "sdkwork-mall-mp-core") {
+      continue;
+    }
     const sourceRoot = path.join(miniProgram, "packages", packageRoot, "src");
     for (const file of collect(sourceRoot)) {
       const source = stripComments(readFileSync(file, "utf8"));

@@ -24,24 +24,27 @@ mini program still hand-rolls; those are the remaining migration work.
 
 The repository already depends on the generated commerce app SDK
 (`sdks/sdkwork-commerce-app-sdk`, consumed through `@sdkwork/mall-commerce-service`)
-and the T1 domain SDKs declared in `pnpm-workspace.yaml`. Their operation groups
-are the intended owners of the surfaces the mini program still reaches through
-`src/services/transport.ts`:
+and the T1 domain SDKs declared in `pnpm-workspace.yaml`. `@sdkwork/mall-mp-core`
+now builds both clients once (over the host `fetch` adapter and the shared token
+manager) and exposes them as `runtime.commerceClient` and `runtime.orderClient`.
 
-| Commerce app SDK group | Will replace |
+**Migrated** (no raw wire path left): `orders`, `cart`, `checkout`, `payments`
+(payment intent + method list), `promotions` (coupon list/apply), `addresses`
+(default selection), `wallet` (holds), `shipments` (logistics trace).
+
+| Commerce app SDK group | Replaces |
 | --- | --- |
-| `catalog` | `src/services/catalog-service.ts` |
+| `orders` / `payments` / `shipments` (order block) | `src/services/order-service.ts`, cart payment intent |
 | `cart` | `src/services/cart-service.ts` (cart half) |
 | `checkout` | `src/services/cart-service.ts` (checkout half) |
-| `orders` | `src/services/order-service.ts` |
+| `promotions` | `src/services/cart-service.ts` + `src/services/promotion-service.ts` |
 | `addresses` | `src/services/address-service.ts` |
+| `catalog` | `src/services/catalog-service.ts` |
 | `after-sales` | `src/services/aftersales-service.ts` |
 | `invoices` | `src/services/invoice-service.ts` |
 | `memberships` | `src/services/account-service.ts` (membership half) |
 | `wallet`, `billing`, `recharges` | `src/services/account-service.ts` (wallet half) |
-| `promotions` | `src/services/promotion-service.ts` |
 | `shops` | `src/services/marketing-service.ts` |
-| `payments` | `src/services/cart-service.ts` (payment-method list) |
 | `@sdkwork/partner-app-sdk` | `src/services/partner-service.ts` |
 | `@sdkwork/account-app-sdk` (`accounts`, `wallet`) | `src/services/profile-service.ts` (membership half only; identity is IAM) |
 
@@ -50,20 +53,19 @@ are the intended owners of the surfaces the mini program still reaches through
 1. **Done — IAM.** Credential grants, identity and password change moved onto
    `@sdkwork/iam-app-sdk`; `verify-mp-auth-block-integration.test.mjs` fails the
    build if a mall service hand-rolls `/auth/*` or `/iam/*`.
-2. **Next — commerce client seam.** Construct the commerce app client in
-   `@sdkwork/mall-mp-core` (same pattern as the IAM/IM clients, over the host
-   `MpHttpClient`) and expose it on the runtime. No service may construct its own
-   client or read the SDK directly.
-3. **Then — order + cart.** Move `cart-service` and `order-service` onto
-   `cart`/`checkout`/`orders`/`payments`; keep the money-path payload builders
-   (`buildCheckoutOrderBody`-style) as pure projections so their vitest contracts
-   keep guarding them.
-4. **Then — catalog + promotion + addresses + after-sales + invoices + wallet +
+2. **Done — SDK transport + commerce/order seams.** `installMpFetch` makes the
+   generated SDKs runnable on WeChat; `createMpCommerceAppSdkClient` and
+   `createMpOrderAppSdkClient` live only in `@sdkwork/mall-mp-core`.
+3. **Done — cart + checkout + orders + payments.** `cart-service` and
+   `order-service` project the blocks; both guards
+   (`verify-mp-cart-block-integration`, `verify-mp-order-block-integration`)
+   reject a reintroduced wire path, and the money-path body builder stays pure.
+4. **Next — catalog + promotion + addresses + after-sales + invoices + wallet +
    membership + shops + partner.** Each migration deletes one raw-request service
    and adds one block-ownership guard.
 5. **Finally — retire `src/services/transport.ts`.** Raw request remains only for
-   surfaces with no composed block (nothing today) and the app-api envelope helper
-   used by the Drive uploader.
+   surfaces with no composed block (Drive upload/download and the app-api
+   envelope helper those use).
 
 ## Guard rules (cumulative)
 

@@ -304,3 +304,35 @@
   - Regression: 25 node guards, 60 vitest contracts, 152/152 repo contract tests,
     both typechecks (49 packages), composition, parity, catalogues and default
     data green.
+
+- 2026-11-16 (ninth pass: cart/checkout/orders on their blocks). The two biggest
+  hand-rolled surfaces now project SDKWork blocks:
+  - `@sdkwork/mall-mp-core` builds both clients once, over the host `fetch`
+    adapter and the shared token manager: `createMpCommerceAppSdkClient`
+    (`@sdkwork/commerce-app-sdk`, the mall's generated facade) and
+    `createMpOrderAppSdkClient` (`@sdkwork/order-app-sdk`, the same operation set
+    the H5 client reaches through `@sdkwork/order-service`). The runtime exposes
+    them as `commerceClient` / `orderClient`; a seam helper
+    `createMpIdempotencyParams()` supplies the order block's `Idempotency-Key`
+    from the shared SDKWork uuid (which falls back without `crypto`, the WeChat
+    case).
+  - `order-service.ts`: list/statistics/detail/payment-success, pay, cancel,
+    receipt confirmation and the shipment trace now call `orders.*` /
+    `shipments.*`; eight hand-written order endpoints are gone and the view
+    models are unchanged.
+  - `cart-service.ts`: cart read/add/update/remove, payment-method list, coupon
+    list, checkout session + quote + order creation, address default selection,
+    coupon application and wallet holds call the commerce block; the payment
+    intent calls the order block. `buildCheckoutOrderBody` stays a pure exported
+    builder so the money-path vitest contract keeps guarding it.
+  - Guards: `verify-mp-order-block-integration` and
+    `verify-mp-cart-block-integration` fail the build on a reintroduced order or
+    commerce wire path, on a command without an idempotency key, or on an impure
+    checkout body builder. The transport-seam guard now exempts only
+    `@sdkwork/mall-mp-core` from the "no client construction" rule.
+  - Tests: `mp-order-block.test.ts` pins the order projection (paging, detail
+    view model, idempotency keys, statistics) with a fake block client and zero
+    HTTP hops.
+  - Regression: 25 node guards, 64 vitest contracts, 159/159 contract tests, both
+    typechecks (49 packages), composition, parity, catalogues, default data and
+    the i18n ratchet green.

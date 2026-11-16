@@ -1,5 +1,22 @@
+/**
+ * Buyer order surfaces for the SDKWork Mall mini program.
+ *
+ * Authority: `TECH-BLOCK-INTEGRATION.md` (order row) and
+ * `MINI_PROGRAM_APP_ARCHITECTURE_SPEC.md` section 6. Orders belong to the order
+ * block: this module projects the generated order app SDK
+ * (`@sdkwork/mall-mp-core` `runtime.orderClient`) onto mall view models and owns
+ * no wire path of its own.
+ *
+ * Mapping:
+ * - list / statistics / detail / payment-success → `orders.*`
+ * - pay → `orders.payments.create` (idempotent)
+ * - cancel → `orders.cancellations.create` (idempotent)
+ * - confirm receipt → `orders.receipts.create` (idempotent)
+ * - logistics → `shipments.retrieve` + `packages.list` + `trackingEvents.list`
+ */
+import { createMpIdempotencyParams, getMallMpRuntime } from "@sdkwork/mall-mp-core";
+
 import { readPageInfo } from "./page-info";
-import { request } from "./transport";
 
 export interface MpOrderSummary {
   createdAt: string;
@@ -39,6 +56,10 @@ const STATUS_FILTER_MAP: Record<string, string> = {
   CANCELLED: "CANCELLED",
 };
 
+function ordersClient() {
+  return getMallMpRuntime().orderClient.orders;
+}
+
 function mapSummary(order: Record<string, unknown>): MpOrderSummary {
   return {
     id: String(order.orderId ?? order.id ?? ""),
@@ -57,20 +78,18 @@ export async function listOrders(options: { page?: number; pageSize?: number; st
 }> {
   const page = options.page ?? 1;
   const statusFilter = STATUS_FILTER_MAP[options.status || "all"] ?? options.status ?? "";
-  const payload = await request({
-    path: "/orders",
-    query: {
-      page,
-      page_size: options.pageSize ?? 20,
-      status: statusFilter || undefined,
-    },
+  const payload = await ordersClient().list({
+    page,
+    pageSize: options.pageSize ?? 20,
+    ...(statusFilter ? { status: statusFilter } : {}),
   });
-  const rows: Array<Record<string, unknown>> = Array.isArray(payload.content)
-    ? payload.content
-    : Array.isArray(payload.items)
-      ? payload.items
+  const record = (payload ?? {}) as unknown as Record<string, unknown>;
+  const rows: Array<Record<string, unknown>> = Array.isArray(record.items)
+    ? record.items as Array<Record<string, unknown>>
+    : Array.isArray(record.content)
+      ? record.content as Array<Record<string, unknown>>
       : [];
-  const pageInfo = readPageInfo(payload, rows.length, page);
+  const pageInfo = readPageInfo(record, rows.length, page);
   return {
     hasMore: pageInfo.hasMore,
     orders: rows.map(mapSummary),
@@ -79,7 +98,7 @@ export async function listOrders(options: { page?: number; pageSize?: number; st
 }
 
 export async function getOrderStatistics(): Promise<MpOrderStatistics> {
-  const payload = await request({ path: "/orders/statistics" });
+  const payload = await ordersClient().statistics.retrieve();
   return {
     totalOrders: Number(payload.totalOrders) || 0,
     pendingPayment: Number(payload.pendingPayment) || 0,
@@ -90,7 +109,7 @@ export async function getOrderStatistics(): Promise<MpOrderStatistics> {
 }
 
 export async function getOrderDetail(orderId: string): Promise<MpOrderDetail> {
-  const record = await request({ path: `/orders/${orderId}` });
+  const record = await ordersClient().retrieve(orderId);
   const items = Array.isArray(record.items) ? record.items : [];
   return {
     id: String(record.orderId ?? record.id ?? orderId),
@@ -120,26 +139,28 @@ export async function getOrderDetail(orderId: string): Promise<MpOrderDetail> {
 }
 
 export async function payOrder(orderId: string, paymentMethod: string): Promise<string> {
-  const payment = await request({
-    path: `/orders/${orderId}/payments`,
-    method: "POST",
-    body: { paymentMethod },
-  });
+  const payment = await ordersClient().payments.create(
+    orderId,
+    { paymentMethod },
+    createMpIdempotencyParams(),
+  );
   return String(payment.paymentId ?? payment.id ?? "");
 }
 
 export async function cancelOrder(orderId: string): Promise<Record<string, unknown>> {
-  return request({ path: `/orders/${orderId}/cancellations`, method: "POST", body: {} });
+  return ordersClient().cancellations.create(orderId, createMpIdempotencyParams(), {}) as unknown as
+    Promise<Record<string, unknown>>;
 }
 
 export async function confirmReceipt(orderId: string): Promise<Record<string, unknown>> {
-  return request({ path: `/orders/${orderId}/receipt_confirmations`, method: "POST", body: {} });
+  return ordersClient().receipts.create(orderId, createMpIdempotencyParams(), {}) as unknown as
+    Promise<Record<string, unknown>>;
 }
 
 export async function getPaymentSuccess(orderId: string): Promise<Record<string, unknown> | null> {
   try {
-    return await request({ path: `/orders/${orderId}/payment_success` });
-  } catch (error) {
+    return (await ordersClient().paymentSuccess.retrieve(orderId)) as unknown as Record<string, unknown>;
+  } catch {
     return null;
   }
 }
@@ -187,13 +208,17 @@ function readRows(payload: Record<string, unknown>): Array<Record<string, unknow
   return [];
 }
 
+function shipmentsClient() {
+  return getMallMpRuntime().orderClient.shipments;
+}
+
 async function getShipmentLogistics(shipmentId: string): Promise<MpShipmentLogistics> {
   const [shipment, packagesPayload, trackingPayload] = await Promise.all([
-    request({ path: `/shipments/${shipmentId}` }),
-    request({ path: `/shipments/${shipmentId}/packages`, query: { page: 1, page_size: 20 } }),
-    request({ path: `/shipments/${shipmentId}/tracking_events`, query: { page: 1, page_size: 50 } }),
+    shipmentsClient().retrieve(shipmentId),
+    shipmentsClient().packages.list(shipmentId, { page: 1, pageSize: 20 }),
+    shipmentsClient().trackingEvents.list(shipmentId, { page: 1, pageSize: 50 }),
   ]);
-  const trackingEvents = readRows(trackingPayload)
+  const trackingEvents = readRows(trackingPayload as unknown as Record<string, unknown>)
     .map((row) => ({
       description: pickString(row, ["description", "content", "detail", "message"]) || "物流更新",
       occurredAt: pickString(row, ["occurredAt", "eventTime", "createdAt", "time"]),
@@ -209,7 +234,7 @@ async function getShipmentLogistics(shipmentId: string): Promise<MpShipmentLogis
     shipmentNo: pickString(shipment, ["shipmentNo", "shipmentNumber", "trackingNumber", "logisticsNo"]),
     carrier: pickString(shipment, ["carrierName", "carrier", "logisticsCompany"]),
     statusLabel: pickString(shipment, ["statusName", "statusLabel"]),
-    packages: readRows(packagesPayload).map((row, index) => ({
+    packages: readRows(packagesPayload as unknown as Record<string, unknown>).map((row, index) => ({
       id: pickString(row, ["packageId", "id"]) || `package-${index + 1}`,
       name: pickString(row, ["packageName", "name", "title"]),
     })),
@@ -220,7 +245,7 @@ async function getShipmentLogistics(shipmentId: string): Promise<MpShipmentLogis
 /**
  * Loads every shipment trace for an order (or one explicit shipment).
  * Mirrors the H5 `/buyer/logistics` surface: order detail supplies the
- * shipment ids, then shipment/packages/tracking endpoints compose the view.
+ * shipment ids, then the shipment block composes the view.
  */
 export async function getOrderLogistics(input: {
   orderId?: string;

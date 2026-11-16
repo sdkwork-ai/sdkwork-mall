@@ -19,11 +19,14 @@
     "README.md"
   ],
   "dependencies": {
+    "@sdkwork/commerce-app-sdk": "workspace:*",
     "@sdkwork/iam-app-sdk": "workspace:*",
     "@sdkwork/iam-mp-core": "workspace:*",
     "@sdkwork/im-app-sdk": "workspace:*",
     "@sdkwork/im-sdk": "workspace:*",
-    "@sdkwork/mall-mp-host": "workspace:*"
+    "@sdkwork/mall-mp-host": "workspace:*",
+    "@sdkwork/order-app-sdk": "workspace:*",
+    "@sdkwork/utils": "workspace:*"
   },
   "sdkwork": {
     "architecture": "mini-program",

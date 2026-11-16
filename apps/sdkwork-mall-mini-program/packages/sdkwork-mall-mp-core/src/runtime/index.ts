@@ -21,12 +21,16 @@ import {
   type MpRequestClient,
 } from "../request";
 import {
+  createMpCommerceAppSdkClient,
   createMpIamAppSdkClient,
   createMpImAppSdkClient,
   createMpImChatSdkClient,
+  createMpOrderAppSdkClient,
   type IamAppSdkClient,
   type ImAppSdkClient,
   type ImChatSdkClient,
+  type MpCommerceAppSdkClient,
+  type MpOrderAppSdkClient,
 } from "../sdk";
 import {
   createIamMpWechatSessionManager,
@@ -54,11 +58,15 @@ export interface MallMpRuntimeEnvironment {
 export interface MallMpRuntime {
   /** IAM-owned session lifecycle (WeChat exchange, restore, logout). */
   readonly authManager: IamMpWechatSessionManager;
+  /** Mall commerce app SDK: catalog, cart, checkout, payments, promotions, … */
+  readonly commerceClient: MpCommerceAppSdkClient;
   readonly environment: MallMpRuntimeEnvironment;
   readonly host: MpHost;
   readonly iamClient: IamAppSdkClient;
   readonly imAppClient: ImAppSdkClient;
   readonly imChatClient: ImChatSdkClient;
+  /** Order block (orders, cancellations, receipts, payments, shipments). */
+  readonly orderClient: MpOrderAppSdkClient;
   readonly request: MpRequestClient;
   readonly session: MpSessionStore;
   readonly tokenManager: MpTokenManager;
@@ -102,6 +110,8 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
     session,
   });
   const iamClient = createMpIamAppSdkClient({ baseUrl: appApiBaseUrl, tokenManager });
+  const commerceClient = createMpCommerceAppSdkClient({ baseUrl: appApiBaseUrl, tokenManager });
+  const orderClient = createMpOrderAppSdkClient({ baseUrl: appApiBaseUrl, tokenManager });
   const imAppClient = createMpImAppSdkClient({
     baseUrl: input.environment.imAppApiBaseUrl ?? appApiBaseUrl,
     tokenManager,
@@ -124,6 +134,8 @@ export function initializeMallMpRuntime(input: InitializeMallMpRuntimeInput): Ma
     tokenManager,
     request,
     iamClient,
+    commerceClient,
+    orderClient,
     imAppClient,
     imChatClient,
     authManager,
