@@ -298,6 +298,7 @@ function buildLabels(): Record<string, string> {
     dashShareTitle: t("partner.dashboard.shareTitle"),
     dashShareProductsEmpty: t("partner.dashboard.shareProductsEmpty"),
     dashTeamPageCounts: t("partner.dashboard.teamPageCounts"),
+    dashTeamTabEmpty: t("partner.dashboard.teamTabEmpty"),
     dashQrClose: t("partner.dashboard.qrClose"),
     dashQrCopy: t("partner.dashboard.qrCopy"),
     dashQrHint: t("partner.dashboard.qrHint"),

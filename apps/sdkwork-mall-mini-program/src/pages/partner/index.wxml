@@ -95,8 +95,8 @@
         <view class="partner-team-tab {{teamTab === 'direct' ? 'partner-team-tab-on' : ''}}" data-tab="direct" bindtap="switchTeamTab">{{labels.dashTabFirst}}</view>
         <view class="partner-team-tab {{teamTab === 'second' ? 'partner-team-tab-on' : ''}}" data-tab="second" bindtap="switchTeamTab">{{labels.dashTabSecond}}</view>
       </view>
-      <view class="partner-team-counts mp-muted">{{labels.dashTeamPageCounts}}：{{labels.dashTabFirst}} {{teamDirectCount}} · {{labels.dashTabSecond}} {{teamSecondCount}} · {{labels.dashTabAll}} {{teamTotal}}</view>
-      <view wx:if="{{!teamView.length}}" class="mp-muted partner-empty">{{labels.teamEmpty}}</view>
+      <view class="partner-team-counts mp-muted">{{labels.dashTeamPageCounts}}：{{labels.dashTabFirst}} {{teamDirectCount}} · {{labels.dashTabSecond}} {{teamSecondCount}} · {{labels.dashTabAll}} {{team.length}}</view>
+      <view wx:if="{{!teamView.length}}" class="mp-muted partner-empty">{{team.length ? labels.dashTeamTabEmpty : labels.teamEmpty}}</view>
       <view class="partner-level" wx:for="{{teamView}}" wx:key="partnerId">
         <view class="partner-level-head">
           <text class="partner-level-name">{{item.name}}</text>

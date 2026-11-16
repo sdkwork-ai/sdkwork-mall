@@ -1015,3 +1015,10 @@
     path contains the distributor's invite code.
   - verification: mini typecheck + 47 node tests + 69 vitest + smoke; H5 typecheck +
     27 contract tests + standalone build; PC typecheck; i18n baseline holds.
+
+- 2026-11-17 (forty-fourth pass: team list semantics). Two more alignment defects:
+  - the 本页 counts line mixed a page-scoped count with the cross-page team total;
+    it now counts the loaded page only, while the centre summary keeps the totals.
+  - filtering to a level with no members on the current page showed the "team is
+    empty" copy even though members exist on other pages — it now says the level has
+    no members on this page and suggests switching levels.

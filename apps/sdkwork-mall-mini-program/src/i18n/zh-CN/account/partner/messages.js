@@ -18,6 +18,7 @@ module.exports = {
       shareProductsTitle: "分享热卖商品",
       shareProductsEmpty: "暂无可分享商品，稍后重试",
       teamPageCounts: "本页",
+      teamTabEmpty: "该层级本页暂无成员，可切换其他层级",
       shareTitle: "分享赚佣金",
       cardProductFallback: "分享好物，一起赚佣金",
       cardProductSuffix: "好物推荐",
