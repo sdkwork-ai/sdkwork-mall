@@ -18,6 +18,9 @@ import cashier from "./zh-CN/checkout/cashier/messages";
 import paymentResult from "./zh-CN/checkout/payment-result/messages";
 import help from "./zh-CN/support/help/messages";
 import afterSales from "./zh-CN/support/after-sales/messages";
+import share from "./zh-CN/common/share/messages";
+import activity from "./zh-CN/storefront/product-detail/messages";
+import cart from "./zh-CN/storefront/cart/messages";
 import home from "./zh-CN/storefront/home/messages";
 import orderList from "./zh-CN/order/list/messages";
 
@@ -45,6 +48,9 @@ collect(cashier as Record<string, unknown>, "");
 collect(paymentResult as Record<string, unknown>, "");
 collect(help as Record<string, unknown>, "");
 collect(afterSales as Record<string, unknown>, "");
+collect(share as Record<string, unknown>, "");
+collect(activity as Record<string, unknown>, "");
+collect(cart as Record<string, unknown>, "");
 collect(home as Record<string, unknown>, "");
 collect(orderList as Record<string, unknown>, "");
 

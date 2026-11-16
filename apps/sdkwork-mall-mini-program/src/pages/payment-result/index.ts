@@ -70,6 +70,8 @@ Page({
       orderId,
       paymentId,
       status: options.status || "pending",
+      // Keep the channel the cashier used so "重新支付" returns to the same one.
+      paymentMethod: options.paymentMethod || "",
       orderNoText: orderId ? t("paymentResult.orderNo", { id: orderId }) : "",
       paymentNoText: paymentId ? t("paymentResult.paymentNo", { id: paymentId }) : "",
     });

@@ -1,3 +1,4 @@
+import { readPageInfo } from "./page-info";
 import { request } from "./transport";
 
 export interface MpOrderSummary {
@@ -49,12 +50,17 @@ function mapSummary(order: Record<string, unknown>): MpOrderSummary {
   };
 }
 
-export async function listOrders(options: { page?: number; pageSize?: number; status?: string } = {}): Promise<{ orders: MpOrderSummary[]; total: number }> {
+export async function listOrders(options: { page?: number; pageSize?: number; status?: string } = {}): Promise<{
+  hasMore: boolean;
+  orders: MpOrderSummary[];
+  total: number;
+}> {
+  const page = options.page ?? 1;
   const statusFilter = STATUS_FILTER_MAP[options.status || "all"] ?? options.status ?? "";
   const payload = await request({
     path: "/orders",
     query: {
-      page: options.page ?? 1,
+      page,
       page_size: options.pageSize ?? 20,
       status: statusFilter || undefined,
     },
@@ -64,9 +70,11 @@ export async function listOrders(options: { page?: number; pageSize?: number; st
     : Array.isArray(payload.items)
       ? payload.items
       : [];
+  const pageInfo = readPageInfo(payload, rows.length, page);
   return {
+    hasMore: pageInfo.hasMore,
     orders: rows.map(mapSummary),
-    total: Number((payload.pageInfo as Record<string, unknown> | undefined)?.total) || rows.length,
+    total: pageInfo.totalItems,
   };
 }
 

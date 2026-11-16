@@ -78,7 +78,8 @@ interface AddressData {
   loading: boolean;
   error: string;
   toast: string;
-  _pickerMode: boolean;
+  /** True when opened from checkout to return the picked address. */
+  pickerMode: boolean;
   _toastTimer: number | null;
 }
 
@@ -93,12 +94,12 @@ Page({
     loading: true,
     error: "",
     toast: "",
-    _pickerMode: false,
+    pickerMode: false,
     _toastTimer: null,
   } as AddressData,
 
   onLoad(options: Record<string, string | undefined>) {
-    this.setData({ _pickerMode: options.picker === "1" });
+    this.setData({ pickerMode: options.picker === "1" });
   },
 
   onShow() {
@@ -119,7 +120,7 @@ Page({
   },
 
   pickAddress(event: MpTapEvent) {
-    if (!this.data._pickerMode) {
+    if (!this.data.pickerMode) {
       return;
     }
     const addressId = String(event.currentTarget.dataset.id ?? "");
@@ -275,5 +276,9 @@ Page({
 
   retry() {
     void this.refresh();
+  },
+
+  onPullDownRefresh() {
+    void this.refresh().finally(() => wx.stopPullDownRefresh());
   },
 });

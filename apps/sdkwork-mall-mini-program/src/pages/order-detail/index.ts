@@ -1,6 +1,7 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatCny, formatTime, statusLabel } from "../../utils/format";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import {
   cancelOrder,
   confirmReceipt,
@@ -34,11 +35,40 @@ Page({
   } as OrderDetailData,
 
   onLoad(options: Record<string, string | undefined>) {
-    this.setData({ _orderId: options.id || "" });
+    // `id` is the canonical query key (orders + reviews both emit it);
+    // `orderId` is accepted because logistics/after-sales use that name and a
+    // hand-built link should not open an empty page.
+    this.setData({ _orderId: options.id || options.orderId || "" });
   },
 
   onShow() {
     this.loadDetail();
+  },
+
+  onShareAppMessage() {
+    const detail = this.data.detail;
+    return buildMpShareCard({
+      query: { id: this.data._orderId },
+      routeId: "buyer.mall.orders.detail",
+      title: detail ? `${detail.subject} · ${detail.statusText}` : undefined,
+    });
+  },
+
+  onShareTimeline() {
+    const detail = this.data.detail;
+    return buildMpTimelineCard({
+      query: { id: this.data._orderId },
+      routeId: "buyer.mall.orders.detail",
+      title: detail ? `${detail.subject} · ${detail.statusText}` : undefined,
+    });
+  },
+
+  retry() {
+    void this.loadDetail();
+  },
+
+  onPullDownRefresh() {
+    void this.loadDetail().finally(() => wx.stopPullDownRefresh());
   },
 
   async loadDetail() {

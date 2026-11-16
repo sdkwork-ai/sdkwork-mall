@@ -51,7 +51,7 @@ Page({
   goOrder(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.detail", { orderId: id }) });
+      wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders.detail", { id }) });
     }
   },
 

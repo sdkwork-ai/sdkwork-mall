@@ -1,7 +1,9 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
 import { formatCny } from "../../utils/format";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 
 type CategoryProduct = MpProductCard & { priceText: string };
 
@@ -11,6 +13,7 @@ interface CategoryData {
   products: CategoryProduct[];
   page: number;
   total: number;
+  hasMore: boolean;
   loading: boolean;
   loadingMore: boolean;
   error: string;
@@ -24,6 +27,7 @@ Page({
     products: [],
     page: 1,
     total: 0,
+    hasMore: false,
     loading: true,
     loadingMore: false,
     error: "",
@@ -37,6 +41,24 @@ Page({
 
   goProduct(event: MpTapEvent) {
     wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
+  },
+
+  onShareAppMessage() {
+    const active = this.data.categories.find((category) => category.id === this.data.activeCategoryId);
+    return buildMpShareCard({
+      query: { categoryId: this.data.activeCategoryId },
+      routeId: "storefront.mall.categories",
+      title: active ? t("share.titledWithMall", { title: active.name }) : undefined,
+    });
+  },
+
+  onShareTimeline() {
+    const active = this.data.categories.find((category) => category.id === this.data.activeCategoryId);
+    return buildMpTimelineCard({
+      query: { categoryId: this.data.activeCategoryId },
+      routeId: "storefront.mall.categories",
+      title: active ? t("share.titledWithMall", { title: active.name }) : undefined,
+    });
   },
 
   goSearch() {
@@ -73,6 +95,7 @@ Page({
       this.setData({
         products: nextPage === 1 ? products : this.data.products.concat(products),
         total: result.total,
+        hasMore: result.hasMore,
         page: nextPage,
         loading: false,
         loadingMore: false,
@@ -96,7 +119,7 @@ Page({
   },
 
   async loadMore() {
-    if (this.data.loadingMore || this.data.products.length >= this.data.total) {
+    if (this.data.loadingMore || !this.data.hasMore) {
       return;
     }
     this.setData({ loadingMore: true });
@@ -109,5 +132,15 @@ Page({
 
   onReachBottom() {
     void this.loadMore();
+  },
+
+  retry() {
+    this.setData({ error: "" });
+    if (this.data.categories.length === 0) {
+      void this.loadCategories();
+      return;
+    }
+    this.setData({ loading: true });
+    void this.loadProducts(1);
   },
 });

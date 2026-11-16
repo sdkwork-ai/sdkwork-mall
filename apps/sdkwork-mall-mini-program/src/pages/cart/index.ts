@@ -1,4 +1,5 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCartItem, getCart, removeCartItem, updateCartItem } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
@@ -18,10 +19,19 @@ interface CartData {
   selectedIds: string[];
   selectedTotal: string;
   selectedCount: number;
+  allSelected: boolean;
+  itemCount: number;
+  manageMode: boolean;
+  busy: boolean;
   loading: boolean;
   loggedIn: boolean;
   error: string;
   toast: string;
+  manageText: string;
+  doneText: string;
+  countText: string;
+  priceFallback: string;
+  retryText: string;
   _toastTimer: number | null;
 }
 
@@ -32,7 +42,7 @@ function groupByShop(items: MpCartItem[]): CartGroup[] {
     const shopId = item.shopId || "shop-default";
     let group = byId.get(shopId);
     if (!group) {
-      group = { shopId, shopName: item.shopName || "SDKWork 精选", items: [] };
+      group = { shopId, shopName: item.shopName || t("cart.shopFallback"), items: [] };
       byId.set(shopId, group);
       groups.push(group);
     }
@@ -47,10 +57,19 @@ Page({
     selectedIds: [],
     selectedTotal: "0.00",
     selectedCount: 0,
+    allSelected: false,
+    itemCount: 0,
+    manageMode: false,
+    busy: false,
     loading: true,
     loggedIn: false,
     error: "",
     toast: "",
+    manageText: t("cart.manage"),
+    doneText: t("cart.done"),
+    countText: t("cart.countLabel", { count: 0 }),
+    priceFallback: t("cart.priceFallback"),
+    retryText: t("cart.retry"),
     _toastTimer: null,
   } as CartData,
 
@@ -71,12 +90,17 @@ Page({
         ...group,
         allSelected: group.items.every((item) => this.isSelected(item.id)),
       }));
-      this.setData({ groups, loading: false });
+      this.setData({
+        groups,
+        itemCount: cart.items.length,
+        countText: t("cart.countLabel", { count: cart.items.length }),
+        loading: false,
+      });
       this.syncSelection(groups);
     } catch (cause) {
       this.setData({
         loading: false,
-        error: errorMessage(cause, "购物车加载失败"),
+        error: errorMessage(cause, t("cart.errors.load")),
       });
     }
   },
@@ -107,6 +131,7 @@ Page({
       selectedIds,
       selectedTotal: selectedTotal.toFixed(2),
       selectedCount,
+      allSelected: allIds.length > 0 && selectedIds.length === allIds.length,
       groups: groups.map((group) => ({
         ...group,
         allSelected: group.items.every((item) => this.isSelected(item.id)),
@@ -156,25 +181,90 @@ Page({
   async changeQuantity(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     const nextQuantity = Number(event.currentTarget.dataset.quantity ?? 0);
-    if (!id || nextQuantity < 1) {
+    // The stepper is a network command: a double tap must not queue two writes.
+    if (!id || nextQuantity < 1 || this.data.busy) {
       return;
     }
+    this.setData({ busy: true });
     try {
       await updateCartItem(id, nextQuantity);
       await this.refresh();
     } catch (cause) {
-      this.showToast(errorMessage(cause, "更新数量失败"));
+      this.showToast(errorMessage(cause, t("cart.errors.updateQuantity")));
+    } finally {
+      this.setData({ busy: false });
     }
   },
 
   async removeItem(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
+    if (!id) {
+      return;
+    }
+    const item = this.findItem(id);
+    wx.showModal({
+      title: t("cart.deleteTitle"),
+      content: item
+        ? t("cart.deleteConfirm", { title: item.title })
+        : t("cart.deleteConfirmPlain"),
+      success: (result) => {
+        if (result.confirm) {
+          void this.deleteItems([id]);
+        }
+      },
+    });
+  },
+
+  findItem(itemId: string): MpCartItem | null {
+    for (const group of this.data.groups) {
+      for (const item of group.items) {
+        if (item.id === itemId) {
+          return item;
+        }
+      }
+    }
+    return null;
+  },
+
+  async deleteItems(itemIds: string[]) {
+    if (itemIds.length === 0 || this.data.busy) {
+      return;
+    }
+    this.setData({ busy: true });
     try {
-      await removeCartItem(id);
+      for (const id of itemIds) {
+        await removeCartItem(id);
+      }
+      this.setData({ selectedIds: this.data.selectedIds.filter((id) => itemIds.indexOf(id) < 0) });
       await this.refresh();
     } catch (cause) {
-      this.showToast(errorMessage(cause, "删除失败"));
+      this.showToast(errorMessage(cause, t("cart.errors.remove")));
+    } finally {
+      this.setData({ busy: false });
     }
+  },
+
+  removeSelected() {
+    if (this.data.selectedIds.length === 0) {
+      return;
+    }
+    wx.showModal({
+      title: t("cart.deleteSelected"),
+      content: t("cart.deleteSelectedConfirm", { count: this.data.selectedIds.length }),
+      success: (result) => {
+        if (result.confirm) {
+          void this.deleteItems(this.data.selectedIds.slice());
+        }
+      },
+    });
+  },
+
+  toggleManage() {
+    this.setData({ manageMode: !this.data.manageMode });
+  },
+
+  onPullDownRefresh() {
+    void this.refresh().finally(() => wx.stopPullDownRefresh());
   },
 
   goProduct(event: MpTapEvent) {
@@ -191,7 +281,7 @@ Page({
 
   goCheckout() {
     if (this.data.selectedIds.length === 0) {
-      this.showToast("请先选择商品");
+      this.showToast(t("cart.errors.selectionRequired"));
       return;
     }
     wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.checkout", { items: this.data.selectedIds.join(",") }) });

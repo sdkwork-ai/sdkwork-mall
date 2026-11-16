@@ -1,4 +1,7 @@
+import { errorMessage } from "../../types/common";
+import { t } from "../../i18n";
 import { type MpActivity, retrieveActivity } from "../../services/marketing-service";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 
 interface ActivityView extends Omit<MpActivity, "startAt" | "endAt"> {
   windowText: string;
@@ -6,7 +9,9 @@ interface ActivityView extends Omit<MpActivity, "startAt" | "endAt"> {
 
 interface ActivityDetailData {
   loading: boolean;
+  error: string;
   activity: ActivityView | null;
+  _eventId: string;
 }
 
 function formatTime(iso: string): string {
@@ -20,14 +25,36 @@ function formatTime(iso: string): string {
 Page({
   data: {
     loading: true,
+    error: "",
     activity: null,
+    _eventId: "",
   } as ActivityDetailData,
 
   onLoad(options: Record<string, string | undefined>) {
-    void this.load(options.id || "");
+    this.setData({ _eventId: options.id || "" });
+    void this.load(this.data._eventId);
+  },
+
+  onShareAppMessage() {
+    const activity = this.data.activity;
+    return buildMpShareCard({
+      query: { id: this.data._eventId },
+      routeId: "storefront.mall.activity-detail",
+      title: activity ? activity.title : undefined,
+    });
+  },
+
+  onShareTimeline() {
+    const activity = this.data.activity;
+    return buildMpTimelineCard({
+      query: { id: this.data._eventId },
+      routeId: "storefront.mall.activity-detail",
+      title: activity ? activity.title : undefined,
+    });
   },
 
   async load(eventId: string) {
+    this.setData({ loading: true, error: "" });
     try {
       const activity = await retrieveActivity(eventId);
       if (!activity) {
@@ -42,8 +69,16 @@ Page({
         activity: { ...activity, windowText },
         loading: false,
       });
-    } catch {
-      this.setData({ activity: null, loading: false });
+    } catch (cause) {
+      this.setData({
+        activity: null,
+        error: errorMessage(cause, t("activity.errors.load")),
+        loading: false,
+      });
     }
+  },
+
+  retry() {
+    void this.load(this.data._eventId);
   },
 });

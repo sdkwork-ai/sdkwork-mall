@@ -8,11 +8,11 @@
 
   <view class="messages-list">
     <view
-      class="messages-row"
+      class="messages-row {{item.expanded ? 'messages-row-expanded' : ''}}"
       wx:for="{{rows}}"
       wx:key="id"
       bindtap="openRow"
-      data-url="{{item.targetUrl}}"
+      data-id="{{item.id}}"
     >
       <view class="messages-icon messages-icon-notice">
         <text>{{item.categoryText}}</text>
@@ -23,11 +23,15 @@
           {{item.title}}
         </view>
         <view class="mp-muted messages-summary">{{item.summary}}</view>
+        <view wx:if="{{item.expanded && item.body}}" class="messages-detail">{{item.body}}</view>
         <view wx:if="{{item.timeText}}" class="mp-muted messages-time">{{item.timeText}}</view>
       </view>
-      <view class="messages-action">{{viewText}}</view>
+      <view class="messages-action">{{item.expanded ? collapseText : viewText}}</view>
     </view>
   </view>
+
+  <view wx:if="{{rows.length > 0 && hasMore}}" class="mp-loading">{{loadMoreText}}</view>
+  <view wx:if="{{rows.length > 0 && !hasMore}}" class="mp-loading">{{allShownText}}</view>
 
   <view wx:if="{{!loading && rows.length > 0}}" class="mp-muted messages-footnote">{{footnoteText}}</view>
 </view>

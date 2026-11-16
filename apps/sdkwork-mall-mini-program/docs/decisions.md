@@ -51,3 +51,61 @@
   home/help entry tables were migrated from hard-coded `/pages/...` strings, and
   `tests/capability-navigation.test.mjs` now fails if any page module hard-codes a
   page path again or if the registry and `app.json` disagree.
+- 2026-11-16 (user-directed, "align with H5 and polish the storefront"): the
+  route-level parity contract already resolved 37/37 capabilities, so this pass
+  audited *implementation depth* against the H5 client and fixed the defects it
+  found. Recorded here because several of them changed a shared seam:
+  - **Pagination was dead.** `PageInfo` carries `totalItems`/`page`/`pageSize`/
+    `totalPages`/`hasMore` (API_SPEC §16); the services read a non-existent
+    `pageInfo.total`, so `total` was always 0 and every "load more" guard
+    (`products.length >= total`) fired immediately — category/search/orders
+    could never page past 20. `services/page-info.ts#readPageInfo` now owns the
+    normalization (prefers `hasMore`, then `totalPages`, then the item count)
+    and the three list pages guard on `hasMore`.
+  - **Checkout ignored the picked address.** The address page emitted
+    `addressPicked` on the opener EventChannel, but nothing subscribed and every
+    `onShow` reset the selection to the default. Checkout now passes an
+    `events` handler on `wx.navigateTo` and keeps a still-existing selection
+    across refreshes. The address page's picker styling also read the wrong
+    data key (`pickerMode` vs `_pickerMode`), so the mode was invisible.
+  - **Dead error/empty states.** The home loader swallowed every failure into
+    `[]`, so its `{{error}}` block was unreachable; shop and activity detail
+    turned network failures into "店铺不存在/活动已结束". Those now surface a
+    retry, and `tests/capability-navigation.test.mjs` matches any `{{error…}}`
+    binding (its exact-match regex let `{{error || '订单不存在'}}` escape).
+  - **Share and pull-to-refresh coverage.** `utils/share.ts` builds cards
+    through `mpCapabilityUrl()` so a shared link always restores a registered
+    capability; home, category, search, activity (list + detail), shop and order
+    detail now publish `onShareAppMessage`/`onShareTimeline` (product already
+    did). `enablePullDownRefresh` + `onPullDownRefresh` + `wx.stopPullDownRefresh`
+    went from 7 to 22 pages, including the cart and buyer tabs and every
+    server-backed buyer list.
+  - **H5 parity on the product detail.** The PDP gained the H5 surfaces it was
+    missing: claimable-coupon row, service guarantees, a review placeholder, a
+    "看了又看" recommendation strip, a full-screen gallery viewer, and a real
+    SKU sheet (thumbnail, selected spec, quantity, confirm) instead of the
+    confirm-only popup.
+  - **Cart parity.** Manage mode with bulk delete, item count, a disabled
+    stepper at quantity 1, confirmation dialogs and a busy guard — the H5 cart
+    already had all of these.
+  - **Smaller correctness fixes:** points rendered through `formatCny` showed
+    "¥100.00" for 100 积分 (`utils/format.ts#formatPoints`); the review centre
+    sent `?orderId=` to a page reading `id`; the settings page read
+    `getApp().environment` instead of `globalData`; the activity list class used
+    a `phase` the row view never set; the message centre navigated to itself
+    without an id (tap did nothing visible) and now expands the notice inline
+    with cursor paging; the chat page never rendered its error and wrote a read
+    receipt on every 5 s poll; the cashier always reported `pending` even after
+    a completed native payment; partner's invite link was never assigned (now
+    derived from the invite code) and the page was the codebase's only
+    `px`-styled stylesheet (converted to `rpx`); `sitemap.json` indexed the
+    private cart/order/account pages and now allows only the browse set.
+  - **Copy moved into catalogues.** New copy went to
+    `i18n/zh-CN/{common/share,storefront/cart,storefront/product-detail}` and the
+    cart page was migrated wholesale; the readiness ratchet improved from 194 to
+    179 hard-coded strings (baseline refreshed).
+  - **New guard: `tests/mp-page-contract.test.mjs`.** WXML is not type-checked,
+    which is how `{{allCount}}` shipped while `data` only had `selectedIds`.
+    The new suite cross-checks every top-level template binding against the
+    page module, every `t("…")` key against the catalogue, the `PageInfo`
+    contract, `rpx`-only styles, share hooks, and pull-to-refresh pairing.

@@ -5,7 +5,7 @@ import {
   type MpPointsLot,
 } from "../../services/account-service";
 import { isLoggedIn } from "../../services/session";
-import { formatCny } from "../../utils/format";
+import { formatCny, formatPoints } from "../../utils/format";
 
 interface LotRow {
   id: string;
@@ -39,7 +39,7 @@ function formatOccurredAt(iso: string): string {
 function toLotRows(lots: MpPointsLot[]): LotRow[] {
   return lots.map((lot) => ({
     id: lot.id,
-    pointsText: lot.points != null ? formatCny(lot.points) : "--",
+    pointsText: lot.points != null ? formatPoints(lot.points) : "--",
     expiresText: lot.expiresAt ? formatOccurredAt(lot.expiresAt) : "",
   }));
 }
@@ -75,7 +75,7 @@ Page({
     try {
       const summary = await getPointsSummary();
       this.setData({
-        balanceText: summary.balance != null ? formatCny(summary.balance) : "--",
+        balanceText: summary.balance != null ? formatPoints(summary.balance) : "--",
         lots: toLotRows(summary.lots),
         ledger: toLedgerRows(summary.ledger),
         loading: false,
@@ -87,5 +87,9 @@ Page({
 
   retry() {
     void this.load();
+  },
+
+  onPullDownRefresh() {
+    void this.load().finally(() => wx.stopPullDownRefresh());
   },
 });

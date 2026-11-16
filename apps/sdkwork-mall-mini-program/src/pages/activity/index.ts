@@ -1,11 +1,15 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
+import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { listActivities, type MpActivity } from "../../services/marketing-service";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 
 interface ActivityRow {
   id: string;
   title: string;
   highlight: string;
+  /** Drives the `activity-<phase>` card modifier used by the stylesheet. */
+  phase: MpActivity["phase"];
   phaseText: string;
   windowText: string;
 }
@@ -37,6 +41,7 @@ function toRows(activities: MpActivity[]): ActivityRow[] {
     id: activity.id,
     title: `${activity.typeLabel} · ${activity.title}`,
     highlight: activity.highlight || activity.discountText,
+    phase: activity.phase,
     phaseText: PHASE_TEXTS[activity.phase],
     windowText: [
       activity.startAt ? formatTime(activity.startAt) : "",
@@ -73,7 +78,25 @@ Page({
     }
   },
 
+  onShareAppMessage() {
+    return buildMpShareCard({
+      routeId: "storefront.mall.activity-list",
+      title: t("activity.hallTitle"),
+    });
+  },
+
+  onShareTimeline() {
+    return buildMpTimelineCard({
+      routeId: "storefront.mall.activity-list",
+      title: t("activity.hallTitle"),
+    });
+  },
+
   retry() {
     void this.load();
+  },
+
+  onPullDownRefresh() {
+    void this.load().finally(() => wx.stopPullDownRefresh());
   },
 });

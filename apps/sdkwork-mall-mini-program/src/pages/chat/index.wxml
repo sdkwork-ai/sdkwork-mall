@@ -1,4 +1,9 @@
 <view class="page-chat">
+  <view wx:if="{{message}}" class="mp-error chat-error">
+    <text>{{message}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
+
   <scroll-view class="chat-stream" scroll-y scroll-into-view="{{scrollInto}}">
     <view wx:if="{{messages.length === 0}}" class="mp-empty chat-empty">发送消息，客服将尽快回复</view>
     <view

@@ -154,4 +154,8 @@ Page({
   retry() {
     void this.reload();
   },
+
+  onPullDownRefresh() {
+    void this.reload().finally(() => wx.stopPullDownRefresh());
+  },
 });

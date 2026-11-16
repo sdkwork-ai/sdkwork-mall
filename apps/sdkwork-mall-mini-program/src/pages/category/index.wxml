@@ -3,7 +3,10 @@
     <view class="category-search-box">搜索商品</view>
   </view>
 
-  <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
 
   <view class="category-layout">
     <scroll-view class="category-rail" scroll-y>
@@ -39,7 +42,7 @@
             </view>
           </view>
         </view>
-        <view wx:if="{{products.length >= total}}" class="mp-loading">已展示全部 {{total}} 件商品</view>
+        <view wx:if="{{!hasMore}}" class="mp-loading">已展示全部 {{products.length}} 件商品</view>
         <view wx:elif="{{loadingMore}}" class="mp-loading">加载更多...</view>
       </view>
     </scroll-view>

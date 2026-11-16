@@ -77,6 +77,9 @@ Page({
   },
 
   async pay() {
+    if (this.data.paying) {
+      return;
+    }
     const { orderId, selectedCode } = this.data;
     if (!selectedCode) {
       this.setData({ error: t("cashier.errors.methodRequired") });
@@ -85,9 +88,13 @@ Page({
     this.setData({ paying: true, error: "" });
     try {
       const payment = await payOrder(orderId, selectedCode);
+      // The result page is told what actually happened: a completed native
+      // WeChat Pay handoff is a success, every deferred channel is pending.
+      let status = "pending";
       if (payment.wechatPay) {
         // Real WeChat Pay handoff: the native cashier completes the charge.
         await this.requestWechatPayment(payment.wechatPay);
+        status = "success";
       } else if (payment.paymentUrl) {
         // Outside channels (e.g. H5/QR) cannot be opened inside the mini
         // program: copy the link so the buyer can finish in a browser.
@@ -103,7 +110,7 @@ Page({
           orderId,
           paymentId: payment.paymentId,
           paymentMethod: selectedCode,
-          status: "pending",
+          status,
         }),
       });
     } catch (cause) {

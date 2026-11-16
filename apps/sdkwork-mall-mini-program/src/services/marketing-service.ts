@@ -1,7 +1,7 @@
 /**
  * Marketing surfaces: shops and promotional activities.
  *
- * Wire contract: `GET /shops/{shopId}` (shop detail), `GET /catalog/spus`
+ * Wire contract: `GET /shops/{shopId}` (shop detail), `GET /catalog/products`
  * filtered by `shop_id` (shop products), `GET /promotions/offers` with
  * `status=active` (activity list) and `GET /promotions/offers/{offerId}`
  * (activity detail).
@@ -91,7 +91,7 @@ export async function retrieveShop(shopId: string): Promise<MpShopDetail | null>
   const [shop, productsPayload] = await Promise.all([
     request({ path: `/shops/${shopId}` }).catch(() => ({}) as MpRecord),
     request({
-      path: "/catalog/spus",
+      path: "/catalog/products",
       query: { page: 1, page_size: 20, shop_id: shopId },
     }).catch(() => ({}) as MpRecord),
   ]);
@@ -121,7 +121,9 @@ export async function listActivities(): Promise<MpActivity[]> {
 }
 
 export async function retrieveActivity(eventId: string): Promise<MpActivity | null> {
-  const record = await request({ path: `/promotions/offers/${eventId}` }).catch(() => ({}) as MpRecord);
+  // A failed read must stay distinguishable from "no such activity": the page
+  // shows a retry for the first and a terminal empty state for the second.
+  const record = await request({ path: `/promotions/offers/${eventId}` });
   if (!asString(record, ["id", "offerId", "activityId"])) {
     return null;
   }

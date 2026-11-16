@@ -32,6 +32,7 @@ interface OrdersData {
   orders: MpOrderRow[];
   page: number;
   total: number;
+  hasMore: boolean;
   loading: boolean;
   loadingMore: boolean;
   error: string;
@@ -40,6 +41,7 @@ interface OrdersData {
   loadMoreText: string;
   allShownText: string;
   viewDetailText: string;
+  retryText: string;
   payText: string;
   cancelText: string;
   confirmReceiptText: string;
@@ -53,6 +55,7 @@ Page({
     orders: [],
     page: 1,
     total: 0,
+    hasMore: false,
     loading: true,
     loadingMore: false,
     error: "",
@@ -61,6 +64,7 @@ Page({
     loadMoreText: t("orderList.loadMore"),
     allShownText: t("orderList.allShown"),
     viewDetailText: t("orderList.viewDetail"),
+    retryText: t("orderList.retry"),
     payText: t("orderList.actions.pay"),
     cancelText: t("orderList.actions.cancel"),
     confirmReceiptText: t("orderList.actions.confirmReceipt"),
@@ -98,6 +102,7 @@ Page({
       this.setData({
         orders: nextPage === 1 ? orders : this.data.orders.concat(orders),
         total: result.total,
+        hasMore: result.hasMore,
         page: nextPage,
         loading: false,
         loadingMore: false,
@@ -174,9 +179,13 @@ Page({
   },
 
   loadMore() {
-    if (this.data.loadingMore || this.data.orders.length >= this.data.total) {
+    if (this.data.loadingMore || !this.data.hasMore) {
       return;
     }
     void this.loadOrders(this.data.page + 1);
+  },
+
+  retry() {
+    void this.loadOrders(1);
   },
 });

@@ -2,6 +2,7 @@ import { errorMessage, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { retrieveShop, type MpShopDetail } from "../../services/marketing-service";
 import { formatCny } from "../../utils/format";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 
 interface ShopProductRow {
   id: string;
@@ -21,6 +22,7 @@ interface ShopView {
 
 interface ShopData {
   loading: boolean;
+  error: string;
   shop: ShopView | null;
   _shopId: string;
 }
@@ -46,6 +48,7 @@ function toView(shop: MpShopDetail): ShopView {
 Page({
   data: {
     loading: true,
+    error: "",
     shop: null,
     _shopId: "",
   } as ShopData,
@@ -55,21 +58,54 @@ Page({
     void this.load();
   },
 
+  onShareAppMessage() {
+    const shop = this.data.shop;
+    return buildMpShareCard({
+      imageUrl: shop?.logoUrl || undefined,
+      query: { id: this.data._shopId },
+      routeId: "storefront.mall.shop",
+      title: shop?.name,
+    });
+  },
+
+  onShareTimeline() {
+    const shop = this.data.shop;
+    return buildMpTimelineCard({
+      imageUrl: shop?.logoUrl || undefined,
+      query: { id: this.data._shopId },
+      routeId: "storefront.mall.shop",
+      title: shop?.name,
+    });
+  },
+
   async load() {
-    this.setData({ loading: true });
+    this.setData({ loading: true, error: "" });
     try {
       const shop = await retrieveShop(this.data._shopId);
       this.setData({ shop: shop ? toView(shop) : null, loading: false });
     } catch (cause) {
-      this.setData({ shop: null, loading: false });
-      wx.showToast({ title: errorMessage(cause, "店铺加载失败"), icon: "none" });
+      // A failed read is not "this shop is closed": keep the distinction so the
+      // buyer gets a retry instead of a dead end.
+      this.setData({
+        shop: null,
+        loading: false,
+        error: errorMessage(cause, "店铺加载失败"),
+      });
     }
   },
 
   goProduct(event: MpTapEvent) {
     const id = String(event.currentTarget.dataset.id ?? "");
     if (id) {
-      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: id }) });
+      wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id }) });
     }
+  },
+
+  retry() {
+    void this.load();
+  },
+
+  onPullDownRefresh() {
+    void this.load().finally(() => wx.stopPullDownRefresh());
   },
 });

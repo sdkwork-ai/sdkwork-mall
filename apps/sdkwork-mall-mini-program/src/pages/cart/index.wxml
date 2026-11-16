@@ -7,18 +7,23 @@
   <block wx:else>
     <view wx:if="{{loading}}" class="mp-loading">加载购物车...</view>
     <view wx:if="{{error}}" class="mp-error">
-    <text>{{error}}</text>
-    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
-  </view>
+      <text>{{error}}</text>
+      <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
+    </view>
 
     <view wx:if="{{!loading && groups.length === 0}}" class="mp-empty">
       <view>购物车还是空的</view>
       <button class="mp-btn mp-btn-primary cart-login-btn" bindtap="goHome">去逛逛</button>
     </view>
 
+    <view wx:if="{{groups.length > 0}}" class="mp-flex-between cart-toolbar">
+      <text class="mp-muted">{{countText}}</text>
+      <text class="cart-manage" bindtap="toggleManage">{{manageMode ? doneText : manageText}}</text>
+    </view>
+
     <block wx:if="{{groups.length > 0}}">
       <view class="cart-select-all mp-row" bindtap="toggleAll">
-        <view class="cart-checkbox {{selectedIds.length > 0 && groups.length > 0 && selectedIds.length === allCount ? 'cart-checkbox-on' : ''}}" />
+        <view class="cart-checkbox {{allSelected ? 'cart-checkbox-on' : ''}}" />
         <text>全选</text>
       </view>
 
@@ -42,10 +47,10 @@
             <view class="mp-product-title" bindtap="goProduct" data-id="{{item.spuId}}">{{item.title}}</view>
             <view class="mp-muted" wx:if="{{item.skuName}}">{{item.skuName}}</view>
             <view class="mp-flex-between">
-              <text class="mp-price">{{item.priceCny ? '¥' + item.priceCny.toFixed(2) : '询价'}}</text>
+              <text class="mp-price">{{item.priceCny ? '¥' + item.priceCny.toFixed(2) : priceFallback}}</text>
               <view class="cart-quantity">
                 <text
-                  class="cart-quantity-btn"
+                  class="cart-quantity-btn {{item.quantity <= 1 ? 'cart-quantity-btn-disabled' : ''}}"
                   bindtap="changeQuantity"
                   data-id="{{item.id}}"
                   data-quantity="{{item.quantity - 1}}"
@@ -67,8 +72,15 @@
       <view class="cart-footer">
         <view class="cart-total">合计：<text class="mp-price">¥{{selectedTotal}}</text></view>
         <button
+          wx:if="{{manageMode}}"
+          class="mp-btn mp-btn-ghost cart-checkout-btn cart-remove-selected"
+          disabled="{{busy || selectedCount === 0}}"
+          bindtap="removeSelected"
+        >删除所选({{selectedCount}})</button>
+        <button
+          wx:else
           class="mp-btn mp-btn-primary cart-checkout-btn"
-          disabled="{{selectedCount === 0}}"
+          disabled="{{busy || selectedCount === 0}}"
           bindtap="goCheckout"
         >去结算({{selectedCount}})</button>
       </view>

@@ -50,6 +50,11 @@ Page({
     void this.loadLogistics(this.data._orderId, this.data._shipmentId);
   },
 
+  onPullDownRefresh() {
+    void this.loadLogistics(this.data._orderId, this.data._shipmentId)
+      .finally(() => wx.stopPullDownRefresh());
+  },
+
   async loadLogistics(orderId: string, shipmentId: string) {
     if (!orderId && !shipmentId) {
       this.setData({ loading: false, missingOrder: true });

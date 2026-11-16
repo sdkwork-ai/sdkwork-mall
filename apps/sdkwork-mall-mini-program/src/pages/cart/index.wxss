@@ -7,6 +7,25 @@
   width: 260rpx;
 }
 
+.cart-toolbar {
+  padding: 16rpx 24rpx;
+}
+
+.cart-manage {
+  font-size: 26rpx;
+  color: #e93b3d;
+  padding: 6rpx 12rpx;
+}
+
+.cart-remove-selected {
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.cart-quantity-btn-disabled {
+  color: #d1d5db;
+}
+
 .cart-select-all {
   margin: 0;
   border-radius: 16rpx 16rpx 0 0;

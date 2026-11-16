@@ -1,4 +1,5 @@
-import { request, type MpPayload } from "./transport";
+import { readPageInfo } from "./page-info";
+import { request } from "./transport";
 
 export interface MpCategory {
   id: string;
@@ -66,12 +67,17 @@ export async function listCategories(): Promise<MpCategory[]> {
   }));
 }
 
-export async function listProducts(options: MpProductListOptions = {}): Promise<{ items: MpProductCard[]; total: number }> {
+export async function listProducts(options: MpProductListOptions = {}): Promise<{
+  hasMore: boolean;
+  items: MpProductCard[];
+  total: number;
+}> {
+  const page = options.page ?? 1;
   const payload = await request({
-    path: "/catalog/spus",
+    path: "/catalog/products",
     query: {
       category_id: options.categoryId,
-      page: options.page ?? 1,
+      page,
       page_size: options.pageSize ?? 20,
       q: options.keyword,
       shop_id: options.shopId,
@@ -79,14 +85,16 @@ export async function listProducts(options: MpProductListOptions = {}): Promise<
     },
   });
   const items = Array.isArray(payload.items) ? payload.items : [];
+  const pageInfo = readPageInfo(payload, items.length, page);
   return {
+    hasMore: pageInfo.hasMore,
     items: items.map(mapProductCard),
-    total: Number((payload.pageInfo as MpPayload | undefined)?.total) || 0,
+    total: pageInfo.totalItems,
   };
 }
 
 export async function getProductDetail(productId: string): Promise<MpProductDetail | null> {
-  const record = await request({ path: `/catalog/spus/${productId}` });
+  const record = await request({ path: `/catalog/products/${productId}` });
   if (!record || !record.id) {
     return null;
   }

@@ -5,6 +5,20 @@ export function formatCny(value: number | null | undefined): string {
   return `¥${value.toFixed(2)}`;
 }
 
+/**
+ * Points are a count, not money: rendering them through `formatCny` showed
+ * "¥100.00" for 100 积分. Thousands are grouped for readability.
+ */
+export function formatPoints(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "--";
+  }
+  const rounded = Math.round(value);
+  const digits = String(Math.abs(rounded));
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/gu, ",");
+  return rounded < 0 ? `-${grouped}` : grouped;
+}
+
 export function formatTime(value: string | null | undefined): string {
   if (!value) {
     return "--";

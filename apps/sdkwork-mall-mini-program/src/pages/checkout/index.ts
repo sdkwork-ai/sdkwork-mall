@@ -214,6 +214,10 @@ Page({
         quoteError = errorMessage(cause, t("checkout.errors.quoteLoad"));
       }
       const defaultAddress = addresses.find((address) => address.isDefault) || addresses[0];
+      // A checkout visit can pick an address and come back through onShow; keep
+      // that selection instead of resetting to the default on every refresh.
+      const current = addresses.find((address) => address.id === this.data.selectedAddressId);
+      const selected = current || defaultAddress;
       this.setData({
         addresses,
         coupons: coupons.map((coupon) => ({
@@ -232,7 +236,7 @@ Page({
           quote && quote.discountAmountCny != null && quote.discountAmountCny > 0
             ? formatCny(quote.discountAmountCny)
             : "",
-        selectedAddressId: defaultAddress ? defaultAddress.id : "",
+        selectedAddressId: selected ? selected.id : "",
         loading: false,
       });
     } catch (cause) {
@@ -327,10 +331,29 @@ Page({
   },
 
   goAddress() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.addresses", { picker: "1" }) });
+    // The address page emits the picked row over the opener EventChannel
+    // (`pages/address/index.ts`), so checkout receives the choice instead of
+    // silently keeping the default address.
+    wx.navigateTo({
+      url: mpCapabilityUrl("buyer.mall.addresses", { picker: "1" }),
+      events: {
+        addressPicked: (payload: unknown) => {
+          const picked = payload as { id?: unknown } | null;
+          const addressId = picked && picked.id != null ? String(picked.id) : "";
+          if (addressId) {
+            this.setData({ selectedAddressId: addressId });
+          }
+        },
+      },
+    });
   },
 
   async submit() {
+    // One order per tap: the button is disabled while busy, and the handler
+    // guards as well so a fast double tap cannot create two orders.
+    if (this.data.busy) {
+      return;
+    }
     if (!this.data.selectedAddressId) {
       this.showToast(t("checkout.errors.addressRequired"));
       return;

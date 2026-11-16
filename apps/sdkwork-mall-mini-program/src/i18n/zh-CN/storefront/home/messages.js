@@ -8,6 +8,8 @@ module.exports = {
     hot: "热卖推荐",
     sold: "已售 {{count}}",
     error: "首页加载失败",
+    retry: "重试",
+    shareTitle: "SDKWork 商城 · 品质生活一站购齐",
     seckill: {
       title: "限时秒杀",
       ongoing: "进行中",

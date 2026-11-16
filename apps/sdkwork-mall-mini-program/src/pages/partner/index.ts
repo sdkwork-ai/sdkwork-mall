@@ -419,7 +419,15 @@ Page({
   async loadCenter() {
     try {
       const center = await retrievePartnerCenter();
-      this.setData({ center, centerNotice: "" });
+      this.setData({
+        center,
+        centerNotice: "",
+        // Restored by the distribution route as `?invite=`; the invite code is
+        // also validated by the application form.
+        shareLink: center.inviteCode
+          ? mpCapabilityUrl("buyer.mall.distribution", { invite: center.inviteCode })
+          : "",
+      });
       await Promise.all([
         this.loadTeamPage(1),
         this.loadCommissionPage(1),
@@ -427,10 +435,10 @@ Page({
       ]);
     } catch (cause) {
       if ((cause as { statusCode?: number }).statusCode === 404) {
-        this.setData({ center: null, centerNotice: t("partner.center.notEnrolled") });
+        this.setData({ center: null, shareLink: "", centerNotice: t("partner.center.notEnrolled") });
         return;
       }
-      this.setData({ center: null, centerNotice: t("partner.center.notSupported") });
+      this.setData({ center: null, shareLink: "", centerNotice: t("partner.center.notSupported") });
     }
   },
 
@@ -657,12 +665,19 @@ Page({
 
   copyShareLink() {
     if (!this.data.shareLink) {
+      // The invite link only exists once the partner centre resolved an invite
+      // code, so say so instead of copying an empty clipboard.
+      wx.showToast({ title: t("partner.center.notEnrolled"), icon: "none" });
       return;
     }
     wx.setClipboardData({ data: this.data.shareLink });
   },
 
-  goOrders() {
-    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.orders") });
+  copyInviteCode() {
+    const code = this.data.center?.inviteCode ?? "";
+    if (!code) {
+      return;
+    }
+    wx.setClipboardData({ data: code });
   },
 });

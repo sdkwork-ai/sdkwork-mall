@@ -13,6 +13,10 @@ interface MallMpGlobalData {
   deploymentProfile?: string;
 }
 
+interface MallMpApp {
+  globalData?: MallMpGlobalData;
+}
+
 Page({
   data: {
     loggedIn: false,
@@ -21,11 +25,13 @@ Page({
   } as SettingsData,
 
   onShow() {
-    const app = getApp<MallMpGlobalData>();
+    // The app shell publishes these under `globalData` (src/app.ts), not as
+    // top-level app members.
+    const globalData = getApp<MallMpApp>()?.globalData;
     this.setData({
       loggedIn: isLoggedIn(),
-      environment: String(app?.environment ?? "development"),
-      deploymentProfile: String(app?.deploymentProfile ?? "standalone"),
+      environment: String(globalData?.environment ?? "development"),
+      deploymentProfile: String(globalData?.deploymentProfile ?? "standalone"),
     });
   },
 

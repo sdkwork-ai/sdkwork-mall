@@ -1,91 +1,91 @@
 .page-partner {
-  padding: 12px 12px 32px;
+  padding: 24rpx 24rpx 64rpx;
 }
 
 .partner-eyebrow {
-  font-size: 12px;
+  font-size: 24rpx;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .partner-status-title {
-  font-size: 20px;
+  font-size: 40rpx;
   font-weight: 600;
-  margin: 2px 0 6px;
+  margin: 4rpx 0 12rpx;
 }
 
 .partner-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin: 12px 0;
+  gap: 16rpx;
+  margin: 24rpx 0;
 }
 
 .partner-chip {
   background: #fdecec;
-  border-radius: 999px;
+  border-radius: 999rpx;
   color: #c0272d;
-  font-size: 12px;
-  padding: 4px 10px;
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
 }
 
 .partner-error {
   color: #c0272d;
-  margin: 8px 0 12px;
+  margin: 16rpx 0 24rpx;
 }
 
 .partner-empty {
-  margin: 8px 0;
+  margin: 16rpx 0;
 }
 
 .partner-invite-result {
-  border-radius: 8px;
-  margin-top: 10px;
-  padding: 10px 12px;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+  padding: 20rpx 24rpx;
 }
 
 .partner-invite-valid {
   background: #eaf7ed;
-  border: 1px solid #b7e0c0;
+  border: 2rpx solid #b7e0c0;
 }
 
 .partner-invite-invalid {
   background: #fdecec;
-  border: 1px solid #f0bfc2;
+  border: 2rpx solid #f0bfc2;
 }
 
 .partner-invite-title {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 8rpx;
 }
 
 .partner-picker {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
 }
 
 .partner-actions {
   display: flex;
-  gap: 10px;
+  gap: 20rpx;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 24rpx;
 }
 
 .partner-issues {
-  margin-top: 8px;
+  margin-top: 16rpx;
 }
 
 .partner-issue {
   color: #c0272d;
-  font-size: 12px;
+  font-size: 24rpx;
 }
 
 .partner-level,
 .partner-application {
-  border-bottom: 1px solid #f0f1f3;
-  padding: 12px 0;
+  border-bottom: 2rpx solid #f0f1f3;
+  padding: 24rpx 0;
 }
 
 .partner-level:last-child,
@@ -100,24 +100,24 @@
 }
 
 .partner-level-name {
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: 600;
 }
 
 .partner-level-meta {
   color: #4b5563;
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: 26rpx;
+  margin-top: 8rpx;
 }
 
 .partner-benefits {
-  margin-top: 6px;
+  margin-top: 12rpx;
 }
 
 .partner-benefit {
   color: #4b5563;
-  font-size: 13px;
-  padding-left: 10px;
+  font-size: 26rpx;
+  padding-left: 20rpx;
   position: relative;
 }
 
@@ -128,9 +128,9 @@
 }
 
 .partner-rules {
-  border-top: 1px solid #f0f1f3;
-  margin-top: 10px;
-  padding-top: 10px;
+  border-top: 2rpx solid #f0f1f3;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
 }
 
 /* Join application modal: a dedicated overlay, never an in-flow card. */
@@ -148,27 +148,27 @@
 
 .partner-modal-panel {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 32rpx;
   display: flex;
   flex-direction: column;
-  left: 16px;
+  left: 32rpx;
   max-height: 88vh;
   position: absolute;
-  right: 16px;
+  right: 32rpx;
   top: 50%;
   transform: translateY(-50%);
 }
 
 .partner-modal-head {
   align-items: center;
-  border-bottom: 1px solid #eceef1;
+  border-bottom: 2rpx solid #eceef1;
   display: flex;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 32rpx 40rpx;
 }
 
 .partner-modal-title {
-  font-size: 18px;
+  font-size: 36rpx;
   font-weight: 600;
 }
 
@@ -176,9 +176,9 @@
   background: transparent;
   border: 0;
   color: #6b7280;
-  font-size: 24px;
+  font-size: 48rpx;
   line-height: 1;
-  padding: 0 8px;
+  padding: 0 16rpx;
 }
 
 .partner-modal-body {
@@ -190,4 +190,16 @@
   border: 0;
   box-shadow: none;
   margin: 0;
+}
+
+.partner-invite-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.partner-invite-btn {
+  min-height: 64rpx;
+  font-size: 24rpx;
+  padding: 0 24rpx;
 }

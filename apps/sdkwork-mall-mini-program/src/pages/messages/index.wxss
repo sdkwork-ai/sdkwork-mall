@@ -60,6 +60,22 @@
   white-space: nowrap;
 }
 
+/* Expanded notice: the summary stops truncating and the body is revealed. */
+.messages-row-expanded .messages-summary {
+  white-space: normal;
+}
+
+.messages-detail {
+  margin-top: 12rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 24rpx;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 .messages-time {
   margin-top: 6rpx;
   font-size: 22rpx;

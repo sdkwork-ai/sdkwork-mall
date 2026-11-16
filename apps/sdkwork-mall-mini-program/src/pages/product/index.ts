@@ -1,12 +1,34 @@
 import { errorMessage, type MpSwiperChangeEvent, type MpTapEvent } from "../../types/common";
+import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
-import { type MpProductDetail, type MpSku, getProductDetail } from "../../services/catalog-service";
+import {
+  type MpProductDetail,
+  type MpSku,
+  getProductDetail,
+  listProducts,
+} from "../../services/catalog-service";
 import { addToCart } from "../../services/cart-service";
 import { isFavorite, recordFootprint, toggleFavorite } from "../../services/favorites-service";
+import { claimCoupon, type MpOffer, listOffers } from "../../services/promotion-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 
 type ProductSku = MpSku & { priceText: string };
+
+interface ProductOffer {
+  claimable: boolean;
+  discountText: string;
+  id: string;
+  title: string;
+}
+
+interface RecommendationCard {
+  id: string;
+  imageUrl: string;
+  priceText: string;
+  title: string;
+}
 
 interface ProductData {
   detail: MpProductDetail | null;
@@ -15,11 +37,16 @@ interface ProductData {
   skus: ProductSku[];
   specs: Array<{ name: string; value: string }>;
   selectedSkuId: string;
+  selectedSkuTitle: string;
   quantity: number;
   maxQuantity: number | null;
+  stockUrgent: boolean;
   soldOut: boolean;
   displayPrice: string;
   favorite: boolean;
+  offers: ProductOffer[];
+  claimingOfferId: string;
+  recommendations: RecommendationCard[];
   loading: boolean;
   busy: boolean;
   error: string;
@@ -27,8 +54,28 @@ interface ProductData {
   skuPopupOpen: boolean;
   skuPopupMode: string;
   toast: string;
+  priceFallback: string;
+  favoriteText: string;
+  favoritedText: string;
+  soldOutText: string;
+  buyNowText: string;
+  addToCartText: string;
+  defaultSkuText: string;
+  retryText: string;
   _productId: string;
   _toastTimer: number | null;
+}
+
+/** Mirrors the H5 floor: below this the PDP shows an urgency hint. */
+const STOCK_URGENT_THRESHOLD = 20;
+
+function toOfferRows(offers: MpOffer[]): ProductOffer[] {
+  return offers.map((offer) => ({
+    claimable: offer.claimable,
+    discountText: offer.discountText,
+    id: offer.id,
+    title: offer.title,
+  }));
 }
 
 Page({
@@ -39,11 +86,16 @@ Page({
     skus: [],
     specs: [],
     selectedSkuId: "",
+    selectedSkuTitle: "",
     quantity: 1,
     maxQuantity: null,
+    stockUrgent: false,
     soldOut: false,
     displayPrice: "",
     favorite: false,
+    offers: [],
+    claimingOfferId: "",
+    recommendations: [],
     loading: true,
     busy: false,
     error: "",
@@ -51,6 +103,14 @@ Page({
     skuPopupOpen: false,
     skuPopupMode: "cart",
     toast: "",
+    priceFallback: t("productDetail.priceFallback"),
+    favoriteText: t("productDetail.favorite"),
+    favoritedText: t("productDetail.favorited"),
+    soldOutText: t("productDetail.soldOut"),
+    buyNowText: t("productDetail.buyNow"),
+    addToCartText: t("productDetail.addToCart"),
+    defaultSkuText: t("productDetail.defaultSku"),
+    retryText: t("productDetail.retry"),
     _productId: "",
     _toastTimer: null,
   } as ProductData,
@@ -63,21 +123,23 @@ Page({
   /** 好友/群聊分享：携带商品标题、主图与还原路径。 */
   onShareAppMessage() {
     const detail = this.data.detail;
-    return {
-      title: detail ? detail.title : "SDKWork 商城好物推荐",
+    return buildMpShareCard({
       imageUrl: this.data.images[0],
-      path: mpCapabilityUrl("storefront.mall.product-detail", { id: this.data._productId }),
-    };
+      query: { id: this.data._productId },
+      routeId: "storefront.mall.product-detail",
+      title: detail ? detail.title : undefined,
+    });
   },
 
   /** 朋友圈分享：静态落地页形态（不携带个性化参数）。 */
   onShareTimeline() {
     const detail = this.data.detail;
-    return {
-      title: detail ? `${detail.title} - SDKWork 商城` : "SDKWork 商城好物推荐",
+    return buildMpTimelineCard({
       imageUrl: this.data.images[0],
-      query: `id=${this.data._productId}`,
-    };
+      query: { id: this.data._productId },
+      routeId: "storefront.mall.product-detail",
+      title: detail ? `${detail.title} - SDKWork 商城` : undefined,
+    });
   },
 
   async loadDetail() {
@@ -109,12 +171,15 @@ Page({
         skus,
         specs: detail.specs,
         selectedSkuId: selectedSku ? selectedSku.id : "",
+        selectedSkuTitle: selectedSku ? selectedSku.title : "",
         displayPrice: formatCny(selectedSku && selectedSku.priceCny != null ? selectedSku.priceCny : detail.priceCny),
         maxQuantity,
+        stockUrgent: maxQuantity != null && maxQuantity > 0 && maxQuantity < STOCK_URGENT_THRESHOLD,
         soldOut: maxQuantity != null && maxQuantity <= 0,
         favorite: isFavorite(detail.id),
         loading: false,
       });
+      void this.loadEnrichments(detail);
     } catch (cause) {
       this.setData({
         loading: false,
@@ -123,8 +188,44 @@ Page({
     }
   },
 
+  /**
+   * Coupons and "看了又看" are enrichments: the product is already usable when
+   * they fail, so both degrade silently instead of turning the page into an
+   * error (same rule as the H5 product detail).
+   */
+  async loadEnrichments(detail: MpProductDetail) {
+    const [offersResult, recommendedResult] = await Promise.all([
+      listOffers().catch(() => [] as MpOffer[]),
+      listProducts({ page: 1, pageSize: 8, sort: "sales" }).catch(() => null),
+    ]);
+    const recommendations = recommendedResult
+      ? recommendedResult.items
+          .filter((product) => product.id && product.id !== detail.id)
+          .slice(0, 4)
+          .map((product) => ({
+            id: product.id,
+            imageUrl: product.imageUrl,
+            priceText: formatCny(product.priceCny),
+            title: product.title,
+          }))
+      : [];
+    this.setData({
+      offers: toOfferRows(offersResult.filter((offer) => offer.claimable)),
+      recommendations,
+    });
+  },
+
   onImageChange(event: MpSwiperChangeEvent) {
     this.setData({ activeImage: event.detail.current });
+  },
+
+  /** Full-screen gallery: the platform viewer handles pinch, swipe and save. */
+  previewImage(event: MpTapEvent) {
+    const current = String(event.currentTarget.dataset.url ?? "");
+    if (!current || this.data.images.length === 0) {
+      return;
+    }
+    wx.previewImage({ current, urls: this.data.images });
   },
 
   toggleFavorite() {
@@ -149,6 +250,36 @@ Page({
     }
   },
 
+  goRecommendation(event: MpTapEvent) {
+    const id = String(event.currentTarget.dataset.id ?? "");
+    if (!id) {
+      return;
+    }
+    wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id }) });
+  },
+
+  async claimOffer(event: MpTapEvent) {
+    const offerId = String(event.currentTarget.dataset.id ?? "");
+    if (!offerId || this.data.claimingOfferId) {
+      return;
+    }
+    if (!isLoggedIn()) {
+      wx.navigateTo({ url: mpCapabilityUrl("account.mall.login") });
+      return;
+    }
+    this.setData({ claimingOfferId: offerId });
+    try {
+      await claimCoupon(offerId);
+      // The claimed offer leaves the row exactly like the H5 sheet does.
+      this.setData({ offers: this.data.offers.filter((offer) => offer.id !== offerId) });
+      this.showToast(t("productDetail.toasts.couponClaimed"));
+    } catch (cause) {
+      this.showToast(errorMessage(cause, t("productDetail.toasts.couponClaimFailed")));
+    } finally {
+      this.setData({ claimingOfferId: "" });
+    }
+  },
+
   selectSku(event: MpTapEvent) {
     const skuId = String(event.currentTarget.dataset.id ?? "");
     const sku = this.data.skus.find((entry) => entry.id === skuId);
@@ -158,7 +289,9 @@ Page({
     const maxQuantity = sku.stock != null && sku.stock >= 0 ? sku.stock : this.data.maxQuantity;
     this.setData({
       selectedSkuId: skuId,
+      selectedSkuTitle: sku.title,
       maxQuantity,
+      stockUrgent: maxQuantity != null && maxQuantity > 0 && maxQuantity < STOCK_URGENT_THRESHOLD,
       soldOut: maxQuantity != null && maxQuantity <= 0,
       displayPrice: formatCny(sku.priceCny ?? this.data.detail?.priceCny ?? null),
       quantity: 1,
@@ -181,6 +314,9 @@ Page({
   },
 
   openSkuPopup(event: MpTapEvent) {
+    if (this.data.busy || this.data.soldOut) {
+      return;
+    }
     this.setData({ skuPopupOpen: true, skuPopupMode: String(event.currentTarget.dataset.mode ?? "") || "cart" });
   },
 
@@ -188,10 +324,20 @@ Page({
     this.setData({ skuPopupOpen: false });
   },
 
+  /** Stops the mask tap from closing the sheet when the sheet itself is tapped. */
+  noop() {
+    // Intentionally empty: `catchtap` consumes the bubble.
+  },
+
   async confirmSkuPopup() {
+    if (this.data.busy) {
+      return;
+    }
     const mode = this.data.skuPopupMode;
-    this.setData({ skuPopupOpen: false });
     await this.addToCart(mode === "buy");
+    if (!this.data.busy) {
+      this.setData({ skuPopupOpen: false });
+    }
   },
 
   async addToCart(goCheckout: boolean) {
@@ -242,12 +388,24 @@ Page({
     }
   },
 
+  goCart() {
+    wx.switchTab({ url: mpCapabilityUrl("storefront.mall.cart") });
+  },
+
+  goChat() {
+    wx.navigateTo({ url: mpCapabilityUrl("buyer.mall.im.chats") });
+  },
+
   retry() {
     void this.loadDetail();
   },
 
   goHome() {
     wx.switchTab({ url: mpCapabilityUrl("storefront.mall.home") });
+  },
+
+  onPullDownRefresh() {
+    void this.loadDetail().finally(() => wx.stopPullDownRefresh());
   },
 
   showToast(message: string) {

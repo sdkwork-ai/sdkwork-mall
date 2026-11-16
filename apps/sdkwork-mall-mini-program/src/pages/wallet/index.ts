@@ -74,4 +74,8 @@ Page({
   retry() {
     void this.load();
   },
+
+  onPullDownRefresh() {
+    void this.load().finally(() => wx.stopPullDownRefresh());
+  },
 });

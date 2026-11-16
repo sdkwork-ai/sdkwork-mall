@@ -179,7 +179,10 @@ test("every mini-program error state offers a recovery path", () => {
       continue;
     }
     const wxml = readFileSync(wxmlPath, "utf8");
-    const rendersError = /\{\{\s*error\s*\}\}/u.test(wxml);
+    // Match any error binding, not just the bare `{{error}}` form: a page that
+    // renders `{{error || '订单不存在'}}` (order detail used to) is the same
+    // trapped buyer, and the old exact-match regex let it through.
+    const rendersError = /\{\{\s*error\b/u.test(wxml);
     if (!rendersError && !wxml.includes("mp-error")) {
       continue;
     }

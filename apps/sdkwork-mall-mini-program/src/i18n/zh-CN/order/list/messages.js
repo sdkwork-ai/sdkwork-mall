@@ -7,6 +7,7 @@ module.exports = {
     loadMore: "上拉加载更多",
     allShown: "已展示全部",
     viewDetail: "订单详情",
+    retry: "重试",
     tabs: {
       all: "全部",
       pendingPayment: "待付款",

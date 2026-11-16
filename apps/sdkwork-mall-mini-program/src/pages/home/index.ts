@@ -1,12 +1,10 @@
 import { t } from "../../i18n";
 import { errorMessage, type MpTapEvent } from "../../types/common";
-import {
-  isMpTabCapability,
-  mpCapabilityUrl,
-} from "../../routes/capabilities";
+import { isMpTabCapability, mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
 import { type MpOffer, listOffers } from "../../services/promotion-service";
 import { formatCny } from "../../utils/format";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 
 /**
  * 首页入口按能力路由声明，路径由 routes/capabilities.ts 解析；
@@ -57,6 +55,8 @@ interface HomeData {
   seckillTitle: string;
   seckillOngoing: string;
   hotTitle: string;
+  retryText: string;
+  shareTitle: string;
   loading: boolean;
   error: string;
   _seckillTimer: number | null;
@@ -112,6 +112,8 @@ Page({
     seckillTitle: t("home.seckill.title"),
     seckillOngoing: t("home.seckill.ongoing"),
     hotTitle: t("home.hot"),
+    retryText: t("home.retry"),
+    shareTitle: t("home.shareTitle"),
     loading: true,
     error: "",
     _seckillTimer: null,
@@ -121,9 +123,48 @@ Page({
     void this.loadHome();
   },
 
+  onShow() {
+    // The tab page keeps its timer across `onHide`, so resume the countdown
+    // that `onHide` stopped instead of leaving the seckill clock frozen.
+    if (this.data.seckillOffer && this.data._seckillTimer == null) {
+      this.startSeckillCountdown();
+    }
+  },
+
+  onHide() {
+    this.stopSeckillCountdown();
+  },
+
   onUnload() {
-    if (this.data._seckillTimer != null) {
-      clearInterval(this.data._seckillTimer);
+    this.stopSeckillCountdown();
+  },
+
+  onShareAppMessage() {
+    return buildMpShareCard({
+      routeId: "storefront.mall.home",
+      title: this.data.shareTitle,
+    });
+  },
+
+  onShareTimeline() {
+    return buildMpTimelineCard({
+      routeId: "storefront.mall.home",
+      title: this.data.shareTitle,
+    });
+  },
+
+  goBanner(event: MpTapEvent) {
+    const id = String(event.currentTarget.dataset.id ?? "");
+    const banner = this.data.banners.find((entry) => entry.id === id);
+    if (banner) {
+      this.openCapability(banner.capability, banner.query);
+    }
+  },
+
+  goSeckill() {
+    const offer = this.data.seckillOffer;
+    if (offer && offer.id) {
+      this.openCapability("storefront.mall.activity-detail", { id: offer.id });
     }
   },
 
@@ -173,10 +214,13 @@ Page({
   async loadHome() {
     this.setData({ loading: true, error: "" });
     try {
+      // Categories and the hot list are the storefront itself: a failure has to
+      // surface as an error with a retry path, not as a blank page. Offers are
+      // an enrichment and degrade to "no seckill floor".
       const [categoryResult, hotResult, offersResult] = await Promise.all([
-        listCategories().catch(() => []),
-        listProducts({ page: 1, pageSize: 10, sort: "sales" }).catch(() => ({ items: [], total: 0 })),
-        listOffers().catch(() => []),
+        listCategories(),
+        listProducts({ page: 1, pageSize: 10, sort: "sales" }),
+        listOffers().catch(() => [] as MpOffer[]),
       ]);
       const titleTokens = t("home.seckill.titleMatch")
         .split(",")
@@ -210,11 +254,15 @@ Page({
     }
   },
 
-  startSeckillCountdown() {
+  stopSeckillCountdown() {
     if (this.data._seckillTimer != null) {
       clearInterval(this.data._seckillTimer);
       this.setData({ _seckillTimer: null });
     }
+  },
+
+  startSeckillCountdown() {
+    this.stopSeckillCountdown();
     const offer = this.data.seckillOffer;
     if (!offer || !offer.endAt) {
       return;
@@ -227,12 +275,18 @@ Page({
       }
       const remaining = Math.max(0, Math.floor((end - Date.now()) / 1000));
       const pad = (part: number) => String(part).padStart(2, "0");
-      this.setData({
-        seckillCountdown: `${pad(Math.floor(remaining / 3600))}:${pad(Math.floor((remaining % 3600) / 60))}:${pad(remaining % 60)}`,
-      });
+      const next = `${pad(Math.floor(remaining / 3600))}:${pad(Math.floor((remaining % 3600) / 60))}:${pad(remaining % 60)}`;
+      // Only repaint when the displayed second actually changed.
+      if (next !== this.data.seckillCountdown) {
+        this.setData({ seckillCountdown: next });
+      }
     };
     tick();
     this.setData({ _seckillTimer: setInterval(tick, 1000) });
+  },
+
+  retry() {
+    void this.loadHome();
   },
 
   onPullDownRefresh() {

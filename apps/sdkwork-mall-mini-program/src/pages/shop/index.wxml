@@ -1,6 +1,10 @@
 <view class="page-shop">
   <view wx:if="{{loading}}" class="mp-loading">加载店铺...</view>
-  <view wx:if="{{!loading && !shop}}" class="mp-empty">店铺不存在或已关闭</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
+  <view wx:if="{{!loading && !error && !shop}}" class="mp-empty">店铺不存在或已关闭</view>
 
   <block wx:if="{{!loading && shop}}">
     <view class="shop-hero">

@@ -1,6 +1,10 @@
 <view class="page-activity-detail">
   <view wx:if="{{loading}}" class="mp-loading">加载活动...</view>
-  <view wx:if="{{!loading && !activity}}" class="mp-empty">活动不存在或已结束</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
+  <view wx:if="{{!loading && !error && !activity}}" class="mp-empty">活动不存在或已结束</view>
 
   <block wx:if="{{!loading && activity}}">
     <view class="activity-hero activity-{{activity.phase}}">

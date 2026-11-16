@@ -6,6 +6,9 @@ module.exports = {
     retry: "重试",
     empty: "暂无消息",
     view: "查看",
+    collapse: "收起",
+    loadMore: "加载更多",
+    allShown: "已展示全部",
     footnote: "消息来自通知服务：订单动态、售后进度与系统提醒都会出现在这里。",
     unread: "未读",
     categories: {

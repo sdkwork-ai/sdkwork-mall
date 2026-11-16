@@ -55,6 +55,8 @@ module.exports = {
       submit: "提交申请",
       submitting: "提交中...",
       submitted: "售后申请已提交",
+      orderSummary: "订单共 {{count}} 件商品",
+      orderSummaryAmount: "订单金额 {{amount}} · 共 {{count}} 件商品",
     },
     list: {
       title: "售后记录",

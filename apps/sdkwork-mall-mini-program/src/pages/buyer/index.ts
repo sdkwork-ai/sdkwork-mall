@@ -88,8 +88,16 @@ Page({
     const loggedIn = isLoggedIn();
     this.setData({ loggedIn });
     if (loggedIn) {
-      this.loadStatistics();
+      void this.loadStatistics();
     }
+  },
+
+  onPullDownRefresh() {
+    if (!isLoggedIn()) {
+      wx.stopPullDownRefresh();
+      return;
+    }
+    void this.loadStatistics().finally(() => wx.stopPullDownRefresh());
   },
 
   async loadStatistics() {

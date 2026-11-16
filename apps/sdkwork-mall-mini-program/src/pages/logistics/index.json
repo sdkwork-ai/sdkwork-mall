@@ -1,3 +1,4 @@
 {
-  "navigationBarTitleText": "物流跟踪"
+  "navigationBarTitleText": "物流跟踪",
+  "enablePullDownRefresh": true
 }

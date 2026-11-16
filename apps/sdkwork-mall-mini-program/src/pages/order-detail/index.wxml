@@ -1,6 +1,10 @@
 <view class="page-order-detail">
   <view wx:if="{{loading}}" class="mp-loading">加载订单详情...</view>
-  <view wx:if="{{!loading && !detail}}" class="mp-empty">{{error || '订单不存在'}}</view>
+  <view wx:if="{{error}}" class="mp-error">
+    <text>{{error}}</text>
+    <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+  </view>
+  <view wx:if="{{!loading && !error && !detail}}" class="mp-empty">订单不存在</view>
 
   <block wx:if="{{detail}}">
     <view class="detail-hero">

@@ -109,4 +109,8 @@ Page({
   retry() {
     void this.refresh();
   },
+
+  onPullDownRefresh() {
+    void this.refresh().finally(() => wx.stopPullDownRefresh());
+  },
 });

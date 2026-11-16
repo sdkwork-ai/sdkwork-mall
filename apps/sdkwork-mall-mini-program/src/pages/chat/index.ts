@@ -17,6 +17,10 @@ interface ChatData {
   message: string;
   scrollInto: string;
   _conversationId: string;
+  /** Newest message already acknowledged with a read receipt. */
+  _acknowledgedId: string;
+  /** Newest message already rendered; drives both scroll and read receipts. */
+  _lastMessageId: string;
   _pollTimer: number | null;
 }
 
@@ -28,11 +32,15 @@ Page({
     message: "",
     scrollInto: "",
     _conversationId: "",
+    _acknowledgedId: "",
+    _lastMessageId: "",
     _pollTimer: null,
   } as ChatData,
 
   onLoad(options: Record<string, string | undefined>) {
-    this.setData({ _conversationId: options.id || "" });
+    // The conversation list navigates with `?id=`; `conversationId` stays
+    // accepted for links built by the other clients.
+    this.setData({ _conversationId: options.id || options.conversationId || "" });
   },
 
   onShow() {
@@ -75,14 +83,21 @@ Page({
     }
     try {
       const messages = await listChatMessages(this.data._conversationId);
-      const lastId = messages.length ? `msg-${messages[messages.length - 1].id}` : "";
-      this.setData({
-        messages,
-        scrollInto: lastId,
-        message: "",
-      });
-      if (messages.length) {
-        await markChatRead(this.data._conversationId).catch(() => undefined);
+      const lastId = messages.length ? messages[messages.length - 1].id : "";
+      const patch: Record<string, unknown> = { message: "" };
+      // Repaint only when the stream actually changed: a 5 s poll that always
+      // called setData with a fresh array re-rendered the page every cycle.
+      if (lastId !== this.data._lastMessageId || messages.length !== this.data.messages.length) {
+        patch.messages = messages;
+        patch.scrollInto = lastId ? `msg-${lastId}` : "";
+        patch._lastMessageId = lastId;
+      }
+      this.setData(patch);
+      // A read receipt per poll wrote ~720 receipts per hour; only a new
+      // inbound message needs one.
+      if (lastId && lastId !== this.data._acknowledgedId) {
+        this.setData({ _acknowledgedId: lastId });
+        void markChatRead(this.data._conversationId).catch(() => undefined);
       }
     } catch (cause) {
       this.setData({ message: errorMessage(cause, "消息加载失败") });
@@ -98,7 +113,7 @@ Page({
     if (!content || this.data.busy || !this.data._conversationId) {
       return;
     }
-    this.setData({ busy: true });
+    this.setData({ busy: true, message: "" });
     try {
       await sendChatMessage(this.data._conversationId, content);
       this.setData({ draft: "" });
@@ -108,5 +123,9 @@ Page({
     } finally {
       this.setData({ busy: false });
     }
+  },
+
+  retry() {
+    void this.refresh();
   },
 });

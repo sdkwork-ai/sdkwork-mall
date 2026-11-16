@@ -34,6 +34,10 @@
           {{labels.customers}} {{center.customerCount}}
         </view>
         <view class="mp-muted">{{labels.inviteCodeLabel}}: {{center.inviteCode || '—'}}</view>
+        <view wx:if="{{center.inviteCode}}" class="partner-invite-actions">
+          <button class="mp-btn mp-btn-ghost partner-invite-btn" bindtap="copyInviteCode">{{labels.actionsCopy}}</button>
+          <button class="mp-btn mp-btn-plain partner-invite-btn" bindtap="copyShareLink">复制邀请链接</button>
+        </view>
       </block>
       <view wx:else class="mp-muted">{{centerNotice}}</view>
     </view>

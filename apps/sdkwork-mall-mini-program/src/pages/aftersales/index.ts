@@ -491,4 +491,8 @@ Page({
   retry() {
     void this.loadOrder(); void this.reloadRequests();
   },
+
+  onPullDownRefresh() {
+    void this.reloadRequests().finally(() => wx.stopPullDownRefresh());
+  },
 });

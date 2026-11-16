@@ -1,7 +1,9 @@
 import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
+import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCategory, type MpProductCard, listCategories, listProducts } from "../../services/catalog-service";
 import { formatCny } from "../../utils/format";
+import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 
 interface SearchSort {
   code: string;
@@ -21,6 +23,7 @@ interface SearchData {
   products: SearchProduct[];
   page: number;
   total: number;
+  hasMore: boolean;
   loading: boolean;
   loadingMore: boolean;
   error: string;
@@ -48,6 +51,7 @@ Page({
     products: [],
     page: 1,
     total: 0,
+    hasMore: false,
     loading: true,
     loadingMore: false,
     error: "",
@@ -79,7 +83,9 @@ Page({
     if (!keyword) {
       return;
     }
-    const history = [keyword].concat(this.readHistory().filter((entry) => entry !== keyword)).slice(0, 10);
+    const history: string[] = [keyword]
+      .concat(this.readHistory().filter((entry: string) => entry !== keyword))
+      .slice(0, 10);
     try {
       wx.setStorageSync(HISTORY_KEY, JSON.stringify(history));
     } catch {
@@ -126,6 +132,7 @@ Page({
       this.setData({
         products: nextPage === 1 ? products : this.data.products.concat(products),
         total: result.total,
+        hasMore: result.hasMore,
         page: nextPage,
         loading: false,
         loadingMore: false,
@@ -174,11 +181,28 @@ Page({
     wx.navigateTo({ url: mpCapabilityUrl("storefront.mall.product-detail", { id: String(event.currentTarget.dataset.id ?? "") }) });
   },
 
+  onShareAppMessage() {
+    const keyword = this.data.keyword.trim();
+    return buildMpShareCard({
+      query: {
+        categoryId: this.data.activeCategoryId,
+        q: this.data.activeCategoryId ? "" : keyword,
+        sort: this.data.activeSort,
+      },
+      routeId: "storefront.mall.search",
+      title: keyword ? t("share.titledWithMall", { title: keyword }) : undefined,
+    });
+  },
+
   loadMore() {
-    if (this.data.loadingMore || this.data.products.length >= this.data.total) {
+    if (this.data.loadingMore || !this.data.hasMore) {
       return;
     }
     void this.loadProducts(this.data.page + 1);
+  },
+
+  retry() {
+    void this.loadProducts(1);
   },
 
   onReachBottom() {
