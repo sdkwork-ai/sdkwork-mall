@@ -63,11 +63,17 @@ test("the Flutter member centre purchases packages", () => {
 });
 
 test("the member centre offers a payable action and reports the result", () => {
+  // The screen is the membership subscription brick; the mall package only binds
+  // the runtime port (plans, payment methods, purchase result) in the adapter.
   const page = read(pagePath);
-  assert.match(page, /purchaseMallH5Membership\(\{ packageId, paymentMethod \}\)/u);
-  assert.match(page, /listMallH5PaymentMethods/u);
-  assert.match(page, /membership\.plans\.success/u);
-  assert.match(page, /membership\.plans\.pending/u);
-  assert.match(page, /membership\.plans\.failed/u);
-  assert.doesNotMatch(page, /购买入口即将开放/u);
+  assert.match(page, /MembershipSubscriptionPage/u);
+  const brick = read(
+    "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-membership/src/membership-brick.ts",
+  );
+  assert.match(brick, /purchaseMallH5Membership\(/u);
+  assert.match(brick, /packageId: input\.planId/u);
+  assert.match(brick, /paymentMethod: input\.paymentMethod/u);
+  assert.match(brick, /listMallH5PaymentMethods/u);
+  assert.match(brick, /return \{ status: result\.status \}/u);
+  assert.doesNotMatch(page + brick, /购买入口即将开放/u);
 });

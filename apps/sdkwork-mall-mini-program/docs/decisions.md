@@ -1022,3 +1022,25 @@
   - filtering to a level with no members on the current page showed the "team is
     empty" copy even though members exist on other pages — it now says the level has
     no members on this page and suggests switching levels.
+
+- 2026-11-17 (forty-fifth pass: all repository gates green). The eight long-standing
+  contract failures were stale expectations left over from the brick migration, not
+  missing features; each was re-anchored to the architecture that now ships:
+  - checkout scoping/invoice/delivery/gift-card contracts now assert the shop brick
+    adapter (`src/checkout-brick.ts`: `cartItemIds`, `needInvoice`/`invoiceForm`,
+    `deliveryMethod`/`giftCardCode`) instead of a mall-owned confirm-order form.
+  - the H5 i18n runtime contract covers the pages that still own copy; checkout,
+    membership and order list/detail are mobile bricks with their own strings.
+  - membership purchase asserts the subscription brick adapter
+    (`purchaseMallH5Membership` + plan/payment-method/status wiring).
+  - H5 pay actions hand off to the order brick's cashier route; only the provider
+    return page keeps the `paymentUrl` redirect.
+  - the three H5-only routes (`buyer.mall.password`, `buyer.mall.orders.refunds`,
+    `buyer.mall.orders.voucher`) are documented as parity `platformExtras.h5`, and
+    the gift-card shared statement now lives in the H5 catalogue at the exact
+    canonical text.
+  - distributors' H5 product shares append their invite code (commons share-attribution
+    seam + `resolveOwnInviteCode`), so forwarded products attribute orders.
+  - verification: `pnpm test:node` **206/206**, composition/parity/snapshot/i18n
+    green, H5 typecheck + 27 root contract tests + standalone build, PC typecheck,
+    mini typecheck + 47 node tests + smoke.

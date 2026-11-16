@@ -30,19 +30,16 @@ test("the H5 order service surfaces the channel cashier URL", () => {
 });
 
 test("every H5 pay action redirects to the channel URL when present", () => {
-  for (const pagePath of [
-    "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-order/src/pages/OrderPage.tsx",
-    "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-order/src/pages/OrderDetailPage.tsx",
-    "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/PaymentResultPage.tsx",
-  ]) {
-    const page = read(pagePath);
-    assert.match(page, /if \(paymentUrl\) \{/u, `${pagePath} must branch on paymentUrl`);
-    assert.match(
-      page,
-      /window\.location\.assign\(paymentUrl\)/u,
-      `${pagePath} must hand the buyer to the channel cashier`,
-    );
-  }
+  // Order list/detail hand control to the order brick's cashier route (which
+  // owns session creation and provider redirects); only the provider-return page
+  // still branches on paymentUrl itself.
+  const orderPage = read("apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-order/src/pages/OrderPage.tsx");
+  assert.match(orderPage, /\/cashier`/u, "OrderPage must route into the brick cashier");
+  const detailPage = read("apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-order/src/pages/OrderDetailPage.tsx");
+  assert.match(detailPage, /orderCashierPath="\/buyer\/orders\/:orderId\/cashier"/u);
+  const resultPage = read("apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/PaymentResultPage.tsx");
+  assert.match(resultPage, /if \(paymentUrl\) \{/u);
+  assert.match(resultPage, /window\.location\.assign\(paymentUrl\)/u);
 
   const cartService = read("apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/cart-service.ts");
   assert.match(cartService, /export interface MallH5PaymentRetryStart/u);

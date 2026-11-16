@@ -20,6 +20,7 @@ export function SdkworkMallH5GiftCardsPage() {
           <Gift aria-hidden="true" size={18} /> {t("giftCards.section")}
         </h2>
         <div className="sdk-h5-empty">{t("giftCards.empty")}</div>
+        <p className="sdk-h5-muted">{t("giftCards.upstreamStatement")}</p>
         <p className="sdk-h5-muted">{t("giftCards.hint")}</p>
       </section>
 

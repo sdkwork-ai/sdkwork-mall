@@ -35,8 +35,10 @@ const ROOTS = [
     productPage:
       "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/pages/ProductDetailPage.tsx",
     productPatterns: ["立即购买", "/checkout?items=", "/cart"],
-    checkoutPage: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
-    checkoutPatterns: ['searchParams.get("items")'],
+    // The confirm-order surface is the shop mobile brick; the mall adapter binds
+    // the scoped line ids into its quote/submit ports.
+    checkoutPage: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/checkout-brick.ts",
+    checkoutPatterns: ["cartItemIds: input.cartItemIds", "input.cartItemIds?.length"],
     quoteService: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/cart-service.ts",
     quotePatterns: [
       "export async function createMallH5CheckoutQuote(",
@@ -151,8 +153,8 @@ const INVOICE_ROOTS = [
     servicePatterns: ["MallH5CheckoutInvoiceForm", "needInvoice", "invoiceForm"],
     pageFiles: [
       {
-        path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
-        patterns: ["checkout.invoice.need", "invoiceForm", "/^[A-Z0-9]{15,20}$/u"],
+        path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/checkout-brick.ts",
+        patterns: ["invoiceForm", "needInvoice"],
       },
     ],
   },
@@ -229,8 +231,8 @@ const DELIVERY_ROOTS = [
     servicePatterns: ["deliveryMethod", "giftCardCode"],
     pageFiles: [
       {
-        path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
-        patterns: ["checkout.delivery.title", "checkout.giftCard.title", "DELIVERY_METHODS"],
+        path: "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/checkout-brick.ts",
+        patterns: ["deliveryMethod", "giftCardCode"],
       },
     ],
   },

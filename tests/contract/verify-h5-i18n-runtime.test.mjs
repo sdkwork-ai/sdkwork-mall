@@ -28,17 +28,18 @@ const FRAGMENTS = [
   "apps/sdkwork-mall-h5/src/i18n/zh-CN/order/list/messages.json",
 ];
 
+/**
+ * Pages that still own user-facing copy. The checkout confirm-order and
+ * membership/order screens are mobile bricks now (they own their strings), so the
+ * mall packages no longer carry catalogue keys for them.
+ */
 const PAGES = [
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/PaymentResultPage.tsx",
-  "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-cart/src/pages/CheckoutPage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-catalog/src/pages/ProductDetailPage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-home/src/pages/HomePage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/BuyerHomePage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/AddressesPage.tsx",
-  "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-membership/src/pages/MembershipPage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-buyer/src/pages/AfterSalesPage.tsx",
-  "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-order/src/pages/OrderDetailPage.tsx",
-  "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-order/src/pages/OrderPage.tsx",
   "apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-home/src/pages/HelpPage.tsx",
 ];
 
