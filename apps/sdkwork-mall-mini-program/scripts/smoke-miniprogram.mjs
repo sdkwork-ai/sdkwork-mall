@@ -138,6 +138,18 @@ if (process.argv.includes("--hot-reload")) {
   }
   console.log("[smoke] hot-reload: runtime/host/services state cleared, bootstrap factory kept");
 }
+// `--shared-store-only` proves the module-cache store is enough: the three
+// platform-facing stores are cleared and `wx` is frozen, so only
+// `dist/shared-state.js` can carry the runtime/host/services to the page bundles.
+if (process.argv.includes("--shared-store-only")) {
+  const shared = appInstance?.globalData ?? {};
+  for (const key of ["__SDKWORK_MALL_MP_RUNTIME__", "__SDKWORK_MALL_MP_HOST__", "__SDKWORK_MALL_MP_IM_SERVICES__"]) {
+    delete shared[key];
+    delete globalThis.wx[key];
+  }
+  Object.freeze(globalThis.wx);
+  console.log("[smoke] shared-store-only: platform stores cleared, wx frozen");
+}
 for (const page of appJson.pages) {
   const before = pageConfigs.length;
   try {

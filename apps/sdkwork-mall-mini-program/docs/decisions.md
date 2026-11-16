@@ -572,3 +572,26 @@
   - Regression: 32 node guards, 69 vitest contracts, typecheck, composition green;
     184/191 contract tests with the seven failures inside the concurrent H5 brick
     migration.
+
+- 2026-11-16 (twenty-first pass: a store the platform cannot take away). The
+  previous fix relied on `getApp().globalData` / `wx` as the cross-bundle channel,
+  but in the dev tool both can be missing or read-only, so the runtime died again
+  after a hot reload with `runtime is not initialized`.
+  - Added `src/shared-state.js`, copied verbatim into `dist/`: the mini-program
+    caches modules per appservice context, so a plain `require` of this one file is
+    the only channel that is reliably shared and writable on every base library.
+  - The bundler injects `var __sdkworkSharedStore = require(<relative>/shared-state.js)`
+    into every entry (a post-build pass rewrites the placeholder to `./shared-state.js`
+    for the app and `../../shared-state.js` for pages) and exposes it to the scope
+    resolver through a `declare const`.
+  - `readSharedState`/`writeSharedState` now consult the module-cache store between
+    `getApp().globalData` and the platform global, and every write is try/caught so a
+    frozen `wx` cannot fail the write. `installMpFetch` publishes the fetch and
+    AbortController shims to the same store; the bundled globals read it first.
+  - `smoke:mp --shared-store-only` proves the claim: it clears the runtime/host/
+    services keys from `getApp().globalData`, deletes them from `wx`, freezes `wx`,
+    then runs all 36 pages — PASS with 16 request attempts, i.e. the module-cache
+    store alone carries the graph and the HTTP adapter.
+  - Regression: 32 node guards, 69 vitest contracts, typecheck, composition green;
+    184/191 contract tests (seven H5-only failures from the concurrent brick
+    migration).

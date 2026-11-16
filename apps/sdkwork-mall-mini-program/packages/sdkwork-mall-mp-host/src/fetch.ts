@@ -13,7 +13,7 @@
  * (`ok`/`status`/`statusText`/`headers.get`/`json`/`text`/`arrayBuffer`).
  */
 import type { MpHttpClient, MpHttpResponse } from "./index";
-import { resolveGlobalObject } from "./scope";
+import { resolveGlobalObject, writeSharedState } from "./scope";
 
 /** Minimal `fetch` shape the SDKs rely on. */
 export type MpFetch = (
@@ -255,6 +255,7 @@ export function installMpFetch(http: MpHttpClient): MpFetch {
 
   const adapter = createMpFetch(http);
   globalScope.__SDKWORK_MALL_MP_FETCH__ = adapter as unknown;
+  writeSharedState("__SDKWORK_MALL_MP_FETCH__", adapter as unknown);
   if (typeof globalScope.fetch === "function") {
     return globalScope.fetch as MpFetch;
   }

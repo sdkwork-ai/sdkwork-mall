@@ -8,6 +8,10 @@
  * cross-bundle store. This module resolves both without ever dereferencing a
  * possibly missing binding unguarded.
  */
+// Injected by `scripts/build-miniprogram.mjs` into every bundle: the module-cache
+// shared store (`dist/shared-state.js`).
+declare const __sdkworkSharedStore: Record<string, unknown> | undefined;
+
 export interface MpPlatformScope {
   wx?: Record<string, unknown>;
 }
@@ -88,8 +92,12 @@ function sharedStores(): Array<Record<string, unknown>> {
       // not constructed yet
     }
   }
-  // `resolveGlobalObject` already falls back to the module object when neither
-  // `wx` nor `globalThis` exists, so no extra (stale) store is appended here.
+  // The bundler injects a module cache-shared store into every entry
+  // (`dist/shared-state.js`); it is the only channel that works on every base
+  // library, where `wx` may be read-only and `getApp()` is not yet available.
+  if (typeof __sdkworkSharedStore !== "undefined" && __sdkworkSharedStore) {
+    stores.push(__sdkworkSharedStore);
+  }
   const globalObject = resolveGlobalObject();
   if (!stores.includes(globalObject)) {
     stores.push(globalObject);

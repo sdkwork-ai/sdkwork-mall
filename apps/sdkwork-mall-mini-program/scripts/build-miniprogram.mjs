@@ -50,16 +50,17 @@ for (const entry of entryPoints) {
  * adapter the app installs on the platform scope (`wx`).
  */
 const GLOBAL_SHIMS = `
+var __sdkworkSharedStore = require(__SDKWORK_SHARED_STORE_PATH__);
 var __sdkworkGlobal = (typeof wx !== "undefined" && wx) || (typeof globalThis !== "undefined" && globalThis) || {};
 var __sdkworkFetchImpl = function (input, init) {
-  var impl = __sdkworkGlobal.__SDKWORK_MALL_MP_FETCH__ || (typeof globalThis !== "undefined" && globalThis.fetch);
+  var impl = __sdkworkSharedStore.__SDKWORK_MALL_MP_FETCH__ || __sdkworkGlobal.__SDKWORK_MALL_MP_FETCH__ || (typeof globalThis !== "undefined" && globalThis.fetch);
   if (typeof impl !== "function") {
     throw new Error("SDK fetch is not installed; call installMpFetch from the app bootstrap");
   }
   return impl(input, init);
 };
 var fetch = __sdkworkFetchImpl;
-var AbortSignal = __sdkworkGlobal.__SDKWORK_MALL_MP_ABORT_SIGNAL__ || (function () {
+var AbortSignal = __sdkworkSharedStore.__SDKWORK_MALL_MP_ABORT_SIGNAL__ || __sdkworkGlobal.__SDKWORK_MALL_MP_ABORT_SIGNAL__ || (function () {
   function MpAbortSignal() {
     this.aborted = false;
     this.__listeners = [];
@@ -81,7 +82,7 @@ var AbortSignal = __sdkworkGlobal.__SDKWORK_MALL_MP_ABORT_SIGNAL__ || (function 
   };
   return MpAbortSignal;
 })();
-var AbortController = __sdkworkGlobal.__SDKWORK_MALL_MP_ABORT_CONTROLLER__ || (function () {
+var AbortController = __sdkworkSharedStore.__SDKWORK_MALL_MP_ABORT_CONTROLLER__ || __sdkworkGlobal.__SDKWORK_MALL_MP_ABORT_CONTROLLER__ || (function () {
   function MpAbortController() {
     this.signal = new AbortSignal();
   }
@@ -193,6 +194,35 @@ function copyAssets(directory) {
 }
 
 copyAssets(srcRoot);
+// Copy the shared-state module (plain JS, not bundled: every bundle requires the
+// same file so the mini-program module cache makes it one instance).
+cpSync(path.join(srcRoot, "shared-state.js"), path.join(outRoot, "shared-state.js"));
+
+/**
+ * Rewrites the shared-store placeholder in each bundle with the correct relative
+ * path (`./shared-state.js` at the root, `../../shared-state.js` for a page).
+ */
+function rewriteSharedStorePaths(directory) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      rewriteSharedStorePaths(full);
+      continue;
+    }
+    if (!entry.name.endsWith(".js")) {
+      continue;
+    }
+    const source = readFileSync(full, "utf8");
+    if (!source.includes("__SDKWORK_SHARED_STORE_PATH__")) {
+      continue;
+    }
+    const relative = path.relative(path.dirname(full), path.join(outRoot, "shared-state.js")).replace(/\\/gu, "/");
+    const specifier = relative.startsWith(".") ? relative : `./${relative}`;
+    writeFileSync(full, source.replace(/__SDKWORK_SHARED_STORE_PATH__/gu, JSON.stringify(specifier)));
+  }
+}
+
+rewriteSharedStorePaths(outRoot);
 
 const appJsonTarget = path.join(outRoot, "app.json");
 if (!statSync(appJsonTarget, { throwIfNoEntry: false })?.isFile()) {
