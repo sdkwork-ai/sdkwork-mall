@@ -74,6 +74,28 @@ mall-owned implementations. Upstream gaps are fixed upstream.
 - Order surfaces must format wire timestamps with the brick's
   `formatOrderDateTime` (detail, refunds, tracking), never render raw ISO.
 
+## Membership mobile brick
+
+- /buyer/membership mounts MembershipSubscriptionPage from
+  @sdkwork/membership-mobile-react-subscription. The mall membership package
+  injects the service through src/membership-brick.ts
+  (configureMembershipSubscriptionRuntime -> status, plans, payment methods,
+  purchase) and no longer owns level/plan/marketing markup.
+- The brick renders the level hero, benefit grid, plan list, payment-method
+  picker and purchase feedback; the host supplies localized amounts and the
+  page owns its chrome. The app stylesheet keeps the brick's @source root.
+
+## Wallet / points mobile brick
+
+- /buyer/wallet and /buyer/points mount @sdkwork/account-mobile-react-wallet
+  (AccountWalletWalletPage / AccountWalletPointsPage). The mall account package
+  injects the data plane through src/wallet-brick.ts
+  (configureAccountWalletRuntime -> loadMallH5WalletOverview, loadMallH5CashLedger,
+  loadMallH5Points); do not rebuild balances, ledgers or point lots in the host.
+- The brick renders the balance hero, cash ledger, point lots and the
+  loading/error/empty states; the host only supplies localized amounts. The
+  app stylesheet must keep the @source root for the account wallet package.
+
 ## Account mobile brick (IAM user center)
 
 - Profile and password are the IAM H5 user-center bricks

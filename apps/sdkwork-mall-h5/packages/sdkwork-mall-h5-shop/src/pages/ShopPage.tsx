@@ -45,12 +45,18 @@ export function SdkworkMallH5ShopPage() {
   }, [shopId]);
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载店铺...</div>;
+    return (
+      <div className="sdk-h5-page sdk-h5-loading">
+        <h1 className="sdk-h5-visually-hidden">店铺</h1>
+        加载店铺...
+      </div>
+    );
   }
 
   if (error || !shop) {
     return (
       <div className="sdk-h5-page">
+        <h1 className="sdk-h5-visually-hidden">店铺</h1>
         <SdkworkMallH5ErrorState message={error ?? "店铺不存在或已关闭"} />
         <div className="sdk-h5-center">
           <Link className="sdk-h5-button sdk-h5-button-ghost" to="/">回到首页</Link>

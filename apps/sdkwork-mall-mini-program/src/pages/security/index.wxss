@@ -43,7 +43,7 @@
 
 .security-input {
   background: #f9fafb;
-  border-radius: 10rpx;
+  border-radius: 0;
   padding: 16rpx 20rpx;
   font-size: 26rpx;
   margin-bottom: 14rpx;

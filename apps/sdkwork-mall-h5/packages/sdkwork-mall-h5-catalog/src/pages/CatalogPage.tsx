@@ -287,6 +287,7 @@ export function SdkworkMallH5CatalogPage() {
   if (searchMode) {
     return (
       <div className="sdk-h5-page">
+        <h1 className="sdk-h5-visually-hidden">搜索</h1>
         {searchField}
         <section className="sdk-h5-section">
           <h2>热搜</h2>
@@ -393,7 +394,9 @@ export function SdkworkMallH5CatalogPage() {
               ? childCategories.find((child) => child.id === categoryId)?.name ?? railActiveRoot.name
               : railActiveRoot.name}
           </h1>
-        ) : null}
+        ) : (
+          <h1 className="sdk-h5-visually-hidden">分类</h1>
+        )}
 
         {/* 未指定二级分类时展示该一级分类下的二级宫格 */}
         {!categoryId && railActiveRoot && railActiveRoot.children.length > 0 ? (

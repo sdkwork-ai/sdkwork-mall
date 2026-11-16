@@ -19,6 +19,8 @@ surfaces stay in the mall packages by design.
 | Logistics | `/buyer/logistics` | order brick `OrderShipmentPage` | `src/logistics-brick.ts` (`OrderLogisticsRuntime` → commerce order plane) |
 | Cart | `/cart` | `@sdkwork/shop-mobile-react-shopping` | `src/cart-brick.ts` (`configureShopMobileCartRuntime` → `cart.current`/`cart.items`) |
 | Checkout | `/checkout` | shop brick `CheckoutPage` | `src/checkout-brick.ts` (`ShopCheckoutRuntime` → commerce checkout facade + cashier handoff) |
+| Membership | /buyer/membership | @sdkwork/membership-mobile-react-subscription | src/membership-brick.ts (configureMembershipSubscriptionRuntime) |
+| Wallet / points | /buyer/wallet, /buyer/points | @sdkwork/account-mobile-react-wallet | src/wallet-brick.ts (configureAccountWalletRuntime) |
 | Profile / password | `/buyer/profile`, `/buyer/password` | `@sdkwork/iam-h5-user-center` | `src/user-center-runtime.ts` (`configureSdkworkMallH5UserCenter(iamRuntime.iamService)`) |
 
 Application-owned (not a capability gap): home, catalog/search, product detail,
@@ -39,22 +41,32 @@ footprint, invoices, reviews, IM/support, partner/distribution.
   placeholder-safe images, `verbatimModuleSyntax`-clean type imports.
 - `sdkwork-iam` H5 auth brick: token-driven brand mark (no gradient/glow by
   default) and a browser-safe countdown timer type.
+- `sdkwork-account` account wallet brick (new package
+  `@sdkwork/account-mobile-react-wallet`): WalletPage / PointsPage behind an
+  `AccountWalletRuntime` port (overview, cash ledger, point lots).
+- `sdkwork-membership` subscription brick: data-driven
+  `MembershipSubscriptionPage` + `MembershipSubscriptionRuntime` port (status,
+  plans, payment methods, purchase) and `verbatimModuleSyntax`-clean type imports
+  across the legacy VIP/Token pages.
 - `sdkwork-specs/workspace/consumers/sdkwork-mall.json`: registered the
   `iam-h5-core`, `iam-h5-auth`, `iam-h5-commons`, `iam-h5-user-center`,
   `order-mobile-react-orders`, `shop-mobile-react-shopping`, `ui-mobile-react`
   sibling packages; `pnpm-workspace.yaml` is generated from that registry
   (`node ../sdkwork-specs/tools/sync-workspace.mjs --repo sdkwork-mall --root .`).
 
-## Remaining upstream gaps (not reimplemented in the app)
+## Remaining host surfaces (intentional)
 
-1. **Membership**: `@sdkwork/membership-mobile-react-subscription` is still a
-   marketing demo (hardcoded plans/benefits, no backend/runtime port). It needs
-   a real runtime port + service binding upstream before `MembershipPage` can
-   move onto it.
-2. **Wallet / points**: `sdkwork-account` has no H5 wallet brick yet. It needs a
-   new mobile package upstream.
-3. **Payment result boundary**: `/payment/result` remains the provider-return
-   surface only; the brick cashier owns creation/QR/polling.
+1. **Payment result boundary**: /payment/result remains the provider-return
+   surface only; the brick cashier owns creation, QR, countdown and polling.
+2. **Legacy upstream demo pages**: sdkwork-membership still ships the older
+   VIP/Token marketing pages; the mall consumes the new data-driven
+   MembershipSubscriptionPage and leaves those demos untouched.
+3. **Host data shapes**: each brick port is exercised with the mall's mocked
+   gateway in verification; real end-to-end service data is validated by the
+   backend/SDK test suites, not by this UI repository.
+
+No capability currently duplicates an upstream brick: every capability listed
+in the matrix above is a thin wrapper plus a runtime adapter.
 
 ## Verification
 

@@ -117,6 +117,7 @@ export function isSdkworkMallH5PageOwnedChrome(pathname: string): boolean {
     (pathname.startsWith("/buyer/orders/") && pathname !== "/buyer/orders")
     || pathname === "/buyer/vouchers"
     || pathname === "/buyer/refunds"
+    || pathname === "/buyer/membership"
     || pathname === "/buyer/profile"
     || pathname === "/buyer/password"
     || pathname === "/buyer/logistics"

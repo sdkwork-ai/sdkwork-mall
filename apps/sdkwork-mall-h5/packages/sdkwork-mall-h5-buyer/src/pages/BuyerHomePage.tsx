@@ -196,7 +196,7 @@ export function SdkworkMallH5BuyerHomePage() {
 
       <section className="sdk-h5-section">
         <h2>{t("buyerHub.services.title")}</h2>
-        <div className="sdk-h5-quick-grid">
+        <div className="sdk-h5-quick-grid sdk-h5-quick-grid-3">
           {TOOL_LINKS.map((link) => {
             const Icon = link.icon;
             return (

@@ -298,4 +298,101 @@
   and wallet/points surfaces still need upstream H5 bricks (the membership
   package is a hardcoded marketing demo and sdkwork-account has no wallet H5
   brick).
+- 2026-11-16 (page & component audit): every route (34, including all
+  session-gated surfaces) was audited in a real browser for heading structure,
+  tap-target size, raw-token leaks, overflow, gradients/shadows and console
+  errors. Findings and fixes: (1) missing `h1` in catalog/search/loading and
+  not-found branches (product, shop, activity, catalog), duplicate `h1` on the
+  membership hero, and no `h1` in the brick cashier/refund pages — all pages now
+  expose exactly one page heading (brick pages render `sr-only` headings);
+  (2) undersized targets — shell back button (36→44), home brand (25→44 tall),
+  carousel dots (24→44) and pause (32→40), catalog sort (32→44), chips (28→36),
+  shared buttons (40) and error retries (44 wide), cart checkbox/steppers/delete,
+  checkout option rows (44 tall), order-copy, buyer logout and review links;
+  (3) checkout radios/checkboxes are 44px label rows (the label is the tap
+  target). The audit script is repeatable (`.tmp/page-audit.mjs`) and now reports
+  `issueCount: 0` for 34 routes.
+- 2026-11-16 (cart settlement bar): the cart's 去结算 bar was `sticky` inside a
+  `min-h-full` page, so on short carts it floated after the last row with a
+  large gray gap above the tab bar. It is now `position: fixed; inset-x-0` with
+  `bottom` set from a host-provided `footerBottom` (default
+  `calc(var(--sdk-h5-tabbar-height, 0px) + env(safe-area-inset-bottom, 0px))`),
+  so it sits flush on top of the tab bar (measured gap = 0px). The list gets
+  `pb-32` clearance, and the enlarged 40px steppers wrap to their own line so
+  they are no longer clipped at the card edge. Checkbox hit areas stay 40px while
+  the visible circles return to 20px (industry convention).
+- 2026-11-16 (design polish, page review pass): check of home/catalog/search/
+  wallet/points against real data. Product thumbnails now use the fill token so
+  an empty-image tile reads as an image slot instead of blending into the card;
+  the home coupon strip moved from a saturated full-bleed orange band to a soft
+  warm tint (`#fff4e5` on `#9a3412`) so it stops breaking the flat blue rhythm;
+  wallet and points heroes show `¥0.00`/`0` instead of `--`, use thousands
+  separators, add a hairline divider before the secondary balance row, and the
+  points amount carries a small `分` unit. The per-page audit (34 routes) stays at
+  `issueCount: 0`; catalog/search rows were verified full-width (the earlier
+  "clipping" read was the white placeholder blending into the card).
+- 2026-11-16 (cart item layout): each cart line now keeps price and quantity
+  stepper on one right-aligned row (`justify-end`, stepper flush with the card
+  padding; price to its left) instead of price-left / stepper-wrapped-below. The
+  remove action moved out of the flow to a 40px floating control at the card's
+  top-right, and the stepper count cell narrowed to `w-10` so the 40px targets
+  still fit inside the text column. Cart footer stays fixed on the tab bar.
+- 2026-11-16 (PDP review): product detail prices now use grouped locale
+  formatting (`¥4,899.00`) in the hero, the compact sticky header and the
+  selected-SKU row; sales/stock counts are grouped too. The no-image gallery
+  fallback sits on the fill token so it reads as an image slot, and the
+  duplicate favorite pill next to the price was removed — the fixed action bar
+  already owns favorite, leaving one control per action.
+- 2026-11-16 (cart line alignment): the price column now starts on the same
+  left edge as the product title (`justify-between` inside the text column),
+  while the stepper stays flush right. The stepper is shorter (32px content,
+  40px-wide targets) so it reads as a secondary control instead of a large
+  block; both buttons were updated (the first pass only compacted one and the
+  shared class string masked the other).
+- 2026-11-16 (order & buyer hub review): order detail no longer prints the raw
+  payment channel (`WECHAT`); the brick normalizes codes and maps aliases to
+  readable labels (`微信支付`, `支付宝`, `银联支付`, `货到付款`, `钱包余额`) with
+  the i18n key still taking precedence. The buyer hub's nine service tiles moved
+  from a 4-column grid (4+4+1 orphan) to a 3x3 service dock so every row is full.
+- 2026-11-16 (refund & gift-card review): the refund reason field is now a
+  localized select (质量问题/未收到货/与描述不符/商品破损/其他) that still submits the
+  stable wire codes (`quality`, `not_received`, `not_as_described`, `damaged`,
+  `other`); the old free-text field exposed codes like `quality / not_received`
+  in its placeholder. The gift-card page's two CTAs became an equal-width row
+  (`sdk-h5-action-row-full`) instead of small right-floating buttons on a mostly
+  empty surface. Logistics and cashier states were re-checked: the brick already
+  renders dedicated paid/expired/cancelled/not-payable result screens.
+- 2026-11-16 (width & appearance matrix): the H5 app now renders as a centered
+  34rem (`544px`) mobile canvas on screens ≥40rem, with a neutral surround
+  (`#e7e9ee`) and hairline side borders; before this the home hero, service
+  grids and action bars stretched across a 1440 desktop. Fixed chrome (tab bar,
+  PDP compact/search/action bars, sheets, partner modal, and brick-owned
+  `fixed inset-x-0` bars such as the cart settlement bar) is clipped to the same
+  canvas column. Dark preference is intentionally not themed: `color-scheme:
+  light` keeps the flat white/blue palette consistent rather than half-dark.
+  Verification: 34-route page audit `issueCount: 0`; 43-check 360/1440 sweep
+  problems: [].
+- 2026-11-16 (wallet brick): a new upstream H5 package
+  @sdkwork/account-mobile-react-wallet now owns the wallet and points screens
+  (balance hero, cash ledger rows, expiring point lots, loading/error/empty
+  states) behind an AccountWalletRuntime port. The mall account package keeps
+  only the adapter (src/wallet-brick.ts) and the app composes the runtime in
+  bootstrap; the former host wallet/points markup is gone. This removes the
+  last duplicated account surface - membership remains the only capability
+  still on an app-owned screen until the membership brick gains a runtime
+  port. Registered through the workspace registry (wildcard) plus
+  sync-workspace.mjs and pnpm install; contract tests pin brick ownership and
+  headings.
+- 2026-11-17 (membership brick): the membership subscription brick now ships a
+  data-driven MembershipSubscriptionPage plus a MembershipSubscriptionRuntime
+  port (status / plans / payment methods / purchase). The mall membership
+  package keeps only the adapter (src/membership-brick.ts) and the app composes
+  the runtime in bootstrap; the host membership-service stays the single data
+  source. The page owns its chrome, renders the level hero, 2x2 benefits,
+  plan cards with recommended badge and grouped prices, a payment-method
+  picker and purchase feedback. Verified in the browser: 黄金会员 status,
+  month/year plans, 微信/支付宝 selection, purchase -> 会员开通成功. This removes
+  the last app-owned capability screen; only the provider-return
+  /payment/result surface remains intentionally host-owned.
+  headings.
 

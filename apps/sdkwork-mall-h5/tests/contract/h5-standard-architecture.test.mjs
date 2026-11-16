@@ -164,6 +164,19 @@ test("the cart is composed from the shop mobile shopping brick", () => {
   );
   assert.match(css, /--color-bg-color/u, "the host maps the brick page background token");
   assert.match(css, /--shopping-accent/u, "the host maps the brick accent to commerce blue");
+
+  // Settlement bar: fixed above the host tab bar, not a sticky element that
+  // floats mid-page on short carts.
+  const appRoot = fileURLToPath(new URL("../../", import.meta.url));
+  const brickCart = readFileSync(
+    join(
+      appRoot,
+      "../../../sdkwork-shop/apps/sdkwork-shop-common/packages/sdkwork-shop-mobile-react-shopping/src/pages/ShoppingCart.tsx",
+    ),
+    "utf8",
+  );
+  assert.match(brickCart, /fixed inset-x-0/u, "the settlement bar must be fixed");
+  assert.match(brickCart, /footerBottom/u, "the host tab-bar height offsets the bar");
 });
 
 test("voucher redemption is the order brick's page, not an app-owned form", () => {
@@ -333,6 +346,31 @@ test("brick coverage matrix stays wired to the shared packages", () => {
   assert.match(routes, /module\.RefundRequestsPage/u, "refunds = order brick page");
   assert.match(routes, /module\.VoucherCodePage/u, "vouchers = order brick page");
   assert.match(logisticsPage, /<OrderShipmentPage/u, "logistics = order brick page");
+  assert.match(
+    read("../../packages/sdkwork-mall-h5-account/src/pages/WalletPage.tsx"),
+    /@sdkwork\/account-mobile-react-wallet/u,
+    "wallet = account wallet brick",
+  );
+  assert.match(
+    read("../../packages/sdkwork-mall-h5-account/src/pages/PointsPage.tsx"),
+    /@sdkwork\/account-mobile-react-wallet/u,
+    "points = account wallet brick",
+  );
+  assert.match(
+    read("../../packages/sdkwork-mall-h5-membership/src/pages/MembershipPage.tsx"),
+    /@sdkwork\/membership-mobile-react-subscription/u,
+    "membership = membership subscription brick",
+  );
+  assert.match(
+    read("../../src/bootstrap/runtime.ts"),
+    /configureSdkworkMallH5MembershipBrick/u,
+    "the membership brick runtime is composed",
+  );
+  assert.match(
+    read("../../src/bootstrap/runtime.ts"),
+    /configureSdkworkMallH5WalletBrick/u,
+    "the wallet brick runtime is composed",
+  );
   assert.match(profilePage, /SdkworkIamH5UserCenterProfileScreen/u, "profile = IAM user-center brick");
   assert.match(passwordPage, /SdkworkIamH5UserCenterPasswordScreen/u, "password = IAM user-center brick");
   // Checkout is the last funnel screen: it is now the shop brick's page with
@@ -523,7 +561,6 @@ test("primary list surfaces share one flat empty-state primitive", () => {
     "../../packages/sdkwork-mall-h5-buyer/src/pages/CouponsPage.tsx",
     "../../packages/sdkwork-mall-h5-buyer/src/pages/AddressesPage.tsx",
     "../../packages/sdkwork-mall-h5-im/src/pages/NoticesPage.tsx",
-    "../../packages/sdkwork-mall-h5-account/src/pages/WalletPage.tsx",
   ];
   for (const page of pages) {
     assert.match(
@@ -532,6 +569,23 @@ test("primary list surfaces share one flat empty-state primitive", () => {
       `${page} must render the shared empty state`,
     );
   }
+
+  // Wallet/points moved to the account wallet brick; the brick keeps its flat
+  // empty composition for an empty ledger and empty point lots.
+  const walletBrickDir = join(
+    fileURLToPath(new URL("../../", import.meta.url)),
+    "../../../sdkwork-account/apps/sdkwork-account-common/packages/sdkwork-account-mobile-react-wallet/src",
+  );
+  assert.match(
+    readFileSync(join(walletBrickDir, "WalletPage.tsx"), "utf8"),
+    /accountWallet\.ledgerEmpty/u,
+    "the wallet brick renders its flat empty-ledger state",
+  );
+  assert.match(
+    readFileSync(join(walletBrickDir, "PointsPage.tsx"), "utf8"),
+    /accountWallet\.lotsEmpty/u,
+    "the wallet brick renders its flat empty-lots state",
+  );
 
   const css = read("../../src/index.css");
   const rule = css.match(/\.sdk-h5-empty-state\s*\{[^}]*\}/u);
@@ -896,6 +950,33 @@ test("every H5 page component exposes an accessible page heading", () => {
           "utf8",
         );
         assert.match(brickShipmentPage, /<h1[\s>]/u, "the shipment brick must render the page heading");
+        continue;
+      }
+      if (pageKey === "sdkwork-mall-h5-membership/MembershipPage.tsx") {
+        const brickMembershipPage = readFileSync(
+          join(
+            appRoot,
+            "../../../sdkwork-membership/apps/sdkwork-membership-common/packages/sdkwork-membership-mobile-react-subscription/src/MembershipSubscriptionPage.tsx",
+          ),
+          "utf8",
+        );
+        assert.match(brickMembershipPage, /<h1[\s>]/u, "the membership brick must render the page heading");
+        continue;
+      }
+      if (
+        pageKey === "sdkwork-mall-h5-account/WalletPage.tsx"
+        || pageKey === "sdkwork-mall-h5-account/PointsPage.tsx"
+      ) {
+        const walletBrickPage = readFileSync(
+          join(
+            appRoot,
+            pageKey.endsWith("WalletPage.tsx")
+              ? "../../../sdkwork-account/apps/sdkwork-account-common/packages/sdkwork-account-mobile-react-wallet/src/WalletPage.tsx"
+              : "../../../sdkwork-account/apps/sdkwork-account-common/packages/sdkwork-account-mobile-react-wallet/src/PointsPage.tsx",
+          ),
+          "utf8",
+        );
+        assert.match(walletBrickPage, /<h1[\s>]/u, "the wallet brick must render the page heading");
         continue;
       }
       if (

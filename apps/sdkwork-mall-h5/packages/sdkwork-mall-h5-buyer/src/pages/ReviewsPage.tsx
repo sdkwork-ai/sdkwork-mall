@@ -55,7 +55,7 @@ export function SdkworkMallH5ReviewsPage() {
               <div className="sdk-h5-cart-row" key={order.id}>
                 <div className="sdk-h5-cart-row-body">
                   <Link
-                    className="sdk-h5-product-title"
+                    className="sdk-h5-product-title sdk-h5-pending-order-link"
                     to={`/buyer/orders/${encodeURIComponent(order.id)}`}
                   >
                     {order.subject}

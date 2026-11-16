@@ -1,73 +1,9 @@
-import { useEffect, useState } from "react";
-import { SdkworkMallH5EmptyState } from "@sdkwork/mall-h5-commons/empty-state";
+import { AccountWalletPointsPage } from "@sdkwork/account-mobile-react-wallet";
 
-import { loadMallH5Points, type MallH5PointsSummary } from "../account-service";
-import { SdkworkMallH5ErrorState } from "@sdkwork/mall-h5-commons/error-state";
-
+/**
+ * Points surface. Owned by the account wallet brick (available-points hero,
+ * expiring lots, empty/error states); the host only supplies the runtime.
+ */
 export function SdkworkMallH5PointsPage() {
-  const [summary, setSummary] = useState<MallH5PointsSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    loadMallH5Points()
-      .then((data) => {
-        if (active) {
-          setSummary(data);
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active) {
-          setError(cause instanceof Error ? cause.message : "积分加载失败");
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载积分...</div>;
-  }
-
-  return (
-    <div className="sdk-h5-page">
-      <h1 className="sdk-h5-visually-hidden">我的积分</h1>
-
-      {error ? <SdkworkMallH5ErrorState message={error} /> : null}
-
-      <section className="sdk-h5-wallet-hero">
-        <div className="sdk-h5-wallet-hero-label">可用积分</div>
-        <div className="sdk-h5-wallet-hero-amount">{summary?.balance != null ? summary.balance : "--"}</div>
-        <div className="sdk-h5-wallet-hero-points">
-          <span className="sdk-h5-wallet-hero-points-label">积分可在下单时抵扣现金</span>
-        </div>
-      </section>
-
-      <section className="sdk-h5-section">
-        <h2>积分批次</h2>
-        {!summary || summary.lots.length === 0 ? (
-          <SdkworkMallH5EmptyState>暂无积分批次</SdkworkMallH5EmptyState>
-        ) : (
-          <div className="sdk-h5-ledger-list">
-            {summary.lots.map((lot) => (
-              <div className="sdk-h5-ledger-row" key={lot.id}>
-                <span className="sdk-h5-ledger-icon" aria-hidden="true">分</span>
-                <div className="sdk-h5-ledger-body">
-                  <strong>{lot.points != null ? `${lot.points} 分` : "--"}</strong>
-                  <div className="sdk-h5-muted">{lot.expiresAt ? `${lot.expiresAt} 到期` : "长期有效"}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-  );
+  return <AccountWalletPointsPage />;
 }

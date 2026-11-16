@@ -10,7 +10,8 @@
 .shop-logo {
   width: 120rpx;
   height: 120rpx;
-  border-radius: 16rpx;
+  /* Circle, matching the H5 shop avatar and the home shop logo. */
+  border-radius: 50%;
   background: #f4f5f7;
   flex-shrink: 0;
 }

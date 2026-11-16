@@ -44,12 +44,18 @@ export function SdkworkMallH5ActivityDetailPage() {
   }, [eventId]);
 
   if (loading) {
-    return <div className="sdk-h5-page sdk-h5-loading">加载活动...</div>;
+    return (
+      <div className="sdk-h5-page sdk-h5-loading">
+        <h1 className="sdk-h5-visually-hidden">活动详情</h1>
+        加载活动...
+      </div>
+    );
   }
 
   if (error || !activity) {
     return (
       <div className="sdk-h5-page">
+        <h1 className="sdk-h5-visually-hidden">活动详情</h1>
         <SdkworkMallH5ErrorState message={error ?? "活动不存在或已结束"} />
         <div className="sdk-h5-center">
           <Link className="sdk-h5-button sdk-h5-button-ghost" to="/activity">返回活动会场</Link>

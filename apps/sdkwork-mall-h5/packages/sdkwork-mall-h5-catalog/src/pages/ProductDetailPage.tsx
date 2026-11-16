@@ -356,6 +356,7 @@ export function SdkworkMallH5ProductDetailPage() {
   if (!detail) {
     return (
       <div className="sdk-h5-page">
+        <h1 className="sdk-h5-visually-hidden">{t("productDetail.title")}</h1>
         <SdkworkMallH5EmptyState title={t("productDetail.notFound")} />
         <div className="sdk-h5-center">
           <Link className="sdk-h5-button" to="/">{t("productDetail.backHome")}</Link>
@@ -408,7 +409,9 @@ export function SdkworkMallH5ProductDetailPage() {
       {/* 滚动后的紧凑头部 */}
       <header className={showCompact ? "sdk-h5-pdp-compact sdk-h5-pdp-compact-show" : "sdk-h5-pdp-compact"}>
         <span className="sdk-h5-pdp-compact-price">
-          {displayPrice != null ? `¥${displayPrice.toFixed(2)}` : t("productDetail.price.inquiry")}
+          {displayPrice != null
+            ? `¥${displayPrice.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : t("productDetail.price.inquiry")}
         </span>
         <span className="sdk-h5-pdp-compact-title">{detail.title}</span>
       </header>
@@ -476,27 +479,19 @@ export function SdkworkMallH5ProductDetailPage() {
       <section className="sdk-h5-pdp-summary">
         <div className="sdk-h5-pdp-price-row">
           <span className="sdk-h5-pdp-price">
-            {displayPrice != null ? <>¥{displayPrice.toFixed(2)}</> : t("productDetail.price.inquiry")}
+            {displayPrice != null
+              ? `¥${displayPrice.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : t("productDetail.price.inquiry")}
           </span>
-          <button
-            aria-label={favoriteFlag ? t("productDetail.actions.unfavorite") : t("productDetail.actions.favorite")}
-            className={favoriteFlag ? "sdk-h5-pdp-fav sdk-h5-pdp-fav-on" : "sdk-h5-pdp-fav"}
-            onClick={() => setFavoriteFlag(toggleMallH5Favorite({
-              id: detail.id,
-              imageUrl: detail.imageUrl,
-              priceCny: detail.priceCny,
-              title: detail.title,
-            }))}
-            type="button"
-          >
-            <Heart aria-hidden="true" size={16} />
-            {favoriteFlag ? t("productDetail.actions.favorited") : t("productDetail.actions.favoriteShort")}
-          </button>
         </div>
         <h1 className="sdk-h5-pdp-title">{detail.title}</h1>
         <p className="sdk-h5-pdp-sales">
-          {detail.sales != null ? <span>{t("productDetail.stats.sales", { count: detail.sales })}</span> : null}
-          {maxQuantity != null ? <span> · {t("productDetail.stats.stock", { count: maxQuantity })}</span> : null}
+          {detail.sales != null ? (
+            <span>{t("productDetail.stats.sales", { count: detail.sales.toLocaleString("zh-CN") })}</span>
+          ) : null}
+          {maxQuantity != null ? (
+            <span> · {t("productDetail.stats.stock", { count: maxQuantity.toLocaleString("zh-CN") })}</span>
+          ) : null}
           {stockUrgent ? (
             <em className="sdk-h5-pdp-stock-urgent"> · {t("productDetail.stats.onlyLeft", { count: maxQuantity })}</em>
           ) : null}
@@ -574,7 +569,11 @@ export function SdkworkMallH5ProductDetailPage() {
               quantity,
               title: selectedSku?.title ?? t("productDetail.sku.default"),
             })}
-            {selectedSku?.priceCny != null ? <strong>　¥{selectedSku.priceCny.toFixed(2)}</strong> : null}
+            {selectedSku?.priceCny != null ? (
+              <strong>
+                ¥{selectedSku.priceCny.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </strong>
+            ) : null}
           </p>
         </section>
       ) : null}

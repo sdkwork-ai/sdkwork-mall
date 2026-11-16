@@ -10,7 +10,7 @@
 
 .inv-input {
   border: 1rpx solid #e5e7eb;
-  border-radius: 12rpx;
+  border-radius: 0;
   padding: 16rpx 20rpx;
   font-size: 28rpx;
 }

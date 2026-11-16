@@ -6,6 +6,8 @@ import { configureSdkworkMallH5Providers } from "./commerceProviders";
 import { configureSdkworkMallH5CartBrick } from "@sdkwork/mall-h5-cart/cart-brick";
 import { configureSdkworkMallH5CheckoutBrick } from "@sdkwork/mall-h5-cart";
 import { configureSdkworkMallH5UserCenter } from "@sdkwork/mall-h5-buyer";
+import { configureSdkworkMallH5WalletBrick } from "@sdkwork/mall-h5-account";
+import { configureSdkworkMallH5MembershipBrick } from "@sdkwork/mall-h5-membership";
 import { configureSdkworkMallH5OrderLogisticsBrick } from "@sdkwork/mall-h5-order";
 import { configureSdkworkMallH5PartnerProviders } from "./partnerProviders";
 import {
@@ -58,6 +60,8 @@ export function createSdkworkMallH5Runtime(): SdkworkMallH5Runtime {
     sdkClients,
   });
   configureSdkworkMallH5UserCenter(iamRuntime.iamService);
+  configureSdkworkMallH5WalletBrick();
+  configureSdkworkMallH5MembershipBrick();
   configureSdkworkMallH5ImProviders({ config, tokenManager });
   configureSdkworkMallH5PartnerProviders(sdkClients);
   // The order mobile brick owns the order read/write flows; the mall root only

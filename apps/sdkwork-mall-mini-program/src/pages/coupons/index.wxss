@@ -38,7 +38,7 @@
 .coupon-redeem-input {
   flex: 1;
   border: 1rpx solid #e5e7eb;
-  border-radius: 12rpx;
+  border-radius: 0;
   padding: 14rpx 20rpx;
   font-size: 26rpx;
 }

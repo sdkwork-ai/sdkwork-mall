@@ -30,6 +30,7 @@
     "src"
   ],
   "dependencies": {
+    "@sdkwork/account-mobile-react-wallet": "workspace:*",
     "@sdkwork/mall-h5-commons": "workspace:*",
     "@sdkwork/account-service": "workspace:*",
     "@sdkwork/mall-h5-core": "workspace:*"

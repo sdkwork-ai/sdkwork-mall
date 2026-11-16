@@ -16,6 +16,7 @@ module.exports = {
       titleMatch: "秒杀,闪购",
     },
     banners: {
+      cta: "立即查看",
       quality: {
         title: "品质生活，一站购齐",
         subtitle: "平台自营与品牌商家",

@@ -23,7 +23,7 @@ export function SdkworkMallH5GiftCardsPage() {
         <p className="sdk-h5-muted">{t("giftCards.hint")}</p>
       </section>
 
-      <div className="sdk-h5-action-row">
+      <div className="sdk-h5-action-row sdk-h5-action-row-full">
         <Link className="sdk-h5-button sdk-h5-button-primary" to="/buyer/vouchers">
           <Ticket aria-hidden="true" size={16} /> {t("giftCards.redeem")}
         </Link>
