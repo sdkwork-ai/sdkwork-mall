@@ -93,6 +93,24 @@ test("every template event handler exists on its page", () => {
   assert.deepEqual(problems, [], "a template must not call an undeclared handler");
 });
 
+test("the loader-compatibility env shim mirrors the generated module", () => {
+  // The WeChat compiler derives the module id `runtime-env.json.js` from a JSON
+  // import. An older compiled bundle that still requires it must resolve to the
+  // same values the build materializes; drift here would silently point a stale
+  // build at another API host.
+  const shim = read(path.join(srcRoot, "runtime-env.json.js"));
+  const generated = read(path.join(srcRoot, "bootstrap", "runtime-env.generated.ts"));
+  const readValue = (source, key) => {
+    const match = source.match(new RegExp(`"${key}"\\s*:\\s*"([^"]*)"|${key}\\s*:\\s*"([^"]*)"`, "u"));
+    return match ? (match[1] ?? match[2]) : "";
+  };
+  for (const key of ["commerceAppApiBaseUrl", "deploymentProfile", "environment"]) {
+    assert.ok(readValue(shim, key), `shim is missing ${key}`);
+    assert.equal(readValue(shim, key), readValue(generated, key), `shim ${key} drifted from runtime-env.generated.ts`);
+  }
+  assert.match(shim, /module\.exports = \{/u, "the shim must be a CommonJS module");
+});
+
 test("the app loads no JSON module and no non-mini-program global", () => {
   const problems = [];
   const scan = (directory) => {

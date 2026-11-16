@@ -463,3 +463,23 @@
   - Regression: 29 node guards, 68 vitest contracts, both typechecks, composition,
     parity, default data and the i18n ratchet green; 181/185 contract tests with
     the four failures all in the concurrent H5 brick migration.
+
+- 2026-11-16 (sixteenth pass: the reported boot error persisted after the JSON
+  import was removed). Diagnosis: the source tree no longer contains the import
+  (only comments mention it), but the dev tool kept compiling an older module
+  graph — its project directory cache
+  (`%LOCALAPPDATA%\微信开发者工具\User Data\cc5f1145...\WeappCache\dirCache\432ab158...\fileCache.cfg`,
+  written 19:41) still lists `src/runtime-env.json` and no `packages/`, i.e. a
+  snapshot from before the integration; the tool also runs the compiler in the
+  main process with hot reload, so the compiled module graph survives a plain
+  "编译".
+  - Added `src/runtime-env.json.js`: the WeChat compiler registers a JSON import
+    under the module id `runtime-env.json.js`, so this CommonJS shim makes that id
+    resolve to the same values the build materializes. A stale compiled bundle now
+    boots instead of aborting.
+  - `scripts/build-runtime.mjs` writes the shim alongside
+    `src/bootstrap/runtime-env.generated.ts`; the completeness guard fails when the
+    shim and the generated module disagree, and still fails on any JSON import.
+  - Operator action required once: clear the dev-tool cache and recompile, or fully
+    quit and reopen the project, so the stale index is dropped.
+  - Regression: 30 node guards, 69 vitest contracts, mini typecheck green.
