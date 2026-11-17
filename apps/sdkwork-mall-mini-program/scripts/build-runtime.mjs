@@ -16,7 +16,12 @@ import { fileURLToPath } from "node:url";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const specsRoot = path.resolve(appRoot, "..", "..", "..", "sdkwork-specs");
-const appId = "sdkwork-mall-mini-program";
+// The public token's app id comes from the deploy anchor. Profiles materialized
+// without an anchor carry the placeholder verbatim, so the projection must use
+// the same value instead of assuming the package's historical app id.
+const appId =
+  String(process.env.SDKWORK_DEPLOY_APPLICATION_ID ?? "").trim() ||
+  "__SDKWORK_DEPLOY_APPLICATION_ID__";
 
 const args = process.argv.slice(2);
 function argValue(name) {

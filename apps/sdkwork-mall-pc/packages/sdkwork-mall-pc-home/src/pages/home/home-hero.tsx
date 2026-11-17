@@ -54,23 +54,26 @@ export interface HomeCategoryItem {
 function HomeCategoryPanel({ categories }: { readonly categories: HomeCategoryItem[] }) {
   return (
     <aside aria-label="商品分类导航" className="sdkwork-mall-pc-home-categories">
-      {categories.map((category) => {
-        const visual = resolveHomeCatalogVisual(category.name);
-        const Icon = visual.icon;
-        return (
-          <Link className="sdkwork-mall-pc-home-category-item" key={category.id} to={category.to}>
-            <span className="sdkwork-mall-pc-home-category-icon">
-              <Icon aria-hidden="true" size={17} strokeWidth={1.7} />
-            </span>
-            <span className="sdkwork-mall-pc-home-category-name">{category.name}</span>
-            <ChevronRight
-              aria-hidden="true"
-              className="sdkwork-mall-pc-home-category-chevron"
-              size={13}
-            />
-          </Link>
-        );
-      })}
+      {/* 列表独立滚动，行高固定：类目数量少时不会被拉伸，数量多时只在面板内滚动。 */}
+      <div className="sdkwork-mall-pc-home-category-list">
+        {categories.map((category) => {
+          const visual = resolveHomeCatalogVisual(category.name);
+          const Icon = visual.icon;
+          return (
+            <Link className="sdkwork-mall-pc-home-category-item" key={category.id} to={category.to}>
+              <span className="sdkwork-mall-pc-home-category-icon">
+                <Icon aria-hidden="true" size={17} strokeWidth={1.7} />
+              </span>
+              <span className="sdkwork-mall-pc-home-category-name">{category.name}</span>
+              <ChevronRight
+                aria-hidden="true"
+                className="sdkwork-mall-pc-home-category-chevron"
+                size={13}
+              />
+            </Link>
+          );
+        })}
+      </div>
       <Link className="sdkwork-mall-pc-home-category-more" to="/categories">
         查看全部类目
         <ChevronRight aria-hidden="true" size={12} />

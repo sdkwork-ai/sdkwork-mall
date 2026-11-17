@@ -25,6 +25,16 @@
       "import": "./src/default-data/index.ts",
       "default": "./src/default-data/index.ts"
     },
+    "./default-data/provider": {
+      "types": "./src/default-data/provider.ts",
+      "import": "./src/default-data/provider.ts",
+      "default": "./src/default-data/provider.ts"
+    },
+    "./default-data/profiles": {
+      "types": "./src/default-data/profiles.ts",
+      "import": "./src/default-data/profiles.ts",
+      "default": "./src/default-data/profiles.ts"
+    },
     "./default-data-admin-page": {
       "types": "./src/default-data/pages/DefaultDataPage.tsx",
       "import": "./src/default-data/pages/DefaultDataPage.tsx",

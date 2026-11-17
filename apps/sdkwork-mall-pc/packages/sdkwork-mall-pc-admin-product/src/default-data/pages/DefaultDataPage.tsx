@@ -11,6 +11,9 @@ import {
 } from "../copy";
 import {
   MallDefaultDataError,
+  ensureMallDefaultDataConfigured,
+  hasMallDefaultDataBootstrapper,
+  isMallDefaultDataConfigured,
   previewMallDefaultDataInitialization,
   runMallDefaultDataInitialization,
   verifyMallDefaultDataInitialization,
@@ -129,21 +132,37 @@ export function SdkworkMallDefaultDataPage({ locale }: SdkworkMallDefaultDataPag
   const [busy, setBusy] = useState<BusyAction | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const loadPreview = useCallback(() => {
-    setBusy("plan");
-    setError(null);
+  const applyPreview = useCallback(() => {
     try {
       setPreview(previewMallDefaultDataInitialization({ locale }));
     } catch (cause: unknown) {
       setPreview(null);
       setError(formatError(cause, copy));
-    } finally {
-      setBusy(null);
     }
   }, [copy, locale]);
 
+  const loadPreview = useCallback(async () => {
+    setBusy("plan");
+    setError(null);
+    // The real bootstrap registers a lazy adapter builder; a surface without a
+    // backend has none and fails fast instead of waiting on a load it cannot
+    // perform.
+    if (!isMallDefaultDataConfigured() && hasMallDefaultDataBootstrapper()) {
+      try {
+        await ensureMallDefaultDataConfigured();
+      } catch (cause: unknown) {
+        setPreview(null);
+        setError(formatError(cause, copy));
+        setBusy(null);
+        return;
+      }
+    }
+    applyPreview();
+    setBusy(null);
+  }, [applyPreview, copy]);
+
   useEffect(() => {
-    loadPreview();
+    void loadPreview();
   }, [loadPreview]);
 
   const totals = preview?.totals;
@@ -166,6 +185,7 @@ export function SdkworkMallDefaultDataPage({ locale }: SdkworkMallDefaultDataPag
 
   const runVerification = useCallback(async () => {
     try {
+      await ensureMallDefaultDataConfigured();
       setVerification(await verifyMallDefaultDataInitialization({ locale }));
     } catch (cause: unknown) {
       setVerification(null);
@@ -180,6 +200,7 @@ export function SdkworkMallDefaultDataPage({ locale }: SdkworkMallDefaultDataPag
       setReport(null);
       setStepStates({});
       try {
+        await ensureMallDefaultDataConfigured();
         const result = await runMallDefaultDataInitialization({
           dryRun,
           locale,

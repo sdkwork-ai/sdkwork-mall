@@ -21,9 +21,20 @@ describe("mall default dataset", () => {
 
   it("authors a complete, professional mall surface", () => {
     const dataset = zhCnDefaultDataset;
-    expect(dataset.categories.length).toBeGreaterThanOrEqual(8);
-    expect(dataset.shops.length).toBeGreaterThanOrEqual(6);
-    expect(dataset.products.length).toBeGreaterThanOrEqual(20);
+    const leafCount = dataset.categories.reduce(
+      (total, category) => total + category.children.length,
+      0,
+    );
+    const skuCount = dataset.products.reduce(
+      (total, product) => total + product.skus.length,
+      0,
+    );
+    expect(dataset.categories.length).toBeGreaterThanOrEqual(18);
+    expect(leafCount).toBeGreaterThanOrEqual(90);
+    expect(dataset.shops.length).toBeGreaterThanOrEqual(12);
+    expect(dataset.brands.length).toBeGreaterThanOrEqual(30);
+    expect(dataset.products.length).toBeGreaterThanOrEqual(1000);
+    expect(skuCount).toBeGreaterThanOrEqual(3000);
     expect(dataset.offers.length).toBeGreaterThanOrEqual(4);
     expect(dataset.membership.plans.length).toBeGreaterThanOrEqual(3);
     expect(dataset.membership.packageGroups.length).toBeGreaterThanOrEqual(2);
@@ -33,12 +44,43 @@ describe("mall default dataset", () => {
     expect(dataset.cms.hotKeywords.length).toBeGreaterThanOrEqual(6);
 
     for (const product of dataset.products) {
-      expect(product.skus.length).toBeGreaterThanOrEqual(1);
+      // Every product is a real multi-variant listing: single-SKU rows make the
+      // detail page and the SKU picker look unfinished.
+      expect(product.skus.length).toBeGreaterThanOrEqual(2);
       expect(product.description.length).toBeGreaterThan(40);
       expect(product.keywords.length).toBeGreaterThanOrEqual(2);
+      const combinations = new Set(
+        product.skus.map((sku) => JSON.stringify(sku.values ?? {})),
+      );
+      expect(combinations.size).toBe(product.skus.length);
     }
     for (const category of dataset.categories) {
       expect(category.children.length).toBeGreaterThanOrEqual(2);
+    }
+    // Every leaf category must express at least one spec dimension.
+    const attributeCategories = new Set(
+      dataset.categoryAttributes.map((attribute) => attribute.categoryKey),
+    );
+    for (const category of dataset.categories) {
+      for (const child of category.children) {
+        expect(attributeCategories.has(child.key), `${child.key} has no spec attribute`).toBe(true);
+      }
+    }
+  });
+
+  it("keeps retail prices inside a realistic range with sane markdowns", () => {
+    const skus = zhCnDefaultDataset.products.flatMap((product) => product.skus);
+    for (const sku of skus) {
+      const price = Number(sku.price);
+      const listPrice = Number(sku.listPrice);
+      expect(price).toBeGreaterThanOrEqual(5);
+      expect(price).toBeLessThanOrEqual(300000);
+      expect(listPrice).toBeGreaterThanOrEqual(price);
+      if (listPrice > price) {
+        const discount = 1 - price / listPrice;
+        expect(discount).toBeGreaterThanOrEqual(0.03);
+        expect(discount).toBeLessThanOrEqual(0.5);
+      }
     }
   });
 

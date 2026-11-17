@@ -271,6 +271,11 @@ function centerWireClient(): SdkworkPartnerCenterWireClient {
             };
           },
         },
+        customerBindings: {
+          async create() {
+            return { id: "binding-1" };
+          },
+        },
       },
     },
   };

@@ -3408,6 +3408,8 @@ h1 {
 .sdkwork-mall-pc-home-categories {
   display: flex;
   flex-direction: column;
+  /* 面板高度只跟随首屏主视觉，绝不因类目多少而自动撑高首屏。 */
+  contain: size;
   min-height: 0;
   padding: 8px 0 0;
   background: var(--mall-surface);
@@ -3416,12 +3418,32 @@ h1 {
   overflow: hidden;
 }
 
+.sdkwork-mall-pc-home-category-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #d6dae1 transparent;
+  scrollbar-width: thin;
+}
+
+.sdkwork-mall-pc-home-category-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sdkwork-mall-pc-home-category-list::-webkit-scrollbar-thumb {
+  background: #d6dae1;
+  border-radius: 999px;
+}
+
 .sdkwork-mall-pc-home-category-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1;
-  min-height: 0;
+  flex: 0 0 auto;
+  height: 36px;
   padding: 0 14px;
   color: var(--mall-ink-2);
   font-size: 13.5px;

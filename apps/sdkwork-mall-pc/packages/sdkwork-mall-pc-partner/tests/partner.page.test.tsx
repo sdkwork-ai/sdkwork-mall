@@ -31,6 +31,8 @@ const submittedApplication: SdkworkPartnerApplication = {
 
 function service(): SdkworkPartnerService {
   return {
+    bindCustomerByInviteCode: vi.fn(async () => undefined),
+    resolveOwnInviteCode: vi.fn(async () => "ABC123"),
     cancelApplication: vi.fn(async () => submittedApplication),
     createWithdrawal: vi.fn(async () => ({
       amount: "100.00",

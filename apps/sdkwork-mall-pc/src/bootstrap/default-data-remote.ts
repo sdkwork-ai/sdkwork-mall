@@ -1,13 +1,18 @@
 import {
+  configureMallDefaultDataBootstrapper,
   configureMallDefaultDataProvider,
+  ensureMallDefaultDataConfigured,
+} from "@sdkwork/mall-pc-admin-product/default-data/provider";
+import {
   resolveMallDefaultDataEnvironment,
   resolveMallDefaultDataProfile,
-  runMallDefaultDataInitialization,
-  type MallDefaultDataCmsConfigShape,
-  type MallDefaultDataEnvironment,
-  type MallDefaultDataLocale,
-  type MallDefaultDataPort,
-  type MallDefaultDataProfile,
+} from "@sdkwork/mall-pc-admin-product/default-data/profiles";
+import type {
+  MallDefaultDataCmsConfigShape,
+  MallDefaultDataEnvironment,
+  MallDefaultDataLocale,
+  MallDefaultDataPort,
+  MallDefaultDataProfile,
 } from "@sdkwork/mall-pc-admin-product/default-data";
 import {
   configureMallHomeSeedProvider,
@@ -78,14 +83,71 @@ const BACKEND_COMMAND_PATHS = [
 ] as const;
 
 /**
- * Provisioning lookups read at most one bounded page.
+ * Provisioning lookups must see the whole environment.
  *
- * The dataset tops out below this page size, and seeding is a one-shot operator
- * action rather than an interactive list, so a second page would only hide a
- * dataset defect behind pagination (`PAGINATION_SPEC.md` §2 forbids unbounded
- * client-side collection).
+ * Seeding is idempotent only if the plan can tell "this natural key is already
+ * provisioned" for every row — a catalog larger than one page would otherwise be
+ * re-created on every rerun. The walk is bounded (200 pages × 200 rows) so a
+ * mispaginating backend fails loudly instead of looping, and it stays on the
+ * one-shot operator path rather than an interactive list.
  */
-const PROVISIONING_LIST_QUERY = Object.freeze({ page: 1, page_size: 200 });
+const PROVISIONING_PAGE_SIZE = 200;
+const PROVISIONING_MAX_PAGES = 200;
+
+interface ProvisioningPageQuery {
+  readonly page: number;
+  readonly pageSize?: number;
+  readonly page_size?: number;
+  readonly [key: string]: unknown;
+}
+
+function readListItems(value: unknown): Record<string, unknown>[] {
+  if (Array.isArray(value)) {
+    return value.filter(
+      (item): item is Record<string, unknown> =>
+        Boolean(item) && typeof item === "object" && !Array.isArray(item),
+    );
+  }
+  if (!value || typeof value !== "object") {
+    return [];
+  }
+  const record = value as Record<string, unknown>;
+  const data = record.data;
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const items = (data as Record<string, unknown>).items;
+    if (Array.isArray(items)) {
+      return readListItems(items);
+    }
+  }
+  if (Array.isArray(record.items)) {
+    return readListItems(record.items);
+  }
+  return [];
+}
+
+async function collectAllPages(
+  list: (query: ProvisioningPageQuery) => Promise<unknown>,
+  options: {
+    readonly pageSizeKey?: "pageSize" | "page_size";
+    readonly fixed?: Record<string, unknown>;
+  } = {},
+): Promise<{ items: Record<string, unknown>[] }> {
+  const pageSizeKey = options.pageSizeKey ?? "page_size";
+  const items: Record<string, unknown>[] = [];
+  for (let page = 1; page <= PROVISIONING_MAX_PAGES; page += 1) {
+    const query: ProvisioningPageQuery = {
+      ...(options.fixed ?? {}),
+      page,
+      [pageSizeKey]: PROVISIONING_PAGE_SIZE,
+    };
+    const pageItems = readListItems(await list(query));
+    items.push(...pageItems);
+    if (pageItems.length < PROVISIONING_PAGE_SIZE) {
+      break;
+    }
+  }
+  return { items };
+}
 
 const CMS_PRESET_STORAGE_KEY = "sdkwork-mall-pc-default-data:cms-preset";
 
@@ -154,43 +216,59 @@ export function createSdkworkMallPcDefaultDataPort(
   );
   const catalog = createSdkworkShopCatalogNamespace(shopCatalog);
 
+  const catalogPageSize = { pageSizeKey: "pageSize" } as const;
+  const federatedPageSize = { pageSizeKey: "page_size" } as const;
+
   return {
     catalog: {
-      listBrands: () => catalog.brands.list({ ...PROVISIONING_LIST_QUERY }),
+      listBrands: () => collectAllPages((query) => catalog.brands.list(query), catalogPageSize),
       createBrand: (body) => catalog.brands.create(body),
-      listAttributes: () => catalog.attributes.management.list({ ...PROVISIONING_LIST_QUERY }),
+      listAttributes: () =>
+        collectAllPages((query) => catalog.attributes.management.list(query), catalogPageSize),
       createAttribute: (body) => catalog.attributes.create(body),
       listAttributeValues: (query) => catalog.attributeValues.list(query),
-      listCategoryAttributes: () => catalog.categoryAttributes.list({ ...PROVISIONING_LIST_QUERY }),
+      listCategoryAttributes: () =>
+        collectAllPages((query) => catalog.categoryAttributes.list(query), catalogPageSize),
       createCategoryAttribute: (body) => catalog.categoryAttributes.create(body),
-      listPriceLists: () => catalog.priceLists.list({ ...PROVISIONING_LIST_QUERY }),
+      listPriceLists: () =>
+        collectAllPages((query) => catalog.priceLists.list(query), catalogPageSize),
       createPriceList: (body) => catalog.priceLists.create(body),
-      listPriceListItems: () => catalog.priceListItems.list({ page: 1, pageSize: 200 }),
+      listPriceListItems: () =>
+        collectAllPages((query) => catalog.priceListItems.list(query), catalogPageSize),
       createPriceListItem: (body) => catalog.priceListItems.create(body),
-      listCategories: () => catalog.categories.management.list({ ...PROVISIONING_LIST_QUERY }),
+      listCategories: () =>
+        collectAllPages((query) => catalog.categories.management.list(query), catalogPageSize),
       createCategory: (body) => catalog.categories.create(body),
-      listProducts: () => catalog.products.management.list({ ...PROVISIONING_LIST_QUERY }),
+      listProducts: () =>
+        collectAllPages((query) => catalog.products.management.list(query), catalogPageSize),
       createProduct: (body) => catalog.products.create(body),
       publishProduct: (productId, expectedVersion) =>
         catalog.products.publish(productId, expectedVersion),
-      listSkus: () => catalog.skus.list({ ...PROVISIONING_LIST_QUERY }),
+      listSkus: () => collectAllPages((query) => catalog.skus.list(query), catalogPageSize),
       createSku: (body) => catalog.skus.create(body),
     },
     shops: {
-      listShops: () => commerce.shops.management.list({ ...PROVISIONING_LIST_QUERY }),
+      listShops: () =>
+        collectAllPages((query) => commerce.shops.management.list(query), federatedPageSize),
       createShop: (body) => commerce.shops.create(body),
     },
     promotions: {
-      listOffers: () => commerce.promotions.offers.management.list({ ...PROVISIONING_LIST_QUERY }),
+      listOffers: () =>
+        collectAllPages((query) => commerce.promotions.offers.management.list(query), federatedPageSize),
       createOffer: (body) => commerce.promotions.offers.create(body),
     },
     memberships: {
-      listPlans: () => commerce.memberships.plans.management.list({ ...PROVISIONING_LIST_QUERY }),
+      listPlans: () =>
+        collectAllPages((query) => commerce.memberships.plans.management.list(query), federatedPageSize),
       createPlan: (body) => commerce.memberships.plans.create(body),
       listPackageGroups: () =>
-        commerce.memberships.packageGroups.management.list({ ...PROVISIONING_LIST_QUERY }),
+        collectAllPages(
+          (query) => commerce.memberships.packageGroups.management.list(query),
+          federatedPageSize,
+        ),
       createPackageGroup: (body) => commerce.memberships.packageGroups.create(body),
-      listPackages: () => commerce.memberships.packages.management.list({ ...PROVISIONING_LIST_QUERY }),
+      listPackages: () =>
+        collectAllPages((query) => commerce.memberships.packages.management.list(query), federatedPageSize),
       createPackage: (body) => commerce.memberships.packages.create(body),
     },
     cms: {
@@ -218,15 +296,19 @@ export function configureSdkworkMallPcDefaultDataProvider(input: {
   const port = createSdkworkMallPcDefaultDataPort(input.sdkClients);
   if (!port) {
     configureMallDefaultDataProvider(null);
+    configureMallDefaultDataBootstrapper(null);
     configureMallHomeSeedProvider(null);
     return;
   }
   const locale: MallDefaultDataLocale = input.locale === "en-US" ? "en-US" : "zh-CN";
   const environment = resolveMallDefaultDataEnvironment(input.environment);
-  configureMallDefaultDataProvider({
-    defaultLocale: locale,
-    environment,
-    port,
+  const providerInput = { defaultLocale: locale, environment, port };
+
+  // The provisioning engine owns the multi-megabyte dataset chunk, so it is
+  // registered lazily: the admin console and the first-run seed both call
+  // `ensureMallDefaultDataConfigured()` and only then download the engine.
+  configureMallDefaultDataBootstrapper(async () => {
+    configureMallDefaultDataProvider(providerInput);
   });
 
   // Storefront first-run recovery: the same provisioning plan, reachable from
@@ -314,6 +396,12 @@ async function runStorefrontSeedInitialization(
   profileOverride?: MallDefaultDataProfile,
 ): Promise<MallHomeSeedOutcome> {
   const policy = resolveSdkworkMallPcSeedPolicy(environment);
+  await ensureMallDefaultDataConfigured();
+  // Lazy on purpose: the dataset is a large chunk that a storefront visitor must
+  // not download unless this environment actually needs provisioning.
+  const { runMallDefaultDataInitialization } = await import(
+    "@sdkwork/mall-pc-admin-product/default-data"
+  );
   const report = await runMallDefaultDataInitialization({
     profile: profileOverride ?? policy.profile,
   });

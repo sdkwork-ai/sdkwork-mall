@@ -46,7 +46,9 @@ export {
 } from "./plan";
 export {
   MallDefaultDataError,
+  configureMallDefaultDataBootstrapper,
   configureMallDefaultDataProvider,
+  ensureMallDefaultDataConfigured,
   isMallDefaultDataConfigured,
   previewMallDefaultDataInitialization,
   resolveMallDefaultDataSlice,

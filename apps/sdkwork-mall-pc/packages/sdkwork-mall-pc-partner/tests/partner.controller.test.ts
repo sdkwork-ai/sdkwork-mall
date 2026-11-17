@@ -53,6 +53,8 @@ function application(overrides: Partial<SdkworkPartnerApplication> = {}): Sdkwor
 function fakeService(): SdkworkPartnerService {
   let applications: SdkworkPartnerApplication[] = [application()];
   return {
+    bindCustomerByInviteCode: vi.fn(async () => undefined),
+    resolveOwnInviteCode: vi.fn(async () => "ABC123"),
     cancelApplication: vi.fn(async (id: string) => {
       const updated = application({ id, status: "CANCELLED" });
       applications = applications.map((entry) => (entry.id === id ? updated : entry));

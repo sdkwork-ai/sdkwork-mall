@@ -182,6 +182,35 @@ describe("mall default data port adapter", () => {
     });
   });
 
+  it("walks every catalog page so idempotency lookups see the whole environment", async () => {
+    const catalog = createStubShopCatalog();
+    const rows = (count: number, offset: number) =>
+      Array.from({ length: count }, (_, index) => ({
+        id: `spu-${offset + index}`,
+        productNo: `MALL-SPU-${offset + index}`,
+      }));
+    catalog.products.management.list = vi.fn(async (params: unknown) => {
+      const page = (params as { page: number }).page;
+      return {
+        items: page === 1 ? rows(200, 0) : page === 2 ? rows(150, 200) : [],
+        pageInfo: { mode: "offset" },
+      };
+    });
+
+    const port = createSdkworkMallPcDefaultDataPort({
+      commerceBackendClient: { commerce: createStubCommerce() },
+      shopBackendClient: { catalog: catalog as unknown as SdkworkShopBackendClient["catalog"] },
+    });
+    expect(port).not.toBeNull();
+
+    const result = (await port?.catalog.listProducts()) as { items: unknown[] };
+
+    expect(result.items).toHaveLength(350);
+    expect(catalog.products.management.list).toHaveBeenCalledTimes(2);
+    expect(catalog.products.management.list).toHaveBeenNthCalledWith(1, { page: 1, pageSize: 200 });
+    expect(catalog.products.management.list).toHaveBeenNthCalledWith(2, { page: 2, pageSize: 200 });
+  });
+
   it("tracks the CMS preset marker through local storage", () => {
     const port = createSdkworkMallPcDefaultDataPort({
       commerceBackendClient: { commerce: createStubCommerce() },

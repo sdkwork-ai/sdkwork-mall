@@ -4,11 +4,11 @@
  * "runtime-env.json.js" that the WeChat compiler derives from a JSON import.
  */
 module.exports = {
-  "applicationPublicHttpUrl": "https://api.sdkwork.com",
-  "commerceAppApiBaseUrl": "https://api.sdkwork.com/app/v3/api",
+  "applicationPublicHttpUrl": "https://api-dev.sdkwork.com",
+  "commerceAppApiBaseUrl": "https://api-dev.sdkwork.com/app/v3/api",
   "deploymentProfile": "cloud",
-  "environment": "production",
-  "platformApiGatewayHttpUrl": "https://api.sdkwork.com",
-  "profileId": "cloud.production",
+  "environment": "development",
+  "platformApiGatewayHttpUrl": "https://api-dev.sdkwork.com",
+  "profileId": "cloud.development",
   "runtimeTarget": "mini-program"
 };

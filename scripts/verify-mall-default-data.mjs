@@ -50,6 +50,34 @@ const BUILD_ENV_ALIASES = { development: "dev", test: "test", demo: "demo", stag
 const AMOUNT = /^(?:0|[1-9][0-9]{0,9})\.[0-9]{2}$/u;
 const BARCODE = /^[0-9]{13}$/u;
 
+/**
+ * Minimum professional scale. A mall that claims to be demo-ready must be able
+ * to fill a real storefront: a thousand purchasable products across a hundred
+ * leaf categories, with variants and genuine retail price spreads.
+ */
+const MINIMUM = Object.freeze({
+  brands: 30,
+  leafCategories: 90,
+  products: 1000,
+  skus: 3000,
+  shops: 12,
+  productsPerLeaf: 5,
+  productsPerShop: 10,
+  demoOnlyProducts: 20,
+});
+
+/** Retail price sanity bounds in CNY (major units). */
+const PRICE_FLOOR = 5;
+const PRICE_CEILING = 300000;
+
+function ean13CheckDigit(value) {
+  let sum = 0;
+  for (let index = 0; index < 12; index += 1) {
+    sum += Number(value[index]) * (index % 2 === 0 ? 1 : 3);
+  }
+  return (10 - (sum % 10)) % 10;
+}
+
 const problems = [];
 const summary = {};
 
@@ -80,6 +108,24 @@ function checkDataset() {
     (dataset.cms?.banners?.length ?? 0) +
     (dataset.cms?.floors?.length ?? 0) +
     (dataset.cms?.hotKeywords?.length ?? 0);
+
+  const leafCategoryCount = (dataset.categories ?? []).reduce(
+    (total, category) => total + (category.children?.length ?? 0),
+    0,
+  );
+  summary.leafCategories = leafCategoryCount;
+  for (const [label, actual, minimum] of [
+    ["brands", dataset.brands?.length ?? 0, MINIMUM.brands],
+    ["leaf categories", leafCategoryCount, MINIMUM.leafCategories],
+    ["products", summary.products, MINIMUM.products],
+    ["skus", summary.skus, MINIMUM.skus],
+    ["shops", summary.shops, MINIMUM.shops],
+  ]) {
+    if (actual < minimum) {
+      fail("scale", `${label} must be at least ${minimum}, found ${actual}`);
+    }
+  }
+  summary.minimums = MINIMUM;
 
   if (dataset.schemaVersion !== 1) fail("dataset", "schemaVersion must be 1");
   if (dataset.locale !== "zh-CN") fail("dataset", "authored dataset locale must be zh-CN");
@@ -140,6 +186,14 @@ function checkDataset() {
     attributeBindings.set(attribute.categoryKey, bound);
   }
 
+  // Every leaf category must express at least one spec dimension, otherwise its
+  // products can only ever ship as single-SKU rows.
+  for (const leaf of leafKeys) {
+    if ((attributeBindings.get(leaf) ?? []).length === 0) {
+      fail("spec", `leaf category ${leaf} has no spec attribute; multi-variant products cannot be expressed`);
+    }
+  }
+
   const productKeys = new Set();
   const skuKeys = new Set();
   const barcodes = new Set();
@@ -156,7 +210,28 @@ function checkDataset() {
     for (const field of ["brand", "title", "subtitle", "description", "productType"]) {
       if (!product[field]) fail("dataset", `product ${product.key} is missing ${field}`);
     }
-    if (!product.skus?.length) fail("dataset", `product ${product.key} has no SKUs`);
+    if (typeof product.description === "string" && product.description.length < 40) {
+      fail("dataset", `product ${product.key} description is too short to be useful (${product.description.length})`);
+    }
+    if (!Array.isArray(product.keywords) || product.keywords.length < 2) {
+      fail("dataset", `product ${product.key} needs at least two search keywords`);
+    }
+    if (!Array.isArray(product.skus) || product.skus.length < 2) {
+      fail("dataset", `product ${product.key} must carry at least two SKU variants`);
+    }
+    const specCombinations = new Set();
+    for (const sku of product.skus ?? []) {
+      const combination = Object.entries(sku.values ?? {})
+        .map(([attributeName, valueName]) => `${attributeName}=${valueName}`)
+        .sort()
+        .join("|");
+      if (combination && specCombinations.has(combination)) {
+        fail("dataset", `product ${product.key} repeats spec combination ${combination}`);
+      }
+      if (combination) {
+        specCombinations.add(combination);
+      }
+    }
     for (const sku of product.skus ?? []) {
       if (skuKeys.has(sku.key)) fail("dataset", `duplicate SKU key ${sku.key}`);
       skuKeys.add(sku.key);
@@ -169,10 +244,25 @@ function checkDataset() {
       if (Number(sku.price) > Number(sku.listPrice)) {
         fail("dataset", `SKU ${sku.key} sale price exceeds list price`);
       }
+      const salePrice = Number(sku.price);
+      const listPrice = Number(sku.listPrice);
+      if (Number.isFinite(salePrice) && (salePrice < PRICE_FLOOR || salePrice > PRICE_CEILING)) {
+        fail("dataset", `SKU ${sku.key} price ${sku.price} is outside the realistic retail range`);
+      }
+      if (Number.isFinite(salePrice) && Number.isFinite(listPrice) && listPrice > salePrice) {
+        const discount = 1 - salePrice / listPrice;
+        if (discount < 0.03 || discount > 0.5) {
+          fail("dataset", `SKU ${sku.key} discount ${(discount * 100).toFixed(1)}% is not a realistic retail markdown`);
+        }
+      }
       // A barcode is an EAN-13 when present; digital and service goods have no
       // physical unit to tag and leave it empty.
       if (sku.barcode) {
-        if (!BARCODE.test(String(sku.barcode))) fail("dataset", `SKU ${sku.key} barcode must be EAN-13`);
+        if (!BARCODE.test(String(sku.barcode))) {
+          fail("dataset", `SKU ${sku.key} barcode must be EAN-13`);
+        } else if (Number(sku.barcode[12]) !== ean13CheckDigit(sku.barcode)) {
+          fail("dataset", `SKU ${sku.key} barcode ${sku.barcode} has an invalid EAN-13 check digit`);
+        }
         if (barcodes.has(sku.barcode)) fail("dataset", `duplicate barcode ${sku.barcode}`);
         barcodes.add(sku.barcode);
       }
@@ -253,9 +343,57 @@ function checkDataset() {
     }
   }
   const demoOnlyProducts = (dataset.products ?? []).filter((product) => product.demoOnly).length;
-  if (demoOnlyProducts === 0) {
-    fail("coverage", "the dataset must keep at least one demo-only product so profiles stay distinguishable");
+  if (demoOnlyProducts < MINIMUM.demoOnlyProducts) {
+    fail(
+      "coverage",
+      `the dataset must keep at least ${MINIMUM.demoOnlyProducts} demo-only products so profiles stay distinguishable ` +
+        `(found ${demoOnlyProducts})`,
+    );
   }
+
+  // Depth, not just breadth: a leaf category or storefront page with one or two
+  // products looks unfinished the moment a shopper opens it.
+  const perLeafCount = new Map();
+  const perShopCount = new Map();
+  for (const product of standardProducts) {
+    perLeafCount.set(product.categoryKey, (perLeafCount.get(product.categoryKey) ?? 0) + 1);
+    perShopCount.set(product.shopKey, (perShopCount.get(product.shopKey) ?? 0) + 1);
+  }
+  for (const leaf of leafCategoryKeys) {
+    const count = perLeafCount.get(leaf) ?? 0;
+    if (count < MINIMUM.productsPerLeaf) {
+      fail("coverage", `leaf category ${leaf} has only ${count} non-demo products; need at least ${MINIMUM.productsPerLeaf}`);
+    }
+  }
+  for (const shop of dataset.shops ?? []) {
+    const count = perShopCount.get(shop.key) ?? 0;
+    if (count < MINIMUM.productsPerShop) {
+      fail("coverage", `shop ${shop.key} has only ${count} non-demo products; need at least ${MINIMUM.productsPerShop}`);
+    }
+  }
+
+  // Storefront floors are free-text shelves; a query that matches nothing turns
+  // the home page into an empty shelf even with a full catalog.
+  for (const floor of dataset.cms?.floors ?? []) {
+    const query = String(floor.productQuery ?? "").trim();
+    if (!query) {
+      fail("cms", `floor ${floor.key} has no productQuery`);
+      continue;
+    }
+    const matches = (dataset.products ?? []).filter((product) =>
+      `${product.title} ${product.subtitle ?? ""} ${product.description ?? ""}`.includes(query));
+    if (matches.length === 0) {
+      fail("cms", `floor ${floor.key} query "${query}" matches no product title`);
+    }
+  }
+  const allSkus = (dataset.products ?? []).flatMap((product) => product.skus ?? []);
+  summary.priceRange = {
+    min: Math.min(...allSkus.map((sku) => Number(sku.price))),
+    max: Math.max(...allSkus.map((sku) => Number(sku.price))),
+  };
+  summary.multiSkuProducts = (dataset.products ?? []).filter(
+    (product) => (product.skus?.length ?? 0) >= 2,
+  ).length;
   summary.catalogCoverage = {
     leaves: leafCategoryKeys.length,
     coveredLeaves: leafCategoryKeys.filter((leaf) => coveredCategories.has(leaf)).length,
@@ -321,6 +459,22 @@ function checkLocaleParity(dataset) {
 
   summary.localeTranslations = summary.categories + summary.shops + summary.products + summary.skus +
     summary.offers + summary.membershipPlans + summary.membershipPackages + summary.cmsEntries;
+
+  // Storefront shelves must resolve in both locales, not just the authored one:
+  // a localized floor whose query only appears in zh-CN titles renders empty in
+  // the en-US storefront.
+  for (const floor of dataset.cms?.floors ?? []) {
+    const query = String(floor.productQuery ?? "").trim();
+    if (!query) {
+      continue;
+    }
+    const matches = (dataset.products ?? []).filter((product) =>
+      String(overlay.products?.[product.key]?.title ?? "").includes(query));
+    if (matches.length === 0) {
+      fail("locale", `floor ${floor.key} query "${query}" matches no en-US product title`);
+    }
+  }
+
   if (missing.length > 0) {
     fail("locale", `${missing.length} en-US translations missing: ${missing.slice(0, 8).join(", ")}`);
   }
@@ -423,6 +577,13 @@ if (asJson) {
       process.stdout.write(
         `  coverage leaves ${coverage.coveredLeaves}/${coverage.leaves} | shops ${coverage.coveredShops}/${coverage.shops} | ` +
           `demo-only products ${coverage.demoOnlyProducts}\n`,
+      );
+    }
+    if (summary.priceRange) {
+      process.stdout.write(
+        `  multi-SKU products ${summary.multiSkuProducts}/${summary.products} | ` +
+          `price range ${summary.priceRange.min.toFixed(2)} - ${summary.priceRange.max.toFixed(2)} CNY | ` +
+          `minimums ${JSON.stringify(summary.minimums)}\n`,
       );
     }
   }

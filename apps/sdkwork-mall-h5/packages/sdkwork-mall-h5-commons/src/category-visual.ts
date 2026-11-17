@@ -1,50 +1,81 @@
 import {
   Apple,
   Baby,
+  BatteryCharging,
+  Beef,
+  Bike,
+  Bone,
   BookOpen,
   Boxes,
+  Cable,
+  Cake,
   Camera,
   Car,
   Carrot,
+  Cog,
   Coffee,
   Cookie,
   CookingPot,
+  Cross,
+  Drill,
   Droplets,
   Dumbbell,
+  Flower2,
   Footprints,
   Gamepad2,
   Gem,
   Gift,
+  Glasses,
+  Guitar,
+  HardHat,
   Headphones,
   HeartPulse,
   Keyboard,
+  Lamp,
   Laptop,
   LayoutGrid,
+  Mic,
   Milk,
   Monitor,
+  Music,
   Package,
   Palette,
   PawPrint,
+  Piano,
+  Pill,
   Plane,
+  Plug,
+  Printer,
   Puzzle,
   Refrigerator,
+  Ruler,
   Shirt,
+  Shovel,
   ShoppingBag,
   ShowerHead,
   Shapes,
   Smartphone,
   Sofa,
   Sparkles,
+  Speaker,
+  Sprout,
   Tablet,
   Tag,
   Tent,
+  Trophy,
   Tv,
   Utensils,
   WashingMachine,
   Watch,
   Wheat,
+  Wind,
+  Wine,
+  Wrench,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
+
+import { SDKWORK_MALL_H5_SEEDED_CATEGORIES } from "./category-seeded-taxonomy";
 
 /**
  * Storefront category presentation.
@@ -387,13 +418,110 @@ const ALL_RULES: readonly SdkworkMallH5CategoryRule[] = [
 ];
 
 /**
+ * Seeded taxonomy glyphs by icon name.
+ *
+ * `category-seeded-taxonomy.ts` stores the icon as a string so the generated
+ * table stays data; this map is the single place that binds those names to
+ * lucide components.
+ */
+const ICON_BY_NAME: Readonly<Record<string, LucideIcon | undefined>> = {
+  Apple,
+  Baby,
+  BatteryCharging,
+  Beef,
+  Bike,
+  Bone,
+  BookOpen,
+  Boxes,
+  Cable,
+  Cake,
+  Camera,
+  Car,
+  Carrot,
+  Cog,
+  Coffee,
+  Cookie,
+  CookingPot,
+  Cross,
+  Drill,
+  Droplets,
+  Dumbbell,
+  Flower2,
+  Footprints,
+  Gamepad2,
+  Gem,
+  Gift,
+  Glasses,
+  Guitar,
+  HardHat,
+  Headphones,
+  HeartPulse,
+  Keyboard,
+  Lamp,
+  Laptop,
+  LayoutGrid,
+  Mic,
+  Milk,
+  Monitor,
+  Music,
+  Package,
+  Palette,
+  PawPrint,
+  Piano,
+  Pill,
+  Plane,
+  Plug,
+  Printer,
+  Puzzle,
+  Refrigerator,
+  Ruler,
+  Shirt,
+  Shovel,
+  ShoppingBag,
+  ShowerHead,
+  Shapes,
+  Smartphone,
+  Sofa,
+  Sparkles,
+  Speaker,
+  Sprout,
+  Tablet,
+  Tag,
+  Tent,
+  Trophy,
+  Tv,
+  Utensils,
+  WashingMachine,
+  Watch,
+  Wheat,
+  Wind,
+  Wine,
+  Wrench,
+  Zap,
+};
+
+const SEEDED_VISUAL_BY_KEY = new Map<string, SdkworkMallH5CategoryVisual>();
+const SEEDED_KEY_BY_NAME = new Map<string, string>();
+
+for (const category of SDKWORK_MALL_H5_SEEDED_CATEGORIES) {
+  const icon = ICON_BY_NAME[category.icon];
+  if (icon) {
+    SEEDED_VISUAL_BY_KEY.set(category.key, { icon, tone: category.tone });
+  }
+  SEEDED_KEY_BY_NAME.set(category.zhName, category.key);
+  SEEDED_KEY_BY_NAME.set(category.enName, category.key);
+}
+
+
+/**
  * Every category key that resolves through an explicit rule. The default
  * dataset contract test uses it to prove that initializing an environment
  * covers the whole seeded taxonomy.
  */
-export const SDKWORK_MALL_H5_CATEGORY_VISUAL_KEYS: readonly string[] = ALL_RULES.flatMap(
-  (rule) => rule.keys,
-);
+export const SDKWORK_MALL_H5_CATEGORY_VISUAL_KEYS: readonly string[] = [
+  ...SDKWORK_MALL_H5_SEEDED_CATEGORIES.map((category) => category.key),
+  ...ALL_RULES.flatMap((rule) => rule.keys),
+];
 
 const FALLBACK_VISUALS: readonly SdkworkMallH5CategoryVisual[] = [
   { icon: Shapes, tone: "slate" },
@@ -443,19 +571,43 @@ export function resolveSdkworkMallH5CategoryVisual(
   category: SdkworkMallH5CategoryInput,
 ): SdkworkMallH5CategoryVisual {
   const key = normalizeCategoryKey(category.key ?? category.code ?? "");
+
+  // The seeded taxonomy is a closed, authored set: resolve it by key first and
+  // then by its exact zh/en names, so a category that arrives without a code
+  // still gets the same deliberate glyph instead of a regex guess.
   if (key) {
-    const keyed = ALL_RULES.find((rule) => rule.keys.includes(key));
-    if (keyed) {
-      return { icon: keyed.icon, tone: keyed.tone };
+    const seeded = SEEDED_VISUAL_BY_KEY.get(key);
+    if (seeded) {
+      return seeded;
     }
   }
 
   const name = (category.name ?? "").trim();
   if (name) {
+    const seededKey = SEEDED_KEY_BY_NAME.get(name);
+    if (seededKey) {
+      const seeded = SEEDED_VISUAL_BY_KEY.get(seededKey);
+      if (seeded) {
+        return seeded;
+      }
+    }
+
+    if (key) {
+      const keyed = ALL_RULES.find((rule) => rule.keys.includes(key));
+      if (keyed) {
+        return { icon: keyed.icon, tone: keyed.tone };
+      }
+    }
+
     const matched =
       matchRule(ROOT_RULES, name) ?? matchRule(CHILD_RULES, name) ?? matchRule(GENERIC_RULES, name);
     if (matched) {
       return { icon: matched.icon, tone: matched.tone };
+    }
+  } else if (key) {
+    const keyed = ALL_RULES.find((rule) => rule.keys.includes(key));
+    if (keyed) {
+      return { icon: keyed.icon, tone: keyed.tone };
     }
   }
 

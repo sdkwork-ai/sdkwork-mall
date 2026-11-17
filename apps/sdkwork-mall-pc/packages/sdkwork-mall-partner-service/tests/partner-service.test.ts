@@ -12,6 +12,7 @@ function centerPort(
   overrides: Partial<SdkworkPartnerCenterPort> = {},
 ): SdkworkPartnerCenterPort {
   return {
+    bindCustomerByInviteCode: vi.fn(async () => undefined),
     createWithdrawal: vi.fn(async () => ({
       amount: "100.00",
       createdAt: "2026-11-01T00:00:00Z",

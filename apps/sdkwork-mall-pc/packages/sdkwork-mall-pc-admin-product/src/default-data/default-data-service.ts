@@ -1,13 +1,13 @@
 import { resolveDefaultDataset, validateDefaultDataset } from "./dataset";
 import { executeMallDefaultDataPlan, type MallDefaultDataReport } from "./execute";
 import { buildMallDefaultDataPlan } from "./plan";
-import type { MallDefaultDataPort } from "./port";
 import {
   isMallDefaultDataEnvironment,
   resolveMallDefaultDataEnvironment,
   resolveMallDefaultDataProfile,
   selectMallDefaultDataSlice,
 } from "./profiles";
+import { MallDefaultDataError, requireMallDefaultDataProvider } from "./provider";
 import type {
   MallDefaultDataDataset,
   MallDefaultDataDomain,
@@ -17,30 +17,20 @@ import type {
 } from "./types";
 import { verifyMallDefaultData, type MallDefaultDataVerification } from "./verify";
 
-/** Stable failure reasons for the default-data capability. */
-export type MallDefaultDataErrorCode =
-  | "not-configured"
-  | "invalid-dataset"
-  | "invalid-argument";
-
-/** Typed business failure raised by the default-data service. */
-export class MallDefaultDataError extends Error {
-  readonly code: MallDefaultDataErrorCode;
-
-  constructor(code: MallDefaultDataErrorCode, message: string) {
-    super(message);
-    this.name = "MallDefaultDataError";
-    this.code = code;
-  }
-}
-
-export interface MallDefaultDataProviderInput {
-  readonly port: MallDefaultDataPort;
-  readonly environment: MallDefaultDataEnvironment;
-  readonly defaultLocale: MallDefaultDataLocale;
-  /** Platform organization the seeded stores belong to. */
-  readonly organizationId?: string;
-}
+// The provider registry lives in `provider.ts` so the app bootstrap can read it
+// without pulling the dataset into the initial bundle. Re-exported here because
+// this module has always been the package's default-data entry surface.
+export {
+  MallDefaultDataError,
+  configureMallDefaultDataProvider,
+  configureMallDefaultDataBootstrapper,
+  ensureMallDefaultDataConfigured,
+  hasMallDefaultDataBootstrapper,
+  isMallDefaultDataConfigured,
+  requireMallDefaultDataProvider,
+  type MallDefaultDataErrorCode,
+  type MallDefaultDataProviderInput,
+} from "./provider";
 
 export interface MallDefaultDataPlanStepPreview {
   readonly id: string;
@@ -64,27 +54,6 @@ export interface MallDefaultDataPlanPreview {
     readonly membershipPackages: number;
     readonly cmsEntries: number;
   };
-}
-
-let provider: MallDefaultDataProviderInput | null = null;
-
-/** Registers the environment adapter; called once from the mall PC bootstrap. */
-export function configureMallDefaultDataProvider(input: MallDefaultDataProviderInput | null): void {
-  provider = input;
-}
-
-export function isMallDefaultDataConfigured(): boolean {
-  return provider !== null;
-}
-
-function requireProvider(): MallDefaultDataProviderInput {
-  if (!provider) {
-    throw new MallDefaultDataError(
-      "not-configured",
-      "Mall default data port is not configured. Call configureMallDefaultDataProvider() from the mall PC bootstrap.",
-    );
-  }
-  return provider;
 }
 
 function normalizeLocale(value: string | undefined, fallback: MallDefaultDataLocale): MallDefaultDataLocale {
@@ -123,7 +92,7 @@ export interface MallDefaultDataRunRequest {
 }
 
 function resolveRunContext(request: MallDefaultDataRunRequest) {
-  const active = requireProvider();
+  const active = requireMallDefaultDataProvider();
   const environment = isMallDefaultDataEnvironment(request.environment)
     ? request.environment
     : resolveMallDefaultDataEnvironment(request.environment ?? active.environment);

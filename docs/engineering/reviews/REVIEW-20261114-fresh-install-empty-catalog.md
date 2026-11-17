@@ -3,6 +3,43 @@
 Status: implemented
 Scope: `apps/sdkwork-mall-pc` (storefront home / catalog / search, bootstrap, tests)
 
+## Follow-up 2026-11-18: professional-scale dataset
+
+The first pass made an empty install recoverable but the seeded catalog was too
+small to demo a real mall (32 products / 56 SKUs / 25 leaves). The dataset is now
+generated from an authored taxonomy model:
+
+- **Scale**: 20 root categories / 100 leaf categories / 45 brands / 16 shops /
+  1100 products / 3575 SKUs; every product is multi-variant (3–4 spec
+  combinations) and every leaf category carries at least one spec attribute.
+- **Realistic prices and specs**: per-leaf retail bands (5.00–44939.00 CNY),
+  2-decimal amounts, deliberate list prices with 3–50% markdowns, valid EAN-13
+  check digits on every physical SKU, and variant dictionaries that fit the
+  goods (precious metal for jewellery, portions for food and drinks, sizes for
+  apparel) instead of one generic dictionary.
+- **Generation, not transcription**: `scripts/generate-mall-default-dataset.mjs`
+  emits both locale documents deterministically (same seed → identical keys,
+  barcodes and translations). `pnpm check:dataset-generation` fails on drift and
+  `pnpm verify` runs it before the data gate.
+- **Integrity gates**: `pnpm check:default-data` now enforces the minimum scale,
+  per-leaf/per-shop product depth, unique spec combinations, spec dictionary
+  membership, EAN-13 checksums, realistic prices/discounts, and that every CMS
+  floor query matches at least one product title in both locales.
+- **Provisioning at scale**: the bootstrap port now walks bounded pages for every
+  provisioning lookup instead of reading one page (a catalog larger than one page
+  would otherwise be re-created on rerun), and the 1.7 MB dataset chunk is loaded
+  lazily so the storefront initial bundle stays unchanged.
+- **Cross-surface alignment**: the H5 category visual contract reads the dataset;
+  a generated seeded-taxonomy table (`category-seeded-taxonomy.ts`, 120 entries,
+  glyphs and both locale names) keeps every seeded category resolving to one
+  deliberate icon, and the test still fails on omission or glyph mismatch.
+- **Stale partner fixtures**: the repo currently failed `pnpm typecheck` because
+  the new partner customer-binding methods were not added to four test stubs;
+  those fixtures are repaired as part of this regression.
+
+Verification for the follow-up: typecheck, 353 vitest tests, the two dataset
+gates, app config preflight, `pnpm verify` and `pnpm build` all pass.
+
 ## Symptom
 
 After installing the app, the storefront showed no categories, products, SKUs or
