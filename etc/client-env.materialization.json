@@ -117,7 +117,26 @@
       "format": "mini-program",
       "runtimeTarget": "mini-program",
       "includeKeys": [],
-      "bindings": {},
+      "bindings": {
+        "SDKWORK_MALL_MINI_PROGRAM_APPLICATION_PUBLIC_HTTP_URL": {
+          "sources": [
+            "SDKWORK_MALL_APPLICATION_PUBLIC_HTTP_URL"
+          ],
+          "required": true
+        },
+        "SDKWORK_MALL_MINI_PROGRAM_PLATFORM_API_GATEWAY_HTTP_URL": {
+          "sources": [
+            "SDKWORK_MALL_PLATFORM_API_GATEWAY_HTTP_URL"
+          ],
+          "required": true
+        },
+        "SDKWORK_IAM_APP_API_BASE_URL": {
+          "sources": [
+            "SDKWORK_IAM_APP_API_BASE_URL"
+          ],
+          "required": false
+        }
+      },
       "accessToken": {
         "appId": "sdkwork-mall-mini-program",
         "tenantId": "100001",
@@ -125,7 +144,18 @@
         "permissionScope": [
           "iam:self"
         ]
-      }
+      },
+      "identityPrefixes": [
+        "SDKWORK_MALL_MINI_PROGRAM"
+      ],
+      "requiredOutputKeys": [
+        "SDKWORK_ENVIRONMENT",
+        "SDKWORK_DEPLOYMENT_PROFILE",
+        "SDKWORK_PROFILE_ID",
+        "SDKWORK_RUNTIME_TARGET",
+        "SDKWORK_MALL_MINI_PROGRAM_APPLICATION_PUBLIC_HTTP_URL",
+        "SDKWORK_MALL_MINI_PROGRAM_PLATFORM_API_GATEWAY_HTTP_URL"
+      ]
     }
   ]
 }

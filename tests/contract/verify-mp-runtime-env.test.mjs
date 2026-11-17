@@ -6,9 +6,11 @@ import test from "node:test";
 /**
  * Mini-program runtime environment contract.
  *
- * The MP bundle resolves its API base URL at build time from the app manifest.
- * A missing environment silently disables that profile, and a release build
- * without injection must never fall back to the development host.
+ * Authority: APP_RUNTIME_ENV_SPEC.md §3.1. The mini program is a packaged surface:
+ * one committed client-env profile per lifecycle is projected into a typed
+ * EnvConfig at build time, and runtime code imports that module. No source
+ * constant may bake a deploy host, and a release-channel build must run a
+ * production profile.
  */
 const workspaceRoot = path.resolve(import.meta.dirname, "..", "..");
 
@@ -38,17 +40,18 @@ test("the mini-program manifest declares every lifecycle environment", () => {
   }
 });
 
-test("build-runtime derives /app/v3/api from the manifest access URL", () => {
+test("build-runtime projects the selected profile through the canonical generator", () => {
   const script = read("apps/sdkwork-mall-mini-program/scripts/build-runtime.mjs");
-  assert.match(script, /--environment/u);
-  assert.match(script, /--deployment-profile/u);
-  assert.match(script, /accessUrl\.replace\(\/\\\/apps\\\/\.\*\$\/u, ""\)/u);
-  assert.match(script, /\/app\/v3\/api/u);
-  assert.match(script, /manifest\.environments\?\.\[environment\]/u);
+  assert.match(script, /--profile/u);
+  assert.match(script, /generate-app-env-config\.mjs/u);
+  assert.match(script, /"--app-id", appId/u);
+  assert.match(script, /"config", "mini-program"/u);
+  assert.match(script, /\/app\/v3\/api/u, "the commerce app-api path is derived once at runtime");
+  assert.doesNotMatch(script, /manifest\.environments/u, "the app manifest no longer owns transport hosts");
 });
 
-test("the release channel decides the fallback API host", () => {
-  // The channel is a host fact now: the weixin profile reads the account info,
+test("the release channel guards the packaged profile", () => {
+  // The channel is a host fact: the weixin profile reads the account info,
   // `bootstrap/environment.ts` maps it, and the app entry passes it in.
   const host = read("apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-host/src/weixin/lifecycle.ts");
   assert.match(host, /getAccountInfoSync\(\)/u);
@@ -56,9 +59,11 @@ test("the release channel decides the fallback API host", () => {
 
   const environment = read("apps/sdkwork-mall-mini-program/src/bootstrap/environment.ts");
   assert.match(environment, /EnvVersion === "release"/u);
-  assert.match(environment, /https:\/\/api\.sdkwork\.com\/app\/v3\/api/u);
-  assert.match(environment, /https:\/\/api-dev\.sdkwork\.com\/app\/v3\/api/u);
   assert.match(environment, /resolveReleaseChannel/u);
+  assert.match(environment, /ENV_CONFIG/u, "runtime reads the generated projection");
+  assert.match(environment, /release channel is production/u, "a release mismatch is surfaced");
+  assert.match(environment, /\/app\/v3\/api/u);
+  assert.doesNotMatch(environment, /https:\/\/api/u, "no deploy host is baked into source");
 
   // The base URL is resolved once by the app entry and handed to the runtime
   // (`@sdkwork/mall-mp-core`); the transport seam only delegates, so it must not
@@ -66,8 +71,9 @@ test("the release channel decides the fallback API host", () => {
   const appEntry = read("apps/sdkwork-mall-mini-program/src/app.ts");
   assert.match(appEntry, /readRuntimeEnv\(/u);
   assert.match(appEntry, /accountEnvVersion\(\)/u);
-  assert.match(appEntry, /commerceAppApiBaseUrl/u);
   assert.match(appEntry, /appApiBaseUrl/u);
+  assert.doesNotMatch(appEntry, /FALLBACK_API_BASE_URL/u);
+  assert.doesNotMatch(appEntry, /https:\/\/api/u);
 
   const transport = read("apps/sdkwork-mall-mini-program/src/services/transport.ts");
   assert.match(transport, /getMallMpRuntime\(\)\.request/u);

@@ -126,10 +126,15 @@ test("the loader-compatibility env shim mirrors the generated module", () => {
     const match = source.match(new RegExp(`"${key}"\\s*:\\s*"([^"]*)"|${key}\\s*:\\s*"([^"]*)"`, "u"));
     return match ? (match[1] ?? match[2]) : "";
   };
-  for (const key of ["commerceAppApiBaseUrl", "deploymentProfile", "environment"]) {
+  for (const key of ["deploymentProfile", "environment", "profileId", "platformApiGatewayHttpUrl"]) {
     assert.ok(readValue(shim, key), `shim is missing ${key}`);
     assert.equal(readValue(shim, key), readValue(generated, key), `shim ${key} drifted from runtime-env.generated.ts`);
   }
+  assert.equal(
+    readValue(shim, "commerceAppApiBaseUrl"),
+    `${readValue(generated, "platformApiGatewayHttpUrl")}/app/v3/api`,
+    "shim commerceAppApiBaseUrl must be derived from the projected gateway",
+  );
   assert.match(shim, /module\.exports = \{/u, "the shim must be a CommonJS module");
 });
 

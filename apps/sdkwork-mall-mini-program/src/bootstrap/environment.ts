@@ -1,31 +1,31 @@
 /**
  * Mini-program runtime environment.
  *
- * Base URLs come from the build-time materialized module
- * (`runtime-env.generated.ts`, written by `scripts/build-runtime.mjs`), never
- * from hard-coded secrets. The release channel still decides the production
- * default, so a production build can never silently fall back to the development
- * API host even if the materialized file was left at its development values.
+ * Base URLs are projected at build time from one committed client-env profile by
+ * the canonical generator (APP_RUNTIME_ENV_SPEC.md §3.1):
+ * `runtime-env.generated.ts` (`ENV_CONFIG`) is the only source. Release code must
+ * never parse the profile JSON or bake a deploy URL into a source constant.
  *
- * A TypeScript module rather than a JSON import: the WeChat compiler emits
- * `require("./runtime-env.json")` for a JSON import, which the mini-program
- * module system cannot resolve and which aborts the whole app boot.
- *
- * The channel itself is a host fact (`deviceInfo.accountEnvVersion`) rather than
- * a platform call here: this module stays pure and testable, and the app entry
- * passes the value in.
+ * The channel is a host fact (`deviceInfo.accountEnvVersion`); this module stays
+ * pure and testable, and the app entry passes the value in.
  */
 import { resolveGlobalObject } from "@sdkwork/mall-mp-core";
-import { RUNTIME_ENV } from "./runtime-env.generated";
+
+import { ENV_CONFIG } from "./runtime-env.generated";
 
 export interface SdkworkMallMpRuntimeEnvironment {
-  commerceAppApiBaseUrl: string;
-  environment: string;
-  deploymentProfile: string;
+  readonly accessToken: string;
+  readonly applicationPublicHttpUrl: string;
+  /** Commerce app-api base derived from the platform gateway origin. */
+  readonly appApiBaseUrl: string;
+  readonly deploymentProfile: string;
+  readonly environment: string;
+  readonly platformApiGatewayHttpUrl: string;
+  readonly profileId: string;
+  readonly runtimeTarget: string;
 }
 
-const PRODUCTION_API_BASE_URL = "https://api.sdkwork.com/app/v3/api";
-const DEVELOPMENT_API_BASE_URL = "https://api-dev.sdkwork.com/app/v3/api";
+const APP_API_PATH = "/app/v3/api";
 
 /**
  * Maps the platform account channel onto the deployment environment.
@@ -36,11 +36,16 @@ export function resolveReleaseChannel(accountEnvVersion: string): "development" 
   return accountEnvVersion === "release" ? "production" : "development";
 }
 
+function trimTrailingSlashes(value: string): string {
+  return value.replace(/\/+$/u, "");
+}
+
 /**
  * Resolves the runtime environment document for this launch.
  *
- * Precedence: runtime global injection (tests, DevTools console override) →
- * build-time materialized values → release-channel default.
+ * Precedence: runtime global injection (tests, DevTools console override) ->
+ * generated EnvConfig. A release-channel build must run a production profile;
+ * a mismatch is surfaced instead of silently pointing the app at dev hosts.
  *
  * @param accountEnvVersion - Platform release channel from the host profile.
  */
@@ -53,15 +58,25 @@ export function readRuntimeEnv(accountEnvVersion: string): SdkworkMallMpRuntimeE
   };
   const globalRuntime = injected.__SDKWORK_MALL_MP_RUNTIME_ENV__ ?? {};
   const channel = resolveReleaseChannel(accountEnvVersion);
-  const environment = globalRuntime.environment ?? RUNTIME_ENV.environment ?? channel;
-  // A release channel is a production build no matter what the materialized file
-  // says; a materialized `production` environment is production too.
-  const production = channel === "production" || environment === "production";
+  const environment = globalRuntime.environment ?? ENV_CONFIG.environment;
+  const platformApiGatewayHttpUrl = trimTrailingSlashes(
+    globalRuntime.platformApiGatewayHttpUrl ?? ENV_CONFIG.platformApiGatewayHttpUrl,
+  );
+  const appApiBaseUrl = globalRuntime.appApiBaseUrl
+    ?? (platformApiGatewayHttpUrl ? `${platformApiGatewayHttpUrl}${APP_API_PATH}` : "");
+  if (channel === "production" && environment !== "production") {
+    console.warn(
+      `[sdkwork-mall] release channel is production but the packaged profile is ${ENV_CONFIG.profileId}; rebuild with a production profile.`,
+    );
+  }
   return {
-    commerceAppApiBaseUrl:
-      globalRuntime.commerceAppApiBaseUrl
-      ?? (production ? PRODUCTION_API_BASE_URL : RUNTIME_ENV.commerceAppApiBaseUrl || DEVELOPMENT_API_BASE_URL),
+    accessToken: ENV_CONFIG.accessToken,
+    applicationPublicHttpUrl: globalRuntime.applicationPublicHttpUrl ?? ENV_CONFIG.applicationPublicHttpUrl,
+    appApiBaseUrl,
+    deploymentProfile: globalRuntime.deploymentProfile ?? ENV_CONFIG.deploymentProfile,
     environment,
-    deploymentProfile: globalRuntime.deploymentProfile ?? RUNTIME_ENV.deploymentProfile ?? "standalone",
+    platformApiGatewayHttpUrl,
+    profileId: globalRuntime.profileId ?? ENV_CONFIG.profileId,
+    runtimeTarget: ENV_CONFIG.runtimeTarget,
   };
 }

@@ -37,8 +37,6 @@ interface MallMpGlobalData {
   runtimeReady: boolean;
 }
 
-const FALLBACK_API_BASE_URL = "https://api-dev.sdkwork.com/app/v3/api";
-
 /**
  * Resolves the launch environment.
  *
@@ -51,8 +49,8 @@ function resolveEnvironment(accountEnvVersion: string) {
   return {
     environment: resolved.environment,
     deploymentProfile: resolved.deploymentProfile,
-    profileId: `${resolved.deploymentProfile}.${resolved.environment}`,
-    appApiBaseUrl: resolved.commerceAppApiBaseUrl || FALLBACK_API_BASE_URL,
+    profileId: resolved.profileId,
+    appApiBaseUrl: resolved.appApiBaseUrl,
   };
 }
 
@@ -101,7 +99,7 @@ registerMallMpBootstrap(bootstrapMallMpRuntime);
 
 App({
   globalData: {
-    commerceApiBaseUrl: FALLBACK_API_BASE_URL,
+    commerceApiBaseUrl: "",
     deploymentProfile: "standalone",
     environment: "development",
     runtimeError: "",

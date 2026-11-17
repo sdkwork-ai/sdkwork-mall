@@ -65,7 +65,16 @@
     "_sdkwork:dev:standalone": "pnpm --dir apps/sdkwork-mall-pc dev",
     "api:assembly:materialize": "node ../sdkwork-specs/tools/materialize-api-assembly.mjs --root .",
     "api:assembly:validate": "node ../sdkwork-specs/tools/validate-api-assembly.mjs --root .",
-    "dev:browser:postgres:standalone": "pnpm --dir apps/sdkwork-mall-pc dev"
+    "dev:browser:postgres:standalone": "pnpm --dir apps/sdkwork-mall-pc dev",
+    "workflow:materialize-topology-env": "node ../sdkwork-specs/tools/materialize-topology-env.mjs --root .",
+    "workflow:materialize-client-env": "node ../sdkwork-specs/tools/materialize-client-env.mjs --root . --config etc/client-env.materialization.json",
+    "workflow:check-env": "node ../sdkwork-specs/tools/materialize-topology-env.mjs --root . --check && node ../sdkwork-specs/tools/materialize-client-env.mjs --root . --config etc/client-env.materialization.json --check",
+    "env:materialize": "pnpm run workflow:materialize-topology-env && pnpm run workflow:materialize-client-env",
+    "env:check": "pnpm run workflow:check-env",
+    "env:generate:mp": "pnpm --dir apps/sdkwork-mall-mini-program run build:runtime",
+    "build:mp:dev": "pnpm --dir apps/sdkwork-mall-mini-program run build:mp:dev",
+    "build:mp:prod": "pnpm --dir apps/sdkwork-mall-mini-program run build:mp:prod",
+    "build:mp:demo": "pnpm --dir apps/sdkwork-mall-mini-program run build:mp:demo"
   },
   "devDependencies": {
     "@sdkwork/iam-app-sdk": "workspace:*",

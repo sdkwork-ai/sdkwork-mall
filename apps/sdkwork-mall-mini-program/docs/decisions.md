@@ -1086,3 +1086,25 @@
   carries the snapshot, and the mini program order list appends the distributor to
   the meta line. Verified: mini typecheck + 49 node tests + build + smoke; H5
   typecheck + 30 contract tests; root 211/211; i18n baseline.
+
+- 2026-11-17 (fifty-first pass: mini-program env alignment + production builds).
+  The mini program now follows `APP_RUNTIME_ENV_SPEC.md` end to end:
+  - topology gained `SDKWORK_MALL_PLATFORM_API_GATEWAY_HTTP_URL`,
+    `SDKWORK_MALL_APPLICATION_PUBLIC_HTTP_URL` and `SDKWORK_IAM_APP_API_BASE_URL`
+    per environment; the mini-program surface in `etc/client-env.materialization.json`
+    binds them and the canonical materializer regenerated all 10 profiles.
+  - `scripts/build-runtime.mjs` now projects the selected committed profile through
+    `sdkwork-specs/tools/generate-app-env-config.mjs` (app id enforced, profile/token
+    validation, `--check` mode) instead of deriving hosts from the app manifest; the
+    WeChat loader shim is regenerated from the same projection.
+  - runtime reads only `ENV_CONFIG` (`src/bootstrap/runtime-env.generated.ts`); the
+    hard-coded production/development host constants and the app-entry fallback are
+    gone, and a release channel running a non-production profile logs a warning.
+  - `etc/env.cloud.development.env` points the dev package at the device-reachable
+    dev gateway (a phone cannot reach 127.0.0.1); local simulator overrides go through
+    `__SDKWORK_MALL_MP_RUNTIME_ENV__`.
+  - per-environment commands: `pnpm build:mp:dev|test|staging|demo|prod` (root and app),
+    `pnpm env:materialize`, `pnpm env:check`; production flow documented in
+    `apps/sdkwork-mall-mini-program/docs/production-build.md`.
+  - verified: env:check, mini typecheck + 54 node tests + 69 vitest + dev & production
+    builds + smoke, root contract 216/216, H5/PC typecheck, i18n baseline.
