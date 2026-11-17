@@ -157,7 +157,9 @@ describe("mall default data execution", () => {
 
     const report = await runMallDefaultDataInitialization();
     expect(report.locale).toBe("en-US");
-    expect(port.state.categories[0]?.categoryNo).toBe("MALL-CAT-DIGITAL");
+    expect(port.state.categories[0]?.categoryNo).toBe(
+      `MALL-CAT-${zhCnDefaultDataset.categories[0].key.toUpperCase()}`,
+    );
     expect(port.state.cmsPreset).toBe("v1:en-US");
     expect(String(port.state.products[0]?.title)).toContain("AURORA X1 Pro");
   });

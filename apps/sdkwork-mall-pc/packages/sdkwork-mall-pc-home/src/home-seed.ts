@@ -50,6 +50,12 @@ export interface MallHomeSeedProvider {
    */
   readonly profile: MallHomeSeedProfile;
   /**
+   * Whether the environment is missing entities from the shipped dataset
+   * revision (an upgraded install with an older catalog). The page tops up on
+   * the next visit even when the catalog is not empty.
+   */
+  readonly needsRefresh?: () => boolean;
+  /**
    * Whether the visitor currently holds credentials; an anonymous visitor is
    * asked to sign in instead of being offered an action that would 401.
    */
@@ -79,6 +85,11 @@ function isAutomaticAllowed(provider: MallHomeSeedProvider): boolean {
 
 export function isMallHomeSeedAutomatic(): boolean {
   return seedProvider ? isAutomaticAllowed(seedProvider) : false;
+}
+
+/** Whether an upgraded install still needs the shipped dataset revision. */
+export function isMallHomeSeedRefreshNeeded(): boolean {
+  return seedProvider?.needsRefresh?.() ?? false;
 }
 
 /** Slice the runtime would write by default, when a provider is configured. */

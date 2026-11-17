@@ -21,6 +21,7 @@ import {
   claimMallHomeAutomaticSeed,
   getMallHomeSeedProfile,
   isMallHomeSeedAvailable,
+  isMallHomeSeedRefreshNeeded,
   isMallHomeSeedSignedIn,
   runMallHomeSeed,
   type MallHomeSeedProfile,
@@ -320,9 +321,16 @@ export function SdkworkMallHomePage() {
 
   // Non-production installs provision themselves on first paint; production
   // waits for the explicit action so a live storefront never gains demo rows
-  // without an operator decision.
+  // without an operator decision. An upgraded install whose catalog predates the
+  // shipped dataset revision is topped up in the same pass (additive only).
   useEffect(() => {
-    if (!snapshot?.isEmpty || !claimMallHomeAutomaticSeed()) {
+    if (!snapshot) {
+      return;
+    }
+    if (!snapshot.isEmpty && !isMallHomeSeedRefreshNeeded()) {
+      return;
+    }
+    if (!claimMallHomeAutomaticSeed()) {
       return;
     }
     void startSeed();
@@ -445,6 +453,24 @@ export function SdkworkMallHomePage() {
             seedProfile={getMallHomeSeedProfile()}
             signedIn={isMallHomeSeedSignedIn()}
           />
+        ) : null}
+
+        {snapshot && !snapshot.isEmpty && seedPhase === "failed" ? (
+          <div className="sdkwork-mall-pc-home-notice is-warning" role="alert">
+            <div className="sdkwork-mall-pc-home-notice-body">
+              <strong>默认数据更新失败</strong>
+              <span>{seedMessage ?? "未知错误"}</span>
+            </div>
+            <Button
+              onClick={() => {
+                void startSeed();
+              }}
+              type="button"
+              variant="outline"
+            >
+              重试
+            </Button>
+          </div>
         ) : null}
 
         <HomeSeckill

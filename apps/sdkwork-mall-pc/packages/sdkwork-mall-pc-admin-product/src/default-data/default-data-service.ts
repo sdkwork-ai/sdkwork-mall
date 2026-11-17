@@ -97,7 +97,10 @@ function resolveRunContext(request: MallDefaultDataRunRequest) {
     ? request.environment
     : resolveMallDefaultDataEnvironment(request.environment ?? active.environment);
   const locale = normalizeLocale(request.locale, active.defaultLocale);
-  const profile = resolveMallDefaultDataProfile(environment, request.profile ?? null);
+  const profile = resolveMallDefaultDataProfile(
+    environment,
+    request.profile ?? active.defaultProfile ?? null,
+  );
   const dataset = resolveMallDefaultDataSlice(locale, profile);
   return { active, environment, locale, profile, dataset };
 }

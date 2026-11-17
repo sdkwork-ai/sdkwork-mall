@@ -12,6 +12,7 @@ import type { MallDefaultDataPort } from "./port";
 import type {
   MallDefaultDataEnvironment,
   MallDefaultDataLocale,
+  MallDefaultDataProfile,
 } from "./types";
 
 /** Stable failure reasons for the default-data capability. */
@@ -35,6 +36,14 @@ export interface MallDefaultDataProviderInput {
   readonly port: MallDefaultDataPort;
   readonly environment: MallDefaultDataEnvironment;
   readonly defaultLocale: MallDefaultDataLocale;
+  /**
+   * Profile this deployment resolves to (already accounting for the deployment
+   * profile, e.g. a self-hosted production install gets `standard`). Consumers
+   * that do not pass an explicit profile — the admin console's preview/run and
+   * the storefront first-run seed — use it instead of the plain environment
+   * mapping, so both surfaces agree on what will be written.
+   */
+  readonly defaultProfile?: MallDefaultDataProfile;
   /** Platform organization the seeded stores belong to. */
   readonly organizationId?: string;
 }

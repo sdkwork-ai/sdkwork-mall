@@ -81,6 +81,23 @@ describe("storefront home first-run provisioning", () => {
     expect(loadSnapshotMock.mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("tops up an existing catalog when the shipped dataset revision changed", async () => {
+    const run = vi.fn(() => Promise.resolve({ created: 40, state: "succeeded" as const }));
+    configureMallHomeSeedProvider({
+      automatic: true,
+      needsRefresh: () => true,
+      profile: "standard",
+      run,
+    });
+    loadSnapshotMock.mockResolvedValue(populatedSnapshot);
+
+    renderHome();
+
+    await waitFor(() => expect(run).toHaveBeenCalledTimes(1));
+    // A populated catalog keeps rendering; the top-up is silent.
+    expect(screen.queryByText("商城还没有商品数据")).toBeNull();
+  });
+
   it("waits for an explicit click when the runtime policy disables automatic seeding", async () => {
     const run = vi.fn(() => Promise.resolve({ created: 12, state: "succeeded" as const }));
     configureMallHomeSeedProvider({ automatic: false, profile: "demo", run });

@@ -56,11 +56,11 @@ const BARCODE = /^[0-9]{13}$/u;
  * leaf categories, with variants and genuine retail price spreads.
  */
 const MINIMUM = Object.freeze({
-  brands: 30,
-  leafCategories: 90,
-  products: 1000,
-  skus: 3000,
-  shops: 12,
+  brands: 40,
+  leafCategories: 260,
+  products: 1500,
+  skus: 4500,
+  shops: 18,
   productsPerLeaf: 5,
   productsPerShop: 10,
   demoOnlyProducts: 20,

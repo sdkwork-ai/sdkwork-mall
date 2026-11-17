@@ -7,16 +7,25 @@ Scope: `apps/sdkwork-mall-pc` (storefront home / catalog / search, bootstrap, te
 
 The first pass made an empty install recoverable but the seeded catalog was too
 small to demo a real mall (32 products / 56 SKUs / 25 leaves). The dataset is now
-generated from an authored taxonomy model:
+generated from an authored industry taxonomy:
 
-- **Scale**: 20 root categories / 100 leaf categories / 45 brands / 16 shops /
-  1100 products / 3575 SKUs; every product is multi-variant (3–4 spec
+- **Scale**: 24 root categories / 240 leaf categories / 52 brands / 19 shops /
+  1440 products / 4362 SKUs; every product is multi-variant (3–4 spec
   combinations) and every leaf category carries at least one spec attribute.
-- **Realistic prices and specs**: per-leaf retail bands (5.00–44939.00 CNY),
+- **Industry taxonomy**: roots follow retail structure (手机数码, 电脑办公,
+  家用电器, 服饰内衣, 鞋靴箱包, 美妆个护, 食品生鲜, 母婴玩具, 运动户外,
+  家居家装, 汽车用品, 图书文娱, 珠宝配饰, 宠物生活, 医药保健, 五金工具,
+  乐器影音, 礼品鲜花, 农资园艺, 酒水饮料, 数码配件, 办公耗材, 工业品,
+  清洁日化), and each root owns ten named secondary categories with
+  globally-unique Chinese and English names.
+- **Realistic prices and specs**: per-leaf retail bands (5.00–55430.00 CNY),
   2-decimal amounts, deliberate list prices with 3–50% markdowns, valid EAN-13
-  check digits on every physical SKU, and variant dictionaries that fit the
-  goods (precious metal for jewellery, portions for food and drinks, sizes for
-  apparel) instead of one generic dictionary.
+  check digits on every physical SKU, and dictionaries that fit the goods
+  (storage/colour for phones, sizes for apparel, shoe sizes, precious metals
+  for jewellery, carton bundles for office supplies, model grades for
+  industrial parts, weights for dumbbells, portions for food and drinks).
+- **English titles** use a singular product noun derived from the plural
+  category label, so a shelf of "Smartphones" yields a "Smartphone" listing.
 - **Generation, not transcription**: `scripts/generate-mall-default-dataset.mjs`
   emits both locale documents deterministically (same seed → identical keys,
   barcodes and translations). `pnpm check:dataset-generation` fails on drift and
@@ -39,6 +48,26 @@ generated from an authored taxonomy model:
 
 Verification for the follow-up: typecheck, 353 vitest tests, the two dataset
 gates, app config preflight, `pnpm verify` and `pnpm build` all pass.
+
+## Follow-up 2026-11-18 (b): installs actually receive the catalog
+
+A generated 1,440-product dataset still produced an empty store in two common
+installs, so the provisioning policy was the remaining defect:
+
+- **Standalone production was `minimal`.** A self-hosted install runs with the
+  lifecycle environment `production`, which mapped to the `minimal` slice (no
+  products). Standalone installs now resolve to `standard` (1,200 real products)
+  and seed automatically; only `cloud` production keeps `minimal`, and an
+  explicit `SDKWORK_MALL_SEED_PROFILE` still wins either way.
+- **Upgraded installs kept the old catalog.** Seeding only ran when the storefront
+  was empty, so an install upgraded from a previous dataset never received the
+  new taxonomy. The bootstrap now records a dataset revision
+  (`MALL_DEFAULT_DATA_REVISION`) after a successful run and tops up on the next
+  visit when the shipped revision moved on; the plan is additive by natural key,
+  so operator edits and existing rows are preserved.
+- Failure of that top-up is surfaced as a "默认数据更新失败" banner with retry;
+  the silent path only exists when the environment is already current.
+
 
 ## Symptom
 

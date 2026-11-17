@@ -151,6 +151,18 @@ async function collectAllPages(
 
 const CMS_PRESET_STORAGE_KEY = "sdkwork-mall-pc-default-data:cms-preset";
 
+/**
+ * Revision of the shipped default dataset.
+ *
+ * Bumping this value makes an already-provisioned install top itself up on the
+ * next storefront visit: natural keys are stable, so the idempotent plan adds
+ * only the entities the new dataset introduced. Without it an upgraded app
+ * would keep showing whatever the previous dataset seeded.
+ */
+export const MALL_DEFAULT_DATA_REVISION = "2026-11-18-taxonomy-4";
+
+const DATASET_REVISION_STORAGE_KEY = "sdkwork-mall-pc-default-data:revision";
+
 function toCmsConfig(shape: MallDefaultDataCmsConfigShape): MallCmsConfig {
   return {
     banners: shape.banners.map((banner) => ({ ...banner })),
@@ -181,6 +193,34 @@ function writeCmsPresetMarker(presetId: string): void {
     // A blocked storage write only means the preset may be reapplied; the
     // storefront configuration itself has already been written.
   }
+}
+
+function readAppliedDatasetRevision(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    return readAccountScopedItem(DATASET_REVISION_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeAppliedDatasetRevision(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    writeAccountScopedItem(DATASET_REVISION_STORAGE_KEY, MALL_DEFAULT_DATA_REVISION);
+  } catch {
+    // A blocked storage write means the top-up may run again; the plan is
+    // idempotent, so that is safe rather than corrupting.
+  }
+}
+
+/** Whether the environment has not been topped up to the shipped dataset. */
+export function isMallDefaultDataRevisionCurrent(): boolean {
+  return readAppliedDatasetRevision() === MALL_DEFAULT_DATA_REVISION;
 }
 
 /**
@@ -288,6 +328,7 @@ export function createSdkworkMallPcDefaultDataPort(
  * requests that cannot succeed.
  */
 export function configureSdkworkMallPcDefaultDataProvider(input: {
+  readonly deploymentProfile?: string;
   readonly environment: string;
   readonly locale: string;
   readonly sdkClients: SdkworkMallPcSdkClientInventory;
@@ -302,7 +343,13 @@ export function configureSdkworkMallPcDefaultDataProvider(input: {
   }
   const locale: MallDefaultDataLocale = input.locale === "en-US" ? "en-US" : "zh-CN";
   const environment = resolveMallDefaultDataEnvironment(input.environment);
-  const providerInput = { defaultLocale: locale, environment, port };
+  const policy = resolveSdkworkMallPcSeedPolicy(environment, input.deploymentProfile ?? "");
+  const providerInput = {
+    defaultLocale: locale,
+    defaultProfile: policy.profile,
+    environment,
+    port,
+  };
 
   // The provisioning engine owns the multi-megabyte dataset chunk, so it is
   // registered lazily: the admin console and the first-run seed both call
@@ -314,7 +361,6 @@ export function configureSdkworkMallPcDefaultDataProvider(input: {
   // Storefront first-run recovery: the same provisioning plan, reachable from
   // the home page instead of only from the admin console. A brand-new install
   // must never present an unexplained empty mall to the first visitor.
-  const policy = resolveSdkworkMallPcSeedPolicy(environment);
   configureMallHomeSeedProvider({
     // Both conditions are evaluated per attempt: the environment policy is
     // static, but the session is not. An anonymous visitor must never trigger
@@ -322,8 +368,21 @@ export function configureSdkworkMallPcDefaultDataProvider(input: {
     // pass on the next empty read.
     automatic: () => policy.automatic && hasMallSessionCredentials(input.session),
     isSignedIn: () => hasMallSessionCredentials(input.session),
+    // A populated store from an older dataset still needs topping up when the
+    // shipped taxonomy moved on; natural keys make that run additive only.
+    needsRefresh: () => !isMallDefaultDataRevisionCurrent(),
     profile: policy.profile,
-    run: (options) => runStorefrontSeedInitialization(environment, options?.profile),
+    run: async (options) => {
+      const outcome = await runStorefrontSeedInitialization(
+        environment,
+        input.deploymentProfile ?? "",
+        options?.profile,
+      );
+      if (outcome.state === "succeeded") {
+        writeAppliedDatasetRevision();
+      }
+      return outcome;
+    },
   });
 }
 
@@ -371,18 +430,27 @@ function readRuntimeFlag(key: string): boolean | undefined {
  * Resolves whether the storefront seeds itself and which slice it writes.
  *
  * Non-production environments seed automatically with their environment
- * profile (`demo` or `standard`). Production defaults to the `minimal` reference
- * slice and never writes on its own; an operator can opt into a richer slice
- * with `SDKWORK_MALL_SEED_PROFILE`, which also makes the run eligible for
- * automatic provisioning because that is an explicit deployment decision.
+ * profile (`demo` or `standard`). Cloud production keeps the `minimal`
+ * reference slice (platform structure only, no products) and never writes on
+ * its own. A **standalone** install is a self-hosted evaluation/demo surface:
+ * its production environment is upgraded from `minimal` to `standard` so a
+ * fresh install ships the full 1,200-product catalog instead of an empty store.
+ * An explicit `SDKWORK_MALL_SEED_PROFILE` always wins, and makes the run
+ * eligible for automatic provisioning because that is an explicit decision.
  */
 export function resolveSdkworkMallPcSeedPolicy(
   environment: MallDefaultDataEnvironment,
+  deploymentProfileHint = "",
 ): SdkworkMallPcSeedPolicy {
-  const profile = resolveMallDefaultDataProfile(
-    environment,
-    readRuntimeEnv(MALL_SEED_PROFILE_ENV_KEY) ?? null,
-  );
+  const override = readRuntimeEnv(MALL_SEED_PROFILE_ENV_KEY) ?? null;
+  let profile = resolveMallDefaultDataProfile(environment, override);
+  const deploymentProfile = (readRuntimeEnv("deploymentProfile") ?? deploymentProfileHint)
+    .trim()
+    .toLowerCase();
+  const standalone = deploymentProfile === "" || deploymentProfile === "standalone";
+  if (!override && standalone && profile === "minimal") {
+    profile = "standard";
+  }
   const explicitAutomatic = readRuntimeFlag(MALL_SEED_AUTOMATIC_ENV_KEY);
   return {
     automatic: explicitAutomatic ?? profile !== "minimal",
@@ -393,9 +461,10 @@ export function resolveSdkworkMallPcSeedPolicy(
 
 async function runStorefrontSeedInitialization(
   environment: MallDefaultDataEnvironment,
+  deploymentProfile: string,
   profileOverride?: MallDefaultDataProfile,
 ): Promise<MallHomeSeedOutcome> {
-  const policy = resolveSdkworkMallPcSeedPolicy(environment);
+  const policy = resolveSdkworkMallPcSeedPolicy(environment, deploymentProfile);
   await ensureMallDefaultDataConfigured();
   // Lazy on purpose: the dataset is a large chunk that a storefront visitor must
   // not download unless this environment actually needs provisioning.

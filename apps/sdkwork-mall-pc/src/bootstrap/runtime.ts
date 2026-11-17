@@ -62,6 +62,7 @@ export function createSdkworkMallPcRuntime(): SdkworkMallPcRuntime {
   });
   configureSdkworkMallPcPartnerProviders(sdkClients);
   configureSdkworkMallPcDefaultDataProvider({
+    deploymentProfile: config.deploymentProfile,
     environment: config.environment,
     locale: config.i18n.defaultLocale,
     sdkClients,

@@ -184,6 +184,10 @@ export default defineConfig({
     ],
   },
   test: {
+    // Provisioning tests drive the full default dataset (1,400 products) through
+    // an in-memory authority twice to prove idempotency; the default 5s budget
+    // is too tight for that once the catalog reached production scale.
+    testTimeout: 30_000,
     exclude: [
       ...configDefaults.exclude,
       // Inactive legacy SaaS-template packages (contract:

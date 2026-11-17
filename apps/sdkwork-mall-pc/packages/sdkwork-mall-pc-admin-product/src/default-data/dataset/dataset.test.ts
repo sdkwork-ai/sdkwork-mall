@@ -29,12 +29,12 @@ describe("mall default dataset", () => {
       (total, product) => total + product.skus.length,
       0,
     );
-    expect(dataset.categories.length).toBeGreaterThanOrEqual(18);
-    expect(leafCount).toBeGreaterThanOrEqual(90);
-    expect(dataset.shops.length).toBeGreaterThanOrEqual(12);
-    expect(dataset.brands.length).toBeGreaterThanOrEqual(30);
-    expect(dataset.products.length).toBeGreaterThanOrEqual(1000);
-    expect(skuCount).toBeGreaterThanOrEqual(3000);
+    expect(dataset.categories.length).toBeGreaterThanOrEqual(20);
+    expect(leafCount).toBeGreaterThanOrEqual(250);
+    expect(dataset.shops.length).toBeGreaterThanOrEqual(18);
+    expect(dataset.brands.length).toBeGreaterThanOrEqual(40);
+    expect(dataset.products.length).toBeGreaterThanOrEqual(1500);
+    expect(skuCount).toBeGreaterThanOrEqual(4500);
     expect(dataset.offers.length).toBeGreaterThanOrEqual(4);
     expect(dataset.membership.plans.length).toBeGreaterThanOrEqual(3);
     expect(dataset.membership.packageGroups.length).toBeGreaterThanOrEqual(2);

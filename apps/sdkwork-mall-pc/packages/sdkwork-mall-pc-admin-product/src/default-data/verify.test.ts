@@ -47,7 +47,9 @@ describe("mall default data verification", () => {
     expect(verification.ok).toBe(false);
     const categoryCheck = verification.checks.find((check) => check.id === "catalog.categories");
     expect(categoryCheck?.status).toBe("fail");
-    expect(categoryCheck?.missing).toContain("MALL-CAT-DIGITAL");
+    expect(categoryCheck?.missing).toContain(
+      `MALL-CAT-${zhCnDefaultDataset.categories[0].key.toUpperCase()}`,
+    );
     expect(verification.checks.find((check) => check.id === "cms.storefront")?.status).toBe("fail");
   });
 
@@ -119,12 +121,13 @@ describe("mall default data verification", () => {
     await runMallDefaultDataInitialization();
 
     const dataset = selectMallDefaultDataSlice(zhCnDefaultDataset, "demo");
-    const withoutAudio = {
+    const leafKey = dataset.categories[0].children[0].key;
+    const withoutLeaf = {
       ...dataset,
-      products: dataset.products.filter((product) => product.categoryKey !== "audio"),
+      products: dataset.products.filter((product) => product.categoryKey !== leafKey),
     };
     const verification = await verifyMallDefaultData({
-      dataset: withoutAudio,
+      dataset: withoutLeaf,
       environment: "demo",
       locale: "zh-CN",
       port,
@@ -132,7 +135,7 @@ describe("mall default data verification", () => {
     });
     const coverage = verification.checks.find((check) => check.id === "catalog.coverage");
     expect(coverage?.status).toBe("warn");
-    expect(coverage?.missing).toContain("category:audio");
+    expect(coverage?.missing).toContain(`category:${leafKey}`);
   });
 
   it("keeps parity between the coverage check and the journey guide", async () => {

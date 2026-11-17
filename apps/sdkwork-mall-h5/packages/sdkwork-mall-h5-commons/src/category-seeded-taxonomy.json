@@ -1,6 +1,6 @@
 [
   {
-    "key": "digital",
+    "key": "mobile",
     "zhName": "手机数码",
     "enName": "Phones & Digital",
     "icon": "Smartphone",
@@ -8,9 +8,25 @@
     "level": "root"
   },
   {
-    "key": "phone",
+    "key": "smartphone",
     "zhName": "智能手机",
     "enName": "Smartphones",
+    "icon": "Smartphone",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "foldable-phone",
+    "zhName": "折叠屏手机",
+    "enName": "Foldable Phones",
+    "icon": "Smartphone",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "gaming-phone",
+    "zhName": "游戏手机",
+    "enName": "Gaming Phones",
     "icon": "Smartphone",
     "tone": "blue",
     "level": "leaf"
@@ -19,32 +35,72 @@
     "key": "tablet",
     "zhName": "平板电脑",
     "enName": "Tablets",
-    "icon": "Tablet",
+    "icon": "Smartphone",
     "tone": "blue",
     "level": "leaf"
   },
   {
-    "key": "wearable",
-    "zhName": "智能穿戴",
-    "enName": "Wearables",
-    "icon": "Watch",
+    "key": "smart-watch",
+    "zhName": "智能手表",
+    "enName": "Smartwatches",
+    "icon": "Smartphone",
     "tone": "blue",
     "level": "leaf"
   },
   {
-    "key": "audio",
-    "zhName": "耳机音箱",
-    "enName": "Audio",
+    "key": "smart-band",
+    "zhName": "智能手环",
+    "enName": "Fitness Bands",
+    "icon": "Smartphone",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "earbuds",
+    "zhName": "无线耳机",
+    "enName": "Wireless Earbuds",
     "icon": "Headphones",
     "tone": "blue",
     "level": "leaf"
   },
   {
-    "key": "camera",
-    "zhName": "摄影摄像",
-    "enName": "Cameras",
-    "icon": "Camera",
-    "tone": "slate",
+    "key": "bluetooth-speaker",
+    "zhName": "蓝牙音箱",
+    "enName": "Bluetooth Speakers",
+    "icon": "Headphones",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "smart-glasses",
+    "zhName": "智能眼镜",
+    "enName": "Smart Glasses",
+    "icon": "Headphones",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "action-camera",
+    "zhName": "运动相机",
+    "enName": "Action Cameras",
+    "icon": "Laptop",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "kids-watch",
+    "zhName": "儿童手表",
+    "enName": "Kids Smartwatches",
+    "icon": "Smartphone",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "sports-earbuds",
+    "zhName": "运动耳机",
+    "enName": "Sports Earbuds",
+    "icon": "Headphones",
+    "tone": "blue",
     "level": "leaf"
   },
   {
@@ -57,17 +113,33 @@
   },
   {
     "key": "laptop",
-    "zhName": "笔记本电脑",
-    "enName": "Laptops",
+    "zhName": "轻薄笔记本",
+    "enName": "Ultrabooks",
     "icon": "Laptop",
     "tone": "indigo",
     "level": "leaf"
   },
   {
-    "key": "desktop",
+    "key": "gaming-laptop",
+    "zhName": "游戏笔记本",
+    "enName": "Gaming Laptops",
+    "icon": "Laptop",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "desktop-pc",
     "zhName": "台式整机",
-    "enName": "Desktops",
-    "icon": "Monitor",
+    "enName": "Desktop PCs",
+    "icon": "Laptop",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "all-in-one-pc",
+    "zhName": "一体机",
+    "enName": "All-in-One PCs",
+    "icon": "Laptop",
     "tone": "indigo",
     "level": "leaf"
   },
@@ -75,23 +147,63 @@
     "key": "monitor",
     "zhName": "显示器",
     "enName": "Monitors",
-    "icon": "Monitor",
+    "icon": "Laptop",
     "tone": "indigo",
     "level": "leaf"
   },
   {
-    "key": "peripheral",
-    "zhName": "键鼠外设",
-    "enName": "Keyboards & Mice",
-    "icon": "Keyboard",
-    "tone": "indigo",
+    "key": "mechanical-keyboard",
+    "zhName": "机械键盘",
+    "enName": "Mechanical Keyboards",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "mouse",
+    "zhName": "鼠标",
+    "enName": "Mice",
+    "icon": "Cable",
+    "tone": "blue",
     "level": "leaf"
   },
   {
     "key": "printer",
-    "zhName": "打印办公",
+    "zhName": "打印机",
     "enName": "Printers",
-    "icon": "Printer",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "scanner",
+    "zhName": "扫描仪",
+    "enName": "Scanners",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "projector",
+    "zhName": "投影仪",
+    "enName": "Projectors",
+    "icon": "Tv",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "drawing-tablet",
+    "zhName": "绘图板",
+    "enName": "Drawing Tablets",
+    "icon": "Laptop",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "mini-pc",
+    "zhName": "迷你主机",
+    "enName": "Mini PCs",
+    "icon": "Laptop",
     "tone": "indigo",
     "level": "leaf"
   },
@@ -104,9 +216,9 @@
     "level": "root"
   },
   {
-    "key": "tv",
-    "zhName": "电视",
-    "enName": "TVs",
+    "key": "smart-tv",
+    "zhName": "智能电视",
+    "enName": "Smart TVs",
     "icon": "Tv",
     "tone": "teal",
     "level": "leaf"
@@ -115,7 +227,7 @@
     "key": "refrigerator",
     "zhName": "冰箱",
     "enName": "Refrigerators",
-    "icon": "Refrigerator",
+    "icon": "WashingMachine",
     "tone": "teal",
     "level": "leaf"
   },
@@ -128,65 +240,281 @@
     "level": "leaf"
   },
   {
-    "key": "kitchen",
-    "zhName": "厨房电器",
-    "enName": "Kitchen Appliances",
-    "icon": "CookingPot",
+    "key": "air-conditioner",
+    "zhName": "空调",
+    "enName": "Air Conditioners",
+    "icon": "WashingMachine",
     "tone": "teal",
     "level": "leaf"
   },
   {
-    "key": "air",
-    "zhName": "生活电器",
-    "enName": "Home Comfort",
-    "icon": "Wind",
+    "key": "range-hood",
+    "zhName": "油烟机",
+    "enName": "Range Hoods",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "gas-stove",
+    "zhName": "燃气灶",
+    "enName": "Gas Stoves",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "dishwasher",
+    "zhName": "洗碗机",
+    "enName": "Dishwashers",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "air-purifier",
+    "zhName": "空气净化器",
+    "enName": "Air Purifiers",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "vacuum-cleaner",
+    "zhName": "吸尘器",
+    "enName": "Vacuum Cleaners",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "water-heater",
+    "zhName": "电热水器",
+    "enName": "Water Heaters",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "electric-fan",
+    "zhName": "电风扇",
+    "enName": "Electric Fans",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "humidifier",
+    "zhName": "加湿器",
+    "enName": "Humidifiers",
+    "icon": "WashingMachine",
     "tone": "teal",
     "level": "leaf"
   },
   {
     "key": "fashion",
-    "zhName": "服饰鞋包",
-    "enName": "Fashion",
+    "zhName": "服饰内衣",
+    "enName": "Fashion & Underwear",
     "icon": "Shirt",
     "tone": "cyan",
     "level": "root"
   },
   {
-    "key": "menswear",
-    "zhName": "男士上装",
-    "enName": "Men's Tops",
+    "key": "men-tshirt",
+    "zhName": "男士T恤",
+    "enName": "Men's T-Shirts",
     "icon": "Shirt",
     "tone": "cyan",
     "level": "leaf"
   },
   {
-    "key": "womenswear",
-    "zhName": "女士上装",
-    "enName": "Women's Tops",
+    "key": "men-shirt",
+    "zhName": "男士衬衫",
+    "enName": "Men's Shirts",
     "icon": "Shirt",
     "tone": "cyan",
     "level": "leaf"
   },
   {
-    "key": "pants",
-    "zhName": "裤装",
-    "enName": "Trousers",
+    "key": "women-knitwear",
+    "zhName": "女士针织衫",
+    "enName": "Women's Knitwear",
     "icon": "Shirt",
     "tone": "cyan",
     "level": "leaf"
   },
   {
-    "key": "sneakers",
+    "key": "women-dress",
+    "zhName": "女士连衣裙",
+    "enName": "Women's Dresses",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "hoodie",
+    "zhName": "卫衣",
+    "enName": "Hoodies",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "down-jacket",
+    "zhName": "羽绒服",
+    "enName": "Down Jackets",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "jeans",
+    "zhName": "牛仔裤",
+    "enName": "Jeans",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "underwear",
+    "zhName": "内衣",
+    "enName": "Underwear",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "loungewear",
+    "zhName": "家居服",
+    "enName": "Loungewear",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "socks",
+    "zhName": "袜子",
+    "enName": "Socks",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "suits",
+    "zhName": "西装",
+    "enName": "Suits",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "skirts",
+    "zhName": "半身裙",
+    "enName": "Skirts",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "shoes-bags",
+    "zhName": "鞋靴箱包",
+    "enName": "Shoes & Bags",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "root"
+  },
+  {
+    "key": "running-shoes",
     "zhName": "运动鞋",
-    "enName": "Sneakers",
+    "enName": "Running Shoes",
     "icon": "Footprints",
     "tone": "cyan",
     "level": "leaf"
   },
   {
-    "key": "bag",
-    "zhName": "箱包",
-    "enName": "Bags",
+    "key": "casual-shoes",
+    "zhName": "休闲鞋",
+    "enName": "Casual Shoes",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "leather-shoes",
+    "zhName": "皮鞋",
+    "enName": "Leather Shoes",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "boots",
+    "zhName": "靴子",
+    "enName": "Boots",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "sandals",
+    "zhName": "凉鞋",
+    "enName": "Sandals",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "backpack",
+    "zhName": "双肩包",
+    "enName": "Backpacks",
+    "icon": "ShoppingBag",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "handbag",
+    "zhName": "手提包",
+    "enName": "Handbags",
+    "icon": "ShoppingBag",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "suitcase",
+    "zhName": "行李箱",
+    "enName": "Suitcases",
+    "icon": "ShoppingBag",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "wallet",
+    "zhName": "钱包",
+    "enName": "Wallets",
+    "icon": "ShoppingBag",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "belt",
+    "zhName": "腰带",
+    "enName": "Belts",
+    "icon": "ShoppingBag",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "slippers",
+    "zhName": "拖鞋",
+    "enName": "Slippers",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "waist-bags",
+    "zhName": "腰包",
+    "enName": "Waist Bags",
     "icon": "ShoppingBag",
     "tone": "cyan",
     "level": "leaf"
@@ -200,42 +528,98 @@
     "level": "root"
   },
   {
-    "key": "skincare",
-    "zhName": "护肤",
-    "enName": "Skincare",
-    "icon": "Droplets",
-    "tone": "rose",
-    "level": "leaf"
-  },
-  {
-    "key": "makeup",
-    "zhName": "彩妆",
-    "enName": "Makeup",
-    "icon": "Palette",
-    "tone": "rose",
-    "level": "leaf"
-  },
-  {
-    "key": "haircare",
-    "zhName": "洗护",
-    "enName": "Hair Care",
-    "icon": "ShowerHead",
-    "tone": "rose",
-    "level": "leaf"
-  },
-  {
-    "key": "fragrance",
-    "zhName": "香水",
-    "enName": "Fragrance",
+    "key": "serum",
+    "zhName": "精华",
+    "enName": "Serums",
     "icon": "Sparkles",
     "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "device",
-    "zhName": "美容仪器",
+    "key": "face-cream",
+    "zhName": "面霜",
+    "enName": "Face Creams",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "mask",
+    "zhName": "面膜",
+    "enName": "Face Masks",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "cleanser",
+    "zhName": "洁面",
+    "enName": "Cleansers",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "lipstick",
+    "zhName": "口红",
+    "enName": "Lipsticks",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "foundation",
+    "zhName": "粉底",
+    "enName": "Foundations",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "perfume",
+    "zhName": "香水",
+    "enName": "Perfumes",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "shampoo",
+    "zhName": "洗发水",
+    "enName": "Shampoos",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "body-wash",
+    "zhName": "沐浴露",
+    "enName": "Body Washes",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "beauty-device",
+    "zhName": "美容仪",
     "enName": "Beauty Devices",
-    "icon": "Zap",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "eye-cream",
+    "zhName": "眼霜",
+    "enName": "Eye Creams",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "body-lotion",
+    "zhName": "身体乳",
+    "enName": "Body Lotions",
+    "icon": "Sparkles",
     "tone": "rose",
     "level": "leaf"
   },
@@ -248,42 +632,98 @@
     "level": "root"
   },
   {
-    "key": "grain",
-    "zhName": "米面粮油",
-    "enName": "Rice & Oil",
-    "icon": "Wheat",
+    "key": "rice",
+    "zhName": "大米",
+    "enName": "Rice",
+    "icon": "Carrot",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "snacks",
-    "zhName": "休闲零食",
-    "enName": "Snacks",
-    "icon": "Cookie",
+    "key": "cooking-oil",
+    "zhName": "食用油",
+    "enName": "Cooking Oil",
+    "icon": "Carrot",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "fruit",
+    "key": "nuts",
+    "zhName": "坚果",
+    "enName": "Nuts",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "biscuits",
+    "zhName": "饼干",
+    "enName": "Biscuits",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "fresh-fruit",
     "zhName": "新鲜水果",
     "enName": "Fresh Fruit",
-    "icon": "Apple",
+    "icon": "Carrot",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "meat",
-    "zhName": "肉禽蛋品",
-    "enName": "Meat & Eggs",
-    "icon": "Beef",
+    "key": "beef",
+    "zhName": "牛肉",
+    "enName": "Beef",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "eggs",
+    "zhName": "鸡蛋",
+    "enName": "Eggs",
+    "icon": "Carrot",
     "tone": "emerald",
     "level": "leaf"
   },
   {
     "key": "seasoning",
     "zhName": "调味品",
-    "enName": "Seasoning",
-    "icon": "CookingPot",
+    "enName": "Seasonings",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "instant-food",
+    "zhName": "方便食品",
+    "enName": "Instant Food",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "dairy",
+    "zhName": "乳制品",
+    "enName": "Dairy",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "honey",
+    "zhName": "蜂蜜",
+    "enName": "Honey",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "frozen-food",
+    "zhName": "冷冻食品",
+    "enName": "Frozen Food",
+    "icon": "Carrot",
     "tone": "emerald",
     "level": "leaf"
   },
@@ -296,15 +736,23 @@
     "level": "root"
   },
   {
-    "key": "formula",
-    "zhName": "奶粉辅食",
-    "enName": "Formula & Food",
-    "icon": "Milk",
+    "key": "infant-formula",
+    "zhName": "婴幼儿奶粉",
+    "enName": "Infant Formula",
+    "icon": "Baby",
     "tone": "violet",
     "level": "leaf"
   },
   {
-    "key": "diaper",
+    "key": "baby-food",
+    "zhName": "辅食",
+    "enName": "Baby Food",
+    "icon": "Baby",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "diapers",
     "zhName": "纸尿裤",
     "enName": "Diapers",
     "icon": "Baby",
@@ -312,27 +760,75 @@
     "level": "leaf"
   },
   {
-    "key": "toy",
-    "zhName": "益智玩具",
-    "enName": "Toys",
-    "icon": "Puzzle",
-    "tone": "violet",
-    "level": "leaf"
-  },
-  {
-    "key": "stroller",
-    "zhName": "童车出行",
-    "enName": "Strollers",
+    "key": "wipes",
+    "zhName": "湿巾",
+    "enName": "Baby Wipes",
     "icon": "Baby",
     "tone": "violet",
     "level": "leaf"
   },
   {
     "key": "kidswear",
-    "zhName": "童装童鞋",
-    "enName": "Kids' Wear",
+    "zhName": "童装",
+    "enName": "Kids' Clothing",
     "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "kids-shoes",
+    "zhName": "童鞋",
+    "enName": "Kids' Shoes",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "building-blocks",
+    "zhName": "积木",
+    "enName": "Building Blocks",
+    "icon": "Puzzle",
     "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "early-toys",
+    "zhName": "早教玩具",
+    "enName": "Early Learning Toys",
+    "icon": "Puzzle",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "stroller",
+    "zhName": "婴儿车",
+    "enName": "Strollers",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "child-car-seat",
+    "zhName": "安全座椅",
+    "enName": "Child Car Seats",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "kids-tableware",
+    "zhName": "儿童餐具",
+    "enName": "Kids Tableware",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "play-mat",
+    "zhName": "爬行垫",
+    "enName": "Play Mats",
+    "icon": "Sofa",
+    "tone": "teal",
     "level": "leaf"
   },
   {
@@ -344,43 +840,99 @@
     "level": "root"
   },
   {
-    "key": "fitness",
-    "zhName": "健身训练",
-    "enName": "Fitness",
+    "key": "treadmill",
+    "zhName": "跑步机",
+    "enName": "Treadmills",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "yoga-mat",
+    "zhName": "瑜伽垫",
+    "enName": "Yoga Mats",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "dumbbells",
+    "zhName": "哑铃",
+    "enName": "Dumbbells",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "tent",
+    "zhName": "帐篷",
+    "enName": "Tents",
     "icon": "Dumbbell",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "camping",
-    "zhName": "户外露营",
-    "enName": "Camping",
-    "icon": "Tent",
+    "key": "sleeping-bag",
+    "zhName": "睡袋",
+    "enName": "Sleeping Bags",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "hiking-shoes",
+    "zhName": "登山鞋",
+    "enName": "Hiking Shoes",
+    "icon": "Footprints",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "bike-helmet",
+    "zhName": "骑行头盔",
+    "enName": "Bike Helmets",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "road-bike",
+    "zhName": "公路自行车",
+    "enName": "Road Bikes",
+    "icon": "Dumbbell",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "cycling",
-    "zhName": "骑行装备",
-    "enName": "Cycling",
-    "icon": "Bike",
+    "key": "basketball",
+    "zhName": "篮球",
+    "enName": "Basketballs",
+    "icon": "Dumbbell",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "outdoor-wear",
-    "zhName": "户外服饰",
-    "enName": "Outdoor Wear",
-    "icon": "Tent",
+    "key": "football",
+    "zhName": "足球",
+    "enName": "Footballs",
+    "icon": "Dumbbell",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "ball",
-    "zhName": "球类运动",
-    "enName": "Ball Sports",
-    "icon": "Trophy",
+    "key": "badminton",
+    "zhName": "羽毛球拍",
+    "enName": "Badminton Rackets",
+    "icon": "Dumbbell",
     "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "swim-goggles",
+    "zhName": "泳镜",
+    "enName": "Swim Goggles",
+    "icon": "Shirt",
+    "tone": "cyan",
     "level": "leaf"
   },
   {
@@ -392,42 +944,98 @@
     "level": "root"
   },
   {
-    "key": "bedding",
-    "zhName": "床上用品",
-    "enName": "Bedding",
+    "key": "bedding-set",
+    "zhName": "四件套",
+    "enName": "Bedding Sets",
     "icon": "Sofa",
     "tone": "teal",
     "level": "leaf"
   },
   {
-    "key": "furniture",
-    "zhName": "家具",
-    "enName": "Furniture",
+    "key": "quilt",
+    "zhName": "被子",
+    "enName": "Quilts",
     "icon": "Sofa",
     "tone": "teal",
     "level": "leaf"
   },
   {
-    "key": "kitchenware",
-    "zhName": "厨具",
-    "enName": "Kitchenware",
-    "icon": "CookingPot",
+    "key": "pillow",
+    "zhName": "枕头",
+    "enName": "Pillows",
+    "icon": "Sofa",
     "tone": "teal",
     "level": "leaf"
   },
   {
-    "key": "storage",
-    "zhName": "收纳整理",
-    "enName": "Storage",
-    "icon": "Boxes",
+    "key": "sofa",
+    "zhName": "沙发",
+    "enName": "Sofas",
+    "icon": "Sofa",
     "tone": "teal",
     "level": "leaf"
   },
   {
-    "key": "lighting",
-    "zhName": "灯饰照明",
-    "enName": "Lighting",
-    "icon": "Lamp",
+    "key": "desk",
+    "zhName": "书桌",
+    "enName": "Desks",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "wardrobe",
+    "zhName": "衣柜",
+    "enName": "Wardrobes",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "wok",
+    "zhName": "炒锅",
+    "enName": "Woks",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "tableware",
+    "zhName": "餐具",
+    "enName": "Tableware",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "shelf",
+    "zhName": "置物架",
+    "enName": "Shelving",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "table-lamp",
+    "zhName": "台灯",
+    "enName": "Table Lamps",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "curtains",
+    "zhName": "窗帘",
+    "enName": "Curtains",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "rugs",
+    "zhName": "地毯",
+    "enName": "Rugs",
+    "icon": "Sofa",
     "tone": "teal",
     "level": "leaf"
   },
@@ -440,42 +1048,98 @@
     "level": "root"
   },
   {
-    "key": "car-care",
-    "zhName": "汽车养护",
-    "enName": "Car Care",
-    "icon": "Droplets",
-    "tone": "slate",
+    "key": "engine-oil",
+    "zhName": "机油",
+    "enName": "Engine Oil",
+    "icon": "Carrot",
+    "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "car-electronics",
-    "zhName": "车载电器",
-    "enName": "Car Electronics",
-    "icon": "Monitor",
-    "tone": "slate",
-    "level": "leaf"
-  },
-  {
-    "key": "car-parts",
-    "zhName": "车载配件",
-    "enName": "Car Parts",
-    "icon": "Cog",
-    "tone": "slate",
-    "level": "leaf"
-  },
-  {
-    "key": "car-seat",
-    "zhName": "儿童安全座椅",
-    "enName": "Child Car Seats",
+    "key": "tyres",
+    "zhName": "轮胎",
+    "enName": "Tyres",
     "icon": "Car",
     "tone": "slate",
     "level": "leaf"
   },
   {
-    "key": "car-tire",
-    "zhName": "轮胎轮毂",
-    "enName": "Tyres",
-    "icon": "Cog",
+    "key": "dash-cam",
+    "zhName": "行车记录仪",
+    "enName": "Dash Cams",
+    "icon": "Laptop",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "car-charger",
+    "zhName": "车载充电器",
+    "enName": "Car Chargers",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "car-seat",
+    "zhName": "车载安全座椅",
+    "enName": "Car Safety Seats",
+    "icon": "Car",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "floor-mats",
+    "zhName": "脚垫",
+    "enName": "Floor Mats",
+    "icon": "Car",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "car-film",
+    "zhName": "车膜",
+    "enName": "Window Films",
+    "icon": "Car",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "ceramic-coating",
+    "zhName": "镀晶",
+    "enName": "Ceramic Coatings",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "car-vacuum",
+    "zhName": "车载吸尘器",
+    "enName": "Car Vacuums",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "sunshade",
+    "zhName": "遮阳挡",
+    "enName": "Sunshades",
+    "icon": "Car",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "car-fridge",
+    "zhName": "车载冰箱",
+    "enName": "Car Fridges",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "steering-cover",
+    "zhName": "方向盘套",
+    "enName": "Steering Covers",
+    "icon": "Car",
     "tone": "slate",
     "level": "leaf"
   },
@@ -488,42 +1152,98 @@
     "level": "root"
   },
   {
-    "key": "literature",
-    "zhName": "文学小说",
-    "enName": "Literature",
+    "key": "novels",
+    "zhName": "小说",
+    "enName": "Novels",
     "icon": "BookOpen",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "business",
-    "zhName": "经管励志",
-    "enName": "Business",
+    "key": "essays",
+    "zhName": "文学散文",
+    "enName": "Essays",
     "icon": "BookOpen",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "techbook",
-    "zhName": "科技计算机",
-    "enName": "Technology",
+    "key": "business-books",
+    "zhName": "经管",
+    "enName": "Business Books",
     "icon": "BookOpen",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "children-book",
+    "key": "investing-books",
+    "zhName": "投资理财",
+    "enName": "Investing Books",
+    "icon": "BookOpen",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "computer-books",
+    "zhName": "计算机",
+    "enName": "Computer Books",
+    "icon": "BookOpen",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "science-books",
+    "zhName": "科普",
+    "enName": "Science Books",
+    "icon": "BookOpen",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "picture-books",
     "zhName": "童书绘本",
-    "enName": "Children's Books",
+    "enName": "Picture Books",
     "icon": "BookOpen",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "artbook",
-    "zhName": "艺术生活",
-    "enName": "Art & Lifestyle",
-    "icon": "Palette",
+    "key": "art-albums",
+    "zhName": "艺术画册",
+    "enName": "Art Albums",
+    "icon": "BookOpen",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "exam-books",
+    "zhName": "教辅",
+    "enName": "Study Guides",
+    "icon": "BookOpen",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "magazines",
+    "zhName": "杂志",
+    "enName": "Magazines",
+    "icon": "BookOpen",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "history-books",
+    "zhName": "历史",
+    "enName": "History Books",
+    "icon": "BookOpen",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "psychology-books",
+    "zhName": "心理学",
+    "enName": "Psychology Books",
+    "icon": "BookOpen",
     "tone": "amber",
     "level": "leaf"
   },
@@ -536,42 +1256,98 @@
     "level": "root"
   },
   {
-    "key": "necklace",
-    "zhName": "项链",
-    "enName": "Necklaces",
+    "key": "gold-necklace",
+    "zhName": "黄金项链",
+    "enName": "Gold Necklaces",
     "icon": "Gem",
     "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "ring",
-    "zhName": "戒指",
-    "enName": "Rings",
+    "key": "diamond-ring",
+    "zhName": "钻石戒指",
+    "enName": "Diamond Rings",
     "icon": "Gem",
     "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "earring",
-    "zhName": "耳饰",
-    "enName": "Earrings",
+    "key": "pearl-earrings",
+    "zhName": "珍珠耳饰",
+    "enName": "Pearl Earrings",
     "icon": "Gem",
     "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "bracelet",
-    "zhName": "手链",
-    "enName": "Bracelets",
+    "key": "silver-bracelet",
+    "zhName": "银手链",
+    "enName": "Silver Bracelets",
     "icon": "Gem",
     "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "watch",
-    "zhName": "腕表",
-    "enName": "Watches",
-    "icon": "Watch",
+    "key": "mechanical-watch",
+    "zhName": "机械腕表",
+    "enName": "Mechanical Watches",
+    "icon": "Gem",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "gem-pendant",
+    "zhName": "宝石吊坠",
+    "enName": "Gem Pendants",
+    "icon": "Gem",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "couple-rings",
+    "zhName": "情侣对戒",
+    "enName": "Couple Rings",
+    "icon": "Gem",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "baby-lock",
+    "zhName": "长命锁",
+    "enName": "Baby Lock Pendants",
+    "icon": "Gem",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "jewelry-care",
+    "zhName": "珠宝保养",
+    "enName": "Jewelry Care",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "jewelry-box",
+    "zhName": "首饰盒",
+    "enName": "Jewelry Boxes",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "gold-bangle",
+    "zhName": "黄金手镯",
+    "enName": "Gold Bangles",
+    "icon": "Gem",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "brooch",
+    "zhName": "胸针",
+    "enName": "Brooches",
+    "icon": "Gem",
     "tone": "rose",
     "level": "leaf"
   },
@@ -584,90 +1360,202 @@
     "level": "root"
   },
   {
-    "key": "pet-food",
-    "zhName": "宠物主粮",
-    "enName": "Pet Food",
-    "icon": "Bone",
-    "tone": "amber",
-    "level": "leaf"
-  },
-  {
-    "key": "pet-treat",
-    "zhName": "宠物零食",
-    "enName": "Pet Treats",
-    "icon": "Bone",
-    "tone": "amber",
-    "level": "leaf"
-  },
-  {
-    "key": "pet-toy",
-    "zhName": "宠物玩具",
-    "enName": "Pet Toys",
+    "key": "dog-food",
+    "zhName": "狗粮",
+    "enName": "Dog Food",
     "icon": "PawPrint",
     "tone": "amber",
     "level": "leaf"
   },
   {
-    "key": "pet-care",
-    "zhName": "宠物洗护",
-    "enName": "Pet Grooming",
-    "icon": "ShowerHead",
+    "key": "cat-food",
+    "zhName": "猫粮",
+    "enName": "Cat Food",
+    "icon": "PawPrint",
     "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "pet-treats",
+    "zhName": "宠物零食",
+    "enName": "Pet Treats",
+    "icon": "PawPrint",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "cat-litter",
+    "zhName": "猫砂",
+    "enName": "Cat Litter",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "pet-toys",
+    "zhName": "宠物玩具",
+    "enName": "Pet Toys",
+    "icon": "Puzzle",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "pet-shampoo",
+    "zhName": "宠物沐浴露",
+    "enName": "Pet Shampoo",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "cat-tree",
+    "zhName": "猫爬架",
+    "enName": "Cat Trees",
+    "icon": "Sofa",
+    "tone": "teal",
     "level": "leaf"
   },
   {
     "key": "pet-bed",
-    "zhName": "宠物窝垫",
+    "zhName": "宠物窝",
     "enName": "Pet Beds",
     "icon": "Sofa",
-    "tone": "amber",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "leash",
+    "zhName": "牵引绳",
+    "enName": "Leashes",
+    "icon": "ShoppingBag",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "pet-bowl",
+    "zhName": "食盆",
+    "enName": "Pet Bowls",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "pet-stroller",
+    "zhName": "宠物推车",
+    "enName": "Pet Strollers",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "cat-scratcher",
+    "zhName": "猫抓板",
+    "enName": "Cat Scratchers",
+    "icon": "Sofa",
+    "tone": "teal",
     "level": "leaf"
   },
   {
     "key": "health",
-    "zhName": "医药健康",
+    "zhName": "医药保健",
     "enName": "Health & Wellness",
     "icon": "HeartPulse",
     "tone": "emerald",
     "level": "root"
   },
   {
-    "key": "supplement",
-    "zhName": "营养保健",
-    "enName": "Supplements",
-    "icon": "Pill",
-    "tone": "emerald",
-    "level": "leaf"
-  },
-  {
-    "key": "medical-device",
-    "zhName": "医疗器械",
-    "enName": "Devices",
+    "key": "vitamins",
+    "zhName": "维生素",
+    "enName": "Vitamins",
     "icon": "HeartPulse",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "massager",
-    "zhName": "按摩养生",
-    "enName": "Massagers",
+    "key": "protein-powder",
+    "zhName": "蛋白粉",
+    "enName": "Protein Powder",
     "icon": "HeartPulse",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "optical",
-    "zhName": "视力健康",
-    "enName": "Eye Care",
-    "icon": "Glasses",
+    "key": "fish-oil",
+    "zhName": "鱼油",
+    "enName": "Fish Oil",
+    "icon": "HeartPulse",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "first-aid",
-    "zhName": "家庭常备",
-    "enName": "First Aid",
-    "icon": "Cross",
+    "key": "blood-pressure-monitor",
+    "zhName": "血压计",
+    "enName": "Blood Pressure Monitors",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "glucose-meter",
+    "zhName": "血糖仪",
+    "enName": "Glucose Meters",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "neck-massager",
+    "zhName": "颈椎按摩仪",
+    "enName": "Neck Massagers",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "fascia-gun",
+    "zhName": "筋膜枪",
+    "enName": "Fascia Guns",
+    "icon": "WashingMachine",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "eye-massager",
+    "zhName": "护眼仪",
+    "enName": "Eye Massagers",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "first-aid-kit",
+    "zhName": "急救包",
+    "enName": "First Aid Kits",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "medical-masks",
+    "zhName": "医用口罩",
+    "enName": "Medical Masks",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "calcium",
+    "zhName": "钙片",
+    "enName": "Calcium Supplements",
+    "icon": "HeartPulse",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "probiotics",
+    "zhName": "益生菌",
+    "enName": "Probiotics",
+    "icon": "HeartPulse",
     "tone": "emerald",
     "level": "leaf"
   },
@@ -680,43 +1568,99 @@
     "level": "root"
   },
   {
-    "key": "power-tool",
-    "zhName": "电动工具",
-    "enName": "Power Tools",
-    "icon": "Drill",
-    "tone": "indigo",
-    "level": "leaf"
-  },
-  {
-    "key": "hand-tool",
-    "zhName": "手动工具",
-    "enName": "Hand Tools",
+    "key": "drill",
+    "zhName": "电钻",
+    "enName": "Drills",
     "icon": "Wrench",
     "tone": "indigo",
     "level": "leaf"
   },
   {
-    "key": "fastener",
-    "zhName": "紧固件",
-    "enName": "Fasteners",
+    "key": "angle-grinder",
+    "zhName": "角磨机",
+    "enName": "Angle Grinders",
+    "icon": "Wrench",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "wrench-set",
+    "zhName": "扳手套装",
+    "enName": "Wrench Sets",
+    "icon": "Wrench",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "screwdriver",
+    "zhName": "螺丝刀",
+    "enName": "Screwdrivers",
+    "icon": "Wrench",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "screws",
+    "zhName": "螺丝",
+    "enName": "Screws",
     "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "tape-measure",
+    "zhName": "卷尺",
+    "enName": "Tape Measures",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "laser-measure",
+    "zhName": "激光测距仪",
+    "enName": "Laser Measures",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "spirit-level",
+    "zhName": "水平仪",
+    "enName": "Spirit Levels",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "cut-gloves",
+    "zhName": "防割手套",
+    "enName": "Cut-resistant Gloves",
+    "icon": "Shirt",
+    "tone": "cyan",
+    "level": "leaf"
+  },
+  {
+    "key": "safety-helmet",
+    "zhName": "安全帽",
+    "enName": "Safety Helmets",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "rotary-hammer",
+    "zhName": "电锤",
+    "enName": "Rotary Hammers",
+    "icon": "Wrench",
     "tone": "indigo",
     "level": "leaf"
   },
   {
-    "key": "measure",
-    "zhName": "测量工具",
-    "enName": "Measuring",
-    "icon": "Ruler",
-    "tone": "indigo",
-    "level": "leaf"
-  },
-  {
-    "key": "safety",
-    "zhName": "劳保防护",
-    "enName": "Safety Gear",
-    "icon": "HardHat",
-    "tone": "indigo",
+    "key": "cutting-disc",
+    "zhName": "切割片",
+    "enName": "Cutting Discs",
+    "icon": "Cog",
+    "tone": "slate",
     "level": "leaf"
   },
   {
@@ -728,26 +1672,50 @@
     "level": "root"
   },
   {
-    "key": "guitar",
-    "zhName": "吉他",
-    "enName": "Guitars",
-    "icon": "Guitar",
+    "key": "acoustic-guitar",
+    "zhName": "民谣吉他",
+    "enName": "Acoustic Guitars",
+    "icon": "Music",
     "tone": "violet",
     "level": "leaf"
   },
   {
-    "key": "keyboard",
-    "zhName": "键盘乐器",
-    "enName": "Keyboards",
-    "icon": "Piano",
+    "key": "electric-guitar",
+    "zhName": "电吉他",
+    "enName": "Electric Guitars",
+    "icon": "Music",
     "tone": "violet",
     "level": "leaf"
   },
   {
-    "key": "audio-gear",
-    "zhName": "专业音响",
-    "enName": "Audio Gear",
-    "icon": "Speaker",
+    "key": "digital-piano",
+    "zhName": "电钢琴",
+    "enName": "Digital Pianos",
+    "icon": "Music",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "electronic-keyboard",
+    "zhName": "电子琴",
+    "enName": "Electronic Keyboards",
+    "icon": "Music",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "drum-kit",
+    "zhName": "架子鼓",
+    "enName": "Drum Kits",
+    "icon": "Music",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "violin",
+    "zhName": "小提琴",
+    "enName": "Violins",
+    "icon": "Music",
     "tone": "violet",
     "level": "leaf"
   },
@@ -755,14 +1723,46 @@
     "key": "microphone",
     "zhName": "麦克风",
     "enName": "Microphones",
-    "icon": "Mic",
+    "icon": "Headphones",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "effect-pedal",
+    "zhName": "效果器",
+    "enName": "Effect Pedals",
+    "icon": "Music",
     "tone": "violet",
     "level": "leaf"
   },
   {
-    "key": "music-accessory",
+    "key": "ukulele",
+    "zhName": "尤克里里",
+    "enName": "Ukuleles",
+    "icon": "Music",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "music-accessories",
     "zhName": "乐器配件",
     "enName": "Music Accessories",
+    "icon": "Music",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "erhu",
+    "zhName": "二胡",
+    "enName": "Erhu",
+    "icon": "Music",
+    "tone": "violet",
+    "level": "leaf"
+  },
+  {
+    "key": "saxophone",
+    "zhName": "萨克斯",
+    "enName": "Saxophones",
     "icon": "Music",
     "tone": "violet",
     "level": "leaf"
@@ -776,91 +1776,99 @@
     "level": "root"
   },
   {
-    "key": "flower",
-    "zhName": "鲜花花束",
-    "enName": "Flowers",
-    "icon": "Flower2",
-    "tone": "rose",
-    "level": "leaf"
-  },
-  {
-    "key": "gift-box",
-    "zhName": "礼盒礼券",
-    "enName": "Gift Boxes",
+    "key": "rose-bouquet",
+    "zhName": "玫瑰花束",
+    "enName": "Rose Bouquets",
     "icon": "Gift",
     "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "cake",
-    "zhName": "烘焙甜点",
-    "enName": "Bakery",
-    "icon": "Cake",
-    "tone": "rose",
-    "level": "leaf"
-  },
-  {
-    "key": "chocolate",
-    "zhName": "巧克力",
-    "enName": "Chocolate",
-    "icon": "Cookie",
-    "tone": "rose",
-    "level": "leaf"
-  },
-  {
-    "key": "custom-gift",
-    "zhName": "定制礼品",
-    "enName": "Custom Gifts",
+    "key": "preserved-flower",
+    "zhName": "永生花",
+    "enName": "Preserved Flowers",
     "icon": "Gift",
     "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "accessory",
-    "zhName": "数码配件",
-    "enName": "Digital Accessories",
-    "icon": "Cable",
-    "tone": "blue",
-    "level": "root"
-  },
-  {
-    "key": "charger",
-    "zhName": "充电器",
-    "enName": "Chargers",
-    "icon": "Plug",
-    "tone": "blue",
+    "key": "holiday-gift-box",
+    "zhName": "节日礼盒",
+    "enName": "Holiday Gift Boxes",
+    "icon": "Gift",
+    "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "powerbank",
-    "zhName": "移动电源",
-    "enName": "Power Banks",
-    "icon": "BatteryCharging",
-    "tone": "blue",
+    "key": "birthday-cake",
+    "zhName": "生日蛋糕",
+    "enName": "Birthday Cakes",
+    "icon": "Carrot",
+    "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "cable",
-    "zhName": "数据线",
-    "enName": "Cables",
-    "icon": "Cable",
-    "tone": "blue",
+    "key": "chocolate-gift",
+    "zhName": "巧克力礼盒",
+    "enName": "Chocolate Gifts",
+    "icon": "Carrot",
+    "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "case",
-    "zhName": "保护壳膜",
-    "enName": "Cases & Films",
-    "icon": "Smartphone",
-    "tone": "blue",
+    "key": "engraved-gift",
+    "zhName": "定制刻字",
+    "enName": "Engraved Gifts",
+    "icon": "Gift",
+    "tone": "rose",
     "level": "leaf"
   },
   {
-    "key": "stand",
-    "zhName": "支架配件",
-    "enName": "Stands",
-    "icon": "Monitor",
-    "tone": "blue",
+    "key": "greeting-card",
+    "zhName": "贺卡",
+    "enName": "Greeting Cards",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "aroma-gift",
+    "zhName": "香薰礼盒",
+    "enName": "Aroma Gift Sets",
+    "icon": "Sparkles",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "fruit-basket",
+    "zhName": "果篮",
+    "enName": "Fruit Baskets",
+    "icon": "Carrot",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "souvenir",
+    "zhName": "伴手礼",
+    "enName": "Souvenirs",
+    "icon": "Gift",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "gift-card",
+    "zhName": "礼品卡",
+    "enName": "Gift Cards",
+    "icon": "Gift",
+    "tone": "rose",
+    "level": "leaf"
+  },
+  {
+    "key": "balloon-decor",
+    "zhName": "气球布置",
+    "enName": "Balloon Decor",
+    "icon": "Gift",
+    "tone": "rose",
     "level": "leaf"
   },
   {
@@ -872,43 +1880,99 @@
     "level": "root"
   },
   {
-    "key": "plant",
-    "zhName": "绿植盆栽",
-    "enName": "Plants",
+    "key": "pothos",
+    "zhName": "绿萝",
+    "enName": "Pothos",
     "icon": "Sprout",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "seed",
-    "zhName": "种子种球",
-    "enName": "Seeds",
+    "key": "succulent",
+    "zhName": "多肉",
+    "enName": "Succulents",
     "icon": "Sprout",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "fertilizer",
-    "zhName": "肥料营养",
-    "enName": "Fertilizer",
-    "icon": "Droplets",
+    "key": "flower-seeds",
+    "zhName": "花卉种子",
+    "enName": "Flower Seeds",
+    "icon": "Sprout",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "garden-tool",
+    "key": "vegetable-seeds",
+    "zhName": "蔬菜种子",
+    "enName": "Vegetable Seeds",
+    "icon": "Sprout",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "compound-fertilizer",
+    "zhName": "复合肥",
+    "enName": "Compound Fertilizer",
+    "icon": "Sprout",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "potting-soil",
+    "zhName": "营养土",
+    "enName": "Potting Soil",
+    "icon": "Sprout",
+    "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "flower-pot",
+    "zhName": "花盆",
+    "enName": "Flower Pots",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "garden-tools",
     "zhName": "园艺工具",
     "enName": "Garden Tools",
-    "icon": "Shovel",
+    "icon": "Wrench",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "watering-can",
+    "zhName": "浇水壶",
+    "enName": "Watering Cans",
+    "icon": "Sprout",
     "tone": "emerald",
     "level": "leaf"
   },
   {
-    "key": "garden-supply",
-    "zhName": "园艺用品",
-    "enName": "Garden Supplies",
-    "icon": "Droplets",
+    "key": "drip-irrigation",
+    "zhName": "自动灌溉",
+    "enName": "Drip Irrigation",
+    "icon": "Sprout",
     "tone": "emerald",
+    "level": "leaf"
+  },
+  {
+    "key": "pruning-shears",
+    "zhName": "园艺剪刀",
+    "enName": "Pruning Shears",
+    "icon": "Wrench",
+    "tone": "indigo",
+    "level": "leaf"
+  },
+  {
+    "key": "plant-stand",
+    "zhName": "花架",
+    "enName": "Plant Stands",
+    "icon": "Sofa",
+    "tone": "teal",
     "level": "leaf"
   },
   {
@@ -920,43 +1984,515 @@
     "level": "root"
   },
   {
-    "key": "water",
-    "zhName": "饮用水",
-    "enName": "Water",
-    "icon": "Droplets",
-    "tone": "amber",
-    "level": "leaf"
-  },
-  {
-    "key": "tea",
-    "zhName": "茶叶",
-    "enName": "Tea",
-    "icon": "Coffee",
-    "tone": "amber",
-    "level": "leaf"
-  },
-  {
-    "key": "coffee",
-    "zhName": "咖啡",
-    "enName": "Coffee",
-    "icon": "Coffee",
-    "tone": "amber",
-    "level": "leaf"
-  },
-  {
-    "key": "juice",
-    "zhName": "果汁饮料",
-    "enName": "Juice",
-    "icon": "Coffee",
-    "tone": "amber",
-    "level": "leaf"
-  },
-  {
-    "key": "alcohol",
-    "zhName": "酒类",
-    "enName": "Alcohol",
+    "key": "mineral-water",
+    "zhName": "矿泉水",
+    "enName": "Mineral Water",
     "icon": "Wine",
     "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "soda-water",
+    "zhName": "苏打水",
+    "enName": "Soda Water",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "green-tea",
+    "zhName": "绿茶",
+    "enName": "Green Tea",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "black-tea",
+    "zhName": "红茶",
+    "enName": "Black Tea",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "coffee-beans",
+    "zhName": "咖啡豆",
+    "enName": "Coffee Beans",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "drip-coffee",
+    "zhName": "挂耳咖啡",
+    "enName": "Drip Coffee",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "juice-drink",
+    "zhName": "果汁",
+    "enName": "Juice",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "craft-beer",
+    "zhName": "精酿啤酒",
+    "enName": "Craft Beer",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "red-wine",
+    "zhName": "红酒",
+    "enName": "Red Wine",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "baijiu",
+    "zhName": "白酒",
+    "enName": "Baijiu",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "milk-tea",
+    "zhName": "奶茶",
+    "enName": "Milk Tea",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "rice-wine",
+    "zhName": "黄酒",
+    "enName": "Rice Wine",
+    "icon": "Wine",
+    "tone": "amber",
+    "level": "leaf"
+  },
+  {
+    "key": "accessory",
+    "zhName": "数码配件",
+    "enName": "Digital Accessories",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "root"
+  },
+  {
+    "key": "gan-charger",
+    "zhName": "氮化镓充电器",
+    "enName": "GaN Chargers",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "braided-cable",
+    "zhName": "数据线",
+    "enName": "Braided Cables",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "magnetic-powerbank",
+    "zhName": "移动电源",
+    "enName": "Power Banks",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "phone-case",
+    "zhName": "手机壳",
+    "enName": "Phone Cases",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "tempered-glass",
+    "zhName": "钢化膜",
+    "enName": "Screen Protectors",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "desk-stand",
+    "zhName": "桌面支架",
+    "enName": "Desk Stands",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "selfie-stick",
+    "zhName": "自拍杆",
+    "enName": "Selfie Sticks",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "memory-card",
+    "zhName": "存储卡",
+    "enName": "Memory Cards",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "card-reader",
+    "zhName": "读卡器",
+    "enName": "Card Readers",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "cleaning-kit",
+    "zhName": "清洁套装",
+    "enName": "Cleaning Kits",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "wireless-charger",
+    "zhName": "无线充电器",
+    "enName": "Wireless Chargers",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "phone-cooler",
+    "zhName": "手机散热器",
+    "enName": "Phone Coolers",
+    "icon": "Cable",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "office",
+    "zhName": "办公耗材",
+    "enName": "Office Supplies",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "root"
+  },
+  {
+    "key": "a4-paper",
+    "zhName": "A4纸",
+    "enName": "A4 Paper",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "gel-pens",
+    "zhName": "中性笔",
+    "enName": "Gel Pens",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "notebooks",
+    "zhName": "笔记本",
+    "enName": "Notebooks",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "folders",
+    "zhName": "文件夹",
+    "enName": "Folders",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "stapler",
+    "zhName": "订书机",
+    "enName": "Staplers",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "stamps",
+    "zhName": "印章",
+    "enName": "Stamps",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "ink-cartridge",
+    "zhName": "墨盒",
+    "enName": "Ink Cartridges",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "label-paper",
+    "zhName": "标签纸",
+    "enName": "Label Paper",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "whiteboard",
+    "zhName": "白板",
+    "enName": "Whiteboards",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "shredder",
+    "zhName": "碎纸机",
+    "enName": "Shredders",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "calculators",
+    "zhName": "计算器",
+    "enName": "Calculators",
+    "icon": "Package",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "file-cabinets",
+    "zhName": "文件柜",
+    "enName": "File Cabinets",
+    "icon": "Sofa",
+    "tone": "teal",
+    "level": "leaf"
+  },
+  {
+    "key": "industrial",
+    "zhName": "工业品",
+    "enName": "Industrial Supplies",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "root"
+  },
+  {
+    "key": "bearings",
+    "zhName": "轴承",
+    "enName": "Bearings",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "motors",
+    "zhName": "电机",
+    "enName": "Motors",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "pneumatic-parts",
+    "zhName": "气动元件",
+    "enName": "Pneumatic Parts",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "hydraulic-parts",
+    "zhName": "液压件",
+    "enName": "Hydraulic Parts",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "sensors",
+    "zhName": "传感器",
+    "enName": "Sensors",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "relays",
+    "zhName": "继电器",
+    "enName": "Relays",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "power-cables",
+    "zhName": "电缆",
+    "enName": "Power Cables",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "distribution-box",
+    "zhName": "配电箱",
+    "enName": "Distribution Boxes",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "industrial-adhesive",
+    "zhName": "工业胶粘剂",
+    "enName": "Industrial Adhesives",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "ppe-suits",
+    "zhName": "劳保用品",
+    "enName": "PPE Supplies",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "inverters",
+    "zhName": "变频器",
+    "enName": "Inverters",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "reducers",
+    "zhName": "减速机",
+    "enName": "Reducers",
+    "icon": "Cog",
+    "tone": "slate",
+    "level": "leaf"
+  },
+  {
+    "key": "cleaning",
+    "zhName": "清洁日化",
+    "enName": "Home Cleaning",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "root"
+  },
+  {
+    "key": "laundry-liquid",
+    "zhName": "洗衣液",
+    "enName": "Laundry Detergent",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "dish-soap",
+    "zhName": "洗洁精",
+    "enName": "Dish Soap",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "disinfectant",
+    "zhName": "消毒液",
+    "enName": "Disinfectant",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "toilet-cleaner",
+    "zhName": "洁厕灵",
+    "enName": "Toilet Cleaner",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "facial-tissues",
+    "zhName": "抽纸",
+    "enName": "Facial Tissues",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "toilet-paper",
+    "zhName": "卷纸",
+    "enName": "Toilet Paper",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "trash-bags",
+    "zhName": "垃圾袋",
+    "enName": "Trash Bags",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "mop",
+    "zhName": "拖把",
+    "enName": "Mops",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "cleaning-cloths",
+    "zhName": "抹布",
+    "enName": "Cleaning Cloths",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "air-freshener",
+    "zhName": "空气清新剂",
+    "enName": "Air Fresheners",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "glass-cleaner",
+    "zhName": "玻璃清洁剂",
+    "enName": "Glass Cleaner",
+    "icon": "Droplets",
+    "tone": "blue",
+    "level": "leaf"
+  },
+  {
+    "key": "mite-spray",
+    "zhName": "除螨喷雾",
+    "enName": "Mite Spray",
+    "icon": "Droplets",
+    "tone": "blue",
     "level": "leaf"
   }
 ]

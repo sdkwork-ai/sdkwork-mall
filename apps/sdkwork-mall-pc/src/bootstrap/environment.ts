@@ -53,6 +53,12 @@ export interface SdkworkMallPcRuntimeConfig {
   buildMode: SdkworkMallPcBuildMode;
   configProfile: SdkworkMallPcConfigProfile;
   deploymentMode: SdkworkMallPcDeploymentMode;
+  /**
+   * Build-time deployment profile (`standalone` / `cloud`). The served runtime
+   * document wins at runtime; this is the fallback that keeps a cloud build from
+   * being treated as a self-hosted install when the document is missing.
+   */
+  deploymentProfile?: string;
   environment: SdkworkMallPcEnvironment;
   i18n: SdkworkMallPcI18nRuntimeConfig;
   runtimeTarget: SdkworkMallPcRuntimeTarget;
@@ -151,6 +157,7 @@ export function resolveSdkworkMallPcRuntimeConfig(
     buildMode: environment,
     configProfile: profileByEnvironment[environment],
     deploymentMode: "web",
+    deploymentProfile: envValue("VITE_SDKWORK_DEPLOYMENT_PROFILE"),
     environment,
     i18n: {
       defaultLocale: envValue("VITE_SDKWORK_COMMERCE_PC_DEFAULT_LOCALE") ?? "zh-CN",

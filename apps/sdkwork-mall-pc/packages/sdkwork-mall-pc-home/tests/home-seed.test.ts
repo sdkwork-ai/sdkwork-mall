@@ -6,6 +6,7 @@ import {
   getMallHomeSeedProfile,
   isMallHomeSeedAutomatic,
   isMallHomeSeedAvailable,
+  isMallHomeSeedRefreshNeeded,
   resetMallHomeSeedState,
   runMallHomeSeed,
 } from "../src/home-seed";
@@ -49,6 +50,19 @@ describe("mall home seed provider", () => {
 
     expect(claimMallHomeAutomaticSeed()).toBe(false);
     expect(getMallHomeSeedProfile()).toBe("minimal");
+  });
+
+  it("reports whether a dataset revision still needs topping up", () => {
+    expect(isMallHomeSeedRefreshNeeded()).toBe(false);
+
+    configureMallHomeSeedProvider({
+      automatic: true,
+      needsRefresh: () => true,
+      profile: "standard",
+      run: () => Promise.resolve({ created: 0, state: "succeeded" }),
+    });
+
+    expect(isMallHomeSeedRefreshNeeded()).toBe(true);
   });
 
   it("deduplicates concurrent seeding runs", async () => {
