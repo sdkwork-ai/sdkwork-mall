@@ -74,7 +74,8 @@
     "env:generate:mp": "pnpm --dir apps/sdkwork-mall-mini-program run build:runtime",
     "build:mp:dev": "pnpm --dir apps/sdkwork-mall-mini-program run build:mp:dev",
     "build:mp:prod": "pnpm --dir apps/sdkwork-mall-mini-program run build:mp:prod",
-    "build:mp:demo": "pnpm --dir apps/sdkwork-mall-mini-program run build:mp:demo"
+    "build:mp:demo": "pnpm --dir apps/sdkwork-mall-mini-program run build:mp:demo",
+    "check:release-access-token:require-anchor": "node ../sdkwork-specs/tools/check-release-access-token-env.mjs --root . --require-anchor"
   },
   "devDependencies": {
     "@sdkwork/iam-app-sdk": "workspace:*",

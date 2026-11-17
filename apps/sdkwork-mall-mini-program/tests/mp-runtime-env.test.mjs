@@ -19,6 +19,18 @@ const profiles = [
   "cloud.development", "cloud.test", "cloud.staging", "cloud.demo", "cloud.production",
 ];
 
+// IAM makes the deploy application the identity of every access token, so the
+// committed `app_id`/`aud` claims are this installation's anchor, never the
+// manifest runtime id (APP_ACCESS_TOKEN_SPEC.md section 3.1.1). With no anchor on
+// a source checkout the committed profiles carry the explicit placeholder.
+const DEPLOY_APPLICATION_ID_ENV = "SDKWORK_DEPLOY_APPLICATION_ID";
+const PENDING_DEPLOY_APPLICATION_ID = "__SDKWORK_DEPLOY_APPLICATION_ID__";
+
+function expectedTokenAppId() {
+  return String(process.env[DEPLOY_APPLICATION_ID_ENV] ?? "").trim()
+    || PENDING_DEPLOY_APPLICATION_ID;
+}
+
 function read(relativePath) {
   return readFileSync(path.join(repoRoot, relativePath), "utf8").replace(/^\uFEFF/u, "");
 }
@@ -33,7 +45,7 @@ test("the mini-program surface is declared with the canonical env bindings", () 
   assert.ok(surface, "the mini-program surface must exist");
   assert.equal(surface.format, "mini-program");
   assert.equal(surface.runtimeTarget, "mini-program");
-  assert.equal(surface.accessToken.appId, "sdkwork-mall-mini-program");
+  assert.equal(surface.accessToken.appIdEnv, "SDKWORK_DEPLOY_APPLICATION_ID");
   for (const key of [
     "SDKWORK_MALL_MINI_PROGRAM_APPLICATION_PUBLIC_HTTP_URL",
     "SDKWORK_MALL_MINI_PROGRAM_PLATFORM_API_GATEWAY_HTTP_URL",
@@ -51,7 +63,7 @@ test("every committed mini-program profile carries the transport URLs and its ow
     assert.equal(values.SDKWORK_PROFILE_ID, profile);
     assert.equal(values.SDKWORK_RUNTIME_TARGET, "mini-program");
     const payload = JSON.parse(Buffer.from(String(values.SDKWORK_ACCESS_TOKEN).split(".")[1], "base64url").toString("utf8"));
-    assert.equal(payload.app_id, "sdkwork-mall-mini-program");
+    assert.equal(payload.app_id, expectedTokenAppId());
     assert.equal(`${payload.deployment_profile}.${payload.environment}`, profile);
   }
 });

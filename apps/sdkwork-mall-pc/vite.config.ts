@@ -266,16 +266,19 @@ function readProfilePublicApplicationAccessToken(mode: string): string | undefin
   return process.env.SDKWORK_ACCESS_TOKEN?.trim() || undefined;
 }
 
-/** Manifest `backend.appId`: the application identity the access token must carry. */
-function readManifestApplicationId(): string | undefined {
-  try {
-    const manifest = JSON.parse(
-      readFileSync(path.join(appRoot, "agent.app.config.json"), "utf8"),
-    ) as { backend?: { appId?: string } };
-    return manifest.backend?.appId?.trim() || undefined;
-  } catch {
-    return undefined;
-  }
+/**
+ * Deploy application anchor: the identity the public application access token
+ * must carry.
+ *
+ * IAM makes the deploy application the identity of every access token, so the
+ * expected `app_id` is `SDKWORK_DEPLOY_APPLICATION_ID`, never the manifest
+ * `backend.appId` runtime id (APP_ACCESS_TOKEN_SPEC.md section 3.1.1). A source
+ * checkout has no anchor: the committed profile then carries the
+ * `__SDKWORK_DEPLOY_APPLICATION_ID__` placeholder, and `undefined` here skips the
+ * plugin's app_id comparison instead of comparing against a retired identity.
+ */
+function readDeployApplicationId(): string | undefined {
+  return process.env.SDKWORK_DEPLOY_APPLICATION_ID?.trim() || undefined;
 }
 
 /**
@@ -315,7 +318,7 @@ function resolveCredentialEntryPlugins({
   return [
     createSdkworkPublicApplicationAccessTokenVitePlugin({
       accessToken: readProfilePublicApplicationAccessToken(mode),
-      applicationId: readManifestApplicationId(),
+      applicationId: readDeployApplicationId(),
       environment,
       profileId: mode,
     }),

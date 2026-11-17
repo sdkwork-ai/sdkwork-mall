@@ -19,6 +19,19 @@ const workspaceRoot = path.resolve(import.meta.dirname, "..", "..");
 const DEPLOYMENT_PROFILES = ["standalone", "cloud"];
 const LIFECYCLES = ["development", "test", "staging", "demo", "production"];
 
+// IAM makes the deploy application the identity of every access token, so the
+// `app_id`/`aud` claims are this installation's anchor, never the manifest
+// `backend.appId` runtime id (APP_ACCESS_TOKEN_SPEC.md section 3.1.1). A source
+// checkout has no anchor: the committed profiles then carry the explicit
+// placeholder, because a repository cannot know an installation's deploy id.
+const DEPLOY_APPLICATION_ID_ENV = "SDKWORK_DEPLOY_APPLICATION_ID";
+const PENDING_DEPLOY_APPLICATION_ID = "__SDKWORK_DEPLOY_APPLICATION_ID__";
+
+function expectedTokenAppId() {
+  return String(process.env[DEPLOY_APPLICATION_ID_ENV] ?? "").trim()
+    || PENDING_DEPLOY_APPLICATION_ID;
+}
+
 const SURFACES = [
   { appId: "sdkwork-mall-pc", root: "apps/sdkwork-mall-pc" },
   { appId: "sdkwork-mall-h5", root: "apps/sdkwork-mall-h5" },
@@ -87,8 +100,8 @@ test("every PC/H5 profile file carries an identity-matched public application to
         const claims = decodeSegment(parts[1]);
         assert.equal(claims.token_class, "application", `${root} ${profileId}: token_class`);
         assert.equal(claims.token_type, "access", `${root} ${profileId}: token_type`);
-        assert.equal(claims.app_id, manifest.backend.appId, `${root} ${profileId}: app_id claim`);
-        assert.equal(claims.aud, manifest.backend.appId, `${root} ${profileId}: aud claim`);
+        assert.equal(claims.app_id, expectedTokenAppId(), `${root} ${profileId}: app_id claim`);
+        assert.equal(claims.aud, expectedTokenAppId(), `${root} ${profileId}: aud claim`);
         assert.equal(
           String(claims.tenant_id),
           String(manifest.backend.tenantId),
