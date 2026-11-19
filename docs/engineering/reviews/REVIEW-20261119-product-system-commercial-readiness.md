@@ -311,6 +311,21 @@ JS boot smoke cannot observe.
   the row; delete and default toggling stay available. 删除 now asks for
   confirmation before the destructive write.
 
+### 2.0.10 Upstream catalog price projection (round 17)
+
+- The buyer list read model now publishes the **minimum sellable SKU price**:
+  `sdkwork-merchandise` commit `08af5af` extends `SpuRecord` with
+  `min_sale_price_minor`/`max_sale_price_minor`/`min_currency_code`/
+  `min_price_scale`, adds correlated SKU aggregates to `spu_list_select!`, and
+  serialises `salePriceMinor`/`currencyCode`/`minorUnitExponent` on
+  `ProductResponse`.
+- The storefront already reads exactly those fields, so real catalog cards now
+  have a real price instead of “暂无报价”. `cargo check` and the
+  `sdkwork-merchandise-web-support` tests (15) pass; the SQL path itself still
+  needs an integration database run before production sign-off.
+- Still open upstream: `primaryImageUrl` (Drive media → delivery URL), detail
+  `skus`, inventory aggregation and server-side facets.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
@@ -360,13 +375,14 @@ dev double 只认 `sales` / `price_asc` / `price_desc` / `newest`。结果是“
 ## 3. Remaining blockers for commercial delivery
 
 These are **upstream read-model gaps**, not app defects. The current catalog app API
-(`/app/v3/api/catalog/products*`) returns `ProductResponse`, which has no price, media or
-SKU rows; the composed commerce contract the storefront consumes has no product-SKU
-collection. Therefore, on a real catalog backend:
+(`/app/v3/api/catalog/products*`) now publishes the minimum sellable SKU price
+(commit `08af5af`), but still has no media or SKU rows; the composed commerce
+contract the storefront consumes has no product-SKU collection. Therefore, on a
+real catalog backend:
 
-1. **列表/搜索卡片无价格、无主图**：需要 catalog 列表投影返回
-   `salePriceMinor` / `listPriceMinor` / `minorUnitExponent` / `primaryImageUrl`
-   （取 `commerce_product_sku` 最低可售价与 `commerce_product_media` 首图）。
+1. **列表/搜索卡片有价格、无主图**：价格已由 `salePriceMinor` /
+   `minorUnitExponent` 投影；还缺 `primaryImageUrl`
+   （取 `commerce_product_media` 首图并经 Drive delivery 转成可渲染 URL）。
    Frontend already reads these fields.
 2. **详情无 SKU**：需要 `GET /catalog/products/{productId}` 内嵌 `skus`，或开放
    `GET /catalog/products/{productId}/skus` 到 app SDK。Catalog service 已具备
@@ -383,11 +399,12 @@ collection. Therefore, on a real catalog backend:
 
 Recommended upstream change set (one PR each, in dependency order):
 
-- `sdkwork-merchandise`: extend `SpuRecord` + list/retrieve SQL with
-  `min_sale_price_minor`, `min_list_price_minor`, `currency_code`, `minor_unit_exponent`,
-  `primary_image_url`, `brand_name`; add `skus` to the detail read model.
-- `sdkwork-catalog`: add those fields (and `skus`) to the app-api `CatalogProduct` /
-  product-detail schema, plus an app-api SKU collection for direct reads.
+- `sdkwork-merchandise` (price done in `08af5af`): still add `primary_image_url`,
+  `brand_name` and `skus` to the detail/list read model; media needs the Drive
+  delivery URL resolver.
+- `sdkwork-catalog`: add the remaining fields (and `skus`) to the app-api
+  `CatalogProduct` / product-detail schema, plus an app-api SKU collection for
+  direct reads.
 - `scripts/dev/mock-commerce-gateway.mjs`: keep in sync (already emits the frontend shape).
 - No mall SDK regeneration is required for additive response fields because the federated
   commerce client is generic; typed contract updates still belong to the authority repos.
