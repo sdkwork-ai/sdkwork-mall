@@ -19,6 +19,7 @@ export interface MpCategory {
 
 export interface MpProductCard {
   id: string;
+  brand?: string;
   imageUrl: string;
   priceCny: number | null;
   sales: number | null;
@@ -94,6 +95,7 @@ function mapProductCard(item: Record<string, unknown>): MpProductCard {
   const image = item.imageUrl ?? item.mainImage ?? item.image;
   return {
     id: String(item.id ?? item.spuId ?? ""),
+    brand: typeof item.brandName === "string" ? item.brandName : undefined,
     title: String(item.title ?? item.name ?? "商品"),
     imageUrl: typeof image === "string" ? image : "",
     priceCny: readProductPrice(item),

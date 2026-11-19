@@ -167,6 +167,12 @@ page {
   min-height: 72rpx;
 }
 
+.mp-product-brand {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
 .mp-product-meta {
   display: flex;
   align-items: baseline;

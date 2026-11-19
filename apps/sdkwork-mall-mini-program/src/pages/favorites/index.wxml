@@ -12,7 +12,7 @@
         <view class="fav-body" bindtap="goProduct" data-id="{{item.id}}">
           <view class="fav-title">{{item.title}}</view>
           <view class="mp-price" wx:if="{{item.priceText}}">{{item.priceText}}</view>
-          <view class="mp-muted" wx:else>询价</view>
+          <view class="mp-muted" wx:else>暂无报价</view>
         </view>
         <button
           class="mp-btn mp-btn-ghost fav-remove"

@@ -424,6 +424,14 @@ JS boot smoke cannot observe.
   title; `catalog-price.test.ts` asserts the mapped brand.
 - H5 typecheck and 3 catalog tests pass; mall `pnpm verify` remains green.
 
+### 2.0.19 Mini-program missing-price copy and brand (round 27)
+
+- MP favorites still rendered `询价` for a card without a price; it now uses
+  `暂无报价`, matching PC and H5.
+- `MpProductCard` maps `brandName` and the category card renders it under the
+  title, so brand is consistent across PC, H5 and MP list surfaces.
+- MP `tsc --noEmit` passes and the 36-page smoke stays clean.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是

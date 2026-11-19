@@ -51,6 +51,7 @@
           </view>
           <view class="category-product-body">
             <view class="mp-product-title">{{item.title}}</view>
+            <view class="mp-product-brand" wx:if="{{item.brand}}">{{item.brand}}</view>
             <view class="mp-product-meta">
               <text class="mp-price">{{item.priceText}}</text>
               <text class="mp-product-sales" wx:if="{{item.sales}}">已售 {{item.sales}}</text>
