@@ -151,7 +151,7 @@ describe("sdkwork-mall-pc-wallet service", () => {
       id: 202,
       points: 5000,
       priceCny: 24,
-      title: "5000 points",
+      title: "5000 积分",
     });
     expect(`recharge${"Packs"}` in overview).toBe(false);
   });

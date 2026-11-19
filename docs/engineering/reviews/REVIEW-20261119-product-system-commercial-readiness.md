@@ -199,7 +199,11 @@ of a skeleton:
   the “提现后预计余额” preview work.
 - **Ledger rows shared one React key** because the fallback was `Date.now()`;
   rows now use `historyId`/`transactionId`/`id` with an index fallback, and the
-  double publishes point-ledger entries with `historyId`.
+  double publishes point-ledger entries with `historyId`. Cash/points entries
+  also carry `transactionTypeName`/`remarks`/`createdAt`, so the wallet activity
+  shows “订单奖励 / 充值赠送 / 充值 / 订单支付” instead of “Wallet transaction”
+  and no longer renders a 1970 timestamp. Recharge package titles read
+  “30,000 积分” rather than “30000 points”.
 - **Invoice centre**: “新建草稿” creates a real draft (企业/个人, tax number,
   amount) that appears in 开票历史 with ¥100.00; detail loads line items and
   “提交发票” moves it to 待开票. The double now returns the created invoice

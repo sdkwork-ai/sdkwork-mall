@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "roots": {
-    "pc": 1895,
+    "pc": 1896,
     "h5": 229,
     "miniProgram": 173,
     "flutter": 163
   },
-  "total": 2460
+  "total": 2461
 }

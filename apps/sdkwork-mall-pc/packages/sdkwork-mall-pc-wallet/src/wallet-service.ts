@@ -371,7 +371,7 @@ export function createSdkworkWalletService(
       const rechargeSettings = unwrapSdkworkOrderResponse<RemoteRechargeSettings>(pointsToCashRatePayload);
       const rechargePackages = rechargePackagesPayload.map((item) => ({
         id: item.id,
-        name: `${item.points} points`,
+        name: `${item.points} 积分`,
         pointAmount: item.points,
         price: item.priceAmount,
       }));

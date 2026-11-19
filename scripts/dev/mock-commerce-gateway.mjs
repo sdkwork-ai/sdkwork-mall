@@ -1291,12 +1291,12 @@ async function handle(method, url, body) {
   if (p === "GET /app/v3/api/wallet/ledger_entries/points") {
     return ok({
       content: [
-        { id: "point-ledger-1", historyId: "point-ledger-1", summary: "订单奖励", pointsDelta: 120, points: 120, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
-        { id: "point-ledger-2", historyId: "point-ledger-2", summary: "充值赠送", pointsDelta: 500, points: 500, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
+        { id: "point-ledger-1", historyId: "point-ledger-1", summary: "订单奖励", transactionTypeName: "订单奖励", remarks: "订单奖励", pointsDelta: 120, points: 120, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
+        { id: "point-ledger-2", historyId: "point-ledger-2", summary: "充值赠送", transactionTypeName: "充值赠送", remarks: "充值赠送", pointsDelta: 500, points: 500, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
       ],
       items: [
-        { id: "point-ledger-1", historyId: "point-ledger-1", summary: "订单奖励", pointsDelta: 120, points: 120, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
-        { id: "point-ledger-2", historyId: "point-ledger-2", summary: "充值赠送", pointsDelta: 500, points: 500, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
+        { id: "point-ledger-1", historyId: "point-ledger-1", summary: "订单奖励", transactionTypeName: "订单奖励", remarks: "订单奖励", pointsDelta: 120, points: 120, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
+        { id: "point-ledger-2", historyId: "point-ledger-2", summary: "充值赠送", transactionTypeName: "充值赠送", remarks: "充值赠送", pointsDelta: 500, points: 500, occurredAt: new Date().toISOString(), createdAt: new Date().toISOString(), status: "COMPLETED" },
       ],
       pageInfo: { page: 1, total: 2 },
     });
@@ -1322,7 +1322,10 @@ async function handle(method, url, body) {
   }
   if (p === "GET /app/v3/api/wallet/points/summary") return ok({ balance: 8600 });
   if (p === "GET /app/v3/api/wallet/ledger_entries/cash") {
-    return ok({ content: [{ id: "ledger-1", summary: "充值", amountCny: 1000, occurredAt: new Date().toISOString() }, { id: "ledger-2", summary: "订单支付", amountCny: -89, occurredAt: new Date().toISOString() }], pageInfo: { page: 1, total: 2 } });
+    return ok({ content: [
+      { id: "ledger-1", historyId: "ledger-1", summary: "充值", transactionTypeName: "充值", remarks: "充值", amount: 1000, amountCny: 1000, createdAt: new Date().toISOString(), occurredAt: new Date().toISOString() },
+      { id: "ledger-2", historyId: "ledger-2", summary: "订单支付", transactionTypeName: "订单支付", remarks: "订单支付", amount: -89, amountCny: -89, createdAt: new Date().toISOString(), occurredAt: new Date().toISOString() },
+    ], pageInfo: { page: 1, total: 2 } });
   }
   if (p === "GET /app/v3/api/wallet/points/lots") {
     return ok({ content: [{ id: "lot-1", points: 6000, expiresAt: "2026-12-31" }, { id: "lot-2", points: 2600 }], pageInfo: { page: 1, total: 2 } });
