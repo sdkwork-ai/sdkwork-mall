@@ -438,6 +438,14 @@ JS boot smoke cannot observe.
   matching PC, H5 and the mini-program.
 - `flutter analyze` reports no issues and 35 widget tests pass.
 
+### 2.0.21 Mini-program product-detail brand (round 29)
+
+- `MpProductDetail` maps `brandName`; the product detail header renders
+  `品牌：{brand}` under the title. PC/H5 PDP, MP detail and all list cards now
+  expose the same brand projection.
+- MP `tsc --noEmit` passes, the 36-page smoke stays clean and mall
+  `pnpm verify` remains green.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是

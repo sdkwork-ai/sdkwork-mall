@@ -28,6 +28,7 @@
     <view class="mp-card product-summary">
       <view class="mp-price product-price">{{displayPrice || priceFallback}}</view>
       <view class="product-title">{{detail.title}}</view>
+      <view class="mp-muted product-brand" wx:if="{{detail.brand}}">品牌：{{detail.brand}}</view>
       <view class="mp-muted product-sales">
         <text wx:if="{{detail.sales}}">已售 {{detail.sales}}</text>
         <text wx:if="{{maxQuantity != null}}"> · 库存 {{maxQuantity}}</text>

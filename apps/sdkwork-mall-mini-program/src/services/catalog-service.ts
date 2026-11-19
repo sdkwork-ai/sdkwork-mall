@@ -47,6 +47,7 @@ export interface MpSku {
 export interface MpProductDetail {
   description: string;
   id: string;
+  brand?: string;
   imageUrl: string;
   images: string[];
   priceCny: number | null;
@@ -163,6 +164,7 @@ export async function getProductDetail(productId: string): Promise<MpProductDeta
   const images = [...new Set([mainImage, ...gallery].filter(Boolean))];
   return {
     id: String(record.id ?? productId),
+    brand: typeof record.brandName === "string" ? record.brandName : undefined,
     title: String(record.title ?? record.name ?? "商品"),
     description: typeof record.description === "string" ? record.description : "",
     imageUrl: mainImage,
