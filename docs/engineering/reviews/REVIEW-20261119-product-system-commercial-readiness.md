@@ -380,6 +380,16 @@ JS boot smoke cannot observe.
 - `cargo check` and crate tests pass; the SQL/media path still needs a database
   integration run.
 
+### 2.0.15 Upstream brand-name projection (round 23)
+
+- `sdkwork-merchandise` commit `50ac2f4` adds `brand_name` to `SpuRecord` and
+  projects it from `commerce_product_brand` in the list SQL; `ProductResponse`
+  serialises `brandName`.
+- The PC search service already maps `record.brandName` and `SearchPage` renders
+  it under the product title, so real search results now show the brand without
+  a frontend change. The catalog OpenAPI schema was extended in `9637c93`.
+- `cargo check`/crate tests pass; the SQL path still needs a database run.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
@@ -452,11 +462,11 @@ real catalog backend:
 Recommended upstream change set (one PR each, in dependency order):
 
 - `sdkwork-merchandise` (price `08af5af`, detail SKUs `f208021`, main image
-  `4525ce1`, gallery `5b1214b`): still add `brand_name`; media that carries only
-  a Drive id needs the delivery-URL resolver.
+  `4525ce1`, gallery `5b1214b`, brand `50ac2f4`): remaining work is media that
+  carries only a Drive id (delivery-URL resolver) and inventory aggregation.
 - `sdkwork-catalog` (detail SKUs `795b1a6`, schema `b6a01d2`, image schema
-  `008e4fc`, gallery `f59e63d`): add the remaining brand field to the app-api
-  `CatalogProduct` schema.
+  `008e4fc`, gallery `f59e63d`, brand `9637c93`): no remaining catalog-field
+  change on this list.
 - `scripts/dev/mock-commerce-gateway.mjs`: keep in sync (already emits the frontend shape).
 - No mall SDK regeneration is required for additive response fields because the federated
   commerce client is generic; typed contract updates still belong to the authority repos.
