@@ -150,6 +150,10 @@ export interface MallProductDetail {
   shopId?: string;
   shopName?: string;
   /**
+   * Brand display name from the catalog projection (`brandName`).
+   */
+  brand?: string;
+  /**
    * 店铺评分摘要。
    */
   shopRating?: MallShopRatingSummary | null;
@@ -614,6 +618,7 @@ export async function loadMallProductDetail(productId: string): Promise<MallProd
     videoUrl: readString(record.videoUrl ?? record.video),
     shopId: readString(record.shopId ?? record.shop_id),
     shopName: readString(record.shopName ?? record.shop_name),
+    brand: readString(record.brandName ?? record.brand),
     shopRating,
     images,
     skus,

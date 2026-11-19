@@ -1523,6 +1523,13 @@ a {
   margin: 0;
 }
 
+.sdkwork-mall-pc-pdp-brand {
+  margin: 0.35rem 0 0;
+  color: var(--sdk-color-brand-primary, #e1251b);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .sdkwork-mall-pc-pdp-subtitle {
   color: var(--sdk-color-text-secondary, #6b7280);
   font-size: 0.85rem;

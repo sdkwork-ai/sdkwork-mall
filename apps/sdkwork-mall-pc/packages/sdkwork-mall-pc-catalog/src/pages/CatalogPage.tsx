@@ -950,6 +950,7 @@ export function SdkworkMallProductDetailPage() {
 
         <div className="sdkwork-mall-pc-pdp-info">
           <h1>{detail.title}</h1>
+          {detail.brand ? <p className="sdkwork-mall-pc-pdp-brand">品牌：{detail.brand}</p> : null}
           {detail.subtitle ? <p className="sdkwork-mall-pc-pdp-subtitle">{detail.subtitle}</p> : null}
 
           <div className="sdkwork-mall-pc-pdp-price-block">

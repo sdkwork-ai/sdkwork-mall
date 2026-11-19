@@ -34,6 +34,7 @@ describe("loadMallProductDetail", () => {
           title: "AURORA X1 Pro 旗舰手机",
           subtitle: "影像旗舰",
           description: "一英寸大底",
+          brandName: "PolarDay",
           attributes: [
             {
               attributeId: "8",
@@ -103,6 +104,7 @@ describe("loadMallProductDetail", () => {
     expect(detail.title).toBe("AURORA X1 Pro 旗舰手机");
     expect(detail.subtitle).toBe("影像旗舰");
     expect(detail.description).toBe("一英寸大底");
+    expect(detail.brand).toBe("PolarDay");
     expect(detail.priceCny).toBe(6251.9);
     expect(detail.listPriceCny).toBe(7056);
     expect(detail.images).toEqual(["https://cdn.example/x1.png"]);

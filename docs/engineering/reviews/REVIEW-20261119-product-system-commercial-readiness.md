@@ -103,8 +103,9 @@ list/detail → logistics → after-sales submission**. Fixes found by that run:
   matches the runtime-env contract. The i18n ratchet baseline was refreshed
   (miniProgram 153 → 173 from the concurrent MP commercial pass; PC 1866 → 1897
   for the wallet retry/success labels, cancellation confirmations, merchant
-  error/retry copy, localized governance statuses, the admin SPU field and
-  membership success copy); no H5 or Flutter copy was added.
+  error/retry copy, localized governance statuses, the admin SPU field,
+  membership success copy and the PDP brand line); no H5 or Flutter copy was
+  added.
 - **`pnpm verify` now passes end-to-end**, including 216 node contract tests,
   vitest, i18n catalogues/baseline, dataset and default-data gates.
 
@@ -403,6 +404,16 @@ JS boot smoke cannot observe.
   the updated catalog OpenAPI (and expose it on `commerce.catalog.products`),
   then the app can wire `brandId` end to end. Brand **display** already works
   through `brandName` (`50ac2f4`).
+
+### 2.0.17 PDP brand line (round 25)
+
+- `loadMallProductDetail` maps `brandName` into `MallProductDetail.brand`
+  (catalog service test now asserts `PolarDay`), and the PDP renders
+  `品牌：{brand}` above the subtitle.
+- Search/catalog cards already rendered the same field, so brand now appears
+  consistently on list, catalog and detail surfaces. The filter UI remains
+  blocked by the cloudrouter generated client (see 2.0.16).
+- `catalog-service.test.ts` 4 tests pass; i18n baseline PC 1897 / total 2462.
 
 ### 2.1 列表分页全部失效（P0）
 
