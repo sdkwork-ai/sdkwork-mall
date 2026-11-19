@@ -342,6 +342,16 @@ JS boot smoke cannot observe.
 - Remaining upstream: `primaryImageUrl` (Drive delivery URL), inventory
   aggregation and server-side facets.
 
+### 2.0.12 H5/MP consume the canonical price projection (round 19)
+
+- Upstream now publishes `salePriceMinor` + `minorUnitExponent`; only PC read
+  them. The H5 and mini-program catalog services now convert minor units with
+  the currency exponent before falling back to legacy `priceCny/price`.
+- H5 list totals also accept `pageInfo.totalItems` (canonical v3) before the
+  legacy `total`, matching PC/MP.
+- Verified: H5 and mini-program `tsc --noEmit` clean; MP 36-page smoke passes;
+  mall `pnpm verify` remains green.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
@@ -465,6 +475,8 @@ Recommended upstream change set (one PR each, in dependency order):
     编辑张三 pre-fills the structured fields before saving
   - H5: login → PDP (曜石黑/皓月白, 库存 50) → checkout with coupon+wallet+points
     shows `¥2,332.50`, submit opens the cashier and completes
+  - H5/MP catalog services consume `salePriceMinor`/`minorUnitExponent`; H5
+    totals read `pageInfo.totalItems`
   - mini-program: 37-entry build, 36-page smoke (12 requests, 0 errors)
   - Flutter: `flutter analyze` clean, 35/35 widget/route/i18n/logistics tests
   - membership: 立即升级 → 操作成功 / 会员已开通，权益立即生效 (no console errors)

@@ -96,6 +96,27 @@ function readMoney(value: unknown): number | null {
   return null;
 }
 
+/**
+ * Reads a canonical minor-unit amount plus its currency exponent.
+ *
+ * The catalog read model publishes `salePriceMinor` + `minorUnitExponent`
+ * (strings per the int64 wire rule), so a card must not fall back to the
+ * legacy decimal `priceCny` when the canonical pair is present.
+ */
+function readMinorMoney(value: unknown, exponent: unknown): number | null {
+  const minor = readMoney(value);
+  if (minor === null) {
+    return null;
+  }
+  const scale = readMoney(exponent) ?? 2;
+  return Math.round(minor) / 10 ** scale;
+}
+
+function readProductPrice(record: Record<string, unknown>): number | null {
+  return readMinorMoney(record.salePriceMinor, record.minorUnitExponent)
+    ?? readMoney(record.priceCny ?? record.price ?? record.salePrice);
+}
+
 function readImage(value: unknown): string | undefined {
   return typeof value === "string" && value ? value : undefined;
 }
@@ -166,17 +187,17 @@ export async function searchMallH5Products(input: {
   });
   const payload = unwrapSdkworkCommerceResponse<{
     items?: Record<string, unknown>[];
-    pageInfo?: { total?: number | string };
+    pageInfo?: { total?: number | string; totalItems?: number | string };
   }>(response) ?? {};
   return {
     items: (payload.items ?? []).map((item) => ({
       id: String(item.id ?? item.spuId ?? ""),
       imageUrl: readImage(item.imageUrl ?? item.mainImage ?? item.image),
-      priceCny: readMoney(item.priceCny ?? item.price ?? item.salePrice),
+      priceCny: readProductPrice(item),
       sales: readMoney(item.sales ?? item.salesCount) ?? undefined,
       title: String(item.title ?? item.name ?? "商品"),
     })),
-    total: readMoney(payload.pageInfo?.total) ?? 0,
+    total: readMoney(payload.pageInfo?.totalItems) ?? readMoney(payload.pageInfo?.total) ?? 0,
   };
 }
 
@@ -199,13 +220,15 @@ export async function retrieveMallH5ProductDetail(productId: string): Promise<Ma
     id: String(record.id ?? productId),
     imageUrl: mainImage,
     images,
-    priceCny: readMoney(record.priceCny ?? record.price ?? record.salePrice),
+    priceCny: readProductPrice(record),
     sales: readMoney(record.sales ?? record.salesCount) ?? undefined,
     shopId: typeof record.shopId === "string" ? record.shopId : undefined,
     shopName: typeof record.shopName === "string" ? record.shopName : undefined,
     skus: skuItems.map((sku, index) => ({
       id: String(sku.id ?? `sku-${index + 1}`),
-      priceCny: readMoney(sku.priceCny ?? sku.price),
+      priceCny:
+        readMinorMoney(sku.salePriceMinor, sku.minorUnitExponent)
+        ?? readMoney(sku.priceCny ?? sku.price),
       stock: readMoney(sku.stock ?? sku.quantity),
       title: String(sku.title ?? sku.name ?? `规格 ${index + 1}`),
     })),

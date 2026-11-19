@@ -75,13 +75,28 @@ function readNullableNumber(value: unknown): number | null {
   return null;
 }
 
+/** Canonical money wire shape: minor units plus the currency exponent. */
+function readMinorMoney(value: unknown, exponent: unknown): number | null {
+  const minor = readNullableNumber(value);
+  if (minor === null) {
+    return null;
+  }
+  const scale = readNullableNumber(exponent) ?? 2;
+  return Math.round(minor) / 10 ** scale;
+}
+
+function readProductPrice(record: Record<string, unknown>): number | null {
+  return readMinorMoney(record.salePriceMinor, record.minorUnitExponent)
+    ?? readNullableNumber(record.priceCny ?? record.price ?? record.salePrice);
+}
+
 function mapProductCard(item: Record<string, unknown>): MpProductCard {
   const image = item.imageUrl ?? item.mainImage ?? item.image;
   return {
     id: String(item.id ?? item.spuId ?? ""),
     title: String(item.title ?? item.name ?? "商品"),
     imageUrl: typeof image === "string" ? image : "",
-    priceCny: readNullableNumber(item.priceCny ?? item.price ?? item.salePrice),
+    priceCny: readProductPrice(item),
     sales: readNullableNumber(item.sales ?? item.salesCount),
   };
 }
@@ -150,7 +165,7 @@ export async function getProductDetail(productId: string): Promise<MpProductDeta
     description: typeof record.description === "string" ? record.description : "",
     imageUrl: mainImage,
     images,
-    priceCny: readNullableNumber(record.priceCny ?? record.price),
+    priceCny: readProductPrice(record),
     sales: readNullableNumber(record.sales ?? record.salesCount),
     shopId: typeof record.shopId === "string" ? record.shopId : "",
     shopName: typeof record.shopName === "string" ? record.shopName : "",
@@ -167,7 +182,9 @@ export async function getProductDetail(productId: string): Promise<MpProductDeta
     skus: skuItems.map((sku, index) => ({
       id: String(sku.id ?? `sku-${index + 1}`),
       title: String(sku.title ?? sku.name ?? `规格 ${index + 1}`),
-      priceCny: readNullableNumber(sku.priceCny ?? sku.price),
+      priceCny:
+        readMinorMoney(sku.salePriceMinor, sku.minorUnitExponent)
+        ?? readNullableNumber(sku.priceCny ?? sku.price),
       stock: readNullableNumber(sku.stock ?? sku.quantity),
       imageUrl: typeof sku.imageUrl === "string" ? sku.imageUrl : "",
     })),
