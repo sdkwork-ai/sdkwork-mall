@@ -98,7 +98,7 @@ class _SdkworkFavoritesPageState extends State<SdkworkFavoritesPage> {
                   fontWeight: FontWeight.w700,
                 ),
               )
-            : const Text('询价'),
+            : const Text('暂无报价'),
         trailing: TextButton(
           onPressed: () async {
             await SdkworkFavoritesStore.removeFavorite(item.id);

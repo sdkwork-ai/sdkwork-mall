@@ -432,6 +432,12 @@ JS boot smoke cannot observe.
   title, so brand is consistent across PC, H5 and MP list surfaces.
 - MP `tsc --noEmit` passes and the 36-page smoke stays clean.
 
+### 2.0.20 Flutter missing-price copy (round 28)
+
+- The Flutter favorites card still rendered `询价`; it now renders `暂无报价`,
+  matching PC, H5 and the mini-program.
+- `flutter analyze` reports no issues and 35 widget tests pass.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
