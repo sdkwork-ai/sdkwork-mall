@@ -323,8 +323,8 @@ JS boot smoke cannot observe.
   have a real price instead of “暂无报价”. `cargo check` and the
   `sdkwork-merchandise-web-support` tests (15) pass; the SQL path itself still
   needs an integration database run before production sign-off.
-- Still open upstream: `primaryImageUrl` (Drive media → delivery URL), detail
-  `skus`, inventory aggregation and server-side facets.
+- Still open upstream: inventory aggregation and server-side facets; media
+  without a snapshot URL still needs the Drive delivery resolver.
 
 ### 2.0.11 Upstream product-detail SKUs (round 18)
 
@@ -339,8 +339,8 @@ JS boot smoke cannot observe.
 - The storefront already reads `record.skus` (`readSkus`), so no mall code
   change was needed; `cargo check` passes for the merchandise and catalog route
   crates. The SQL integration path still needs a database run.
-- Remaining upstream: `primaryImageUrl` (Drive delivery URL), inventory
-  aggregation and server-side facets.
+- Remaining upstream: inventory aggregation and server-side facets; media that
+  carries only a Drive id still needs the delivery-URL resolver.
 
 ### 2.0.12 H5/MP consume the canonical price projection (round 19)
 
@@ -351,6 +351,19 @@ JS boot smoke cannot observe.
   legacy `total`, matching PC/MP.
 - Verified: H5 and mini-program `tsc --noEmit` clean; MP 36-page smoke passes;
   mall `pnpm verify` remains green.
+
+### 2.0.13 Upstream product image projection (round 20)
+
+- `sdkwork-merchandise` commit `4525ce1` adds `primary_image_url` to
+  `SpuRecord` and projects it from the product's `main_image` media row:
+  `resource_snapshot->>'url' | 'downloadUrl' | 'previewUrl'`.
+- `ProductResponse` now serialises `imageUrl`, which PC/H5/MP cards and PDP
+  already read; catalog OpenAPI adds the field (`008e4fc`).
+- This is a best-effort projection: media created with a snapshot URL renders
+  immediately; media that only carries a Drive `media_resource_id` still needs
+  the Drive delivery-URL resolver before it can render.
+- `cargo check` and `sdkwork-merchandise-web-support` tests pass; SQL still needs
+  a database integration run.
 
 ### 2.1 列表分页全部失效（P0）
 
@@ -406,10 +419,10 @@ These are **upstream read-model gaps**, not app defects. The current catalog app
 contract the storefront consumes has no product-SKU collection. Therefore, on a
 real catalog backend:
 
-1. **列表/搜索卡片有价格、无主图**：价格已由 `salePriceMinor` /
-   `minorUnitExponent` 投影；还缺 `primaryImageUrl`
-   （取 `commerce_product_media` 首图并经 Drive delivery 转成可渲染 URL）。
-   Frontend already reads these fields.
+1. **列表/搜索卡片**：价格已由 `salePriceMinor` / `minorUnitExponent` 投影；
+   主图已从 `commerce_product_media.resource_snapshot` 投影为 `imageUrl`
+   （`4525ce1` / `008e4fc`）。仅有 Drive `media_resource_id`、快照无 URL 的媒体
+   仍需 Drive delivery URL 解析。Frontend already reads these fields.
 2. **详情 SKU 已补齐**：`ProductResponse.skus` + `map_product_with_skus`（`f208021`），
    catalog app-api 详情在 `795b1a6` 加载 active SKU；OpenAPI 已同步（`b6a01d2`）。
    真实 PDP 现在具备 SKU 价格/库存/规格轴数据；仍需数据库集成验证。
@@ -422,11 +435,12 @@ real catalog backend:
 
 Recommended upstream change set (one PR each, in dependency order):
 
-- `sdkwork-merchandise` (price `08af5af`, detail SKUs `f208021`): still add
-  `primary_image_url` and `brand_name`; media needs the Drive delivery URL
-  resolver.
-- `sdkwork-catalog` (detail SKUs `795b1a6`, schema `b6a01d2`): add the remaining
-  media/brand fields to the app-api `CatalogProduct` schema.
+- `sdkwork-merchandise` (price `08af5af`, detail SKUs `f208021`, main image
+  `4525ce1`): still add `brand_name`; media that carries only a Drive id needs
+  the delivery-URL resolver.
+- `sdkwork-catalog` (detail SKUs `795b1a6`, schema `b6a01d2`, image schema
+  `008e4fc`): add the remaining brand field to the app-api `CatalogProduct`
+  schema.
 - `scripts/dev/mock-commerce-gateway.mjs`: keep in sync (already emits the frontend shape).
 - No mall SDK regeneration is required for additive response fields because the federated
   commerce client is generic; typed contract updates still belong to the authority repos.
