@@ -326,6 +326,22 @@ JS boot smoke cannot observe.
 - Still open upstream: `primaryImageUrl` (Drive media → delivery URL), detail
   `skus`, inventory aggregation and server-side facets.
 
+### 2.0.11 Upstream product-detail SKUs (round 18)
+
+- `sdkwork-merchandise` commit `f208021` adds a `skus` array to
+  `ProductResponse` plus `map_product_with_skus`; list reads publish an empty
+  array, detail reads embed the active sellable SKUs.
+- `sdkwork-catalog` commit `795b1a6` makes `GET /catalog/products/{id}` load
+  `list_skus_page(spu_id, status=active)` and return `map_product_with_skus`, so
+  the real PDP now carries SKU prices, stock and axis values. The catalog
+  OpenAPI `CatalogProduct` schema was extended in `b6a01d2` with
+  `salePriceMinor/currencyCode/minorUnitExponent/skus`.
+- The storefront already reads `record.skus` (`readSkus`), so no mall code
+  change was needed; `cargo check` passes for the merchandise and catalog route
+  crates. The SQL integration path still needs a database run.
+- Remaining upstream: `primaryImageUrl` (Drive delivery URL), inventory
+  aggregation and server-side facets.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
@@ -384,12 +400,9 @@ real catalog backend:
    `minorUnitExponent` 投影；还缺 `primaryImageUrl`
    （取 `commerce_product_media` 首图并经 Drive delivery 转成可渲染 URL）。
    Frontend already reads these fields.
-2. **详情无 SKU**：需要 `GET /catalog/products/{productId}` 内嵌 `skus`，或开放
-   `GET /catalog/products/{productId}/skus` 到 app SDK。Catalog service 已具备
-   `list_skus_page`，最小改动是在 app-api 详情响应中组装 `skus`。当前 mall PC
-   消费的 `@sdkwork/cloudrouter-app-sdk/domains` 里 `catalog.products` 只有
-   `list/retrieve`（无 `skus` 子集合），所以前端无法直接补拉；尝试在 app 侧
-   补拉会在类型检查阶段失败，已回退并把该路径保留给上游。
+2. **详情 SKU 已补齐**：`ProductResponse.skus` + `map_product_with_skus`（`f208021`），
+   catalog app-api 详情在 `795b1a6` 加载 active SKU；OpenAPI 已同步（`b6a01d2`）。
+   真实 PDP 现在具备 SKU 价格/库存/规格轴数据；仍需数据库集成验证。
 3. **无库存**：库存属于 `sdkwork-inventory`，catalog 不持有库存。需要门店前台聚合投影，
    或在 SKU 读模型中增加可售库存字段；在此之前详情只显示“库存信息待确认”，不阻断加购。
 4. **无销量/评分**：目录没有 sales/rating 列，所以“销量/好评”排序与卡片统计暂不可交付；
@@ -399,12 +412,11 @@ real catalog backend:
 
 Recommended upstream change set (one PR each, in dependency order):
 
-- `sdkwork-merchandise` (price done in `08af5af`): still add `primary_image_url`,
-  `brand_name` and `skus` to the detail/list read model; media needs the Drive
-  delivery URL resolver.
-- `sdkwork-catalog`: add the remaining fields (and `skus`) to the app-api
-  `CatalogProduct` / product-detail schema, plus an app-api SKU collection for
-  direct reads.
+- `sdkwork-merchandise` (price `08af5af`, detail SKUs `f208021`): still add
+  `primary_image_url` and `brand_name`; media needs the Drive delivery URL
+  resolver.
+- `sdkwork-catalog` (detail SKUs `795b1a6`, schema `b6a01d2`): add the remaining
+  media/brand fields to the app-api `CatalogProduct` schema.
 - `scripts/dev/mock-commerce-gateway.mjs`: keep in sync (already emits the frontend shape).
 - No mall SDK regeneration is required for additive response fields because the federated
   commerce client is generic; typed contract updates still belong to the authority repos.
