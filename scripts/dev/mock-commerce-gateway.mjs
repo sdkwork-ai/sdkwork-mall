@@ -93,7 +93,17 @@ const spus = [
 const shop = { id: "shop-1", name: "SDKWork 官方旗舰店", logoUrl: "", rating: 4.9, status: "active" };
 
 const addresses = [
-  { id: "addr-1", receiverName: "张三", receiverPhone: "13800000000", addressLine: "浙江省杭州市西湖区文一路 96 号", isDefault: true },
+  {
+    id: "addr-1",
+    name: "张三",
+    phone: "13800000000",
+    province: "浙江省",
+    city: "杭州市",
+    district: "西湖区",
+    detail: "文一路 96 号",
+    tag: "home",
+    isDefault: true,
+  },
 ];
 
 const paymentMethods = [

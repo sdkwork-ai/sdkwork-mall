@@ -292,6 +292,16 @@ JS boot smoke cannot observe.
   (`会员已开通…`, `会员已升级…`, `会员已续费…`) instead of silently reloading the
   dashboard after a successful mutation.
 
+### 2.0.9 Address book operations (round 14)
+
+- The dev fixture only carried legacy `receiverName`/`addressLine`; the edit
+  form therefore opened with `收件人` and empty province/city/detail for the
+  seeded address. The fixture now publishes structured
+  `name/phone/province/city/district/detail/tag`, matching the create payload.
+- Verified: 新增李四 → 设为默认 (badge moves) → 编辑张三 pre-fills
+  `张三 / 13800000000 / 浙江省 / 杭州市 / 西湖区 / 文一路 96 号` → 保存 updates
+  the row; delete and default toggling stay available.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
@@ -410,7 +420,8 @@ Recommended upstream change set (one PR each, in dependency order):
     8%/15% ratios, ¥1,280.50 available, ¥3,560.00 lifetime commission; profile
     shows 开发买家 / buyer@example.com / 138****0000 / 黄金会员
   - favorites and footprint record the browsed phone; address create adds
-    “李四 / 13900000000 / 浙江省 杭州市 西湖区” and can be set as default
+    “李四 / 13900000000 / 浙江省 杭州市 西湖区”, 设为默认 moves the badge, and
+    编辑张三 pre-fills the structured fields before saving
   - H5: login → PDP (曜石黑/皓月白, 库存 50) → checkout with coupon+wallet+points
     shows `¥2,332.50`, submit opens the cashier and completes
   - mini-program: 37-entry build, 36-page smoke (12 requests, 0 errors)
