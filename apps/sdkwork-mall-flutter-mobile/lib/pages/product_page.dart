@@ -63,6 +63,7 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
           asNum(detail, ['priceCny', 'price', 'salePrice']),
     );
     final soldOut = _maxQuantity != null && _maxQuantity! <= 0;
+    final brand = asString(detail, const <String>['brandName', 'brand']);
 
     return Scaffold(
       appBar: AppBar(title: Text(SdkworkI18n.t('productDetail.title'))),
@@ -134,6 +135,16 @@ class _SdkworkProductPageState extends State<SdkworkProductPage> {
                 ),
                 const SizedBox(height: 8),
                 Text('${detail['title']}', style: Theme.of(context).textTheme.titleMedium),
+                if (brand.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      brand,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
                 const SizedBox(height: 8),
                 Text(
                   <String>[

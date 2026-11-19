@@ -456,6 +456,12 @@ JS boot smoke cannot observe.
 - Brand is therefore visible on PC, H5, mini-program and Flutter list cards;
   PDPs show it on PC/H5/MP.
 
+### 2.0.23 Flutter product-detail brand (round 31)
+
+- The Flutter product page renders `brandName`/`brand` under the title when the
+  detail carries it, so Flutter now matches PC/H5/MP on both list cards and PDP.
+- `flutter analyze` and the 36 widget tests pass.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
