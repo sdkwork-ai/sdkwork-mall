@@ -7,7 +7,8 @@
     <view class="mp-card" wx:if="{{favorites.length}}">
       <view class="mp-card-title">共 {{favorites.length}} 件收藏</view>
       <view class="fav-row" wx:for="{{favorites}}" wx:key="id">
-        <image class="fav-image" src="{{item.imageUrl}}" mode="aspectFill" />
+        <image wx:if="{{item.imageUrl}}" class="fav-image" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
+        <view wx:else class="fav-image fav-image-fallback">SDKWork</view>
         <view class="fav-body" bindtap="goProduct" data-id="{{item.id}}">
           <view class="fav-title">{{item.title}}</view>
           <view class="mp-price" wx:if="{{item.priceText}}">{{item.priceText}}</view>
@@ -22,7 +23,7 @@
       </view>
     </view>
 
-    <view class="mp-muted page-favorites-note">收藏暂存本机，登录账号云同步将在收藏服务上线后开放。</view>
+    <view class="mp-muted page-favorites-note">收藏保存在本机，更换设备后不会同步。</view>
   </block>
 
   <view wx:if="{{toast}}" class="mp-toast">{{toast}}</view>

@@ -397,3 +397,15 @@
   font-size: 22rpx;
   color: #8b9199;
 }
+
+.partner-guest {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 40rpx 30rpx;
+}
+
+.partner-withdraw-line {
+  display: block;
+  line-height: 1.7;
+}

@@ -5,7 +5,7 @@ import { type MpAddress, listAddresses } from "../../services/address-service";
 import { type MpCheckoutQuote, createCheckoutQuote, getCart, listUserCoupons, submitOrder } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
-import { platform } from "@sdkwork/mall-mp-core";
+import { createMpIdempotencyParams, platform } from "@sdkwork/mall-mp-core";
 import { syncCartTabBadge } from "../../services/tab-bar-service";
 
 interface MpCouponOption {
@@ -118,6 +118,8 @@ interface CheckoutData {
   submitText: string;
   submittingText: string;
   _cartItemIds: string[];
+  /** One key per checkout attempt; reused when the buyer retries after a timeout. */
+  _submitKey: string;
   _toastTimer: number | null;
 }
 
@@ -188,6 +190,8 @@ Page({
     submitText: t("checkout.submit"),
     submittingText: t("checkout.submitting"),
     _cartItemIds: [],
+    // Minted per checkout visit in onLoad: one key per attempt, reused on retry.
+    _submitKey: "",
     _toastTimer: null,
   } as CheckoutData,
 
@@ -195,6 +199,7 @@ Page({
     const cartItemIds = options.items ? options.items.split(",").filter(Boolean) : [];
     this.setData({
       _cartItemIds: cartItemIds,
+      _submitKey: createMpIdempotencyParams().idempotencyKey,
       itemCount: cartItemIds.length,
       selectedCountText:
         cartItemIds.length > 0
@@ -388,6 +393,12 @@ Page({
       this.showToast(this.data.quoteError || t("checkout.errors.quoteNotReady"));
       return;
     }
+    // A selected line can disappear between bootstrap and submit (another device
+    // or another session); ordering an empty basket must not be possible.
+    if (this.data._cartItemIds.length > 0 && this.data.goods.length === 0) {
+      this.showToast(t("checkout.errors.goodsUnavailable"));
+      return;
+    }
     if (this.data.needInvoice) {
       if (!this.data.invoiceTitle.trim()) {
         this.showToast(
@@ -416,6 +427,7 @@ Page({
         couponId: this.data.selectedCouponId || undefined,
         deliveryMethod: this.data.deliveryMethodCode,
         giftCardCode: this.data.giftCardApplied || undefined,
+        idempotencyKey: this.data._submitKey,
         invoiceForm: this.data.needInvoice
           ? {
               email: this.data.invoiceEmail.trim() || undefined,
@@ -431,10 +443,17 @@ Page({
         useWallet: this.data.useWallet,
         usePoints: this.data.usePoints,
         buyerRemark: this.data.buyerRemark.trim() || undefined,
-      });
+      }, this.data.quote);
       // The cart lines are consumed by the order: clear the tab badge before the
       // cashier takes over (H5 parity: the shell reads the same total quantity).
       void syncCartTabBadge();
+      if (!result.orderId) {
+        // The create resolved (ack-shaped response) but carried no id: the order
+        // exists, so never re-enable submit and risk a second one.
+        this.showToast(t("checkout.errors.orderSubmitted"));
+        platform.redirectTo(mpCapabilityUrl("buyer.mall.orders"));
+        return;
+      }
       const next = () =>
         platform.redirectTo(mpCapabilityUrl("storefront.mall.payment-cashier", { orderId: result.orderId }));
       if (result.warnings.length > 0) {

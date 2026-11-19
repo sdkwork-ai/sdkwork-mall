@@ -5,6 +5,7 @@ import {
   type MpChatConversation,
 } from "../../services/im-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { requireSignedIn } from "../../utils/auth-gate";
 
 interface ConversationRow {
   id: string;
@@ -38,6 +39,10 @@ Page({
   } as ChatsData,
 
   onShow() {
+    if (!requireSignedIn()) {
+      this.setData({ loading: false });
+      return;
+    }
     void this.load();
   },
 

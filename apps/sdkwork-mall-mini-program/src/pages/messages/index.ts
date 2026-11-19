@@ -3,6 +3,7 @@ import { errorMessage, type MpTapEvent } from "../../types/common";
 import { formatTime } from "../../utils/format";
 import { listNotices, retrieveNotice } from "../../services/im-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { requireSignedIn } from "../../utils/auth-gate";
 
 interface MpMessageRowView {
   id: string;
@@ -66,6 +67,10 @@ Page({
   } as MessagesData,
 
   onShow() {
+    if (!requireSignedIn()) {
+      this.setData({ loading: false });
+      return;
+    }
     void this.loadRows();
   },
 
@@ -151,7 +156,8 @@ Page({
       return;
     }
     if (row.body) {
-      this.patchRow(id, { expanded: true, unread: false });
+      // Expanding only changes the client view; read state is server-owned.
+      this.patchRow(id, { expanded: true });
       return;
     }
     this.setData({ _busyRowId: id });
@@ -160,7 +166,9 @@ Page({
       this.patchRow(id, {
         body: notice ? notice.body : row.summary,
         expanded: true,
-        unread: false,
+        // Mirror only a status the server reported; the client has no mark-read
+        // command, so flipping it locally made the dot return on every reload.
+        ...(notice?.status === "read" ? { unread: false } : {}),
       });
     } catch (cause) {
       this.setData({ error: errorMessage(cause, t("messages.errors.loadFailed")) });

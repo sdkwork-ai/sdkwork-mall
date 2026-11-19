@@ -65,8 +65,10 @@ export function readRuntimeEnv(accountEnvVersion: string): SdkworkMallMpRuntimeE
   const appApiBaseUrl = globalRuntime.appApiBaseUrl
     ?? (platformApiGatewayHttpUrl ? `${platformApiGatewayHttpUrl}${APP_API_PATH}` : "");
   if (channel === "production" && environment !== "production") {
-    console.warn(
-      `[sdkwork-mall] release channel is production but the packaged profile is ${ENV_CONFIG.profileId}; rebuild with a production profile.`,
+    // Fail closed: booting a release build against a dev host with a placeholder
+    // application identity must be visible, not a console warning.
+    throw new Error(
+      `[sdkwork-mall] release channel requires a production profile; this package was built with ${ENV_CONFIG.profileId}. Rebuild with build:mp:prod.`,
     );
   }
   return {

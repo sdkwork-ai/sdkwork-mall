@@ -57,3 +57,14 @@
 .address-editor-actions button {
   flex: 1;
 }
+
+.address-guest {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 40rpx 30rpx;
+}
+
+.address-guest-action {
+  align-self: flex-start;
+}

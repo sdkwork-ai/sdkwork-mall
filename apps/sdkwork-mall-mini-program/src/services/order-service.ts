@@ -55,11 +55,13 @@ export interface MpOrderStatistics {
 
 const STATUS_FILTER_MAP: Record<string, string> = {
   all: "",
-  PENDING_PAYMENT: "PENDING_PAYMENT",
-  PENDING_SHIPMENT: "PENDING_SHIPMENT",
-  PENDING_RECEIPT: "PENDING_RECEIPT",
-  COMPLETED: "COMPLETED",
-  CANCELLED: "CANCELLED",
+  // The order app-api stores and compares lowercase snake_case statuses
+  // (`pending_payment`, …); sending the UI code verbatim matched no rows.
+  PENDING_PAYMENT: "pending_payment",
+  PENDING_SHIPMENT: "pending_shipment",
+  PENDING_RECEIPT: "pending_receipt",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
 };
 
 function ordersClient() {
@@ -70,7 +72,9 @@ function mapSummary(order: Record<string, unknown>): MpOrderSummary {
   return {
     id: String(order.orderId ?? order.id ?? ""),
     subject: String(order.subject ?? "订单"),
-    status: String(order.status ?? ""),
+    // The wire status is lowercase snake_case; the view models and templates
+    // compare the uppercase API codes.
+    status: String(order.status ?? "").toUpperCase(),
     totalAmountCny: Number(order.totalAmount ?? order.totalAmountCny) || null,
     paidAmountCny: Number(order.paidAmount ?? order.paidAmountCny) || null,
     createdAt: String(order.createdAt ?? ""),
@@ -122,7 +126,7 @@ export async function getOrderDetail(orderId: string): Promise<MpOrderDetail> {
   return {
     id: String(record.orderId ?? record.id ?? orderId),
     subject: String(record.subject ?? "订单"),
-    status: String(record.status ?? ""),
+    status: String(record.status ?? "").toUpperCase(),
     totalAmountCny: Number(record.totalAmount ?? record.totalAmountCny) || null,
     paidAmountCny: Number(record.paidAmount ?? record.paidAmountCny) || null,
     paymentMethod: String(record.paymentMethod ?? ""),
@@ -138,10 +142,12 @@ export async function getOrderDetail(orderId: string): Promise<MpOrderDetail> {
       return {
         id: String(item.id ?? sku.id ?? `item-${index + 1}`),
         spuId: String(item.spuId ?? spu.id ?? ""),
-        title: String(spu.title ?? item.title ?? "商品"),
-        skuName: String(sku.name ?? sku.title ?? ""),
+        // The order app-api returns `productName`; `spu.title` never exists, which
+        // made every line render as "商品".
+        title: String(item.productName ?? spu.title ?? item.title ?? "商品"),
+        skuName: String(item.skuName ?? sku.name ?? sku.title ?? ""),
         imageUrl: String(item.imageUrl ?? spu.imageUrl ?? ""),
-        priceCny: Number(item.priceCny ?? item.unitPrice) || null,
+        priceCny: Number(item.unitPrice ?? item.priceCny) || null,
         quantity: Number(item.quantity) || 1,
       };
     }),

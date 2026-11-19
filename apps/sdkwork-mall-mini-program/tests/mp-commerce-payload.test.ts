@@ -35,6 +35,27 @@ describe("commerce payload reader", () => {
     ).toEqual({ items: [{ id: "p-1" }] });
   });
 
+  it("unwraps a v3 single-resource body", () => {
+    expect(
+      normalizeCommercePayload({
+        code: 0,
+        data: { item: { id: "1000", name: "会员服务" } },
+        traceId: "trace-2",
+      }),
+    ).toEqual({ id: "1000", name: "会员服务" });
+    // The SDK already strips `code`/`data`; the item wrapper is still there.
+    expect(normalizeCommercePayload({ item: { id: "1000", name: "会员服务" } })).toEqual({
+      id: "1000",
+      name: "会员服务",
+    });
+  });
+
+  it("does not mistake a list payload for a resource wrapper", () => {
+    expect(
+      normalizeCommercePayload({ items: [{ id: "p-1" }], pageInfo: { hasMore: false } }),
+    ).toEqual({ items: [{ id: "p-1" }], pageInfo: { hasMore: false } });
+  });
+
   it("wraps a bare array answer so list readers keep working", () => {
     expect(normalizeCommercePayload([{ id: "p-1" }, null])).toEqual({ items: [{ id: "p-1" }] });
   });

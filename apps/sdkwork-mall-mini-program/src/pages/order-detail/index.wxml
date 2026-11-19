@@ -23,7 +23,7 @@
         data-spu="{{item.spuId}}"
       >
         <view class="detail-item-image">
-          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
           <text wx:else>SDKWork</text>
         </view>
         <view class="detail-item-body">

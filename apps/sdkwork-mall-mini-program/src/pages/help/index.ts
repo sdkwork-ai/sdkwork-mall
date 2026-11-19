@@ -18,7 +18,6 @@ const QUICK_LINKS: HelpQuickLink[] = [
   { labelKey: "help.quick.afterSales", capability: "buyer.mall.after-sales" },
   { labelKey: "help.quick.invoices", capability: "buyer.mall.invoices" },
   { labelKey: "help.quick.messages", capability: "buyer.mall.messages" },
-  { labelKey: "help.quick.giftCards", capability: "buyer.mall.gift-cards" },
   { labelKey: "help.quick.security", capability: "buyer.mall.security" },
 ];
 

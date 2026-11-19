@@ -48,6 +48,7 @@ interface OrdersData {
   confirmReceiptText: string;
   logisticsText: string;
   afterSalesText: string;
+  _acting: string;
 }
 
 Page({
@@ -72,6 +73,7 @@ Page({
     confirmReceiptText: t("orderList.actions.confirmReceipt"),
     logisticsText: t("orderList.actions.logistics"),
     afterSalesText: t("orderList.actions.afterSales"),
+    _acting: "",
   } as OrdersData,
 
   onLoad(options: Record<string, string | undefined>) {
@@ -164,23 +166,49 @@ Page({
 
   async cancelOrder(event: MpTapEvent) {
     const orderId = String(event.currentTarget.dataset.id ?? "");
+    if (!orderId || this.data._acting) {
+      return;
+    }
+    const confirmed = await platform.confirm({
+      title: t("orderList.actions.cancel"),
+      content: t("orderList.confirmCancel"),
+    });
+    if (!confirmed) {
+      return;
+    }
+    this.setData({ _acting: orderId });
     try {
       await cancelOrder(orderId);
       platform.toast(t("orderList.toasts.cancelled"), "success");
       void this.loadOrders(1);
     } catch (cause) {
       platform.toast(errorMessage(cause, t("orderList.errors.cancelFailed")));
+    } finally {
+      this.setData({ _acting: "" });
     }
   },
 
   async confirmReceipt(event: MpTapEvent) {
     const orderId = String(event.currentTarget.dataset.id ?? "");
+    if (!orderId || this.data._acting) {
+      return;
+    }
+    const confirmed = await platform.confirm({
+      title: t("orderList.actions.confirmReceipt"),
+      content: t("orderList.confirmReceipt"),
+    });
+    if (!confirmed) {
+      return;
+    }
+    this.setData({ _acting: orderId });
     try {
       await confirmReceipt(orderId);
       platform.toast(t("orderList.toasts.receiptConfirmed"), "success");
       void this.loadOrders(1);
     } catch (cause) {
       platform.toast(errorMessage(cause, t("orderList.errors.receiptFailed")));
+    } finally {
+      this.setData({ _acting: "" });
     }
   },
 

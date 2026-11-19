@@ -23,11 +23,11 @@ module.exports = {
       },
       express: {
         label: "极速达",
-        description: "次日送达 · ¥12.00",
+        description: "次日送达 · 运费以结算为准",
       },
       sf: {
         label: "顺丰速运",
-        description: "当日达 · ¥22.00",
+        description: "当日达 · 运费以结算为准",
       },
     },
     coupon: {
@@ -79,6 +79,8 @@ module.exports = {
       load: "结算信息加载失败",
       addressRequired: "请选择收货地址",
       quoteNotReady: "应付金额未就绪，请重试",
+      goodsUnavailable: "购物车商品已失效，请返回购物车重新选择",
+      orderSubmitted: "订单已提交，请到订单列表查看",
       submitFailed: "提交订单失败",
       warningsTitle: "部分优惠未生效",
     },

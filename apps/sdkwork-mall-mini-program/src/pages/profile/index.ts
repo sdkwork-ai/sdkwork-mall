@@ -58,6 +58,10 @@ Page({
     }
   },
 
+  retry() {
+    void this.load();
+  },
+
   goLogin() {
     platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },

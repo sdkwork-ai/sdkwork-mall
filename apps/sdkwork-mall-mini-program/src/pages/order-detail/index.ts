@@ -9,6 +9,7 @@ import {
   type MpOrderDetail,
 } from "../../services/order-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { requireSignedIn } from "../../utils/auth-gate";
 
 type MpOrderDetailItemView = MpOrderDetail["items"][number] & { priceText: string };
 
@@ -25,6 +26,7 @@ interface OrderDetailData {
   loading: boolean;
   error: string;
   _orderId: string;
+  _acting: boolean;
 }
 
 Page({
@@ -33,6 +35,7 @@ Page({
     loading: true,
     error: "",
     _orderId: "",
+    _acting: false,
   } as OrderDetailData,
 
   onLoad(options: Record<string, string | undefined>) {
@@ -43,6 +46,10 @@ Page({
   },
 
   onShow() {
+    if (!requireSignedIn()) {
+      this.setData({ loading: false });
+      return;
+    }
     this.loadDetail();
   },
 
@@ -116,12 +123,25 @@ Page({
   },
 
   async cancel() {
+    if (this.data._acting) {
+      return;
+    }
+    const confirmed = await platform.confirm({
+      title: "取消订单",
+      content: "取消后订单不可恢复，确定取消？",
+    });
+    if (!confirmed) {
+      return;
+    }
+    this.setData({ _acting: true });
     try {
       await cancelOrder(this.data._orderId);
       platform.toast("已取消", "success");
       this.loadDetail();
     } catch (cause) {
       platform.toast(errorMessage(cause, "取消失败"));
+    } finally {
+      this.setData({ _acting: false });
     }
   },
 
@@ -134,12 +154,25 @@ Page({
   },
 
   async confirmReceipt() {
+    if (this.data._acting) {
+      return;
+    }
+    const confirmed = await platform.confirm({
+      title: "确认收货",
+      content: "请确认已收到全部商品，确认后订单完成。",
+    });
+    if (!confirmed) {
+      return;
+    }
+    this.setData({ _acting: true });
     try {
       await confirmReceipt(this.data._orderId);
       platform.toast("已确认收货", "success");
       this.loadDetail();
     } catch (cause) {
       platform.toast(errorMessage(cause, "确认收货失败"));
+    } finally {
+      this.setData({ _acting: false });
     }
   },
 

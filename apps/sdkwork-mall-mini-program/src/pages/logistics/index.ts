@@ -6,6 +6,7 @@ import {
   type MpShipmentLogistics,
 } from "../../services/order-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { requireSignedIn } from "../../utils/auth-gate";
 
 interface MpTrackingEventView {
   description: string;
@@ -41,6 +42,10 @@ Page({
   } as LogisticsData,
 
   onLoad(options: Record<string, string | undefined>) {
+    if (!requireSignedIn()) {
+      this.setData({ loading: false });
+      return;
+    }
     const orderId = options.orderId || "";
     const shipmentId = options.shipmentId || "";
     this.setData({ _orderId: orderId, _shipmentId: shipmentId });

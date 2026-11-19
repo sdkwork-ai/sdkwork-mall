@@ -228,18 +228,46 @@ export async function listChatMessages(conversationId: string): Promise<MpChatMe
       role: currentUserId && item.senderId === currentUserId ? "user" : "agent",
       sentAt: item.occurredAt,
       ...(item.media?.nodeId ? { mediaNodeId: item.media.nodeId } : {}),
-      // int64 wire field; used only to order the stream.
-      seq: Number(item.messageSeq) || 0,
+      // int64 wire field kept as a decimal string; never parsed to a double.
+      seq: item.messageSeq,
     }))
     // The IM services own history paging and may return newest-first; the mall
     // chat stream renders oldest-first and scrolls to the newest bubble.
     .sort((left, right) => {
-      if (left.seq !== right.seq) {
-        return left.seq - right.seq;
+      const seqOrder = compareDecimalSeq(left.seq, right.seq);
+      if (seqOrder !== 0) {
+        return seqOrder;
       }
-      return Date.parse(left.sentAt) - Date.parse(right.sentAt);
+      const leftTime = Date.parse(left.sentAt);
+      const rightTime = Date.parse(right.sentAt);
+      return (Number.isFinite(leftTime) ? leftTime : 0) - (Number.isFinite(rightTime) ? rightTime : 0);
     })
     .map(({ seq: _seq, ...message }) => message);
+}
+
+/**
+ * Compares two int64 decimal strings without converting them to a double.
+ *
+ * `Number("...")` collapses precision past 2^53 and can reorder two adjacent
+ * messages; comparing sign, length and then lexicographically is exact for the
+ * non-negative sequence ids the IM plane issues.
+ */
+function compareDecimalSeq(left: string | null | undefined, right: string | null | undefined): number {
+  const a = left ? left.replace(/^0+(?=\d)/u, "") : "";
+  const b = right ? right.replace(/^0+(?=\d)/u, "") : "";
+  if (a === b) {
+    return 0;
+  }
+  if (!a) {
+    return -1;
+  }
+  if (!b) {
+    return 1;
+  }
+  if (a.length !== b.length) {
+    return a.length - b.length;
+  }
+  return a < b ? -1 : 1;
 }
 
 /**

@@ -10,9 +10,12 @@
     </view>
 
     <block wx:else>
-      <view wx:if="{{error}}" class="mp-error">{{error}}</view>
+      <view wx:if="{{error}}" class="mp-error">
+        <text>{{error}}</text>
+        <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
+      </view>
 
-      <view class="mp-card">
+      <view class="mp-card" wx:if="{{!error}}">
         <view class="mp-card-title">基本资料</view>
         <view class="profile-row" wx:for="{{rows}}" wx:key="label">
           <text class="profile-label">{{item.label}}</text>

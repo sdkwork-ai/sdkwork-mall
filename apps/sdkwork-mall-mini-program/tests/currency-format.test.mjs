@@ -34,7 +34,11 @@ function listTemplates(directory) {
 }
 
 test("formatCny owns the currency symbol", () => {
-  assert.match(formatSource, /return `¥\$\{value\.toFixed\(2\)\}`/u);
+  // Negative amounts put the sign before the symbol (`-¥5.00`); non-finite
+  // values fall back to `--` instead of printing `¥NaN`.
+  assert.match(formatSource, /const sign = value < 0 \? "-" : ""/u);
+  assert.match(formatSource, /return `\$\{sign\}¥\$\{Math\.abs\(value\)\.toFixed\(2\)\}`/u);
+  assert.match(formatSource, /!Number\.isFinite\(value\)/u);
 });
 
 test("page templates never prefix an already formatted currency string", () => {

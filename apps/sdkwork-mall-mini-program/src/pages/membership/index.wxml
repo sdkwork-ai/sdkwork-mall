@@ -1,11 +1,17 @@
 <view class="page-membership">
+  <view wx:if="{{needLogin}}" class="mp-card membership-guest">
+    <view class="mp-card-title">登录后查看会员中心</view>
+    <view class="mp-muted">会员等级、权益与套餐需要登录后查看。</view>
+    <button class="mp-btn mp-btn-primary membership-guest-action" bindtap="goLogin">立即登录</button>
+  </view>
+
   <view wx:if="{{loading}}" class="mp-loading">{{loadingText}}</view>
   <view wx:if="{{message}}" class="mp-error">
     <text>{{message}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
   </view>
 
-  <block wx:if="{{!loading}}">
+  <block wx:if="{{!loading && !needLogin}}">
     <view class="membership-hero">
       <view class="membership-label">{{levelLabel}}</view>
       <view class="membership-level">{{status ? status.levelName : defaultLevel}}</view>

@@ -87,7 +87,8 @@ describe("order block projection", () => {
 
     const page = await listOrders({ page: 1, pageSize: 20, status: "PENDING_PAYMENT" });
 
-    expect(orders.list).toHaveBeenCalledWith({ page: 1, pageSize: 20, status: "PENDING_PAYMENT" });
+    // The app-api stores lowercase snake_case statuses; the UI code is uppercase.
+    expect(orders.list).toHaveBeenCalledWith({ page: 1, pageSize: 20, status: "pending_payment" });
     expect(page.orders[0]).toMatchObject({ id: "o-1", subject: "机械键盘", totalAmountCny: 399 });
     expect(page.hasMore).toBe(true);
     expect(page.total).toBe(21);

@@ -43,7 +43,8 @@ const QUICK_LINKS: Array<{ labelKey: string; capability: string; icon: string }>
 const ACCOUNT_LINKS: Array<{ labelKey: string; capability: string }> = [
   { labelKey: "buyerHub.account.profile", capability: "buyer.mall.profile" },
   { labelKey: "buyerHub.account.reviews", capability: "buyer.mall.reviews" },
-  { labelKey: "buyerHub.account.giftCards", capability: "buyer.mall.gift-cards" },
+  // 「礼品卡」is a capability placeholder with no commerce API yet; the entry stays
+  // hidden so a shopper never lands on a "coming soon" wall.
   { labelKey: "buyerHub.account.security", capability: "buyer.mall.security" },
   { labelKey: "buyerHub.account.settings", capability: "buyer.mall.settings" },
   { labelKey: "buyerHub.account.help", capability: "storefront.mall.help" },

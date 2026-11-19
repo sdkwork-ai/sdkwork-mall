@@ -11,6 +11,7 @@ import { listPaymentMethods } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 
 interface MpMembershipPackageView extends MpMembershipPackage {
   durationText: string;
@@ -20,6 +21,7 @@ interface MpMembershipPackageView extends MpMembershipPackage {
 interface MembershipData {
   busyPackageId: string | null;
   isMember: boolean;
+  needLogin: boolean;
   /** Static benefit tiles shown above the packages (parity with the H5 page). */
   benefits: Array<{ id: string; label: string }>;
   loading: boolean;
@@ -55,6 +57,7 @@ Page({
   data: {
     busyPackageId: null,
     isMember: false,
+    needLogin: false,
     benefits: [
       { id: "price", label: t("membership.benefits.price") },
       { id: "points", label: t("membership.benefits.points") },
@@ -80,9 +83,10 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      this.setData({ loading: false, message: t("membership.loginRequired") });
+      this.setData({ loading: false, needLogin: true, message: "" });
       return;
     }
+    this.setData({ needLogin: false });
     void this.load();
   },
 
@@ -144,7 +148,15 @@ Page({
   },
 
   retry() {
+    if (!isLoggedIn()) {
+      this.goLogin();
+      return;
+    }
     void this.load();
+  },
+
+  goLogin() {
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 
   onPullDownRefresh() {

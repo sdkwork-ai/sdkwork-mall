@@ -48,3 +48,20 @@
   margin-top: 24rpx;
   text-align: center;
 }
+
+.wallet-guest {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 40rpx 30rpx;
+}
+
+.wallet-guest-action {
+  align-self: flex-start;
+}
+
+.wallet-end {
+  text-align: center;
+  padding: 20rpx 0 0;
+  font-size: 24rpx;
+}

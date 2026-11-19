@@ -15,6 +15,7 @@ import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
 import { asNumber, asRecord, asRecordList, asString, type MpRecord } from "../types/common";
 import { readCommercePayload } from "./commerce-payload";
+import { readPageInfo } from "./page-info";
 
 const PAGE_SIZE = 20;
 
@@ -46,6 +47,8 @@ export interface MpPointsLot {
 
 export interface MpPointsSummary {
   balance: number | null;
+  /** Points expiring soon, when the account document states them. */
+  expiringPoints: number | null;
   lots: MpPointsLot[];
   ledger: MpPointsLedgerEntry[];
 }
@@ -84,6 +87,22 @@ function pageItems(payload: MpRecord): MpRecord[] {
   return asRecordList(payload.items);
 }
 
+/** A ledger row is signed by its `direction`; the wire amount is positive. */
+function readSignedAmount(row: MpRecord, keys: readonly string[]): number | null {
+  const amount = asNumber(row, keys);
+  if (amount == null) {
+    return null;
+  }
+  const direction = asString(row, ["direction", "drCr", "dcFlag"]).toLowerCase();
+  if (direction === "debit" || direction === "d" || direction === "expense") {
+    return -Math.abs(amount);
+  }
+  if (direction === "credit" || direction === "c" || direction === "income") {
+    return Math.abs(amount);
+  }
+  return amount;
+}
+
 export async function getWalletOverview(): Promise<MpWalletOverview> {
   // Failures must reach the page: swallowing them rendered "--" balances and an
   // empty ledger as if the account really held nothing.
@@ -97,16 +116,26 @@ export async function getWalletOverview(): Promise<MpWalletOverview> {
   };
 }
 
-export async function listCashLedger(): Promise<MpLedgerEntry[]> {
+export async function listCashLedger(page = 1): Promise<{ hasMore: boolean; items: MpLedgerEntry[] }> {
   const payload = await readCommercePayload(
-    commerce().wallet.ledgerEntries.list({ page: 1, pageSize: PAGE_SIZE }),
+    commerce().wallet.ledgerEntries.list({ page, pageSize: PAGE_SIZE }),
   );
-  return pageItems(payload).map((row, index) => ({
-    id: asString(row, ["id", "entryId", "ledgerEntryId"]) || `entry-${index + 1}`,
-    summary: asString(row, ["summary", "title", "remark", "reason", "type"], "钱包变动"),
-    amountCny: asNumber(row, ["amountCny", "amount", "changeAmount"]),
-    occurredAt: asString(row, ["occurredAt", "createdAt", "entryTime"]),
-  }));
+  const rows = pageItems(payload)
+    // The unfiltered ledger mixes points and token entries; the cash ledger must
+    // not print those as CNY. When the asset type is absent the row is kept.
+    .filter((row) => {
+      const assetType = asString(row, ["assetType", "asset_type"]).toLowerCase();
+      return !assetType || assetType === "cash";
+    });
+  return {
+    hasMore: readPageInfo(payload, rows.length, page).hasMore,
+    items: rows.map((row, index) => ({
+      id: asString(row, ["id", "entryId", "ledgerEntryId"]) || `entry-${index + 1}`,
+      summary: asString(row, ["summary", "title", "remark", "reason", "type"], "钱包变动"),
+      amountCny: readSignedAmount(row, ["amountCny", "amount", "changeAmount"]),
+      occurredAt: asString(row, ["occurredAt", "createdAt", "entryTime"]),
+    })),
+  };
 }
 
 export async function getPointsSummary(): Promise<MpPointsSummary> {
@@ -118,13 +147,14 @@ export async function getPointsSummary(): Promise<MpPointsSummary> {
   ]);
   return {
     balance: asNumber(summary, ["balance", "availablePoints", "totalPoints"]),
+    expiringPoints: asNumber(summary, ["expiringPoints", "expiringAmount", "expireSoonPoints"]),
     // The commerce block settles points as one balance plus ledger entries; there
     // is no per-lot reader to project.
     lots: [],
     ledger: pageItems(ledgerPage).map((row, index) => ({
       id: asString(row, ["id", "entryId", "ledgerEntryId"]) || `point-entry-${index + 1}`,
       summary: asString(row, ["summary", "title", "remark", "reason", "type"], "积分变动"),
-      points: asNumber(row, ["points", "amount", "changeAmount", "amountCny"]),
+      points: readSignedAmount(row, ["points", "amount", "changeAmount"]),
       occurredAt: asString(row, ["occurredAt", "createdAt", "entryTime"]),
     })),
   };
@@ -193,9 +223,17 @@ export async function purchaseMembership(input: {
     paymentMethod: input.paymentMethod,
   }));
   const record = asRecord(payload);
-  const raw = asString(record, ["status"]).toLowerCase();
+  const raw = asString(record, ["status"]).toUpperCase();
+  // Canonical terminal statuses (H5/PC membership service mapping): a charged
+  // order reported as PAID/SUCCESS must not be shown as "开通失败".
+  const status =
+    raw === "SUCCESS" || raw === "COMPLETED" || raw === "PAID" || raw === "ACTIVE"
+      ? "completed"
+      : raw === "FAILED" || raw === "REJECTED" || raw === "CANCELLED" || raw === "CLOSED" || raw === "EXPIRED"
+        ? "failed"
+        : "pending";
   return {
     orderId: asString(record, ["orderId"]) || undefined,
-    status: raw.includes("complete") ? "completed" : raw.includes("pending") ? "pending" : "failed",
+    status,
   };
 }

@@ -14,7 +14,7 @@
     <text>{{error}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
   </view>
-  <view wx:if="{{!loading && orders.length === 0}}" class="mp-empty">{{emptyText}}</view>
+  <view wx:if="{{!loading && !error && orders.length === 0}}" class="mp-empty">{{emptyText}}</view>
 
   <view class="orders-list">
     <view class="orders-item" wx:for="{{orders}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">

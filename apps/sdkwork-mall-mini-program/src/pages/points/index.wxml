@@ -1,14 +1,21 @@
 <view class="page-points">
+  <view wx:if="{{needLogin}}" class="mp-card points-guest">
+    <view class="mp-card-title">登录后查看积分</view>
+    <view class="mp-muted">积分余额与明细需要登录后查看。</view>
+    <button class="mp-btn mp-btn-primary points-guest-action" bindtap="goLogin">立即登录</button>
+  </view>
+
   <view wx:if="{{loading}}" class="mp-loading">加载积分...</view>
   <view wx:if="{{message}}" class="mp-error">
     <text>{{message}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
   </view>
 
-  <block wx:if="{{!loading}}">
+  <block wx:if="{{!loading && !needLogin}}">
     <view class="points-hero">
       <view class="points-label">积分余额</view>
       <view class="points-amount">{{balanceText}}</view>
+      <view wx:if="{{expiringText}}" class="mp-muted points-expiring">{{expiringText}}</view>
     </view>
 
     <view class="mp-card" wx:if="{{lots.length}}">
@@ -21,7 +28,7 @@
 
     <view class="mp-card">
       <view class="mp-card-title">积分明细</view>
-      <view wx:if="{{ledger.length === 0}}" class="mp-empty">暂无积分记录</view>
+      <view wx:if="{{!message && ledger.length === 0}}" class="mp-empty">暂无积分记录</view>
       <view class="ledger-row" wx:for="{{ledger}}" wx:key="id">
         <view class="ledger-body">
           <view class="ledger-summary">{{item.summary}}</view>

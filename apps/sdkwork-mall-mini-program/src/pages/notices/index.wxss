@@ -27,3 +27,9 @@
   font-size: 26rpx;
   line-height: 1.6;
 }
+
+.notices-end {
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 24rpx;
+}

@@ -87,7 +87,7 @@
 
     <view class="mp-card">
       <view class="mp-card-title">{{listTitle}}</view>
-      <view wx:if="{{requests.length === 0}}" class="mp-empty">{{listEmpty}}</view>
+      <view wx:if="{{!error && requests.length === 0}}" class="mp-empty">{{listEmpty}}</view>
       <view class="aftersales-row" wx:for="{{requests}}" wx:key="id">
         <view class="aftersales-body">
           <view class="aftersales-title">

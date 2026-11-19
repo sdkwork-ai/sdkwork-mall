@@ -63,6 +63,7 @@ module.exports = {
       empty: "暂无售后记录",
       orderNo: "订单 {{id}}",
       cancel: "撤销",
+      cancelConfirm: "撤销后该售后申请将关闭，确定撤销？",
       cancelled: "已撤销",
       returnEntry: "填写退货物流",
       progressToggle: "处理进度",

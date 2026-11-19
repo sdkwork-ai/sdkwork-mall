@@ -15,6 +15,9 @@
 import type { MpHttpClient, MpHttpResponse } from "./index";
 import { resolveGlobalObject, writeSharedState } from "./scope";
 
+/** Matches `@sdkwork/sdk-common`'s default request timeout. */
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
+
 /** Minimal `fetch` shape the SDKs rely on. */
 export type MpFetch = (
   input: string,
@@ -169,6 +172,10 @@ export function createMpFetch(http: MpHttpClient): MpFetch {
       ...(init.method ? { method: init.method } : {}),
       ...(init.headers ? { header: init.headers } : {}),
       ...(encodeBody(init.body) !== undefined ? { data: encodeBody(init.body) } : {}),
+      // The SDK's own AbortController timeout is not forwarded through the fetch
+      // shim, so the platform default (60s) used to win. Cap the platform request
+      // at the SDK's documented 30s budget instead.
+      timeoutMs: DEFAULT_REQUEST_TIMEOUT_MS,
     });
     return createResponse(input, response);
   };

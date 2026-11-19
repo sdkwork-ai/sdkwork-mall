@@ -11,7 +11,7 @@
 import { getMallMpRuntime, createMpIdempotencyParams } from "@sdkwork/mall-mp-core";
 
 import { errorMessage } from "../types/common";
-import { readCommercePayload } from "./commerce-payload";
+import { readCommercePayload, normalizeCommercePayload } from "./commerce-payload";
 
 export interface MpCartItem {
   id: string;
@@ -61,6 +61,8 @@ export interface MpSubmitOrderOptions {
   /** `standard` | `express` | `sf`; the server prices it into the quote. */
   deliveryMethod?: string;
   giftCardCode?: string;
+  /** Stable across retries of one checkout attempt so a timeout cannot duplicate the order. */
+  idempotencyKey?: string;
   invoiceForm?: MpCheckoutInvoiceForm;
   needPoints?: boolean;
   needInvoice?: boolean;
@@ -188,8 +190,13 @@ export function buildCheckoutOrderBody(
   };
 }
 
-export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orderId: string; quote: MpCheckoutQuote; warnings: string[] }> {
-  const quote = await createCheckoutQuote({ cartItemIds: options.cartItemIds });
+export async function submitOrder(
+  options: MpSubmitOrderOptions,
+  approvedQuote?: MpCheckoutQuote,
+): Promise<{ orderId: string; quote: MpCheckoutQuote; warnings: string[] }> {
+  // The buyer approved the quote the page rendered; reuse it so the order is not
+  // silently created against a second, differently-priced quote.
+  const quote = approvedQuote ?? await createCheckoutQuote({ cartItemIds: options.cartItemIds });
 
   if (options.addressId) {
     // Marks the checkout address as the account default; the commerce block owns
@@ -197,12 +204,33 @@ export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orde
     await commerce().addresses.defaultSelection.create(options.addressId, {});
   }
 
-  const order = await readCommercePayload(
-    commerce().checkout.sessions.orders.create(quote.sessionId, buildCheckoutOrderBody(options, quote)),
+  const orderResponse = await getMallMpRuntime().request.request({
+    // The generated commerce client retries every call three times and exposes no
+    // idempotency parameter on order creation. Order creation is a command: it
+    // goes through the authored request seam (both tokens, no blind retry) with an
+    // Idempotency-Key so a transport timeout can be replayed safely.
+    path: `/checkout/sessions/${encodeURIComponent(quote.sessionId)}/orders`,
+    method: "POST",
+    body: buildCheckoutOrderBody(options, quote),
+    headers: {
+      "Idempotency-Key":
+        options.idempotencyKey ?? createMpIdempotencyParams().idempotencyKey,
+    },
+  });
+  // The seam unwraps `data`; a single-resource body may still be `{ item }`.
+  const order = normalizeCommercePayload(orderResponse);
+  // A resolved create may acknowledge with `resourceId`/`orderNo` instead of `id`.
+  const orderId = String(
+    order.id
+    ?? order.orderId
+    ?? order.resourceId
+    ?? order.orderNo
+    ?? "",
   );
-  const orderId = String(order.id ?? order.orderId ?? "");
+  // A resolved create means the order exists even when the id member is missing:
+  // throwing here made the page re-enable submit and risked a duplicate order.
   if (!orderId) {
-    throw new Error("订单创建失败");
+    return { orderId: "", quote, warnings: [] };
   }
 
   const warnings: string[] = [];

@@ -8,6 +8,8 @@ module.exports = {
     allShown: "已展示全部",
     viewDetail: "订单详情",
     retry: "重试",
+    confirmCancel: "取消后订单不可恢复，确定取消该订单？",
+    confirmReceipt: "请确认已收到全部商品，确认后订单完成。",
     tabs: {
       all: "全部",
       pendingPayment: "待付款",

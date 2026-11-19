@@ -1,11 +1,17 @@
 <view class="page-address">
+  <view wx:if="{{needLogin}}" class="mp-card address-guest">
+    <view class="mp-card-title">登录后管理收货地址</view>
+    <view class="mp-muted">保存与使用收货地址需要登录。</view>
+    <button class="mp-btn mp-btn-primary address-guest-action" bindtap="goLogin">立即登录</button>
+  </view>
+
   <view wx:if="{{loading}}" class="mp-loading">加载地址...</view>
   <view wx:if="{{error}}" class="mp-error">
     <text>{{error}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
   </view>
 
-  <view wx:if="{{!loading && addresses.length === 0}}" class="mp-empty">还没有收货地址</view>
+  <view wx:if="{{!needLogin && !loading && !error && addresses.length === 0}}" class="mp-empty">还没有收货地址</view>
 
   <view
     class="mp-card {{pickerMode ? 'address-pickable' : ''}}"
@@ -31,11 +37,11 @@
     </view>
   </view>
 
-  <view wx:if="{{!editing}}" class="address-create">
+  <view wx:if="{{!needLogin && !editing}}" class="address-create">
     <button class="mp-btn mp-btn-primary address-create-btn" bindtap="openCreate">新增收货地址</button>
   </view>
 
-  <view wx:if="{{editing}}" class="mp-card">
+  <view wx:if="{{!needLogin && editing}}" class="mp-card">
     <view class="mp-card-title">{{editingId ? '编辑地址' : '新增地址'}}</view>
     <view class="mp-field">
       <text class="mp-field-label">收货人</text>

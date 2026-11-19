@@ -1,4 +1,4 @@
-import { t } from "../../i18n";
+import { hasMessage, t } from "../../i18n";
 import { errorMessage, type MpInputEvent, type MpPickerChangeEvent, type MpTapEvent } from "../../types/common";
 import { isLoggedIn } from "../../services/session";
 import { formatCny, formatTime } from "../../utils/format";
@@ -100,6 +100,7 @@ interface PartnerWithdrawalView {
 interface PartnerPageData {
   applicantTypeOptions: string[];
   loading: boolean;
+  loggedIn: boolean;
   error: string;
   membershipState: "none" | "pending" | "approved" | "rejected" | "cancelled";
   statusTitle: string;
@@ -138,6 +139,7 @@ interface PartnerPageData {
   withdrawalLoading: boolean;
   withdrawAmount: string;
   withdrawRemark: string;
+  withdrawSummary: string[];
   withdrawing: boolean;
   withdrawError: string;
   withdrawSuccess: boolean;
@@ -177,6 +179,17 @@ function percentText(value: string): string {
 function moneyText(value: string): string {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? formatCny(parsed) : "—";
+}
+
+/** Withdrawal summary lines; every amount goes through formatCny. */
+function buildWithdrawSummary(center: MpPartnerCenter): string[] {
+  return [
+    `${t("partner.withdrawals.available")} ${moneyText(center.availableBalance)}`,
+    `${t("partner.withdrawals.pending")} ${moneyText(center.frozenBalance)}`,
+    `${t("partner.withdrawals.totalEarned")} ${moneyText(center.totalCommission)}`,
+    `${t("partner.withdrawals.withdrawn")} ${moneyText(center.withdrawnAmount)}`,
+    t("partner.withdrawals.minWithdrawal", { value: moneyText(center.minWithdrawalAmount) }),
+  ];
 }
 
 function toLevelView(level: MpPartnerLevel): PartnerLevelView {
@@ -234,7 +247,10 @@ function toCommissionView(record: MpPartnerCommissionRecord): PartnerCommissionV
     metaText: `${t("partner.commissions.levelOffset")} ${record.levelOffset} · ${formatTime(record.computedAt)}`,
     ratioText: `${t("partner.commissions.ratio")} ${percentText(record.ratio)}`,
     sourceText: record.sourceRef ? `${record.sourceType} · ${record.sourceRef}` : record.sourceType,
-    statusText: record.status,
+    statusText: (() => {
+      const key = `partner.commissionStatusLabel.${record.status.toUpperCase()}`;
+      return hasMessage(key) ? t(key) : t("partner.commissionStatusLabel.UNKNOWN");
+    })(),
   };
 }
 
@@ -248,7 +264,11 @@ function toWithdrawalView(withdrawal: MpPartnerWithdrawal): PartnerWithdrawalVie
         : ""
     }`,
     reviewComment: withdrawal.reviewRemark,
-    statusText: t(`partner.withdrawalStatusLabel.${withdrawal.status.toUpperCase()}`),
+    // A wire status the catalogue does not carry must not render as a raw key.
+    statusText: (() => {
+      const key = `partner.withdrawalStatusLabel.${withdrawal.status.toUpperCase()}`;
+      return hasMessage(key) ? t(key) : t("partner.withdrawalStatusLabel.UNKNOWN");
+    })(),
   };
 }
 
@@ -344,6 +364,9 @@ function buildLabels(): Record<string, string> {
     loading: t("partner.page.loading"),
     pageEyebrow: t("partner.page.eyebrow"),
     pageTitle: t("partner.page.title"),
+    loginRequired: t("partner.page.loginRequired"),
+    loginHint: t("partner.page.loginHint"),
+    loginAction: t("partner.page.loginAction"),
     programBenefits: t("partner.program.benefits"),
     programCustomerRevenue: t("partner.program.customerRevenue"),
     programDescription: t("partner.program.description"),
@@ -403,6 +426,7 @@ Page({
     commissionTotal: 0,
     commissions: [],
     error: "",
+    loggedIn: true,
     form: { ...EMPTY_FORM },
     formOpen: false,
     inviteCode: "",
@@ -432,6 +456,7 @@ Page({
     withdrawAmount: "",
     withdrawError: "",
     withdrawRemark: "",
+    withdrawSummary: [],
     withdrawSuccess: false,
     withdrawing: false,
     withdrawalLoading: false,
@@ -451,13 +476,17 @@ Page({
 
   onShow() {
     if (!isLoggedIn()) {
-      this.setData({
-        error: t("partner.page.errorTitle"),
-        loading: false,
-      });
+      // Invite share links land here signed-out. A CTA keeps the invite code in
+      // the page (onLoad captured it) and avoids a misleading "加载失败".
+      this.setData({ loggedIn: false, error: "", loading: false });
       return;
     }
+    this.setData({ loggedIn: true });
     void this.load();
+  },
+
+  goLogin() {
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 
   async load() {
@@ -510,6 +539,7 @@ Page({
           ? mpCapabilityUrl("buyer.mall.distribution", { invite: center.inviteCode })
           : "",
         earnings: summarizeEarnings(center),
+        withdrawSummary: buildWithdrawSummary(center),
         shareProductsLoading: true,
       });
       rememberOwnInviteCode(center.inviteCode);
@@ -528,7 +558,9 @@ Page({
         this.setData({ center: null, shareLink: "", centerNotice: t("partner.center.notEnrolled") });
         return;
       }
-      this.setData({ center: null, shareLink: "", centerNotice: t("partner.center.notSupported") });
+      // Any other failure is a real outage: surface the page-level error with its
+      // retry instead of a fake "this deployment is not supported" state.
+      throw cause;
     }
   },
 
@@ -641,11 +673,29 @@ Page({
       return;
     }
     this.setData({ withdrawError: "", withdrawing: true, withdrawSuccess: false });
+    const confirmed = await platform.confirm({
+      title: t("partner.withdrawals.confirmTitle"),
+      content: t("partner.withdrawals.confirmContent", { amount: moneyText(this.data.withdrawAmount) }),
+    });
+    if (!confirmed) {
+      this.setData({ withdrawing: false });
+      return;
+    }
     try {
       await createPartnerWithdrawal(this.data.withdrawAmount.trim(), this.data.withdrawRemark.trim());
-      this.setData({ withdrawAmount: "", withdrawRemark: "", withdrawSuccess: true });
-      await this.loadWithdrawalPage(1);
-      this.setData({ center: await retrievePartnerCenter() });
+      this.setData({ withdrawAmount: "", withdrawRemark: "", withdrawSuccess: true, withdrawing: false });
+      // A refresh failure must not repaint a created withdrawal as failed.
+      try {
+        await this.loadWithdrawalPage(1);
+        const center = await retrievePartnerCenter();
+        this.setData({
+          center,
+          earnings: summarizeEarnings(center),
+          withdrawSummary: buildWithdrawSummary(center),
+        });
+      } catch {
+        // the withdrawal exists; leave the previous summary until the next load
+      }
     } catch (cause) {
       this.setData({ withdrawError: errorMessage(cause, t("partner.page.errorTitle")) });
     } finally {
@@ -744,6 +794,13 @@ Page({
   async cancelApplication(event: MpTapEvent) {
     const applicationId = String(event.currentTarget.dataset.id ?? "");
     if (!applicationId || this.data.cancellingId) {
+      return;
+    }
+    const confirmed = await platform.confirm({
+      title: t("partner.applications.cancelConfirmTitle"),
+      content: t("partner.applications.cancelConfirmContent"),
+    });
+    if (!confirmed) {
       return;
     }
     this.setData({ cancellingId: applicationId });

@@ -46,3 +46,9 @@
   text-align: center;
   margin-top: 8rpx;
 }
+
+.reviews-end {
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 24rpx;
+}

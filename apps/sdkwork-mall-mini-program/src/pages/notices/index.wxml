@@ -22,5 +22,7 @@
       <view class="mp-muted notice-body">{{item.body}}</view>
       <view class="mp-muted" wx:if="{{item.timeText}}">{{item.timeText}}</view>
     </view>
+    <view wx:if="{{loadingMore}}" class="mp-loading">加载更多通知...</view>
+    <view wx:elif="{{notices.length > 0 && !hasMore}}" class="mp-muted notices-end">没有更多通知了</view>
   </block>
 </view>

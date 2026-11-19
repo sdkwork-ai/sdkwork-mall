@@ -6,35 +6,15 @@ import { platform } from "@sdkwork/mall-mp-core";
 
 interface SettingsData {
   loggedIn: boolean;
-  environment: string;
-  deploymentProfile: string;
-}
-
-interface MallMpGlobalData {
-  environment?: string;
-  deploymentProfile?: string;
-}
-
-interface MallMpApp {
-  globalData?: MallMpGlobalData;
 }
 
 Page({
   data: {
     loggedIn: false,
-    environment: "development",
-    deploymentProfile: "standalone",
   } as SettingsData,
 
   onShow() {
-    // The app shell publishes these under `globalData` (src/app.ts), not as
-    // top-level app members.
-    const globalData = getApp<MallMpApp>()?.globalData;
-    this.setData({
-      loggedIn: isLoggedIn(),
-      environment: String(globalData?.environment ?? "development"),
-      deploymentProfile: String(globalData?.deploymentProfile ?? "standalone"),
-    });
+    this.setData({ loggedIn: isLoggedIn() });
   },
 
   async clearFootprint() {

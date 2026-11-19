@@ -83,6 +83,7 @@ interface AddressData {
   toast: string;
   /** True when opened from checkout to return the picked address. */
   pickerMode: boolean;
+  needLogin: boolean;
   _toastTimer: number | null;
   _saving: boolean;
 }
@@ -99,6 +100,7 @@ Page({
     error: "",
     toast: "",
     pickerMode: false,
+    needLogin: false,
     _toastTimer: null,
     _saving: false,
   } as AddressData,
@@ -108,14 +110,18 @@ Page({
   },
 
   onShow() {
-    // The address book is account-scoped: a guest must sign in instead of
-    // reading a masked 401 as "还没有收货地址".
+    // The address book is account-scoped. An inline CTA (not an auto-push on
+    // every show) avoids the back-from-login redirect loop.
     if (!isLoggedIn()) {
-      this.setData({ loading: false });
-      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
+      this.setData({ needLogin: true, loading: false, error: "" });
       return;
     }
+    this.setData({ needLogin: false });
     void this.refresh();
+  },
+
+  goLogin() {
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 
   async refresh() {

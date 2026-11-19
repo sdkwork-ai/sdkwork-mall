@@ -17,6 +17,14 @@
   flex-shrink: 0;
 }
 
+.fav-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 20rpx;
+}
+
 .fav-body {
   flex: 1;
   margin: 0 20rpx;

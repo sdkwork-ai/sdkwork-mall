@@ -48,7 +48,9 @@ export async function getProfile(): Promise<MpProfile> {
     return { ...EMPTY_PROFILE };
   }
   const [user, membership] = await Promise.all([
-    currentUser().catch(() => null),
+    // Identity is the page's primary content: a failed IAM read must surface as an
+    // error with retry, not as an empty profile.
+    currentUser(),
     getMembershipStatus().catch(() => null),
   ]);
   return {

@@ -30,6 +30,8 @@ export interface MpShopDetail extends MpShopSummary {
   products: MpShopProduct[];
   /** True when the shop has more products than the first page. */
   productsHasMore: boolean;
+  /** True when the shelf read failed; the header is still valid. */
+  productsUnavailable: boolean;
 }
 
 export interface MpActivity {
@@ -141,10 +143,15 @@ export async function retrieveShop(shopId: string): Promise<MpShopDetail | null>
   // A failed shop read stays a failure: turning it into `null` would report an
   // outage as "店铺不存在或已关闭" and drop the retry the page offers.
   const shop = await readCommercePayload(commerce().shops.retrieve(shopId) as unknown as Promise<Record<string, unknown>>);
-  // The product shelf is enrichment: the shop header is still useful without it.
+  // The product shelf is enrichment: the shop header is still useful without it,
+  // but a failed read must render as a shelf error, not as "暂无在售商品".
+  let productsUnavailable = false;
   const productsPayload = await readCommercePayload(
     commerce().catalog.products.list({ page: 1, pageSize: 20, shopId }) as unknown as Promise<Record<string, unknown>>,
-  ).catch(() => ({}) as MpRecord);
+  ).catch(() => {
+    productsUnavailable = true;
+    return {} as MpRecord;
+  });
   if (!asString(shop, ["id", "shopId"])) {
     return null;
   }
@@ -153,6 +160,7 @@ export async function retrieveShop(shopId: string): Promise<MpShopDetail | null>
     ...readShopSummary(shop),
     products: productRows.map(mapShopProduct).filter((product) => product.id),
     productsHasMore: readPageInfo(productsPayload, productRows.length, 1).hasMore,
+    productsUnavailable,
   };
 }
 

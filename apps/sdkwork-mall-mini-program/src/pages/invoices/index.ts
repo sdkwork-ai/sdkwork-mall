@@ -108,20 +108,23 @@ Page({
   },
 
   async submit() {
+    if (this.data.busy) {
+      return;
+    }
     const title = this.data.title.trim();
     const titleType = TITLE_TYPE_VALUES[this.data.titleTypeIndex] ?? "personal";
+    // A USCC is case-insensitive; lowercase input was rejected by the uppercase
+    // pattern even though it is a valid tax number.
+    const taxNumber = this.data.taxNumber.trim().toUpperCase();
     if (!title) {
       this.showToast("请填写发票抬头");
       return;
     }
-    if (titleType === "company" && !this.data.taxNumber.trim()) {
+    if (titleType === "company" && !taxNumber) {
       this.showToast("企业抬头需要填写税号");
       return;
     }
-    if (
-      titleType === "company" &&
-      !/^[A-Z0-9]{15,20}$/.test(this.data.taxNumber.trim())
-    ) {
+    if (titleType === "company" && !/^[A-Z0-9]{15,20}$/.test(taxNumber)) {
       this.showToast(t("invoices.taxInvalid"));
       return;
     }
@@ -130,7 +133,7 @@ Page({
       await createInvoice({
         title,
         titleType,
-        taxNumber: titleType === "company" ? this.data.taxNumber.trim() : undefined,
+        taxNumber: titleType === "company" ? taxNumber : undefined,
         email: this.data.email.trim() || undefined,
         orderId: this.data.orderId.trim() || undefined,
       });

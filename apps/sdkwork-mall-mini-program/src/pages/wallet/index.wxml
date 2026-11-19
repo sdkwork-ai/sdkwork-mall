@@ -1,11 +1,17 @@
 <view class="page-wallet">
+  <view wx:if="{{needLogin}}" class="mp-card wallet-guest">
+    <view class="mp-card-title">登录后查看钱包</view>
+    <view class="mp-muted">余额、积分与流水需要登录后查看。</view>
+    <button class="mp-btn mp-btn-primary wallet-guest-action" bindtap="goLogin">立即登录</button>
+  </view>
+
   <view wx:if="{{loading}}" class="mp-loading">加载钱包...</view>
   <view wx:if="{{message}}" class="mp-error">
     <text>{{message}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
   </view>
 
-  <block wx:if="{{!loading}}">
+  <block wx:if="{{!loading && !needLogin}}">
     <view class="wallet-hero">
       <view class="wallet-hero-item">
         <view class="wallet-label">现金余额</view>
@@ -19,7 +25,7 @@
 
     <view class="mp-card">
       <view class="mp-card-title">现金流水</view>
-      <view wx:if="{{ledger.length === 0}}" class="mp-empty">暂无流水记录</view>
+      <view wx:if="{{!message && ledger.length === 0}}" class="mp-empty">暂无流水记录</view>
       <view class="ledger-row" wx:for="{{ledger}}" wx:key="id">
         <view class="ledger-body">
           <view class="ledger-summary">{{item.summary}}</view>
@@ -27,8 +33,8 @@
         </view>
         <view class="mp-price" wx:if="{{item.amountText}}">{{item.amountText}}</view>
       </view>
+      <view wx:if="{{loadingMore}}" class="mp-loading">加载更多流水...</view>
+      <view wx:elif="{{ledger.length > 0 && !hasMore}}" class="mp-muted wallet-end">没有更多流水了</view>
     </view>
-
-    <view class="mp-muted wallet-note">充值与提现将在支付渠道接入后开放。</view>
   </block>
 </view>

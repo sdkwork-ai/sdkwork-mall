@@ -2,7 +2,13 @@
   <view class="mp-muted partner-eyebrow">{{labels.pageEyebrow}}</view>
   <view class="mp-title">{{labels.pageTitle}}</view>
 
-  <view wx:if="{{loading}}" class="mp-card">
+  <view wx:if="{{!loggedIn}}" class="mp-card partner-guest">
+    <view class="mp-card-title">{{labels.loginRequired}}</view>
+    <view class="mp-muted">{{labels.loginHint}}</view>
+    <button class="mp-btn mp-btn-primary" bindtap="goLogin">{{labels.loginAction}}</button>
+  </view>
+
+  <view wx:elif="{{loading}}" class="mp-card">
     <view class="mp-muted">{{labels.loading}}</view>
   </view>
 
@@ -73,7 +79,7 @@
       <view class="partner-share-title">{{labels.dashShareProductsTitle}}</view>
       <view class="partner-products">
         <view class="partner-product" wx:for="{{shareProducts}}" wx:key="id">
-          <image wx:if="{{item.imageUrl}}" class="partner-product-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.imageUrl}}" class="partner-product-image" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
           <view wx:else class="partner-product-image partner-product-image-empty">SDKWork</view>
           <view class="partner-product-title">{{item.title}}</view>
           <view class="partner-product-price">{{item.priceText}}</view>
@@ -135,10 +141,8 @@
     <view wx:if="{{center}}" class="mp-card">
       <view class="mp-card-title">{{labels.withdrawTitle}}</view>
       <view class="partner-level-meta">
-        {{labels.withdrawAvailable}} {{center.availableBalance}} · {{labels.withdrawPending}} {{center.frozenBalance}} ·
-        {{labels.withdrawTotal}} {{center.totalCommission}} · {{labels.withdrawWithdrawn}} {{center.withdrawnAmount}}
+        <text wx:for="{{withdrawSummary}}" wx:key="*this" class="partner-withdraw-line">{{item}}</text>
       </view>
-      <view class="mp-muted">{{labels.withdrawMin}} {{center.minWithdrawalAmount}}</view>
       <view class="mp-field">
         <view class="mp-field-label">{{labels.withdrawAmount}}</view>
         <input type="digit" placeholder="{{labels.withdrawAmountPlaceholder}}" value="{{withdrawAmount}}" bindinput="onWithdrawAmountInput" />

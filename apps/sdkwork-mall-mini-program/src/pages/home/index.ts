@@ -312,12 +312,20 @@ Page({
     }
   },
 
+  goSearch() {
+    this.openCapability("storefront.mall.search");
+  },
+
   goQuickEntry(event: MpTapEvent) {
     const capability = String(event.currentTarget.dataset.capability ?? "");
     if (!capability) {
       return;
     }
-    this.openCapability(capability, this.queryFor(capability));
+    // Match the entry by id: matching by capability returned the *banner* query,
+    // which sent the search bar and the 热卖 entry to `?q=new`.
+    const entryId = String(event.currentTarget.dataset.id ?? "");
+    const entry = this.data.quickEntries.find((quick) => quick.id === entryId);
+    this.openCapability(capability, entry?.query);
   },
 
   goProduct(event: MpTapEvent) {
@@ -344,20 +352,6 @@ Page({
     if (capability) {
       this.openCapability(capability);
     }
-  },
-
-  /** Banner / 快捷入口自带的查询参数（新品、热卖等入口携带）。 */
-  queryFor(capability: string) {
-    const banner = this.data.banners.find(
-      (entry) => entry.capability === capability && entry.query,
-    );
-    if (banner?.query) {
-      return banner.query;
-    }
-    const quick = this.data.quickEntries.find(
-      (entry) => entry.capability === capability && entry.query,
-    );
-    return quick?.query;
   },
 
   openCapability(capability: string, query?: Record<string, string>) {

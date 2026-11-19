@@ -189,7 +189,13 @@ Page({
           }]
         : skuRows;
       const purchasable = skus.length > 0;
-      const selectedSku = skus[0] || null;
+      // Prefer a sellable SKU: a first SKU at zero stock used to mark the whole
+      // product sold out and locked the picker even when other SKUs were in stock.
+      const selectedSku = skus.find((sku) => sku.stock == null || sku.stock > 0) ?? skus[0] ?? null;
+      const knownStocks = skus
+        .map((sku) => sku.stock)
+        .filter((stock): stock is number => stock != null);
+      const allSoldOut = knownStocks.length > 0 && knownStocks.every((stock) => stock <= 0);
       const maxQuantity = selectedSku && selectedSku.stock != null && selectedSku.stock >= 0
         ? selectedSku.stock
         : skus.reduce((sum, sku) => sum + (sku.stock ?? 0), 0) || null;
@@ -208,7 +214,7 @@ Page({
         displayPrice: formatCny(selectedSku && selectedSku.priceCny != null ? selectedSku.priceCny : detail.priceCny),
         maxQuantity,
         stockUrgent: maxQuantity != null && maxQuantity > 0 && maxQuantity < STOCK_URGENT_THRESHOLD,
-        soldOut: maxQuantity != null && maxQuantity <= 0,
+        soldOut: allSoldOut,
         purchasable,
         favorite: isFavorite(detail.id),
         loading: false,
@@ -440,10 +446,16 @@ Page({
         // buyer is sent to the cart to choose, never to a whole-cart checkout.
         const item = (record.item ?? record.cartItem ?? record) as Record<string, unknown>;
         const cartItemId = String(item.id ?? item.cartItemId ?? record.id ?? "");
-        const target = cartItemId
-          ? mpCapabilityUrl("storefront.mall.checkout", { items: cartItemId })
-          : mpCapabilityUrl("storefront.mall.cart");
-        platform.navigateTo(target, { fallbackUrl: mpCapabilityUrl("storefront.mall.cart") });
+        if (cartItemId) {
+          platform.navigateTo(
+            mpCapabilityUrl("storefront.mall.checkout", { items: cartItemId }),
+            { fallbackUrl: mpCapabilityUrl("storefront.mall.cart") },
+          );
+        } else {
+          // The cart is a tabBar page: navigateTo/redirectTo cannot open it, so the
+          // fallback must switch tabs or the buy-now appears to do nothing.
+          platform.switchTab(mpCapabilityUrl("storefront.mall.cart"));
+        }
       } else {
         this.showToast("已加入购物车");
       }

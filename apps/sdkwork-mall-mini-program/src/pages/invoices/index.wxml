@@ -37,7 +37,7 @@
 
     <view class="mp-card">
       <view class="mp-card-title">我的发票</view>
-      <view wx:if="{{invoices.length === 0}}" class="mp-empty">暂无发票</view>
+      <view wx:if="{{!message && invoices.length === 0}}" class="mp-empty">暂无发票</view>
       <view class="inv-row" wx:for="{{invoices}}" wx:key="id">
         <view class="inv-row-body">
           <view class="inv-row-title">{{item.title}}</view>

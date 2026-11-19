@@ -1,5 +1,5 @@
 <view class="page-home">
-  <view class="home-search" bindtap="goQuickEntry" data-capability="storefront.mall.search">
+  <view class="home-search" bindtap="goSearch">
     <view class="home-search-box">{{searchPlaceholder}}</view>
   </view>
 
@@ -30,6 +30,7 @@
       wx:for="{{quickEntries}}"
       wx:key="id"
       bindtap="goQuickEntry"
+      data-id="{{item.id}}"
       data-capability="{{item.capability}}"
     >{{item.label}}</view>
   </view>

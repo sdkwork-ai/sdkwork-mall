@@ -127,7 +127,9 @@ Page({
     try {
       const result = await listProducts({
         categoryId: activeCategoryId || undefined,
-        keyword: activeCategoryId ? undefined : keyword || undefined,
+        // A category chip narrows the keyword search; it must not discard the
+        // keyword the buyer typed and still sees in the input.
+        keyword: keyword || undefined,
         page: nextPage,
         pageSize: 20,
         sort: activeSort || undefined,

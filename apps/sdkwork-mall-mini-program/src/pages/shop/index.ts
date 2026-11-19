@@ -20,6 +20,7 @@ interface ShopView {
   ratingText: string;
   products: ShopProductRow[];
   productsHasMore: boolean;
+  productsUnavailable: boolean;
 }
 
 interface ShopData {
@@ -49,6 +50,7 @@ function toView(shop: MpShopDetail): ShopView {
     ratingText: shop.rating != null ? shop.rating.toFixed(1) : "",
     products: shop.products.filter((product) => product.id).map(toProductRow),
     productsHasMore: shop.productsHasMore,
+    productsUnavailable: shop.productsUnavailable,
   };
 }
 
@@ -104,6 +106,31 @@ Page({
         loading: false,
         error: errorMessage(cause, "店铺加载失败"),
       });
+    }
+  },
+
+  /** Retries only the product shelf after a failed read. */
+  async retryProducts() {
+    const current = this.data.shop;
+    if (!current || this.data.loadingMore) {
+      return;
+    }
+    this.setData({ loadingMore: true });
+    try {
+      const result = await listShopProducts(this.data._shopId, 1);
+      this.setData({
+        shop: {
+          ...current,
+          products: result.items.map(toProductRow),
+          productsHasMore: result.hasMore,
+          productsUnavailable: false,
+        },
+        _productPage: 1,
+        loadingMore: false,
+      });
+    } catch (cause) {
+      this.setData({ loadingMore: false });
+      platform.toast(errorMessage(cause, "商品加载失败"), "none");
     }
   },
 

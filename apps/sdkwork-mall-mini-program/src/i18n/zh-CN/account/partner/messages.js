@@ -44,6 +44,9 @@ module.exports = {
       subtitle: "邀请好友、管理团队、查看佣金与提现进度。",
       loading: "正在加载分销中心…",
       errorTitle: "分销中心加载失败",
+      loginRequired: "登录后查看分销中心",
+      loginHint: "分销中心需要登录后查看；邀请码会在登录后自动保留。",
+      loginAction: "立即登录",
       retry: "重试",
     },
     actions: {
@@ -126,6 +129,8 @@ module.exports = {
       targetLevel: "意向等级",
       submittedAt: "提交时间",
       reviewComment: "审核意见",
+      cancelConfirmTitle: "撤回申请",
+      cancelConfirmContent: "确定撤回这条加盟申请？撤回后可以重新提交。",
     },
     apply: {
       title: "加盟申请",
@@ -201,6 +206,8 @@ module.exports = {
       invalidAmount: "请输入有效的提现金额。",
       exceedsBalance: "提现金额超过可提现余额。",
       belowMin: "提现金额低于最低提现额度。",
+      confirmTitle: "确认提现",
+      confirmContent: "确认申请提现 {{amount}}？提交后由平台审核并打款。",
       success: "提现申请已提交，等待平台审核。",
       previousPage: "上一页",
       nextPage: "下一页",
@@ -211,6 +218,14 @@ module.exports = {
       APPROVED: "已审核",
       REJECTED: "已驳回",
       PAID: "已打款",
+      UNKNOWN: "处理中",
+    },
+    commissionStatusLabel: {
+      PENDING: "待结算",
+      SETTLED: "已结算",
+      AVAILABLE: "可提现",
+      CANCELLED: "已取消",
+      UNKNOWN: "处理中",
     },
   },
 };

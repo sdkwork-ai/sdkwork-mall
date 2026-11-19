@@ -56,3 +56,18 @@
   font-size: 28rpx;
   font-weight: 600;
 }
+
+.points-expiring {
+  margin-top: 8rpx;
+}
+
+.points-guest {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 40rpx 30rpx;
+}
+
+.points-guest-action {
+  align-self: flex-start;
+}

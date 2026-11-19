@@ -133,12 +133,16 @@ test("no mini-program capability page is an orphan screen", () => {
     "storefront.mall.cart",
     "buyer.mall.dashboard",
   ]);
+  // Placeholder capabilities deliberately hidden from shoppers (no commerce API
+  // yet). They stay authored so shipping the API is a wiring change, not a page
+  // build; nothing in the app links to them.
+  const hiddenRouteIds = new Set(["buyer.mall.gift-cards"]);
   const pagesDirectory = join(sourceRoot, "pages");
   const allModules = collectPageModules(pagesDirectory);
 
   const orphans = [];
   for (const entry of registryEntries()) {
-    if (tabRouteIds.has(entry.routeId)) {
+    if (tabRouteIds.has(entry.routeId) || hiddenRouteIds.has(entry.routeId)) {
       continue;
     }
     const ownerDirectory = join(pagesDirectory, entry.page.split("/")[1]);

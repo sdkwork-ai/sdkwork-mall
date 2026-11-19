@@ -106,13 +106,6 @@
       </view>
     </view>
 
-    <view class="mp-card">
-      <view class="mp-card-title">商品评价</view>
-      <view class="product-reviews">
-        <text class="mp-muted">评价功能即将开放，先看看买家怎么说～</text>
-      </view>
-    </view>
-
     <view class="mp-card" wx:if="{{detail.description}}">
       <view class="mp-card-title">商品介绍</view>
       <view class="product-description">{{detail.description}}</view>
@@ -154,7 +147,7 @@
         <view class="mp-flex-between product-sku-head">
           <view class="mp-flex">
             <view class="product-sku-thumb">
-              <image wx:if="{{images[0]}}" src="{{images[0]}}" mode="aspectFill" />
+              <image wx:if="{{images[0]}}" src="{{images[0]}}" mode="aspectFill" lazy-load />
               <text wx:else>SDKWork</text>
             </view>
             <view class="product-sku-meta">

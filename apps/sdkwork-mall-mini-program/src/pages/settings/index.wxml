@@ -43,11 +43,5 @@
         <view class="mp-muted">SDKWork Mall 小程序</view>
       </view>
     </view>
-    <view class="settings-row">
-      <view class="settings-row-body">
-        <view class="settings-row-label">环境</view>
-        <view class="mp-muted">{{environment}} · {{deploymentProfile}}</view>
-      </view>
-    </view>
   </view>
 </view>

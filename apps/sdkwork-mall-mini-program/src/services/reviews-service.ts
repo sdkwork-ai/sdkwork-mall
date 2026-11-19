@@ -15,14 +15,22 @@ export interface MpPendingReviewOrder {
   subject: string;
 }
 
-export async function listPendingReviewOrders(): Promise<MpPendingReviewOrder[]> {
+export interface MpPendingReviewPage {
+  hasMore: boolean;
+  items: MpPendingReviewOrder[];
+}
+
+export async function listPendingReviewOrders(page = 1): Promise<MpPendingReviewPage> {
   if (!isLoggedIn()) {
-    return [];
+    return { hasMore: false, items: [] };
   }
-  const { orders } = await listOrders({ page: 1, pageSize: 20, status: "COMPLETED" });
-  return orders.map((order) => ({
-    id: order.id,
-    paidAmountCny: order.paidAmountCny,
-    subject: order.subject.trim() || "订单",
-  }));
+  const result = await listOrders({ page, pageSize: 20, status: "COMPLETED" });
+  return {
+    hasMore: result.hasMore,
+    items: result.orders.map((order) => ({
+      id: order.id,
+      paidAmountCny: order.paidAmountCny,
+      subject: order.subject.trim() || "订单",
+    })),
+  };
 }

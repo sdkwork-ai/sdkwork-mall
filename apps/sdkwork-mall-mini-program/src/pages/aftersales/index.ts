@@ -1,6 +1,6 @@
 import { t } from "../../i18n";
 import { errorMessage, type MpPickerChangeEvent, type MpTapEvent, type MpInputEvent } from "../../types/common";
-import { formatCny } from "../../utils/format";
+import { formatCny, formatTime } from "../../utils/format";
 import {
   AFTER_SALES_REASON_PRESETS,
   AFTER_SALES_TYPES,
@@ -17,6 +17,7 @@ import { uploadDriveImage } from "../../services/drive-upload-service";
 import { getOrderDetail } from "../../services/order-service";
 import { SDKWORK_MALL_MP_AFTER_SALES_EVIDENCE_UPLOAD } from "../../bootstrap/uploadDeclaration";
 import { platform } from "@sdkwork/mall-mp-core";
+import { requireSignedIn } from "../../utils/auth-gate";
 
 const MAX_EVIDENCE_FILES = 6;
 const MAX_EVIDENCE_BYTES = 5 * 1024 * 1024;
@@ -182,6 +183,10 @@ Page({
   } as AftersalesData,
 
   onLoad(options: Record<string, string | undefined>) {
+    if (!requireSignedIn()) {
+      this.setData({ loading: false });
+      return;
+    }
     const presetOrderId = options?.orderId ?? "";
     this.setData({ presetOrderId, orderId: presetOrderId });
     if (presetOrderId) {
@@ -347,6 +352,11 @@ Page({
   },
 
   async submit() {
+    if (this.data.busy) {
+      // The submit is a money-moving command: a second tap must not open a second
+      // after-sales ticket while the first is in flight.
+      return;
+    }
     if (!this.data.orderLoaded || !this.data.orderItems || this.data.orderItems.length === 0) {
       this.setData({ error: t("afterSales.errors.readOrderFirst") });
       return;
@@ -401,7 +411,14 @@ Page({
 
   async cancelRequest(event: MpTapEvent) {
     const requestId = `${event.currentTarget.dataset.id ?? ""}`;
-    if (!requestId) {
+    if (!requestId || this.data.busy) {
+      return;
+    }
+    const confirmed = await platform.confirm({
+      title: t("afterSales.list.cancel"),
+      content: t("afterSales.list.cancelConfirm"),
+    });
+    if (!confirmed) {
       return;
     }
     this.setData({ busy: true, error: "" });
@@ -477,7 +494,11 @@ Page({
     }
     this.setData({ progressRequestId: requestId, progressEvents: [], progressLoading: true });
     try {
-      const events = await listAfterSalesEvents(requestId);
+      const events = (await listAfterSalesEvents(requestId)).map((event) => ({
+        action: event.action,
+        // The wire timestamp is ISO; shoppers read a formatted local time.
+        at: formatTime(event.at),
+      }));
       if (this.data.progressRequestId === requestId) {
         this.setData({ progressEvents: events, progressLoading: false });
       }

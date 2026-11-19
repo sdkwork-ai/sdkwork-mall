@@ -19,9 +19,8 @@ export type MpHostErrorCode =
   | "cancelled"
   | "invalid-state";
 
-export interface MpHostError {
+export interface MpHostError extends Error {
   readonly code: MpHostErrorCode;
-  readonly message: string;
   readonly cause?: unknown;
 }
 
@@ -55,7 +54,18 @@ export function createMpHostError(
   message: string,
   cause?: unknown,
 ): MpHostError {
-  const error: MpHostError = cause === undefined ? { code, message } : { code, message, cause };
+  // A plain object is invisible to `instanceof Error`, so the SDK transport
+  // replaced every platform failure with "Unknown network error". A real Error
+  // keeps the platform message while still carrying the stable code.
+  const error = new Error(message) as Error & {
+    code: MpHostErrorCode;
+    cause?: unknown;
+  };
+  error.name = "MpHostError";
+  error.code = code;
+  if (cause !== undefined) {
+    error.cause = cause;
+  }
   return error;
 }
 

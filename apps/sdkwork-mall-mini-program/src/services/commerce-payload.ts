@@ -38,6 +38,7 @@ function isSuccessCode(code: unknown): boolean {
  * - a list payload stays a record (`items` / `pageInfo`);
  * - a bare array becomes `{ items }` so list readers keep working;
  * - a verbatim success envelope is unwrapped;
+ * - a single-resource body (`{ item }`, API_SPEC §15.4) is unwrapped;
  * - a verbatim failure envelope raises its message instead of looking empty.
  */
 export function normalizeCommercePayload(value: unknown): MpRecord {
@@ -51,13 +52,34 @@ export function normalizeCommercePayload(value: unknown): MpRecord {
   const ownsPayloadFields =
     "items" in record || "content" in record || "id" in record || "pageInfo" in record;
   if (!("data" in record) || ownsPayloadFields) {
-    return record;
+    return unwrapResourceItem(record);
   }
   if ("code" in record && !isSuccessCode(record.code)) {
     throw new Error(asString(record, ["message", "msg", "detail", "title"], "请求失败"));
   }
   const data = record.data;
-  return Array.isArray(data) ? { items: asRecordList(data) } : asRecord(data);
+  return Array.isArray(data) ? { items: asRecordList(data) } : unwrapResourceItem(asRecord(data));
+}
+
+/**
+ * Unwraps a v3 single-resource body.
+ *
+ * The SDK removes `{ code, data }` but leaves the resource wrapper: a retrieve
+ * resolves to `{ item: { id, … } }`. Reading `.id` off that wrapper missed every
+ * field, so product detail, cart, checkout, wallet and membership all looked
+ * empty (the same defect the PC review recorded on 2026-11-14). List payloads
+ * (`items` / `content`) are left untouched because `item` there is not a wrapper.
+ */
+function unwrapResourceItem(record: MpRecord): MpRecord {
+  const hasListMembers = Array.isArray(record.items) || Array.isArray(record.content) || "pageInfo" in record;
+  if (hasListMembers) {
+    return record;
+  }
+  const item = record.item;
+  if (item !== null && typeof item === "object" && !Array.isArray(item)) {
+    return item as MpRecord;
+  }
+  return record;
 }
 
 /** Awaits one commerce call and returns its normalized payload. */

@@ -5,6 +5,7 @@ import { listPaymentMethods, payOrder, type MpWechatPayParams } from "../../serv
 import { getOrderDetail } from "../../services/order-service";
 import { formatCny } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
+import { requireSignedIn } from "../../utils/auth-gate";
 
 interface CashierData {
   orderId: string;
@@ -50,6 +51,10 @@ Page({
   } as CashierData,
 
   onLoad(options: Record<string, string | undefined>) {
+    if (!requireSignedIn()) {
+      this.setData({ loading: false });
+      return;
+    }
     const orderId = options.orderId || "";
     this.setData({
       orderId,

@@ -17,6 +17,14 @@
   flex-shrink: 0;
 }
 
+.fp-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 20rpx;
+}
+
 .fp-body {
   flex: 1;
   margin-left: 20rpx;

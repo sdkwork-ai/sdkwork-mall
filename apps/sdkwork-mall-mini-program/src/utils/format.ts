@@ -1,8 +1,9 @@
 export function formatCny(value: number | null | undefined): string {
-  if (value === null || value === undefined) {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
     return "--";
   }
-  return `¥${value.toFixed(2)}`;
+  const sign = value < 0 ? "-" : "";
+  return `${sign}¥${Math.abs(value).toFixed(2)}`;
 }
 
 /**

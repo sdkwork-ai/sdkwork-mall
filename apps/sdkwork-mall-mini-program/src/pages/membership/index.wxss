@@ -48,3 +48,14 @@
   font-size: 24rpx;
   box-sizing: border-box;
 }
+
+.membership-guest {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 40rpx 30rpx;
+}
+
+.membership-guest-action {
+  align-self: flex-start;
+}

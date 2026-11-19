@@ -41,7 +41,7 @@
             data-id="{{item.id}}"
           />
           <view class="cart-item-image" bindtap="goProduct" data-id="{{item.spuId}}">
-            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
             <text wx:else>SDKWork</text>
           </view>
           <view class="cart-item-body">
