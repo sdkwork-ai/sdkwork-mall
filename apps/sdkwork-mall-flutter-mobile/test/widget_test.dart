@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:sdkwork_mall_flutter_mobile/shell/mobile_shell.dart';
+import 'package:sdkwork_mall_flutter_mobile/pages/widgets.dart';
 
 import 'support/i18n_fixture.dart';
 
@@ -68,5 +69,27 @@ void main() {
     expect(find.byIcon(Icons.inventory_2_outlined), findsOneWidget);
     expect(find.byIcon(Icons.local_shipping_outlined), findsOneWidget);
     expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+  });
+
+  testWidgets('product card shows the projected brand', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 220,
+            child: SdkworkProductCard(
+              product: const <String, dynamic>{
+                'title': '人体工学椅 Pro',
+                'priceText': '¥1,299.00',
+                'brandName': 'PolarDay',
+              },
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('PolarDay'), findsOneWidget);
   });
 }

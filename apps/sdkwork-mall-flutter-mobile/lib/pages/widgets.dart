@@ -166,6 +166,8 @@ class SdkworkProductCard extends StatelessWidget {
     final imageUrl = product['imageUrl']?.toString() ?? '';
     final price = product['priceText']?.toString() ?? '';
     final sales = product['sales']?.toString() ?? '';
+    final brand =
+        (product['brandName'] ?? product['brand'])?.toString() ?? '';
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -198,6 +200,20 @@ class SdkworkProductCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  if (brand.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        brand,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

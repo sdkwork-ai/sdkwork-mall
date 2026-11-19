@@ -446,6 +446,16 @@ JS boot smoke cannot observe.
 - MP `tsc --noEmit` passes, the 36-page smoke stays clean and mall
   `pnpm verify` remains green.
 
+### 2.0.22 Flutter product-card brand (round 30)
+
+- `SdkworkProductCard` reads `brandName`/`brand` from the product map and
+  renders it under the title. Home and search already preserve the raw product
+  map, so the projected brand reaches the card without a data-layer change.
+- Added a widget test (`product card shows the projected brand`); Flutter now
+  runs 36 tests, `flutter analyze` reports no issues.
+- Brand is therefore visible on PC, H5, mini-program and Flutter list cards;
+  PDPs show it on PC/H5/MP.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
