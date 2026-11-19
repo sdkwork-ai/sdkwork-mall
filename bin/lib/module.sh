@@ -81,7 +81,9 @@ sdkwork_package_app() {
           "missing browser bundle for sdkwork-mall-${app_type} (${environment}/${profile}); run bin/apps-build.sh ${app_type} ${environment}:${profile} first"
       fi
       mkdir -p "${out:-target/bin-packages}"
-      artifact_name="sdkwork-mall-${app_type}-${env_alias}-${profile}.tgz"
+      # MODULE_BIN_SPEC.md §4.4 recognized packaging formats: tar.gz carries a
+      # sidecar .sha256 and is validated by sdkwork_assert_out_artifacts.
+      artifact_name="sdkwork-mall-${app_type}-${env_alias}-${profile}.tar.gz"
       sdkwork_tar_artifact "${dist_dir}" "${out:-target/bin-packages}/${artifact_name}" ;;
     *)
       sdkwork_die "${SDKWORK_BIN_E_STATE}" \
