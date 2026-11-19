@@ -366,6 +366,20 @@ JS boot smoke cannot observe.
 - `cargo check` and `sdkwork-merchandise-web-support` tests pass; SQL still needs
   a database integration run.
 
+### 2.0.14 Upstream product gallery projection (round 22)
+
+- `sdkwork-merchandise` commit `5b1214b` adds `ProductResponse.images`,
+  `map_product_detail` and `media_snapshot_url` (reads
+  `url|downloadUrl|previewUrl` from the media snapshot).
+- `sdkwork-catalog` commit `f59e63d` loads up to 50 active `spu` media rows on
+  detail and returns their renderable URLs; a gallery read failure degrades to
+  an empty array instead of blocking the PDP.
+- PC (`record.images`), H5 (`images/galleryImages`) and the mini-program gallery
+  already read this shape; OpenAPI `CatalogProduct.images` was added in the same
+  commit.
+- `cargo check` and crate tests pass; the SQL/media path still needs a database
+  integration run.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
@@ -422,8 +436,9 @@ real catalog backend:
 
 1. **列表/搜索卡片**：价格已由 `salePriceMinor` / `minorUnitExponent` 投影；
    主图已从 `commerce_product_media.resource_snapshot` 投影为 `imageUrl`
-   （`4525ce1` / `008e4fc`）。仅有 Drive `media_resource_id`、快照无 URL 的媒体
-   仍需 Drive delivery URL 解析。Frontend already reads these fields.
+   （`4525ce1` / `008e4fc`），详情图集已投影为 `images`（`5b1214b` / `f59e63d`）。
+   仅有 Drive `media_resource_id`、快照无 URL 的媒体仍需 Drive delivery URL
+   解析。Frontend already reads these fields.
 2. **详情 SKU 已补齐**：`ProductResponse.skus` + `map_product_with_skus`（`f208021`），
    catalog app-api 详情在 `795b1a6` 加载 active SKU；OpenAPI 已同步（`b6a01d2`）。
    真实 PDP 现在具备 SKU 价格/库存/规格轴数据；仍需数据库集成验证。
@@ -437,11 +452,11 @@ real catalog backend:
 Recommended upstream change set (one PR each, in dependency order):
 
 - `sdkwork-merchandise` (price `08af5af`, detail SKUs `f208021`, main image
-  `4525ce1`): still add `brand_name`; media that carries only a Drive id needs
-  the delivery-URL resolver.
+  `4525ce1`, gallery `5b1214b`): still add `brand_name`; media that carries only
+  a Drive id needs the delivery-URL resolver.
 - `sdkwork-catalog` (detail SKUs `795b1a6`, schema `b6a01d2`, image schema
-  `008e4fc`): add the remaining brand field to the app-api `CatalogProduct`
-  schema.
+  `008e4fc`, gallery `f59e63d`): add the remaining brand field to the app-api
+  `CatalogProduct` schema.
 - `scripts/dev/mock-commerce-gateway.mjs`: keep in sync (already emits the frontend shape).
 - No mall SDK regeneration is required for additive response fields because the federated
   commerce client is generic; typed contract updates still belong to the authority repos.
