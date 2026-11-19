@@ -29,7 +29,12 @@ export interface FakeMallDefaultDataPortOptions {
 
 export interface FakeMallDefaultDataPort extends MallDefaultDataPort {
   readonly state: FakeMallDefaultDataPortState;
-  readonly calls: { readonly created: string[]; readonly published: string[]; readonly cmsWrites: number };
+  readonly calls: {
+    readonly created: string[];
+    readonly published: string[];
+    readonly activated: string[];
+    readonly cmsWrites: number;
+  };
 }
 
 const EMPTY_CMS: MallDefaultDataCmsConfigShape = {
@@ -73,6 +78,7 @@ export function createFakeMallDefaultDataPort(
   const nextId = (prefix: string) => `${prefix}-${(sequence += 1)}`;
   const created: string[] = [];
   const published: string[] = [];
+  const activated: string[] = [];
   const state: FakeMallDefaultDataPortState = {
     brands: [],
     attributes: [],
@@ -102,6 +108,7 @@ export function createFakeMallDefaultDataPort(
     calls: {
       created,
       published,
+      activated,
       get cmsWrites() {
         return cmsWriteCount;
       },
@@ -215,9 +222,30 @@ export function createFakeMallDefaultDataPort(
         const skuNo = pickKey(body, ["skuNo"]);
         failIfRequested(skuNo);
         const id = nextId("sku");
-        state.skus.push({ ...body, id });
+        // The authority inserts every SKU as a draft; activation is a separate
+        // guarded update. The fake must reproduce that or the plan's
+        // activation step would look unnecessary.
+        state.skus.push({ ...body, id, status: "draft", salesStatus: "inactive", version: 0 });
         created.push(skuNo);
-        return okItem(id);
+        return okItem({ id, version: 0, status: "draft", salesStatus: "inactive" });
+      },
+      async retrieveSku(skuId) {
+        const record = state.skus.find((sku) => sku.id === skuId);
+        return record ? okItem(record) : { code: 40401, message: "sku not found" };
+      },
+      async updateSku(skuId, body, expectedVersion) {
+        const record = state.skus.find((sku) => sku.id === skuId);
+        if (!record) {
+          throw new Error(`sku ${skuId} not found`);
+        }
+        if (Number(record.version ?? 0) !== expectedVersion) {
+          throw new Error(`stale version for sku ${skuId}`);
+        }
+        Object.assign(record, body);
+        record.salesStatus = record.status === "active" ? "active" : "inactive";
+        record.version = expectedVersion + 1;
+        activated.push(String(record.skuNo ?? skuId));
+        return okItem(record);
       },
     },
     shops: {

@@ -18,9 +18,7 @@ import {
 import {
   Badge,
   Button,
-  Checkbox,
   EmptyState,
-  Input,
   KeyValueTable,
   LoadingBlock,
   Pagination,
@@ -52,7 +50,9 @@ import {
   loadMallProductCoupons,
   loadMallProductDetail,
   retrieveMallCategory,
+  setMallProductCartQuantity,
   type MallProductDetail,
+  type MallProductSkuAttribute,
   type MallShopRatingSummary,
 } from "../catalog-service";
 
@@ -79,8 +79,8 @@ const DEFAULT_FAQ = [
 ];
 
 function formatCny(value: number | null | undefined): string {
-  if (value == null || !Number.isFinite(value)) return "询价";
-  return formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "询价";
+  if (value == null || !Number.isFinite(value)) return "暂无报价";
+  return formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "暂无报价";
 }
 
 function formatRating(value: number | null | undefined): string {
@@ -96,6 +96,119 @@ function resolveStockStatus(stock: number | undefined): {
   if (stock <= 0) return { label: "暂时缺货", tone: "danger" };
   if (stock < 10) return { label: `仅剩 ${stock} 件`, tone: "warning" };
   return { label: "现货充足", tone: "success" };
+}
+
+interface MallSkuSpecValue {
+  key: string;
+  label: string;
+  skuIds: string[];
+}
+
+interface MallSkuSpecGroup {
+  key: string;
+  label: string;
+  values: MallSkuSpecValue[];
+}
+
+function skuAxisValueKey(attribute: MallProductSkuAttribute): string {
+  return attribute.valueId || attribute.valueLabel;
+}
+
+/**
+ * Groups SKUs into one option list per sales axis.
+ *
+ * A SKU only carries axis ids, so the label comes from the product-level
+ * attribute table. When the payload has no axis rows (dev doubles ship a flat
+ * `{ id, title, priceCny }` SKU), an empty list makes the page fall back to a
+ * flat SKU picker instead of rendering meaningless groups.
+ */
+function buildMallSkuSpecGroups(
+  skus: MallProductDetail["skus"],
+  labels: Record<string, string>,
+): MallSkuSpecGroup[] {
+  const groups = new Map<string, MallSkuSpecGroup>();
+  for (const sku of skus) {
+    for (const attribute of sku.attributes) {
+      const key = attribute.axisKey;
+      const label =
+        labels[key] ??
+        labels[`no:${attribute.attributeNo}`] ??
+        labels[`id:${attribute.attributeId}`] ??
+        attribute.attributeNo ??
+        "规格";
+      let group = groups.get(key);
+      if (!group) {
+        group = { key, label, values: [] };
+        groups.set(key, group);
+      }
+      const valueKey = skuAxisValueKey(attribute);
+      let option = group.values.find((value) => value.key === valueKey);
+      if (!option) {
+        option = { key: valueKey, label: attribute.valueLabel, skuIds: [] };
+        group.values.push(option);
+      }
+      option.skuIds.push(sku.id);
+    }
+  }
+  return [...groups.values()].filter((group) => group.values.length > 0);
+}
+
+/** True when some SKU with this axis value is in stock under the other chosen axes. */
+function isMallSkuAxisValueAvailable(input: {
+  skus: MallProductDetail["skus"];
+  selectedSku: MallProductDetail["skus"][number] | null;
+  axisKey: string;
+  valueKey: string;
+}): boolean {
+  return input.skus.some((sku) => {
+    const matchesValue = sku.attributes.some(
+      (attribute) => attribute.axisKey === input.axisKey && skuAxisValueKey(attribute) === input.valueKey,
+    );
+    if (!matchesValue || (sku.stock != null && sku.stock <= 0)) {
+      return false;
+    }
+    return sku.attributes.every((attribute) => {
+      if (attribute.axisKey === input.axisKey) {
+        return true;
+      }
+      const chosen = input.selectedSku?.attributes.find((entry) => entry.axisKey === attribute.axisKey);
+      return chosen == null || skuAxisValueKey(chosen) === skuAxisValueKey(attribute);
+    });
+  });
+}
+
+/**
+ * Picks the SKU that results from changing one axis.
+ *
+ * Other chosen axes are preserved when a SKU exists for the combination, which
+ * is what stops a click from silently discarding "曜石黑" when the shopper only
+ * changed the storage size.
+ */
+function pickMallSkuForAxis(input: {
+  skus: MallProductDetail["skus"];
+  selectedSku: MallProductDetail["skus"][number] | null;
+  axisKey: string;
+  valueKey: string;
+}): string | null {
+  const matchesValue = (sku: MallProductDetail["skus"][number]) =>
+    sku.attributes.some(
+      (attribute) => attribute.axisKey === input.axisKey && skuAxisValueKey(attribute) === input.valueKey,
+    );
+  const inStock = (sku: MallProductDetail["skus"][number]) => sku.stock == null || sku.stock > 0;
+  const preferred = input.skus.find((sku) => {
+    if (!matchesValue(sku) || !inStock(sku)) {
+      return false;
+    }
+    return sku.attributes.every((attribute) => {
+      if (attribute.axisKey === input.axisKey) {
+        return true;
+      }
+      const chosen = input.selectedSku?.attributes.find((entry) => entry.axisKey === attribute.axisKey);
+      return chosen == null || skuAxisValueKey(chosen) === skuAxisValueKey(attribute);
+    });
+  });
+  const fallback = input.skus.find((sku) => matchesValue(sku) && inStock(sku)) ?? input.skus.find(matchesValue);
+  return (preferred ?? fallback)?.id ?? null;
 }
 
 function ShopRatingPanel({ rating }: { rating: MallShopRatingSummary | null | undefined }) {
@@ -130,17 +243,15 @@ function ShopRatingPanel({ rating }: { rating: MallShopRatingSummary | null | un
 
 const CATEGORY_SORT_OPTIONS = [
   { label: "综合", value: "" },
-  { label: "销量", value: "sales" },
   { label: "价格升序", value: "price-asc" },
   { label: "价格降序", value: "price-desc" },
-  { label: "好评", value: "rating" },
-  { label: "上新", value: "created_at" },
+  { label: "上新", value: "newest" },
 ] as const;
 
 const CATEGORY_PAGE_SIZE = 20;
 
 function formatCategoryCny(value: number | null | undefined): string {
-  if (value == null || !Number.isFinite(value)) return "询价";
+  if (value == null || !Number.isFinite(value)) return "暂无报价";
   return `¥${value.toFixed(2)}`;
 }
 
@@ -172,14 +283,6 @@ export function SdkworkMallCategoryPage() {
   const [banners, setBanners] = useState<MallCmsBanner[]>(() => listEnabledMallCmsBanners());
   const [hotProducts, setHotProducts] = useState<MallSearchProduct[]>([]);
   const [newProducts, setNewProducts] = useState<MallSearchProduct[]>([]);
-
-  // 客户端筛选维度
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [filterFreeShipping, setFilterFreeShipping] = useState(false);
-  const [filterSelfOperated, setFilterSelfOperated] = useState(false);
-  const [filterInStock, setFilterInStock] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -263,24 +366,19 @@ export function SdkworkMallCategoryPage() {
     };
   }, [categoryId, keyword, sort, page, reloadToken]);
 
-  // 侧边栏热销榜与新品榜
+  // 侧边栏推荐榜与新品榜：目录没有销量字段，一次「最新」读取后拆成两栏，
+  // 避免两个榜单在真实后端返回完全相同的 6 件商品。
   useEffect(() => {
     let active = true;
-    const hotPromise = searchMallProducts({
+    searchMallProducts({
       categoryId: categoryId ?? undefined,
-      pageSize: 6,
-      sort: "sales",
-    });
-    const newPromise = searchMallProducts({
-      categoryId: categoryId ?? undefined,
-      pageSize: 6,
-      sort: "created_at",
-    });
-    Promise.all([hotPromise, newPromise])
-      .then(([hotResult, newResult]) => {
+      pageSize: 12,
+      sort: "newest",
+    })
+      .then((result) => {
         if (active) {
-          setHotProducts(hotResult.items);
-          setNewProducts(newResult.items);
+          setNewProducts(result.items.slice(0, 6));
+          setHotProducts(result.items.slice(6, 12));
         }
       })
       .catch(() => {
@@ -294,49 +392,10 @@ export function SdkworkMallCategoryPage() {
     };
   }, [categoryId]);
 
-  // 从搜索结果中提取品牌选项
-  const brandOptions = useMemo(() => {
-    const brands = items
-      .map((item) => item.brand)
-      .filter((brand): brand is string => Boolean(brand));
-    const counts = new Map<string, number>();
-    for (const brand of brands) {
-      counts.set(brand, (counts.get(brand) ?? 0) + 1);
-    }
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
-      .map(([brand, count]) => ({ brand, count }));
-  }, [items]);
-
-  // 客户端筛选：品牌、包邮、自营、现货、价格区间
-  const filteredItems = useMemo(() => {
-    const min = minPrice.trim() ? Number(minPrice) : null;
-    const max = maxPrice.trim() ? Number(maxPrice) : null;
-    return items.filter((product) => {
-      if (product.priceCny != null) {
-        if (min != null && Number.isFinite(min) && product.priceCny < min) return false;
-        if (max != null && Number.isFinite(max) && product.priceCny > max) return false;
-      } else if (min != null || max != null) {
-        return false;
-      }
-      if (selectedBrands.length > 0) {
-        if (!product.brand || !selectedBrands.includes(product.brand)) return false;
-      }
-      if (filterFreeShipping && !product.freeShipping) return false;
-      if (filterSelfOperated && !product.selfOperated) return false;
-      if (filterInStock && product.inStock === false) return false;
-      return true;
-    });
-  }, [items, minPrice, maxPrice, selectedBrands, filterFreeShipping, filterSelfOperated, filterInStock]);
-
-  const hasActiveFilters =
-    selectedBrands.length > 0 ||
-    filterFreeShipping ||
-    filterSelfOperated ||
-    filterInStock ||
-    Boolean(minPrice.trim()) ||
-    Boolean(maxPrice.trim());
+  // Facets for brand/price/service were removed here: the catalog list API
+  // exposes only `q`, `category_id`, `shop_id`, `product_type` and `sort`, so
+  // those facets filtered the 20 loaded rows while the header claimed a
+  // catalog-wide result. They return once the authority accepts the filters.
 
   function updateParam(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
@@ -351,22 +410,8 @@ export function SdkworkMallCategoryPage() {
     setSearchParams(next);
   }
 
-  function clearAllFilters() {
-    setSelectedBrands([]);
-    setFilterFreeShipping(false);
-    setFilterSelfOperated(false);
-    setFilterInStock(false);
-    setMinPrice("");
-    setMaxPrice("");
-  }
-
-  function toggleBrand(brand: string) {
-    setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand],
-    );
-  }
-
   const totalPages = Math.max(1, Math.ceil(total / CATEGORY_PAGE_SIZE));
+  const hasRankings = hotProducts.length > 0 || newProducts.length > 0;
   const pageNumbers = useMemo(() => {
     const pages: number[] = [];
     const maxVisible = 7;
@@ -449,8 +494,7 @@ export function SdkworkMallCategoryPage() {
           <p>{activeCategory.description}</p>
         ) : null}
         <p className="sdkwork-mall-pc-category-count">
-          共 {filteredItems.length} 件商品
-          {filteredItems.length !== total ? `（筛选自 ${total} 件）` : ""}
+          共 {total} 件商品
         </p>
       </header>
 
@@ -499,85 +543,14 @@ export function SdkworkMallCategoryPage() {
         </section>
       ) : null}
 
-      <div className="sdkwork-mall-pc-search-layout">
-        {/* 左侧筛选区 */}
+      <div className={hasRankings ? "sdkwork-mall-pc-search-layout" : "sdkwork-mall-pc-search-layout is-single-column"}>
+        {/* 侧栏：推荐榜与新品榜（服务端暂不支持品牌/价格/服务筛选） */}
+        {hasRankings ? (
         <aside className="sdkwork-mall-pc-search-filters">
-          <div className="sdkwork-mall-pc-filter-section">
-            <h3>价格区间</h3>
-            <div className="sdkwork-mall-pc-price-filter">
-              <Input
-                aria-label="最低价"
-                min={0}
-                onChange={(event) => setMinPrice(event.target.value)}
-                placeholder="最低"
-                type="number"
-                value={minPrice}
-              />
-              <span className="sdkwork-mall-pc-price-separator">-</span>
-              <Input
-                aria-label="最高价"
-                min={0}
-                onChange={(event) => setMaxPrice(event.target.value)}
-                placeholder="最高"
-                type="number"
-                value={maxPrice}
-              />
-            </div>
-          </div>
-
-          <div className="sdkwork-mall-pc-filter-section">
-            <h3>服务筛选</h3>
-            <label className="sdkwork-mall-pc-filter-checkbox">
-              <Checkbox
-                checked={filterFreeShipping}
-                onCheckedChange={(checked) => setFilterFreeShipping(checked === true)}
-              />
-              <span>包邮</span>
-            </label>
-            <label className="sdkwork-mall-pc-filter-checkbox">
-              <Checkbox
-                checked={filterSelfOperated}
-                onCheckedChange={(checked) => setFilterSelfOperated(checked === true)}
-              />
-              <span>自营</span>
-            </label>
-            <label className="sdkwork-mall-pc-filter-checkbox">
-              <Checkbox
-                checked={filterInStock}
-                onCheckedChange={(checked) => setFilterInStock(checked === true)}
-              />
-              <span>仅看现货</span>
-            </label>
-          </div>
-
-          {brandOptions.length > 0 ? (
-            <div className="sdkwork-mall-pc-filter-section">
-              <h3>品牌</h3>
-              {brandOptions.map(({ brand, count }) => (
-                <label key={brand} className="sdkwork-mall-pc-filter-checkbox">
-                  <Checkbox
-                    checked={selectedBrands.includes(brand)}
-                    onCheckedChange={() => toggleBrand(brand)}
-                  />
-                  <span>{brand}</span>
-                  <span className="sdkwork-mall-pc-filter-count">{count}</span>
-                </label>
-              ))}
-            </div>
-          ) : null}
-
-          {hasActiveFilters ? (
-            <Button variant="ghost" size="sm" onClick={clearAllFilters} type="button">
-              清空筛选
-            </Button>
-          ) : null}
-
-          <Separator />
-
-          {/* 热销榜 */}
+          {/* 推荐榜 */}
           {hotProducts.length > 0 ? (
             <div className="sdkwork-mall-pc-filter-section">
-              <h3><Flame aria-hidden="true" size={14} /> 热销榜</h3>
+              <h3><Flame aria-hidden="true" size={14} /> 精选推荐</h3>
               <ul className="sdkwork-mall-pc-rank-list">
                 {hotProducts.map((product, index) => (
                   <li key={product.id}>
@@ -610,6 +583,7 @@ export function SdkworkMallCategoryPage() {
             </div>
           ) : null}
         </aside>
+        ) : null}
 
         {/* 右侧主区 */}
         <div className="sdkwork-mall-pc-search-main">
@@ -629,19 +603,19 @@ export function SdkworkMallCategoryPage() {
           </div>
 
           {/* 商品列表 */}
-          {filteredItems.length === 0 ? (
-            total === 0 && !hasActiveFilters ? (
+          {items.length === 0 ? (
+            total === 0 ? (
               <EmptyState
                 actions={<Link to="/admin/default-data">初始化默认数据</Link>}
                 description="该环境还没有商品数据。全新安装后可先在首页或管理后台初始化默认数据集（类目、店铺、商品与 SKU）。"
                 title="暂无商品"
               />
             ) : (
-              <EmptyState description="该类目下暂无商品，试试调整筛选条件" title="暂无商品" />
+              <EmptyState description="该页暂无可显示的商品，请返回上一页。" title="暂无商品" />
             )
           ) : (
             <div className="sdkwork-mall-pc-product-grid">
-              {filteredItems.map((product) => (
+              {items.map((product) => (
                 <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
                   <div className="sdkwork-mall-pc-product-image">
                     {product.imageUrl ? <img alt={product.title} src={product.imageUrl} /> : null}
@@ -727,8 +701,10 @@ export function SdkworkMallProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [messageTone, setMessageTone] = useState<"default" | "success" | "warning" | "danger">("default");
   const [busy, setBusy] = useState(false);
   const [favorited, setFavorited] = useState(false);
+  const [categoryName, setCategoryName] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [coupons, setCoupons] = useState<Array<{ id: string; title: string }>>([]);
   const [recommendations, setRecommendations] = useState<Awaited<ReturnType<typeof searchMallProducts>>["items"]>([]);
@@ -737,8 +713,21 @@ export function SdkworkMallProductDetailPage() {
   const loadDetail = useCallback(async () => {
     const data = await loadMallProductDetail(productId);
     setDetail(data);
-    setSelectedSkuId(data.skus[0]?.id ?? "");
+    // Preselect a SKU the shopper could actually buy: the first purchasable one
+    // (stock is not reported by every projection), then the first SKU, then
+    // none. Preselecting an out-of-stock variant made the CTA enable for an
+    // unbuyable line.
+    const purchasable = data.skus.find((sku) => sku.stock == null || sku.stock > 0);
+    setSelectedSkuId(purchasable?.id ?? data.skus[0]?.id ?? "");
     setFavorited(isMallFavorite(data.id));
+    // Breadcrumb category is optional metadata; a failed read only drops one
+    // crumb and must not fail the product page.
+    setCategoryName(null);
+    if (data.categoryId) {
+      void retrieveMallCategory(data.categoryId)
+        .then((category) => setCategoryName(category?.name ?? null))
+        .catch(() => setCategoryName(null));
+    }
     recordMallFootprint({ id: data.id, title: data.title });
     void searchMallProducts({
       categoryId: undefined,
@@ -807,6 +796,10 @@ export function SdkworkMallProductDetailPage() {
       const idx = detail.images.indexOf(selectedSku.imageUrl);
       setActiveImageIndex(idx >= 0 ? idx : 0);
     }
+    // 数量不能停留在新规格的库存之外，否则加购会被后端拒绝。
+    if (selectedSku?.stock != null) {
+      setQuantity((value) => Math.min(value, Math.max(1, selectedSku.stock ?? 1)));
+    }
   }, [selectedSkuId, detail]);
 
   if (loading) {
@@ -826,17 +819,23 @@ export function SdkworkMallProductDetailPage() {
     return <EmptyState description="商品可能已下架" title="商品不存在" />;
   }
 
-  const selectedSku = detail.skus.find((sku) => sku.id === selectedSkuId) ?? detail.skus[0];
+  const selectedSku = detail.skus.find((sku) => sku.id === selectedSkuId) ?? null;
   const displayPrice = selectedSku?.priceCny ?? detail.priceCny;
+  const displayListPrice = selectedSku?.listPriceCny ?? detail.listPriceCny;
   const hasDiscount =
-    detail.listPriceCny != null &&
+    displayListPrice != null &&
     displayPrice != null &&
-    detail.listPriceCny > displayPrice;
+    displayListPrice > displayPrice;
   const discountPercent =
-    hasDiscount && displayPrice != null && detail.listPriceCny != null
-      ? Math.round((1 - displayPrice / detail.listPriceCny) * 100)
+    hasDiscount && displayPrice != null && displayListPrice != null
+      ? Math.round((1 - displayPrice / displayListPrice) * 100)
       : null;
   const stockStatus = resolveStockStatus(selectedSku?.stock);
+  const selectedSkuSoldOut = selectedSku?.stock != null && (selectedSku.stock ?? 0) <= 0;
+  const canPurchase = selectedSku != null && !selectedSkuSoldOut;
+  const maxPurchasable =
+    selectedSku?.stock != null && selectedSku.stock > 0 ? selectedSku.stock : undefined;
+  const skuGroups = buildMallSkuSpecGroups(detail.skus, detail.attributeLabels);
   const serviceCommitments =
     detail.serviceCommitments.length > 0 ? detail.serviceCommitments : DEFAULT_SERVICE_COMMITMENTS;
   const faqItems = detail.faq.length > 0 ? detail.faq : DEFAULT_FAQ;
@@ -849,8 +848,24 @@ export function SdkworkMallProductDetailPage() {
   }));
 
   async function handleAddToCart(): Promise<string | undefined> {
+    if (detail!.skus.length === 0) {
+      setMessageTone("warning");
+      setMessage("该商品暂未返回可售规格，无法加入购物车");
+      return undefined;
+    }
     if (!selectedSku?.id) {
+      setMessageTone("warning");
       setMessage("请选择规格");
+      return undefined;
+    }
+    if (selectedSkuSoldOut) {
+      setMessageTone("warning");
+      setMessage("该规格暂时缺货，请选择其他规格");
+      return undefined;
+    }
+    if (maxPurchasable != null && quantity > maxPurchasable) {
+      setMessageTone("warning");
+      setMessage(`该规格最多可购买 ${maxPurchasable} 件`);
       return undefined;
     }
     setBusy(true);
@@ -861,6 +876,7 @@ export function SdkworkMallProductDetailPage() {
         skuId: selectedSku.id,
         quantity,
       });
+      setMessageTone("success");
       setMessage("已加入购物车");
       return cartItemId;
     } catch (cause: unknown) {
@@ -870,6 +886,7 @@ export function SdkworkMallProductDetailPage() {
         navigate(`/auth/login?redirect=${encodeURIComponent(`${location.pathname}${location.search}`)}`);
         return undefined;
       }
+      setMessageTone("danger");
       setMessage(cause instanceof Error ? cause.message : "加入购物车失败");
       return undefined;
     } finally {
@@ -882,6 +899,12 @@ export function SdkworkMallProductDetailPage() {
       {/* 面包屑 */}
       <nav className="sdkwork-mall-pc-pdp-breadcrumb" aria-label="面包屑">
         <Link to="/">首页</Link>
+        {categoryName && detail.categoryId ? (
+          <>
+            <ChevronRight aria-hidden="true" size={14} />
+            <Link to={`/categories/${detail.categoryId}`}>{categoryName}</Link>
+          </>
+        ) : null}
         <ChevronRight aria-hidden="true" size={14} />
         {detail.shopId ? (
           <Link to={`/shop/${detail.shopId}`}>{detail.shopName ?? "店铺"}</Link>
@@ -936,7 +959,7 @@ export function SdkworkMallProductDetailPage() {
             </div>
             {hasDiscount ? (
               <div className="sdkwork-mall-pc-pdp-price-list">
-                <span className="sdkwork-mall-pc-pdp-price-original">{formatCny(detail.listPriceCny)}</span>
+                <span className="sdkwork-mall-pc-pdp-price-original">{formatCny(displayListPrice)}</span>
                 {discountPercent != null ? (
                   <Badge variant="danger">省 {discountPercent}%</Badge>
                 ) : null}
@@ -986,31 +1009,104 @@ export function SdkworkMallProductDetailPage() {
             </div>
           </div>
 
-          {detail.skus.length > 1 ? (
+          {detail.skus.length === 0 ? (
             <div className="sdkwork-mall-pc-pdp-sku-picker">
               <span className="sdkwork-mall-pc-pdp-meta-label">规格</span>
-              <div className="sdkwork-mall-pc-pdp-sku-options">
-                {detail.skus.map((sku) => (
-                  <button
-                    className={
-                      sku.id === selectedSkuId
-                        ? "sdkwork-mall-pc-pdp-sku-option is-active"
-                        : "sdkwork-mall-pc-pdp-sku-option"
-                    }
-                    key={sku.id}
-                    onClick={() => setSelectedSkuId(sku.id)}
-                    type="button"
-                  >
-                    {sku.imageUrl ? <img alt="" src={sku.imageUrl} /> : null}
-                    <span>{sku.name}</span>
-                    {sku.stock != null && sku.stock <= 0 ? (
-                      <Badge variant="secondary">缺货</Badge>
-                    ) : null}
-                  </button>
-                ))}
-              </div>
+              <StatusNotice tone="warning">
+                商品接口未返回可售规格，暂时无法加入购物车。请稍后重试，或联系店铺客服确认货源。
+              </StatusNotice>
             </div>
-          ) : null}
+          ) : (
+            <div className="sdkwork-mall-pc-pdp-sku-picker">
+              <span className="sdkwork-mall-pc-pdp-meta-label">规格</span>
+              {skuGroups.length > 0 ? (
+                <div className="sdkwork-mall-pc-pdp-sku-groups">
+                  {skuGroups.map((group) => (
+                    <div className="sdkwork-mall-pc-pdp-sku-axis" key={group.key}>
+                      <span className="sdkwork-mall-pc-pdp-sku-axis-label">{group.label}</span>
+                      <div className="sdkwork-mall-pc-pdp-sku-options">
+                        {group.values.map((value) => {
+                          const active =
+                            selectedSku?.attributes.some(
+                              (attribute) =>
+                                attribute.axisKey === group.key && skuAxisValueKey(attribute) === value.key,
+                            ) ?? false;
+                          const available = isMallSkuAxisValueAvailable({
+                            skus: detail.skus,
+                            selectedSku,
+                            axisKey: group.key,
+                            valueKey: value.key,
+                          });
+                          return (
+                            <button
+                              aria-pressed={active}
+                              className={
+                                active
+                                  ? "sdkwork-mall-pc-pdp-sku-option is-active"
+                                  : "sdkwork-mall-pc-pdp-sku-option"
+                              }
+                              disabled={!available && !active}
+                              key={value.key}
+                              onClick={() => {
+                                const nextSkuId = pickMallSkuForAxis({
+                                  skus: detail.skus,
+                                  selectedSku,
+                                  axisKey: group.key,
+                                  valueKey: value.key,
+                                });
+                                if (!nextSkuId) {
+                                  return;
+                                }
+                                setSelectedSkuId(nextSkuId);
+                                setQuantity(1);
+                                setMessage(null);
+                              }}
+                              type="button"
+                            >
+                              <span>{value.label}</span>
+                              {!available ? <Badge variant="secondary">缺货</Badge> : null}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  <p className="sdkwork-mall-pc-pdp-sku-summary">
+                    {selectedSku ? `已选：${selectedSku.name}` : "请选择规格"}
+                  </p>
+                </div>
+              ) : (
+                <div className="sdkwork-mall-pc-pdp-sku-options">
+                  {detail.skus.map((sku) => {
+                    const soldOut = sku.stock != null && sku.stock <= 0;
+                    const active = sku.id === selectedSkuId;
+                    return (
+                      <button
+                        aria-pressed={active}
+                        className={
+                          active
+                            ? "sdkwork-mall-pc-pdp-sku-option is-active"
+                            : "sdkwork-mall-pc-pdp-sku-option"
+                        }
+                        disabled={soldOut && !active}
+                        key={sku.id}
+                        onClick={() => {
+                          setSelectedSkuId(sku.id);
+                          setQuantity(1);
+                          setMessage(null);
+                        }}
+                        type="button"
+                      >
+                        {sku.imageUrl ? <img alt="" src={sku.imageUrl} /> : null}
+                        <span>{sku.name}</span>
+                        {soldOut ? <Badge variant="secondary">缺货</Badge> : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           <label className="sdkwork-mall-pc-quantity">
             <span className="sdkwork-mall-pc-pdp-meta-label">数量</span>
@@ -1023,13 +1119,18 @@ export function SdkworkMallProductDetailPage() {
                 -
               </button>
               <input
+                max={maxPurchasable}
                 min={1}
-                onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+                onChange={(event) => {
+                  const next = Math.max(1, Number(event.target.value) || 1);
+                  setQuantity(maxPurchasable != null ? Math.min(next, maxPurchasable) : next);
+                }}
                 type="number"
                 value={quantity}
               />
               <button
-                onClick={() => setQuantity((value) => value + 1)}
+                disabled={maxPurchasable != null && quantity >= maxPurchasable}
+                onClick={() => setQuantity((value) => (maxPurchasable != null ? Math.min(value + 1, maxPurchasable) : value + 1))}
                 type="button"
               >
                 +
@@ -1037,13 +1138,14 @@ export function SdkworkMallProductDetailPage() {
             </span>
           </label>
 
-          {message ? <StatusNotice tone="default">{message}</StatusNotice> : null}
+          {message ? <StatusNotice tone={messageTone}>{message}</StatusNotice> : null}
 
           <div className="sdkwork-mall-pc-pdp-actions">
             <Button
               onClick={() => {
                 const next = toggleMallFavorite({ id: detail.id, title: detail.title });
                 setFavorited(next);
+                setMessageTone("default");
                 setMessage(next ? "已加入收藏" : "已取消收藏");
               }}
               type="button"
@@ -1052,11 +1154,11 @@ export function SdkworkMallProductDetailPage() {
               <Heart aria-hidden="true" fill={favorited ? "currentColor" : "none"} size={16} />
               {favorited ? "已收藏" : "收藏"}
             </Button>
-            <Button disabled={busy || stockStatus.tone === "danger"} onClick={handleAddToCart} type="button">
+            <Button disabled={busy || !canPurchase} onClick={handleAddToCart} type="button">
               加入购物车
             </Button>
             <Button
-              disabled={busy || stockStatus.tone === "danger"}
+              disabled={busy || !canPurchase}
               onClick={async () => {
                 // 立即购买 settles only the line just created. Falling back to
                 // the cart (never to a whole-cart checkout) keeps the buyer from
@@ -1065,7 +1167,20 @@ export function SdkworkMallProductDetailPage() {
                 if (cartItemId === undefined) {
                   return;
                 }
-                navigate(cartItemId ? `/checkout?items=${encodeURIComponent(cartItemId)}` : "/cart");
+                if (!cartItemId) {
+                  navigate("/cart");
+                  return;
+                }
+                try {
+                  // An existing line is merged with +1 on add, so pin the line
+                  // to the quantity the shopper chose before opening checkout.
+                  await setMallProductCartQuantity(cartItemId, quantity);
+                } catch (cause: unknown) {
+                  setMessageTone("danger");
+                  setMessage(cause instanceof Error ? cause.message : "无法设置购买数量");
+                  return;
+                }
+                navigate(`/checkout?items=${encodeURIComponent(cartItemId)}`);
               }}
               type="button"
               variant="primary"
@@ -1241,7 +1356,7 @@ export function SdkworkMallProductDetailPage() {
               <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
                 <div className="sdkwork-mall-pc-product-body">
                   <h3>{product.title}</h3>
-                  <strong>{product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "询价"}</strong>
+                  <strong>{product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "暂无报价"}</strong>
                 </div>
               </Link>
             ))}
@@ -1257,7 +1372,7 @@ export function SdkworkMallProductDetailPage() {
               <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
                 <div className="sdkwork-mall-pc-product-body">
                   <h3>{product.title}</h3>
-                  <strong>{product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "询价"}</strong>
+                  <strong>{product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "暂无报价"}</strong>
                 </div>
               </Link>
             ))}

@@ -140,8 +140,10 @@ interface RemotePageEnvelope<T> {
 }
 
 interface RemoteInvoice {
+  amountCny?: number | string;
   createdAt?: string;
   currency?: string;
+  id?: string;
   invoiceCode?: string;
   invoiceId?: string;
   invoiceNo?: string;
@@ -349,14 +351,17 @@ function mapSummary(
     canSubmit: canSubmitInvoice(status),
     createdAt: toSdkworkPaymentOptionalString(invoice?.createdAt) || new Date(0).toISOString(),
     currency: toSdkworkPaymentOptionalString(invoice?.currency) || messages.service.defaultCurrency,
-    id: toSdkworkPaymentOptionalString(invoice?.invoiceId) || "unknown-invoice",
+    id:
+      toSdkworkPaymentOptionalString(invoice?.invoiceId)
+      ?? toSdkworkPaymentOptionalString(invoice?.id)
+      ?? "unknown-invoice",
     invoiceCode: toSdkworkPaymentOptionalString(invoice?.invoiceCode),
     invoiceNo: toSdkworkPaymentOptionalString(invoice?.invoiceNo),
     status,
     statusLabel: formatStatusLabel(status, messages),
     title: toSdkworkPaymentOptionalString(invoice?.title) || messages.service.summaryFallbackTitle,
     titleType: mapTitleType(invoice?.titleType),
-    totalAmountCny: toNullableAmount(invoice?.totalAmount),
+    totalAmountCny: toNullableAmount(invoice?.totalAmount ?? invoice?.amountCny),
     type: mapInvoiceType(invoice?.type),
     updatedAt: toSdkworkPaymentOptionalString(invoice?.updatedAt),
   };

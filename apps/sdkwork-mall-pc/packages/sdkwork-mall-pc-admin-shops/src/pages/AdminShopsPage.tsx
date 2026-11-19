@@ -26,6 +26,25 @@ function matchesShopFilter(shop: ShopRow, filter: ShopFilter): boolean {
 
 const SHOPS_PAGE_SIZE = 20;
 
+const SHOP_REVIEW_LABELS: Record<string, string> = {
+  approved: "已通过",
+  pending: "待审核",
+  rejected: "已拒绝",
+  unknown: "未知",
+};
+
+const SHOP_OPERATION_LABELS: Record<string, string> = {
+  active: "经营中",
+  open: "经营中",
+  suspended: "已暂停",
+  closed: "已关闭",
+  unknown: "未知",
+};
+
+function shopStatusLabel(value: string, labels: Record<string, string>): string {
+  return labels[value.toLowerCase()] ?? value;
+}
+
 export function SdkworkMallAdminShopsPage() {
   const [shops, setShops] = useState<ShopRow[]>([]);
   const [filter, setFilter] = useState<ShopFilter>("all");
@@ -134,8 +153,8 @@ export function SdkworkMallAdminShopsPage() {
                     {shop.name}
                   </button>
                 </td>
-                <td>{shop.reviewStatus}</td>
-                <td>{shop.operationStatus}</td>
+                <td>{shopStatusLabel(shop.reviewStatus, SHOP_REVIEW_LABELS)}</td>
+                <td>{shopStatusLabel(shop.operationStatus, SHOP_OPERATION_LABELS)}</td>
                 <td className="sdkwork-mall-pc-table-actions">
                   <Button disabled={busyShopId === shop.id} onClick={() => void mutateShop(shop.id, "approve")} type="button">
                     通过

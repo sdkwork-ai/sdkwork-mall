@@ -10,7 +10,6 @@ import {
   Badge,
   Button,
   EmptyState,
-  Input,
   LoadingBlock,
   Pagination,
   PaginationContent,
@@ -24,13 +23,17 @@ import { listEnabledMallCmsHotKeywords, type MallCmsHotKeyword } from "@sdkwork/
 import { loadMallCmsConfigRemote } from "@sdkwork/mall-pc-cms/cms-service";
 import { listMallCategories, searchMallProducts, searchMallShops, type MallSearchProduct, type MallSearchShop } from "../search-service";
 
+// Only the dimensions the catalog read model actually honours are offered:
+// `price-asc` / `price-desc` are the two sort values the authority maps, and
+// `newest` resolves to the default (publish time) order on the real authority
+// and is recognised by the dev double. "销量" and "好评" used to be shown here
+// but there is no sales/rating column in the catalog read model, so the
+// authority silently ignored them and the list never changed.
 const sortOptions = [
   { label: "综合", value: "" },
-  { label: "销量", value: "sales" },
   { label: "价格 ↑", value: "price-asc" },
   { label: "价格 ↓", value: "price-desc" },
-  { label: "好评", value: "rating" },
-  { label: "上新", value: "created_at" },
+  { label: "上新", value: "newest" },
 ] as const;
 
 const PAGE_SIZE = 20;
@@ -65,7 +68,7 @@ function writeSearchHistory(entries: string[]): void {
 }
 
 function formatCny(value: number | null): string {
-  return value == null ? "询价" : (formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "询价");
+  return value == null ? "暂无报价" : (formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "暂无报价");
 }
 
 function formatSalesCount(count?: number): string | null {
@@ -105,15 +108,6 @@ export function SdkworkMallSearchPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
   const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-
-  // 客户端筛选维度
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedOrigins, setSelectedOrigins] = useState<string[]>([]);
-  const [filterFreeShipping, setFilterFreeShipping] = useState(false);
-  const [filterSelfOperated, setFilterSelfOperated] = useState(false);
-  const [filterInStock, setFilterInStock] = useState(false);
 
   useEffect(() => {
     listMallCategories()
@@ -220,70 +214,17 @@ export function SdkworkMallSearchPage() {
     setParams(next);
   }
 
-  // 从搜索结果中提取品牌和发货地选项
-  const brandOptions = useMemo(() => {
-    const brands = items
-      .map((item) => item.brand)
-      .filter((brand): brand is string => Boolean(brand));
-    const counts = new Map<string, number>();
-    for (const brand of brands) {
-      counts.set(brand, (counts.get(brand) ?? 0) + 1);
-    }
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
-      .map(([brand, count]) => ({ brand, count }));
-  }, [items]);
-
-  const originOptions = useMemo(() => {
-    const origins = items
-      .map((item) => item.origin)
-      .filter((origin): origin is string => Boolean(origin));
-    const counts = new Map<string, number>();
-    for (const origin of origins) {
-      counts.set(origin, (counts.get(origin) ?? 0) + 1);
-    }
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([origin, count]) => ({ origin, count }));
-  }, [items]);
-
-  // 客户端筛选：品牌、发货地、包邮、自营、现货、价格区间
-  const filteredItems = useMemo(() => {
-    const min = minPrice.trim() ? Number(minPrice) : null;
-    const max = maxPrice.trim() ? Number(maxPrice) : null;
-    return items.filter((product) => {
-      // 价格区间
-      if (product.priceCny != null) {
-        if (min != null && Number.isFinite(min) && product.priceCny < min) return false;
-        if (max != null && Number.isFinite(max) && product.priceCny > max) return false;
-      } else if (min != null || max != null) {
-        return false;
-      }
-      // 品牌
-      if (selectedBrands.length > 0) {
-        if (!product.brand || !selectedBrands.includes(product.brand)) return false;
-      }
-      // 发货地
-      if (selectedOrigins.length > 0) {
-        if (!product.origin || !selectedOrigins.includes(product.origin)) return false;
-      }
-      // 包邮
-      if (filterFreeShipping && !product.freeShipping) return false;
-      // 自营
-      if (filterSelfOperated && !product.selfOperated) return false;
-      // 现货
-      if (filterInStock && product.inStock === false) return false;
-      return true;
-    });
-  }, [items, minPrice, maxPrice, selectedBrands, selectedOrigins, filterFreeShipping, filterSelfOperated, filterInStock]);
+  // Facets for brand/origin/price/service were removed here: the catalog list
+  // API exposes only `q`, `category_id`, `shop_id`, `product_type` and `sort`,
+  // so those facets filtered the 20 rows on the current page while the toolbar
+  // claimed to filter the whole result set. They return when the authority
+  // accepts the filters server-side.
 
   const [fallbackProducts, setFallbackProducts] = useState<MallSearchProduct[]>([]);
 
   useEffect(() => {
     if (!loading && items.length === 0) {
-      searchMallProducts({ pageSize: 8, sort: "sales" })
+      searchMallProducts({ pageSize: 8 })
         .then((result) => setFallbackProducts(result.items))
         .catch(() => setFallbackProducts([]));
     }
@@ -291,36 +232,6 @@ export function SdkworkMallSearchPage() {
 
   const activeCategoryName = categories.find((category) => category.id === categoryId)?.name;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const hasActiveFilters =
-    selectedBrands.length > 0 ||
-    selectedOrigins.length > 0 ||
-    filterFreeShipping ||
-    filterSelfOperated ||
-    filterInStock ||
-    Boolean(minPrice.trim()) ||
-    Boolean(maxPrice.trim());
-
-  function clearAllFilters() {
-    setSelectedBrands([]);
-    setSelectedOrigins([]);
-    setFilterFreeShipping(false);
-    setFilterSelfOperated(false);
-    setFilterInStock(false);
-    setMinPrice("");
-    setMaxPrice("");
-  }
-
-  function toggleBrand(brand: string) {
-    setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand],
-    );
-  }
-
-  function toggleOrigin(origin: string) {
-    setSelectedOrigins((prev) =>
-      prev.includes(origin) ? prev.filter((o) => o !== origin) : [...prev, origin],
-    );
-  }
 
   // 分页页码生成
   const pageNumbers = useMemo(() => {
@@ -417,96 +328,6 @@ export function SdkworkMallSearchPage() {
           </div>
         ) : null}
 
-        {brandOptions.length > 0 ? (
-          <div className="sdkwork-mall-pc-search-facet">
-            <span className="sdkwork-mall-pc-search-facet-label">品牌</span>
-            <div className="sdkwork-mall-pc-search-facet-values">
-              {brandOptions.map(({ brand, count }) => (
-                <button
-                  aria-pressed={selectedBrands.includes(brand)}
-                  className={searchChipClass(selectedBrands.includes(brand))}
-                  key={brand}
-                  onClick={() => toggleBrand(brand)}
-                  type="button"
-                >
-                  {brand}
-                  <span className="sdkwork-mall-pc-search-chip-count">{count}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {originOptions.length > 0 ? (
-          <div className="sdkwork-mall-pc-search-facet">
-            <span className="sdkwork-mall-pc-search-facet-label">发货地</span>
-            <div className="sdkwork-mall-pc-search-facet-values">
-              {originOptions.map(({ origin, count }) => (
-                <button
-                  aria-pressed={selectedOrigins.includes(origin)}
-                  className={searchChipClass(selectedOrigins.includes(origin))}
-                  key={origin}
-                  onClick={() => toggleOrigin(origin)}
-                  type="button"
-                >
-                  {origin}
-                  <span className="sdkwork-mall-pc-search-chip-count">{count}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="sdkwork-mall-pc-search-facet">
-          <span className="sdkwork-mall-pc-search-facet-label">价格</span>
-          <div className="sdkwork-mall-pc-search-facet-values">
-            <div className="sdkwork-mall-pc-search-price-range">
-              <Input
-                aria-label="最低价"
-                min={0}
-                onChange={(event) => setMinPrice(event.target.value)}
-                placeholder="¥ 最低"
-                type="number"
-                value={minPrice}
-              />
-              <span className="sdkwork-mall-pc-search-price-separator">-</span>
-              <Input
-                aria-label="最高价"
-                min={0}
-                onChange={(event) => setMaxPrice(event.target.value)}
-                placeholder="¥ 最高"
-                type="number"
-                value={maxPrice}
-              />
-            </div>
-            <span aria-hidden="true" className="sdkwork-mall-pc-search-facet-divider" />
-            <button
-              aria-pressed={filterFreeShipping}
-              className={searchChipClass(filterFreeShipping)}
-              onClick={() => setFilterFreeShipping((current) => !current)}
-              type="button"
-            >
-              包邮
-            </button>
-            <button
-              aria-pressed={filterSelfOperated}
-              className={searchChipClass(filterSelfOperated)}
-              onClick={() => setFilterSelfOperated((current) => !current)}
-              type="button"
-            >
-              自营
-            </button>
-            <button
-              aria-pressed={filterInStock}
-              className={searchChipClass(filterInStock)}
-              onClick={() => setFilterInStock((current) => !current)}
-              type="button"
-            >
-              仅看现货
-            </button>
-          </div>
-        </div>
-
         {!loading && shops.length > 0 ? (
           <div className="sdkwork-mall-pc-search-facet">
             <span className="sdkwork-mall-pc-search-facet-label">相关店铺</span>
@@ -541,14 +362,8 @@ export function SdkworkMallSearchPage() {
         </div>
         <div className="sdkwork-mall-pc-search-toolbar-meta">
           <span className="sdkwork-mall-pc-search-count">
-            共 <strong>{filteredItems.length}</strong> 件
-            {filteredItems.length !== total ? <span>（筛选自 {total} 件）</span> : null}
+            共 <strong>{total}</strong> 件
           </span>
-          {hasActiveFilters ? (
-            <button className="sdkwork-mall-pc-search-reset" onClick={clearAllFilters} type="button">
-              清空筛选
-            </button>
-          ) : null}
         </div>
       </div>
 
@@ -569,7 +384,7 @@ export function SdkworkMallSearchPage() {
         />
       ) : null}
 
-      {!loading && !loadError && filteredItems.length === 0 ? (
+      {!loading && !loadError && items.length === 0 ? (
         <>
           <EmptyState
             actions={<Link to="/">去首页逛逛</Link>}
@@ -602,9 +417,9 @@ export function SdkworkMallSearchPage() {
       ) : null}
 
       {/* 商品列表 */}
-      {!loading && filteredItems.length > 0 ? (
+      {!loading && items.length > 0 ? (
         <div className="sdkwork-mall-pc-product-grid sdkwork-mall-pc-search-grid">
-          {filteredItems.map((product) => (
+          {items.map((product) => (
             <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
               <div className="sdkwork-mall-pc-product-image">
                 {product.imageUrl ? <img alt={product.title} src={product.imageUrl} /> : null}
@@ -649,7 +464,7 @@ export function SdkworkMallSearchPage() {
       ) : null}
 
       {/* 分页 */}
-      {!loading && filteredItems.length > 0 && totalPages > 1 ? (
+      {!loading && items.length > 0 && totalPages > 1 ? (
         <Pagination className="sdkwork-mall-pc-search-pagination">
           <PaginationContent>
             {page > 1 ? (

@@ -6,8 +6,11 @@ import {
   resetCommerceServiceMockSession,
 } from "../../../tests/test-utils/commerce-service-mock";
 import {
+  buildProductCreatePayload,
+  createBlankProductDraft,
   createCommerceProductAdminService,
   createCommerceProductAdminWorkspaceManifest,
+  normalizeSelectedCategoryIds,
 } from "../src";
 
 describe("sdkwork-mall-pc-admin-product service", () => {
@@ -300,5 +303,34 @@ describe("sdkwork-mall-pc-admin-product service", () => {
     expect(createPageSource).toContain("publishCommerceProduct");
     expect(listPageSource).toContain("readProductCommercialSignals");
     expect(listPageSource).toContain("data-admin-product-commercial-signals");
+  });
+
+  it("starts real create/edit forms from a blank draft, not the marketing fixture", () => {
+    const draft = createBlankProductDraft();
+    expect(draft.title).toBe("");
+    expect(draft.description).toBe("");
+    expect(draft.spuNo).toBe("");
+    expect(draft.defaultPriceAmount).toBe("");
+    expect(draft.specGroups).toEqual([]);
+    expect(draft.skuDrafts).toHaveLength(1);
+    expect(draft.skuDrafts[0]?.skuNo).toBe("");
+    expect(draft.detailConfig.mainImageUrl).toBe("");
+    expect(draft.detailConfig.galleryImageUrls).toEqual([]);
+    expect(draft.detailConfig.seoKeywords).toEqual([]);
+  });
+
+  it("keeps authority category ids the demo tree does not know", () => {
+    const draft = createBlankProductDraft();
+    draft.title = "商业化测试手机";
+    draft.spuNo = "SPU-TEST-1";
+    draft.selectedCategoryIds = ["cat-digital-phone"];
+    draft.skuDrafts = draft.skuDrafts.map((sku) => ({
+      ...sku,
+      skuNo: "SKU-TEST-1",
+      priceAmount: "1999",
+    }));
+
+    expect(normalizeSelectedCategoryIds(["cat-digital-phone"])).toEqual(["cat-digital-phone"]);
+    expect(buildProductCreatePayload(draft).categoryId).toBe("cat-digital-phone");
   });
 });

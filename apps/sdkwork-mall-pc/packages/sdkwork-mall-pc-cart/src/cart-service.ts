@@ -88,32 +88,45 @@ export interface MallCheckoutSubmitResult {
 
 export const MALL_CHECKOUT_WARNINGS_STORAGE_KEY = "sdkwork-mall-pc-checkout-warnings";
 
-function readMoney(value: unknown): number {
+function readOptionalMoney(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
   }
-  if (typeof value === "object" && value !== null && "amount" in value) {
-    return readMoney((value as { amount?: unknown }).amount);
+  // Cart amounts may ride as decimal strings; a failed parse must stay null so
+  // the line renders "暂无报价" instead of a fake 0.00.
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   }
-  return 0;
+  if (typeof value === "object" && value !== null && "amount" in value) {
+    return readOptionalMoney((value as { amount?: unknown }).amount);
+  }
+  return null;
+}
+
+function readMoney(value: unknown): number {
+  return readOptionalMoney(value) ?? 0;
 }
 
 function readCartLine(record: Record<string, unknown>): MallCartLine {
   const sku = (record.sku ?? null) as Record<string, unknown> | null;
   const spu = (record.spu ?? null) as Record<string, unknown> | null;
   const unitPrice =
-    typeof record.unitPrice === "number"
-      ? record.unitPrice
-      : typeof record.price === "number"
-        ? record.price
-        : typeof record.priceCny === "number"
-          ? record.priceCny
-          : typeof sku?.priceCny === "number"
-            ? sku.priceCny
-            : typeof spu?.priceCny === "number"
-              ? spu.priceCny
-              : null;
+    readOptionalMoney(record.unitPrice) ??
+    readOptionalMoney(record.unitPriceCny) ??
+    readOptionalMoney(record.price) ??
+    readOptionalMoney(record.priceCny) ??
+    readOptionalMoney(sku?.salePrice) ??
+    readOptionalMoney(sku?.priceCny) ??
+    readOptionalMoney(spu?.salePrice) ??
+    readOptionalMoney(spu?.priceCny) ??
+    null;
   const quantity = typeof record.quantity === "number" ? record.quantity : 1;
+  const lineTotal =
+    readOptionalMoney(record.lineTotal) ??
+    readOptionalMoney(record.lineTotalCny) ??
+    readOptionalMoney(record.totalAmount) ??
+    (unitPrice != null ? unitPrice * quantity : null);
   const imageSource =
     typeof record.imageUrl === "string" && record.imageUrl.length > 0
       ? record.imageUrl
@@ -149,7 +162,7 @@ function readCartLine(record: Record<string, unknown>): MallCartLine {
     imageUrl: imageSource,
     quantity,
     unitPriceCny: unitPrice,
-    lineTotalCny: unitPrice != null ? unitPrice * quantity : null,
+    lineTotalCny: lineTotal,
   };
 }
 
@@ -168,7 +181,14 @@ function readOrderId(record: Record<string, unknown>): string {
 export async function loadMallCart(): Promise<MallCartSnapshot> {
   const remote = getSdkworkCartRemotePort();
   const response = await remote.retrieveCurrentCart();
-  const payload = unwrapSdkworkPaymentResponse(response) as Record<string, unknown>;
+  const unwrapped = unwrapSdkworkPaymentResponse(response) as Record<string, unknown> | null;
+  // v3 single-resource responses nest the cart under `item`; the dev double
+  // answers the cart at the root. Reading only the root silently emptied the
+  // cart after a successful read.
+  const payload =
+    (unwrapped?.item && typeof unwrapped.item === "object"
+      ? (unwrapped.item as Record<string, unknown>)
+      : unwrapped) ?? {};
   const items = Array.isArray(payload.items)
     ? payload.items.map((item) => readCartLine(item as Record<string, unknown>))
     : [];
@@ -251,32 +271,91 @@ export async function loadMallCheckoutContext(): Promise<MallCheckoutContext> {
         code: String(item.code ?? item.id ?? ""),
         label: String(item.label ?? item.name ?? item.code ?? "支付方式"),
       })) ?? [],
-    walletBalanceCny: readMoney(walletPayload.cashAvailable ?? walletPayload.availableBalance),
-    pointsBalance: readMoney(pointsPayload.availablePoints ?? pointsPayload.totalPoints),
+    walletBalanceCny: readMoney(
+      walletPayload.cashAvailable ?? walletPayload.availableBalance ?? walletPayload.balance,
+    ),
+    pointsBalance: readMoney(
+      pointsPayload.availablePoints ?? pointsPayload.totalPoints ?? pointsPayload.balance,
+    ),
   };
 }
 
-export async function createMallCheckoutQuote(cartItemIds?: string[]): Promise<MallCheckoutQuote> {
+function readQuoteAmount(record: Record<string, unknown>, keys: readonly string[]): number {
+  for (const key of keys) {
+    const value = record[key];
+    const parsed = readOptionalMoney(value);
+    if (parsed != null) {
+      return parsed;
+    }
+  }
+  return 0;
+}
+
+export interface MallCheckoutQuoteInput {
+  cartItemIds?: string[];
+  couponId?: string;
+  deliveryMethod?: string;
+  giftCardCode?: string;
+  needInvoice?: boolean;
+  usePoints?: boolean;
+  useWallet?: boolean;
+}
+
+export async function createMallCheckoutQuote(
+  input: MallCheckoutQuoteInput | string[] = {},
+): Promise<MallCheckoutQuote> {
   const remote = getSdkworkCartRemotePort();
-  const sessionResponse = await remote.createCheckoutSession(
-    cartItemIds?.length ? { cartItemIds } : {},
-  );
-  const session = unwrapSdkworkPaymentResponse(sessionResponse) as Record<string, unknown>;
+  // Callers historically passed the cart-item id array; accept both shapes.
+  const options: MallCheckoutQuoteInput = Array.isArray(input) ? { cartItemIds: input } : input;
+  const body: Record<string, unknown> = {};
+  if (options.cartItemIds?.length) body.cartItemIds = options.cartItemIds;
+  if (options.couponId) body.couponId = options.couponId;
+  if (options.deliveryMethod) body.deliveryMethod = options.deliveryMethod;
+  if (options.giftCardCode) body.giftCardCode = options.giftCardCode;
+  if (options.needInvoice != null) body.needInvoice = options.needInvoice;
+  if (options.usePoints != null) body.usePoints = options.usePoints;
+  if (options.useWallet != null) body.useWallet = options.useWallet;
+
+  const sessionResponse = await remote.createCheckoutSession(body);
+  const sessionRaw = unwrapSdkworkPaymentResponse(sessionResponse) as Record<string, unknown> | null;
+  const session =
+    (sessionRaw?.item && typeof sessionRaw.item === "object"
+      ? (sessionRaw.item as Record<string, unknown>)
+      : sessionRaw) ?? {};
   const sessionId = readSessionId(session);
   let quoteId = readQuoteId(session);
+  let quote: Record<string, unknown> = {};
 
   if (!quoteId && sessionId) {
     const quoteResponse = await remote.createCheckoutQuote(sessionId, {});
-    const quote = unwrapSdkworkPaymentResponse(quoteResponse) as Record<string, unknown>;
+    const quoteRaw = unwrapSdkworkPaymentResponse(quoteResponse) as Record<string, unknown> | null;
+    quote =
+      (quoteRaw?.item && typeof quoteRaw.item === "object"
+        ? (quoteRaw.item as Record<string, unknown>)
+        : quoteRaw) ?? {};
     quoteId = readQuoteId(quote);
   }
+
+  // The authority has used both `originalAmount` and `originalAmountCny` (and
+  // snake_case) across revisions, and may publish the amounts on the session
+  // instead of the quote. Read every spelling before falling back to zero; the
+  // page then falls back to the cart subtotal rather than showing ¥0.00.
+  const pick = (keys: readonly string[]) =>
+    readQuoteAmount(quote, keys) || readQuoteAmount(session, keys);
 
   return {
     sessionId,
     quoteId,
-    originalAmountCny: readMoney(session.originalAmount ?? session.original_amount),
-    discountAmountCny: readMoney(session.discountAmount ?? session.discount_amount),
-    payableAmountCny: readMoney(session.payableAmount ?? session.payable_amount),
+    originalAmountCny: pick([
+      "originalAmountCny",
+      "original_amount_cny",
+      "originalAmount",
+      "original_amount",
+      "merchandiseAmountCny",
+      "merchandiseAmount",
+    ]),
+    discountAmountCny: pick(["discountAmountCny", "discount_amount_cny", "discountAmount", "discount_amount"]),
+    payableAmountCny: pick(["payableAmountCny", "payable_amount_cny", "payableAmount", "payable_amount", "totalAmount"]),
   };
 }
 
@@ -284,7 +363,18 @@ export async function submitMallCheckoutOrder(
   input: MallCheckoutSubmitInput,
 ): Promise<MallCheckoutSubmitResult> {
   const remote = getSdkworkCartRemotePort();
-  const quote = await createMallCheckoutQuote(input.cartItemIds);
+  // The quote must be built with exactly the offsets the buyer saw; creating
+  // the order from an un-offset quote charged the pre-discount total while the
+  // checkout summary had already subtracted coupon/wallet/points.
+  const quote = await createMallCheckoutQuote({
+    cartItemIds: input.cartItemIds,
+    couponId: input.couponId,
+    deliveryMethod: input.deliveryMethod,
+    giftCardCode: input.giftCardCode,
+    needInvoice: input.needInvoice,
+    usePoints: input.usePoints,
+    useWallet: input.useWallet,
+  });
 
   if (input.addressId) {
     await remote.setDefaultAddress({ addressId: input.addressId });
@@ -293,11 +383,14 @@ export async function submitMallCheckoutOrder(
   const orderResponse = await remote.createCheckoutOrder(quote.sessionId, {
     buyerRemark: input.buyerRemark,
     cartItemIds: input.cartItemIds?.length ? input.cartItemIds : undefined,
+    couponId: input.couponId,
     deliveryMethod: input.deliveryMethod,
     giftCardCode: input.giftCardCode,
     invoiceForm: input.invoiceForm,
     needInvoice: input.needInvoice,
     quoteId: quote.quoteId,
+    usePoints: input.usePoints,
+    useWallet: input.useWallet,
   });
   const order = unwrapSdkworkPaymentResponse(orderResponse) as Record<string, unknown>;
   const orderId = readOrderId(order);

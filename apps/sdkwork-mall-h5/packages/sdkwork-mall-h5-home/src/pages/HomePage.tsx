@@ -60,7 +60,7 @@ const HOME_BANNERS: readonly HomeBanner[] = [
   },
   {
     id: "banner-new",
-    linkUrl: "/search?q=new",
+    linkUrl: "/search?sort=newest",
     subtitleKey: "home.banners.new.subtitle",
     titleKey: "home.banners.new.title",
     tone: "teal",
@@ -142,8 +142,8 @@ interface HomeEntry {
  */
 const HOME_QUICK_ENTRIES: readonly HomeEntry[] = [
   { icon: LayoutGrid, id: "categories", labelKey: "home.quick.categories", to: "/categories", tone: "blue" },
-  { icon: Sparkles, id: "new", labelKey: "home.quick.new", to: "/search?q=new", tone: "violet" },
-  { icon: Flame, id: "hot", labelKey: "home.quick.hot", to: "/search?sort=sales", tone: "amber" },
+  { icon: Sparkles, id: "new", labelKey: "home.quick.new", to: "/search?sort=newest", tone: "violet" },
+  { icon: Flame, id: "hot", labelKey: "home.quick.hot", to: "/search", tone: "amber" },
   { icon: PartyPopper, id: "activity", labelKey: "home.quick.activity", to: "/activity", tone: "rose" },
   { icon: Ticket, id: "coupon", labelKey: "home.quick.coupon", to: "/buyer/coupons", tone: "emerald" },
 ];
@@ -698,7 +698,7 @@ export function SdkworkMallH5HomePage() {
 
       {snapshot?.hotProducts.length ? (
         <section className="sdk-h5-section">
-          <HomeSectionHeader moreTo="/search?sort=sales" title={t("home.sections.hot")} />
+          <HomeSectionHeader moreTo="/search" title={t("home.sections.hot")} />
           <div className="sdk-h5-product-grid">
             {snapshot.hotProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
@@ -709,7 +709,7 @@ export function SdkworkMallH5HomePage() {
 
       {snapshot?.newProducts.length ? (
         <section className="sdk-h5-section">
-          <HomeSectionHeader moreTo="/search?q=new" title={t("home.sections.new")} />
+          <HomeSectionHeader moreTo="/search?sort=newest" title={t("home.sections.new")} />
           <div className="sdk-h5-product-grid">
             {snapshot.newProducts.map((product) => (
               <ProductCard key={product.id} product={product} />

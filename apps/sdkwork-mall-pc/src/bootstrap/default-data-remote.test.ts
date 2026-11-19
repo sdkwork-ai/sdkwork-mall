@@ -136,6 +136,8 @@ describe("mall default data port adapter", () => {
     await port?.catalog.createCategory({ categoryNo: "MALL-CAT-DIGITAL" });
     await port?.catalog.createProduct({ productNo: "MALL-SPU-AURORA-X1-PRO" });
     await port?.catalog.createSku({ skuNo: "MALL-SKU-AURORA-X1-PRO-256-OBSIDIAN" });
+    await port?.catalog.retrieveSku("sku-1");
+    await port?.catalog.updateSku("sku-1", { status: "active" }, 7);
     await port?.catalog.publishProduct("spu-1", 4);
 
     expect(catalog.categories.management.list).toHaveBeenCalledWith({ page: 1, pageSize: 200 });
@@ -146,6 +148,14 @@ describe("mall default data port adapter", () => {
     expect(catalog.skus.create).toHaveBeenCalledWith({
       skuNo: "MALL-SKU-AURORA-X1-PRO-256-OBSIDIAN",
     });
+    // Activation is a guarded authority update: the port's `expectedVersion`
+    // becomes the transport's `ifMatch` precondition, and only `status` rides
+    // the body (the create-time prices/axes stay untouched).
+    expect(catalog.skus.update).toHaveBeenCalledWith(
+      "sku-1",
+      { ifMatch: "7" },
+      { status: "active" },
+    );
     // Publishing is the authority `products.publish` command carrying the row
     // version as the generated transport's `ifMatch` precondition; no
     // idempotency body is injected.

@@ -81,6 +81,11 @@ export interface SdkworkWalletRechargeInput {
 export interface SdkworkWalletRechargeResult {
   cashAmountCny: number | null;
   paymentMethod?: string;
+  /**
+   * Channel cashier URL returned by the recharge order. Present when the
+   * provider requires a redirect/QR step before the points are credited.
+   */
+  paymentUrl?: string;
   points: number;
   processedAt?: string;
   remainingPoints: number | null;
@@ -151,6 +156,7 @@ interface RemoteHistoryItem {
   amount?: number | string;
   createdAt?: string;
   historyId?: string;
+  id?: string;
   points?: number | string;
   pointsAfter?: number | string;
   pointsBefore?: number | string;
@@ -249,14 +255,17 @@ function resolveTransactionTitle(item: RemoteHistoryItem): string {
   );
 }
 
-function mapTransaction(item: RemoteHistoryItem): SdkworkWalletTransaction {
+function mapTransaction(item: RemoteHistoryItem, index = 0): SdkworkWalletTransaction {
   return {
     cashAmountCny: toNullableSdkworkAccountNumber(item.amount),
     createdAt: toSdkworkAccountOptionalString(item.createdAt) || new Date(0).toISOString(),
     id:
       toSdkworkAccountOptionalString(item.historyId)
       || toSdkworkAccountOptionalString(item.transactionId)
-      || `wallet-transaction-${Date.now()}`,
+      || toSdkworkAccountOptionalString(item.id)
+      // A `Date.now()` fallback collapsed every row mapped in the same tick to
+      // one React key; the index keeps each ledger row stable and unique.
+      || `wallet-transaction-${index}`,
     pointsAfter: toNullableSdkworkAccountNumber(item.pointsAfter),
     pointsBefore: toNullableSdkworkAccountNumber(item.pointsBefore),
     pointsDelta: toSdkworkAccountNumber(item.points),
@@ -289,6 +298,9 @@ function mapRechargePackages(
 
   return sorted.map((rechargePackage, index) => ({
     ...rechargePackage,
+    // Non-numeric authority ids (for example `recharge-100`) collapse to 0 and
+    // every package then shares the React key `0`; keep a unique fallback.
+    id: rechargePackage.id > 0 ? rechargePackage.id : -(index + 1),
     recommended: index === 0,
   }));
 }
@@ -389,6 +401,7 @@ export function createSdkworkWalletService(
       return {
         cashAmountCny: result.amountCny,
         paymentMethod: toSdkworkAccountOptionalString(input.paymentMethod),
+        paymentUrl: toSdkworkAccountOptionalString(result.cashierUrl),
         points: result.points,
         remainingPoints: null,
         requestNo: toSdkworkAccountOptionalString(input.requestNo),

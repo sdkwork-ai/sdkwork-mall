@@ -183,25 +183,23 @@ function useFloorProducts(floors: MallCmsFloor[]): Record<string, FloorProductsS
 
     for (const floor of floors) {
       const isNew = floor.id.includes("new") || floor.productQuery === "new";
-      const sort = isNew ? "created_at" : "sales";
+      // `newest` is the one recency token both transports understand; the
+      // catalog maps only price sorts and otherwise falls back to publish time.
+      const sort = isNew ? "newest" : undefined;
       void searchMallProducts({
         pageSize: FLOOR_PRODUCT_SIZE,
         query: isNew ? undefined : floor.productQuery || undefined,
         sort,
       })
-        .then(async (result) => {
-          // A floor keyword that matches nothing (a localized shelf over a
-          // catalog written in another locale, for example) must not render an
-          // empty shelf: fall back to the general list for the same sort.
-          const resolved = result.items.length === 0 && floor.productQuery && !isNew
-            ? await searchMallProducts({ pageSize: FLOOR_PRODUCT_SIZE, sort })
-            : result;
-          return resolved;
-        })
         .then((result) => {
           if (!active) {
             return;
           }
+          // A floor keyword that matches nothing (a localized shelf over a
+          // differently-localized catalog, for example) is hidden by
+          // `HomeFloor` (< 3 products). Falling back to the general list made
+          // every unmatched floor render the same six products, which is worse
+          // than an honest omission.
           setState((current) => ({
             ...current,
             [floor.id]: { loading: false, products: result.items.map(mapSearchProduct) },
@@ -338,8 +336,8 @@ export function SdkworkMallHomePage() {
 
   useEffect(() => {
     let active = true;
-    // 猜你喜欢：基于热销商品随机打散，提供个性化推荐流。
-    void searchMallProducts({ pageSize: 20, sort: "sales" })
+    // 猜你喜欢：目录暂无个性化信号，按默认（发布时间）顺序取一页后打散。
+    void searchMallProducts({ pageSize: 20 })
       .then((result) => {
         if (active) {
           setGuessYouLike(
@@ -496,17 +494,17 @@ export function SdkworkMallHomePage() {
               {hotProducts.length > 0 || loading ? (
                 <HomeProductSection
                   loading={loading}
-                  moreTo="/search?sort=sales"
+                  moreTo="/search"
                   products={hotProducts}
-                  subtitle="大家都在买"
-                  title="热卖推荐"
+                  subtitle="为你精选"
+                  title="精选推荐"
                 />
               ) : null}
               {newProducts.length > 0 || loading ? (
                 <HomeProductSection
                   columns="four"
                   loading={loading}
-                  moreTo="/search?q=new"
+                  moreTo="/search?sort=newest"
                   products={newProducts}
                   subtitle="新品抢先看"
                   title="新品首发"

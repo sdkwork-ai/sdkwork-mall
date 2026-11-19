@@ -75,7 +75,7 @@ export function resolveHomeCatalogVisual(text: string | undefined): CatalogVisua
 }
 
 export function formatHomePrice(value: number | null): string {
-  return value == null ? "询价" : `¥${HOME_PRICE_FORMATTER.format(value)}`;
+  return value == null ? "暂无报价" : `¥${HOME_PRICE_FORMATTER.format(value)}`;
 }
 
 export function formatHomeSales(count: number | undefined): string | null {

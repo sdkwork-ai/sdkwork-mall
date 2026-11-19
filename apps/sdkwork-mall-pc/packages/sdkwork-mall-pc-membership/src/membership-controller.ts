@@ -19,6 +19,7 @@ export interface SdkworkMembershipControllerState {
   isLoading: boolean;
   isMutating: boolean;
   lastError?: string;
+  lastMessage?: string;
   selectedPlanId: number | null;
 }
 
@@ -109,11 +110,13 @@ export function createSdkworkMembershipController(
   async function runMutation(
     callback: (packageId: number) => Promise<SdkworkMembershipPurchaseResult>,
     input?: Omit<SdkworkMembershipMutationInput, "packageId"> & { packageId?: number },
+    successMessage?: string,
   ): Promise<SdkworkMembershipPurchaseResult> {
     const packageId = resolvePlanId(state, input);
     setState({
       isMutating: true,
       lastError: undefined,
+      lastMessage: undefined,
       selectedPlanId: packageId,
     });
 
@@ -124,6 +127,7 @@ export function createSdkworkMembershipController(
         dashboard,
         isBootstrapped: true,
         isMutating: false,
+        lastMessage: successMessage,
       });
       return result;
     } catch (error) {
@@ -167,6 +171,7 @@ export function createSdkworkMembershipController(
       return runMutation(
         (packageId) => service.purchaseMembership({ ...input, packageId }),
         input,
+        "会员已开通，权益立即生效",
       );
     },
 
@@ -184,6 +189,7 @@ export function createSdkworkMembershipController(
       return runMutation(
         (packageId) => service.renewMembership({ ...input, packageId }),
         input,
+        "会员已续费，有效期已延长",
       );
     },
 
@@ -212,6 +218,7 @@ export function createSdkworkMembershipController(
       return runMutation(
         (packageId) => service.upgradeMembership({ ...input, packageId }),
         input,
+        "会员已升级，新等级权益已生效",
       );
     },
   };

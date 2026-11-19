@@ -1,6 +1,7 @@
 import { decimalAmountToMinorUnits } from "../merchandiseContract";
 import {
   readDefaultDataId,
+  readDefaultDataItem,
   readDefaultDataItems,
   readDefaultDataString,
   readDefaultDataVersion,
@@ -760,6 +761,16 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
     "spu_no",
   ]);
   const existingSkus = indexByNaturalKey(readDefaultDataItems(skuResponse), ["skuNo", "sku_no"]);
+  // A guarded activation needs the row version, and the list row already
+  // carries it. Keeping the whole record avoids one retrieve per existing SKU
+  // when a top-up rerun walks a catalog with thousands of variants.
+  const existingSkuRecords = new Map<string, Record<string, unknown>>();
+  for (const record of readDefaultDataItems(skuResponse)) {
+    const skuNo = readDefaultDataString(record, ["skuNo", "sku_no"]);
+    if (skuNo && !existingSkuRecords.has(skuNo)) {
+      existingSkuRecords.set(skuNo, record);
+    }
+  }
   // Price-ladder provisioning keys off the dataset SKU key, so reruns resolve
   // pre-existing SKUs through the same natural key the create path used.
   const skuIdByDatasetKey = new Map<string, string>();
@@ -791,6 +802,45 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
   const details: string[] = [];
   let created = 0;
   let skipped = 0;
+  let activated = 0;
+
+  /**
+   * Makes one provisioned SKU purchasable.
+   *
+   * The authority inserts every SKU as `draft`/`inactive`, and
+   * `products.publish` does not cascade to the SKUs (it only requires that a
+   * non-deleted SKU exists). The storefront SKU read model lists `active` rows
+   * only, so a seed that stops at product publish leaves the product visible
+   * with an empty spec picker and nothing to buy. Activation is idempotent: an
+   * already-active row is left untouched, and a guarded update carries the
+   * version read (or re-read) from the row.
+   */
+  async function ensureSkuActive(
+    skuNo: string,
+    skuId: string,
+    knownRecord?: Record<string, unknown>,
+  ): Promise<void> {
+    const known = knownRecord && knownRecord.id ? knownRecord : null;
+    let record = known;
+    if (!record || readDefaultDataVersion(record) === null) {
+      record = readDefaultDataItem(await context.port.catalog.retrieveSku(skuId)) ?? record;
+    }
+    if (!record) {
+      throw new Error(`cannot activate ${skuNo}: sku ${skuId} was not readable`);
+    }
+    if (
+      readDefaultDataString(record, ["status"]) === "active" &&
+      readDefaultDataString(record, ["salesStatus", "sales_status"]) === "active"
+    ) {
+      return;
+    }
+    const version = readDefaultDataVersion(record);
+    if (version === null) {
+      throw new Error(`cannot activate ${skuNo}: sku ${skuId} has no concurrency version`);
+    }
+    await context.port.catalog.updateSku(skuId, { status: "active" }, version);
+    activated += 1;
+  }
 
   for (const product of context.dataset.products) {
     context.assertActive();
@@ -839,7 +889,15 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       if (existingSkus.has(skuNo)) {
         // Reruns still record the pre-existing id: the price-ladder step keys
         // its items off this state, so a partial rerun can resume the ladder.
-        context.state.skuIdByKey.set(sku.key, existingSkus.get(skuNo) ?? "");
+        // A pre-existing row may predate SKU activation, so a top-up run also
+        // makes it purchasable instead of only counting it as skipped.
+        const existingSkuId = existingSkus.get(skuNo) ?? "";
+        if (existingSkuId) {
+          context.state.skuIdByKey.set(sku.key, existingSkuId);
+          if (!context.dryRun) {
+            await ensureSkuActive(skuNo, existingSkuId, existingSkuRecords.get(skuNo));
+          }
+        }
         skipped += 1;
         continue;
       }
@@ -870,6 +928,8 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       const createdSkuId = readDefaultDataId(skuResponse);
       if (createdSkuId) {
         context.state.skuIdByKey.set(sku.key, createdSkuId);
+        // Create leaves the row a draft; the storefront only sells active SKUs.
+        await ensureSkuActive(skuNo, createdSkuId, readDefaultDataItem(skuResponse) ?? undefined);
       }
       created += 1;
       details.push(`+ ${skuNo} ${sku.title}`);
@@ -886,6 +946,12 @@ async function provisionProducts(context: MallDefaultDataStepContext): Promise<M
       }
       await context.port.catalog.publishProduct(productId, productVersion);
     }
+  }
+
+  if (activated > 0) {
+    // One summary line rather than thousands: the per-SKU detail would bury the
+    // provisioning report on a catalog of this size.
+    details.push(`~ 已激活 ${activated} 个可售 SKU`);
   }
 
   return { status: created > 0 ? "created" : "skipped", created, skipped, details };

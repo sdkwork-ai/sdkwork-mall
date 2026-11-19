@@ -548,7 +548,10 @@ test("mall PC CMS remote persistence and route permission guards are wired", () 
   const searchSource = read("apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-search/src/pages/SearchPage.tsx");
   assert.match(searchSource, /shopId/);
   assert.match(searchSource, /热卖推荐/);
-  assert.match(searchSource, /最低价/);
+  // Sort vocabulary is pinned to the values the catalog authority honours; the
+  // old page-local "最低价" facet was removed because it only filtered the
+  // loaded page while claiming a catalog-wide result.
+  assert.match(searchSource, /price-asc/);
   assert.match(searchSource, /相关店铺/);
 
   const homeSource = read("apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-home/src/home-service.ts");

@@ -132,7 +132,7 @@ export function SdkworkMallH5ProductDetailPage() {
 
   useEffect(() => {
     let active = true;
-    searchMallH5Products({ pageSize: 8, sort: "sales" })
+    searchMallH5Products({ pageSize: 8, sort: "newest" })
       .then((result) => {
         if (active) {
           setRecommendations(result.items.filter((item) => item.id !== productId).slice(0, 4));

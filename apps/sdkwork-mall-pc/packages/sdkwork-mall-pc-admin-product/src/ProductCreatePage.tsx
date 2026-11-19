@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   BadgeCheck,
@@ -368,7 +368,7 @@ export function ProductCreatePage({ mode = 'create', productId }: ProductCreateP
   const [brandOptions, setBrandOptions] = useState<BrandOption[]>([]);
   const [categoryLoadError, setCategoryLoadError] = useState<string | null>(null);
   const [attributeDefinitions, setAttributeDefinitions] = useState<ProductAttributeDefinition[]>([]);
-  const [draft, setDraft] = useState<ProductDraftState>(() => createDefaultProductDraft());
+  const [draft, setDraft] = useState<ProductDraftState>(() => createBlankProductDraft());
   const [submitState, setSubmitState] = useState<SubmitState>({
     mode: null,
     status: 'idle',
@@ -602,7 +602,13 @@ export function ProductCreatePage({ mode = 'create', productId }: ProductCreateP
       });
     const submitDraft = {
       ...draft,
-      selectedCategoryIds,
+      // The authority requires a product number; the form no longer exposes
+      // it, so generate a stable one when the operator leaves it blank instead
+      // of blocking every draft with “请填写 SPU 编码”.
+      spuNo: draft.spuNo.trim() || `SPU-${Date.now().toString(36).toUpperCase()}`,
+      selectedCategoryIds: selectedCategoryIds.length > 0
+        ? selectedCategoryIds
+        : draft.selectedCategoryIds,
       specGroups: normalizedSpecGroups,
       skuDrafts: submitSkuDrafts,
       skuAttributeValues: mergeSkuAttributeValues(
@@ -644,6 +650,11 @@ export function ProductCreatePage({ mode = 'create', productId }: ProductCreateP
           ? `已更新商品 ${result.productId}，同步 ${result.skuCount} 个 SKU。`
           : `已创建商品 ${result.productId}，同步 ${result.skuCount} 个 SKU。库存创建接口待补齐，当前库存数量仅作为 SKU 运营草稿保留。`,
       });
+      if (typeof window !== "undefined") {
+        // Stay on the create form and the operator can submit twice; move to
+        // the new product's edit page instead.
+        window.location.assign(`/admin/products/${encodeURIComponent(result.productId)}/edit`);
+      }
     } catch (error) {
       setSubmitState({
         mode,
@@ -834,8 +845,24 @@ function ProductCreateStepOne({
   onSelectedCategoryIdsChange: (categoryIds: string[]) => void;
   updateDraft: (patch: Partial<ProductDraftState>) => void;
 }) {
+  function selectImage(file: File, slotIndex: number) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = typeof reader.result === "string" ? reader.result : "";
+      if (!url) {
+        return;
+      }
+      updateDraft({
+        detailConfig: slotIndex === 0
+          ? { ...draft.detailConfig, mainImageUrl: url }
+          : { ...draft.detailConfig, galleryImageUrls: [...draft.detailConfig.galleryImageUrls, url] },
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
   return (
-    <div className="flex min-h-full flex-col" data-admin-product-create-step-one>
+    <div className="flex min-h-full flex-col" data-admin-product-create-step-one data-selected-category-count={selectedCategoryIds.length}>
       <FormPanel>
         <PanelHeader
           description="完成商品基础属性后，系统会根据类目带出商品参数、规格模板和审核规则。"
@@ -846,9 +873,23 @@ function ProductCreateStepOne({
           <FormRow help="建议上传 3-5 张高清图片，首图用于商品列表、分享卡片和搜索结果。" label="主图" required>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
               {PREVIEW_IMAGES.map((label, index) => (
-                <UploadTile featured={index === 0} key={label} label={label} />
+                <UploadTile
+                  featured={index === 0}
+                  key={label}
+                  label={label}
+                  onSelect={(file) => selectImage(file, index)}
+                  src={index === 0 ? draft.detailConfig.mainImageUrl : undefined}
+                />
               ))}
             </div>
+          </FormRow>
+
+          <FormRow help="平台商品编码；留空时保存会自动生成。" label="SPU 编码">
+            <TextInput
+              placeholder="例如：SPU-2026-0001，留空自动生成"
+              value={draft.spuNo}
+              onChange={(value) => updateDraft({ spuNo: value })}
+            />
           </FormRow>
 
           <FormRow help="标题建议 12-30 个字，突出品牌、型号、卖点和适用场景。" label="商品标题" required>
@@ -887,7 +928,12 @@ function ProductCreateStepOne({
               categoryTree={categoryTree}
               onCategoryCreate={onCategoryCreate}
               selectedCategoryIds={selectedCategoryIds}
-              onSelectedCategoryIdsChange={onSelectedCategoryIdsChange}
+              onSelectedCategoryIdsChange={(categoryIds) => {
+                onSelectedCategoryIdsChange(categoryIds);
+                // Keep the draft in lockstep; the submit path falls back to it
+                // when the standalone state is stale after an async tree load.
+                updateDraft({ selectedCategoryIds: categoryIds });
+              }}
             />
           </FormRow>
 
@@ -961,7 +1007,7 @@ function ProductCreateStepTwo({
   const readinessReport = evaluateProductReadiness(draft);
 
   return (
-    <div className="flex min-h-full flex-col" data-admin-product-create-step-two>
+    <div className="flex min-h-full flex-col" data-admin-product-create-step-two data-selected-category-count={selectedCategoryIds.length}>
       <div className="space-y-4">
         <ProductPublishReadinessPanel report={readinessReport} />
         <FormPanel>
@@ -1757,7 +1803,10 @@ export function readSelectedCategoryPaths(categoryIds: string[], categoryTree = 
   return readSelectedCategoryEntries(categoryIds, categoryTree).map((entry) => entry.path);
 }
 
-export function normalizeSelectedCategoryIds(categoryIds: string[], categoryTree = PRODUCT_CATEGORY_TREE): string[] {
+export function normalizeSelectedCategoryIds(
+  categoryIds: string[],
+  categoryTree?: ProductCategoryNode[],
+): string[] {
   const normalizedCategoryIds: string[] = [];
   const seenCategoryIds = new Set<string>();
 
@@ -1765,10 +1814,15 @@ export function normalizeSelectedCategoryIds(categoryIds: string[], categoryTree
     if (seenCategoryIds.has(categoryId)) {
       continue;
     }
-    const categoryPath = findCategoryPath(categoryId, categoryTree);
-    const selectedNode = categoryPath[categoryPath.length - 1];
-    if (!selectedNode || selectedNode.children?.length) {
-      continue;
+    // Only validate leaf status when the caller supplies the live tree. The
+    // module-level demo tree must never drop authority category ids in edit or
+    // payload building.
+    if (categoryTree) {
+      const categoryPath = findCategoryPath(categoryId, categoryTree);
+      const selectedNode = categoryPath[categoryPath.length - 1];
+      if (!selectedNode || selectedNode.children?.length) {
+        continue;
+      }
     }
     seenCategoryIds.add(categoryId);
     normalizedCategoryIds.push(categoryId);
@@ -1849,6 +1903,81 @@ export function createDefaultProductDraft(): ProductDraftState {
     categoryAttributeValues: DEFAULT_PRODUCT_DRAFT.categoryAttributeValues.map((attribute) => ({ ...attribute })),
     skuAttributeValues: DEFAULT_PRODUCT_DRAFT.skuAttributeValues.map((attribute) => ({ ...attribute })),
     metadata: { ...DEFAULT_PRODUCT_DRAFT.metadata },
+    productVersion: 0,
+  };
+}
+
+/**
+ * An empty draft for real create/edit work.
+ *
+ * The exported default draft is the marketing/example state used by fixtures;
+ * seeding a real form with it leaked "企业版 AI 助手" copy and
+ * `assets.sdkwork.local` placeholder URLs into every product, and an operator
+ * pressing save could persist them. Edit mode also starts here and overlays only
+ * the fields the authority actually returned.
+ */
+export function createBlankProductDraft(): ProductDraftState {
+  const base = createDefaultProductDraft();
+  const templateSku = base.skuDrafts[0];
+  const detail = createDefaultDetailConfig();
+  return {
+    ...base,
+    title: "",
+    subtitle: "",
+    description: "",
+    brandId: "",
+    brand: "",
+    productType: "physical",
+    spuNo: "",
+    defaultPriceAmount: "",
+    defaultCurrencyCode: "CNY",
+    baseSkuNo: "",
+    selectedCategoryIds: [],
+    shopCategoryIds: [],
+    parameters: [],
+    specGroups: [],
+    skuDrafts: templateSku
+      ? [{
+        ...templateSku,
+        id: "sku-default",
+        backendSkuId: undefined,
+        specKey: "default",
+        specPath: "默认规格",
+        title: "",
+        skuNo: "",
+        barcode: "",
+        image: undefined,
+        priceAmount: "",
+        currencyCode: "CNY",
+        stockQuantity: 0,
+        enabled: true,
+        status: "draft",
+        version: 0,
+        specSelections: [],
+      }]
+      : [],
+    detailConfig: {
+      ...detail,
+      mainImageUrl: "",
+      galleryImageUrls: [],
+      detailImageUrls: [],
+      videoUrl: "",
+      sellingPoints: [],
+      parameterRows: [],
+      servicePromises: [],
+      shippingPolicy: "",
+      afterSalePolicy: "",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: [],
+      shareTitle: "",
+      shareDescription: "",
+      shareImageUrl: "",
+      customSections: [],
+    },
+    categoryAttributeValues: [],
+    skuAttributeValues: [],
+    metadata: {},
     productVersion: 0,
   };
 }
@@ -1945,7 +2074,7 @@ export function validateProductDraft(draft: ProductDraftState): string[] {
  * exposes a carrier for it.
  */
 export function buildProductCreatePayload(draft: ProductDraftState) {
-  const categoryId = normalizeSelectedCategoryIds(draft.selectedCategoryIds)[0] ?? '';
+  const categoryId = draft.selectedCategoryIds.map((id) => id.trim()).find(Boolean) ?? '';
   if (!categoryId) {
     throw new Error('请选择商品所属类目。');
   }
@@ -2217,12 +2346,17 @@ async function loadProductRecordForEdit(productId: string): Promise<CatalogRecor
 }
 
 function createProductDraftFromCatalogRecords(product: CatalogRecord, skuRecords: CatalogRecord[]): ProductDraftState {
-  const baseDraft = createDefaultProductDraft();
+  const baseDraft = createBlankProductDraft();
   const firstSku = skuRecords[0];
   const categoryIds = readCatalogStringArray(product, 'categoryIds');
   const skuDrafts = skuRecords.map(skuDraftFromRecord);
   const specGroups = inferSpecGroupsFromSkuRecords(skuDrafts);
   const commercialMetadata = readCommercialProductMetadata(product);
+  const productImageUrls = readCatalogStringArray(product, 'images');
+  const productMainImageUrl =
+    readMediaResourceUrl(readCatalogMediaResource(product, ['mainImageUrl', 'mainImage', 'imageUrl', 'image']))
+    || productImageUrls[0]
+    || '';
   const spuNo = readCatalogString(product, ['spuNo', 'spu_no', 'code', 'id']) || baseDraft.spuNo;
   const defaultPriceAmount = firstSku
     ? readCatalogString(firstSku, ['defaultPriceAmount', 'priceAmount', 'price_amount'])
@@ -2246,6 +2380,14 @@ function createProductDraftFromCatalogRecords(product: CatalogRecord, skuRecords
     description: readCatalogString(product, ['description']) || '',
     brandId: readCatalogString(product, ['brandId', 'brand_id']) || '',
     brand: readCatalogString(product, ['brand']) || '',
+    detailConfig: {
+      ...(commercialMetadata.detailConfig ?? baseDraft.detailConfig),
+      mainImageUrl: commercialMetadata.detailConfig?.mainImageUrl || productMainImageUrl,
+      galleryImageUrls:
+        commercialMetadata.detailConfig?.galleryImageUrls?.length
+          ? commercialMetadata.detailConfig.galleryImageUrls
+          : productImageUrls,
+    },
     productType: normalizeProductType(readCatalogString(product, ['productType', 'product_type'])),
     spuNo,
     defaultPriceAmount: defaultPriceAmount || baseDraft.defaultPriceAmount,
@@ -2789,19 +2931,50 @@ function stripCategorySortOrder(node: ProductCategoryNode & { sortOrder?: number
   };
 }
 
-function UploadTile({ featured, label }: { featured?: boolean; label: string }) {
+function UploadTile({
+  featured,
+  label,
+  onSelect,
+  src,
+}: {
+  featured?: boolean;
+  label: string;
+  onSelect?: (file: File) => void;
+  src?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <button
-      className={`group flex aspect-square min-h-28 flex-col items-center justify-center rounded-lg border border-dashed text-[13px] font-semibold transition-colors ${
+      className={`group relative flex aspect-square min-h-28 flex-col items-center justify-center overflow-hidden rounded-lg border border-dashed text-[13px] font-semibold transition-colors ${
         featured
           ? 'border-lobster-300 bg-lobster-50 text-lobster-600 hover:bg-lobster-100 dark:border-lobster-500/30 dark:bg-lobster-500/10 dark:text-lobster-300 dark:hover:bg-lobster-500/15'
           : 'border-slate-300 bg-slate-50 text-slate-500 hover:border-lobster-300 hover:bg-lobster-50/50 hover:text-lobster-600 dark:border-white/15 dark:bg-white/[0.03] dark:text-slate-400 dark:hover:border-lobster-500/40 dark:hover:bg-lobster-500/10 dark:hover:text-lobster-300'
       }`}
+      onClick={() => inputRef.current?.click()}
       type="button"
     >
-      {featured ? <Plus className="mb-2 h-5 w-5" /> : <Upload className="mb-2 h-5 w-5" />}
-      {label}
-      <span className="mt-1 text-[11px] font-medium opacity-75">{featured ? '必填' : '选填'}</span>
+      {src ? (
+        <img alt={label} className="absolute inset-0 h-full w-full object-cover" src={src} />
+      ) : (
+        <>
+          {featured ? <Plus className="mb-2 h-5 w-5" /> : <Upload className="mb-2 h-5 w-5" />}
+          {label}
+          <span className="mt-1 text-[11px] font-medium opacity-75">{featured ? '必填' : '选填'}</span>
+        </>
+      )}
+      <input
+        accept="image/*"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) {
+            onSelect?.(file);
+          }
+          event.target.value = "";
+        }}
+        ref={inputRef}
+        type="file"
+      />
     </button>
   );
 }
@@ -3282,7 +3455,7 @@ function CreateBottomBar({
         </label>
         {submitState ? (
           <div
-            className={`hidden max-w-[520px] truncate rounded-lg px-3 py-2 text-[12px] font-semibold lg:block ${
+            className={`block max-w-[520px] truncate rounded-lg px-3 py-2 text-[12px] font-semibold ${
               submitState.status === 'error'
                 ? 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-200'
                 : submitState.status === 'success'

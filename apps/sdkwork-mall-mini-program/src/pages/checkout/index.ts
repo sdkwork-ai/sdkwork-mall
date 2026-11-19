@@ -117,6 +117,7 @@ interface CheckoutData {
   goodsTitle: string;
   submitText: string;
   submittingText: string;
+  trustText: string;
   _cartItemIds: string[];
   /** One key per checkout attempt; reused when the buyer retries after a timeout. */
   _submitKey: string;
@@ -189,6 +190,7 @@ Page({
     goodsTitle: t("checkout.goods.title"),
     submitText: t("checkout.submit"),
     submittingText: t("checkout.submitting"),
+    trustText: t("checkout.trust"),
     _cartItemIds: [],
     // Minted per checkout visit in onLoad: one key per attempt, reused on retry.
     _submitKey: "",

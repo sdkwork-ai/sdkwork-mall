@@ -23,6 +23,56 @@ export interface MallSearchResult {
   total: number;
 }
 
+function readSearchNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  // Money and counts may ride the wire as decimal strings; Number("4299.00")
+  // keeps a paid product from degrading to the "询价" fallback.
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+/** Reads an aggregated SKU price published in minor units, else a decimal one. */
+function readSearchMoney(
+  record: Record<string, unknown>,
+  minorKey: string,
+  decimalKeys: readonly string[],
+): number | null {
+  const minor = readSearchNumber(record[minorKey]);
+  const exponent = readSearchNumber(record.minorUnitExponent ?? record.priceScale);
+  if (minor != null && exponent != null && Number.isInteger(exponent) && exponent >= 0 && exponent <= 8) {
+    return minor / 10 ** exponent;
+  }
+  for (const key of decimalKeys) {
+    const value = readSearchNumber(record[key]);
+    if (value != null) {
+      return value;
+    }
+  }
+  return null;
+}
+
+function readMediaUrl(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  const record = value as Record<string, unknown>;
+  const snapshot =
+    record.resourceSnapshot && typeof record.resourceSnapshot === "object"
+      ? (record.resourceSnapshot as Record<string, unknown>)
+      : null;
+  const url =
+    (typeof record.url === "string" && record.url) ||
+    (typeof record.publicUrl === "string" && record.publicUrl) ||
+    (typeof snapshot?.url === "string" && snapshot.url) ||
+    (typeof snapshot?.publicUrl === "string" && snapshot.publicUrl);
+  return url || undefined;
+}
+
 function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
   // Canonical media is a primaryImage/coverImage `{ url }` object; the dev
   // double (and legacy payloads) ship a plain string `imageUrl` plus an
@@ -32,6 +82,8 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
     typeof media === "object" && media !== null && "url" in media
       ? String((media as { url?: unknown }).url ?? "")
       : undefined;
+  const mediaRows = Array.isArray(record.media) ? record.media : [];
+  const firstMediaUrl = mediaRows.map(readMediaUrl).find((url) => Boolean(url));
   const images = Array.isArray(record.images) ? record.images : [];
   const firstListImage = images.find((item) => typeof item === "string" && item !== "");
   const imageUrl =
@@ -39,7 +91,8 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
     ?? (typeof record.imageUrl === "string" && record.imageUrl
       ? record.imageUrl
       : undefined)
-    ?? (typeof firstListImage === "string" ? firstListImage : undefined);
+    ?? (typeof firstListImage === "string" ? firstListImage : undefined)
+    ?? firstMediaUrl;
 
   const brand =
     typeof record.brand === "string"
@@ -57,12 +110,7 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
           ? record.originPlace
           : undefined;
 
-  const stock =
-    typeof record.stock === "number"
-      ? record.stock
-      : typeof record.stockQuantity === "number"
-        ? record.stockQuantity
-        : undefined;
+  const stock = readSearchNumber(record.stock) ?? readSearchNumber(record.stockQuantity) ?? undefined;
   const inStock = stock == null ? undefined : stock > 0;
 
   const selfOperated =
@@ -83,39 +131,18 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
           ? record.isFreeShipping
           : undefined;
 
-  const rating =
-    typeof record.rating === "number"
-      ? record.rating
-      : typeof record.averageRating === "number"
-        ? record.averageRating
-        : undefined;
-
-  const salesCount =
-    typeof record.salesCount === "number"
-      ? record.salesCount
-      : typeof record.sales === "number"
-        ? record.sales
-        : undefined;
+  const rating = readSearchNumber(record.rating) ?? readSearchNumber(record.averageRating) ?? undefined;
+  const salesCount = readSearchNumber(record.salesCount) ?? readSearchNumber(record.sales) ?? undefined;
 
   return {
     id: String(record.id ?? record.spuId ?? ""),
     title: String(record.title ?? record.name ?? "商品"),
-    priceCny:
-      typeof record.salePrice === "number"
-        ? record.salePrice
-        : typeof record.price === "number"
-          ? record.price
-          : typeof record.priceCny === "number"
-            ? record.priceCny
-            : null,
-    listPriceCny:
-      typeof record.listPrice === "number"
-        ? record.listPrice
-        : typeof record.marketPrice === "number"
-          ? record.marketPrice
-          : typeof record.originalPrice === "number"
-            ? record.originalPrice
-            : null,
+    priceCny: readSearchMoney(record, "salePriceMinor", ["salePrice", "price", "priceCny"]),
+    listPriceCny: readSearchMoney(record, "listPriceMinor", [
+      "listPrice",
+      "marketPrice",
+      "originalPrice",
+    ]),
     shopId:
       typeof record.shopId === "string"
         ? record.shopId
@@ -176,6 +203,33 @@ export function buildMallCategoryTree(categories: MallCategoryOption[]): MallCat
   return roots;
 }
 
+/**
+ * Reads the server-reported total from either page-info shape.
+ *
+ * SDKWork v3 publishes `pageInfo: { totalItems: "1200", totalPages, hasMore }`
+ * while the dev double and older payloads publish `pageInfo.total` (or a flat
+ * `total`). Reading only `payload.total` made every list one page long: the
+ * total fell back to the current page length and pagination disappeared.
+ */
+function readSearchTotal(payload: {
+  total?: unknown;
+  pageInfo?: { totalItems?: unknown; total?: unknown } | null;
+}): number | null {
+  const candidates = [payload.pageInfo?.totalItems, payload.pageInfo?.total, payload.total];
+  for (const candidate of candidates) {
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
+      return candidate;
+    }
+    if (typeof candidate === "string" && candidate.trim() !== "") {
+      const parsed = Number(candidate);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+  }
+  return null;
+}
+
 export async function searchMallProducts(input: {
   categoryId?: string;
   page?: number;
@@ -200,10 +254,11 @@ export async function searchMallProducts(input: {
     });
     const payload = unwrapSdkworkPaymentResponse(response) as {
       items?: Record<string, unknown>[];
-      total?: number;
+      pageInfo?: { totalItems?: unknown; total?: unknown } | null;
+      total?: unknown;
     };
     const items = payload.items?.map(readSearchProduct) ?? [];
-    return { items, total: payload.total ?? items.length };
+    return { items, total: readSearchTotal(payload) ?? items.length };
   }
 
   // 自由文本搜索走 catalog.products.list（支持 q 与 sort），由服务端分页。
@@ -216,10 +271,11 @@ export async function searchMallProducts(input: {
   });
   const payload = unwrapSdkworkPaymentResponse(response) as {
     items?: Record<string, unknown>[];
-    total?: number;
+    pageInfo?: { totalItems?: unknown; total?: unknown } | null;
+    total?: unknown;
   };
   const items = payload.items?.map(readSearchProduct) ?? [];
-  return { items, total: payload.total ?? items.length };
+  return { items, total: readSearchTotal(payload) ?? items.length };
 }
 
 export interface MallSearchShop {
@@ -241,7 +297,8 @@ export async function searchMallShops(input: {
   });
   const payload = unwrapSdkworkPaymentResponse(response) as {
     items?: Record<string, unknown>[];
-    total?: number;
+    pageInfo?: { totalItems?: unknown; total?: unknown } | null;
+    total?: unknown;
   };
   const items =
     payload.items?.map((item) => ({
@@ -258,6 +315,6 @@ export async function searchMallShops(input: {
 
   return {
     items,
-    total: payload.total ?? items.length,
+    total: readSearchTotal(payload) ?? items.length,
   };
 }

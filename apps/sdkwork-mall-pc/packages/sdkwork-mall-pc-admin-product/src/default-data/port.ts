@@ -59,6 +59,22 @@ export interface MallDefaultDataPort {
     publishProduct(productId: string, expectedVersion: number): Promise<unknown>;
     listSkus(): Promise<unknown>;
     createSku(body: Record<string, unknown>): Promise<unknown>;
+    /** Reads one SKU so a rerun can learn the version a guarded update needs. */
+    retrieveSku(skuId: string): Promise<unknown>;
+    /**
+     * Activates one SKU.
+     *
+     * `catalog.skus.create` writes `status = draft` / `sales_status = inactive`,
+     * and publishing the product deliberately does not cascade to its SKUs. The
+     * storefront's product-SKU read model lists `status = active` rows only, so
+     * a seed that stops after `publishProduct` leaves a published product with
+     * zero purchasable specifications.
+     */
+    updateSku(
+      skuId: string,
+      body: Record<string, unknown>,
+      expectedVersion: number,
+    ): Promise<unknown>;
   };
   readonly shops: {
     listShops(): Promise<unknown>;

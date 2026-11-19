@@ -82,7 +82,7 @@ export class MallHomeUnavailableError extends Error {
 
 const SECTION_LABELS: Readonly<Record<MallHomeSection, string>> = {
   categories: "类目",
-  hotProducts: "热卖商品",
+  hotProducts: "商品",
   newProducts: "新品",
   shops: "店铺",
 };
@@ -120,9 +120,42 @@ function readBoolean(record: Record<string, unknown>, keys: readonly string[]): 
   return undefined;
 }
 
+/**
+ * Reads a price that may ride as an integer minor unit (`salePriceMinor` +
+ * `minorUnitExponent`) or as a decimal amount. The storefront projection can
+ * aggregate the minimum active SKU price; when it does, the card must not fall
+ * back to "询价".
+ */
+function readCardMoney(
+  record: Record<string, unknown>,
+  minorKey: string,
+  decimalKeys: readonly string[],
+): number | undefined {
+  const minor = readNumber(record, [minorKey]);
+  const exponent = readNumber(record, ["minorUnitExponent", "priceScale"]);
+  if (minor != null && exponent != null && Number.isInteger(exponent) && exponent >= 0 && exponent <= 8) {
+    return minor / 10 ** exponent;
+  }
+  return readNumber(record, decimalKeys);
+}
+
 function readProductCard(record: Record<string, unknown>): MallHomeProductCard {
   const media = record.primaryImage ?? record.coverImage ?? record.image;
   const images = Array.isArray(record.images) ? record.images : [];
+  const mediaRows = Array.isArray(record.media) ? record.media : [];
+  const firstMedia = mediaRows
+    .map((item) => {
+      const row = item && typeof item === "object" ? (item as Record<string, unknown>) : null;
+      const snapshot = row && row.resourceSnapshot && typeof row.resourceSnapshot === "object"
+        ? (row.resourceSnapshot as Record<string, unknown>)
+        : null;
+      return typeof row?.url === "string"
+        ? row.url
+        : typeof snapshot?.url === "string"
+          ? snapshot.url
+          : undefined;
+    })
+    .find((url) => typeof url === "string" && url !== "");
   const firstImage = images.find((item) => typeof item === "string" && item !== "");
   const imageUrl =
     typeof media === "object" && media !== null && "url" in media
@@ -131,7 +164,7 @@ function readProductCard(record: Record<string, unknown>): MallHomeProductCard {
         ? record.imageUrl
         : typeof firstImage === "string"
           ? firstImage
-          : undefined;
+          : firstMedia;
 
   const brand =
     typeof record.brand === "string"
@@ -146,9 +179,10 @@ function readProductCard(record: Record<string, unknown>): MallHomeProductCard {
     id: String(record.id ?? record.spuId ?? ""),
     title: String(record.title ?? record.name ?? "商品"),
     subtitle: typeof record.subtitle === "string" ? record.subtitle : undefined,
-    priceCny: readNumber(record, ["salePrice", "price", "priceCny"]) ?? null,
+    priceCny: readCardMoney(record, "salePriceMinor", ["salePrice", "price", "priceCny"]) ?? null,
     listPriceCny:
-      readNumber(record, ["listPrice", "marketPrice", "originalPrice", "priceList"]) ?? null,
+      readCardMoney(record, "listPriceMinor", ["listPrice", "marketPrice", "originalPrice", "priceList"]) ??
+      null,
     shopName: typeof record.shopName === "string" ? record.shopName : undefined,
     imageUrl: imageUrl || undefined,
     brand,
@@ -186,10 +220,18 @@ function takeItems(
 
 export async function loadMallHomeSnapshot(): Promise<MallHomeSnapshot> {
   const remote = getSdkworkHomeRemotePort();
-  const [categoriesResult, hotResult, newResult, shopsResult] = await Promise.allSettled([
+  // One product read feeds both shelves.
+  //
+  // The catalog read model has no sales or rating column, and it only maps
+  // `price-asc` / `price-desc`; any other sort value silently falls back to
+  // publish-time order. Asking twice with `sales` and `created_at` therefore
+  // returned the *same* eight products on the real authority (and `created_at`
+  // was also unknown to the dev double). The default order is already newest
+  // first — the authority orders by `created_at DESC` — so one `newest` read
+  // split into "new" and "more" is both truthful and duplicate-free.
+  const [categoriesResult, productsResult, shopsResult] = await Promise.allSettled([
     remote.listCategories({ page: 1, page_size: 10 }),
-    remote.listSpus({ page: 1, page_size: 8, sort: "sales" }),
-    remote.listSpus({ page: 1, page_size: 8, sort: "created_at" }),
+    remote.listSpus({ page: 1, page_size: 16, sort: "newest" }),
     remote.listShops({ page: 1, page_size: 8 }),
   ]);
 
@@ -200,11 +242,16 @@ export async function loadMallHomeSnapshot(): Promise<MallHomeSnapshot> {
     name: String(item.name ?? item.title ?? "类目"),
   }));
 
-  const hotProducts = takeItems(hotResult, "hotProducts", issues).map((item) =>
+  // Both shelves read the same settled result; a failure is reported against
+  // both sections so the page can show one issue per shelf.
+  const productIssues: MallHomeLoadIssue[] = [];
+  const productCards = takeItems(productsResult, "hotProducts", productIssues).map((item) =>
     readProductCard(item));
-
-  const newProducts = takeItems(newResult, "newProducts", issues).map((item) =>
-    readProductCard(item));
+  for (const issue of productIssues) {
+    issues.push(issue, { ...issue, section: "newProducts" });
+  }
+  const newProducts = productCards.slice(0, 8);
+  const hotProducts = productCards.slice(8, 16);
 
   const featuredShops = takeItems(shopsResult, "shops", issues)
     .map((item) => ({

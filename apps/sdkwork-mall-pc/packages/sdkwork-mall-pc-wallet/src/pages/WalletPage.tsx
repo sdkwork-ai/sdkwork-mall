@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import {
+  Button,
   LoadingBlock,
   StatusNotice,
 } from "@sdkwork/ui-pc-react";
@@ -38,10 +39,14 @@ function SdkworkWalletPageContent({
   const { copy } = useSdkworkWalletIntl();
 
   useEffect(() => {
-    if (!state.isBootstrapped && !state.isLoading) {
+    // Bootstrap once per page load. Re-triggering whenever `isLoading` returns
+    // to false turned a failed read into an endless retry loop: every failure
+    // cleared the flag, the effect fired again, and the spinner never left.
+    // A failure now waits for the shopper's explicit retry.
+    if (!state.isBootstrapped && !state.isLoading && !state.lastError) {
       void controller.bootstrap();
     }
-  }, [controller, state.isBootstrapped, state.isLoading]);
+  }, [controller, state.isBootstrapped, state.isLoading, state.lastError]);
 
   return (
     <div className="relative h-full overflow-y-auto">
@@ -64,7 +69,30 @@ function SdkworkWalletPageContent({
 
           {state.lastError ? (
             <StatusNotice title={copy.page.errorTitle} tone="danger">
-              {state.lastError}
+              <div className="flex items-center justify-between gap-3">
+                <span>{state.lastError}</span>
+                <Button
+                  onClick={() => void controller.bootstrap()}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  重试
+                </Button>
+              </div>
+            </StatusNotice>
+          ) : null}
+
+          {state.lastMessage ? (
+            <StatusNotice title="操作成功" tone="success">
+              <div className="flex items-center justify-between gap-3">
+                <span>{state.lastMessage}</span>
+                {state.lastPaymentUrl ? (
+                  <a href={state.lastPaymentUrl}>
+                    <Button size="sm" type="button">去支付</Button>
+                  </a>
+                ) : null}
+              </div>
             </StatusNotice>
           ) : null}
 

@@ -42,9 +42,10 @@ const QUICK_LINKS: Array<{ labelKey: string; capability: string; icon: string }>
 /** 账户区入口（含设置）同样走能力路由。 */
 const ACCOUNT_LINKS: Array<{ labelKey: string; capability: string }> = [
   { labelKey: "buyerHub.account.profile", capability: "buyer.mall.profile" },
-  // 「我的评价」和「礼品卡」are capability placeholders with no published API yet.
-  // They stay authored but unreachable, so a shopper never lands on a dead or
-  // "coming soon" surface. Re-enable here when the API ships.
+  // These capabilities are still pending their authority APIs, but the pages
+  // state that honestly; hiding the entries orphaned both routes.
+  { labelKey: "buyerHub.account.reviews", capability: "buyer.mall.reviews" },
+  { labelKey: "buyerHub.account.giftCards", capability: "buyer.mall.gift-cards" },
   { labelKey: "buyerHub.account.security", capability: "buyer.mall.security" },
   { labelKey: "buyerHub.account.settings", capability: "buyer.mall.settings" },
   { labelKey: "buyerHub.account.help", capability: "storefront.mall.help" },

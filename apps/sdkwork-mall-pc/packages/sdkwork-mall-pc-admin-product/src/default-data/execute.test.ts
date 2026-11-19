@@ -58,6 +58,19 @@ describe("mall default data execution", () => {
     );
     expect(port.state.products).toHaveLength(zhCnDefaultDataset.products.length);
     expect(port.calls.published).toHaveLength(zhCnDefaultDataset.products.length);
+    // A published product with draft SKUs cannot be bought: the storefront SKU
+    // read model lists active rows only. Every seeded SKU must therefore be
+    // activated explicitly.
+    const expectedSkuCount = zhCnDefaultDataset.products.reduce(
+      (total, product) => total + product.skus.length,
+      0,
+    );
+    expect(port.calls.activated).toHaveLength(expectedSkuCount);
+    expect(
+      port.state.skus.every(
+        (sku) => sku.status === "active" && sku.salesStatus === "active",
+      ),
+    ).toBe(true);
     expect(port.state.cmsPreset).toBe("v1:zh-CN");
     expect(port.calls.cmsWrites).toBe(1);
   });
@@ -68,12 +81,15 @@ describe("mall default data execution", () => {
 
     await runMallDefaultDataInitialization();
     const createdAfterFirstRun = port.calls.created.length;
+    const activatedAfterFirstRun = port.calls.activated.length;
     const rerun = await runMallDefaultDataInitialization();
 
     expect(rerun.ok).toBe(true);
     expect(rerun.summary.created).toBe(0);
     expect(rerun.summary.skipped).toBeGreaterThan(0);
     expect(port.calls.created).toHaveLength(createdAfterFirstRun);
+    // Activation is idempotent too: a rerun must not advance every SKU again.
+    expect(port.calls.activated).toHaveLength(activatedAfterFirstRun);
     expect(port.calls.cmsWrites).toBe(1);
     for (const step of rerun.steps) {
       expect(step.status).toBe("skipped");

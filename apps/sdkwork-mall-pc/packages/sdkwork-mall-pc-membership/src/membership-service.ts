@@ -153,7 +153,10 @@ interface RemoteMembershipPackage {
   name?: string;
   originalPrice?: number | string;
   pointAmount?: number | string;
+  points?: number | string;
   price?: number | string;
+  priceAmount?: number | string;
+  salePrice?: number | string;
   recommended?: boolean;
   sortWeight?: number | string;
   tags?: string[];
@@ -172,17 +175,25 @@ interface RemoteMembershipPurchaseResult {
 
 function mapPlan(membershipPackage: RemoteMembershipPackage): SdkworkMembershipPlan {
   const packageId = toSdkworkMembershipNumber(membershipPackage.id);
+  // Preserve the raw identity for the React key. Several packages can map to
+  // numeric 0 (non-numeric ids), and keying them all as `membership-package-0`
+  // duplicated selection state across rows.
+  const identity = membershipPackage.id == null ? packageId : String(membershipPackage.id);
 
   return {
     description: toSdkworkMembershipOptionalString(membershipPackage.description),
     durationDays: toNullableSdkworkMembershipNumber(membershipPackage.durationDays),
-    id: `membership-package-${packageId}`,
-    includedPoints: toSdkworkMembershipNumber(membershipPackage.pointAmount),
+    id: `membership-package-${identity}`,
+    includedPoints: toSdkworkMembershipNumber(
+      membershipPackage.pointAmount ?? membershipPackage.points,
+    ),
     levelName: toSdkworkMembershipOptionalString(membershipPackage.levelName),
     name: toSdkworkMembershipOptionalString(membershipPackage.name) || "Membership package",
     originalPriceCny: toNullableSdkworkMembershipNumber(membershipPackage.originalPrice),
     packageId,
-    priceCny: toSdkworkMembershipNumber(membershipPackage.price),
+    priceCny: toSdkworkMembershipNumber(
+      membershipPackage.priceAmount ?? membershipPackage.price ?? membershipPackage.salePrice,
+    ),
     recommended: Boolean(membershipPackage.recommended),
     tags: Array.isArray(membershipPackage.tags)
       ? membershipPackage.tags.map((tag) => tag.trim()).filter(Boolean)
@@ -245,7 +256,7 @@ function mapLevels(
     badge: toSdkworkMembershipOptionalString(level.badge),
     description: toSdkworkMembershipOptionalString(level.description),
     icon: readSdkworkMediaResource(level.icon),
-    id: `membership-level-${toSdkworkMembershipNumber(level.id)}`,
+    id: `membership-level-${level.id == null ? toSdkworkMembershipNumber(level.id) : String(level.id)}`,
     isCurrent: currentLevelValue !== null && toSdkworkMembershipNumber(level.levelValue) === currentLevelValue,
     levelValue: toSdkworkMembershipNumber(level.levelValue),
     name: toSdkworkMembershipOptionalString(level.name) || "Membership level",
@@ -258,7 +269,7 @@ function mapBenefits(benefits: RemoteMembershipBenefit[]): SdkworkMembershipBene
     benefitKey: toSdkworkMembershipOptionalString(benefit.benefitKey),
     claimed: Boolean(benefit.claimed),
     description: toSdkworkMembershipOptionalString(benefit.description),
-    id: `membership-benefit-${toSdkworkMembershipNumber(benefit.id)}`,
+    id: `membership-benefit-${benefit.id == null ? toSdkworkMembershipNumber(benefit.id) : String(benefit.id)}`,
     name: toSdkworkMembershipOptionalString(benefit.name) || "Membership benefit",
     type: toSdkworkMembershipOptionalString(benefit.type),
     usageLimit: toNullableSdkworkMembershipNumber(benefit.usageLimit),

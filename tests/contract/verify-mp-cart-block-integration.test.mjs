@@ -41,13 +41,17 @@ test("the cart service reads and writes through the commerce block", () => {
     "promotions\\.userCoupons\\.list",
     "checkout\\.sessions\\.create",
     "checkout\\.sessions\\.quotes\\.create",
-    "checkout\\.sessions\\.orders\\.create",
     "addresses\\.defaultSelection\\.create",
     "promotions\\.discountApplications\\.create",
     "wallet\\.holds\\.create",
   ]) {
     assert.match(service, new RegExp(call, "u"), `missing block call ${call}`);
   }
+  // Order creation is the one command the generated client cannot make safely:
+  // it retries blind and exposes no `Idempotency-Key`, so the service uses the
+  // authored request seam with a stable key instead (see the comment there).
+  assert.match(service, /checkout\/sessions\/.*\/orders/u, "order creation uses the idempotent request seam");
+  assert.match(service, /Idempotency-Key/u, "order creation carries an idempotency key");
 });
 
 test("the payment intent is started by the order block", () => {

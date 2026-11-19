@@ -1,5 +1,6 @@
 export interface SdkworkCatalogRemotePort {
   createCartItem(body: Record<string, unknown>): Promise<unknown>;
+  updateCartItem(cartItemId: string, body: Record<string, unknown>): Promise<unknown>;
   listPromotionOffers(query: Record<string, unknown>): Promise<unknown>;
   retrieveCategory(query: Record<string, unknown>): Promise<unknown>;
   retrieveSpu(query: Record<string, unknown>): Promise<unknown>;

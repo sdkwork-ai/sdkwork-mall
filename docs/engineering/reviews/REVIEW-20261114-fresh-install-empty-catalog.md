@@ -3,6 +3,56 @@
 Status: implemented
 Scope: `apps/sdkwork-mall-pc` (storefront home / catalog / search, bootstrap, tests)
 
+## Follow-up 2026-11-19: the product detail page could not select a specification
+
+The storefront PDP rendered `商品 / 询价 / 库存信息待确认` with no specification
+buttons, and clicking 加入购物车 answered `请选择规格`. Two independent defects
+produced that state.
+
+1. **The resource envelope was read as the resource.** `loadMallProductDetail`
+   cast `unwrapSdkworkPaymentResponse(response)` straight to the product record.
+   The unwrap removes only `code`/`data`; a v3 retrieve body is
+   `{ data: { item } }`, so the record was the `{ item }` wrapper. Every field
+   read off it missed and fell back (`title → "商品"`, `id → URL id`,
+   `priceCny → null → 询价`, `skus → []`). The same pattern existed in
+   `retrieveMallCategory` (which returned `null`) and in the H5/mini-program
+   detail readers. The PC read model now unwraps `item` (and still accepts
+   the flat dev-double body), maps the canonical product attribute table into
+   the spec table, and maps canonical SKU money (`salePriceMinor` +
+   `minorUnitExponent`), stock and sales axes (`attributeValues`).
+2. **Seed SKUs were never activated.** `catalog.skus.create` inserts
+   `status = 'draft'` / `sales_status = 'inactive'`; `products.publish` only
+   requires a non-deleted SKU and deliberately does **not** cascade the
+   lifecycle. The storefront SKU read model lists `status = active` rows only,
+   so every seeded product was visible but had zero purchasable
+   specifications. The default-data plan now activates each seeded SKU
+   (guarded `skus.update` with `status: "active"`, idempotent on rerun, existing
+   draft rows included) and the dataset revision was bumped so upgraded installs
+   top themselves up.
+
+The PDP spec picker was also rebuilt on the real data shape: options are grouped
+by sales axis (label from the product attribute table), unavailable
+combinations are disabled, selecting one axis preserves the others, the
+selected SKU drives price, strike-through price, stock and the quantity cap, and
+a product whose API answer carries no SKUs renders an explicit
+"规格信息暂不可用" state instead of an enabled buy button that fails later.
+
+Remaining upstream gap (not fixable in this repository): the composed commerce
+app contract the storefront consumes (`sdkwork-cloudrouter`
+`commerce-server-openapi` → `@sdkwork/cloudrouter-app-sdk/domains`) publishes no
+`/catalog/products/{productId}/skus` operation, and its catalog resources are
+untyped `CommerceApiResult`. The owning catalog app API **does** publish that
+collection (`sdkwork-catalog`, `CatalogSkuPageData`) plus typed `CatalogProduct`
+/ `CatalogSku` models. Until the composed contract gains the SKU collection,
+a real catalog backend returns a product without SKUs, so the PDP can only show
+the explicit unavailable state above even though the seeded rows are active.
+The same contract exposes no product media (`CatalogProduct` and the catalog
+`ProductResponse` carry no media field), so the gallery stays a placeholder
+until the read model projects media and the seed authors asset URLs.
+The clean fix is upstream: add the SKU collection and the media projection to
+the composed commerce contract, then consume the typed catalog app SDK for the
+PDP.
+
 ## Follow-up 2026-11-18: professional-scale dataset
 
 The first pass made an empty install recoverable but the seeded catalog was too

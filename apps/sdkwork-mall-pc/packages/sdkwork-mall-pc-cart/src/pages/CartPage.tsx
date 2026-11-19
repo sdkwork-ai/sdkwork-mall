@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Badge, Button, Checkbox, EmptyState, LoadingBlock, StatusNotice } from "@sdkwork/ui-pc-react";
 import { formatSdkworkPaymentCurrencyCny as formatSdkworkCommerceCurrencyCny } from "@sdkwork/payment-service";
@@ -57,14 +57,26 @@ export function SdkworkMallCartPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [selection, setSelection] = useState<CartItemSelection>({ selected: new Set() });
   const [removing, setRemoving] = useState<string | null>(null);
+  // A mall cart opens with every line selected (JD/Tmall convention). Later
+  // refreshes (quantity change, removal) preserve the shopper's own selection
+  // instead of re-selecting lines they explicitly cleared.
+  const selectionInitialized = useRef(false);
 
   async function refresh() {
     setLoading(true);
     try {
       const snapshot = await loadMallCart();
       setCart(snapshot);
+      // Decide outside the state updater: React may invoke an updater twice in
+      // StrictMode, and flipping the ref inside it made the second invocation
+      // read `previous = empty` and clear the just-computed default selection.
+      const firstLoad = !selectionInitialized.current;
+      selectionInitialized.current = true;
       setSelection((previous) => {
         const validIds = new Set(snapshot.items.map((item) => item.id));
+        if (firstLoad) {
+          return { selected: new Set(validIds) };
+        }
         const next = new Set<string>();
         for (const id of previous.selected) {
           if (validIds.has(id)) {
@@ -414,30 +426,68 @@ export function SdkworkMallCheckoutPage() {
     setLoading(true);
     setQuoteError(null);
     try {
-      const [checkoutContext, checkoutQuote] = await Promise.all([
-        loadMallCheckoutContext(),
-        createMallCheckoutQuote(cartItemIds),
-      ]);
+      const checkoutContext = await loadMallCheckoutContext();
       setContext(checkoutContext);
-      setQuote(checkoutQuote);
       const defaultAddress = checkoutContext.addresses.find((address) => address.isDefault)
         ?? checkoutContext.addresses[0];
-      if (defaultAddress) {
-        setSelectedAddressId(defaultAddress.id);
-      }
-      if (checkoutContext.paymentMethods[0]) {
-        setSelectedPaymentMethodCode(checkoutContext.paymentMethods[0].code);
-      }
+      setSelectedAddressId((current) => current || defaultAddress?.id || "");
+      setSelectedPaymentMethodCode(
+        (current) => current || checkoutContext.paymentMethods[0]?.code || "",
+      );
     } catch (cause: unknown) {
       setQuoteError(cause instanceof Error ? cause.message : "结算信息加载失败");
     } finally {
       setLoading(false);
     }
-  }, [cartItemIds]);
+  }, []);
 
   useEffect(() => {
     void loadCheckout();
   }, [loadCheckout]);
+
+  // The payable amount depends on the coupon, delivery, gift card and asset
+  // deductions. Re-quote whenever any of them changes so the displayed amount
+  // is the one the server will charge (the checkout form used to show the
+  // pre-discount total while sending the offsets in the order body).
+  const quoteInput = useMemo(
+    () => ({
+      cartItemIds,
+      couponId: selectedCouponId || undefined,
+      deliveryMethod: selectedDeliveryMethod || undefined,
+      giftCardCode: giftCardApplied || undefined,
+      needInvoice,
+      usePoints,
+      useWallet,
+    }),
+    [
+      cartItemIds,
+      selectedCouponId,
+      selectedDeliveryMethod,
+      giftCardApplied,
+      needInvoice,
+      usePoints,
+      useWallet,
+    ],
+  );
+
+  useEffect(() => {
+    let active = true;
+    setQuoteError(null);
+    createMallCheckoutQuote(quoteInput)
+      .then((nextQuote) => {
+        if (active) {
+          setQuote(nextQuote);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (active) {
+          setQuoteError(cause instanceof Error ? cause.message : "结算信息加载失败");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [quoteInput]);
 
   const checkoutItems = useMemo(() => {
     if (!context) {
@@ -453,19 +503,21 @@ export function SdkworkMallCheckoutPage() {
     [checkoutItems],
   );
 
-  // 应付金额以服务端报价为准；配送费按报价口径推导展示，避免前端另算一笔。
-  const deliveryFee = useMemo(() => {
-    if (!quote) {
-      return 0;
-    }
-    const merchandiseAmount = Math.max(0, quote.originalAmountCny - quote.discountAmountCny);
-    return Math.max(0, quote.payableAmountCny - merchandiseAmount);
-  }, [quote]);
-
-  const payableAmount = useMemo(() => {
-    const base = quote?.payableAmountCny ?? context?.cart.totalAmountCny ?? 0;
-    return Math.max(0, base);
-  }, [quote, context]);
+  // 应付金额以服务端报价为准；报价缺失/为 0 时回退到所选购物车行小计，
+  // 避免结算页在有效商品上显示 ¥0.00。
+  const cartMerchandiseAmount = useMemo(
+    () => checkoutItems.reduce((sum, item) => sum + (item.lineTotalCny ?? 0), 0),
+    [checkoutItems],
+  );
+  const quotedOriginalAmount = quote?.originalAmountCny ?? 0;
+  const merchandiseAmount = quotedOriginalAmount > 0 ? quotedOriginalAmount : cartMerchandiseAmount;
+  const discountAmount = quote?.discountAmountCny ?? 0;
+  const quoteResolved = quote != null && quotedOriginalAmount > 0;
+  const payableAmount = Math.max(
+    0,
+    quoteResolved ? (quote?.payableAmountCny ?? 0) : merchandiseAmount - discountAmount,
+  );
+  const deliveryFee = Math.max(0, payableAmount - Math.max(0, merchandiseAmount - discountAmount));
 
   function handleApplyGiftCard() {
     setGiftCardError(null);
@@ -812,9 +864,9 @@ export function SdkworkMallCheckoutPage() {
 
       {/* 应付金额汇总 */}
       <section className="sdkwork-mall-pc-checkout-summary">
-        <p>商品金额：¥{(quote?.originalAmountCny ?? context.cart.totalAmountCny).toFixed(2)}</p>
-        {quote && quote.discountAmountCny > 0 ? (
-          <p>优惠金额：-¥{quote.discountAmountCny.toFixed(2)}</p>
+        <p>商品金额：¥{merchandiseAmount.toFixed(2)}</p>
+        {discountAmount > 0 ? (
+          <p>优惠/抵扣金额：-¥{discountAmount.toFixed(2)}</p>
         ) : null}
         {deliveryFee > 0 ? <p>配送费：¥{deliveryFee.toFixed(2)}</p> : null}
         <strong>应付金额：¥{payableAmount.toFixed(2)}</strong>
@@ -890,7 +942,7 @@ export function SdkworkMallPaymentResultPage() {
 
   useEffect(() => {
     let active = true;
-    void searchMallProducts({ pageSize: 6, sort: "sales" })
+    void searchMallProducts({ pageSize: 6 })
       .then((result) => {
         if (active) {
           setRecommendations(result.items.slice(0, 6));
@@ -1013,7 +1065,7 @@ export function SdkworkMallPaymentResultPage() {
               <Link className="sdkwork-mall-pc-product-card" key={product.id} to={`/product/${product.id}`}>
                 <div className="sdkwork-mall-pc-product-body">
                   <h3>{product.title}</h3>
-                  <strong>{product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "询价"}</strong>
+                  <strong>{product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "暂无报价"}</strong>
                 </div>
               </Link>
             ))}

@@ -67,7 +67,7 @@ export async function loadMallH5HomeSnapshot(): Promise<MallH5HomeSnapshot> {
   const commerce = getSdkworkCommerceService();
   const [categoriesResult, hotResult, newResult, shopsResult, offersResult] = await Promise.allSettled([
     commerce.catalog.categories.list({ page: 1, page_size: 50, status: "active" }),
-    commerce.catalog.products.list({ page: 1, page_size: 10, sort: "sales" }),
+    commerce.catalog.products.list({ page: 1, page_size: 10 }),
     commerce.catalog.products.list({ page: 1, page_size: 10, sort: "newest" }),
     commerce.shops.list({ page: 1, page_size: 4, status: "active" }),
     commerce.promotions.offers.list({ page: 1, page_size: 6, status: "active" }),

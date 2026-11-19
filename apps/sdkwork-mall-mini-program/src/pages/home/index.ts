@@ -89,6 +89,7 @@ interface HomeData {
   seckillOngoing: string;
   hotTitle: string;
   newTitle: string;
+  moreText: string;
   shopsTitle: string;
   footprintTitle: string;
   retryText: string;
@@ -126,8 +127,8 @@ const BANNERS: HomeBannerSource[] = [
 const QUICK_ENTRIES: HomeQuickSource[] = [
   { id: "category", labelKey: "home.quick.categories", capability: "storefront.mall.categories" },
   { id: "activity", labelKey: "home.quick.activity", capability: "storefront.mall.activity-list" },
-  { id: "new", labelKey: "home.quick.newArrival", capability: "storefront.mall.search", query: { q: "new" } },
-  { id: "hot", labelKey: "home.quick.hot", capability: "storefront.mall.search", query: { sort: "sales" } },
+  { id: "new", labelKey: "home.quick.newArrival", capability: "storefront.mall.search", query: { sort: "newest" } },
+  { id: "hot", labelKey: "home.quick.hot", capability: "storefront.mall.search" },
   { id: "coupon", labelKey: "home.quick.coupon", capability: "buyer.mall.coupons" },
   { id: "orders", labelKey: "home.quick.orders", capability: "buyer.mall.orders" },
 ];
@@ -176,6 +177,7 @@ Page({
     seckillOngoing: t("home.seckill.ongoing"),
     hotTitle: t("home.hot"),
     newTitle: t("home.newArrivals"),
+    moreText: t("home.more"),
     shopsTitle: t("home.sections.shops"),
     footprintTitle: t("home.sections.footprint"),
     retryText: t("home.retry"),
@@ -322,7 +324,7 @@ Page({
   },
 
   goMoreHot() {
-    this.openCapability("storefront.mall.search", { sort: "sales" });
+    this.openCapability("storefront.mall.search");
   },
 
   goMoreNew() {
@@ -398,7 +400,7 @@ Page({
         listCategories()
           .then((value) => ({ ok: true as const, value }))
           .catch((cause: unknown) => ({ ok: false as const, cause })),
-        listProducts({ page: 1, pageSize: 10, sort: "sales" })
+        listProducts({ page: 1, pageSize: 10 })
           .then((value) => ({ ok: true as const, value }))
           .catch((cause: unknown) => ({ ok: false as const, cause })),
         listProducts({ page: 1, pageSize: 10, sort: "newest" }).catch(() => null),

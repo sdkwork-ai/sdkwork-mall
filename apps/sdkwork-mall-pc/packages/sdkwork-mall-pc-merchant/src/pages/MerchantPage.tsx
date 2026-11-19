@@ -62,10 +62,10 @@ export function SdkworkMallMerchantDashboardPage() {
         </section>
       ) : null}
       <div className="sdkwork-mall-pc-stat-grid">
-        <article><span>今日销售额</span><strong>{String(metrics?.todaySales ?? "-")}</strong></article>
-        <article><span>待发货</span><strong>{String(metrics?.pendingShipment ?? "-")}</strong></article>
-        <article><span>售后处理中</span><strong>{String(metrics?.pendingAfterSales ?? "-")}</strong></article>
-        <article><span>商品预警</span><strong>{String(metrics?.productAlerts ?? "-")}</strong></article>
+        <article><span>今日销售额</span><strong>{String(metrics?.todaySales ?? metrics?.todaySalesAmountCny ?? metrics?.salesAmountCny ?? "-")}</strong></article>
+        <article><span>待发货</span><strong>{String(metrics?.pendingShipment ?? metrics?.pendingShipmentCount ?? "-")}</strong></article>
+        <article><span>售后处理中</span><strong>{String(metrics?.pendingAfterSales ?? metrics?.pendingAfterSalesCount ?? "-")}</strong></article>
+        <article><span>商品预警</span><strong>{String(metrics?.productAlerts ?? metrics?.lowStockProducts ?? metrics?.lowStockCount ?? "-")}</strong></article>
       </div>
       <nav className="sdkwork-mall-pc-quick-links">
         <Link to="/merchant/onboarding">入驻申请</Link>
@@ -235,17 +235,25 @@ export function SdkworkMallMerchantProductsPage() {
 
   async function reload() {
     setLoading(true);
-    const service = getSdkworkMerchantRemotePort();
-    const response = await service.shops.current.products.list({ page: 1, page_size: 50 });
-    const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
-    setProducts(
-      payload.items?.map((item) => ({
-        id: String(item.id ?? ""),
-        title: String(item.title ?? item.name ?? "商品"),
-        status: String(item.status ?? "draft"),
-      })) ?? [],
-    );
-    setLoading(false);
+    setMessage(null);
+    try {
+      const service = getSdkworkMerchantRemotePort();
+      const response = await service.shops.current.products.list({ page: 1, page_size: 50 });
+      const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+      setProducts(
+        payload.items?.map((item) => ({
+          id: String(item.id ?? ""),
+          title: String(item.title ?? item.name ?? "商品"),
+          // The authority may emit UPPER_SNAKE statuses; the action buttons
+          // compare lowercase lifecycle names.
+          status: String(item.status ?? "draft").toLowerCase(),
+        })) ?? [],
+      );
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "商品加载失败");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -278,7 +286,12 @@ export function SdkworkMallMerchantProductsPage() {
   return (
     <div>
       <h1>商品中心</h1>
-      {message ? <p>{message}</p> : null}
+      {message ? (
+        <div>
+          <p>{message}</p>
+          <Button onClick={() => void reload()} type="button">重试</Button>
+        </div>
+      ) : null}
       <Button
         onClick={async () => {
           const service = getSdkworkMerchantRemotePort();
@@ -345,21 +358,26 @@ export function SdkworkMallMerchantOrdersPage() {
 
   async function reload() {
     setLoading(true);
-    const service = getSdkworkMerchantRemotePort();
-    const response = await service.shops.current.orders.list({
-      page: 1,
-      page_size: 50,
-      status: filter === "all" ? undefined : filter,
-    });
-    const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
-    setOrders(
-      payload.items?.map((item) => ({
-        id: String(item.id ?? ""),
-        subject: typeof item.subject === "string" ? item.subject : undefined,
-        status: String(item.status ?? "unknown"),
-      })) ?? [],
-    );
-    setLoading(false);
+    try {
+      const service = getSdkworkMerchantRemotePort();
+      const response = await service.shops.current.orders.list({
+        page: 1,
+        page_size: 50,
+        status: filter === "all" ? undefined : filter,
+      });
+      const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+      setOrders(
+        payload.items?.map((item) => ({
+          id: String(item.id ?? ""),
+          subject: typeof item.subject === "string" ? item.subject : undefined,
+          status: String(item.status ?? "unknown").toLowerCase(),
+        })) ?? [],
+      );
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "订单加载失败");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -466,20 +484,27 @@ export function SdkworkMallMerchantInventoryPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [adjustQty, setAdjustQty] = useState<Record<string, string>>({});
+  const [error, setError] = useState<string | null>(null);
 
   async function reload() {
     setLoading(true);
-    const service = getSdkworkMerchantRemotePort();
-    const response = await service.shops.current.inventory.stocks.list({ page: 1, page_size: 50 });
-    const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
-    setStocks(
-      payload.items?.map((item) => ({
-        id: String(item.id ?? item.stockId ?? ""),
-        skuId: String(item.skuId ?? item.sku_id ?? "-"),
-        available: String(item.availableQuantity ?? item.available ?? "-"),
-      })) ?? [],
-    );
-    setLoading(false);
+    setError(null);
+    try {
+      const service = getSdkworkMerchantRemotePort();
+      const response = await service.shops.current.inventory.stocks.list({ page: 1, page_size: 50 });
+      const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+      setStocks(
+        payload.items?.map((item) => ({
+          id: String(item.id ?? item.stockId ?? ""),
+          skuId: String(item.skuId ?? item.sku_id ?? "-"),
+          available: String(item.availableQuantity ?? item.available ?? item.availableStock ?? "-"),
+        })) ?? [],
+      );
+    } catch (cause: unknown) {
+      setError(cause instanceof Error ? cause.message : "库存加载失败");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -511,6 +536,12 @@ export function SdkworkMallMerchantInventoryPage() {
   return (
     <div>
       <h1>库存管理</h1>
+      {error ? (
+        <div>
+          <p>{error}</p>
+          <Button onClick={() => void reload()} type="button">重试</Button>
+        </div>
+      ) : null}
       {stocks.length === 0 ? (
         <EmptyState description="商品 SKU 入库后将在此展示库存" title="暂无库存记录" />
       ) : (
@@ -558,17 +589,22 @@ export function SdkworkMallMerchantFulfillmentPage() {
 
   async function reload() {
     setLoading(true);
-    const service = getSdkworkMerchantRemotePort();
-    const response = await service.shops.current.orders.list({ status: "paid", page: 1, page_size: 20 });
-    const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
-    setOrders(
-      payload.items?.map((item) => ({
-        id: String(item.id ?? ""),
-        subject: typeof item.subject === "string" ? item.subject : undefined,
-        status: String(item.status ?? "unknown"),
-      })) ?? [],
-    );
-    setLoading(false);
+    try {
+      const service = getSdkworkMerchantRemotePort();
+      const response = await service.shops.current.orders.list({ status: "paid", page: 1, page_size: 20 });
+      const payload = unwrapSdkworkPaymentResponse(response) as { items?: Record<string, unknown>[] };
+      setOrders(
+        payload.items?.map((item) => ({
+          id: String(item.id ?? ""),
+          subject: typeof item.subject === "string" ? item.subject : undefined,
+          status: String(item.status ?? "unknown").toLowerCase(),
+        })) ?? [],
+      );
+    } catch (cause: unknown) {
+      setMessage(cause instanceof Error ? cause.message : "待发货订单加载失败");
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -929,7 +965,7 @@ export function SdkworkMallMerchantDataPage() {
       <div className="sdkwork-mall-pc-stat-grid">
         <article><span>访客数</span><strong>{String(metrics?.visitors ?? "-")}</strong></article>
         <article><span>转化率</span><strong>{String(metrics?.conversionRate ?? "-")}</strong></article>
-        <article><span>销售额</span><strong>{String(metrics?.todaySales ?? "-")}</strong></article>
+        <article><span>销售额</span><strong>{String(metrics?.todaySales ?? metrics?.todaySalesAmountCny ?? metrics?.salesAmountCny ?? "-")}</strong></article>
         <article><span>退款率</span><strong>{String(metrics?.refundRate ?? "-")}</strong></article>
       </div>
     </div>

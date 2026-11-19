@@ -59,9 +59,13 @@ export function configureSdkworkMallH5CheckoutBrick(): void {
       return methods.map((method) => ({ code: method.code, label: method.label }));
     },
     async createQuote(input) {
-      const quote = await createMallH5CheckoutQuote(
-        input.cartItemIds?.length ? { cartItemIds: input.cartItemIds } : {},
-      );
+      const quote = await createMallH5CheckoutQuote({
+        ...(input.cartItemIds?.length ? { cartItemIds: input.cartItemIds } : {}),
+        ...(input.couponId ? { couponId: input.couponId } : {}),
+        ...(input.deliveryMethod ? { deliveryMethod: input.deliveryMethod } : {}),
+        ...(input.usePoints != null ? { usePoints: input.usePoints } : {}),
+        ...(input.useWallet != null ? { useWallet: input.useWallet } : {}),
+      });
       return {
         ...(decimal(quote.originalAmountCny) ? { originalAmount: decimal(quote.originalAmountCny) } : {}),
         ...(decimal(quote.discountAmountCny) ? { discountAmount: decimal(quote.discountAmountCny) } : {}),

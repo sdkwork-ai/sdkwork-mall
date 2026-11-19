@@ -6,7 +6,7 @@ import {
   ReceiptText,
   Truck,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, EmptyState, LoadingBlock, StatusNotice } from "@sdkwork/ui-pc-react";
 import type { SdkworkOrderMessagesOverrides } from "../order-copy";
 import type { SdkworkOrderController } from "../order-controller";
@@ -74,7 +74,42 @@ function SdkworkOrderPageContent({
     locale,
     messages,
   });
+  async function handleCancel(orderId: string) {
+    // Cancelling is destructive and immediately releases stock; ask first.
+    if (typeof window !== "undefined" && !window.confirm("确定取消该订单吗？")) {
+      return;
+    }
+    try {
+      await controller.cancelOrder({ orderId });
+    } catch {
+      // The controller records `lastError`; the page renders it.
+    }
+  }
+
   const state = useSdkworkOrderControllerState(controller);
+  const navigate = useNavigate();
+
+  /**
+   * Order-list "去支付" settles the intent and hands off to the cashier result.
+   * The previous handler refreshed the list in place, so a real payment channel
+   * that returns an intent (rather than settling synchronously) never reached
+   * the result/polling surface.
+   */
+  async function handlePay(orderId: string) {
+    try {
+      const payment = await controller.payOrder({ orderId });
+      const query = new URLSearchParams({ orderId, status: "pending" });
+      if (payment.paymentId) {
+        query.set("paymentId", payment.paymentId);
+      }
+      if (payment.paymentMethod) {
+        query.set("paymentMethod", payment.paymentMethod);
+      }
+      navigate(`/payment/result?${query.toString()}`);
+    } catch {
+      // The controller records `lastError`; the page renders it.
+    }
+  }
   const {
     copy,
     formatCurrencyCny,
@@ -125,7 +160,7 @@ function SdkworkOrderPageContent({
   ];
 
   useEffect(() => {
-    if (!state.isBootstrapped && !state.isLoading) {
+    if (!state.isBootstrapped && !state.isLoading && !state.lastError) {
       void controller.bootstrap();
     }
   }, [controller, state.isBootstrapped, state.isLoading]);
@@ -279,14 +314,14 @@ function SdkworkOrderPageContent({
                       <>
                         <Button
                           disabled={state.isMutating}
-                          onClick={() => void controller.payOrder({ orderId: order.id })}
+                          onClick={() => void handlePay(order.id)}
                           type="button"
                         >
                           去支付
                         </Button>
                         <Button
                           disabled={state.isMutating}
-                          onClick={() => void controller.cancelOrder({ orderId: order.id })}
+                          onClick={() => void handleCancel(order.id)}
                           type="button"
                           variant="ghost"
                         >

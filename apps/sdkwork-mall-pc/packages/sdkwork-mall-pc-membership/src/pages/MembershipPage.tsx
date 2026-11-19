@@ -56,7 +56,7 @@ function SdkworkMembershipPageContent({
   ];
 
   useEffect(() => {
-    if (!state.isBootstrapped && !state.isLoading) {
+    if (!state.isBootstrapped && !state.isLoading && !state.lastError) {
       void controller.bootstrap();
     }
   }, [controller, state.isBootstrapped, state.isLoading]);
@@ -288,6 +288,12 @@ function SdkworkMembershipPageContent({
           {state.lastError ? (
             <StatusNotice title={copy.page.errorTitle} tone="danger">
               {state.lastError}
+            </StatusNotice>
+          ) : null}
+
+          {state.lastMessage ? (
+            <StatusNotice title="操作成功" tone="success">
+              {state.lastMessage}
             </StatusNotice>
           ) : null}
 

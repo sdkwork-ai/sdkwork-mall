@@ -25,15 +25,13 @@ const SHOP_PAGE_SIZE = 24;
 
 const SHOP_SORT_OPTIONS = [
   { label: "综合", value: "" },
-  { label: "销量", value: "sales" },
   { label: "价格升序", value: "price-asc" },
   { label: "价格降序", value: "price-desc" },
-  { label: "好评", value: "rating" },
-  { label: "上新", value: "created_at" },
+  { label: "上新", value: "newest" },
 ] as const;
 
 function formatCny(value: number | null): string {
-  return value == null ? "询价" : (formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "询价");
+  return value == null ? "暂无报价" : (formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "暂无报价");
 }
 
 function formatRating(rating: number | null | undefined): string {

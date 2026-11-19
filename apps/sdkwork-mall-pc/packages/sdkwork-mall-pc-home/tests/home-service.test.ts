@@ -102,8 +102,9 @@ describe("loadMallHomeSnapshot", () => {
                 {
                   id: "spu-1",
                   title: "星野 X1 Pro",
-                  salePrice: "4299.00",
-                  listPrice: "4699.00",
+                  minorUnitExponent: "2",
+                  salePriceMinor: "429900",
+                  listPriceMinor: "469900",
                   imageUrl: "https://cdn.example.com/p.png",
                 },
               ],
@@ -115,12 +116,53 @@ describe("loadMallHomeSnapshot", () => {
     const snapshot = await loadMallHomeSnapshot();
 
     expect(snapshot.isEmpty).toBe(false);
-    expect(snapshot.hotProducts[0]).toMatchObject({
+    expect(snapshot.newProducts[0]).toMatchObject({
       id: "spu-1",
       priceCny: 4299,
       listPriceCny: 4699,
       title: "星野 X1 Pro",
     });
     expect(snapshot.featuredShops[0]).toMatchObject({ id: "shop-1", name: "自营旗舰店" });
+  });
+
+  it("reads the product shelf once and splits it into new and curated shelves", async () => {
+    const listSpus = vi.fn(async () => ({
+      data: {
+        items: Array.from({ length: 12 }, (_, index) => ({
+          id: `spu-${index + 1}`,
+          title: `商品 ${index + 1}`,
+        })),
+      },
+    }));
+    configureSdkworkHomeRemotePort({
+      listCategories: async () => ({ items: [] }),
+      listShops: async () => ({ items: [] }),
+      listSpus,
+    });
+
+    const snapshot = await loadMallHomeSnapshot();
+
+    // The catalog cannot sort by sales/rating, so two sorted reads produced the
+    // same products. One read feeds both shelves without duplication.
+    expect(listSpus).toHaveBeenCalledTimes(1);
+    expect(listSpus).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, page_size: 16, sort: "newest" }),
+    );
+    expect(snapshot.newProducts.map((product) => product.id)).toEqual([
+      "spu-1",
+      "spu-2",
+      "spu-3",
+      "spu-4",
+      "spu-5",
+      "spu-6",
+      "spu-7",
+      "spu-8",
+    ]);
+    expect(snapshot.hotProducts.map((product) => product.id)).toEqual([
+      "spu-9",
+      "spu-10",
+      "spu-11",
+      "spu-12",
+    ]);
   });
 });

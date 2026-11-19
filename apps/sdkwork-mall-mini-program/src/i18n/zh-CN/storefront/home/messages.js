@@ -6,6 +6,7 @@ module.exports = {
     loading: "加载中...",
     categories: "分类导航",
     hot: "热卖推荐",
+    more: "更多 ›",
     sold: "已售 {{count}}",
     error: "首页加载失败",
     retry: "重试",

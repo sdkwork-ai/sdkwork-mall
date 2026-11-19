@@ -218,13 +218,29 @@ export async function listMallH5SelectableCoupons(): Promise<MallH5SelectableCou
     .filter((coupon) => coupon.id);
 }
 
+export interface MallH5CheckoutQuoteInput {
+  cartItemIds?: string[];
+  couponId?: string;
+  deliveryMethod?: string;
+  giftCardCode?: string;
+  needInvoice?: boolean;
+  usePoints?: boolean;
+  useWallet?: boolean;
+}
+
 export async function createMallH5CheckoutQuote(
-  input: { cartItemIds?: string[] } = {},
+  input: MallH5CheckoutQuoteInput = {},
 ): Promise<MallH5CheckoutQuote> {
   const remote = getSdkworkCommerceService();
-  const sessionResponse = await remote.checkout.sessions.create(
-    input.cartItemIds?.length ? { cartItemIds: input.cartItemIds } : {},
-  );
+  const sessionResponse = await remote.checkout.sessions.create({
+    ...(input.cartItemIds?.length ? { cartItemIds: input.cartItemIds } : {}),
+    ...(input.couponId ? { couponId: input.couponId } : {}),
+    ...(input.deliveryMethod ? { deliveryMethod: input.deliveryMethod } : {}),
+    ...(input.giftCardCode ? { giftCardCode: input.giftCardCode } : {}),
+    ...(input.needInvoice != null ? { needInvoice: input.needInvoice } : {}),
+    ...(input.usePoints != null ? { usePoints: input.usePoints } : {}),
+    ...(input.useWallet != null ? { useWallet: input.useWallet } : {}),
+  });
   const session = unwrapSdkworkCommerceResponse<Record<string, unknown>>(sessionResponse) ?? {};
   const sessionId = readId(session.id ?? session.sessionId ?? session.checkoutSessionId);
   let quoteId = readId(session.quoteId ?? session.checkoutQuoteId);
@@ -248,7 +264,15 @@ export async function submitMallH5CheckoutOrder(
   input: MallH5CheckoutSubmitInput,
 ): Promise<MallH5CheckoutSubmitResult> {
   const remote = getSdkworkCommerceService();
-  const quote = await createMallH5CheckoutQuote({ cartItemIds: input.cartItemIds });
+  const quote = await createMallH5CheckoutQuote({
+    cartItemIds: input.cartItemIds,
+    couponId: input.couponId,
+    deliveryMethod: input.deliveryMethod,
+    giftCardCode: input.giftCardCode,
+    needInvoice: input.needInvoice,
+    usePoints: input.usePoints,
+    useWallet: input.useWallet,
+  });
 
   if (input.addressId) {
     // Generated signature: create(addressId, body) — the address id is a path
@@ -259,11 +283,14 @@ export async function submitMallH5CheckoutOrder(
   const orderResponse = await remote.checkout.sessions.orders.create(quote.sessionId, {
     buyerRemark: input.buyerRemark,
     cartItemIds: input.cartItemIds?.length ? input.cartItemIds : undefined,
+    couponId: input.couponId,
     deliveryMethod: input.deliveryMethod,
     giftCardCode: input.giftCardCode,
     invoiceForm: input.needInvoice ? input.invoiceForm : undefined,
     needInvoice: input.needInvoice ?? false,
     quoteId: quote.quoteId,
+    usePoints: input.usePoints,
+    useWallet: input.useWallet,
   });
   const order = unwrapSdkworkCommerceResponse<Record<string, unknown>>(orderResponse) ?? {};
   const orderId = readId(order.id ?? order.orderId);

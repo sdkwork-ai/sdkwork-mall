@@ -313,11 +313,24 @@ export function SdkworkMallPcStorefrontShell({
   );
 }
 
+/**
+ * Console rails list destinations, not resources.
+ *
+ * A dynamic route (`/buyer/orders/:orderId`) is reached from its list, never
+ * from the rail: rendering it produced a literal `:orderId` link that fetched a
+ * non-existent order and could wedge the detail page on its skeleton.
+ */
+function isConsoleNavRoute(route: SdkworkMallPcRouteContribution): boolean {
+  return !route.path.includes(":");
+}
+
 export function SdkworkMallPcBuyerShell({
   children,
   runtime,
 }: SdkworkMallPcShellProps) {
-  const buyerRoutes = runtime.routes.filter((route) => route.surface === "buyer");
+  const buyerRoutes = runtime.routes.filter(
+    (route) => route.surface === "buyer" && isConsoleNavRoute(route),
+  );
 
   return (
     <div className="sdkwork-mall-pc-console">
@@ -351,7 +364,9 @@ export function SdkworkMallPcMerchantShell({
   children,
   runtime,
 }: SdkworkMallPcShellProps) {
-  const merchantRoutes = runtime.routes.filter((route) => route.surface === "merchant");
+  const merchantRoutes = runtime.routes.filter(
+    (route) => route.surface === "merchant" && isConsoleNavRoute(route),
+  );
 
   return (
     <div className="sdkwork-mall-pc-console">
@@ -456,7 +471,9 @@ export function SdkworkMallPcAdminShell({
   const adminRoutes = runtime.routes.filter((route) => route.surface === "backend-admin");
   const routesById = new Map(adminRoutes.map((route) => [route.id, route]));
   const groupedIds = new Set(SDKWORK_ADMIN_MENU_SECTIONS.flatMap((section) => [...section.routeIds]));
-  const ungroupedRoutes = adminRoutes.filter((route) => !groupedIds.has(route.id));
+  const ungroupedRoutes = adminRoutes.filter(
+    (route) => !groupedIds.has(route.id) && isConsoleNavRoute(route),
+  );
 
   return (
     <div className="sdkwork-mall-pc-app">
@@ -482,7 +499,10 @@ export function SdkworkMallPcAdminShell({
           {SDKWORK_ADMIN_MENU_SECTIONS.map((section) => {
             const sectionRoutes = section.routeIds
               .map((routeId) => routesById.get(routeId))
-              .filter((route): route is SdkworkMallPcRouteContribution => Boolean(route));
+              .filter(
+                (route): route is SdkworkMallPcRouteContribution =>
+                  Boolean(route) && isConsoleNavRoute(route as SdkworkMallPcRouteContribution),
+              );
             if (sectionRoutes.length === 0) {
               return null;
             }

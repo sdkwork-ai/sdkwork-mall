@@ -35,13 +35,14 @@ const H5_CHAT_PAGE = "packages/sdkwork-mall-h5-im/src/pages/ChatPage.tsx";
 
 test("the home storefront keeps the H5 floors", () => {
   const h5Home = read(h5, H5_HOME_SERVICE);
-  // H5 loads hot + newest product pages, featured shops and local footprint.
-  assert.match(h5Home, /sort: "sales"/u);
+  // H5 loads the default hot page + newest products, shops and local footprint.
+  // The authority ignores `sort: "sales"`; neither root may claim that ranking.
+  assert.doesNotMatch(h5Home, /sort: "sales"/u);
   assert.match(h5Home, /sort: "newest"/u);
   assert.match(h5Home, /shops\.list/u);
 
   const mpHome = read(mp, "src/pages/home/index.ts");
-  assert.match(mpHome, /sort: "sales"/u, "hot floor wired to the same sort");
+  assert.doesNotMatch(mpHome, /sort: "sales"/u, "hot floor uses the default server order");
   assert.match(mpHome, /sort: "newest"/u, "new-arrivals floor wired to the same sort");
   assert.match(mpHome, /listShops/u, "featured-shop floor");
   assert.match(mpHome, /readFootprint/u, "local footprint chips");

@@ -57,7 +57,7 @@ function SdkworkCommercePageContent({
   const { copy } = useSdkworkCommerceIntl();
 
   useEffect(() => {
-    if (!state.isBootstrapped && !state.isLoading) {
+    if (!state.isBootstrapped && !state.isLoading && !state.lastError) {
       void controller.bootstrap();
     }
   }, [controller, state.isBootstrapped, state.isLoading]);

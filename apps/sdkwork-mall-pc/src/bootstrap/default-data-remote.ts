@@ -159,7 +159,7 @@ const CMS_PRESET_STORAGE_KEY = "sdkwork-mall-pc-default-data:cms-preset";
  * only the entities the new dataset introduced. Without it an upgraded app
  * would keep showing whatever the previous dataset seeded.
  */
-export const MALL_DEFAULT_DATA_REVISION = "2026-11-18-taxonomy-4";
+export const MALL_DEFAULT_DATA_REVISION = "2026-11-19-sku-activation";
 
 const DATASET_REVISION_STORAGE_KEY = "sdkwork-mall-pc-default-data:revision";
 
@@ -286,6 +286,9 @@ export function createSdkworkMallPcDefaultDataPort(
         catalog.products.publish(productId, expectedVersion),
       listSkus: () => collectAllPages((query) => catalog.skus.list(query), catalogPageSize),
       createSku: (body) => catalog.skus.create(body),
+      retrieveSku: (skuId) => catalog.skus.retrieve(skuId),
+      updateSku: (skuId, body, expectedVersion) =>
+        catalog.skus.update(skuId, body, expectedVersion),
     },
     shops: {
       listShops: () =>

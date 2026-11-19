@@ -86,5 +86,6 @@ module.exports = {
     },
     submit: "提交订单",
     submitting: "提交中...",
+    trust: "微信安全支付 · 平台售后保障 · 7 天无理由退换",
   },
 };

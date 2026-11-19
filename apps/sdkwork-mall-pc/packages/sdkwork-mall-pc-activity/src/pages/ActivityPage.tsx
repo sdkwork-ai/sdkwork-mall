@@ -52,7 +52,7 @@ function activityTypeBadgeVariant(type: MallActivityType): "default" | "secondar
 }
 
 function formatCny(value: number | null): string {
-  return value == null ? "询价" : (formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "询价");
+  return value == null ? "暂无报价" : (formatMoney(value, { currency: "CNY", locale: "en-US", mode: "symbol" }) ?? "暂无报价");
 }
 
 /** 倒计时组件 */

@@ -62,7 +62,7 @@ function SdkworkLogisticsPageContent({
   const shipmentId = searchParams.get("shipmentId") ?? undefined;
 
   useEffect(() => {
-    if (!state.isBootstrapped && !state.isLoading) {
+    if (!state.isBootstrapped && !state.isLoading && !state.lastError) {
       void controller.bootstrap({ orderId, shipmentId });
     }
   }, [controller, orderId, shipmentId, state.isBootstrapped, state.isLoading]);

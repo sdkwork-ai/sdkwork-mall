@@ -21,9 +21,9 @@ import { resolveSdkworkMallH5CategoryVisual } from "@sdkwork/mall-h5-commons/cat
 
 const SORT_OPTIONS = [
   { code: "", label: "综合" },
-  { code: "sales", label: "销量" },
-  { code: "price_asc", label: "价格↑" },
-  { code: "price_desc", label: "价格↓" },
+  { code: "price-asc", label: "价格↑" },
+  { code: "price-desc", label: "价格↓" },
+  { code: "newest", label: "上新" },
 ] as const;
 
 const HOT_SEARCH_KEYWORDS = ["手机", "笔记本", "大米", "人体工学椅", "新品", "旗舰"] as const;

@@ -133,7 +133,7 @@
   <view wx:if="{{hotProducts.length}}" class="home-products">
     <view class="home-products-head">
       <view class="mp-card-title home-products-title">{{hotTitle}}</view>
-      <view class="home-more" bindtap="goMoreHot">更多 ›</view>
+      <view class="home-more" bindtap="goMoreHot">{{moreText}}</view>
     </view>
     <view class="mp-product-grid">
       <view
@@ -161,7 +161,7 @@
   <view wx:if="{{newProducts.length}}" class="home-products">
     <view class="home-products-head">
       <view class="mp-card-title home-products-title">{{newTitle}}</view>
-      <view class="home-more" bindtap="goMoreNew">更多 ›</view>
+      <view class="home-more" bindtap="goMoreNew">{{moreText}}</view>
     </view>
     <view class="mp-product-grid">
       <view

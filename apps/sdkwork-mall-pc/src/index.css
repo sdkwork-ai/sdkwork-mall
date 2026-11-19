@@ -599,6 +599,11 @@ a {
   align-items: start;
 }
 
+/* 无推荐榜时不要留下 220px 的空侧栏，否则商品列表被挤在窄列里。 */
+.sdkwork-mall-pc-search-layout.is-single-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 @media (max-width: 900px) {
   .sdkwork-mall-pc-search-layout {
     grid-template-columns: 1fr;
@@ -1691,6 +1696,39 @@ a {
   border-color: var(--sdk-color-brand-primary, #2563eb);
   color: var(--sdk-color-brand-primary, #2563eb);
   font-weight: 600;
+}
+
+.sdkwork-mall-pc-pdp-sku-option:disabled {
+  color: #9ca3af;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.sdkwork-mall-pc-pdp-sku-groups {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.sdkwork-mall-pc-pdp-sku-axis {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.sdkwork-mall-pc-pdp-sku-axis-label {
+  flex: 0 0 4.5rem;
+  padding-top: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--sdk-color-text-secondary, #6b7280);
+}
+
+.sdkwork-mall-pc-pdp-sku-summary {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--sdk-color-text-secondary, #6b7280);
 }
 
 .sdkwork-mall-pc-pdp-actions {

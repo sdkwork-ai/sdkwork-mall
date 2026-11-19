@@ -19,6 +19,8 @@ export interface SdkworkWalletControllerState {
   isRechargeOpen: boolean;
   isWithdrawOpen: boolean;
   lastError?: string;
+  lastMessage?: string;
+  lastPaymentUrl?: string;
   overview: SdkworkWalletOverview;
 }
 
@@ -81,10 +83,15 @@ export function createSdkworkWalletController(
     return service.getOverview();
   }
 
-  async function runMutation<TResult>(callback: () => Promise<TResult>): Promise<TResult> {
+  async function runMutation<TResult>(
+    callback: () => Promise<TResult>,
+    successMessage?: string,
+  ): Promise<TResult> {
     setState({
       isMutating: true,
       lastError: undefined,
+      lastMessage: undefined,
+      lastPaymentUrl: undefined,
     });
 
     try {
@@ -93,6 +100,7 @@ export function createSdkworkWalletController(
       setState({
         isBootstrapped: true,
         isMutating: false,
+        lastMessage: successMessage,
         overview,
       });
       return result;
@@ -158,15 +166,22 @@ export function createSdkworkWalletController(
     },
 
     async rechargePoints(input) {
-      const result = await runMutation(() => service.rechargePoints(input));
+      const result = await runMutation(
+        () => service.rechargePoints(input),
+        "充值订单已创建，请按所选支付方式完成支付",
+      );
       setState({
         isRechargeOpen: false,
+        lastPaymentUrl: result.paymentUrl,
       });
       return result;
     },
 
     async withdrawCash(input) {
-      const result = await runMutation(() => service.withdrawCash(input));
+      const result = await runMutation(
+        () => service.withdrawCash(input),
+        "提现申请已提交，等待平台处理",
+      );
       setState({
         isWithdrawOpen: false,
       });

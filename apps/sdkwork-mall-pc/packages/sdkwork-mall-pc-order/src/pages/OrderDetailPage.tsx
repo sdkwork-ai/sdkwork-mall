@@ -212,7 +212,12 @@ function SdkworkOrderDetailPageContent() {
         {detail.status === "pending-payment" ? (
           <Button
             disabled={mutating}
-            onClick={() => void runAction(() => createSdkworkOrderService({}).cancelOrder({ orderId: detail.id }))}
+            onClick={() => {
+              if (typeof window !== "undefined" && !window.confirm("确定取消该订单吗？")) {
+                return;
+              }
+              void runAction(() => createSdkworkOrderService({}).cancelOrder({ orderId: detail.id }));
+            }}
             size="lg"
             type="button"
             variant="ghost"
@@ -236,7 +241,9 @@ function SdkworkOrderDetailPageContent() {
             </Button>
           </>
         ) : null}
-        {detail.status === "completed" ? (
+        {detail.status === "pending-shipment" ||
+        detail.status === "pending-receipt" ||
+        detail.status === "completed" ? (
           <Link to={`/buyer/after-sales?orderId=${encodeURIComponent(detail.id)}`}>
             <Button type="button" variant="outline">申请售后</Button>
           </Link>

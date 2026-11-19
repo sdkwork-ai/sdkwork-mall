@@ -53,6 +53,9 @@ export function configureSdkworkMallPcStorefrontCommerceRemotePorts(): void {
     createCartItem(body) {
       return commerce().cart.items.create(body);
     },
+    updateCartItem(cartItemId, body) {
+      return commerce().cart.items.update(cartItemId, body);
+    },
     listPromotionOffers(query) {
       return commerce().promotions.offers.list(query);
     },

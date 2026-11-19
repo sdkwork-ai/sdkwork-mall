@@ -116,7 +116,24 @@ function createFakeCommerce() {
         return Promise.resolve({ item: { id: productId, version: expectedVersion + 1 } });
       },
       listSkus: () => list(state.skus),
-      createSku: (body: Record<string, unknown>) => Promise.resolve(insert(state.skus, body, "sku")),
+      createSku: (body: Record<string, unknown>) =>
+        Promise.resolve(
+          insert(state.skus, { ...body, status: "draft", salesStatus: "inactive" }, "sku"),
+        ),
+      retrieveSku: (skuId: string) => {
+        const record = state.skus.find((row) => row.id === skuId);
+        return record ? Promise.resolve({ item: record }) : Promise.reject(new Error(`unknown sku ${skuId}`));
+      },
+      updateSku: (skuId: string, body: Record<string, unknown>, expectedVersion: number) => {
+        const record = state.skus.find((row) => row.id === skuId);
+        if (!record) {
+          return Promise.reject(new Error(`unknown sku ${skuId}`));
+        }
+        Object.assign(record, body);
+        record.salesStatus = record.status === "active" ? "active" : "inactive";
+        record.version = expectedVersion + 1;
+        return Promise.resolve({ item: record });
+      },
     },
     shops: {
       listShops: () => list(state.shops),
@@ -229,6 +246,9 @@ describe("fresh install storefront", () => {
     // 4. Every seeded SPU is published, so storefront listings are not dead ends.
     expect(state.products.every((row) => row.status === "active")).toBe(true);
     expect(state.skus.length).toBeGreaterThan(state.products.length);
+    // 5. Every seeded SKU is active too: a published product whose SKUs stayed
+    //    draft renders a PDP with an empty spec picker.
+    expect(state.skus.every((row) => row.status === "active" && row.salesStatus === "active")).toBe(true);
   });
 
   it("is idempotent: a second run creates nothing and the storefront stays populated", async () => {

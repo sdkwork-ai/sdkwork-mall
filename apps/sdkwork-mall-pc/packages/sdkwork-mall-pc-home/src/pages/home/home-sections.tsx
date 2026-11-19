@@ -166,8 +166,8 @@ export function HomeFloor({
     floor.productQuery && floor.productQuery !== "new"
       ? `/search?q=${encodeURIComponent(floor.productQuery)}`
       : isNew
-        ? "/search?sort=created_at"
-        : "/search?sort=sales";
+        ? "/search?sort=newest"
+        : "/search";
   const FloorIcon = resolveFloorIcon(floor.title);
   if (!loading && products.length < 3) {
     return null;

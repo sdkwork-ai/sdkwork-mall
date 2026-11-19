@@ -85,6 +85,7 @@ describe("H5 checkout order payload", () => {
       body: {
         buyerRemark: "请轻放",
         cartItemIds: ["ci-1"],
+        couponId: "coupon-1",
         deliveryMethod: "sf",
         giftCardCode: "GC-12345678",
         invoiceForm: {
@@ -95,6 +96,8 @@ describe("H5 checkout order payload", () => {
         },
         needInvoice: true,
         quoteId: "quote-1",
+        usePoints: true,
+        useWallet: true,
       },
     });
     expect(result.orderId).toBe("order-1");

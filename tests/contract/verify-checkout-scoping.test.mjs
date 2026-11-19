@@ -28,7 +28,9 @@ const ROOTS = [
     checkoutPage: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-cart/src/pages/CartPage.tsx",
     checkoutPatterns: ['params.get("items")'],
     quoteService: "apps/sdkwork-mall-pc/packages/sdkwork-mall-pc-cart/src/cart-service.ts",
-    quotePatterns: ["createMallCheckoutQuote(input.cartItemIds)", "cartItemIds: input.cartItemIds"],
+    // The quote carries the scoped lines *and* the offsets (coupon/wallet/points)
+    // so the order is created from the amount the checkout page displayed.
+    quotePatterns: ["createMallCheckoutQuote({", "cartItemIds: input.cartItemIds"],
   },
   {
     name: "h5",
