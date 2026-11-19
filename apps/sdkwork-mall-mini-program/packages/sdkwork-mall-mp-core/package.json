@@ -19,7 +19,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@sdkwork/commerce-app-sdk": "workspace:*",
+    "@sdkwork/cloudrouter-app-sdk": "workspace:*",
     "@sdkwork/iam-app-sdk": "workspace:*",
     "@sdkwork/iam-mp-core": "workspace:*",
     "@sdkwork/im-app-sdk": "workspace:*",

@@ -10,6 +10,7 @@ import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
 import { asNumber, asRecordList, asString, type MpRecord } from "../types/common";
 import { readCommercePayload } from "./commerce-payload";
+import { readPageInfo } from "./page-info";
 
 export interface MpInvoice {
   id: string;
@@ -31,15 +32,20 @@ function invoices() {
   return getMallMpRuntime().commerceClient.invoices;
 }
 
-export async function listInvoices(): Promise<MpInvoice[]> {
-  const payload = await readCommercePayload(invoices().mine.list({ page: 1, pageSize: 50 }));
-  return asRecordList(payload.items).map((row: MpRecord) => ({
-    id: asString(row, ["id", "invoiceId"]),
-    title: asString(row, ["title", "invoiceTitle", "header"], "发票"),
-    type: asString(row, ["titleType", "type", "kind"], "personal"),
-    status: asString(row, ["status", "statusName"], "pending"),
-    amountCny: asNumber(row, ["amountCny", "amount", "totalAmount"]),
-  }));
+export async function listInvoices(page = 1): Promise<{ hasMore: boolean; items: MpInvoice[] }> {
+  const pageSize = 20;
+  const payload = await readCommercePayload(invoices().mine.list({ page, pageSize }));
+  const rows = asRecordList(payload.items);
+  return {
+    hasMore: readPageInfo(payload, rows.length, page).hasMore,
+    items: rows.map((row: MpRecord) => ({
+      id: asString(row, ["id", "invoiceId"]),
+      title: asString(row, ["title", "invoiceTitle", "header"], "发票"),
+      type: asString(row, ["titleType", "type", "kind"], "personal"),
+      status: asString(row, ["status", "statusName"], "pending"),
+      amountCny: asNumber(row, ["amountCny", "amount", "totalAmount"]),
+    })),
+  };
 }
 
 export async function createInvoice(input: MpInvoiceCreateInput): Promise<MpRecord> {

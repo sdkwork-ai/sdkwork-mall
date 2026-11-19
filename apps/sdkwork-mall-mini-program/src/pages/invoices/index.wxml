@@ -1,11 +1,17 @@
 <view class="page-invoices">
+  <view wx:if="{{needLogin}}" class="mp-card invoices-guest">
+    <view class="mp-card-title">登录后管理发票</view>
+    <view class="mp-muted">开票申请与发票记录需要登录后查看。</view>
+    <button class="mp-btn mp-btn-primary invoices-guest-action" bindtap="goLogin">立即登录</button>
+  </view>
+
   <view wx:if="{{loading}}" class="mp-loading">加载发票...</view>
   <view wx:if="{{message}}" class="mp-error">
     <text>{{message}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
   </view>
 
-  <block wx:if="{{!loading}}">
+  <block wx:if="{{!loading && !needLogin}}">
     <view class="mp-card">
       <view class="mp-card-title">申请开票</view>
       <view class="inv-field">
@@ -45,6 +51,8 @@
         </view>
         <view class="mp-muted">{{item.statusText}}</view>
       </view>
+      <view wx:if="{{loadingMore}}" class="mp-loading">加载更多发票...</view>
+      <view wx:elif="{{invoices.length > 0 && !hasMore}}" class="mp-muted invoices-end">没有更多发票了</view>
     </view>
   </block>
 

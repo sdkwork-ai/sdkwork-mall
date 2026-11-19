@@ -29,6 +29,7 @@
         <view class="buyer-order-entry-label">{{item.label}}</view>
       </view>
     </view>
+    <view wx:if="{{statsUnavailable}}" class="mp-muted buyer-stats-note">订单数量暂不可用，点进订单列表查看</view>
   </view>
 
   <view class="mp-card">

@@ -21,9 +21,9 @@ import { createClient as createImAppClient, type SdkworkAppClient as ImAppClient
 import { ImSdkClient } from "@sdkwork/im-sdk";
 import type { MpSocket } from "@sdkwork/mall-mp-host";
 import {
-  createCommerceAppSdkClient,
-  type CommerceAppSdkClient,
-} from "@sdkwork/commerce-app-sdk";
+  createClient as createCloudRouterDomainsClient,
+  type CloudRouterCommerceAppClient,
+} from "@sdkwork/cloudrouter-app-sdk/domains";
 import { createClient as createOrderAppClient, type SdkworkAppClient as OrderAppClient } from "@sdkwork/order-app-sdk";
 import { createClient as createPartnerAppClient, type SdkworkAppClient as PartnerAppClient } from "@sdkwork/partner-app-sdk";
 import { uuid } from "@sdkwork/utils";
@@ -35,7 +35,7 @@ export const MP_WECHAT_PROVIDER_CODE = "wechat_mini_program" as const;
 
 export type IamAppSdkClient = IamAppClient;
 export type ImAppSdkClient = ImAppClient;
-export type MpCommerceAppSdkClient = CommerceAppSdkClient;
+export type MpCommerceAppSdkClient = CloudRouterCommerceAppClient;
 export type MpOrderAppSdkClient = OrderAppClient;
 export type MpPartnerAppSdkClient = PartnerAppClient;
 /**
@@ -107,19 +107,21 @@ export function createMpImAppSdkClient(options: MpSdkClientOptions): ImAppSdkCli
 /**
  * Builds the mall commerce app SDK client.
  *
- * The generated commerce SDK owns the storefront domain groups (catalog, cart,
- * checkout, payments, promotions, addresses, wallet, memberships, shops,
- * after-sales, invoices). Capability packages receive this client through the
- * runtime; they never construct it or reach the wire themselves.
+ * Commerce is the federated Cloud Router commerce facade
+ * (`@sdkwork/cloudrouter-app-sdk/domains`); the retired standalone commerce
+ * transport package must not be reintroduced. The facade groups the generated
+ * commerce transports under `.commerce`, which is the namespace the capability
+ * services consume as `commerceClient.catalog` / `.cart` / ….
  */
 export function createMpCommerceAppSdkClient(options: MpSdkClientOptions): MpCommerceAppSdkClient {
-  return createCommerceAppSdkClient({
+  const client = createCloudRouterDomainsClient({
     authMode: "dual-token",
     baseUrl: normalizeBaseUrl(options.baseUrl),
     platform: "mini-program",
     ...(options.timeoutMs !== undefined ? { timeout: options.timeoutMs } : {}),
     tokenManager: options.tokenManager,
   });
+  return client.commerce;
 }
 
 /**

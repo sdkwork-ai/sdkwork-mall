@@ -47,3 +47,20 @@
   font-size: 28rpx;
   font-weight: 600;
 }
+
+.invoices-guest {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 40rpx 30rpx;
+}
+
+.invoices-guest-action {
+  align-self: flex-start;
+}
+
+.invoices-end {
+  text-align: center;
+  padding: 20rpx 0 0;
+  font-size: 24rpx;
+}

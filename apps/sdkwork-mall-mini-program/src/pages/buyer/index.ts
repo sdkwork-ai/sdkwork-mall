@@ -60,6 +60,8 @@ interface BuyerData {
   /** First character of the display name, rendered in the avatar circle. */
   avatarText: string;
   orderEntries: Array<{ status: string; label: string; icon: string; count: string | number }>;
+  /** True when the order statistics read failed; counts render as unavailable. */
+  statsUnavailable: boolean;
   assetLinks: Array<{ label: string; capability: string; icon: string }>;
   quickLinks: Array<{ label: string; capability: string; icon: string }>;
   accountLinks: Array<{ label: string; capability: string }>;
@@ -93,6 +95,7 @@ Page({
     displayName: t("buyerHub.userFallback"),
     avatarText: t("buyerHub.userFallback").slice(0, 1),
     orderEntries: resolveOrderEntries(),
+    statsUnavailable: false,
     assetLinks: resolveLinks(ASSET_LINKS),
     quickLinks: resolveLinks(QUICK_LINKS),
     accountLinks: resolveLinks(ACCOUNT_LINKS),
@@ -158,9 +161,13 @@ Page({
       };
       this.setData({
         orderEntries: resolveOrderEntries(countFor),
+        statsUnavailable: false,
       });
     } catch (cause) {
-      // 统计为增强信息，失败时保持空态。
+      // Counts are an enhancement, but a silent failure made every badge look
+      // like a real zero. Say the statistics are unavailable instead.
+      console.warn("[sdkwork-mall] order statistics unavailable", cause);
+      this.setData({ statsUnavailable: true, orderEntries: resolveOrderEntries() });
     }
   },
 

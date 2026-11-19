@@ -309,7 +309,8 @@
   hand-rolled surfaces now project SDKWork blocks:
   - `@sdkwork/mall-mp-core` builds both clients once, over the host `fetch`
     adapter and the shared token manager: `createMpCommerceAppSdkClient`
-    (`@sdkwork/commerce-app-sdk`, the mall's generated facade) and
+    (`@sdkwork/cloudrouter-app-sdk/domains`; migrated off the retired standalone
+    commerce transport on 2026-11-19) and
     `createMpOrderAppSdkClient` (`@sdkwork/order-app-sdk`, the same operation set
     the H5 client reaches through `@sdkwork/order-service`). The runtime exposes
     them as `commerceClient` / `orderClient`; a seam helper

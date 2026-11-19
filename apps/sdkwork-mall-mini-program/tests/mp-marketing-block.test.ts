@@ -103,7 +103,7 @@ describe("marketing block projections", () => {
     const detail = await retrieveShop("s-1");
     const activities = await listActivities();
 
-    expect(invoiceRows[0]).toMatchObject({ id: "inv-1", status: "issued" });
+    expect(invoiceRows.items[0]).toMatchObject({ id: "inv-1", status: "issued" });
     expect(shopRows[0]).toMatchObject({ id: "s-1", name: "官方旗舰店", rating: 4.9 });
     expect(detail?.products[0]).toMatchObject({ id: "p-1", priceCny: 399 });
     expect(activities[0]).toMatchObject({ id: "o-1", phase: "active" });

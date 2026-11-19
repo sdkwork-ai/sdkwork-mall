@@ -160,3 +160,8 @@
   color: #9ca3af;
   line-height: 1;
 }
+
+.buyer-stats-note {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+}

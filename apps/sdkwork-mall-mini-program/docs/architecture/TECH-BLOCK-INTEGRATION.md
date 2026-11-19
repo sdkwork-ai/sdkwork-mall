@@ -22,11 +22,12 @@ mini program still hand-rolls; those are the remaining migration work.
 
 ### Commerce blocks (available, partially consumed)
 
-The repository already depends on the generated commerce app SDK
-(`sdks/sdkwork-commerce-app-sdk`, consumed through `@sdkwork/mall-commerce-service`)
-and the T1 domain SDKs declared in `pnpm-workspace.yaml`. `@sdkwork/mall-mp-core`
-now builds both clients once (over the host `fetch` adapter and the shared token
-manager) and exposes them as `runtime.commerceClient` and `runtime.orderClient`.
+The repository consumes the federated commerce facade
+(`@sdkwork/cloudrouter-app-sdk/domains`, generated under
+`sdks/cloudrouter-app-sdk`) and the T1 domain SDKs declared in
+`pnpm-workspace.yaml`. `@sdkwork/mall-mp-core` builds the commerce and order
+clients once (over the host `fetch` adapter and the shared token manager) and
+exposes them as `runtime.commerceClient` and `runtime.orderClient`.
 
 **Migrated** (no raw wire path left): `catalog`, `orders`, `cart`, `checkout`, `payments`
 (payment intent + method list), `promotions` (coupon list/apply), `addresses`

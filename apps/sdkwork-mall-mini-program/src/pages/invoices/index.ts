@@ -11,6 +11,7 @@ import {
   type MpInvoice,
 } from "../../services/invoice-service";
 import { isLoggedIn } from "../../services/session";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { formatCny } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
 
@@ -31,6 +32,8 @@ interface InvoiceRow {
 
 interface InvoicesData {
   loading: boolean;
+  loadingMore: boolean;
+  needLogin: boolean;
   busy: boolean;
   message: string;
   toast: string;
@@ -41,6 +44,8 @@ interface InvoicesData {
   email: string;
   orderId: string;
   invoices: InvoiceRow[];
+  hasMore: boolean;
+  _page: number;
   _toastTimer: number | null;
 }
 
@@ -56,6 +61,8 @@ function toRows(invoices: MpInvoice[]): InvoiceRow[] {
 Page({
   data: {
     loading: true,
+    loadingMore: false,
+    needLogin: false,
     busy: false,
     message: "",
     toast: "",
@@ -66,25 +73,61 @@ Page({
     email: "",
     orderId: "",
     invoices: [],
+    hasMore: true,
+    _page: 0,
     _toastTimer: null,
   } as InvoicesData,
 
   onShow() {
     if (!isLoggedIn()) {
-      this.setData({ loading: false, message: "请先登录后管理发票" });
+      this.setData({ loading: false, needLogin: true, message: "" });
       return;
     }
-    void this.reload();
+    this.setData({ needLogin: false });
+    void this.reload(1);
   },
 
-  async reload() {
-    this.setData({ loading: true, message: "" });
+  onReachBottom() {
+    void this.loadMore();
+  },
+
+  async reload(page = 1) {
+    this.setData(
+      page === 1
+        ? { loading: true, message: "", _page: 0, hasMore: true }
+        : { loadingMore: true },
+    );
     try {
-      const invoices = await listInvoices();
-      this.setData({ invoices: toRows(invoices), loading: false });
+      const invoices = await listInvoices(page);
+      const rows = toRows(invoices.items);
+      this.setData(
+        page === 1
+          ? { invoices: rows, loading: false, hasMore: invoices.hasMore, _page: 1 }
+          : {
+              invoices: this.data.invoices.concat(rows.filter((row) => !this.data.invoices.some((existing) => existing.id === row.id))),
+              loadingMore: false,
+              hasMore: invoices.hasMore,
+              _page: page,
+            },
+      );
     } catch (cause) {
-      this.setData({ loading: false, message: errorMessage(cause, "发票加载失败") });
+      this.setData({
+        loading: false,
+        loadingMore: false,
+        message: errorMessage(cause, "发票加载失败"),
+      });
     }
+  },
+
+  async loadMore() {
+    if (this.data.loading || this.data.loadingMore || !this.data.hasMore) {
+      return;
+    }
+    await this.reload(this.data._page + 1);
+  },
+
+  goLogin() {
+    platform.navigateTo(mpCapabilityUrl("account.mall.login"));
   },
 
   onTitleTypeChange(event: MpPickerChangeEvent) {
@@ -156,10 +199,18 @@ Page({
   },
 
   retry() {
-    void this.reload();
+    if (!isLoggedIn()) {
+      this.goLogin();
+      return;
+    }
+    void this.reload(1);
   },
 
   onPullDownRefresh() {
-    void this.reload().finally(() => platform.stopPullDownRefresh());
+    if (!isLoggedIn()) {
+      platform.stopPullDownRefresh();
+      return;
+    }
+    void this.reload(1).finally(() => platform.stopPullDownRefresh());
   },
 });

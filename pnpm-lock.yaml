@@ -6,15 +6,6 @@ settings:
 
 catalogs:
   default:
-    '@testing-library/dom':
-      specifier: 10.4.1
-      version: 10.4.1
-    '@testing-library/jest-dom':
-      specifier: ^7.0.1
-      version: 7.0.1
-    '@testing-library/react':
-      specifier: 16.3.2
-      version: 16.3.2
     '@types/qrcode':
       specifier: ^1.5.6
       version: 1.5.6
@@ -27,9 +18,6 @@ catalogs:
     '@vitejs/plugin-react':
       specifier: ^6.0.5
       version: 6.1.1
-    jsdom:
-      specifier: 29.1.1
-      version: 29.1.1
     lucide-react:
       specifier: ^1.31.0
       version: 1.42.0
@@ -54,21 +42,12 @@ catalogs:
     react-router-dom:
       specifier: ^7.18.2
       version: 7.18.3
-    tsx:
-      specifier: ^4.23.12
-      version: 4.23.15
     typescript:
       specifier: ^6.0.2
       version: 6.0.3
     vite:
       specifier: ^8.0.3
       version: 8.1.5
-    vite-plugin-dts:
-      specifier: ^5.0.3
-      version: 5.1.0
-    vitest:
-      specifier: ^4.1.10
-      version: 4.1.12
     zustand:
       specifier: ^5.0.12
       version: 5.1.0
@@ -182,7 +161,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: ^6.0.1
-        version: 6.0.1(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+        version: 6.0.1(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -239,10 +218,10 @@ importers:
         version: 6.0.3
       vite:
         specifier: ^8.0.3
-        version: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+        version: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)
       vitest:
         specifier: ^4.1.2
-        version: 4.1.9(@types/node@25.9.4)(jsdom@29.1.1)(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+        version: 4.1.9(@types/node@25.9.4)(jsdom@29.1.1)(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))
 
   ../sdkwork-account/apps/sdkwork-account-common/packages/sdkwork-account-contracts: {}
 
@@ -1557,7 +1536,7 @@ importers:
         version: link:../../../sdkwork-ui/sdkwork-ui-mobile-react
       '@tailwindcss/vite':
         specifier: ^4.2.2
-        version: 4.2.2(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+        version: 4.2.2(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0))
       i18next:
         specifier: 26.3.6
         version: 26.3.6(typescript@6.0.3)
@@ -1600,13 +1579,13 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: 'catalog:'
-        version: 6.1.1(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+        version: 6.1.1(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0))
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
       vite:
         specifier: 'catalog:'
-        version: 8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+        version: 8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)
 
   apps/sdkwork-mall-h5/packages/sdkwork-mall-h5-account:
     dependencies:
@@ -1850,9 +1829,9 @@ importers:
 
   apps/sdkwork-mall-mini-program/packages/sdkwork-mall-mp-core:
     dependencies:
-      '@sdkwork/commerce-app-sdk':
+      '@sdkwork/cloudrouter-app-sdk':
         specifier: workspace:*
-        version: link:../../../../sdks/sdkwork-commerce-app-sdk/sdkwork-commerce-app-sdk-typescript
+        version: link:../../../../../sdkwork-cloudrouter/sdks/cloudrouter-app-sdk/cloudrouter-app-sdk-typescript
       '@sdkwork/iam-app-sdk':
         specifier: workspace:*
         version: link:../../../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript
@@ -2091,7 +2070,7 @@ importers:
         version: link:../../../sdkwork-ui/sdkwork-ui-pc-react
       '@tailwindcss/vite':
         specifier: ^4.2.2
-        version: 4.2.2(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+        version: 4.2.2(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))
       lucide-react:
         specifier: 'catalog:'
         version: 1.42.0(react@19.2.8)
@@ -2103,7 +2082,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       react-i18next:
         specifier: 'catalog:'
-        version: 17.0.13(i18next@26.7.1(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@6.0.3)
+        version: 17.0.13(i18next@26.3.6(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@6.0.3)
       react-router:
         specifier: 'catalog:'
         version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -2134,13 +2113,13 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: 'catalog:'
-        version: 6.1.1(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+        version: 6.1.1(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
       vite:
         specifier: 'catalog:'
-        version: 8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+        version: 8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)
 
   apps/sdkwork-mall-pc/packages/sdkwork-mall-commerce-sdk-ports:
     devDependencies:
@@ -2219,7 +2198,7 @@ importers:
         version: 19.2.8(react@19.2.8)
       react-i18next:
         specifier: 'catalog:'
-        version: 17.0.13(i18next@26.7.1(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@6.0.3)
+        version: 17.0.13(i18next@26.3.6(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@6.0.3)
       react-router:
         specifier: 'catalog:'
         version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -9462,12 +9441,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.2.2
       '@tailwindcss/oxide-win32-x64-msvc': 4.2.2
 
-  '@tailwindcss/vite@4.2.2(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))':
+  '@tailwindcss/vite@4.2.2(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))':
     dependencies:
       '@tailwindcss/node': 4.2.2
       '@tailwindcss/oxide': 4.2.2
       tailwindcss: 4.2.2
-      vite: 8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+      vite: 8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)
 
   '@tailwindcss/vite@4.2.2(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))':
     dependencies:
@@ -9475,6 +9454,13 @@ snapshots:
       '@tailwindcss/oxide': 4.2.2
       tailwindcss: 4.2.2
       vite: 8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+
+  '@tailwindcss/vite@4.2.2(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0))':
+    dependencies:
+      '@tailwindcss/node': 4.2.2
+      '@tailwindcss/oxide': 4.2.2
+      tailwindcss: 4.2.2
+      vite: 8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)
 
   '@tanstack/react-table@8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
@@ -9749,25 +9735,25 @@ snapshots:
 
   '@ungap/structured-clone@1.3.1': {}
 
-  '@vitejs/plugin-react@6.0.1(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))':
+  '@vitejs/plugin-react@6.0.1(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.7
-      vite: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+      vite: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)
 
   '@vitejs/plugin-react@6.0.1(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.7
       vite: 8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
 
-  '@vitejs/plugin-react@6.1.1(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))':
+  '@vitejs/plugin-react@6.1.1(vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
-      vite: 8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+      vite: 8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)
 
-  '@vitejs/plugin-react@6.1.1(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))':
+  '@vitejs/plugin-react@6.1.1(vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
-      vite: 8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+      vite: 8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)
 
   '@vitejs/plugin-vue@5.2.4(vite@5.4.21(@types/node@25.9.9)(lightningcss@1.33.0))(vue@3.5.44(typescript@6.0.2))':
     dependencies:
@@ -9808,13 +9794,13 @@ snapshots:
     optionalDependencies:
       vite: 8.3.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
 
-  '@vitest/mocker@4.1.9(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))':
+  '@vitest/mocker@4.1.9(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))':
     dependencies:
       '@vitest/spy': 4.1.9
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+      vite: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)
 
   '@vitest/pretty-format@4.1.12':
     dependencies:
@@ -10989,11 +10975,11 @@ snapshots:
       react-dom: 19.2.8(react@19.2.8)
       typescript: 6.0.3
 
-  react-i18next@17.0.13(i18next@26.7.1(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@6.0.3):
+  react-i18next@17.0.13(i18next@26.3.6(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@6.0.3):
     dependencies:
       '@babel/runtime': 7.29.7
       html-parse-stringify: 4.0.1
-      i18next: 26.7.1(typescript@6.0.3)
+      i18next: 26.3.6(typescript@6.0.3)
       react: 19.2.8
       use-sync-external-store: 1.6.0(react@19.2.8)
     optionalDependencies:
@@ -11622,7 +11608,7 @@ snapshots:
       fsevents: 2.3.3
       lightningcss: 1.33.0
 
-  vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15):
+  vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
@@ -11634,9 +11620,8 @@ snapshots:
       esbuild: 0.28.1
       fsevents: 2.3.3
       jiti: 2.7.0
-      tsx: 4.23.15
 
-  vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15):
+  vite@8.1.5(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.5
@@ -11648,7 +11633,19 @@ snapshots:
       esbuild: 0.28.1
       fsevents: 2.3.3
       jiti: 2.7.0
-      tsx: 4.23.15
+
+  vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0):
+    dependencies:
+      lightningcss: 1.32.0
+      picomatch: 4.0.5
+      postcss: 8.5.25
+      rolldown: 1.1.5
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      '@types/node': 25.9.9
+      esbuild: 0.28.1
+      fsevents: 2.3.3
+      jiti: 2.7.0
 
   vite@8.1.5(@types/node@25.9.9)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15):
     dependencies:
@@ -11783,10 +11780,10 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vitest@4.1.9(@types/node@25.9.4)(jsdom@29.1.1)(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)):
+  vitest@4.1.9(@types/node@25.9.4)(jsdom@29.1.1)(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)):
     dependencies:
       '@vitest/expect': 4.1.9
-      '@vitest/mocker': 4.1.9(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15))
+      '@vitest/mocker': 4.1.9(vite@8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0))
       '@vitest/pretty-format': 4.1.9
       '@vitest/runner': 4.1.9
       '@vitest/snapshot': 4.1.9
@@ -11803,7 +11800,7 @@ snapshots:
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vite: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.15)
+      vite: 8.0.16(@types/node@25.9.4)(esbuild@0.28.1)(jiti@2.7.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.9.4
