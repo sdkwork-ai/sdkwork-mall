@@ -390,6 +390,20 @@ JS boot smoke cannot observe.
   a frontend change. The catalog OpenAPI schema was extended in `9637c93`.
 - `cargo check`/crate tests pass; the SQL path still needs a database run.
 
+### 2.0.16 Brand filter: server accepts, generated client still hides it (round 24)
+
+- `sdkwork-catalog` commit `1b3e6ff` adds `brand_id` to the app-api product list
+  query and OpenAPI. The domain query already supported it.
+- A brand-chip filter was prototyped on PC and then reverted because the
+  cloudrouter generated `CatalogProductsListParams` whitelists only the old
+  parameters: passing `brandId` from the app is silently dropped
+  (`catalog.ts` builds the query from a fixed list). Shipping the chip would
+  have filtered nothing while claiming a full-result filter.
+- The fix belongs upstream: regenerate the cloudrouter commerce snapshot from
+  the updated catalog OpenAPI (and expose it on `commerce.catalog.products`),
+  then the app can wire `brandId` end to end. Brand **display** already works
+  through `brandName` (`50ac2f4`).
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
@@ -456,8 +470,11 @@ real catalog backend:
    或在 SKU 读模型中增加可售库存字段；在此之前详情只显示“库存信息待确认”，不阻断加购。
 4. **无销量/评分**：目录没有 sales/rating 列，所以“销量/好评”排序与卡片统计暂不可交付；
    已从 UI 移除，避免展示假数据。
-5. **服务端筛选**：品牌/价格区间/服务标签需要 catalog 列表新增查询参数
-   （`brand_id` 已存在于 domain query，但 app-api 未透出；价格区间需按最低 SKU 价过滤）。
+5. **服务端筛选**：品牌 `brand_id` 已由 catalog app-api 接受（`1b3e6ff`），
+   但 mall 消费的 cloudrouter 生成客户端
+   `CatalogProductsListParams` 仍是旧白名单（无 `brandId`），前端补传会被丢弃；
+   需要 cloudrouter 从更新后的 catalog OpenAPI 重新生成 commerce 快照。价格区间/
+   服务标签仍未支持。
 
 Recommended upstream change set (one PR each, in dependency order):
 

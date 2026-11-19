@@ -10,6 +10,7 @@ export interface MallSearchProduct {
   shopName?: string;
   title: string;
   brand?: string;
+  brandId?: string;
   origin?: string;
   inStock?: boolean;
   selfOperated?: boolean;
@@ -100,6 +101,13 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
       : typeof record.brandName === "string"
         ? record.brandName
         : undefined;
+  const brandIdValue = record.brandId ?? record.brand_id;
+  const brandId =
+    typeof brandIdValue === "string"
+      ? brandIdValue
+      : typeof brandIdValue === "number" && Number.isFinite(brandIdValue)
+        ? String(brandIdValue)
+        : undefined;
 
   const origin =
     typeof record.origin === "string"
@@ -152,6 +160,7 @@ function readSearchProduct(record: Record<string, unknown>): MallSearchProduct {
     shopName: typeof record.shopName === "string" ? record.shopName : undefined,
     imageUrl: imageUrl || undefined,
     brand,
+    brandId,
     origin,
     inStock,
     selfOperated,

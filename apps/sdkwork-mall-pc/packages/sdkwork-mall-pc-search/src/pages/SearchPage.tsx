@@ -214,11 +214,10 @@ export function SdkworkMallSearchPage() {
     setParams(next);
   }
 
-  // Facets for brand/origin/price/service were removed here: the catalog list
-  // API exposes only `q`, `category_id`, `shop_id`, `product_type` and `sort`,
-  // so those facets filtered the 20 rows on the current page while the toolbar
-  // claimed to filter the whole result set. They return when the authority
-  // accepts the filters server-side.
+  // 品牌字段已由 catalog 投影并在标题下展示；品牌筛选参数 `brand_id` 虽已由
+  // catalog app-api 接受，但 cloudrouter 生成的 catalog 客户端白名单尚未透出，
+  // 前端补传会被丢弃。等 cloudrouter 契约再生效后再加筛选 UI，避免“只筛当前页
+  // 却宣称全量筛选”。产地/价格/服务筛选同样继续隐藏。
 
   const [fallbackProducts, setFallbackProducts] = useState<MallSearchProduct[]>([]);
 
