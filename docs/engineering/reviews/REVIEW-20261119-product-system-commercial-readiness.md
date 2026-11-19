@@ -350,7 +350,8 @@ JS boot smoke cannot observe.
 - H5 list totals also accept `pageInfo.totalItems` (canonical v3) before the
   legacy `total`, matching PC/MP.
 - Verified: H5 and mini-program `tsc --noEmit` clean; MP 36-page smoke passes;
-  mall `pnpm verify` remains green.
+  `catalog-price.test.ts` pins list/detail/SKU minor-unit conversion, legacy
+  fallback and `totalItems`; mall `pnpm verify` remains green (397 tests).
 
 ### 2.0.13 Upstream product image projection (round 20)
 
@@ -448,7 +449,7 @@ Recommended upstream change set (one PR each, in dependency order):
 ## 4. Verification for this round
 
 - `pnpm typecheck`, PC app `tsc --noEmit`: pass
-- `pnpm test:vitest`: 102 files / 392 tests pass (includes search pagination,
+- `pnpm test:vitest`: 103 files / 397 tests pass (includes search pagination,
   home shelf split, PDP mapping, cart envelope and default-selection paths)
 - `pnpm run check:default-data`, `check:dataset-generation`, `check:app-composition`,
   `pnpm --dir apps/sdkwork-mall-pc run test:config`, `pnpm run build:pc:prod`: pass
