@@ -501,6 +501,11 @@ export function SdkworkMallH5ProductDetailPage() {
           </span>
         </div>
         <h1 className="sdk-h5-pdp-title">{detail.title}</h1>
+        {detail.brand ? (
+          <p className="sdk-h5-pdp-brand">
+            {t("productDetail.brand", { brand: detail.brand })}
+          </p>
+        ) : null}
         <p className="sdk-h5-pdp-sales">
           {detail.sales != null ? (
             <span>{t("productDetail.stats.sales", { count: detail.sales.toLocaleString("zh-CN") })}</span>
