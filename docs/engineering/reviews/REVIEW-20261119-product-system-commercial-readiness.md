@@ -244,6 +244,10 @@ of a skeleton:
   address, marks it default and persists the list; 消息中心 lists notifications
   by category. Favorites/footprint remain browser-local by design until the
   commerce favorites / T1 footprint APIs land, and the pages say so.
+- **买家中心 duplicate React key**: the coupon wallet payload carries
+  `userCouponId` (no `id`), so both coupons mapped to the key `""`. The hub now
+  falls back to `userCouponId/couponId` and `couponName`; `/buyer` renders with
+  no duplicate-key warning.
 
 ### 2.0.6 H5 cross-end alignment (round 8)
 
@@ -431,6 +435,8 @@ Recommended upstream change set (one PR each, in dependency order):
   - mini-program: 37-entry build, 36-page smoke (12 requests, 0 errors)
   - Flutter: `flutter analyze` clean, 35/35 widget/route/i18n/logistics tests
   - membership: 立即升级 → 操作成功 / 会员已开通，权益立即生效 (no console errors)
+  - buyer hub `/buyer` renders coupons/activities/orders with no duplicate-key
+    warning after the coupon-id fallback
 
 > `pnpm verify` is green: 216 node contract tests, vitest (393+), i18n
 > catalogues/baseline, dataset and default-data gates all pass. The mini-program

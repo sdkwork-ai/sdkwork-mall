@@ -99,8 +99,8 @@ export async function loadMallBuyerDashboardSnapshot(): Promise<MallBuyerDashboa
     const payload = unwrapSdkworkPaymentResponse(couponsResult.value) as { items?: Record<string, unknown>[] };
     availableCoupons =
       payload.items?.map((item) => ({
-        id: String(item.id ?? ""),
-        title: String(item.title ?? item.name ?? "优惠券"),
+        id: String(item.id ?? item.userCouponId ?? item.couponId ?? ""),
+        title: String(item.title ?? item.couponName ?? item.name ?? "优惠券"),
         discountText:
           typeof item.discountText === "string"
             ? item.discountText
