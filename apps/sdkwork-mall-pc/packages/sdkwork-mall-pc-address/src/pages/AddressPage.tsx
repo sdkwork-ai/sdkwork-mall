@@ -197,6 +197,10 @@ export function SdkworkMallAddressPage() {
   }
 
   async function handleDelete(addressId: string) {
+    // Deleting a saved address is destructive; confirm before the write.
+    if (typeof window !== "undefined" && !window.confirm("确定删除该地址吗？")) {
+      return;
+    }
     setBusy(true);
     setMessage(null);
     try {

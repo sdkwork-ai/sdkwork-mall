@@ -101,7 +101,7 @@ list/detail → logistics → after-sales submission**. Fixes found by that run:
   after-sales "load more" copy comes from the catalogue, the cart contract
   accepts the authored idempotent order seam, and the release-channel message
   matches the runtime-env contract. The i18n ratchet baseline was refreshed
-  (miniProgram 153 → 173 from the concurrent MP commercial pass; PC 1866 → 1896
+  (miniProgram 153 → 173 from the concurrent MP commercial pass; PC 1866 → 1897
   for the wallet retry/success labels, cancellation confirmations, merchant
   error/retry copy, localized governance statuses, the admin SPU field and
   membership success copy); no H5 or Flutter copy was added.
@@ -308,7 +308,8 @@ JS boot smoke cannot observe.
   `name/phone/province/city/district/detail/tag`, matching the create payload.
 - Verified: 新增李四 → 设为默认 (badge moves) → 编辑张三 pre-fills
   `张三 / 13800000000 / 浙江省 / 杭州市 / 西湖区 / 文一路 96 号` → 保存 updates
-  the row; delete and default toggling stay available.
+  the row; delete and default toggling stay available. 删除 now asks for
+  confirmation before the destructive write.
 
 ### 2.1 列表分页全部失效（P0）
 
@@ -369,7 +370,10 @@ collection. Therefore, on a real catalog backend:
    Frontend already reads these fields.
 2. **详情无 SKU**：需要 `GET /catalog/products/{productId}` 内嵌 `skus`，或开放
    `GET /catalog/products/{productId}/skus` 到 app SDK。Catalog service 已具备
-   `list_skus_page`，最小改动是在 app-api 详情响应中组装 `skus`。
+   `list_skus_page`，最小改动是在 app-api 详情响应中组装 `skus`。当前 mall PC
+   消费的 `@sdkwork/cloudrouter-app-sdk/domains` 里 `catalog.products` 只有
+   `list/retrieve`（无 `skus` 子集合），所以前端无法直接补拉；尝试在 app 侧
+   补拉会在类型检查阶段失败，已回退并把该路径保留给上游。
 3. **无库存**：库存属于 `sdkwork-inventory`，catalog 不持有库存。需要门店前台聚合投影，
    或在 SKU 读模型中增加可售库存字段；在此之前详情只显示“库存信息待确认”，不阻断加购。
 4. **无销量/评分**：目录没有 sales/rating 列，所以“销量/好评”排序与卡片统计暂不可交付；
