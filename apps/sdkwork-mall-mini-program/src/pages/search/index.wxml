@@ -67,7 +67,7 @@
     <text>{{error}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
   </view>
-  <view wx:if="{{!loading && products.length === 0}}" class="mp-empty">暂无匹配商品</view>
+  <view wx:if="{{!loading && !error && products.length === 0}}" class="mp-empty">暂无匹配商品</view>
 
   <view class="mp-product-grid">
     <view
@@ -78,7 +78,7 @@
       data-id="{{item.id}}"
     >
       <view class="mp-product-image">
-        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
         <text wx:else>SDKWork</text>
       </view>
       <view class="mp-product-body">

@@ -70,7 +70,9 @@ Page({
     this.setData({
       orderId,
       paymentId,
-      status: options.status || "pending",
+      // Never trust the `status` query parameter: a shared/edited link could
+      // claim "success". Only the server poll may upgrade the result.
+      status: "pending",
       // Keep the channel the cashier used so a retry returns to the same one.
       paymentMethod: options.paymentMethod || "",
       orderNoText: orderId ? t("paymentResult.orderNo", { id: orderId }) : "",

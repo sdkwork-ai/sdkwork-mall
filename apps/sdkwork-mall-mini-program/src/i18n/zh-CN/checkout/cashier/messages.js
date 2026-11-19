@@ -5,6 +5,7 @@ module.exports = {
     loading: "加载收银台...",
     retry: "重试",
     title: "收银台",
+    amountLabel: "应付金额",
     orderNo: "订单号：{{id}}",
     methodsTitle: "选择支付方式",
     methodsEmpty: "暂无可用支付渠道，请稍后重试。",
@@ -16,6 +17,7 @@ module.exports = {
     errors: {
       missingOrder: "缺少订单参数",
       methodsLoadFailed: "支付方式加载失败",
+      amountUnavailable: "订单金额加载失败，请稍后重试",
       methodRequired: "请选择支付方式",
       payFailed: "发起支付失败，请稍后再试",
       cancelled: "已取消支付"

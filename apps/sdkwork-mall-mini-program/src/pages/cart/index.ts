@@ -3,6 +3,7 @@ import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpCartItem, getCart, removeCartItem, updateCartItem } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
+import { formatCny } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
 import { setCartTabBadge } from "../../services/tab-bar-service";
 
@@ -12,7 +13,16 @@ interface CartGroup {
   items: MpCartItem[];
 }
 
-interface CartGroupView extends CartGroup {
+/** WXML expressions cannot call functions, so every row value is precomputed. */
+interface CartItemView extends MpCartItem {
+  priceText: string;
+  selected: boolean;
+}
+
+interface CartGroupView {
+  shopId: string;
+  shopName: string;
+  items: CartItemView[];
   allSelected: boolean;
 }
 
@@ -88,8 +98,15 @@ Page({
     this.setData({ loading: true, error: "" });
     try {
       const cart = await getCart();
-      const groups = groupByShop(cart.items).map((group) => ({
-        ...group,
+      const priceFallback = t("cart.priceFallback");
+      const groups: CartGroupView[] = groupByShop(cart.items).map((group) => ({
+        shopId: group.shopId,
+        shopName: group.shopName,
+        items: group.items.map((item) => ({
+          ...item,
+          priceText: item.priceCny != null ? formatCny(item.priceCny) : priceFallback,
+          selected: this.isSelected(item.id),
+        })),
         allSelected: group.items.every((item) => this.isSelected(item.id)),
       }));
       this.setData({
@@ -139,6 +156,7 @@ Page({
       allSelected: allIds.length > 0 && selectedIds.length === allIds.length,
       groups: groups.map((group) => ({
         ...group,
+        items: group.items.map((item) => ({ ...item, selected: this.isSelected(item.id) })),
         allSelected: group.items.every((item) => this.isSelected(item.id)),
       })),
     });
@@ -218,7 +236,7 @@ Page({
     }
   },
 
-  findItem(itemId: string): MpCartItem | null {
+  findItem(itemId: string): CartItemView | null {
     for (const group of this.data.groups) {
       for (const item of group.items) {
         if (item.id === itemId) {

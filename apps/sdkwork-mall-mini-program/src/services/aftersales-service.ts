@@ -9,6 +9,8 @@
  */
 import { createMpIdempotencyParams, getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
+import { readCommercePayload } from "./commerce-payload";
+
 export interface MpAfterSalesItemInput {
   orderItemId: string;
   requestedQuantity: number;
@@ -77,18 +79,6 @@ function afterSales() {
   return getMallMpRuntime().commerceClient.afterSales;
 }
 
-/**
- * Reads the `data` payload of a commerce block response.
- *
- * The after-sales group wraps results in its own `{ code, data }` response, while
- * a few operations return the payload directly; both shapes are accepted.
- */
-async function readCommerceData(call: Promise<unknown>): Promise<Record<string, unknown>> {
-  const result = (await call) as { data?: unknown } | null | undefined;
-  const data = result && typeof result === "object" ? result.data : undefined;
-  return (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
-}
-
 function readRows(record: Record<string, unknown>): Array<Record<string, unknown>> {
   if (Array.isArray(record.items)) {
     return record.items as Array<Record<string, unknown>>;
@@ -135,7 +125,7 @@ export function buildCreateAfterSalesBody(input: MpAfterSalesCreateInput): Recor
 }
 
 export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSalesRow[]> {
-  const payload = await readCommerceData(afterSales().requests.list({ page, pageSize }));
+  const payload = await readCommercePayload(afterSales().requests.list({ page, pageSize }));
   return readRows(payload).map((item) => {
     const status = String(item.status ?? "").toUpperCase();
     const type = String(item.afterSalesType ?? item.type ?? "refund").toLowerCase();
@@ -159,13 +149,13 @@ export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSale
 
 export async function createRequest(input: MpAfterSalesCreateInput): Promise<Record<string, unknown>> {
   const body = buildCreateAfterSalesBody(input);
-  return readCommerceData(
+  return readCommercePayload(
     afterSales().requests.create(body as never, createMpIdempotencyParams()),
   );
 }
 
 export async function cancelRequest(requestId: string): Promise<Record<string, unknown>> {
-  return readCommerceData(afterSales().requests.update(requestId, { status: "CANCELLED" }));
+  return readCommercePayload(afterSales().requests.update(requestId, { status: "CANCELLED" }));
 }
 
 /** Carriers offered when the buyer ships the goods back. */
@@ -197,7 +187,7 @@ export interface MpAfterSalesEvent {
  * mobile roots had no way to see refund progress.
  */
 export async function listAfterSalesEvents(requestId: string): Promise<MpAfterSalesEvent[]> {
-  const payload = await readCommerceData(afterSales().events.list(requestId, { page: 1, pageSize: 20 }));
+  const payload = await readCommercePayload(afterSales().events.list(requestId, { page: 1, pageSize: 20 }));
   return readRows(payload).map((item) => ({
     action: String(item.eventType ?? item.action ?? item.toStatus ?? "event"),
     at: String(item.createdAt ?? ""),
@@ -219,7 +209,7 @@ export function buildReturnShipmentBody(input: MpReturnShipmentInput): Record<st
  * (`afterSales.returnShipments`), idempotent per submit.
  */
 export async function createReturnShipment(input: MpReturnShipmentInput): Promise<Record<string, unknown>> {
-  return readCommerceData(
+  return readCommercePayload(
     afterSales().returnShipments.create(
       input.requestId,
       buildReturnShipmentBody(input) as never,

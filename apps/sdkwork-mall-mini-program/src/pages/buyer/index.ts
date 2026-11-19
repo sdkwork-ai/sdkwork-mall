@@ -1,9 +1,10 @@
 import { t } from "../../i18n";
 import { type MpTapEvent } from "../../types/common";
-import { mpCapabilityUrl } from "../../routes/capabilities";
+import { isMpTabCapability, mpCapabilityUrl } from "../../routes/capabilities";
 import { getOrderStatistics } from "../../services/order-service";
 import { getProfile } from "../../services/profile-service";
-import { isLoggedIn, clearSession } from "../../services/session";
+import { isLoggedIn } from "../../services/session";
+import { signOut } from "../../services/sign-out";
 import { platform } from "@sdkwork/mall-mp-core";
 
 const ORDER_ENTRIES: Array<{ status: string; labelKey: string; icon: string; count: string | number }> = [
@@ -175,7 +176,14 @@ Page({
     if (!capability) {
       return;
     }
-    platform.navigateTo(mpCapabilityUrl(capability));
+    const url = mpCapabilityUrl(capability);
+    // 客服会话 lives on a tabBar page; navigateTo cannot open one and the
+    // rejection would be swallowed, leaving a dead entry.
+    if (isMpTabCapability(capability)) {
+      platform.switchTab(url);
+      return;
+    }
+    platform.navigateTo(url);
   },
 
   goLogin() {
@@ -190,7 +198,7 @@ Page({
     if (!confirmed) {
       return;
     }
-    clearSession();
+    await signOut();
     this.setData({ loggedIn: false, orderEntries: resolveOrderEntries() });
   },
 });

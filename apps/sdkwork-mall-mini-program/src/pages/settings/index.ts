@@ -1,4 +1,5 @@
-import { clearSession, isLoggedIn } from "../../services/session";
+import { isLoggedIn } from "../../services/session";
+import { signOut } from "../../services/sign-out";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { clearFootprint, readFavorites, removeFavorite } from "../../services/favorites-service";
 import { platform } from "@sdkwork/mall-mp-core";
@@ -70,7 +71,7 @@ Page({
     if (!confirmed) {
       return;
     }
-    clearSession();
+    await signOut();
     this.setData({ loggedIn: false });
   },
 

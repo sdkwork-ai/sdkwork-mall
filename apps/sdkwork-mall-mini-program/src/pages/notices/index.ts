@@ -62,7 +62,9 @@ Page({
     const notices = [...this.data.notices];
     notices[index] = {
       ...current,
-      status: "read",
+      // Only mirror a status the server reported. The client has no mark-read
+      // command, so claiming "read" locally made the dot return on every visit.
+      status: detail?.status || current.status,
       body: detail?.body || current.body,
     };
     this.setData({ notices });

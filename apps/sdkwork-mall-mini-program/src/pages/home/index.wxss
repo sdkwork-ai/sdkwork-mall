@@ -46,20 +46,21 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 14rpx;
+  bottom: 4rpx;
   display: flex;
   justify-content: center;
-  gap: 2rpx;
+  gap: 0;
 }
 
 /* Bar-style indicator, mirroring the H5 hero dots: a slim pill bar inside a
-   square hit area; the active bar widens. */
+   square hit area; the active bar widens. The hit area is 44rpx so the dots stay
+   tappable on a phone. */
 .home-banner-dot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24rpx;
-  height: 24rpx;
+  width: 44rpx;
+  height: 44rpx;
 }
 
 .home-banner-dot::before {
@@ -174,7 +175,9 @@
 }
 
 .home-category-item {
-  width: 30%;
+  /* Four per row: the default dataset seeds eight first-level categories, so a
+     fresh install fills two rows with no ragged trailing row. */
+  width: calc((100% - 48rpx) / 4);
   text-align: center;
   background: #f9fafb;
   border-radius: 0;
@@ -299,10 +302,34 @@
   background: #5b21b6;
 }
 
-/* Visible build stamp: confirms which package the dev tool is running. */
-.home-build {
+/* Empty storefront: explains the blank page and offers a retry. */
+.home-partial {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+}
+
+.home-partial-retry {
+  flex-shrink: 0;
+}
+
+.home-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: 56rpx 32rpx;
   text-align: center;
-  font-size: 20rpx;
-  color: #c0c4cc;
-  padding: 28rpx 0 10rpx;
+}
+
+.home-empty-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.home-empty-retry {
+  margin-top: 12rpx;
 }

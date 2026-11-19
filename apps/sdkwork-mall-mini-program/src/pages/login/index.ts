@@ -3,7 +3,8 @@ import { errorMessage, type MpInputEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { getMallMpRuntime, platform } from "@sdkwork/mall-mp-core";
 import { loginWithPassword, loginWithWechat } from "../../services/auth-service";
-import { clearSession, getToken, isLoggedIn, setToken } from "../../services/session";
+import { getToken, isLoggedIn, setToken } from "../../services/session";
+import { signOut } from "../../services/sign-out";
 import { bindPendingInvite } from "../../services/invite-service";
 
 interface LoginData {
@@ -217,8 +218,8 @@ Page({
     goBackAfterLogin();
   },
 
-  logout() {
-    clearSession();
+  async logout() {
+    await signOut();
     this.setData({ token: "", password: "", loggedIn: false, error: "" });
     platform.toast(t("auth.loggedOut"), "success");
   },

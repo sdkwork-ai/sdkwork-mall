@@ -5,8 +5,24 @@
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
   </view>
 
-  <block wx:if="{{!loading}}">
+  <block wx:if="{{!loading && !error}}">
     <view wx:if="{{itemCount}}" class="mp-muted checkout-count">{{selectedCountText}}</view>
+
+    <view class="mp-card" wx:if="{{goods.length}}">
+      <view class="mp-card-title">{{goodsTitle}}</view>
+      <view class="checkout-goods" wx:for="{{goods}}" wx:key="id">
+        <image wx:if="{{item.imageUrl}}" class="checkout-goods-image" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
+        <view wx:else class="checkout-goods-image checkout-goods-fallback">SDKWork</view>
+        <view class="checkout-goods-body">
+          <view class="checkout-goods-title">{{item.title}}</view>
+          <view class="mp-muted" wx:if="{{item.skuName}}">{{item.skuName}}</view>
+          <view class="mp-flex-between">
+            <text class="mp-price">{{item.priceText}}</text>
+            <text class="mp-muted">×{{item.quantity}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
 
     <view class="mp-card">
       <view class="mp-flex-between">

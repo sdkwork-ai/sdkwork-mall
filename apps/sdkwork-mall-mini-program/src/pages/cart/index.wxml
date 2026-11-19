@@ -36,7 +36,7 @@
 
         <view class="mp-row cart-item" wx:for="{{group.items}}" wx:key="id">
           <view
-            class="cart-checkbox {{selectedIds.indexOf(item.id) >= 0 ? 'cart-checkbox-on' : ''}}"
+            class="cart-checkbox {{item.selected ? 'cart-checkbox-on' : ''}}"
             bindtap="toggleItem"
             data-id="{{item.id}}"
           />
@@ -48,7 +48,7 @@
             <view class="mp-product-title" bindtap="goProduct" data-id="{{item.spuId}}">{{item.title}}</view>
             <view class="mp-muted" wx:if="{{item.skuName}}">{{item.skuName}}</view>
             <view class="mp-flex-between">
-              <text class="mp-price">{{item.priceCny ? '¥' + item.priceCny.toFixed(2) : priceFallback}}</text>
+              <text class="mp-price">{{item.priceText}}</text>
               <view class="cart-quantity">
                 <text
                   class="cart-quantity-btn {{item.quantity <= 1 ? 'cart-quantity-btn-disabled' : ''}}"

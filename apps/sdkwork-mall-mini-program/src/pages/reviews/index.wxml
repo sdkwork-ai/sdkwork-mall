@@ -5,8 +5,8 @@
     <view wx:if="{{error}}" class="mp-error">{{error}}</view>
 
     <view class="mp-card">
-      <view class="mp-card-title">待评价</view>
-      <view wx:if="{{orders.length === 0}}" class="mp-empty">已完成订单可在这里提交评价</view>
+      <view class="mp-card-title">已完成订单</view>
+      <view wx:if="{{!error && orders.length === 0}}" class="mp-empty">暂无已完成订单</view>
       <view
         class="review-row"
         wx:for="{{orders}}"
@@ -26,6 +26,6 @@
       </view>
     </view>
 
-    <view class="mp-muted review-note">商品晒单与媒体上传需等待 T1 商品评价 API 合约落地。</view>
+    <view class="mp-muted review-note">商品评价功能即将上线，可先查看订单或申请售后。</view>
   </block>
 </view>

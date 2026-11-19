@@ -2,7 +2,7 @@ import { t } from "../../i18n";
 import { errorMessage, type MpInputEvent, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { type MpAddress, listAddresses } from "../../services/address-service";
-import { type MpCheckoutQuote, createCheckoutQuote, listUserCoupons, submitOrder } from "../../services/cart-service";
+import { type MpCheckoutQuote, createCheckoutQuote, getCart, listUserCoupons, submitOrder } from "../../services/cart-service";
 import { isLoggedIn } from "../../services/session";
 import { formatCny } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
@@ -46,6 +46,15 @@ function resolveDeliveryMethods(): Array<{ code: string; description: string; la
 
 interface CheckoutData {
   addresses: MpAddress[];
+  /** The lines being bought, projected for display (WXML cannot call formatters). */
+  goods: Array<{
+    id: string;
+    title: string;
+    skuName: string;
+    imageUrl: string;
+    quantity: number;
+    priceText: string;
+  }>;
   selectedAddressId: string;
   coupons: MpCouponOption[];
   selectedCouponId: string;
@@ -105,6 +114,7 @@ interface CheckoutData {
   summaryGoods: string;
   summaryDiscount: string;
   summaryPayable: string;
+  goodsTitle: string;
   submitText: string;
   submittingText: string;
   _cartItemIds: string[];
@@ -114,6 +124,7 @@ interface CheckoutData {
 Page({
   data: {
     addresses: [],
+    goods: [],
     selectedAddressId: "",
     coupons: [],
     selectedCouponId: "",
@@ -173,6 +184,7 @@ Page({
     summaryGoods: t("checkout.summary.goods"),
     summaryDiscount: t("checkout.summary.discount"),
     summaryPayable: t("checkout.summary.payable"),
+    goodsTitle: t("checkout.goods.title"),
     submitText: t("checkout.submit"),
     submittingText: t("checkout.submitting"),
     _cartItemIds: [],
@@ -202,10 +214,22 @@ Page({
   async bootstrap() {
     this.setData({ loading: true, error: "" });
     try {
-      const [addresses, coupons] = await Promise.all([
-        listAddresses().catch(() => []),
+      const [addresses, coupons, cart] = await Promise.all([
+        listAddresses(),
         listUserCoupons().catch(() => []),
+        getCart(),
       ]);
+      const selectedIds = this.data._cartItemIds;
+      const goods = cart.items
+        .filter((item) => selectedIds.length === 0 || selectedIds.indexOf(item.id) >= 0)
+        .map((item) => ({
+          id: item.id,
+          title: item.title,
+          skuName: item.skuName,
+          imageUrl: item.imageUrl,
+          quantity: item.quantity,
+          priceText: item.priceCny != null ? formatCny(item.priceCny) : t("checkout.goods.priceUnknown"),
+        }));
       // The quote is the authoritative payable amount. A failed quote must be
       // visible and must block submission instead of ordering an unknown total.
       let quote: MpCheckoutQuote | null = null;
@@ -222,6 +246,7 @@ Page({
       const selected = current || defaultAddress;
       this.setData({
         addresses,
+        goods,
         coupons: coupons.map((coupon) => ({
           ...coupon,
           thresholdText:

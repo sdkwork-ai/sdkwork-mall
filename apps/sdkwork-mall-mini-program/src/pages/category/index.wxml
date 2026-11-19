@@ -36,7 +36,7 @@
       </scroll-view>
 
       <view wx:if="{{loading}}" class="mp-loading">加载中...</view>
-      <view wx:elif="{{products.length === 0}}" class="mp-empty">该分类暂无商品</view>
+      <view wx:elif="{{!error && products.length === 0}}" class="mp-empty">该分类暂无商品</view>
       <view wx:else class="category-product-list">
         <view
           class="category-product-row"

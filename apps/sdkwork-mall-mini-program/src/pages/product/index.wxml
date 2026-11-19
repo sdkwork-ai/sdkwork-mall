@@ -109,7 +109,6 @@
     <view class="mp-card">
       <view class="mp-card-title">商品评价</view>
       <view class="product-reviews">
-        <text class="product-reviews-stars">★★★★★</text>
         <text class="mp-muted">评价功能即将开放，先看看买家怎么说～</text>
       </view>
     </view>
@@ -146,8 +145,8 @@
         class="product-action-fav {{favorite ? 'product-action-fav-active' : ''}}"
         bindtap="toggleFavorite"
       >{{favorite ? favoritedText : favoriteText}}</button>
-      <button class="product-action-cart" disabled="{{busy || soldOut}}" bindtap="openSkuPopup" data-mode="cart">加入购物车</button>
-      <button class="product-action-buy" disabled="{{busy || soldOut}}" bindtap="openSkuPopup" data-mode="buy">{{soldOut ? soldOutText : buyNowText}}</button>
+      <button class="product-action-cart" disabled="{{busy || soldOut || !purchasable}}" bindtap="openSkuPopup" data-mode="cart">{{purchasable ? addToCartText : unavailableText}}</button>
+      <button class="product-action-buy" disabled="{{busy || soldOut || !purchasable}}" bindtap="openSkuPopup" data-mode="buy">{{soldOut ? soldOutText : (purchasable ? buyNowText : unavailableText)}}</button>
     </view>
 
     <view wx:if="{{skuPopupOpen}}" class="product-sku-mask" bindtap="closeSkuPopup">

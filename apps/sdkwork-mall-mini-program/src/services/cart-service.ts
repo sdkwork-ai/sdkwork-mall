@@ -11,6 +11,7 @@
 import { getMallMpRuntime, createMpIdempotencyParams } from "@sdkwork/mall-mp-core";
 
 import { errorMessage } from "../types/common";
+import { readCommercePayload } from "./commerce-payload";
 
 export interface MpCartItem {
   id: string;
@@ -67,14 +68,9 @@ export interface MpSubmitOrderOptions {
   useWallet?: boolean;
 }
 
-/** The commerce block wraps every payload in its own envelope (`CommerceApiResult`). */
+/** The commerce block hands back the unwrapped `data` payload (or the envelope). */
 function commerce() {
   return getMallMpRuntime().commerceClient;
-}
-
-async function readCommerceData(call: Promise<{ data: Record<string, unknown> }>): Promise<Record<string, unknown>> {
-  const result = await call;
-  return (result?.data ?? {}) as Record<string, unknown>;
 }
 
 function readRows(record: Record<string, unknown>): Array<Record<string, unknown>> {
@@ -88,7 +84,7 @@ function readRows(record: Record<string, unknown>): Array<Record<string, unknown
 }
 
 export async function getCart(): Promise<MpCart> {
-  const payload = await readCommerceData(commerce().cart.current.retrieve());
+  const payload = await readCommercePayload(commerce().cart.current.retrieve());
   return {
     id: String(payload.id ?? "current"),
     items: readRows(payload).map((item) => {
@@ -113,7 +109,7 @@ export async function getCart(): Promise<MpCart> {
 }
 
 export async function addToCart(options: MpAddToCartOptions): Promise<Record<string, unknown>> {
-  return readCommerceData(commerce().cart.items.create({
+  return readCommercePayload(commerce().cart.items.create({
     quantity: options.quantity ?? 1,
     skuId: options.skuId,
     spuId: options.spuId,
@@ -121,15 +117,15 @@ export async function addToCart(options: MpAddToCartOptions): Promise<Record<str
 }
 
 export async function updateCartItem(cartItemId: string, quantity: number): Promise<Record<string, unknown>> {
-  return readCommerceData(commerce().cart.items.update(cartItemId, { quantity }));
+  return readCommercePayload(commerce().cart.items.update(cartItemId, { quantity }));
 }
 
 export async function removeCartItem(cartItemId: string): Promise<Record<string, unknown>> {
-  return readCommerceData(commerce().cart.items.delete(cartItemId));
+  return readCommercePayload(commerce().cart.items.delete(cartItemId));
 }
 
 export async function listPaymentMethods(): Promise<Array<{ code: string; id: string; label: string }>> {
-  const payload = await readCommerceData(commerce().payments.methods.list());
+  const payload = await readCommercePayload(commerce().payments.methods.list());
   return readRows(payload).map((item, index) => ({
     id: String(item.id ?? item.code ?? `method-${index + 1}`),
     code: String(item.code ?? item.id ?? `method-${index + 1}`),
@@ -138,7 +134,7 @@ export async function listPaymentMethods(): Promise<Array<{ code: string; id: st
 }
 
 export async function listUserCoupons(): Promise<Array<{ discountAmountCny: number | null; id: string; minSpendCny: number | null; title: string; validUntil: string }>> {
-  const payload = await readCommerceData(commerce().promotions.userCoupons.list({ page: 1, pageSize: 50 }));
+  const payload = await readCommercePayload(commerce().promotions.userCoupons.list({ page: 1, pageSize: 50 }));
   return readRows(payload)
     .filter((item) => {
       const status = String(item.status ?? item.statusName ?? "AVAILABLE").toUpperCase();
@@ -156,11 +152,11 @@ export async function listUserCoupons(): Promise<Array<{ discountAmountCny: numb
 
 export async function createCheckoutQuote(options: { cartItemIds?: string[] } = {}): Promise<MpCheckoutQuote> {
   const body = options.cartItemIds && options.cartItemIds.length ? { cartItemIds: options.cartItemIds } : {};
-  const sessionRecord = await readCommerceData(commerce().checkout.sessions.create(body));
+  const sessionRecord = await readCommercePayload(commerce().checkout.sessions.create(body));
   const sessionId = String(sessionRecord.id ?? sessionRecord.sessionId ?? "");
   let quoteId = String(sessionRecord.quoteId ?? sessionRecord.checkoutQuoteId ?? "");
   if (!quoteId && sessionId) {
-    const quote = await readCommerceData(commerce().checkout.sessions.quotes.create(sessionId, {}));
+    const quote = await readCommercePayload(commerce().checkout.sessions.quotes.create(sessionId, {}));
     quoteId = String(quote.id ?? quote.quoteId ?? "");
   }
   return {
@@ -201,7 +197,7 @@ export async function submitOrder(options: MpSubmitOrderOptions): Promise<{ orde
     await commerce().addresses.defaultSelection.create(options.addressId, {});
   }
 
-  const order = await readCommerceData(
+  const order = await readCommercePayload(
     commerce().checkout.sessions.orders.create(quote.sessionId, buildCheckoutOrderBody(options, quote)),
   );
   const orderId = String(order.id ?? order.orderId ?? "");
@@ -302,7 +298,9 @@ function readWechatPay(payment: Record<string, unknown>): MpWechatPayParams | nu
     nonceStr,
     package: packageValue,
     paySign,
-    signType: signType === "MD5" || signType === "HMAC-SHA256" ? signType : "RSA",
+    // WeChat's own default is MD5; only send RSA/HMAC when the server states it,
+    // otherwise a v2 backend that omits the field fails every signature check.
+    signType: signType === "MD5" || signType === "HMAC-SHA256" || signType === "RSA" ? signType : "MD5",
     timeStamp,
   };
 }

@@ -31,3 +31,9 @@
   font-size: 24rpx;
   color: #9ca3af;
 }
+
+.activity-end {
+  text-align: center;
+  padding: 24rpx 0;
+  font-size: 24rpx;
+}

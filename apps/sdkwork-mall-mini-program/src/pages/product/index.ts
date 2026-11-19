@@ -1,6 +1,6 @@
 import { errorMessage, type MpSwiperChangeEvent, type MpTapEvent } from "../../types/common";
 import { t } from "../../i18n";
-import { mpCapabilityUrl } from "../../routes/capabilities";
+import { isMpTabCapability, mpCapabilityUrl } from "../../routes/capabilities";
 import { listAddresses } from "../../services/address-service";
 import {
   type MpProductDetail,
@@ -47,6 +47,8 @@ interface ProductData {
   maxQuantity: number | null;
   stockUrgent: boolean;
   soldOut: boolean;
+  /** False when the product exposes no sellable SKU at all. */
+  purchasable: boolean;
   displayPrice: string;
   favorite: boolean;
   offers: ProductOffer[];
@@ -63,6 +65,7 @@ interface ProductData {
   favoriteText: string;
   favoritedText: string;
   soldOutText: string;
+  unavailableText: string;
   buyNowText: string;
   addToCartText: string;
   defaultSkuText: string;
@@ -98,6 +101,8 @@ Page({
     maxQuantity: null,
     stockUrgent: false,
     soldOut: false,
+    /** False when the product exposes no sellable SKU at all. */
+    purchasable: true,
     displayPrice: "",
     favorite: false,
     offers: [],
@@ -114,6 +119,7 @@ Page({
     favoriteText: t("productDetail.favorite"),
     favoritedText: t("productDetail.favorited"),
     soldOutText: t("productDetail.soldOut"),
+    unavailableText: t("productDetail.unavailable"),
     buyNowText: t("productDetail.buyNow"),
     addToCartText: t("productDetail.addToCart"),
     defaultSkuText: t("productDetail.defaultSku"),
@@ -164,10 +170,25 @@ Page({
         this.setData({ loading: false, notFound: true });
         return;
       }
-      const skus = detail.skus.map((sku) => ({
+      const skuRows = detail.skus.map((sku) => ({
         ...sku,
         priceText: formatCny(sku.priceCny),
       }));
+      // A single-SKU product may publish only the selected SKU id on the SPU. The
+      // implicit SKU keeps the buy button working; with no SKU id at all the
+      // product is not sellable and the CTA says so instead of opening a sheet
+      // whose confirm can only ever answer "请选择规格".
+      const skus = skuRows.length === 0 && detail.defaultSkuId
+        ? [{
+            id: detail.defaultSkuId,
+            title: t("productDetail.defaultSku"),
+            priceCny: detail.priceCny,
+            priceText: formatCny(detail.priceCny),
+            stock: null,
+            imageUrl: detail.imageUrl,
+          }]
+        : skuRows;
+      const purchasable = skus.length > 0;
       const selectedSku = skus[0] || null;
       const maxQuantity = selectedSku && selectedSku.stock != null && selectedSku.stock >= 0
         ? selectedSku.stock
@@ -188,6 +209,7 @@ Page({
         maxQuantity,
         stockUrgent: maxQuantity != null && maxQuantity > 0 && maxQuantity < STOCK_URGENT_THRESHOLD,
         soldOut: maxQuantity != null && maxQuantity <= 0,
+        purchasable,
         favorite: isFavorite(detail.id),
         loading: false,
       });
@@ -359,6 +381,10 @@ Page({
     if (this.data.busy || this.data.soldOut) {
       return;
     }
+    if (!this.data.purchasable) {
+      this.showToast(this.data.unavailableText);
+      return;
+    }
     this.setData({ skuPopupOpen: true, skuPopupMode: String(event.currentTarget.dataset.mode ?? "") || "cart" });
   },
 
@@ -387,8 +413,8 @@ Page({
       return;
     }
     const sku = this.data.skus.find((entry) => entry.id === this.data.selectedSkuId);
-    if (!sku) {
-      this.showToast("请选择规格");
+    if (!sku || !sku.id) {
+      this.showToast(this.data.unavailableText);
       return;
     }
     if (!isLoggedIn()) {
@@ -433,7 +459,13 @@ Page({
   },
 
   goChat() {
-    platform.navigateTo(mpCapabilityUrl("buyer.mall.im.chats"));
+    // 客服会话 is a tabBar page; navigateTo cannot open it and fails silently.
+    const url = mpCapabilityUrl("buyer.mall.im.chats");
+    if (isMpTabCapability("buyer.mall.im.chats")) {
+      platform.switchTab(url);
+      return;
+    }
+    platform.navigateTo(url);
   },
 
   retry() {

@@ -8,6 +8,8 @@
  */
 import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 import { asNumber, asRecordList, asString, type MpRecord } from "../types/common";
+import { readCommercePayload } from "./commerce-payload";
+import { readPageInfo } from "./page-info";
 
 export interface MpShopSummary {
   id: string;
@@ -26,6 +28,8 @@ export interface MpShopProduct {
 
 export interface MpShopDetail extends MpShopSummary {
   products: MpShopProduct[];
+  /** True when the shop has more products than the first page. */
+  productsHasMore: boolean;
 }
 
 export interface MpActivity {
@@ -54,20 +58,6 @@ const ACTIVITY_TYPE_LABELS: Record<string, string> = {
 
 function commerce() {
   return getMallMpRuntime().commerceClient;
-}
-
-/**
- * Reads one payload out of the commerce block.
- *
- * `CommerceApiResult` wraps every payload in `{ code, message, requestId, data }`;
- * the commerce `shops` group returns its typed response directly, so both shapes
- * are accepted here.
- */
-async function readCommerceData<T extends Record<string, unknown>>(call: Promise<T | { data: T }>): Promise<T> {
-  const result = (await call) as T | { data: T };
-  return (result && typeof result === "object" && "data" in result && result.data && typeof result.data === "object"
-    ? result.data
-    : result) as T;
 }
 
 function readShopSummary(item: MpRecord): MpShopSummary {
@@ -112,7 +102,7 @@ function readActivity(item: MpRecord): MpActivity {
  * four, fail-soft because the floor is an enrichment.
  */
 export async function listShops(limit = 4): Promise<MpShopSummary[]> {
-  const payload = await readCommerceData(
+  const payload = await readCommercePayload(
     commerce().shops.list({ page: 1, pageSize: limit, operationStatus: "active" }) as unknown as Promise<Record<string, unknown>>,
   ).catch(() => ({}) as MpRecord);
   return asRecordList(payload.items)
@@ -121,41 +111,74 @@ export async function listShops(limit = 4): Promise<MpShopSummary[]> {
     .slice(0, limit);
 }
 
+function mapShopProduct(row: MpRecord): MpShopProduct {
+  return {
+    id: asString(row, ["id", "spuId"]),
+    title: asString(row, ["title", "name"], "商品"),
+    imageUrl: asString(row, ["imageUrl", "mainImage", "image"]),
+    priceCny: asNumber(row, ["priceCny", "price", "salePrice"]),
+    sales: asNumber(row, ["sales", "salesCount"]),
+  };
+}
+
+/** One product page of a shop, for the shop page's load-more. */
+export async function listShopProducts(
+  shopId: string,
+  page = 1,
+  pageSize = 20,
+): Promise<{ hasMore: boolean; items: MpShopProduct[] }> {
+  const payload = await readCommercePayload(
+    commerce().catalog.products.list({ page, pageSize, shopId }) as unknown as Promise<Record<string, unknown>>,
+  );
+  const rows = asRecordList(payload.items);
+  return {
+    hasMore: readPageInfo(payload, rows.length, page).hasMore,
+    items: rows.map(mapShopProduct).filter((product) => product.id),
+  };
+}
+
 export async function retrieveShop(shopId: string): Promise<MpShopDetail | null> {
-  const [shop, productsPayload] = await Promise.all([
-    readCommerceData(commerce().shops.retrieve(shopId) as unknown as Promise<Record<string, unknown>>).catch(() => ({}) as MpRecord),
-    readCommerceData(
-      commerce().catalog.products.list({ page: 1, pageSize: 20, shopId }) as unknown as Promise<Record<string, unknown>>,
-    ).catch(() => ({}) as MpRecord),
-  ]);
+  // A failed shop read stays a failure: turning it into `null` would report an
+  // outage as "店铺不存在或已关闭" and drop the retry the page offers.
+  const shop = await readCommercePayload(commerce().shops.retrieve(shopId) as unknown as Promise<Record<string, unknown>>);
+  // The product shelf is enrichment: the shop header is still useful without it.
+  const productsPayload = await readCommercePayload(
+    commerce().catalog.products.list({ page: 1, pageSize: 20, shopId }) as unknown as Promise<Record<string, unknown>>,
+  ).catch(() => ({}) as MpRecord);
   if (!asString(shop, ["id", "shopId"])) {
     return null;
   }
+  const productRows = asRecordList(productsPayload.items);
   return {
     ...readShopSummary(shop),
-    products: asRecordList(productsPayload.items).map((row) => ({
-      id: asString(row, ["id", "spuId"]),
-      title: asString(row, ["title", "name"], "商品"),
-      imageUrl: asString(row, ["imageUrl", "mainImage", "image"]),
-      priceCny: asNumber(row, ["priceCny", "price", "salePrice"]),
-      sales: asNumber(row, ["sales", "salesCount"]),
-    })),
+    products: productRows.map(mapShopProduct).filter((product) => product.id),
+    productsHasMore: readPageInfo(productsPayload, productRows.length, 1).hasMore,
+  };
+}
+
+/** One activity-hall page, so the venue list can page instead of truncating. */
+export async function listActivityPage(
+  page = 1,
+  pageSize = 20,
+): Promise<{ hasMore: boolean; items: MpActivity[] }> {
+  const payload = await readCommercePayload(
+    commerce().promotions.offers.list({ status: "active", page, pageSize }) as unknown as Promise<Record<string, unknown>>,
+  );
+  const rows = asRecordList(payload.items);
+  return {
+    hasMore: readPageInfo(payload, rows.length, page).hasMore,
+    items: rows.map(readActivity).filter((activity) => activity.id),
   };
 }
 
 export async function listActivities(): Promise<MpActivity[]> {
-  const payload = await readCommerceData(
-    commerce().promotions.offers.list({ status: "active", page: 1, pageSize: 20 }) as unknown as Promise<Record<string, unknown>>,
-  );
-  return asRecordList(payload.items)
-    .map(readActivity)
-    .filter((activity) => activity.id);
+  return (await listActivityPage()).items;
 }
 
 export async function retrieveActivity(eventId: string): Promise<MpActivity | null> {
   // A failed read must stay distinguishable from "no such activity": the page
   // shows a retry for the first and a terminal empty state for the second.
-  const record = await readCommerceData(
+  const record = await readCommercePayload(
     commerce().promotions.offers.retrieve(eventId) as unknown as Promise<Record<string, unknown>>,
   );
   if (!asString(record, ["id", "offerId", "activityId"])) {

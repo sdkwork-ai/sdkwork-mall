@@ -8,6 +8,8 @@
  */
 import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
+import { readCommercePayload } from "./commerce-payload";
+
 export interface MpOffer {
   claimable: boolean;
   discountText: string;
@@ -21,11 +23,6 @@ function promotions() {
   return getMallMpRuntime().commerceClient.promotions;
 }
 
-async function readCommerceData(call: Promise<{ data: Record<string, unknown> }>): Promise<Record<string, unknown>> {
-  const result = await call;
-  return (result?.data ?? {}) as Record<string, unknown>;
-}
-
 function readRows(record: Record<string, unknown>): Array<Record<string, unknown>> {
   if (Array.isArray(record.items)) {
     return record.items as Array<Record<string, unknown>>;
@@ -37,7 +34,7 @@ function readRows(record: Record<string, unknown>): Array<Record<string, unknown
 }
 
 export async function listOffers(): Promise<MpOffer[]> {
-  const payload = await readCommerceData(
+  const payload = await readCommercePayload(
     promotions().offers.list({ page: 1, pageSize: 10, status: "active" }),
   );
   return readRows(payload).map((item) => ({
@@ -51,9 +48,9 @@ export async function listOffers(): Promise<MpOffer[]> {
 }
 
 export async function claimCoupon(offerId: string): Promise<Record<string, unknown>> {
-  return readCommerceData(promotions().userCoupons.claims.create({ offerId }));
+  return readCommercePayload(promotions().userCoupons.claims.create({ offerId }));
 }
 
 export async function redeemCouponCode(code: string): Promise<Record<string, unknown>> {
-  return readCommerceData(promotions().codes.redemptions.create({ code }));
+  return readCommercePayload(promotions().codes.redemptions.create({ code }));
 }

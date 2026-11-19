@@ -5,6 +5,10 @@ module.exports = {
     loading: "加载结算信息...",
     retry: "重试",
     selectedCount: "已选择 {{count}} 件购物车商品参与结算",
+    goods: {
+      title: "商品清单",
+      priceUnknown: "待确认",
+    },
     address: {
       title: "收货地址",
       manage: "管理地址",

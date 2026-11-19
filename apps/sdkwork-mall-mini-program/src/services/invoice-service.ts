@@ -9,6 +9,7 @@
 import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
 import { asNumber, asRecordList, asString, type MpRecord } from "../types/common";
+import { readCommercePayload } from "./commerce-payload";
 
 export interface MpInvoice {
   id: string;
@@ -30,13 +31,8 @@ function invoices() {
   return getMallMpRuntime().commerceClient.invoices;
 }
 
-async function readCommerceData(call: Promise<{ data: Record<string, unknown> }>): Promise<Record<string, unknown>> {
-  const result = await call;
-  return (result?.data ?? {}) as Record<string, unknown>;
-}
-
 export async function listInvoices(): Promise<MpInvoice[]> {
-  const payload = await readCommerceData(invoices().mine.list({ page: 1, pageSize: 50 }));
+  const payload = await readCommercePayload(invoices().mine.list({ page: 1, pageSize: 50 }));
   return asRecordList(payload.items).map((row: MpRecord) => ({
     id: asString(row, ["id", "invoiceId"]),
     title: asString(row, ["title", "invoiceTitle", "header"], "发票"),
@@ -47,7 +43,7 @@ export async function listInvoices(): Promise<MpInvoice[]> {
 }
 
 export async function createInvoice(input: MpInvoiceCreateInput): Promise<MpRecord> {
-  return readCommerceData(invoices().create({
+  return readCommercePayload(invoices().create({
     title: input.title,
     titleType: input.titleType,
     taxNumber: input.taxNumber,

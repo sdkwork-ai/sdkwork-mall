@@ -1,11 +1,11 @@
 import { errorMessage } from "../../types/common";
 import {
   getPointsSummary,
-  type MpLedgerEntry,
+  type MpPointsLedgerEntry,
   type MpPointsLot,
 } from "../../services/account-service";
 import { isLoggedIn } from "../../services/session";
-import { formatCny, formatPoints } from "../../utils/format";
+import { formatPoints } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
 
 interface LotRow {
@@ -45,11 +45,12 @@ function toLotRows(lots: MpPointsLot[]): LotRow[] {
   }));
 }
 
-function toLedgerRows(entries: MpLedgerEntry[]): LedgerRow[] {
+function toLedgerRows(entries: MpPointsLedgerEntry[]): LedgerRow[] {
   return entries.map((entry) => ({
     id: entry.id,
     summary: entry.summary,
-    amountText: entry.amountCny != null ? formatCny(entry.amountCny) : "",
+    // Points are a count: rendering them as CNY printed "¥100.00" for 100 积分.
+    amountText: entry.points != null ? formatPoints(entry.points) : "",
     occurredText: formatOccurredAt(entry.occurredAt),
   }));
 }

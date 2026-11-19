@@ -55,6 +55,21 @@
   background: #f4f5f7;
 }
 
+.shop-end {
+  text-align: center;
+  padding: 24rpx 0 8rpx;
+  font-size: 24rpx;
+}
+
+/* A product without a cover image must not render an empty broken box. */
+.shop-product-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 24rpx;
+}
+
 .shop-product-title {
   font-size: 26rpx;
   font-weight: 600;

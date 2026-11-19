@@ -520,7 +520,11 @@ Page({
         this.loadWithdrawalPage(1),
       ]);
     } catch (cause) {
-      if ((cause as { statusCode?: number }).statusCode === 404) {
+      // `SdkError` exposes `httpStatus` (not `statusCode`): checking the wrong
+      // member made every first-time visitor read as "not supported".
+      const error = cause as { httpStatus?: number; problem?: { status?: number } };
+      const httpStatus = error.httpStatus ?? error.problem?.status;
+      if (httpStatus === 404) {
         this.setData({ center: null, shareLink: "", centerNotice: t("partner.center.notEnrolled") });
         return;
       }

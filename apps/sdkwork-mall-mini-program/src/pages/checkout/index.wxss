@@ -6,6 +6,47 @@
   padding: 20rpx 30rpx 0;
 }
 
+/* 商品清单：买家在付款前必须看到买了什么 */
+.checkout-goods {
+  display: flex;
+  gap: 16rpx;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.checkout-goods:last-child {
+  border-bottom: 0;
+}
+
+.checkout-goods-image {
+  width: 120rpx;
+  height: 120rpx;
+  flex-shrink: 0;
+  background: #f4f5f7;
+}
+
+.checkout-goods-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 22rpx;
+}
+
+.checkout-goods-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkout-goods-title {
+  font-size: 26rpx;
+  color: #1f2937;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .checkout-address {
   border: 1rpx solid #e5e7eb;
   border-radius: 0;

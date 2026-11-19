@@ -9,6 +9,11 @@ module.exports = {
     sold: "已售 {{count}}",
     error: "首页加载失败",
     retry: "重试",
+    partialFailure: "部分内容加载失败，下拉刷新或点击重试",
+    empty: {
+      title: "暂时没有可展示的商品",
+      hint: "网络或商品上架状态可能异常，下拉刷新或稍后再试",
+    },
     shareTitle: "SDKWork 商城 · 品质生活一站购齐",
     seckill: {
       title: "限时秒杀",

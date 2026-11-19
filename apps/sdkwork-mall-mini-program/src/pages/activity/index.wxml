@@ -6,7 +6,7 @@
   </view>
 
   <block wx:if="{{!loading}}">
-    <view wx:if="{{activities.length === 0}}" class="mp-empty">暂无进行中的活动</view>
+    <view wx:if="{{!message && activities.length === 0}}" class="mp-empty">暂无进行中的活动</view>
     <view
       class="activity-card activity-{{item.phase}}"
       wx:for="{{activities}}"
@@ -21,5 +21,7 @@
       <view class="mp-muted" wx:if="{{item.highlight}}">{{item.highlight}}</view>
       <view class="activity-meta" wx:if="{{item.windowText}}">{{item.windowText}}</view>
     </view>
+    <view wx:if="{{loadingMore}}" class="mp-loading">加载更多活动...</view>
+    <view wx:elif="{{activities.length > 0 && !hasMore}}" class="mp-muted activity-end">没有更多活动了</view>
   </block>
 </view>

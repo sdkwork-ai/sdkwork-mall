@@ -47,8 +47,8 @@ Page({
     this.setData({ loading: true });
     try {
       const [offers, coupons] = await Promise.all([
-        listOffers().catch(() => []),
-        listUserCoupons().catch(() => []),
+        listOffers(),
+        listUserCoupons(),
       ]);
       this.setData({
         claimable: offers.filter((offer) => offer.claimable),

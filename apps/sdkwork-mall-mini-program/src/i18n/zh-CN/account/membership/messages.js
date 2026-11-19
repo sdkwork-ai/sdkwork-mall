@@ -9,6 +9,10 @@ module.exports = {
     levelLabel: "当前等级",
     defaultLevel: "普通会员",
     statusLabel: "状态：{{status}}",
+    status: {
+      active: "会员",
+      free: "普通会员",
+    },
     benefits: {
       price: "专属会员价",
       points: "积分加倍",

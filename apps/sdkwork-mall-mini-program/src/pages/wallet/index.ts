@@ -4,7 +4,7 @@ import {
   listCashLedger,
   type MpLedgerEntry,
 } from "../../services/account-service";
-import { formatCny } from "../../utils/format";
+import { formatCny, formatPoints } from "../../utils/format";
 import { isLoggedIn } from "../../services/session";
 import { platform } from "@sdkwork/mall-mp-core";
 
@@ -63,7 +63,7 @@ Page({
       const [overview, ledger] = await Promise.all([getWalletOverview(), listCashLedger()]);
       this.setData({
         cashText: overview.cashBalanceCny != null ? formatCny(overview.cashBalanceCny) : "--",
-        pointsText: overview.pointsBalance != null ? String(overview.pointsBalance) : "--",
+        pointsText: overview.pointsBalance != null ? formatPoints(overview.pointsBalance) : "--",
         ledger: toLedgerRows(ledger),
         loading: false,
       });

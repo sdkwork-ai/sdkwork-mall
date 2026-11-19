@@ -7,6 +7,8 @@
  */
 import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
+import { readCommercePayload } from "./commerce-payload";
+
 export interface MpAddress {
   addressLine: string;
   id: string;
@@ -25,11 +27,6 @@ function addresses() {
   return getMallMpRuntime().commerceClient.addresses;
 }
 
-async function readCommerceData(call: Promise<{ data: Record<string, unknown> }>): Promise<Record<string, unknown>> {
-  const result = await call;
-  return (result?.data ?? {}) as Record<string, unknown>;
-}
-
 function readRows(record: Record<string, unknown>): Array<Record<string, unknown>> {
   if (Array.isArray(record.items)) {
     return record.items as Array<Record<string, unknown>>;
@@ -41,7 +38,7 @@ function readRows(record: Record<string, unknown>): Array<Record<string, unknown
 }
 
 export async function listAddresses(): Promise<MpAddress[]> {
-  const payload = await readCommerceData(addresses().list({ page: 1, pageSize: 20 }));
+  const payload = await readCommercePayload(addresses().list({ page: 1, pageSize: 20 }));
   return readRows(payload).map((item) => ({
     id: String(item.id ?? ""),
     receiverName: String(item.receiverName ?? item.contactName ?? ""),
@@ -52,7 +49,7 @@ export async function listAddresses(): Promise<MpAddress[]> {
 }
 
 export async function createAddress(options: MpAddressInput): Promise<Record<string, unknown>> {
-  return readCommerceData(addresses().create({
+  return readCommercePayload(addresses().create({
     addressLine: options.addressLine,
     receiverName: options.receiverName,
     receiverPhone: options.receiverPhone,
@@ -60,7 +57,7 @@ export async function createAddress(options: MpAddressInput): Promise<Record<str
 }
 
 export async function updateAddress(addressId: string, options: MpAddressInput): Promise<Record<string, unknown>> {
-  return readCommerceData(addresses().update(addressId, {
+  return readCommercePayload(addresses().update(addressId, {
     addressLine: options.addressLine,
     receiverName: options.receiverName,
     receiverPhone: options.receiverPhone,
@@ -68,9 +65,9 @@ export async function updateAddress(addressId: string, options: MpAddressInput):
 }
 
 export async function deleteAddress(addressId: string): Promise<Record<string, unknown>> {
-  return readCommerceData(addresses().delete(addressId));
+  return readCommercePayload(addresses().delete(addressId));
 }
 
 export async function setDefaultAddress(addressId: string): Promise<Record<string, unknown>> {
-  return readCommerceData(addresses().defaultSelection.create(addressId, {}));
+  return readCommercePayload(addresses().defaultSelection.create(addressId, {}));
 }

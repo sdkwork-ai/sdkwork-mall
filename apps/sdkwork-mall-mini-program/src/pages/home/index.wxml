@@ -40,6 +40,20 @@
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
   </view>
 
+  <!-- A single degraded shelf must not look like a fully loaded page. -->
+  <view wx:if="{{!loading && !error && shelfNotice}}" class="mp-card home-partial" aria-role="alert">
+    <text class="mp-muted">{{shelfNotice}}</text>
+    <button class="mp-btn mp-btn-ghost home-partial-retry" bindtap="retry">{{retryText}}</button>
+  </view>
+
+  <!-- A resolved-but-empty storefront must explain itself instead of rendering
+       a blank strip under the hero. -->
+  <view wx:if="{{!loading && !error && !hasContent}}" class="mp-card home-empty" aria-role="status">
+    <view class="home-empty-title">{{emptyTitle}}</view>
+    <text class="mp-muted">{{emptyHint}}</text>
+    <button class="mp-btn mp-btn-ghost home-empty-retry" bindtap="retry">{{retryText}}</button>
+  </view>
+
   <view wx:if="{{categories.length}}" class="mp-card">
     <view class="mp-card-title">{{categoriesTitle}}</view>
     <view class="home-category-grid">
@@ -148,8 +162,6 @@
       </view>
     </view>
   </view>
-
-  <view wx:if="{{buildTag}}" class="home-build">{{buildTag}}</view>
 
   <view class="home-services">
     <view

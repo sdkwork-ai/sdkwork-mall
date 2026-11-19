@@ -18,7 +18,7 @@ interface MpMembershipPackageView extends MpMembershipPackage {
 }
 
 interface MembershipData {
-  busyPackageId: number | null;
+  busyPackageId: string | null;
   isMember: boolean;
   /** Static benefit tiles shown above the packages (parity with the H5 page). */
   benefits: Array<{ id: string; label: string }>;
@@ -26,6 +26,8 @@ interface MembershipData {
   message: string;
   packages: MpMembershipPackageView[];
   status: MpMembershipStatus | null;
+  /** Localized "状态：会员/普通会员" line. */
+  statusLabel: string;
   title: string;
   loadingText: string;
   retryText: string;
@@ -63,6 +65,7 @@ Page({
     message: "",
     packages: [],
     status: null,
+    statusLabel: "",
     title: t("membership.title"),
     loadingText: t("membership.loading"),
     retryText: t("membership.retry"),
@@ -92,6 +95,11 @@ Page({
       ]);
       this.setData({
         status,
+        statusLabel: status
+          ? t("membership.statusLabel", {
+              status: status.status === "active" ? t("membership.status.active") : t("membership.status.free"),
+            })
+          : "",
         packages: packages.map(toPackageView),
         isMember: status?.status === "active",
         loading: false,
@@ -102,7 +110,7 @@ Page({
   },
 
   async purchase(event: MpTapEvent) {
-    const packageId = Number(event.currentTarget.dataset.id);
+    const packageId = String(event.currentTarget.dataset.id ?? "");
     if (!packageId || this.data.busyPackageId !== null) {
       return;
     }

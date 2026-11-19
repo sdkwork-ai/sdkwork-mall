@@ -9,7 +9,7 @@
     <view class="membership-hero">
       <view class="membership-label">{{levelLabel}}</view>
       <view class="membership-level">{{status ? status.levelName : defaultLevel}}</view>
-      <view class="mp-muted membership-status" wx:if="{{status}}">{{status.status}}</view>
+      <view class="mp-muted membership-status" wx:if="{{status}}">{{statusLabel}}</view>
     </view>
 
     <view class="mp-card">

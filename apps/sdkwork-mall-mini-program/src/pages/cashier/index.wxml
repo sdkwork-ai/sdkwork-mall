@@ -9,6 +9,10 @@
     <view class="mp-card">
       <view class="mp-card-title">{{titleText}}</view>
       <view class="mp-muted">{{orderNoText}}</view>
+      <view class="mp-flex-between cashier-amount">
+        <text>{{amountLabel}}</text>
+        <text class="mp-price">{{amountText || '--'}}</text>
+      </view>
     </view>
 
     <view class="mp-card">
@@ -24,7 +28,7 @@
     </view>
 
     <view class="cashier-actions">
-      <button class="mp-btn mp-btn-primary cashier-pay" disabled="{{paying || !selectedCode}}" bindtap="pay">
+      <button class="mp-btn mp-btn-primary cashier-pay" disabled="{{paying || !selectedCode || !amountText}}" bindtap="pay">
         {{paying ? payingText : payText}}
       </button>
       <button class="mp-btn mp-btn-ghost cashier-cancel" bindtap="cancel">{{laterText}}</button>

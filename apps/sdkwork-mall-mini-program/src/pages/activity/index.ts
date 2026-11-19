@@ -1,7 +1,7 @@
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { t } from "../../i18n";
 import { mpCapabilityUrl } from "../../routes/capabilities";
-import { listActivities, type MpActivity } from "../../services/marketing-service";
+import { listActivityPage, type MpActivity } from "../../services/marketing-service";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import { platform } from "@sdkwork/mall-mp-core";
 
@@ -17,8 +17,11 @@ interface ActivityRow {
 
 interface ActivityData {
   loading: boolean;
+  loadingMore: boolean;
   message: string;
   activities: ActivityRow[];
+  hasMore: boolean;
+  _page: number;
 }
 
 const PHASE_TEXTS: Record<MpActivity["phase"], string> = {
@@ -54,8 +57,11 @@ function toRows(activities: MpActivity[]): ActivityRow[] {
 Page({
   data: {
     loading: true,
+    loadingMore: false,
     message: "",
     activities: [],
+    hasMore: true,
+    _page: 0,
   } as ActivityData,
 
   onShow() {
@@ -63,13 +69,44 @@ Page({
   },
 
   async load() {
-    this.setData({ loading: true, message: "" });
+    this.setData({ loading: true, message: "", _page: 0, hasMore: true });
     try {
-      const activities = await listActivities();
-      this.setData({ activities: toRows(activities), loading: false });
+      const page = await listActivityPage(1);
+      this.setData({
+        activities: toRows(page.items),
+        hasMore: page.hasMore,
+        _page: 1,
+        loading: false,
+      });
     } catch (cause) {
       this.setData({ loading: false, message: errorMessage(cause, "活动加载失败") });
     }
+  },
+
+  async loadMore() {
+    if (this.data.loading || this.data.loadingMore || !this.data.hasMore) {
+      return;
+    }
+    const nextPage = this.data._page + 1;
+    this.setData({ loadingMore: true });
+    try {
+      const page = await listActivityPage(nextPage);
+      const seen = new Set(this.data.activities.map((activity) => activity.id));
+      const appended = toRows(page.items).filter((activity) => !seen.has(activity.id));
+      this.setData({
+        activities: this.data.activities.concat(appended),
+        hasMore: page.hasMore,
+        _page: nextPage,
+        loadingMore: false,
+      });
+    } catch (cause) {
+      this.setData({ loadingMore: false });
+      platform.toast(errorMessage(cause, "活动加载失败"), "none");
+    }
+  },
+
+  onReachBottom() {
+    void this.loadMore();
   },
 
   goDetail(event: MpTapEvent) {

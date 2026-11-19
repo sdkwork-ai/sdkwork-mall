@@ -2,6 +2,8 @@ import { t } from "../../i18n";
 import { errorMessage, type MpTapEvent } from "../../types/common";
 import { mpCapabilityUrl } from "../../routes/capabilities";
 import { listPaymentMethods, payOrder, type MpWechatPayParams } from "../../services/cart-service";
+import { getOrderDetail } from "../../services/order-service";
+import { formatCny } from "../../utils/format";
 import { platform } from "@sdkwork/mall-mp-core";
 
 interface CashierData {
@@ -15,6 +17,8 @@ interface CashierData {
   loadingText: string;
   retryText: string;
   titleText: string;
+  amountLabel: string;
+  amountText: string;
   orderNoText: string;
   methodsTitle: string;
   methodsEmpty: string;
@@ -35,6 +39,8 @@ Page({
     loadingText: t("cashier.loading"),
     retryText: t("cashier.retry"),
     titleText: t("cashier.title"),
+    amountLabel: t("cashier.amountLabel"),
+    amountText: "",
     orderNoText: "",
     methodsTitle: t("cashier.methodsTitle"),
     methodsEmpty: t("cashier.methodsEmpty"),
@@ -59,9 +65,18 @@ Page({
       return;
     }
     try {
-      const methods = await listPaymentMethods();
+      // The buyer must see what they are paying before the pay button enables.
+      const [methods, order] = await Promise.all([
+        listPaymentMethods(),
+        getOrderDetail(this.data.orderId),
+      ]);
+      const payable = order.paidAmountCny ?? order.totalAmountCny;
+      if (payable == null) {
+        throw new Error(t("cashier.errors.amountUnavailable"));
+      }
       this.setData({
         methods,
+        amountText: formatCny(payable),
         selectedCode: this.data._preselectedCode || (methods[0] ? methods[0].code : ""),
         loading: false,
       });

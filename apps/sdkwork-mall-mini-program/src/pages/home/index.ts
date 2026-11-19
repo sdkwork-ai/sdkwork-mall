@@ -9,9 +9,6 @@ import { formatCny } from "../../utils/format";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
 import { platform } from "@sdkwork/mall-mp-core";
 
-// Injected by scripts/build-miniprogram.mjs: proves which package is running.
-declare const __SDKWORK_MALL_MP_BUILD_ID__: string;
-
 /**
  * 首页入口按能力路由声明，路径由 routes/capabilities.ts 解析；
  * `query` 为可选的跳转参数，与 PC/H5 的查询参数同名。
@@ -27,6 +24,9 @@ interface HomeBannerSource {
 }
 
 type HomeBannerTone = "brand" | "ember" | "teal" | "violet";
+
+/** A tab return refreshes the shelves after this long, keeping them fresh without refetching on every visit. */
+const HOME_REFRESH_INTERVAL_MS = 60_000;
 
 interface HomeBanner {
   capability: string;
@@ -95,10 +95,16 @@ interface HomeData {
   shareTitle: string;
   loading: boolean;
   error: string;
+  /** True when at least one shelf has something to show (empty state otherwise). */
+  hasContent: boolean;
+  /** Set when one primary shelf failed while the rest of the home rendered. */
+  shelfNotice: string;
+  emptyTitle: string;
+  emptyHint: string;
   _seckillTimer: number | null;
   bannerIndex: number;
-  /** Build stamp rendered at the bottom of the page (visible proof of the package). */
-  buildTag: string;
+  /** Epoch millis of the last completed load, used to refresh a stale tab. */
+  _loadedAt: number;
   _bannerTimer: number | null;
   _bannerTouchX: number | null;
   _bannerTouchY: number | null;
@@ -173,9 +179,13 @@ Page({
     shareTitle: t("home.shareTitle"),
     loading: true,
     error: "",
+    hasContent: false,
+    shelfNotice: "",
+    emptyTitle: t("home.empty.title"),
+    emptyHint: t("home.empty.hint"),
     _seckillTimer: null,
   bannerIndex: 0,
-  buildTag: `build ${__SDKWORK_MALL_MP_BUILD_ID__}`,
+  _loadedAt: 0,
   _bannerTimer: null,
   _bannerTouchX: null,
   _bannerTouchY: null,
@@ -195,6 +205,12 @@ Page({
     // re-read it on tab return instead of carrying a stale chip row.
     this.setData({ footprint: readFootprint().slice(0, 6) });
     this.startBannerAutoplay();
+    // A tab page never re-runs `onLoad`; refresh a stale shelf in place so
+    // prices/stock do not stay frozen from the first visit. The refresh is
+    // silent: the current snapshot stays visible while it happens.
+    if (!this.data.loading && Date.now() - this.data._loadedAt > HOME_REFRESH_INTERVAL_MS) {
+      void this.loadHome({ silent: this.data.hasContent });
+    }
   },
 
   onHide() {
@@ -353,20 +369,44 @@ Page({
     platform.navigateTo(url);
   },
 
-  async loadHome() {
-    this.setData({ loading: true, error: "" });
+  /**
+   * Loads the storefront shelves.
+   *
+   * `silent` is the tab-return refresh: the visible snapshot stays on screen
+   * while it happens, and a failed refresh keeps the last good shelves instead
+   * of replacing a working page with an error banner.
+   */
+  async loadHome(options: { silent?: boolean } = {}) {
+    const silent = options.silent === true;
+    if (!silent) {
+      this.setData({ loading: true, error: "" });
+    }
     try {
-      // Categories and the hot list are the storefront itself: a failure has to
-      // surface as an error with a retry path, not as a blank page. Everything
-      // else (new arrivals, featured shops, offers) is an enrichment floor and
-      // degrades to "section hidden" like the H5 home snapshot.
-      const [categoryResult, hotResult, newResult, shopsResult, offersResult] = await Promise.all([
-        listCategories(),
-        listProducts({ page: 1, pageSize: 10, sort: "sales" }),
+      // Categories and the hot list are the storefront itself. Each is loaded
+      // independently so one degraded dependency (a product read can be 503 while
+      // categories are healthy) hides only its own shelf instead of replacing the
+      // whole page with an error. Everything else (new arrivals, featured shops,
+      // offers) is an enrichment floor and degrades to "section hidden".
+      const [categoryOutcome, hotOutcome, newResult, shopsResult, offersResult] = await Promise.all([
+        listCategories()
+          .then((value) => ({ ok: true as const, value }))
+          .catch((cause: unknown) => ({ ok: false as const, cause })),
+        listProducts({ page: 1, pageSize: 10, sort: "sales" })
+          .then((value) => ({ ok: true as const, value }))
+          .catch((cause: unknown) => ({ ok: false as const, cause })),
         listProducts({ page: 1, pageSize: 10, sort: "newest" }).catch(() => null),
         listShops(4).catch(() => [] as MpShopSummary[]),
         listOffers().catch(() => [] as MpOffer[]),
       ]);
+      // Both primary shelves down: that is a failed page, not a partial one.
+      if (!categoryOutcome.ok && !hotOutcome.ok) {
+        throw categoryOutcome.cause;
+      }
+      const categoryResult = categoryOutcome.ok ? categoryOutcome.value : [];
+      const hotResult = hotOutcome.ok
+        ? hotOutcome.value
+        : { hasMore: false, items: [] as MpProductCard[], total: 0 };
+      const partialShelfIssue = !categoryOutcome.ok || !hotOutcome.ok;
       const toHotProduct = (product: MpProductCard): HotProduct => ({
         ...product,
         priceText: formatCny(product.priceCny),
@@ -385,21 +425,42 @@ Page({
         ) ||
         offersResult[0] ||
         null;
+      const categories = categoryResult.slice(0, 8);
+      const hotProducts = hotResult.items.slice(0, 6).map(toHotProduct);
+      const newProducts = newResult ? newResult.items.slice(0, 6).map(toHotProduct) : [];
+      const footprint = readFootprint().slice(0, 6);
+      const shops = shopsResult.map((shop) => ({
+        ...shop,
+        ratingText:
+          shop.rating != null ? t("home.shopRating", { rating: shop.rating }) : "",
+      }));
       this.setData({
-        categories: categoryResult.slice(0, 8),
-        hotProducts: hotResult.items.slice(0, 6).map(toHotProduct),
-        newProducts: newResult ? newResult.items.slice(0, 6).map(toHotProduct) : [],
-        shops: shopsResult.map((shop) => ({
-          ...shop,
-          ratingText:
-            shop.rating != null ? t("home.shopRating", { rating: shop.rating }) : "",
-        })),
-        footprint: readFootprint().slice(0, 6),
+        categories,
+        hotProducts,
+        newProducts,
+        shops,
+        footprint,
         seckillOffer: flashOffer,
         loading: false,
+        error: "",
+        shelfNotice: partialShelfIssue ? t("home.partialFailure") : "",
+        // A storefront that resolved successfully but carries no rows must say
+        // so instead of rendering an empty page under the hero.
+        hasContent:
+          categories.length > 0 ||
+          hotProducts.length > 0 ||
+          newProducts.length > 0 ||
+          shops.length > 0 ||
+          footprint.length > 0 ||
+          flashOffer != null,
       });
+      this.data._loadedAt = Date.now();
       this.startSeckillCountdown();
     } catch (cause) {
+      if (silent && this.data.hasContent) {
+        this.setData({ loading: false });
+        return;
+      }
       this.setData({
         loading: false,
         error: errorMessage(cause, t("home.error")),

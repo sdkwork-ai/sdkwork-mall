@@ -14,6 +14,7 @@
 import { getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
 import { asNumber, asRecord, asRecordList, asString, type MpRecord } from "../types/common";
+import { readCommercePayload } from "./commerce-payload";
 
 const PAGE_SIZE = 20;
 
@@ -29,6 +30,14 @@ export interface MpLedgerEntry {
   occurredAt: string;
 }
 
+/** A points-ledger row: points are a count, never CNY. */
+export interface MpPointsLedgerEntry {
+  id: string;
+  summary: string;
+  points: number | null;
+  occurredAt: string;
+}
+
 export interface MpPointsLot {
   id: string;
   points: number | null;
@@ -38,7 +47,7 @@ export interface MpPointsLot {
 export interface MpPointsSummary {
   balance: number | null;
   lots: MpPointsLot[];
-  ledger: MpLedgerEntry[];
+  ledger: MpPointsLedgerEntry[];
 }
 
 export interface MpMembershipStatus {
@@ -55,7 +64,8 @@ export interface MpMembershipPlan {
 export interface MpMembershipPackage {
   description: string;
   durationDays: number | null;
-  id: number;
+  /** Wire id (int64); kept as a string so large ids never round. */
+  id: string;
   name: string;
   priceCny: number | null;
   recommended: boolean;
@@ -70,20 +80,16 @@ function commerce() {
   return getMallMpRuntime().commerceClient;
 }
 
-async function readCommerceData(call: Promise<unknown>): Promise<MpRecord> {
-  const result = (await call) as { data?: unknown } | null | undefined;
-  const data = result && typeof result === "object" ? result.data : undefined;
-  return (data && typeof data === "object" ? data : {}) as MpRecord;
-}
-
 function pageItems(payload: MpRecord): MpRecord[] {
   return asRecordList(payload.items);
 }
 
 export async function getWalletOverview(): Promise<MpWalletOverview> {
+  // Failures must reach the page: swallowing them rendered "--" balances and an
+  // empty ledger as if the account really held nothing.
   const [cash, points] = await Promise.all([
-    readCommerceData(commerce().wallet.accounts.retrieve("cash")).catch(() => ({}) as MpRecord),
-    readCommerceData(commerce().wallet.accounts.points.retrieve()).catch(() => ({}) as MpRecord),
+    readCommercePayload(commerce().wallet.accounts.retrieve("cash")),
+    readCommercePayload(commerce().wallet.accounts.points.retrieve()),
   ]);
   return {
     cashBalanceCny: asNumber(cash, ["balanceCny", "balance", "availableAmount"]),
@@ -92,9 +98,9 @@ export async function getWalletOverview(): Promise<MpWalletOverview> {
 }
 
 export async function listCashLedger(): Promise<MpLedgerEntry[]> {
-  const payload = await readCommerceData(
+  const payload = await readCommercePayload(
     commerce().wallet.ledgerEntries.list({ page: 1, pageSize: PAGE_SIZE }),
-  ).catch(() => ({}) as MpRecord);
+  );
   return pageItems(payload).map((row, index) => ({
     id: asString(row, ["id", "entryId", "ledgerEntryId"]) || `entry-${index + 1}`,
     summary: asString(row, ["summary", "title", "remark", "reason", "type"], "钱包变动"),
@@ -105,10 +111,10 @@ export async function listCashLedger(): Promise<MpLedgerEntry[]> {
 
 export async function getPointsSummary(): Promise<MpPointsSummary> {
   const [summary, ledgerPage] = await Promise.all([
-    readCommerceData(commerce().wallet.accounts.points.retrieve()).catch(() => ({}) as MpRecord),
-    readCommerceData(
+    readCommercePayload(commerce().wallet.accounts.points.retrieve()),
+    readCommercePayload(
       commerce().wallet.ledgerEntries.points.list({ page: 1, pageSize: PAGE_SIZE }),
-    ).catch(() => ({}) as MpRecord),
+    ),
   ]);
   return {
     balance: asNumber(summary, ["balance", "availablePoints", "totalPoints"]),
@@ -118,29 +124,36 @@ export async function getPointsSummary(): Promise<MpPointsSummary> {
     ledger: pageItems(ledgerPage).map((row, index) => ({
       id: asString(row, ["id", "entryId", "ledgerEntryId"]) || `point-entry-${index + 1}`,
       summary: asString(row, ["summary", "title", "remark", "reason", "type"], "积分变动"),
-      amountCny: asNumber(row, ["points", "amountCny", "amount", "changeAmount"]),
+      points: asNumber(row, ["points", "amount", "changeAmount", "amountCny"]),
       occurredAt: asString(row, ["occurredAt", "createdAt", "entryTime"]),
     })),
   };
 }
 
 export async function getMembershipStatus(): Promise<MpMembershipStatus | null> {
-  const status = await readCommerceData(
-    commerce().memberships.current.status.retrieve(),
-  ).catch(() => ({}) as MpRecord);
-  if (!asString(status, ["levelName", "level", "status", "statusName"])) {
+  // The status document carries `active`; the plan/level name lives on the
+  // membership summary (`planName`). Reading `levelName`/`status` off the status
+  // document always missed and every member rendered as 普通会员.
+  const [status, summary] = await Promise.all([
+    readCommercePayload(commerce().memberships.current.status.retrieve()),
+    readCommercePayload(commerce().memberships.current.retrieve()).catch(() => ({}) as MpRecord),
+  ]);
+  const active =
+    status.active === true || String(status.status ?? "").toUpperCase() === "ACTIVE";
+  const levelName = asString(summary, ["planName", "levelName", "planTitle", "name"]);
+  if (!active && !levelName) {
     return null;
   }
   return {
-    levelName: asString(status, ["levelName", "level"], "普通会员"),
-    status: asString(status, ["status", "statusName"], "active"),
+    levelName: levelName || "会员",
+    status: active ? "active" : "free",
   };
 }
 
 export async function listMembershipPlans(): Promise<MpMembershipPlan[]> {
-  const payload = await readCommerceData(
+  const payload = await readCommercePayload(
     commerce().memberships.plans.list({}),
-  ).catch(() => ({}) as MpRecord);
+  );
   return pageItems(payload).map((row, index) => ({
     id: asString(asRecord(row), ["id", "planId"]) || `plan-${index + 1}`,
     title: asString(asRecord(row), ["title", "name", "levelName"], `会员方案 ${index + 1}`),
@@ -149,15 +162,15 @@ export async function listMembershipPlans(): Promise<MpMembershipPlan[]> {
 
 /** Purchasable packages; public data, so a guest still sees the catalogue. */
 export async function listMembershipPackages(): Promise<MpMembershipPackage[]> {
-  const payload = await readCommerceData(
+  const payload = await readCommercePayload(
     commerce().memberships.packages.list({}),
-  ).catch(() => ({}) as MpRecord);
+  );
   return pageItems(payload).map((row, index) => {
     const record = asRecord(row);
     return {
       description: asString(record, ["description"]),
       durationDays: asNumber(record, ["durationDays"]),
-      id: asNumber(record, ["id"]) ?? index + 1,
+      id: asString(record, ["id", "packageId"]) || `package-${index + 1}`,
       name: asString(record, ["name"], `#${index + 1}`),
       priceCny: asNumber(record, ["price"]),
       recommended: Boolean(record.recommended),
@@ -171,10 +184,11 @@ export async function listMembershipPackages(): Promise<MpMembershipPackage[]> {
  * channel it wants to pay with.
  */
 export async function purchaseMembership(input: {
-  packageId: number;
+  /** Wire id (int64); sent back as the string the server issued. */
+  packageId: string;
   paymentMethod?: string;
 }): Promise<MpMembershipPurchaseResult> {
-  const payload = await readCommerceData(commerce().memberships.purchases.create({
+  const payload = await readCommercePayload(commerce().memberships.purchases.create({
     packageId: input.packageId,
     paymentMethod: input.paymentMethod,
   }));

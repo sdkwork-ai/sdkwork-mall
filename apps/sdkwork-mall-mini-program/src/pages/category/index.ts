@@ -108,6 +108,13 @@ Page({
 
   async loadProducts(nextPage: number) {
     const { activeChildId, activeRootId } = this.data;
+    // A page-1 request invalidates the previous page/total so an in-flight
+    // load-more cannot append the old category's next page onto the new list.
+    this.setData(
+      nextPage === 1
+        ? { loading: true, error: "", page: 0, total: 0, hasMore: true }
+        : { loadingMore: true },
+    );
     try {
       const result = await listProducts({
         categoryId: activeChildId || activeRootId || undefined,
@@ -162,10 +169,9 @@ Page({
   },
 
   async loadMore() {
-    if (this.data.loadingMore || !this.data.hasMore) {
+    if (this.data.loading || this.data.loadingMore || !this.data.hasMore) {
       return;
     }
-    this.setData({ loadingMore: true });
     await this.loadProducts(this.data.page + 1);
   },
 

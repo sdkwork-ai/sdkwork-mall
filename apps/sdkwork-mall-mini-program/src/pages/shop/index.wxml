@@ -8,7 +8,7 @@
 
   <block wx:if="{{!loading && shop}}">
     <view class="shop-hero">
-      <image wx:if="{{shop.logoUrl}}" class="shop-logo" src="{{shop.logoUrl}}" mode="aspectFill" />
+      <image wx:if="{{shop.logoUrl}}" class="shop-logo" src="{{shop.logoUrl}}" mode="aspectFill" lazy-load />
       <view wx:else class="shop-logo shop-logo-fallback">店</view>
       <view class="shop-hero-body">
         <view class="shop-name">{{shop.name}}</view>
@@ -27,7 +27,8 @@
           bindtap="goProduct"
           data-id="{{item.id}}"
         >
-          <image class="shop-product-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <image wx:if="{{item.imageUrl}}" class="shop-product-image" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
+          <view wx:else class="shop-product-image shop-product-fallback">SDKWork</view>
           <view class="shop-product-title">{{item.title}}</view>
           <view class="mp-flex-between">
             <text class="mp-price">{{item.priceText}}</text>
@@ -35,6 +36,8 @@
           </view>
         </view>
       </view>
+      <view wx:if="{{loadingMore}}" class="mp-loading">加载更多商品...</view>
+      <view wx:elif="{{shop.products.length > 0 && !shop.productsHasMore}}" class="mp-muted shop-end">没有更多商品了</view>
     </view>
   </block>
 </view>

@@ -12,6 +12,7 @@ module.exports = {
     favorite: "♡ 收藏",
     favorited: "♥ 已收藏",
     soldOut: "暂时售罄",
+    unavailable: "该商品暂无可售规格",
     addToCart: "加入购物车",
     buyNow: "立即购买",
     defaultSku: "默认规格",

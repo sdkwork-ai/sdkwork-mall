@@ -117,7 +117,13 @@ Page({
 
   async loadProducts(nextPage: number) {
     const { keyword, activeSort, activeCategoryId } = this.data;
-    this.setData(nextPage === 1 ? { loading: true, error: "" } : { loadingMore: true });
+    // Resetting the cursor on page 1 keeps a scroll-triggered load-more from
+    // fetching the previous query's next page while the new one is in flight.
+    this.setData(
+      nextPage === 1
+        ? { loading: true, error: "", page: 0, total: 0, hasMore: true }
+        : { loadingMore: true },
+    );
     try {
       const result = await listProducts({
         categoryId: activeCategoryId || undefined,
@@ -196,7 +202,7 @@ Page({
   },
 
   loadMore() {
-    if (this.data.loadingMore || !this.data.hasMore) {
+    if (this.data.loading || this.data.loadingMore || !this.data.hasMore) {
       return;
     }
     void this.loadProducts(this.data.page + 1);

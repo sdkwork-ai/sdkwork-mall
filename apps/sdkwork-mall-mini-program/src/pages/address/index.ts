@@ -13,6 +13,8 @@ import {
   type MpAddress,
 } from "../../services/address-service";
 import { platform } from "@sdkwork/mall-mp-core";
+import { mpCapabilityUrl } from "../../routes/capabilities";
+import { isLoggedIn } from "../../services/session";
 
 const PROVINCE_CITIES: Array<{ province: string; cities: string[] }> = [
   { province: "北京市", cities: ["北京市"] },
@@ -82,6 +84,7 @@ interface AddressData {
   /** True when opened from checkout to return the picked address. */
   pickerMode: boolean;
   _toastTimer: number | null;
+  _saving: boolean;
 }
 
 Page({
@@ -97,6 +100,7 @@ Page({
     toast: "",
     pickerMode: false,
     _toastTimer: null,
+    _saving: false,
   } as AddressData,
 
   onLoad(options: Record<string, string | undefined>) {
@@ -104,7 +108,14 @@ Page({
   },
 
   onShow() {
-    this.refresh();
+    // The address book is account-scoped: a guest must sign in instead of
+    // reading a masked 401 as "还没有收货地址".
+    if (!isLoggedIn()) {
+      this.setData({ loading: false });
+      platform.navigateTo(mpCapabilityUrl("account.mall.login"));
+      return;
+    }
+    void this.refresh();
   },
 
   async refresh() {
@@ -204,6 +215,10 @@ Page({
 
   async save() {
     const { form, editingId } = this.data;
+    if (this.data._saving) {
+      // The save is a create/update command; a double tap must not duplicate it.
+      return;
+    }
     if (!form.receiverName.trim() || !form.receiverPhone.trim()) {
       this.showToast("请填写收货人与电话");
       return;
@@ -225,6 +240,7 @@ Page({
       receiverPhone: form.receiverPhone.trim(),
       addressLine: `${form.province}${form.city} ${form.detail.trim()}`,
     };
+    this.data._saving = true;
     try {
       if (editingId) {
         await updateAddress(editingId, payload);
@@ -235,6 +251,8 @@ Page({
       await this.refresh();
     } catch (cause) {
       this.showToast(errorMessage(cause, "保存失败"));
+    } finally {
+      this.data._saving = false;
     }
   },
 

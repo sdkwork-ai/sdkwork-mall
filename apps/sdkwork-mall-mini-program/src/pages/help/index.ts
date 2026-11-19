@@ -1,6 +1,6 @@
 import { t } from "../../i18n";
 import { type MpTapEvent } from "../../types/common";
-import { mpCapabilityUrl } from "../../routes/capabilities";
+import { isMpTabCapability, mpCapabilityUrl } from "../../routes/capabilities";
 import { platform } from "@sdkwork/mall-mp-core";
 
 interface HelpSection {
@@ -84,6 +84,12 @@ Page({
   },
 
   goChats() {
-    platform.navigateTo(mpCapabilityUrl("buyer.mall.im.chats"));
+    // `pages/chats` is a tabBar page: navigateTo would fail silently.
+    const url = mpCapabilityUrl("buyer.mall.im.chats");
+    if (isMpTabCapability("buyer.mall.im.chats")) {
+      platform.switchTab(url);
+      return;
+    }
+    platform.navigateTo(url);
   },
 });
