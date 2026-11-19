@@ -101,10 +101,10 @@ list/detail → logistics → after-sales submission**. Fixes found by that run:
   after-sales "load more" copy comes from the catalogue, the cart contract
   accepts the authored idempotent order seam, and the release-channel message
   matches the runtime-env contract. The i18n ratchet baseline was refreshed
-  (miniProgram 153 → 173 from the concurrent MP commercial pass; PC 1866 → 1891
+  (miniProgram 153 → 173 from the concurrent MP commercial pass; PC 1866 → 1895
   for the wallet retry/success labels, cancellation confirmations, merchant
-  error/retry copy, localized governance statuses and the admin SPU field); no H5
-  or Flutter copy was added.
+  error/retry copy, localized governance statuses, the admin SPU field and
+  membership success copy); no H5 or Flutter copy was added.
 - **`pnpm verify` now passes end-to-end**, including 216 node contract tests,
   vitest, i18n catalogues/baseline, dataset and default-data gates.
 
