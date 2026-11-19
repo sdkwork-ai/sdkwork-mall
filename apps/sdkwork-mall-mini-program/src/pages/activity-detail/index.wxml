@@ -11,7 +11,9 @@
       <view class="activity-hero-type">{{activity.typeLabel}}</view>
       <view class="activity-hero-title">{{activity.title}}</view>
       <view class="activity-hero-highlight" wx:if="{{activity.highlight}}">{{activity.highlight}}</view>
+      <view class="activity-hero-discount" wx:if="{{activity.discountText}}">{{activity.discountText}}</view>
       <view class="activity-hero-window" wx:if="{{activity.windowText}}">{{activity.windowText}}</view>
+      <button class="mp-btn mp-btn-primary activity-cta" bindtap="goBrowse">去逛逛</button>
     </view>
 
     <view class="mp-card" wx:if="{{activity.description}}">

@@ -19,7 +19,7 @@
 
     <view class="mp-card">
       <view class="mp-card-title">客服会话</view>
-      <view wx:if="{{conversations.length === 0}}" class="mp-empty">暂无客服会话</view>
+      <view wx:if="{{!message && conversations.length === 0}}" class="mp-empty">暂无客服会话</view>
       <view
         class="chat-entry"
         wx:for="{{conversations}}"
@@ -37,6 +37,8 @@
           <view class="chat-unread" wx:if="{{item.unread}}">{{item.unread}}</view>
         </view>
       </view>
+      <view wx:if="{{loadingMore}}" class="mp-loading">加载更多会话...</view>
+      <view wx:elif="{{conversations.length > 0 && !hasMore}}" class="mp-muted chats-end">没有更多会话了</view>
     </view>
   </block>
 </view>

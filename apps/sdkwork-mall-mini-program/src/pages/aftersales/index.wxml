@@ -156,6 +156,8 @@
           >{{cancelText}}</button>
         </view>
       </view>
+      <view wx:if="{{requestLoadingMore}}" class="mp-loading">加载更多售后记录...</view>
+      <view wx:elif="{{requests.length > 0 && !requestHasMore}}" class="mp-muted aftersales-end">没有更多售后记录了</view>
     </view>
   </block>
 </view>

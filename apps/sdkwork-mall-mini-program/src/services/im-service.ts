@@ -9,6 +9,7 @@
 export {
   disposeRealtime,
   isRealtimeConnected,
+  listChatConversationPage,
   listChatConversations,
   listChatMessages,
   listNotices,

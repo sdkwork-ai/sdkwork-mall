@@ -51,6 +51,8 @@
 .search-sort {
   font-size: 26rpx;
   color: #6b7280;
+  /* 44rpx-tall hit area keeps the sort tabs tappable on a phone. */
+  padding: 10rpx 16rpx;
 }
 
 .search-sort-active {

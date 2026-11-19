@@ -30,6 +30,8 @@ type MpOrderRow = MpOrderSummary & {
 interface OrdersData {
   tabs: Array<{ code: string; label: string }>;
   activeTab: string;
+  /** False while the order app-api has no order→shipment link; hides a dead entry. */
+  logisticsAvailable: boolean;
   orders: MpOrderRow[];
   page: number;
   total: number;
@@ -55,6 +57,7 @@ Page({
   data: {
     tabs: TAB_DEFINITIONS.map((tab) => ({ code: tab.code, label: t(tab.labelKey) })),
     activeTab: "all",
+    logisticsAvailable: false,
     orders: [],
     page: 1,
     total: 0,

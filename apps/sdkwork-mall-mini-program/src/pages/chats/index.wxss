@@ -65,3 +65,9 @@
   color: #9ca3af;
   font-size: 32rpx;
 }
+
+.chats-end {
+  text-align: center;
+  padding: 20rpx 0 0;
+  font-size: 24rpx;
+}

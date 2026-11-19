@@ -10,6 +10,7 @@
 import { createMpIdempotencyParams, getMallMpRuntime } from "@sdkwork/mall-mp-core";
 
 import { readCommercePayload } from "./commerce-payload";
+import { readPageInfo } from "./page-info";
 
 export interface MpAfterSalesItemInput {
   orderItemId: string;
@@ -124,27 +125,39 @@ export function buildCreateAfterSalesBody(input: MpAfterSalesCreateInput): Recor
   return body;
 }
 
-export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSalesRow[]> {
+export async function listRequestPage(
+  page = 1,
+  pageSize = 20,
+): Promise<{ hasMore: boolean; items: MpAfterSalesRow[] }> {
   const payload = await readCommercePayload(afterSales().requests.list({ page, pageSize }));
-  return readRows(payload).map((item) => {
-    const status = String(item.status ?? "").toUpperCase();
-    const type = String(item.afterSalesType ?? item.type ?? "refund").toLowerCase();
-    return {
-      id: String(item.id ?? ""),
-      afterSalesNo: String(item.afterSalesNo ?? item.requestNo ?? ""),
-      orderId: String(item.orderId ?? ""),
-      reasonCode: String(item.reasonCode ?? ""),
-      description: String(item.description ?? ""),
-      requestedAmount: String(item.requestedAmount ?? ""),
-      typeLabelKey:
-        (AFTER_SALES_TYPES.find((entry) => entry.value === type) || { labelKey: "" }).labelKey,
-      type,
-      status,
-      statusLabelKey: STATUS_LABEL_KEYS[status] || "",
-      returnable: status === "APPROVED" && (type === "return" || type === "exchange"),
-      revokable: status === "PENDING" || status === "REVIEWING",
-    };
-  });
+  const rows = readRows(payload);
+  return {
+    hasMore: readPageInfo(payload, rows.length, page).hasMore,
+    items: rows.map((item) => {
+      const status = String(item.status ?? "").toUpperCase();
+      const type = String(item.afterSalesType ?? item.type ?? "refund").toLowerCase();
+      return {
+        id: String(item.id ?? ""),
+        afterSalesNo: String(item.afterSalesNo ?? item.requestNo ?? ""),
+        orderId: String(item.orderId ?? ""),
+        reasonCode: String(item.reasonCode ?? ""),
+        description: String(item.description ?? ""),
+        requestedAmount: String(item.requestedAmount ?? ""),
+        typeLabelKey:
+          (AFTER_SALES_TYPES.find((entry) => entry.value === type) || { labelKey: "" }).labelKey,
+        type,
+        status,
+        statusLabelKey: STATUS_LABEL_KEYS[status] || "",
+        returnable: status === "APPROVED" && (type === "return" || type === "exchange"),
+        revokable: status === "PENDING" || status === "REVIEWING",
+      };
+    }),
+  };
+}
+
+/** Flat list for callers that render one page (kept for the block contract test). */
+export async function listRequests(page = 1, pageSize = 50): Promise<MpAfterSalesRow[]> {
+  return (await listRequestPage(page, pageSize)).items;
 }
 
 export async function createRequest(input: MpAfterSalesCreateInput): Promise<Record<string, unknown>> {

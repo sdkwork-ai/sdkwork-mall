@@ -48,7 +48,7 @@
           data-id="{{item.id}}"
         >{{confirmReceiptText}}</button>
         <button
-          wx:if="{{item.status === 'PENDING_RECEIPT' || item.status === 'COMPLETED'}}"
+          wx:if="{{logisticsAvailable && (item.status === 'PENDING_RECEIPT' || item.status === 'COMPLETED')}}"
           class="mp-btn mp-btn-ghost orders-action"
           catchtap="goLogistics"
           data-id="{{item.id}}"

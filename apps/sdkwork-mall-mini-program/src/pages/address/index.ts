@@ -244,7 +244,8 @@ Page({
     const payload = {
       receiverName: form.receiverName.trim(),
       receiverPhone: form.receiverPhone.trim(),
-      addressLine: `${form.province}${form.city} ${form.detail.trim()}`,
+      // 直辖市 / 特别行政区的省、市同名，只写一次，避免「北京市北京市」。
+      addressLine: `${form.city === form.province ? form.city : `${form.province}${form.city}`} ${form.detail.trim()}`,
     };
     this.data._saving = true;
     try {

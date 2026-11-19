@@ -88,7 +88,14 @@ Page({
           ...detail,
           statusText: statusLabel(detail.status),
           totalText: formatCny(detail.totalAmountCny),
-          paidText: detail.paidAmountCny != null ? formatCny(detail.paidAmountCny) : "未支付",
+          paidText:
+            detail.paidAmountCny != null
+              ? formatCny(detail.paidAmountCny)
+              : detail.status === "CANCELLED"
+                ? "已取消"
+                : detail.status === "REFUNDED"
+                  ? "已退款"
+                  : "未支付",
           timeText: formatTime(detail.createdAt),
           items: detail.items.map((item) => ({
             ...item,

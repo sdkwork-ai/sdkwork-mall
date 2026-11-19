@@ -202,18 +202,40 @@ export async function retrieveNotice(notificationId: string): Promise<MpNotice |
   };
 }
 
+function toChatConversation(item: {
+  conversationId: string;
+  displayName?: string;
+  lastActivityAt: string;
+  lastSummary?: string;
+  unreadCount: number;
+}): MpChatConversation {
+  return {
+    id: item.conversationId,
+    title: item.displayName || "官方客服",
+    agentName: item.displayName || "客服",
+    lastMessage: item.lastSummary ?? "",
+    lastMessageAt: item.lastActivityAt,
+    unread: item.unreadCount,
+  };
+}
+
+/** One cursor page of the客服 inbox, so older conversations stay reachable. */
+export async function listChatConversationPage(
+  cursor?: string,
+): Promise<{ hasMore: boolean; items: MpChatConversation[]; nextCursor: string }> {
+  const page = await requireServices().inbox.listPage({
+    pageSize: 20,
+    ...(cursor ? { cursor } : {}),
+  });
+  return {
+    hasMore: page.hasMore,
+    items: page.items.filter((item) => item.conversationId).map(toChatConversation),
+    nextCursor: page.nextCursor ?? "",
+  };
+}
+
 export async function listChatConversations(): Promise<MpChatConversation[]> {
-  const page = await requireServices().inbox.listPage({});
-  return page.items
-    .filter((item) => item.conversationId)
-    .map((item) => ({
-      id: item.conversationId,
-      title: item.displayName || "官方客服",
-      agentName: item.displayName || "客服",
-      lastMessage: item.lastSummary ?? "",
-      lastMessageAt: item.lastActivityAt,
-      unread: item.unreadCount,
-    }));
+  return (await listChatConversationPage()).items;
 }
 
 export async function listChatMessages(conversationId: string): Promise<MpChatMessage[]> {

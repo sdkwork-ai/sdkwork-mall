@@ -45,3 +45,14 @@
   line-height: 1.7;
   color: #374151;
 }
+
+.activity-hero-discount {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  opacity: 0.92;
+}
+
+.activity-cta {
+  margin-top: 24rpx;
+  align-self: flex-start;
+}

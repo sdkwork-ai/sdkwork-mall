@@ -8,7 +8,7 @@ import {
   createRequest,
   createReturnShipment,
   listAfterSalesEvents,
-  listRequests,
+  listRequestPage,
   RETURN_CARRIERS,
   type MpAfterSalesEvidenceItem,
   type MpAfterSalesItemInput,
@@ -56,6 +56,9 @@ interface AftersalesData {
     returnable: boolean;
     revokable: boolean;
   }>;
+  requestHasMore: boolean;
+  requestLoadingMore: boolean;
+  _requestPage: number;
   returnCarriers: ReadonlyArray<{ code: string; name: string }>;
   returnFormRequestId: string;
   returnCarrierIndex: number;
@@ -134,6 +137,9 @@ Page({
     amount: "",
     evidence: [],
     requests: [],
+    requestHasMore: true,
+    requestLoadingMore: false,
+    _requestPage: 0,
     returnCarriers: carrierOptions(),
     returnFormRequestId: "",
     returnCarrierIndex: 0,
@@ -331,24 +337,42 @@ Page({
     });
   },
 
-  async reloadRequests() {
+  async reloadRequests(page = 1) {
+    this.setData(
+      page === 1
+        ? { requestHasMore: true, requestLoadingMore: false, _requestPage: 0 }
+        : { requestLoadingMore: true },
+    );
     try {
-      const rows = await listRequests();
+      const result = await listRequestPage(page);
+      const rows = result.items.map((row) => ({
+        ...row,
+        statusLabel: row.statusLabelKey ? t(row.statusLabelKey) : row.status,
+        typeLabel: row.typeLabelKey ? t(row.typeLabelKey) : row.type,
+        orderNoText: t("afterSales.list.orderNo", { id: row.orderId }),
+      }));
+      const seen = new Set(this.data.requests.map((row) => row.id));
       this.setData({
-        requests: rows.map((row) => ({
-          ...row,
-          statusLabel: row.statusLabelKey ? t(row.statusLabelKey) : row.status,
-          typeLabel: row.typeLabelKey ? t(row.typeLabelKey) : row.type,
-          orderNoText: t("afterSales.list.orderNo", { id: row.orderId }),
-        })),
+        requests: page === 1 ? rows : this.data.requests.concat(rows.filter((row) => !seen.has(row.id))),
+        requestHasMore: result.hasMore,
+        requestLoadingMore: false,
+        _requestPage: page,
         loading: false,
       });
     } catch (cause) {
       this.setData({
         loading: false,
+        requestLoadingMore: false,
         error: errorMessage(cause, t("afterSales.errors.listLoadFailed")),
       });
     }
+  },
+
+  onReachBottom() {
+    if (this.data.requestLoadingMore || !this.data.requestHasMore) {
+      return;
+    }
+    void this.reloadRequests(this.data._requestPage + 1);
   },
 
   async submit() {

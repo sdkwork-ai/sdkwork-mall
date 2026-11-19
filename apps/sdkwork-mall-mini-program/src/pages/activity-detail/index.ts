@@ -1,7 +1,9 @@
 import { errorMessage } from "../../types/common";
 import { t } from "../../i18n";
 import { type MpActivity, retrieveActivity } from "../../services/marketing-service";
+import { mpCapabilityUrl } from "../../routes/capabilities";
 import { buildMpShareCard, buildMpTimelineCard } from "../../utils/share";
+import { platform } from "@sdkwork/mall-mp-core";
 
 interface ActivityView extends Omit<MpActivity, "startAt" | "endAt"> {
   windowText: string;
@@ -80,5 +82,9 @@ Page({
 
   retry() {
     void this.load(this.data._eventId);
+  },
+
+  goBrowse() {
+    platform.navigateTo(mpCapabilityUrl("storefront.mall.search", { sort: "sales" }));
   },
 });

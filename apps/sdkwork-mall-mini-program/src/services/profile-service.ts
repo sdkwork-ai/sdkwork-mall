@@ -63,13 +63,9 @@ export async function getProfile(): Promise<MpProfile> {
 
 export async function getSecuritySnapshot(): Promise<MpSecuritySnapshot> {
   const userId = getUserId();
-  let user: MpIamCurrentUser | null = null;
-  try {
-    user = await currentUser();
-  } catch {
-    // The security screen still renders the session identity when IAM is
-    // unreachable; the password form reports its own failure.
-  }
+  // Identity is the page's primary content: an IAM outage surfaces as an error
+  // with retry instead of a plausible-looking "当前账户" placeholder.
+  const user = await currentUser();
   const accountLabel = user?.displayName || user?.email || user?.phone || userId;
   return {
     accountLabel: accountLabel || "当前账户",
