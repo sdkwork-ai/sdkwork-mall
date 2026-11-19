@@ -37,7 +37,7 @@ export function SdkworkMallH5FavoritesPage() {
               <div className="sdk-h5-cart-row-body">
                 <Link className="sdk-h5-product-title" to={`/product/${item.id}`}>{item.title}</Link>
                 <div className="sdk-h5-product-meta">
-                  <strong>{item.priceCny != null ? `¥${item.priceCny.toFixed(2)}` : "询价"}</strong>
+                  <strong>{item.priceCny != null ? `¥${item.priceCny.toFixed(2)}` : "暂无报价"}</strong>
                 </div>
               </div>
               <button

@@ -36,8 +36,9 @@ function ProductRow({ product }: { product: MallH5ProductCard }) {
       </div>
       <div className="sdk-h5-product-row-body">
         <div className="sdk-h5-product-title">{product.title}</div>
+        {product.brand ? <div className="sdk-h5-product-brand">{product.brand}</div> : null}
         <div className="sdk-h5-product-meta">
-          {product.priceCny != null ? <strong>¥{product.priceCny.toFixed(2)}</strong> : <strong>询价</strong>}
+          {product.priceCny != null ? <strong>¥{product.priceCny.toFixed(2)}</strong> : <strong>暂无报价</strong>}
           {product.sales != null ? <span>已售 {product.sales}</span> : null}
         </div>
       </div>

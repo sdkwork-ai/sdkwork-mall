@@ -209,7 +209,7 @@ export function SdkworkMallH5TvPage() {
                 </div>
                 <div className="sdk-tv-card-title">{product.title}</div>
                 <div className="sdk-tv-card-meta">
-                  {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "询价"}
+                  {product.priceCny != null ? `¥${product.priceCny.toFixed(2)}` : "暂无报价"}
                   {product.sales != null ? <span>已售 {product.sales}</span> : null}
                 </div>
               </Link>

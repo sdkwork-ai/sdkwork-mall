@@ -38,6 +38,7 @@ describe("H5 catalog prices", () => {
         {
           id: "spu-1",
           name: "手机",
+          brandName: "PolarDay",
           imageUrl: "https://cdn.example/phone.png",
           salePriceMinor: "625190",
           minorUnitExponent: "2",
@@ -51,6 +52,7 @@ describe("H5 catalog prices", () => {
     expect(page.total).toBe(1);
     expect(page.items[0]).toMatchObject({
       id: "spu-1",
+      brand: "PolarDay",
       imageUrl: "https://cdn.example/phone.png",
       priceCny: 6251.9,
       title: "手机",

@@ -414,6 +414,12 @@ body {
   overflow: hidden;
 }
 
+.sdk-h5-product-brand {
+  margin: 0.15rem 0.5rem 0;
+  font-size: 0.7rem;
+  color: var(--sdk-h5-text-muted);
+}
+
 .sdk-h5-product-meta {
   display: flex;
   align-items: baseline;

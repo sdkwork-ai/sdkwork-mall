@@ -64,6 +64,7 @@ export interface MallH5CategoryTreeNode extends MallH5CategoryOption {
 
 export interface MallH5ProductCard {
   id: string;
+  brand?: string;
   imageUrl?: string;
   priceCny: number | null;
   sales?: number;
@@ -192,6 +193,7 @@ export async function searchMallH5Products(input: {
   return {
     items: (payload.items ?? []).map((item) => ({
       id: String(item.id ?? item.spuId ?? ""),
+      brand: typeof item.brandName === "string" ? item.brandName : undefined,
       imageUrl: readImage(item.imageUrl ?? item.mainImage ?? item.image),
       priceCny: readProductPrice(item),
       sales: readMoney(item.sales ?? item.salesCount) ?? undefined,
@@ -218,6 +220,7 @@ export async function retrieveMallH5ProductDetail(productId: string): Promise<Ma
   return {
     description: typeof record.description === "string" ? record.description : undefined,
     id: String(record.id ?? productId),
+    brand: typeof record.brandName === "string" ? record.brandName : undefined,
     imageUrl: mainImage,
     images,
     priceCny: readProductPrice(record),

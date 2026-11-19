@@ -98,7 +98,7 @@ export function SdkworkMallH5ShopPage() {
                 </div>
                 <div className="sdk-h5-product-title">{product.title}</div>
                 <div className="sdk-h5-product-meta">
-                  {product.priceCny != null ? <strong>¥{product.priceCny.toFixed(2)}</strong> : <strong>询价</strong>}
+                  {product.priceCny != null ? <strong>¥{product.priceCny.toFixed(2)}</strong> : <strong>暂无报价</strong>}
                   {product.sales != null ? <span>已售 {product.sales}</span> : null}
                 </div>
               </Link>

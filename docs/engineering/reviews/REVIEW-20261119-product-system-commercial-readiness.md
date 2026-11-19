@@ -415,6 +415,15 @@ JS boot smoke cannot observe.
   blocked by the cloudrouter generated client (see 2.0.16).
 - `catalog-service.test.ts` 4 tests pass; i18n baseline PC 1897 / total 2462.
 
+### 2.0.18 H5 price fallback and brand display (round 26)
+
+- H5 still rendered `询价` on four surfaces (catalog, TV home, shop, favorites)
+  when a card had no price; PC had already moved to `暂无报价`. All four now
+  use `暂无报价`, so a missing price is never misread as a B2B quote request.
+- H5 catalog cards now carry `brand` from `brandName` and render it under the
+  title; `catalog-price.test.ts` asserts the mapped brand.
+- H5 typecheck and 3 catalog tests pass; mall `pnpm verify` remains green.
+
 ### 2.1 列表分页全部失效（P0）
 
 `searchMallProducts` / `searchMallShops` 只读 `payload.total`，而 v3 分页信封是
