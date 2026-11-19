@@ -1,6 +1,36 @@
 specVersion = 1
 kind = "sdkwork.webserver.server"
 id = "mall"
-enabled = false
-description = "sdkwork-mall webserver placeholder (no cloudPublicHosts in topology)"
+enabled = true
+description = "sdkwork-mall web server (development adaptive static delivery, tests/nginx/edge-parity contract)"
 
+[nginx]
+enabled = true
+profile = "http-core-v1"
+unknownDirectivePolicy = "error"
+strict = true
+confFile = "nginx.conf"
+
+[main]
+user = "sdkwork"
+workerProcesses = "auto"
+pid = "/run/sdkwork/mall/webserver.pid"
+errorLog = "/var/log/sdkwork/mall/webserver/error.log warn"
+
+[main.events]
+workerConnections = 1024
+
+[http]
+sendfile = true
+keepaliveTimeout = 75
+clientMaxBodySize = "1100m"
+serverTokens = "off"
+gzip = true
+include = ["snippets/adaptive-web.maps.conf"]
+
+[http.defaults]
+
+[http.defaults.tls]
+protocols = ["TLSv1.2", "TLSv1.3"]
+preferServerCiphers = true
+sessionCache = "shared:SSL:10m"

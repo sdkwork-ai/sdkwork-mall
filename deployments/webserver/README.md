@@ -1,8 +1,15 @@
 # Web Server Configuration (layout v3)
 
-Module `sdkwork-mall` · runtime code `mall` · disabled
+Module `sdkwork-mall` · runtime code `mall` · development adaptive static delivery
 
 Authority: `SDKWORK_WEBSERVER_SPEC.md` · hosts: `APP_RUNTIME_TOPOLOGY_NAMING.md` §9.
+
+The development edge serves the mall dev preview at `mall-dev.birdcoder.com`
+(sdkwork-webserver `tests/nginx/edge-parity` battery contract): adaptive PC/H5
+static delivery from the cloud-profile dev dist materialized under
+`apps/sdkwork-mall-{pc,h5}/dist/cloud/dev`, with the entrypoint-bootstrapped
+per-domain TLS inventory certificate. Test/staging/production environments
+remain disabled until their topologies declare public web hosts.
 
 ## Layout
 

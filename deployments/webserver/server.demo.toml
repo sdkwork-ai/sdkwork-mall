@@ -1,2 +1,19 @@
 environment = "demo"
 
+[http]
+
+# Adaptive static delivery from the entrypoint-seeded installed-package root
+# (placeholder shell until apps/sdkwork-mall-* build the demo dist).
+[[http.server]]
+listen = ["80", "443 ssl"]
+serverName = ["mall-demo.birdcoder.com"]
+
+[http.server.tls]
+certFile = "/etc/sdkwork/certs/letsencrypt/mall-demo.birdcoder.com/fullchain.pem"
+certKeyFile = "/etc/sdkwork/certs/letsencrypt/mall-demo.birdcoder.com/privkey.pem"
+chainFile = "/etc/sdkwork/certs/letsencrypt/mall-demo.birdcoder.com/chain.pem"
+protocols = ["TLSv1.2", "TLSv1.3"]
+
+[[http.server.location]]
+match = "/"
+include = ["snippets/adaptive-web.dispatch.conf"]

@@ -1,2 +1,20 @@
 environment = "production"
 
+[http]
+
+# Adaptive static delivery from the installed-package Adaptive Web root (the
+# standalone image bakes the production dist trees; operators replace it with
+# ACME material through the canonical certificate layout).
+[[http.server]]
+listen = ["80", "443 ssl"]
+serverName = ["mall.birdcoder.com"]
+
+[http.server.tls]
+certFile = "/etc/sdkwork/certs/letsencrypt/mall.birdcoder.com/fullchain.pem"
+certKeyFile = "/etc/sdkwork/certs/letsencrypt/mall.birdcoder.com/privkey.pem"
+chainFile = "/etc/sdkwork/certs/letsencrypt/mall.birdcoder.com/chain.pem"
+protocols = ["TLSv1.2", "TLSv1.3"]
+
+[[http.server.location]]
+match = "/"
+include = ["snippets/adaptive-web.dispatch.conf"]

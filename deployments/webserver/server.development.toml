@@ -1,2 +1,22 @@
 environment = "development"
 
+[http]
+
+# Development adaptive static delivery for the mall dev preview
+# (tests/nginx/edge-parity battery contract). The TLS certificate directory is
+# bootstrapped at startup by the webserver entrypoint with every aggregated
+# server name in the SAN list; operator/ACME material replaces it without a
+# config change.
+[[http.server]]
+listen = ["80", "443 ssl"]
+serverName = ["mall-dev.birdcoder.com"]
+
+[http.server.tls]
+certFile = "/etc/sdkwork/certs/letsencrypt/mall-dev.birdcoder.com/fullchain.pem"
+certKeyFile = "/etc/sdkwork/certs/letsencrypt/mall-dev.birdcoder.com/privkey.pem"
+chainFile = "/etc/sdkwork/certs/letsencrypt/mall-dev.birdcoder.com/chain.pem"
+protocols = ["TLSv1.2", "TLSv1.3"]
+
+[[http.server.location]]
+match = "/"
+include = ["snippets/adaptive-web.dispatch.conf"]
