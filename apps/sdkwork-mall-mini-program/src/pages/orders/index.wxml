@@ -20,7 +20,7 @@
     <view class="orders-item" wx:for="{{orders}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
       <view class="mp-flex-between">
         <view class="orders-subject">{{item.subject}}</view>
-        <text class="orders-status">{{item.statusText}}</text>
+        <text class="orders-status orders-status-{{item.status}}">{{item.statusText}}</text>
       </view>
       <view class="mp-flex-between orders-meta">
         <text class="mp-muted">

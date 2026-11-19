@@ -160,6 +160,10 @@ Page({
     platform.navigateTo(mpCapabilityUrl("buyer.mall.orders.logistics", { orderId: this.data._orderId }));
   },
 
+  goChat() {
+    platform.switchTab(mpCapabilityUrl("buyer.mall.im.chats"));
+  },
+
   async confirmReceipt() {
     if (this.data._acting) {
       return;

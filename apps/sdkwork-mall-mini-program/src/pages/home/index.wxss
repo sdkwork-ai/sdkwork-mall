@@ -333,3 +333,78 @@
 .home-empty-retry {
   margin-top: 12rpx;
 }
+
+/* Shelf headers: title + ¸ü¶à entry, mirroring the JD/Tmall floor header. */
+.home-products-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20rpx 16rpx;
+}
+
+.home-more {
+  color: #6b7280;
+  font-size: 24rpx;
+  padding: 10rpx 0 10rpx 24rpx;
+}
+
+/* First-paint skeleton: keeps the shelf height stable while data loads. */
+.home-skeleton {
+  padding: 24rpx;
+}
+
+.home-skeleton-line,
+.home-skeleton-tile,
+.home-skeleton-image {
+  background: #f3f4f6;
+  animation: home-skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+.home-skeleton-line {
+  height: 26rpx;
+  margin-bottom: 18rpx;
+}
+
+.home-skeleton-line-title {
+  width: 30%;
+}
+
+.home-skeleton-line-short {
+  width: 55%;
+}
+
+.home-skeleton-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.home-skeleton-tile {
+  width: calc((100% - 48rpx) / 4);
+  height: 96rpx;
+}
+
+.home-skeleton-products {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 0 20rpx;
+}
+
+.home-skeleton-product {
+  width: 48.6%;
+  background: #fff;
+  padding-bottom: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.home-skeleton-image {
+  width: 100%;
+  height: 330rpx;
+  margin-bottom: 18rpx;
+}
+
+@keyframes home-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}

@@ -35,7 +35,23 @@
     >{{item.label}}</view>
   </view>
 
-  <view wx:if="{{loading}}" class="mp-loading">{{loadingText}}</view>
+  <!-- Skeleton shelves: the hero renders immediately, so the first paint should
+       not jump when the product data lands. -->
+  <block wx:if="{{loading}}">
+    <view class="mp-card home-skeleton">
+      <view class="home-skeleton-line home-skeleton-line-title"></view>
+      <view class="home-skeleton-grid">
+        <view class="home-skeleton-tile" wx:for="{{skeletonTiles}}" wx:key="*this"></view>
+      </view>
+    </view>
+    <view class="home-skeleton-products">
+      <view class="home-skeleton-product" wx:for="{{skeletonCards}}" wx:key="*this">
+        <view class="home-skeleton-image"></view>
+        <view class="home-skeleton-line"></view>
+        <view class="home-skeleton-line home-skeleton-line-short"></view>
+      </view>
+    </view>
+  </block>
   <view wx:if="{{error}}" class="mp-error">
     <text>{{error}}</text>
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">{{retryText}}</button>
@@ -115,7 +131,10 @@
   </view>
 
   <view wx:if="{{hotProducts.length}}" class="home-products">
-    <view class="mp-card-title home-products-title">{{hotTitle}}</view>
+    <view class="home-products-head">
+      <view class="mp-card-title home-products-title">{{hotTitle}}</view>
+      <view class="home-more" bindtap="goMoreHot">更多 ›</view>
+    </view>
     <view class="mp-product-grid">
       <view
         class="mp-product-card"
@@ -140,7 +159,10 @@
   </view>
 
   <view wx:if="{{newProducts.length}}" class="home-products">
-    <view class="mp-card-title home-products-title">{{newTitle}}</view>
+    <view class="home-products-head">
+      <view class="mp-card-title home-products-title">{{newTitle}}</view>
+      <view class="home-more" bindtap="goMoreNew">更多 ›</view>
+    </view>
     <view class="mp-product-grid">
       <view
         class="mp-product-card"

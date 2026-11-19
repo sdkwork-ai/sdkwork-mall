@@ -58,6 +58,8 @@ interface AftersalesData {
   }>;
   requestHasMore: boolean;
   requestLoadingMore: boolean;
+  loadMoreText: string;
+  noMoreText: string;
   _requestPage: number;
   returnCarriers: ReadonlyArray<{ code: string; name: string }>;
   returnFormRequestId: string;
@@ -174,6 +176,8 @@ Page({
     submittingText: t("afterSales.apply.submitting"),
     listTitle: t("afterSales.list.title"),
     listEmpty: t("afterSales.list.empty"),
+    loadMoreText: t("afterSales.list.loadMore"),
+    noMoreText: t("afterSales.list.noMore"),
     cancelText: t("afterSales.list.cancel"),
     returnEntryText: t("afterSales.list.returnEntry"),
     progressToggleText: t("afterSales.list.progressToggle"),

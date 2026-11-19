@@ -6,6 +6,7 @@ import {
 } from "../../services/im-service";
 import { platform } from "@sdkwork/mall-mp-core";
 import { requireSignedIn } from "../../utils/auth-gate";
+import { setMessageTabBadge } from "../../services/tab-bar-service";
 
 interface ConversationRow {
   id: string;
@@ -70,6 +71,8 @@ Page({
     this.setData({ loading: true, message: "", _cursor: "", hasMore: true });
     try {
       const page = await listChatConversationPage();
+      // The 消息 tab badge mirrors the unread客服 count (H5 shell parity).
+      setMessageTabBadge(page.items.reduce((sum, conversation) => sum + (Number(conversation.unread) || 0), 0));
       this.setData({
         conversations: page.items.map(toRow),
         hasMore: page.hasMore,
@@ -91,8 +94,10 @@ Page({
       const page = await listChatConversationPage(this.data._cursor);
       const seen = new Set(this.data.conversations.map((row) => row.id));
       const appended = page.items.map(toRow).filter((row) => !seen.has(row.id));
+      const conversations = this.data.conversations.concat(appended);
+      setMessageTabBadge(conversations.reduce((sum, conversation) => sum + (Number(conversation.unread) || 0), 0));
       this.setData({
-        conversations: this.data.conversations.concat(appended),
+        conversations,
         hasMore: page.hasMore,
         _cursor: page.nextCursor,
         loadingMore: false,

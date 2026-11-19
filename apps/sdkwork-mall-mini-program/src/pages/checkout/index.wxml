@@ -170,6 +170,7 @@
     </view>
 
     <view class="checkout-footer">
+      <view class="checkout-trust">微信安全支付 · 平台售后保障 · 7 天无理由退换</view>
       <button class="mp-btn mp-btn-primary checkout-submit" disabled="{{busy}}" bindtap="submit">
         {{busy ? submittingText : submitText}}
       </button>

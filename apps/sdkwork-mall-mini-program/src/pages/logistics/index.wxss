@@ -91,3 +91,8 @@
   margin-top: 6rpx;
   font-size: 22rpx;
 }
+
+.logistics-help {
+  padding: 0 30rpx 40rpx;
+  text-align: center;
+}

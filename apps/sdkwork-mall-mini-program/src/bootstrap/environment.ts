@@ -68,7 +68,7 @@ export function readRuntimeEnv(accountEnvVersion: string): SdkworkMallMpRuntimeE
     // Fail closed: booting a release build against a dev host with a placeholder
     // application identity must be visible, not a console warning.
     throw new Error(
-      `[sdkwork-mall] release channel requires a production profile; this package was built with ${ENV_CONFIG.profileId}. Rebuild with build:mp:prod.`,
+      `[sdkwork-mall] release channel is production; this package was built with ${ENV_CONFIG.profileId}. Rebuild with build:mp:prod.`,
     );
   }
   return {

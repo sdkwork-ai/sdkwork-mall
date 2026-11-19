@@ -10,6 +10,9 @@
     <button class="mp-btn mp-btn-ghost mp-error-retry" bindtap="retry">重试</button>
   </view>
   <view wx:if="{{!loading && !error && !missingOrder && shipments.length === 0}}" class="mp-empty">暂无物流信息，商家发货后可在此查看。</view>
+  <view wx:if="{{!loading && !missingOrder && shipments.length === 0}}" class="logistics-help">
+    <button class="mp-btn mp-btn-ghost" bindtap="goChat">联系客服查询物流</button>
+  </view>
 
   <view class="logistics-list">
     <view class="logistics-card" wx:for="{{shipments}}" wx:key="shipmentId">

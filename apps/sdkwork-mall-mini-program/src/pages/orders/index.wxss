@@ -66,3 +66,13 @@
 .orders-partner {
   color: #b06a00;
 }
+
+/* Status semantics: color is a secondary cue; the label always states it. */
+.orders-status-PENDING_PAYMENT { color: #d97706; }
+.orders-status-PENDING_SHIPMENT { color: #2563eb; }
+.orders-status-PENDING_RECEIPT { color: #7c3aed; }
+.orders-status-PAID { color: #2563eb; }
+.orders-status-COMPLETED { color: #059669; }
+.orders-status-CANCELLED,
+.orders-status-REFUNDED,
+.orders-status-REFUNDING { color: #6b7280; }

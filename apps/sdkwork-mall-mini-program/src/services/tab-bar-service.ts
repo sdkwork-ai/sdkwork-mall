@@ -13,6 +13,7 @@
 import { platform } from "@sdkwork/mall-mp-core";
 
 import { getCart } from "./cart-service";
+import { listChatConversations } from "./im-service";
 import { isLoggedIn } from "./session";
 
 export interface MpTabBarTab {
@@ -31,9 +32,11 @@ export const MP_TAB_BAR_TABS: readonly MpTabBarTab[] = [
 ];
 
 export const MP_CART_TAB_INDEX = 3;
+export const MP_MESSAGE_TAB_INDEX = 2;
 
 /** Same storage contract as H5, namespaced per root. */
 export const MP_CART_COUNT_STORAGE_KEY = "sdkwork-mall-mp-cart-count";
+export const MP_MESSAGE_COUNT_STORAGE_KEY = "sdkwork-mall-mp-message-count";
 
 function badgeText(totalQuantity: number): string {
   if (totalQuantity <= 0) {
@@ -89,6 +92,47 @@ export async function syncCartTabBadge(): Promise<void> {
     const cart = await getCart();
     const total = cart.items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
     setCartTabBadge(total);
+  } catch {
+    // keep the previous count
+  }
+}
+
+/** Last known unread message count, so a cold tab bar shows the badge instantly. */
+export function readMessageTabCount(): number {
+  try {
+    const raw = platform.storage.get(MP_MESSAGE_COUNT_STORAGE_KEY);
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** Projects the stored unread count onto the 消息 tab without a network hop. */
+export function applyMessageTabBadge(): void {
+  platform.tabBarBadge(MP_MESSAGE_TAB_INDEX, badgeText(readMessageTabCount()));
+}
+
+/** Persists one unread count and projects it onto the 消息 tab. */
+export function setMessageTabBadge(unreadCount: number): void {
+  const total = Number.isFinite(unreadCount) ? Math.max(0, Math.floor(unreadCount)) : 0;
+  try {
+    platform.storage.set(MP_MESSAGE_COUNT_STORAGE_KEY, String(total));
+  } catch {
+    // decoration only
+  }
+  platform.tabBarBadge(MP_MESSAGE_TAB_INDEX, badgeText(total));
+}
+
+/** Recomputes the unread badge from the inbox (fail-soft: keep the last count). */
+export async function syncMessageTabBadge(): Promise<void> {
+  if (!isLoggedIn()) {
+    setMessageTabBadge(0);
+    return;
+  }
+  try {
+    const conversations = await listChatConversations();
+    setMessageTabBadge(conversations.reduce((sum, conversation) => sum + (Number(conversation.unread) || 0), 0));
   } catch {
     // keep the previous count
   }

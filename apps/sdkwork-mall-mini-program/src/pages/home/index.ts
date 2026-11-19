@@ -101,6 +101,9 @@ interface HomeData {
   shelfNotice: string;
   emptyTitle: string;
   emptyHint: string;
+  /** Static skeleton placeholders (WXML expressions avoid array literals). */
+  skeletonTiles: number[];
+  skeletonCards: number[];
   _seckillTimer: number | null;
   bannerIndex: number;
   /** Epoch millis of the last completed load, used to refresh a stale tab. */
@@ -183,6 +186,8 @@ Page({
     shelfNotice: "",
     emptyTitle: t("home.empty.title"),
     emptyHint: t("home.empty.hint"),
+    skeletonTiles: [1, 2, 3, 4, 5, 6, 7, 8],
+    skeletonCards: [1, 2, 3, 4],
     _seckillTimer: null,
   bannerIndex: 0,
   _loadedAt: 0,
@@ -314,6 +319,14 @@ Page({
 
   goSearch() {
     this.openCapability("storefront.mall.search");
+  },
+
+  goMoreHot() {
+    this.openCapability("storefront.mall.search", { sort: "sales" });
+  },
+
+  goMoreNew() {
+    this.openCapability("storefront.mall.search", { q: "new" });
   },
 
   goQuickEntry(event: MpTapEvent) {

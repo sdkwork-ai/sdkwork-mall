@@ -56,6 +56,10 @@ Page({
     void this.loadLogistics(this.data._orderId, this.data._shipmentId);
   },
 
+  goChat() {
+    platform.switchTab(mpCapabilityUrl("buyer.mall.im.chats"));
+  },
+
   onPullDownRefresh() {
     void this.loadLogistics(this.data._orderId, this.data._shipmentId)
       .finally(() => platform.stopPullDownRefresh());

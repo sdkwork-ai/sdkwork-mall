@@ -61,6 +61,8 @@ module.exports = {
     list: {
       title: "售后记录",
       empty: "暂无售后记录",
+      loadMore: "加载更多售后记录...",
+      noMore: "没有更多售后记录了",
       orderNo: "订单 {{id}}",
       cancel: "撤销",
       cancelConfirm: "撤销后该售后申请将关闭，确定撤销？",

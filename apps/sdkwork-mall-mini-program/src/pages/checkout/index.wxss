@@ -1,5 +1,5 @@
 .page-checkout {
-  padding-bottom: 160rpx;
+  padding-bottom: 210rpx;
 }
 
 .checkout-count {
@@ -148,4 +148,11 @@
 .checkout-submit {
   width: 100%;
   font-size: 30rpx;
+}
+
+.checkout-trust {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 22rpx;
+  margin-bottom: 10rpx;
 }
