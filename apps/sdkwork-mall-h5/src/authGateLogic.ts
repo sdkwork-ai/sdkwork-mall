@@ -12,6 +12,13 @@ export type SdkworkMallH5AuthGateDecision =
 
 const AUTH_BASE_PATH = "/auth";
 const AUTH_LOGIN_PATH = "/auth/login";
+/**
+ * Provider callback of the website's OAuth client. It is an OAuth hop, not an
+ * account page, so the gate renders the shared auth brick there instead of the
+ * storefront; the IAM H5 auth brick mounts it at
+ * `IAM_H5_AUTH_ROUTES.callbackPath`.
+ */
+const AUTH_OAUTH_CALLBACK_PATH = "/oauth/callback";
 const DEFAULT_HOME_PATH = "/";
 
 export function hasSdkworkMallH5AuthenticatedSession(
@@ -78,7 +85,9 @@ export function resolveSdkworkMallH5AuthGateDecision({
 }
 
 function isAuthRoute(pathname: string): boolean {
-  return pathname === AUTH_BASE_PATH || pathname.startsWith(`${AUTH_BASE_PATH}/`);
+  return pathname === AUTH_BASE_PATH
+    || pathname.startsWith(`${AUTH_BASE_PATH}/`)
+    || pathname === AUTH_OAUTH_CALLBACK_PATH;
 }
 
 function normalizePathname(pathname: string): string {
